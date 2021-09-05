@@ -1,0 +1,45 @@
+version: '3.3'
+
+services:
+  tubearchivist:
+    container_name: tubearchivist
+    restart: always
+    image: bbilly1/tubearchivist:latest
+    ports:
+      - 8000:8000
+    volumes:
+      - ./volumes/tubearchivist/media:/youtube
+      - ./volumes/tubearchivist/cache:/cache
+    environment:
+      - ES_URL=http://archivist-es:9200
+      - REDIS_HOST=archivist-redis
+      - HOST_UID=1000
+      - HOST_GID=1000
+    depends_on:
+      - archivist-es
+      - archivist-redis
+  archivist-redis:
+    image: redislabs/rejson:latest
+    container_name: archivist-redis
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - ./volumes/tubearchivist/redis:/data
+    depends_on:
+      - archivist-es
+  archivist-es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.1
+    container_name: archivist-es
+    restart: always
+    environment:
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./volumes/tubearchivist/es:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200

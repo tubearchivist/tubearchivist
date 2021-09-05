@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+    {% if title %}
+        <title>TA | {{ title }}</title>
+    {% else %}
+        <title>TubeArchivist</title>
+    {% endif %}
+    {% if colors == "dark" %}
+        <link rel="stylesheet" href="{% static 'css/dark.css' %}">
+    {% else %}
+        <link rel="stylesheet" href="{% static 'css/light.css' %}">
+    {% endif %}
+    <script type="text/javascript" src="{% static 'script.js' %}"></script>
+</head>
+<body>
+    <div class="boxed-content">
+        <div class="top-banner">
+            <a href="{% url 'home' %}">
+                {% if colors == 'dark' %}
+                    <img src="{% static 'img/banner-tube-archivist-dark.png' %}" alt="tube-archivist-banner">
+                {% endif %}
+                {% if colors == 'light' %}
+                    <img src="{% static 'img/banner-tube-archivist-light.png' %}" alt="tube-archivist-banner">
+                {% endif %}
+            </a>
+        </div>
+        <div class="top-nav">
+            <div class="nav-items">
+                <a href="{% url 'home' %}">
+                    <div class="nav-item">home</div>
+                </a>
+                <a href="{% url 'channel' %}">
+                    <div class="nav-item">channels</div>
+                </a>
+                <a href="{% url 'downloads' %}">
+                    <div class="nav-item">downloads</div>
+                </a>
+            </div>
+            <div class="nav-icons">
+                <a href="{% url 'about' %}">
+                    <img src="{% static 'img/icon-help.svg' %}" alt="help-icon">
+                </a>
+                <a href="{% url 'settings' %}">
+                    <img src="{% static 'img/icon-gear.svg' %}" alt="gear-icon">
+                </a>
+            </div>
+        </div>
+        {% block content %}{% endblock %}
+            <div class="pagination">
+                {% if pagination %}
+                    {% if pagination.current_page > 1 %}
+                        {% if pagination.search_get %}
+                        <a class="pagination-item" href="{{ request.path }}?search={{ pagination.search_get }}">First</a>
+                        {% else %}
+                        <a class="pagination-item" href="{{ request.path }}">First</a>
+                        {% endif %}
+                    {% endif %}
+                    {% if pagination.prev_pages %}
+                        {% for page in pagination.prev_pages %}
+                            {% if pagination.search_get %}
+                            <a class="pagination-item" href="?page={{ page }}&search={{ pagination.search_get }}">{{ page }}</a>
+                            {% else %}
+                            <a class="pagination-item" href="?page={{ page }}">{{ page }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    {% if pagination.current_page %}
+                    <span>< Page {{ pagination.current_page }}</span>
+                    {% endif %}
+                    {% if pagination.next_pages %}
+                        <span> ></span>
+                        {% for page in pagination.next_pages %}
+                            {% if pagination.search_get %}
+                            <a class="pagination-item" href="?page={{ page }}&search={{ pagination.search_get }}">{{ page }}</a>
+                            {% else %}
+                            <a class="pagination-item" href="?page={{ page }}">{{ page }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    {% if pagination.last_page > 0 %}
+                        {% if pagination.search_get %}
+                        <a class="pagination-item" href="?page={{ pagination.last_page }}&search={{ pagination.search_get }}">Last ({{ pagination.last_page }})</a>
+                        {% else %}
+                        <a class="pagination-item" href="?page={{ pagination.last_page }}">Last ({{ pagination.last_page }})</a>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            </div>
+    </div>
+    <div class="footer">
+        <div class="boxed-content">
+            <span>© 2021 | The Tube Archivist</span>
+        </div>
+    </div>
+</body>
+</html>

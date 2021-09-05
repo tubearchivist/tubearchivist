@@ -1,0 +1,127 @@
+{% extends "home/base.html" %}
+{% block content %}
+<div class="title-bar">
+    <h1>Settings</h1>
+</div>
+<form action="/settings/" method="POST">
+    {% csrf_token %}
+    <div class="settings-group">
+        <h2>Color scheme</h2>
+        <div class="settings-item">
+            <p>Current color scheme: <span class="settings-current">{{ config.application.colors }}</span></p>
+            <i>Select yout prefered color scheme between dark and light mode.</i><br>
+            <select name="application.colors" id="application.colors">
+                <option value="" disabled selected> -- change color scheme -- </option>
+                <option value="dark">dark mode</option>
+                <option value="light">light mode</option>
+            </select>
+        </div>
+    </div>
+    <div class="settings-group">
+        <h2>Archive View</h2>
+        <div class="settings-item">
+            <p>Current default Sort: <span class="settings-current">{{ config.archive.sort }}</span></p>
+            <i>Change how the home view and channels view sorts by defaults.</i><br>
+            <select name="archive.sort" id="archive.sort"">
+                <option value="" disabled selected> -- change sort order -- </option>
+                <option value="published">date published</option>
+                <option value="downloaded">date downloaded</option>
+            </select>
+        </div>
+        <div class="settings-item">
+            <p>Current default hide watched: <span class="settings-current">{{ config.archive.hide_watched }}</span></p>
+            <i>Show or hide watched videos by default.</i><br>
+            <select name="archive.hide_watched" id="archive.hide_watched"">
+                <option value="" disabled selected> -- change visibility -- </option>
+                <option value="0">show watched</option>
+                <option value="1">hide watched</option>
+            </select>
+        </div>
+        <div class="settings-item">
+            <p>Current default show subscribed channels only: <span class="settings-current">{{ config.archive.show_subed_only }}</span></p>
+            <i>Show subscribed channels only by default.</i><br>
+            <select name="archive.show_subed_only" id="archive.show_subed_only"">
+                <option value="" disabled selected> -- change visibility -- </option>
+                <option value="0">show subscribed only</option>
+                <option value="1">hide not subscribed</option>
+            </select>
+        </div>
+        <div class="settings-item">
+            <p>Current page size: <span class="settings-current">{{ config.archive.page_size }}</span></p>
+            <i>Result of videos showing in archive page</i><br>
+            <input type="number" name="archive.page_size" id="archive.page_size">
+        </div>
+    </div>
+    <div class="settings-group">
+        <h2 id="subscriptions">Subscriptions</h2>
+        <div class="settings-item">
+            <p>Currend channel page size: <span class="settings-current">{{ config.subscriptions.channel_size }}</span></p>
+            <i>Recent videos to check on check pending, max recommended 50.</i><br>
+            <input type="number" name="subscriptions.channel_size" id="subscriptions.channel_size">
+        </div>
+        <div class="settings-item">
+            <p>Auto scan subscribed channels:</p>
+            <i>Coming soon</i>
+        </div>
+        <div class="settings-item">
+            <p>Auto download pending:</p>
+            <i>Coming soon</i>
+        </div>
+    </div>
+    <div class="settings-group">
+        <h2 id="downloads">Downloads</h2>
+        <div class="settings-item">
+            <p>Current download limit: <span class="settings-current">{{ config.downloads.limit_count }}</span></p>
+            <i>Limit the count of videos getting downloaded on every run. 0 (zero) to deactivate.</i><br>
+            <input type="number" name="downloads.limit_count" id="downloads.limit_count">
+        </div>
+        <div class="settings-item">
+            <p>Currend Download speed limit: <span class="settings-current">{{ config.downloads.limit_speed }}</span></p>
+            <i>Limit download speed. 0 (zero) to deactivate.</i><br>
+            <input type="number" name="downloads.limit_speed" id="downloads.limit_speed"><span>KB/sec</span>
+        </div>
+        <div class="settings-item">
+            <p>Current scraping sleep interval: <span class="settings-current">{{ config.downloads.sleep_interval }}</p>
+            <i>Seconds to sleep between calls to youtube. Might be necessary to avoid throttling. Recommended 3.</i><br>
+            <input type="number" name="downloads.sleep_interval" id="downloads.sleep_interval">
+        </div>
+        <div class="settings-item">
+            <p>External downloader:</p>
+            <i>Coming soon</i>
+        </div>
+    </div>
+    <div class="settings-group">
+        <h2 id="format">Download Format</h2>
+        <div class="settings-item">
+            <p>Video and audio quality format for yt-dlp.<br>
+                Currently: <span class="settings-current">{{ config.downloads.format }}</span>
+            </p>
+            <p>Example configurations:</p>
+            <ul>
+                <li><span class="settings-current">bestvideo[height<=720]+bestaudio/best[height<=720]</span>: best audio and max video height of 720p.</li>
+                <li><span class="settings-current">bestvideo[height<=1080]+bestaudio/best[height<=1080]</span>: best audio and max video height of 1080p.</li>
+                <li><span class="settings-current">0</span>: deactivate and download the best quality possible as decided by yt-dlp.</li>
+            </ul>
+            <i>Make sure your custom format gets merged into a single file. Check out the <a href="https://github.com/yt-dlp/yt-dlp#format-selection" target="_blank">documentation</a> for valid configurations.</i><br>
+            <input type="text" name="downloads.format" id="downloads.format">
+            <br>
+        </div>
+    </div>
+    <button type="submit">Update Settings</button>
+</form>
+<div class="title-bar">
+    <h1>Actions</h1>
+</div>
+<div class="settings-group">
+    <p>Rescan filesystem.</p>
+    <i>Coming soon</i>
+</div>
+<div class="settings-group">
+    <p>Manual media files import.</p>
+    <i>Coming soon</i>
+</div>
+<div class="settings-group">
+    <p>Backup database.</p>
+    <i>Coming soon</i>
+</div>
+{% endblock content %}

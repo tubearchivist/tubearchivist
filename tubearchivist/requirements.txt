@@ -1,0 +1,9 @@
+requests==2.26.0
+redis==3.5.3
+yt_dlp==2021.8.10
+celery==5.1.2
+Django==3.2.6
+beautifulsoup4==4.9.3
+Pillow==8.3.1
+uWSGI==2.0.19.1
+whitenoise==5.3.0

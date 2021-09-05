@@ -1,0 +1,18 @@
+# Git
+.git
+.gitignore
+
+# Docker
+.docker
+
+# Python
+tubearchivist/__pycache__/
+tubearchivist/*/__pycache__/
+tubearchivist/*/*/__pycache__/
+tubearchivist/*/*/*/__pycache__/
+.env/
+.venv/
+venv/
+
+# Unneeded graphics
+assets/*

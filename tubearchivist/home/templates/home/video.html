@@ -1,0 +1,67 @@
+{% extends "home/base.html" %}
+{% block content %}
+{% load static %}
+{% load humanize %}
+<div class="title-bar">
+    <h1>Video: {{ video.title }}</h1>
+</div>
+<div class="video-main">
+    <video 
+        src="/media/{{ video.media_url }}" 
+        poster="/cache/videos/{{ video.youtube_id }}.jpg" controls preload="false" 
+        type='video/mp4' width="100%">
+    </video>
+</div>
+<div class="info-box info-box-3 padding-box">
+    <div class="info-box-item">
+        <div class="round-img">
+            <a href="{% url 'channel_id' video.channel.channel_id %}">
+                <img src="/cache/channels/{{ video.channel.channel_id }}_thumb.jpg" alt="channel-thumb">
+            </a>
+        </div>
+        <div>
+            <h3><a href="{% url 'channel_id' video.channel.channel_id %}">{{ video.channel.channel_name }}</a></h3>
+            {% if video.channel.channel_subs >= 1000000 %}
+                <p>Subscribers: {{ video.channel.channel_subs|intword }}</p>
+            {% else %}
+                <p>Subscribers: {{ video.channel.channel_subs|intcomma }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="info-box-item">
+        <div>
+            <p>Published: {{ video.published }}</p>
+            <p>Last refreshed: {{ video.vid_last_refresh }}</p>
+            <p class="video-info-watched">Watched:
+                {% if video.player.watched %}
+                    <img src="{% static 'img/icon-seen.svg' %}" alt="seen-icon" class="seen-icon" id="{{ video.youtube_id }}">
+                {% else %}
+                    <img src="{% static 'img/icon-unseen.svg' %}" alt="unseen-icon" id="{{ video.youtube_id }}" onclick="isWatched(this.id)" class="unseen-icon" title="Mark as watched.">
+                {% endif %}
+            </p>
+            {% if video.active %}
+                <p>Youtube: Active</p>
+            {% else %}
+                <p>Youtube: Deactivated</p>
+            {% endif %}
+            <p>Video ID: {{ video.youtube_id }}</p>
+        </div>
+    </div>
+    <div class="info-box-item">
+        <div>
+            <p>Views: {{ video.stats.view_count|intcomma }}</p>
+            <p class="thumb-icon like"><img src="{% static 'img/icon-thumb.svg' %}" alt="thumbs-up">: {{ video.stats.like_count|intcomma }}</p>
+            <p class="thumb-icon dislike"><img src="{% static 'img/icon-thumb.svg' %}" alt="thumbs-down">: {{ video.stats.dislike_count|intcomma }}</p>
+            <p>Rating: {{ video.stats.average_rating }}</p>
+        </div>
+    </div>
+</div>
+{% if video.description %}
+    <div class="info-box-item description-box">
+        <p>Description: <button onclick="textReveal()" id="text-reveal-button">Show</button></p>
+        <div id="text-reveal" class="description-text">
+            {{ video.description|linebreaks }}
+        </div>
+    </div>
+{% endif %}
+{% endblock content %}

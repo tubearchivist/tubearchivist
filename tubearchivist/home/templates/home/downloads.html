@@ -1,0 +1,56 @@
+{% extends "home/base.html" %}
+{% load static %}
+{% block content %}
+<div class="title-bar">
+    <h1>Downloads</h1>
+</div>
+<div id="downloadMessage"></div>
+<div class="info-box info-box-3 padding-box">
+    <div class="icon-text">
+        <img id="rescan-icon" onclick="rescanPending()" src="{% static 'img/icon-rescan.svg' %}" alt="rescan-icon">
+        <p>Rescan subscriptions</p>
+    </div>
+    <div class="icon-text">
+        <img id="download-icon" onclick="dlPending()" src="{% static 'img/icon-download.svg' %}" alt="download-icon">
+        <p>Download queue</p>
+    </div>
+    <div class="icon-text">
+        <img id="add-icon" onclick="showForm()" src="{% static 'img/icon-add.svg' %}" alt="add-icon">
+        <p>Add to download queue</p>
+        <div class="show-form">
+            <form id='hidden-form' action="/downloads/" method="post">
+                {% csrf_token %}
+                <textarea rows="4" placeholder="Enter Video Urls or IDs here..." id="vid-url" name="vid-url"></textarea>
+                <button type="submit">Add to download queue</button>
+            </form>
+        </div>
+    </div>
+</div>
+<h2>Download queue</h2>
+<div>
+    {% if pending %}
+        <h3>Total pending downloads: {{ pending|length }}</h3>
+        {% for video in pending %}
+            <div class="dl-item" id="dl-{{ video.youtube_id }}">
+                <div class="dl-thumb">
+                    <img src="{{ video.vid_thumb_url }}" alt="video_thumb">
+                </div>
+                <div class="dl-desc">
+                    <h3>{{ video.title }}</h3>
+                    {% if video.channel_indexed %}
+                        <a href="{% url 'channel_id' video.channel_id %}">{{ video.channel_name }}</a>
+                    {% else %}
+                        <span>{{ video.channel_name }}</span>
+                    {% endif %}
+                    <p>Published: {{ video.published }} | Duration: {{ video.duration }} | {{ video.youtube_id }}</p>
+                    <button data-id="{{ video.youtube_id }}" onclick="toIgnore(this)">Ignore</button>
+                    <button data-id="{{ video.youtube_id }}" onclick="downloadNow(this)">Download now</button>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <h3>No pending downloads</h3>
+    {% endif %}
+</div>
+<script type="text/javascript" src="{% static 'progress.js' %}"></script>
+{% endblock content %}

@@ -1,0 +1,25 @@
+{
+    "archive": {
+        "sort": "published",
+        "hide_watched": false,
+        "show_subed_only": false,
+        "page_size": 12
+    },
+    "subscriptions": {
+        "auto_search": false,
+        "auto_download": false,
+        "channel_size": 50
+    },
+    "downloads": {
+        "limit_count": 5,
+        "limit_speed": false,
+        "sleep_interval": 3,
+        "format": "bestvideo[height<=720]+bestaudio/best[height<=720]"
+    },
+    "application": {
+        "cache_dir": "/cache",
+        "videos": "/youtube",
+        "file_template": "%(id)s_%(title)s.mp4",
+        "colors": "dark"
+    }
+}

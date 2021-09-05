@@ -1,0 +1,38 @@
+{% extends "home/base.html" %}
+{% load static %}
+{% block content %}
+<div class="title-bar">
+    <h1>About The Tube Archivist</h1>
+</div>
+<div class="about-section">
+    <h2>Getting started</h2>
+    <ol>
+        <li>Before adding some videos to the download queue, take a look at the download format settings on your <a href="{% url 'settings' %}#format">settings</a> page and set your desired download quality.</li>
+        <li>While at the settings page also set the value for the Subscriptions <a href="{% url 'settings' %}#subscriptions">page size</a>. This will define the max amount of videos that will get added once you run <i>Rescan Subscriptions</i>. yt-dlp by default uses 50 video page size. Any value higher than that will significantly slow down the scanning process.</li>
+        <li>Subscribe to some of your favourite youtube channels in the <a href="{% url 'channel' %}">channel</a> page. To subscribe to a channel you have a few options:
+            <ul>
+                <li>Enter the Youtube channel ID, a 25 character alphanumeric string. For example <span class="settings-current">UCBa659QWEk1AI4Tg--mrJ2A</span></li>
+                <li>Enter the url to the channel page on youtube. For example <span class="settings-current">https://www.youtube.com/channel/UCBa659QWEk1AI4Tg--mrJ2A</span></li>
+                <li>Enter the video url for any video and let <i>Tube Archivist</i> extract the channel ID for you. For example <span class="settings-current">https://www.youtube.com/watch?v=2tdiKTSdE9Y</span></li>
+            </ul>
+        </li>
+        <li>After that head over to the <a href="{% url 'downloads' %}">Downloads</a> Page. Once you click on the <i>Rescan Subscriptions</i> button, Tube Archivist will go through all your subscribed channels and look for new videos. Initially these are the latest videos depending on the page size as described above.</li>
+        <li>Click on <span class="settings-current">ignore</span> for any video you don't want to download or on <span class="settings-current">Download now</span> for any video you want to start downloading now independently from the queue.</li>
+        <li>Click on the <span class="settings-current">Download queue</span> button to start downloading. Tube Archivist will then start the queue from the bottom and download as many videos as defined in <a href="{% url 'settings' %}#downloads">download limit</a>. There is currently no good way to cancel the download process.</li>
+    </ol>
+</div>
+<div class="about-section">
+    <h2>Additional</h2>
+    <ul>
+        <li>You can manually add videos to the queue on the <a href="{% url 'downloads' %}">download page</a> by clicking on <i>Add to download queue</i> and then entering a list of videos. Add one link per line. You have a few options:
+            <ul>
+                <li>Add a link to a Youtube video. For example <span class="settings-current">https://www.youtube.com/watch?v=2tdiKTSdE9Y</span>.</li>
+                <li>Add a Youtube video ID. For example <span class="settings-current">2tdiKTSdE9Y</span>.</li>
+                <li>Add a link to a Youtube video by providing the shortened url, for example <span class="settings-current">https://youtu.be/2tdiKTSdE9Y</span>.</li>
+                <li>Add a Channel ID or Channel Url to add every available video to the download queue. This will ignore the page size as described above. You can still ignore selected videos before starting the download.</li>
+            </ul>
+        </li>
+        <li>As you watch videos, mark them as watched by clicking on the unseen icon <span class="about-icon"><img src="{% static 'img/icon-unseen.svg' %}" alt="unseen-icon" class="unseen-icon"></span>. Once marked as watched, the icon will change to <span class="about-icon"><img src="{% static 'img/icon-seen.svg' %}" alt="seen-icon" class="seen-icon"></span>.</li>
+    </ul>
+</div>
+{% endblock content %}
