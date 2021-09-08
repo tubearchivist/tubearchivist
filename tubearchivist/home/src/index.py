@@ -218,6 +218,7 @@ class YoutubeVideo:
     CONFIG = AppConfig().config
     ES_URL = CONFIG['application']['es_url']
     CACHE_DIR = CONFIG['application']['cache_dir']
+    VIDEOS = CONFIG['application']['videos']
 
     def __init__(self, youtube_id):
         self.youtube_id = youtube_id
@@ -294,23 +295,31 @@ class YoutubeVideo:
 
         return vid_basic
 
-    def add_new_player(self):
+    def add_player(self, missing_vid):
         """ add player information for new videos """
         cache_path = self.CACHE_DIR + '/download/'
-        all_cached = os.listdir(cache_path)
-        for file_cached in all_cached:
-            if self.youtube_id in file_cached:
-                vid_path = os.path.join(cache_path, file_cached)
-                duration_handler = DurationConverter()
-                duration = duration_handler.get_sec(vid_path)
-                duration_str = duration_handler.get_str(duration)
-                player = {
-                    "watched": False,
-                    "duration": duration,
-                    "duration_str": duration_str
-                }
-                break
+        videos = self.VIDEOS
 
+        if missing_vid:
+            # coming from scan_filesystem
+            channel_name, file_name, _ = missing_vid
+            vid_path = os.path.join(videos, channel_name, file_name)
+        else:
+            # coming from VideoDownload
+            all_cached = os.listdir(cache_path)
+            for file_cached in all_cached:
+                if self.youtube_id in file_cached:
+                    vid_path = os.path.join(cache_path, file_cached)
+                    break
+
+        duration_handler = DurationConverter()
+        duration = duration_handler.get_sec(vid_path)
+        duration_str = duration_handler.get_str(duration)
+        player = {
+            "watched": False,
+            "duration": duration,
+            "duration_str": duration_str
+        }
         self.vid_dict['player'] = player
 
     def build_file_path(self, channel_name):
@@ -360,7 +369,7 @@ class YoutubeVideo:
             print(response.text)
 
 
-def index_new_video(youtube_id):
+def index_new_video(youtube_id, missing_vid=False):
     """ combine video and channel classes for new video index """
     vid_handler = YoutubeVideo(youtube_id)
     channel_handler = YoutubeChannel(vid_handler.channel_id)
@@ -368,7 +377,7 @@ def index_new_video(youtube_id):
     channel_name = channel_handler.channel_dict['channel_name']
     vid_handler.build_file_path(channel_name)
     # add channel and player to video
-    vid_handler.add_new_player()
+    vid_handler.add_player(missing_vid)
     vid_handler.vid_dict['channel'] = channel_handler.channel_dict
     # add new channel to es
     if channel_handler.source == 'scraped':

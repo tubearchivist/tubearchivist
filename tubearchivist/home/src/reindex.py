@@ -337,7 +337,7 @@ def scan_filesystem():
     if filesystem_handler.to_index:
         for missing_vid in filesystem_handler.to_index:
             youtube_id = missing_vid[2]
-            index_new_video(youtube_id)
+            index_new_video(youtube_id, missing_vid=missing_vid)
 
 
 def reindex_old_documents():
