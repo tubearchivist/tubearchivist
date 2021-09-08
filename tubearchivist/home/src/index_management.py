@@ -64,7 +64,7 @@ INDEX_CONFIG = [
                     }
                 }
             },
-            "number_of_replicas": 0
+            "number_of_replicas": "0"
         }
     },
     {
@@ -155,7 +155,7 @@ INDEX_CONFIG = [
                     }
                 }
             },
-            "number_of_replicas": 0
+            "number_of_replicas": "0"
         }
     },
     {
@@ -206,7 +206,7 @@ INDEX_CONFIG = [
                     }
                 }
             },
-            "number_of_replicas": 0
+            "number_of_replicas": "0"
         }
     }
 ]
@@ -489,6 +489,9 @@ def restore_from_backup():
 
 def index_check(force_restore=False):
     """ check if all indexes are created and have correct mapping """
+
+    backed_up = False
+
     for index in INDEX_CONFIG:
         index_name = index['index_name']
         expected_map = index['expected_map']
@@ -509,6 +512,12 @@ def index_check(force_restore=False):
         # validate index
         rebuild = handler.validate()
         if rebuild:
+            # make backup before rebuild
+            if not backed_up:
+                print('running backup first')
+                backup_all_indexes()
+                backed_up = True
+
             print(f'applying new mappings to index ta_{index_name}...')
             handler.rebuild_index()
             continue
