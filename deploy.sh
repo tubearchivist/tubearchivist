@@ -57,6 +57,9 @@ function sync_docker {
 
 }
 
+# check package versions in requirements.txt for updates
+python version_check.py
+
 
 if [[ $1 == "blackhole" ]]; then
     sync_blackhole
