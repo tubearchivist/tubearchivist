@@ -10,6 +10,22 @@
 * Play videos
 * Keep track of viewed and unviewed videos
 
+## Screenshots
+![home screenshot](assets/tube-archivist-screenshot-home.png?raw=true "Tube Archivist Home")  
+*Home Page*
+
+![channels screenshot](assets/tube-archivist-screenshot-channels.png?raw=true "Tube Archivist Channels")  
+*All Channels*
+
+![single channel screenshot](assets/tube-archivist-screenshot-single-channel.png?raw=true "Tube Archivist Single Channel")  
+*Single Channel*
+
+![video page screenshot](assets/tube-archivist-screenshot-video.png?raw=true "Tube Archivist Video Page")  
+*Video Page*
+
+![video page screenshot](assets/tube-archivist-screenshot-download.png?raw=true "Tube Archivist Video Page")  
+*Downloads Page*
+  
 ## Problem Tube Archivist tries to solve
 Once your Youtube video collection grows, it becomes hard to search and find a specific video. That's where Tube Archivist comes in: By indexing your video collection with metadata from Youtube, you can organize, search and enjoy your archived Youtube videos without hassle offline through a convenient web interface.
 
