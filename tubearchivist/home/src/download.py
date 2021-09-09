@@ -375,6 +375,10 @@ class VideoDownloader:
 
     def download_list(self):
         """ download the list of youtube_ids """
+        limit_count = self.config['downloads']['limit_count']
+        if limit_count:
+            self.youtube_id_list = self.youtube_id_list[:limit_count]
+
         for youtube_id in self.youtube_id_list:
             try:
                 self.dl_single_vid(youtube_id)

@@ -17,7 +17,6 @@ from home.src.config import AppConfig
 
 
 CONFIG = AppConfig().config
-LIMIT_COUNT = CONFIG['downloads']['limit_count']
 REDIS_HOST = CONFIG['application']['REDIS_HOST']
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'home.settings')
@@ -41,12 +40,8 @@ def download_pending():
     """ download latest pending videos """
     pending_handler = PendingList()
     pending_vids = pending_handler.get_all_pending()[0]
-    pending = [i['youtube_id'] for i in pending_vids]
-    pending.reverse()
-    if LIMIT_COUNT:
-        to_download = pending[:LIMIT_COUNT]
-    else:
-        to_download = pending
+    to_download = [i['youtube_id'] for i in pending_vids]
+    to_download.reverse()
     if to_download:
         download_handler = VideoDownloader(to_download)
         download_handler.download_list()
