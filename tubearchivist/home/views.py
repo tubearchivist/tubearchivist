@@ -35,7 +35,9 @@ from home.tasks import (
 
 
 class HomeView(View):
-    """ handle home page and video search post functionality """
+    """ resolves to /
+    handle home page and video search post functionality
+    """
 
     CONFIG = AppConfig().config
     ES_URL = CONFIG['application']['es_url']
@@ -140,8 +142,7 @@ class AboutView(View):
 
 
 class DownloadView(View):
-    """
-    resolves to /download/
+    """ resolves to /download/
     takes POST for downloading youtube links
     """
 
@@ -175,7 +176,9 @@ class DownloadView(View):
 
 
 class ChannelIdView(View):
-    """ display single channel page from channel_id """
+    """ resolves to /chanel/<channel-id>/
+    display single channel page from channel_id
+    """
 
     def get(self, request, channel_id_detail):
         """ get method """
@@ -255,7 +258,10 @@ class ChannelIdView(View):
 
 
 class ChannelView(View):
-    """ handle functionality for channel overview page """
+    """ resolves to /channel/
+    handle functionality for channel overview page, subscribe to channel,
+    search as you type for channel name
+    """
 
     def get(self, request):
         """ handle http get requests """
@@ -319,7 +325,9 @@ class ChannelView(View):
 
 
 class VideoView(View):
-    """ display details about a single video """
+    """ resolves to /video/<video-id>/
+    display details about a single video
+    """
 
     def get(self, request, video_id):
         """ get single video """
@@ -347,7 +355,10 @@ class VideoView(View):
 
 
 class SettingsView(View):
-    """ handle the settings page """
+    """ resolves to /settings/
+    handle the settings page, display current settings,
+    take post request from the form to update settings
+    """
 
     @staticmethod
     def get(request):
@@ -433,7 +444,7 @@ class PostData:
                 youtube_id = item['status']
                 self.parse_watched(youtube_id)
             elif task == 'rescan_pending':
-                print('download pending videos')
+                print('rescan subscribed channels')
                 update_subscribed.delay()
             elif task == 'ignore':
                 print('ignore video')
