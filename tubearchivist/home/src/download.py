@@ -41,6 +41,9 @@ class PendingList:
                     url, limit=False
                 )
                 missing_videos = missing_videos + youtube_ids
+            elif url_type == 'playlist':
+                youtube_ids = playlist_extractor(url)
+                missing_videos = missing_videos + youtube_ids
 
         return missing_videos
 
@@ -364,6 +367,18 @@ class ChannelSubscription:
             print(request.text)
         # sync to videos
         channel_handler.sync_to_videos()
+
+
+def playlist_extractor(playlist_id):
+    """ return youtube_ids from a playlist_id """
+    url = 'https://www.youtube.com/playlist?list=' + playlist_id
+    obs = {
+        'default_search': 'ytsearch', 'quiet': True, 'ignoreerrors': True,
+        'skip_download': True, 'extract_flat': True
+    }
+    playlist = youtube_dl.YoutubeDL(obs).extract_info(url, download=False)
+    playlist_vids = [(i['id'], i['title']) for i in playlist['entries']]
+    return playlist_vids
 
 
 class VideoDownloader:

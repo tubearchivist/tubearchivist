@@ -42,16 +42,24 @@ def clean_string(file_name):
 
 def process_url_list(url_str):
     """ parse url_list to find valid youtube video or channel ids """
+    to_replace = ['watch?v=', 'playlist?list=']
     url_list = re.split('\n+', url_str[0])
     youtube_ids = []
     for url in url_list:
-        url_clean = url.strip().split('/')[-1].replace('watch?v=', '')
+        url_clean = url.strip().split('/')[-1]
+        for i in to_replace:
+            url_clean = url_clean.replace(i, '')
         url_no_param = url_clean.split('&')[0]
         str_len = len(url_no_param)
         if str_len == 11:
             link_type = 'video'
         elif str_len == 24:
             link_type = 'channel'
+        elif str_len == 34:
+            link_type = 'playlist'
+        else:
+            # unable to parse
+            return False
 
         youtube_ids.append({"url": url_no_param, "type": link_type})
 
