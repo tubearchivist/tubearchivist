@@ -16,6 +16,8 @@ function sync_blackhole {
     export PASS=$remote_pw
     
     rsync -a --progress --delete-after \
+        --exclude ".git" \
+        --exclude ".gitignore" \
         --exclude "**/cache" \
         --exclude "**/__pycache__/" \
         --exclude "db.sqlite3" \
@@ -32,6 +34,8 @@ function sync_test {
     host="tubearchivist.local"
 
     rsync -a --progress --delete-after \
+        --exclude ".git" \
+        --exclude ".gitignore" \
         --exclude "**/cache" \
         --exclude "**/__pycache__/" \
         --exclude "db.sqlite3" \
@@ -41,6 +45,9 @@ function sync_test {
 
     ssh "$host" 'docker build -t bbilly1/tubearchivist:latest tubearchivist'
     ssh "$host" 'docker-compose -f docker/docker-compose.yml up -d'
+
+    ssh "$host" 'docker cp tubearchivist/tubearchivist/testing.sh tubearchivist:/app/testing.sh'
+    ssh "$host" 'docker exec tubearchivist chmod +x /app/testing.sh'
 
 }
 

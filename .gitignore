@@ -6,6 +6,3 @@ db.sqlite3
 
 # frontend fonts
 *ttf.woff
-
-# for local testing only
-testing.sh

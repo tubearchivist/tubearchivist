@@ -16,3 +16,6 @@ venv/
 
 # Unneeded graphics
 assets/*
+
+# for local testing only
+testing.sh
