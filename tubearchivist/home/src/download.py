@@ -32,6 +32,15 @@ class PendingList:
         """ extract youtube ids from list """
         missing_videos = []
         for entry in youtube_ids:
+            # notify
+            mess_dict = {
+                "status": "pending",
+                "level": "info",
+                "title": "Adding to download queue.",
+                "message": 'Extracting lists'
+            }
+            set_message('progress:download', mess_dict)
+            # extract
             url = entry['url']
             url_type = entry['type']
             if url_type == 'video':
@@ -78,20 +87,20 @@ class PendingList:
             action = {"create": {"_id": youtube_id, "_index": "ta_download"}}
             bulk_list.append(json.dumps(action))
             bulk_list.append(json.dumps(video))
+            # notify
+            mess_dict = {
+                "status": "pending",
+                "level": "info",
+                "title": "Adding to download queue.",
+                "message": 'Processing IDs...'
+            }
+            set_message('progress:download', mess_dict)
         # add last newline
         bulk_list.append('\n')
         query_str = '\n'.join(bulk_list)
         headers = {'Content-type': 'application/x-ndjson'}
         url = self.ES_URL + '/_bulk'
         request = requests.post(url, data=query_str, headers=headers)
-        # notify
-        mess_dict = {
-            "status": "pending",
-            "level": "info",
-            "title": "Adding to download queue.",
-            "message": 'Processing IDs...'
-        }
-        set_message('progress:download', mess_dict)
         if not request.ok:
             print(request)
 
