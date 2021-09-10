@@ -478,6 +478,13 @@ button:hover {
     padding: 30px 0 15px 0;
 }
 
+.download-progress.info {
+    background-color: var(--highlight-bg);
+}
+
+.download-progress.error {
+    background-color: var(--highlight-error);
+}
 
 /* settings */
 .settings-group {

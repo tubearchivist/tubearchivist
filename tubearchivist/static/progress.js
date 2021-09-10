@@ -54,6 +54,7 @@ function buildDownloadMessage(dlProgress) {
     var dlStatus = dlProgress['status'];
     var dlTitle = dlProgress['title'];
     var dlMessage = dlProgress['message'];
+    var dlLevel = dlProgress['level'];
     // animate
     if (dlStatus === 'rescan') {
         animate('rescan-icon', 'rotate-img');
@@ -64,6 +65,7 @@ function buildDownloadMessage(dlProgress) {
     var box = document.getElementById('downloadMessage');
     var message = document.createElement('div');
     message.classList.add('download-progress');
+    message.classList.add(dlLevel);
     message.id = 'progress';
     message.setAttribute('data', dlStatus);
     var title = document.createElement('h3');

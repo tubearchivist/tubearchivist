@@ -1,19 +1,10 @@
 :root {
     --main-bg: #eeeeee;
     --highlight-bg: #d9e0d9;
+    --highlight-error: #f79c9c;
     --highlight-bg-transparent: #00293baf;
     --main-font: #00202f;
     --accent-font-dark: #259485;
     --accent-font-light: #35b399;
     --img-filter: invert(50%) sepia(9%) saturate(2940%) hue-rotate(122deg) brightness(94%) contrast(90%);
 }
-
-/* :root {
-    --main-bg: #00202f;
-    --highlight-bg: #00293b;
-    --highlight-bg-transparent: #00293baf;
-    --main-font: #eeeeee;
-    --accent-font-dark: #259485;
-    --accent-font-light: #97d4c8;
-    --img-filter: invert(50%) sepia(9%) saturate(2940%) hue-rotate(122deg) brightness(94%) contrast(90%);
-} */
