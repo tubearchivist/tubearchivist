@@ -168,6 +168,18 @@ class DownloadView(View):
             url_str = download_post['vid-url']
             print('adding to queue')
             youtube_ids = process_url_list(url_str)
+            if not youtube_ids:
+                # failed to process
+                print(url_str)
+                mess_dict = {
+                    "status": "downloading",
+                    "level": "error",
+                    "title": 'Failed to extract links.',
+                    "message": ''
+                }
+                set_message('progress:download', mess_dict)
+                return redirect('downloads')
+
             print(youtube_ids)
             extrac_dl.delay(youtube_ids)
 
@@ -454,9 +466,6 @@ class PostData:
             elif task == 'dl_pending':
                 print('download pending')
                 download_pending.delay()
-            elif task == 'vid-url':
-                status_str = item['status']
-                print(urllib.parse.quote(status_str))
             elif task == 'unsubscribe':
                 channel_id_unsub = item['status']
                 print('unsubscribe from ' + channel_id_unsub)
