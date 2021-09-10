@@ -53,9 +53,9 @@ Functions as a cache and temporary link between the application and the filesyst
   - Takes an optional volume at **/data** to make your configuration changes permanent.
 
 ## Getting Started
-1. Go through the **settings** page and look at the available options. Particularly set *Download Format* to you desired video quality before downloading.
+1. Go through the **settings** page and look at the available options. Particularly set *Download Format* to your desired video quality before downloading.
 2. Subscribe to some of your favourite Youtube channels on the **channels** page. 
-3. On the **downloads** page, click on *Rescan subscriptions* to add videos from the subscribed channels to your Download queue or click on *Add to download queue* to manually add Video IDs or links.
+3. On the **downloads** page, click on *Rescan subscriptions* to add videos from the subscribed channels to your Download queue or click on *Add to download queue* to manually add Video IDs, links, channels or playlists.
 4. Click on *Download queue* and let Tube Archivist to it's thing. 
 5. Enjoy your archived collection!
 
@@ -88,5 +88,5 @@ This should be considered as a **minimal viable product**, there is an exstensiv
 
 ## Known limitations
 - Video files created by Tube Archivist need to be **mp4** video files for best browser compatibility.
-- Every limitation **yt-dlp** will also be present in Tube Archivist. If yt-dlp can't download or extract a video for any reason, Tube Archivist won't be able to either.
+- Every limitation of **yt-dlp** will also be present in Tube Archivist. If **yt-dlp** can't download or extract a video for any reason, Tube Archivist won't be able to either.
 - For now this is meant to be run in a trusted network environment.
