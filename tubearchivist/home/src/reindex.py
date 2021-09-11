@@ -20,21 +20,27 @@ from home.src.index import (
     YoutubeVideo,
     index_new_video
 )
-from home.src.helper import get_total_hits, clean_string, set_message
+from home.src.helper import (
+    get_total_hits,
+    clean_string,
+    set_message,
+    get_message
+)
 
 
 class Reindex:
     """ check for outdated documents and refresh data from youtube """
 
     def __init__(self):
-        self.video_daily, self.channel_daily = self.get_daily()
-        self.all_youtube_ids = False
-        self.all_channel_ids = False
         # config
         config = AppConfig().config
         self.sleep_interval = config['downloads']['sleep_interval']
         self.es_url = config['application']['es_url']
         self.refresh_interval = 90
+        # scan
+        self.video_daily, self.channel_daily = self.get_daily()
+        self.all_youtube_ids = False
+        self.all_channel_ids = False
 
     def get_daily(self):
         """ get daily refresh values """
@@ -178,11 +184,13 @@ class Reindex:
     def reindex(self):
         """ reindex what's needed """
         # videos
+        print(f'reindexing {len(self.all_youtube_ids)} videos')
         for youtube_id in self.all_youtube_ids:
             self.reindex_single_video(youtube_id)
             if self.sleep_interval:
                 sleep(self.sleep_interval)
         # channels
+        print(f'reindexing {len(self.all_channel_ids)} channels')
         for channel_id in self.all_channel_ids:
             self.reindex_single_channel(channel_id)
             if self.sleep_interval:
@@ -342,6 +350,14 @@ def scan_filesystem():
 
 def reindex_old_documents():
     """ daily refresh of old documents """
+    # check needed last run
+    now = int(datetime.now().strftime("%s"))
+    last_reindex = get_message('last_reindex')
+    if isinstance(last_reindex, int) and now - last_reindex < 60 * 60 * 12:
+        return
+    # continue if needed
     reindex_handler = Reindex()
     reindex_handler.check_outdated()
     reindex_handler.reindex()
+    # set timestamp
+    set_message('last_reindex', now, expire=False)

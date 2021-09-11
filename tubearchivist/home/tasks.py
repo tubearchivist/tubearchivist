@@ -14,6 +14,7 @@ from home.src.download import (
     VideoDownloader
 )
 from home.src.config import AppConfig
+from home.src.reindex import reindex_old_documents
 
 
 CONFIG = AppConfig().config
@@ -33,6 +34,8 @@ def update_subscribed():
     if missing_videos:
         pending_handler = PendingList()
         pending_handler.add_to_pending(missing_videos)
+    # check if reindex is needed
+    check_reindex.delay()
 
 
 @shared_task
@@ -61,3 +64,9 @@ def extrac_dl(youtube_ids):
     pending_handler = PendingList()
     missing_videos = pending_handler.parse_url_list(youtube_ids)
     pending_handler.add_to_pending(missing_videos)
+
+
+@shared_task
+def check_reindex():
+    """ run the reindex main command """
+    reindex_old_documents()
