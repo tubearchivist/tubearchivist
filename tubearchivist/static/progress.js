@@ -16,11 +16,9 @@ function checkMessage() {
     req.onload = function() {
         var dlProgress = req.response;
         if (dlProgress['status']) {
-            console.log('start interval');
             buildDownloadMessage(dlProgress);
             handleInterval();
         };
-        console.log(JSON.stringify(dlProgress));
     };
     req.send();
 }
@@ -34,14 +32,11 @@ function handleInterval() {
         req.onload = function() {
             var dlProgress = req.response;
             if (dlProgress['status']) {
-                console.log('continue interval');
                 buildDownloadMessage(dlProgress);
             } else {
-                console.log('stop interval');
                 clearInterval(watchDownload);
                 location.reload();
             };
-            console.log(JSON.stringify(dlProgress));
         };
         req.send();
     }, 3000);
@@ -81,6 +76,5 @@ function animate(elementId, animationClass) {
     var toAnimate = document.getElementById(elementId);
     if (toAnimate.className !== animationClass) {
         toAnimate.className = animationClass;
-        console.log(elementId, animationClass);
     }
 }

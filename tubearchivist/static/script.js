@@ -65,7 +65,6 @@ function dlPending() {
 function toIgnore(button) {
     var youtube_id = button.getAttribute('data-id');
     var payload = JSON.stringify({'ignore': youtube_id});
-    console.log(payload);
     sendPost(payload);
     document.getElementById('dl-' + youtube_id).remove();
 }
@@ -151,17 +150,13 @@ function searchChannels(query) {
     if (query.length > 1) {
         var payload = JSON.stringify({'channel-search': query})
         sendSearchAsYouType(payload);
-        console.log(payload);
     };
 }
 
 
 function populateChannelResults(allResults) {
-    
     var searchResultBox = document.getElementById('resultBox');
-    
     for (let i = 0; i < allResults.length; i++) {
-        
         var singleResult = allResults[i];
         var source = singleResult['source'];
         var channelName = source['channel_name'];
@@ -170,10 +165,7 @@ function populateChannelResults(allResults) {
         optionElement.value = channelName;
         optionElement.setAttribute('data', channelId);
         searchResultBox.appendChild(optionElement);
-        console.log(channelId, channelName);
-
-    }
-
+    };
 }
 
 function channelRedirect(){
@@ -181,24 +173,20 @@ function channelRedirect(){
     var firstChild = response.firstChild
     if (firstChild) {
         var redirectId = firstChild.getAttribute('data');
-        console.log('redirecting: ' + redirectId);
         location = '/channel/' + redirectId;
-    }
+    };
     return false;
 }
 
 
 function sendSearchAsYouType(payload) {
-    console.log(payload);
     var http = new XMLHttpRequest();
-    
     http.onreadystatechange = function() {
         if (http.readyState === 4) {
             allResults = JSON.parse(http.response)['results'];
             populateChannelResults(allResults);
-        }
-    }
-
+        };
+    };
     http.open("POST", "/process/", true);
     http.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
     http.setRequestHeader("Content-type", "application/json");
@@ -206,10 +194,8 @@ function sendSearchAsYouType(payload) {
 }
 
 
-
 // generic
 function sendPost(payload) {
-    console.log(payload);
     var http = new XMLHttpRequest();
     http.open("POST", "/process/", true);
     http.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
