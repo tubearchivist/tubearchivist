@@ -353,7 +353,7 @@ def reindex_old_documents():
     # check needed last run
     now = int(datetime.now().strftime("%s"))
     last_reindex = get_message('last_reindex')
-    if isinstance(last_reindex, int) and now - last_reindex < 60 * 60 * 12:
+    if isinstance(last_reindex, int) and now - last_reindex > 60 * 60 * 24:
         return
     # continue if needed
     reindex_handler = Reindex()
