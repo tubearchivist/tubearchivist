@@ -14,7 +14,7 @@
         "limit_count": 5,
         "limit_speed": false,
         "sleep_interval": 3,
-        "format": "bestvideo[height<=720]+bestaudio/best[height<=720]"
+        "format": false
     },
     "application": {
         "cache_dir": "/cache",
