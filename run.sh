@@ -16,5 +16,5 @@ done
 python manage.py migrate
 python manage.py collectstatic
 nginx &
-celery -A home.tasks worker --loglevel=INFO --detach
+celery -A home.tasks worker --loglevel=INFO &
 uwsgi --ini uwsgi.ini
