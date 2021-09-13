@@ -53,11 +53,33 @@ Functions as a cache and temporary link between the application and the filesyst
   - Takes an optional volume at **/data** to make your configuration changes permanent.
 
 ## Getting Started
-1. Go through the **settings** page and look at the available options. Particularly set *Download Format* to your desired video quality before downloading.
+1. Go through the **settings** page and look at the available options. Particularly set *Download Format* to your desired video quality before downloading. **Tube Archivist** downloads the best available quality by default.
 2. Subscribe to some of your favourite Youtube channels on the **channels** page. 
 3. On the **downloads** page, click on *Rescan subscriptions* to add videos from the subscribed channels to your Download queue or click on *Add to download queue* to manually add Video IDs, links, channels or playlists.
 4. Click on *Download queue* and let Tube Archivist to it's thing. 
 5. Enjoy your archived collection!
+  
+## Import your existing library
+So far this depends on the video you are trying to import to be still available on youtube to get the metadata. Add the files you like to import to the */cache/import* folder. Make sure to follow one of the two methods below.
+
+### Method 1:
+Add a matching *.json* file with the media file. Both files need to have the same base name, for example:
+- For the media file: \<base-name>.mp4
+- For the JSON file: \<base-name>.info.json
+- Alternate JSON file: \<base-name>.json
+
+**Tube Archivist** then looks for the 'id' key within the JSON file to identify the video.
+
+### Method 2:
+Detect the Youtube ID from filename, this accepts the default yt-dlp naming convention for file names like:
+- \<base-name>[\<youtube-id>].mp4
+- The Youtube ID in square brackets at the end of the filename is the crucial part.
+
+### Some notes:
+- This will **consume** the files you put into the import folder: Files will get converted to mp4 if needed (this might take a long time...) and moved to the archive, *.json* files will get deleted upon completion to avoid having doublicates on the next run.
+- Mabe start with a subset of your files to import to make sure everythings goes well...
+- Follow the logs to monitor progress and errors: `docker-compose logs -f tubearchivist`.
+
 
 ## Potential pitfalls
 **Elastic Search** in Docker requires the kernel setting of the host machine `vm.max_map_count` to be set to least 262144.
@@ -74,16 +96,23 @@ To apply the change permanently depends on your host operating system:
 
 
 ## Roadmap
-This should be considered as a **minimal viable product**, there is an exstensive list of future functions and improvements planned: 
-- [ ] Scan your filesystem to manually add videos
+This should be considered as a **minimal viable product**, there is an exstensive list of future functions and improvements planned.
+
+### Functionality
+- [ ] Scan your filesystem to index already downloaded videos
 - [ ] Access controll
 - [ ] User roles
 - [ ] Delete videos and channel
 - [ ] Create playlists
-- [ ] Show similar videos on video page
-- [ ] Import existing downloaded archive
-- [ ] Multi language support
 - [ ] Backup and restore
+- [ ] Podcast mode to serve channel as mp3
+- [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
+
+### UI
+- [ ] Show similar videos on video page
+- [ ] Multi language support
+- [ ] Grid and list view for both channel and video list pages
+- [ ] Show total video downloaded vs total videos available in channel
 
 
 ## Known limitations
