@@ -2,6 +2,7 @@
 """ check requirements.txt for outdated packages """
 
 import sys
+import pathlib
 
 import requests
 
@@ -10,8 +11,20 @@ class Requirements:
     """ handle requirements.txt """
 
     FILE_PATH = 'tubearchivist/requirements.txt'
+    LOCK = '/tmp/tubearchivist-requirements.lock'
 
     def __init__(self):
+        self.exists = self.checked_today()
+        self.all_requirements = False
+        self.all_updates = False
+
+    def checked_today(self):
+        """ skip requirements check when lock file exists """
+        exists = pathlib.Path(self.LOCK).exists()
+        return exists
+
+    def look_for_updates(self):
+        """ look through requirements and check for updates """
         self.all_requirements = self.get_dependencies()
         self.all_updates = self.check_packages()
 
@@ -59,6 +72,9 @@ class Requirements:
         if not all_updates:
             print('no updates found')
 
+        # remember that
+        pathlib.Path(self.LOCK).touch()
+
         return all_updates
 
     def apply_updates(self):
@@ -82,8 +98,13 @@ class Requirements:
         print('requirements.txt updates')
 
 
-if __name__ == "__main__":
+def main():
+    """ main to check for updates """
     handler = Requirements()
+    if handler.exists:
+        return
+
+    handler.look_for_updates()
     if handler.all_updates:
         input_response = input('\nupdate requirements.txt? [y/n] ')
         if input_response == 'y':
@@ -91,3 +112,6 @@ if __name__ == "__main__":
         else:
             print('cancle update...')
             sys.exit(1)
+
+if __name__ == "__main__":
+    main()
