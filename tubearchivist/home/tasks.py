@@ -14,7 +14,7 @@ from home.src.download import (
     VideoDownloader
 )
 from home.src.config import AppConfig
-from home.src.reindex import reindex_old_documents
+from home.src.reindex import reindex_old_documents, ManualImport
 
 
 CONFIG = AppConfig().config
@@ -70,3 +70,12 @@ def extrac_dl(youtube_ids):
 def check_reindex():
     """ run the reindex main command """
     reindex_old_documents()
+
+
+@shared_task
+def run_manual_import():
+    """ called from settings page, to go through import folder """
+    print('starting media file import')
+    import_handler = ManualImport()
+    if import_handler.identified:
+        import_handler.process_import()

@@ -7,13 +7,17 @@ Functionality:
 
 import json
 import os
+import re
+import subprocess
+import shutil
+
 from datetime import datetime
 from time import sleep
 from math import ceil
 
 import requests
 
-from home.src.download import ChannelSubscription, PendingList
+from home.src.download import ChannelSubscription, PendingList, VideoDownloader
 from home.src.config import AppConfig
 from home.src.index import (
     YoutubeChannel,
@@ -330,6 +334,119 @@ class FilesystemScanner:
             request = requests.delete(url)
             if not request.ok:
                 print(request.text)
+
+
+class ManualImport:
+    """ import and indexing existing video files """
+
+    CONFIG = AppConfig().config
+    CACHE_DIR = CONFIG['application']['cache_dir']
+    IMPORT_DIR = os.path.join(CACHE_DIR, 'import')
+
+    def __init__(self):
+        self.identified = self.import_folder_parser()
+
+    def import_folder_parser(self):
+        """ detect files in import folder """
+
+        to_import = os.listdir(self.IMPORT_DIR)
+        to_import.sort()
+        video_files = [i for i in to_import if not i.endswith('.json')]
+
+        identified = []
+
+        for file_path in video_files:
+
+            file_dict = {'video_file': file_path}
+            file_name, _ = os.path.splitext(file_path)
+
+            matching_json = [
+                i for i in to_import if i.startswith(file_name)
+                and i.endswith('.json')
+            ]
+            if matching_json:
+                json_file = matching_json[0]
+                youtube_id = self.extract_id_from_json(json_file)
+                file_dict.update({'json_file': json_file})
+            else:
+                youtube_id = self.extract_id_from_filename(file_name)
+                file_dict.update({'json_file': False})
+
+            file_dict.update({'youtube_id': youtube_id})
+            identified.append(file_dict)
+
+        return identified
+
+    @staticmethod
+    def extract_id_from_filename(file_name):
+        """
+        look at the file name for the youtube id
+        expects filename ending in [<youtube_id>].<ext>
+        """
+        id_search = re.search(r'\[([a-zA-Z0-9_-]{11})\]$', file_name)
+        if id_search:
+            youtube_id = id_search.group(1)
+            return youtube_id
+
+        print('failed to extract youtube id for: ' + file_name)
+        raise Exception
+
+    def extract_id_from_json(self, json_file):
+        """ open json file and extract id """
+        json_path = os.path.join(self.CACHE_DIR, 'import', json_file)
+        with open(json_path, 'r', encoding='utf-8') as f:
+            json_content = f.read()
+
+        youtube_id = json.loads(json_content)['id']
+
+        return youtube_id
+
+    def process_import(self):
+        """ go through identified media files """
+
+        for media_file in self.identified:
+            json_file = media_file['json_file']
+            video_file = media_file['video_file']
+            youtube_id = media_file['youtube_id']
+
+            video_path = os.path.join(self.CACHE_DIR, 'import', video_file)
+
+            self.move_to_cache(video_path, youtube_id)
+
+            # identify and archive
+            vid_dict = index_new_video(youtube_id)
+            VideoDownloader([youtube_id]).move_to_archive(vid_dict)
+
+            # cleanup
+            if os.path.exists(video_path):
+                os.remove(video_path)
+            if json_file:
+                json_path = os.path.join(self.CACHE_DIR, 'import', json_file)
+                os.remove(json_path)
+
+    def move_to_cache(self, video_path, youtube_id):
+        """ move identified video file to cache, convert to mp4 """
+        file_name = os.path.split(video_path)[-1]
+        video_file, ext = os.path.splitext(file_name)
+        if not youtube_id in video_file:
+            new_file_name = f'{video_file}_{youtube_id}{ext}'
+            new_path = os.path.join(self.CACHE_DIR, 'download', new_file_name)
+        else:
+            new_path = os.path.join(self.CACHE_DIR, 'download', file_name)
+        if ext == '.mp4':
+            # just move
+            new_path = os.path.join(self.CACHE_DIR, 'download', file_name)
+            shutil.move(video_path, new_path)
+        else:
+            # needs conversion
+            new_path = os.path.join(
+                self.CACHE_DIR, 'download', video_file + '.mp4'
+            )
+            print(f'processing with ffmpeg: {video_file}')
+            subprocess.run(
+                ["ffmpeg", "-i", video_path, new_path, 
+                "-loglevel", "warning", "-stats"], check=True
+            )
 
 
 def scan_filesystem():
