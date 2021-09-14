@@ -1,6 +1,6 @@
-![banner-tube-archivist-light.png](assets/tube-archivist-banner.jpg?raw=true "Tube Archivist Banner")  
+![Tube Archivist](assets/tube-archivist-banner.jpg?raw=true "Tube Archivist Banner")  
 
-<center><h1>The Tube Archivist<br>Your self hosted Youtube media server</h1></center>
+<center><h1>Your self hosted Youtube media server</h1></center>
 
 
 ## Core functionality
@@ -60,7 +60,7 @@ Functions as a cache and temporary link between the application and the filesyst
 5. Enjoy your archived collection!
   
 ## Import your existing library
-So far this depends on the video you are trying to import to be still available on youtube to get the metadata. Add the files you like to import to the */cache/import* folder. Make sure to follow one of the two methods below.
+So far this depends on the video you are trying to import to be still available on youtube to get the metadata. Add the files you like to import to the */cache/import* folder. Then start the process from the settings page *Manual media files import*. Make sure to follow one of the two methods below.
 
 ### Method 1:
 Add a matching *.json* file with the media file. Both files need to have the same base name, for example:
@@ -77,7 +77,7 @@ Detect the Youtube ID from filename, this accepts the default yt-dlp naming conv
 
 ### Some notes:
 - This will **consume** the files you put into the import folder: Files will get converted to mp4 if needed (this might take a long time...) and moved to the archive, *.json* files will get deleted upon completion to avoid having doublicates on the next run.
-- Mabe start with a subset of your files to import to make sure everythings goes well...
+- Maybe start with a subset of your files to import to make sure everything goes well...
 - Follow the logs to monitor progress and errors: `docker-compose logs -f tubearchivist`.
 
 
@@ -99,7 +99,6 @@ To apply the change permanently depends on your host operating system:
 This should be considered as a **minimal viable product**, there is an exstensive list of future functions and improvements planned.
 
 ### Functionality
-- [ ] Scan your filesystem to index already downloaded videos
 - [ ] Access controll
 - [ ] User roles
 - [ ] Delete videos and channel
@@ -107,6 +106,7 @@ This should be considered as a **minimal viable product**, there is an exstensiv
 - [ ] Backup and restore
 - [ ] Podcast mode to serve channel as mp3
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
+- [X] Scan your filesystem to index already downloaded videos [2021-09-14]
 
 ### UI
 - [ ] Show similar videos on video page
