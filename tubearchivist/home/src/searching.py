@@ -125,7 +125,7 @@ class SearchHandler:
                     new_height = width / 16 * 9
                     offset = (height - new_height) / 2
                     img = img.crop((0, offset, width, height - offset))
-                img.save(cache_path)
+                img.convert("RGB").save(cache_path)
 
     def cache_dl_chan(self, all_channels):
         """ download channel thumbs """
