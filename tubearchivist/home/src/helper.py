@@ -100,6 +100,12 @@ def get_dl_message(cache_dir):
     return json_str
 
 
+def get_lock(lock_key):
+    """ handle lock for task management """
+    redis_lock = redis.Redis(host=REDIS_HOST).lock(lock_key)
+    return redis_lock
+
+
 def monitor_cache_dir(cache_dir):
     """
     look at download cache dir directly as alterative progress info

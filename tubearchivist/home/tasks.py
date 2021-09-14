@@ -15,6 +15,7 @@ from home.src.download import (
 )
 from home.src.config import AppConfig
 from home.src.reindex import reindex_old_documents, ManualImport
+from home.src.helper import get_lock
 
 
 CONFIG = AppConfig().config
@@ -75,7 +76,20 @@ def check_reindex():
 @shared_task
 def run_manual_import():
     """ called from settings page, to go through import folder """
+
     print('starting media file import')
-    import_handler = ManualImport()
-    if import_handler.identified:
-        import_handler.process_import()
+    have_lock = False
+    my_lock = get_lock('manual_import')
+
+    try:
+        have_lock = my_lock.acquire(blocking=False)
+        if have_lock:
+            import_handler = ManualImport()
+            if import_handler.identified:
+                import_handler.process_import()
+        else:
+            print("Did not acquire lock form import.")
+
+    finally:
+        if have_lock:
+            my_lock.release()
