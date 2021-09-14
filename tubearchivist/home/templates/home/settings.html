@@ -3,7 +3,7 @@
 <div class="title-bar">
     <h1>Settings</h1>
 </div>
-<form action="/settings/" method="POST">
+<form action="/settings/" method="POST" name="settings-update">
     {% csrf_token %}
     <div class="settings-group">
         <h2>Color scheme</h2>
@@ -113,11 +113,14 @@
     <h1>Actions</h1>
 </div>
 <div class="settings-group">
-    <p>Rescan filesystem.</p>
-    <i>Coming soon</i>
+    <h2>Manual media files import.</h2>
+    <p>Add files to the cache/import folder. Make sure to follow the instructions on Github.</p>
+    <div id="manual-import">
+        <button onclick="manualImport()">Start import</button>
+    </div>
 </div>
 <div class="settings-group">
-    <p>Manual media files import.</p>
+    <p>Rescan filesystem.</p>
     <i>Coming soon</i>
 </div>
 <div class="settings-group">

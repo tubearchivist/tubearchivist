@@ -30,7 +30,8 @@ from home.tasks import (
     update_subscribed,
     download_pending,
     extrac_dl,
-    download_single
+    download_single,
+    run_manual_import
 )
 
 
@@ -428,7 +429,7 @@ class PostData:
     VALID_KEYS = [
         "watched", "rescan_pending", "ignore", "dl_pending",
         "unsubscribe", "sort_order", "hide_watched", "show_subed_only",
-        "channel-search", "video-search", "dlnow"
+        "channel-search", "video-search", "dlnow", "manual-import"
     ]
 
     def __init__(self, post_dict):
@@ -497,6 +498,9 @@ class PostData:
                 youtube_id = item['status']
                 print('downloading: ' + youtube_id)
                 download_single(youtube_id)
+            elif task == 'manual-import':
+                print('starting manual import')
+                run_manual_import.delay()
         return {'success': True}
 
     def search_channels(self, search_query):

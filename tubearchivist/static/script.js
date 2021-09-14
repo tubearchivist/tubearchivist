@@ -79,6 +79,19 @@ function downloadNow(button) {
     }, 500);
 }
 
+// settings page buttons
+function manualImport() {
+    var payload = JSON.stringify({'manual-import': true});
+    console.log(payload);
+    sendPost(payload);
+    // clear button
+    var message = document.createElement('p');
+    message.innerText = 'processing import';
+    var toReplace = document.getElementById('manual-import');
+    toReplace.innerHTML = '';
+    toReplace.appendChild(message);
+}
+
 // player
 function createPlayer(button) {
     var mediaUrl = button.getAttribute('data-src');
