@@ -134,11 +134,14 @@ button:hover {
     grid-row-end: 3;
 }
 
+.footer a {
+    text-decoration: underline;
+}
+
 /* navigation */
 .top-nav {
     display: block;
     padding: 15px 0;
-    /* justify-content: space-around; */
     position: relative;
 }
 
