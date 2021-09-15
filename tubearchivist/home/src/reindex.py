@@ -428,23 +428,22 @@ class ManualImport:
         """ move identified video file to cache, convert to mp4 """
         file_name = os.path.split(video_path)[-1]
         video_file, ext = os.path.splitext(file_name)
+
+        # make sure youtube_id is in filename
         if not youtube_id in video_file:
-            new_file_name = f'{video_file}_{youtube_id}{ext}'
-            new_path = os.path.join(self.CACHE_DIR, 'download', new_file_name)
-        else:
-            new_path = os.path.join(self.CACHE_DIR, 'download', file_name)
+            video_file = f'{video_file}_{youtube_id}'
+
+        # move, convert if needed
         if ext == '.mp4':
-            # just move
-            new_path = os.path.join(self.CACHE_DIR, 'download', file_name)
-            shutil.move(video_path, new_path)
+            new_file = video_file + ext
+            dest_path = os.path.join(self.CACHE_DIR, 'download', new_file)
+            shutil.move(video_path, dest_path)
         else:
-            # needs conversion
-            new_path = os.path.join(
-                self.CACHE_DIR, 'download', video_file + '.mp4'
-            )
             print(f'processing with ffmpeg: {video_file}')
+            new_file = video_file + '.mp4'
+            dest_path = os.path.join(self.CACHE_DIR, 'download', new_file)
             subprocess.run(
-                ["ffmpeg", "-i", video_path, new_path, 
+                ["ffmpeg", "-i", video_path, dest_path,
                 "-loglevel", "warning", "-stats"], check=True
             )
 
