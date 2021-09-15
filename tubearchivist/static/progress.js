@@ -71,10 +71,3 @@ function buildDownloadMessage(dlProgress) {
     message.appendChild(messageText);
     box.appendChild(message);
 };
-
-function animate(elementId, animationClass) {
-    var toAnimate = document.getElementById(elementId);
-    if (toAnimate.className !== animationClass) {
-        toAnimate.className = animationClass;
-    }
-}

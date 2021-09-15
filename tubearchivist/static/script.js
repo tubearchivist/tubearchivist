@@ -82,7 +82,6 @@ function downloadNow(button) {
 // settings page buttons
 function manualImport() {
     var payload = JSON.stringify({'manual-import': true});
-    console.log(payload);
     sendPost(payload);
     // clear button
     var message = document.createElement('p');
@@ -258,7 +257,6 @@ function showSearch() {
 }
 
 function showForm() {
-    console.log('show hidden form');
     var formElement = document.getElementById('hidden-form');
     var displayStyle = formElement.style.display
     if (displayStyle === "") {
@@ -266,5 +264,12 @@ function showForm() {
         animate('add-icon', 'pulse-img');
     } else {
         formElement.style.display = "";
+    }
+}
+
+function animate(elementId, animationClass) {
+    var toAnimate = document.getElementById(elementId);
+    if (toAnimate.className !== animationClass) {
+        toAnimate.className = animationClass;
     }
 }
