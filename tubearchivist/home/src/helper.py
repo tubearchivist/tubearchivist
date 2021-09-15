@@ -59,7 +59,7 @@ def process_url_list(url_str):
             link_type = 'playlist'
         else:
             # unable to parse
-            return False
+            raise ValueError('not a valid url: ' + url)
 
         youtube_ids.append({"url": url_no_param, "type": link_type})
 
