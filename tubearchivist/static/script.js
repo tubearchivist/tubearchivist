@@ -40,7 +40,7 @@ function isWatched(youtube_id) {
 function unsubscribe(channel_id) {
     var payload = JSON.stringify({'unsubscribe': channel_id});
     sendPost(payload);
-    document.getElementById('sub-' + channel_id).remove();
+    document.getElementById(channel_id).remove();
 }
 
 // download page buttons
