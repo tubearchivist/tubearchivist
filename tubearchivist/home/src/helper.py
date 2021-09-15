@@ -46,7 +46,7 @@ def process_url_list(url_str):
     url_list = re.split('\n+', url_str[0])
     youtube_ids = []
     for url in url_list:
-        url_clean = url.strip().split('/')[-1]
+        url_clean = url.strip().strip('/').split('/')[-1]
         for i in to_replace:
             url_clean = url_clean.replace(i, '')
         url_no_param = url_clean.split('&')[0]

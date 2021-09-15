@@ -4,33 +4,31 @@
 <div class="title-bar">
     <h1>Recent Videos</h1>
 </div>
-<div class="two-col">
+<div class="info-box info-box-2">
     <div class="sort">
-        <div>
-            <p>Sort order from <span class="settings-current">{{ sortorder }}</span>
+        <p>Sort order from <span class="settings-current">{{ sortorder }}</span>
             <select name="sort" id="sort" onchange="sortChange(this.value)">
                 <option value="" disabled selected> -- change sort order -- </option>
                 <option value="published">date published</option>
                 <option value="downloaded">date downloaded</option>
-            </select></p>
-        </div>
-        <div>
-            <p>Hide watched videos <span class="settings-current">{{ hide_watched }}</span>
+            </select>
+        </p>
+        <p>Hide watched videos <span class="settings-current">{{ hide_watched }}</span>
             <select name="watched" id="watched" onchange="hideWatched(this.value)">
                 <option value="" disabled selected> -- change hide watched -- </option>
                 <option value="0">show watched videos</option>
                 <option value="1">hide watched videos</option>
-            </select></p>
-        </div>
+            </select>
+        </p>
     </div>
-    <div class="search-form">
+    <div class="search-form icon-text">
+        <div class="search-icon">
+            <img src="{% static 'img/icon-search.svg' %}" alt="search-icon" onclick="showSearch()">
+        </div>
         <form action="/" method="POST" id="search-box">
             {% csrf_token %}
             <input name="videoSearch" list="resultBox" type="text" id="searchInput" autocomplete="off">
         </form>
-        <div class="search-icon">
-            <img src="{% static 'img/icon-search.svg' %}" alt="search-icon" onclick="showSearch()">
-        </div>
     </div>
 </div>
 <div id="player" class="video-player"></div>

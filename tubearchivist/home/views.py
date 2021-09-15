@@ -314,27 +314,40 @@ class ChannelView(View):
         colors = config['application']['colors']
         return es_url, colors
 
-    @staticmethod
-    def post(request):
+    def post(self, request):
         """ handle http post requests """
         subscriptions_post = dict(request.POST)
         print(subscriptions_post)
         subscriptions_post = dict(request.POST)
         if 'subscribe' in subscriptions_post.keys():
-            youtube_ids = process_url_list(subscriptions_post['subscribe'])
-            if youtube_ids[0]['type'] == 'video':
-                youtube_id = youtube_ids[0]['url']
-                vid_details = PendingList().get_youtube_details(youtube_id)
+            sub_str = subscriptions_post['subscribe']
+            try:
+                youtube_ids = process_url_list(sub_str)
+                self.subscribe_to(youtube_ids)
+            except ValueError:
+                print('parsing subscribe ids failed!')
+                print(sub_str)
+
+        sleep(1)
+        return redirect('channel', permanent=True)
+
+    @staticmethod
+    def subscribe_to(youtube_ids):
+        """ process the subscribe ids """
+        for youtube_id in youtube_ids:
+            if youtube_id['type'] == 'video':
+                to_sub = youtube_id['url']
+                vid_details = PendingList().get_youtube_details(to_sub)
                 channel_id_sub = vid_details['channel_id']
+            elif youtube_id['type'] == 'channel':
+                channel_id_sub = youtube_id['url']
             else:
-                channel_id_sub = youtube_ids[0]['url']
+                raise ValueError('failed to subscribe to: ' + youtube_id)
+
             ChannelSubscription().change_subscribe(
                 channel_id_sub, channel_subscribed=True
             )
             print('subscribed to: ' + channel_id_sub)
-
-        sleep(1)
-        return redirect('channel', permanent=True)
 
 
 class VideoView(View):

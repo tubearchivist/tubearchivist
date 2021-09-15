@@ -182,11 +182,7 @@ button:hover {
 .sort {
     display: flex;
     flex-wrap: wrap;
-}
-
-.sort > div {
-    width: 100%;
-    display: inline;
+    align-content: center;
 }
 
 .padding-box {
@@ -199,13 +195,6 @@ button:hover {
 
 .two-col > div {
     width: 50%;
-}
-
-.search-form {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-end;
 }
 
 .search-form input {
@@ -613,9 +602,6 @@ button:hover {
         margin: 15px;
     }
     .sort {
-        display: block;
-    }
-    .sort > div {
         display: block;
     }
     .sort select {

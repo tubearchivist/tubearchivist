@@ -5,26 +5,29 @@
 <div class="title-bar">
     <h1>Channels</h1>
 </div>
-<div class="two-col">
-    <div>
-        <h2>Subscribe to channel</h2>
-        <p>Input channel ID, channel URL or Video of a channel</p>
-        <form action="/channel/" method="post">
-            {% csrf_token %}
-            <input type="text" id="subscribe" name="subscribe" autocomplete="off">
-            <button type="submit">Subscribe</button>
-        </form>
+<div class="info-box info-box-2">
+    <div class="icon-text">
+        <img id="add-icon" onclick="showForm()" src="{% static 'img/icon-add.svg' %}" alt="add-icon">
+        <p>Subscribe to Channels</p>
+        <div class="show-form">
+            <form id="hidden-form" action="/channel/" method="post">
+                {% csrf_token %}
+                <textarea rows="3" placeholder="Input channel ID, channel URL or Video of a channel" id="subscribe" name="subscribe"></textarea>
+                <button type="submit">Subscribe</button>
+            </form>
+        </div>
     </div>
-    <div class="search-form">
+    <div class="search-form icon-text">
+        <div class="search-icon">
+            <img src="{% static 'img/icon-search.svg' %}" alt="search-icon" onclick="showSearch()">
+            <p>Search Channels</p>
+        </div>
         <form onSubmit="return channelRedirect();" id="search-box">
             {% csrf_token %}
             <input name="videoSearch" list="resultBox" type="text" id="searchInput" autocomplete="off" oninput="searchChannels(this.value)">
             <datalist id="resultBox">
             </datalist>
         </form>
-        <div class="search-icon">
-            <img src="{% static 'img/icon-search.svg' %}" alt="search-icon" onclick="showSearch()">
-        </div>
     </div>
 </div>
 <div class="padding-box">
