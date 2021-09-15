@@ -375,6 +375,9 @@ class YoutubeVideo:
 def index_new_video(youtube_id, missing_vid=False):
     """ combine video and channel classes for new video index """
     vid_handler = YoutubeVideo(youtube_id)
+    if not vid_handler.vid_dict:
+        raise ValueError('failed to get metadata for ' + youtube_id)
+
     channel_handler = YoutubeChannel(vid_handler.channel_id)
     # add filepath to vid_dict
     channel_name = channel_handler.channel_dict['channel_name']
