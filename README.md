@@ -30,7 +30,7 @@
 Once your Youtube video collection grows, it becomes hard to search and find a specific video. That's where Tube Archivist comes in: By indexing your video collection with metadata from Youtube, you can organize, search and enjoy your archived Youtube videos without hassle offline through a convenient web interface.
 
 ## Installation
-Take a look at the example `docker-compose.yml` file provided. Tube Archivist depends on three main components split up into seperate docker containers:  
+Take a look at the example `docker-compose.yml` file provided. Tube Archivist depends on three main components split up into separate docker containers:  
 
 ### Tube Archivist
 The main Python application that displays and serves your video collection, built with Django.
@@ -38,18 +38,18 @@ The main Python application that displays and serves your video collection, buil
   - Needs a mandatory volume for the video archive at **/youtube**
   - And another recommended volume to save the cache for thumbnails and artwork at **/cache**.
   - The environment variables `ES_URL` and `REDIS_HOST` are needed to tell Tube Archivist where Elasticsearch and Redis respectively are located.
-  - The environment variables `HOST_UID` and `HOST_GID` allowes Tube Archivist to `chown` the video files to the main host system user instead of the container user.
+  - The environment variables `HOST_UID` and `HOST_GID` allows Tube Archivist to `chown` the video files to the main host system user instead of the container user.
 
 ### Elasticsearch
-Stores video meta data and makes everything searchable. Also keeps track of the download queue.
-  - Needs to be accessable over the default port `9200`
+Stores video metadata and makes everything searchable. Also keeps track of the download queue.
+  - Needs to be accessible over the default port `9200`
   - Needs a volume at **/usr/share/elasticsearch/data** to store data
 
 Follow the [documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html) for additional installation details.
 
 ### Redis JSON
 Functions as a cache and temporary link between the application and the filesystem. Used to store and display messages and configuration variables.
-  - Needs to be accessable over the default port `6379`
+  - Needs to be accessible over the default port `6379`
   - Takes an optional volume at **/data** to make your configuration changes permanent.
 
 ## Getting Started
@@ -82,7 +82,8 @@ Detect the Youtube ID from filename, this accepts the default yt-dlp naming conv
 
 
 ## Potential pitfalls
-**Elastic Search** in Docker requires the kernel setting of the host machine `vm.max_map_count` to be set to least 262144.
+### vm.max_map_count
+**Elastic Search** in Docker requires the kernel setting of the host machine `vm.max_map_count` to be set to at least 262144.
 
 To temporary set the value run:  
 ```
@@ -94,12 +95,19 @@ To apply the change permanently depends on your host operating system:
 - On Arch based systems create a file */etc/sysctl.d/max_map_count.conf* with the content `vm.max_map_count = 262144`. 
 - On any other platform look up in the documentation on how to pass kernel parameters.
 
+### Permissions for elasticsearch
+If you see a message similar to `AccessDeniedException[/usr/share/elasticsearch/data/nodes]` when initially starting elasticsearch, that means the container is not allowed to write files to the volume.  
+That's most likely the case when you run `docker-compose` as an unprivileged user. To fix that issue, shutdown the container and on your host machine run:
+```
+chown 1000:0 /path/to/mount/point
+```
+This will match the permissions with the **UID** and **GID** of elasticsearch within the container and should fix the issue.
 
 ## Roadmap
-This should be considered as a **minimal viable product**, there is an exstensive list of future functions and improvements planned.
+This should be considered as a **minimal viable product**, there is an extensive list of future functions and improvements planned.
 
 ### Functionality
-- [ ] Access controll
+- [ ] Access control
 - [ ] User roles
 - [ ] Delete videos and channel
 - [ ] Create playlists
