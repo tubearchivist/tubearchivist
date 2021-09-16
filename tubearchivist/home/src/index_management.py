@@ -8,6 +8,7 @@ Functionality:
 
 import json
 import os
+import zipfile
 
 from datetime import datetime
 
@@ -375,6 +376,7 @@ class ElasticBackup:
         self.config = AppConfig().config
         self.index_config = index_config
         self.timestamp = datetime.now().strftime('%Y%m%d')
+        self.backup_files = []
 
     def get_all_documents(self, index_name):
         """ export all documents of a single index """
@@ -389,7 +391,7 @@ class ElasticBackup:
         data = {
             "query": {"match_all": {}},
             "size": 100, "pit": {"id": pit_id, "keep_alive": "1m"},
-            "sort": [ {"_id": {"order": "asc"}} ]
+            "sort": [{"_id": {"order": "asc"}}]
         }
         query_str = json.dumps(data)
         url = es_url + '/_search'
@@ -422,7 +424,7 @@ class ElasticBackup:
         for document in all_results:
             document_id = document['_id']
             es_index = document['_index']
-            action = { "index" : { "_index": es_index, "_id": document_id } }
+            action = {"index": {"_index": es_index, "_id": document_id}}
             source = document['_source']
             bulk_list.append(json.dumps(action))
             bulk_list.append(json.dumps(source))
@@ -433,13 +435,43 @@ class ElasticBackup:
 
         return file_content
 
-    def write_json_file(self, file_content, index_name):
-        """ write json file to disk """
+    def write_es_json(self, file_content, index_name):
+        """ write nd json file for es _bulk API to disk """
         cache_dir = self.config['application']['cache_dir']
-        file_name = f'ta_{index_name}-{self.timestamp}.json'
-        file_path = os.path.join(cache_dir, file_name)
+        file_name = f'es_{index_name}-{self.timestamp}.json'
+        file_path = os.path.join(cache_dir, 'backup', file_name)
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(file_content)
+
+        self.backup_files.append(file_path)
+
+    def write_ta_json(self, all_results, index_name):
+        """ write generic json file to disk """
+        cache_dir = self.config['application']['cache_dir']
+        file_name = f'ta_{index_name}-{self.timestamp}.json'
+        file_path = os.path.join(cache_dir, 'backup', file_name)
+        to_write = [i['_source'] for i in all_results]
+        file_content = json.dumps(to_write)
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(file_content)
+
+        self.backup_files.append(file_path)
+
+    def zip_it(self):
+        """ pack it up into single zip file """
+        cache_dir = self.config['application']['cache_dir']
+        file_name = f'ta_backup-{self.timestamp}.zip'
+        backup_file = os.path.join(cache_dir, 'backup', file_name)
+
+        with zipfile.ZipFile(
+                    backup_file, 'w', compression=zipfile.ZIP_DEFLATED
+                ) as zip_f:
+            for backup_file in self.backup_files:
+                zip_f.write(backup_file)
+
+        # cleanup
+        for backup_file in self.backup_files:
+            os.remove(backup_file)
 
     def post_bulk_restore(self, file_name):
         """ send bulk to es """
@@ -475,7 +507,10 @@ def backup_all_indexes():
         index_name = index['index_name']
         all_results = backup_handler.get_all_documents(index_name)
         file_content = backup_handler.build_bulk(all_results)
-        backup_handler.write_json_file(file_content, index_name)
+        backup_handler.write_es_json(file_content, index_name)
+        backup_handler.write_ta_json(all_results, index_name)
+
+    backup_handler.zip_it()
 
 
 def restore_from_backup():

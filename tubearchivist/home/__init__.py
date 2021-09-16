@@ -22,8 +22,8 @@ def sync_redis_state():
 
 
 def make_folders():
-    """ make needed folders here to avoid letting docker messing it up """
-    folders = ['download', 'channels', 'videos', 'import']
+    """ make needed cache folders here so docker doesn't mess it up """
+    folders = ['download', 'channels', 'videos', 'import', 'backup']
     config = AppConfig().config
     cache_dir = config['application']['cache_dir']
     for folder in folders:
