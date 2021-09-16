@@ -91,6 +91,17 @@ function manualImport() {
     toReplace.appendChild(message);
 }
 
+function dbBackup() {
+    var payload = JSON.stringify({'db-backup': true});
+    sendPost(payload)
+    // clear button
+    var message = document.createElement('p');
+    message.innerText = 'backing up archive';
+    var toReplace = document.getElementById('db-backup');
+    toReplace.innerHTML = '';
+    toReplace.appendChild(message);
+}
+
 // player
 function createPlayer(button) {
     var mediaUrl = button.getAttribute('data-src');

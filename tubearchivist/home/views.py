@@ -31,7 +31,8 @@ from home.tasks import (
     download_pending,
     extrac_dl,
     download_single,
-    run_manual_import
+    run_manual_import,
+    run_backup
 )
 
 
@@ -442,7 +443,8 @@ class PostData:
     VALID_KEYS = [
         "watched", "rescan_pending", "ignore", "dl_pending",
         "unsubscribe", "sort_order", "hide_watched", "show_subed_only",
-        "channel-search", "video-search", "dlnow", "manual-import"
+        "channel-search", "video-search", "dlnow", "manual-import",
+        "db-backup"
     ]
 
     def __init__(self, post_dict):
@@ -514,6 +516,9 @@ class PostData:
             elif task == 'manual-import':
                 print('starting manual import')
                 run_manual_import.delay()
+            elif task == 'db-backup':
+                print('backing up database')
+                run_backup.delay()
         return {'success': True}
 
     def search_channels(self, search_query):

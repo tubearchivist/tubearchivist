@@ -15,6 +15,7 @@ from home.src.download import (
 )
 from home.src.config import AppConfig
 from home.src.reindex import reindex_old_documents, ManualImport
+from home.src.index_management import backup_all_indexes
 from home.src.helper import get_lock
 
 
@@ -93,3 +94,9 @@ def run_manual_import():
     finally:
         if have_lock:
             my_lock.release()
+
+@shared_task
+def run_backup():
+    """ called from settings page, dump backup to zip file """
+    backup_all_indexes()
+    print('backup finished')
