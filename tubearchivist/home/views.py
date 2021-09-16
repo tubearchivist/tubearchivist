@@ -148,19 +148,49 @@ class DownloadView(View):
     takes POST for downloading youtube links
     """
 
-    @staticmethod
-    def get(request):
+    def get(self, request):
         """ handle get requests """
         config = AppConfig().config
         colors = config['application']['colors']
-        pending_handler = PendingList()
-        all_pending, _ = pending_handler.get_all_pending()
+
+        page_get = int(request.GET.get('page', 0))
+        pagination_handler = Pagination(page_get)
+
+        url = config['application']['es_url'] + '/ta_download/_search'
+        data = self.build_data(pagination_handler)
+        search = SearchHandler(url, data, cache=False)
+
+        videos_hits = search.get_data()
+        max_hits = search.max_hits
+
+        if videos_hits:
+            all_pending = [i['source'] for i in videos_hits]
+            pagination_handler.validate(max_hits)
+            pagination = pagination_handler.pagination
+        else:
+            all_pending = False
+            pagination = False
+
         context = {
             'pending': all_pending,
+            'max_hits': max_hits,
+            'pagination': pagination,
             'title': 'Downloads',
             'colors': colors
         }
         return render(request, 'home/downloads.html', context)
+
+    @staticmethod
+    def build_data(pagination_handler):
+        """ build data dict for search """
+        page_size = pagination_handler.pagination['page_size']
+        page_from = pagination_handler.pagination['page_from']
+        data = {
+            "size": page_size, "from": page_from,
+            "query": {"term": {"status": {"value": "pending"}}},
+            "sort": [{"timestamp": {"order": "desc"}}]
+        }
+        return data
 
     @staticmethod
     def post(request):

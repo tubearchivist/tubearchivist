@@ -29,7 +29,7 @@
 <h2>Download queue</h2>
 <div>
     {% if pending %}
-        <h3>Total pending downloads: {{ pending|length }}</h3>
+        <h3>Total pending downloads: {{ max_hits }}</h3>
         {% for video in pending %}
             <div class="dl-item" id="dl-{{ video.youtube_id }}">
                 <div class="dl-thumb">
