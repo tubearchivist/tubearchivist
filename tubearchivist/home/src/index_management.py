@@ -391,7 +391,7 @@ class ElasticBackup:
         data = {
             "query": {"match_all": {}},
             "size": 100, "pit": {"id": pit_id, "keep_alive": "1m"},
-            "sort": [{"_id": {"order": "asc"}}]
+            "sort": [{"youtube_id": {"order": "asc"}}]
         }
         query_str = json.dumps(data)
         url = es_url + '/_search'
