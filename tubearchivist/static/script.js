@@ -72,8 +72,8 @@ function toIgnore(button) {
 function downloadNow(button) {
     var youtube_id = button.getAttribute('data-id');
     var payload = JSON.stringify({'dlnow': youtube_id});
-    animate('download-icon', 'bounce-img');
     sendPost(payload);
+    document.getElementById(youtube_id).remove();
     setTimeout(function(){
         handleInterval();
     }, 500);

@@ -55,8 +55,7 @@ def download_pending():
 @shared_task
 def download_single(youtube_id):
     """ start download single video now """
-    to_download = [youtube_id]
-    download_handler = VideoDownloader(to_download)
+    download_handler = VideoDownloader([youtube_id])
     download_handler.download_list()
 
 

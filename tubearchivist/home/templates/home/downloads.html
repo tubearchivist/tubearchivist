@@ -44,7 +44,7 @@
                     {% endif %}
                     <p>Published: {{ video.published }} | Duration: {{ video.duration }} | {{ video.youtube_id }}</p>
                     <button data-id="{{ video.youtube_id }}" onclick="toIgnore(this)">Ignore</button>
-                    <button data-id="{{ video.youtube_id }}" onclick="downloadNow(this)">Download now</button>
+                    <button id="{{ video.youtube_id }}" data-id="{{ video.youtube_id }}" onclick="downloadNow(this)">Download now</button>
                 </div>
             </div>
         {% endfor %}

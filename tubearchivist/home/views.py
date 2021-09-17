@@ -542,7 +542,7 @@ class PostData:
             elif task == 'dlnow':
                 youtube_id = item['status']
                 print('downloading: ' + youtube_id)
-                download_single(youtube_id)
+                download_single.delay(youtube_id=youtube_id)
             elif task == 'manual-import':
                 print('starting manual import')
                 run_manual_import.delay()
