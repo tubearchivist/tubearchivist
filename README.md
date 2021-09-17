@@ -1,10 +1,10 @@
 ![Tube Archivist](assets/tube-archivist-banner.jpg?raw=true "Tube Archivist Banner")  
 
-<center><h1>Your self hosted Youtube media server</h1></center>
+<center><h1>Your self hosted YouTube media server</h1></center>
 
 
 ## Core functionality
-* Subscribe to your favourite Youtube channels
+* Subscribe to your favorite YouTube channels
 * Download Videos using **yt-dlp**
 * Index and make videos searchable
 * Play videos
@@ -27,7 +27,7 @@
 *Downloads Page*
   
 ## Problem Tube Archivist tries to solve
-Once your Youtube video collection grows, it becomes hard to search and find a specific video. That's where Tube Archivist comes in: By indexing your video collection with metadata from Youtube, you can organize, search and enjoy your archived Youtube videos without hassle offline through a convenient web interface.
+Once your YouTube video collection grows, it becomes hard to search and find a specific video. That's where Tube Archivist comes in: By indexing your video collection with metadata from YouTube, you can organize, search and enjoy your archived YouTube videos without hassle offline through a convenient web interface.
 
 ## Installation
 Take a look at the example `docker-compose.yml` file provided. Tube Archivist depends on three main components split up into separate docker containers:  
@@ -41,26 +41,26 @@ The main Python application that displays and serves your video collection, buil
   - The environment variables `HOST_UID` and `HOST_GID` allows Tube Archivist to `chown` the video files to the main host system user instead of the container user.
 
 ### Elasticsearch
-Stores video metadata and makes everything searchable. Also keeps track of the download queue.
+Stores video meta data and makes everything searchable. Also keeps track of the download queue.
   - Needs to be accessible over the default port `9200`
   - Needs a volume at **/usr/share/elasticsearch/data** to store data
 
 Follow the [documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html) for additional installation details.
 
 ### Redis JSON
-Functions as a cache and temporary link between the application and the filesystem. Used to store and display messages and configuration variables.
+Functions as a cache and temporary link between the application and the file system. Used to store and display messages and configuration variables.
   - Needs to be accessible over the default port `6379`
   - Takes an optional volume at **/data** to make your configuration changes permanent.
 
 ## Getting Started
 1. Go through the **settings** page and look at the available options. Particularly set *Download Format* to your desired video quality before downloading. **Tube Archivist** downloads the best available quality by default.
-2. Subscribe to some of your favourite Youtube channels on the **channels** page. 
+2. Subscribe to some of your favorite YouTube channels on the **channels** page. 
 3. On the **downloads** page, click on *Rescan subscriptions* to add videos from the subscribed channels to your Download queue or click on *Add to download queue* to manually add Video IDs, links, channels or playlists.
 4. Click on *Download queue* and let Tube Archivist to it's thing. 
 5. Enjoy your archived collection!
   
 ## Import your existing library
-So far this depends on the video you are trying to import to be still available on youtube to get the metadata. Add the files you like to import to the */cache/import* folder. Then start the process from the settings page *Manual media files import*. Make sure to follow one of the two methods below.
+So far this depends on the video you are trying to import to be still available on YouTube to get the metadata. Add the files you like to import to the */cache/import* folder. Then start the process from the settings page *Manual media files import*. Make sure to follow one of the two methods below.
 
 ### Method 1:
 Add a matching *.json* file with the media file. Both files need to have the same base name, for example:
@@ -71,12 +71,12 @@ Add a matching *.json* file with the media file. Both files need to have the sam
 **Tube Archivist** then looks for the 'id' key within the JSON file to identify the video.
 
 ### Method 2:
-Detect the Youtube ID from filename, this accepts the default yt-dlp naming convention for file names like:
+Detect the YouTube ID from filename, this accepts the default yt-dlp naming convention for file names like:
 - \<base-name>[\<youtube-id>].mp4
-- The Youtube ID in square brackets at the end of the filename is the crucial part.
+- The YouTube ID in square brackets at the end of the filename is the crucial part.
 
 ### Some notes:
-- This will **consume** the files you put into the import folder: Files will get converted to mp4 if needed (this might take a long time...) and moved to the archive, *.json* files will get deleted upon completion to avoid having doublicates on the next run.
+- This will **consume** the files you put into the import folder: Files will get converted to mp4 if needed (this might take a long time...) and moved to the archive, *.json* files will get deleted upon completion to avoid having duplicates on the next run.
 - Maybe start with a subset of your files to import to make sure everything goes well...
 - Follow the logs to monitor progress and errors: `docker-compose logs -f tubearchivist`.
 
@@ -114,7 +114,7 @@ This should be considered as a **minimal viable product**, there is an extensive
 - [ ] Backup and restore
 - [ ] Podcast mode to serve channel as mp3
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
-- [X] Scan your filesystem to index already downloaded videos [2021-09-14]
+- [X] Scan your file system to index already downloaded videos [2021-09-14]
 
 ### UI
 - [ ] Show similar videos on video page
