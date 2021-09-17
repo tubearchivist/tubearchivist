@@ -82,7 +82,8 @@ Detect the YouTube ID from filename, this accepts the default yt-dlp naming conv
 
 
 ## Potential pitfalls
-**Elastic Search** in Docker requires the kernel setting of the host machine `vm.max_map_count` to be set to least 262144.
+### vm.max_map_count
+**Elastic Search** in Docker requires the kernel setting of the host machine `vm.max_map_count` to be set to at least 262144.
 
 To temporary set the value run:  
 ```
@@ -94,6 +95,13 @@ To apply the change permanently depends on your host operating system:
 - On Arch based systems create a file */etc/sysctl.d/max_map_count.conf* with the content `vm.max_map_count = 262144`. 
 - On any other platform look up in the documentation on how to pass kernel parameters.
 
+### Permissions for elasticsearch
+If you see a message similar to `AccessDeniedException[/usr/share/elasticsearch/data/nodes]` when initially starting elasticsearch, that means the container is not allowed to write files to the volume.  
+That's most likely the case when you run `docker-compose` as an unprivileged user. To fix that issue, shutdown the container and on your host machine run:
+```
+chown 1000:0 /path/to/mount/point
+```
+This will match the permissions with the **UID** and **GID** of elasticsearch within the container and should fix the issue.
 
 ## Roadmap
 This should be considered as a **minimal viable product**, there is an extensive list of future functions and improvements planned.

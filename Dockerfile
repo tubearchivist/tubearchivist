@@ -34,7 +34,7 @@ VOLUME /youtube
 
 # start
 WORKDIR /app
-EXPOSE 80
+EXPOSE 8000
 
 RUN chmod +x ./run.sh
 

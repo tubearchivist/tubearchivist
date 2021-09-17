@@ -72,8 +72,8 @@ function toIgnore(button) {
 function downloadNow(button) {
     var youtube_id = button.getAttribute('data-id');
     var payload = JSON.stringify({'dlnow': youtube_id});
-    animate('download-icon', 'bounce-img');
     sendPost(payload);
+    document.getElementById(youtube_id).remove();
     setTimeout(function(){
         handleInterval();
     }, 500);
@@ -87,6 +87,17 @@ function manualImport() {
     var message = document.createElement('p');
     message.innerText = 'processing import';
     var toReplace = document.getElementById('manual-import');
+    toReplace.innerHTML = '';
+    toReplace.appendChild(message);
+}
+
+function dbBackup() {
+    var payload = JSON.stringify({'db-backup': true});
+    sendPost(payload)
+    // clear button
+    var message = document.createElement('p');
+    message.innerText = 'backing up archive';
+    var toReplace = document.getElementById('db-backup');
     toReplace.innerHTML = '';
     toReplace.appendChild(message);
 }

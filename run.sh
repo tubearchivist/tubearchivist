@@ -14,7 +14,7 @@ until curl "$ES_URL" -fs; do
 done
 
 python manage.py migrate
-python manage.py collectstatic
+python manage.py collectstatic --noinput -c
 nginx &
 celery -A home.tasks worker --loglevel=INFO &
 uwsgi --ini uwsgi.ini
