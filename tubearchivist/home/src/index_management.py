@@ -9,13 +9,10 @@ Functionality:
 import json
 import os
 import zipfile
-
 from datetime import datetime
 
 import requests
-
 from home.src.config import AppConfig
-
 
 # expected mapping and settings
 INDEX_CONFIG = [

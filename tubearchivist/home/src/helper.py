@@ -10,8 +10,8 @@ import string
 import subprocess
 import unicodedata
 
-import requests
 import redis
+import requests
 
 REDIS_HOST = os.environ.get('REDIS_HOST')
 

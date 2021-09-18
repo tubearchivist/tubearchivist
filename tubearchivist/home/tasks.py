@@ -7,17 +7,11 @@ Functionality:
 import os
 
 from celery import Celery, shared_task
-
-from home.src.download import (
-    PendingList,
-    ChannelSubscription,
-    VideoDownloader
-)
 from home.src.config import AppConfig
-from home.src.reindex import reindex_old_documents, ManualImport
-from home.src.index_management import backup_all_indexes
+from home.src.download import ChannelSubscription, PendingList, VideoDownloader
 from home.src.helper import get_lock
-
+from home.src.index_management import backup_all_indexes
+from home.src.reindex import ManualImport, reindex_old_documents
 
 CONFIG = AppConfig().config
 REDIS_HOST = CONFIG['application']['REDIS_HOST']
@@ -93,6 +87,7 @@ def run_manual_import():
     finally:
         if have_lock:
             my_lock.release()
+
 
 @shared_task
 def run_backup():

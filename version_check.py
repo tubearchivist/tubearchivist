@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """ check requirements.txt for outdated packages """
 
-import sys
 import pathlib
+import sys
 
 import requests
 
@@ -39,7 +39,7 @@ class Requirements:
             package, version = dependency.split('==')
             all_requirements.append((package, version.strip()))
 
-        all_requirements.sort(key = lambda x: x[0].lower())
+        all_requirements.sort(key=lambda x: x[0].lower())
 
         return all_requirements
 
@@ -112,6 +112,7 @@ def main():
         else:
             print('cancle update...')
             sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
