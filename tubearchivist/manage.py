@@ -5,6 +5,7 @@ import sys
 
 
 def main():
+    # pylint: disable=import-outside-toplevel
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
     try:

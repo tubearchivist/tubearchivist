@@ -9,13 +9,10 @@ Functionality:
 import json
 import os
 import zipfile
-
 from datetime import datetime
 
 import requests
-
 from home.src.config import AppConfig
-
 
 # expected mapping and settings
 INDEX_CONFIG = [
@@ -391,7 +388,7 @@ class ElasticBackup:
         data = {
             "query": {"match_all": {}},
             "size": 100, "pit": {"id": pit_id, "keep_alive": "1m"},
-            "sort": [{"youtube_id": {"order": "asc"}}]
+            "sort": [{"_id": {"order": "asc"}}]
         }
         query_str = json.dumps(data)
         url = es_url + '/_search'
@@ -436,7 +433,7 @@ class ElasticBackup:
         return file_content
 
     def write_es_json(self, file_content, index_name):
-        """ write nd json file for es _bulk API to disk """
+        """ write nd-json file for es _bulk API to disk """
         cache_dir = self.config['application']['cache_dir']
         file_name = f'es_{index_name}-{self.timestamp}.json'
         file_path = os.path.join(cache_dir, 'backup', file_name)
@@ -461,13 +458,14 @@ class ElasticBackup:
         """ pack it up into single zip file """
         cache_dir = self.config['application']['cache_dir']
         file_name = f'ta_backup-{self.timestamp}.zip'
-        backup_file = os.path.join(cache_dir, 'backup', file_name)
+        backup_folder = os.path.join(cache_dir, 'backup')
+        backup_file = os.path.join(backup_folder, file_name)
 
         with zipfile.ZipFile(
                     backup_file, 'w', compression=zipfile.ZIP_DEFLATED
                 ) as zip_f:
             for backup_file in self.backup_files:
-                zip_f.write(backup_file)
+                zip_f.write(backup_file, os.path.basename(backup_file))
 
         # cleanup
         for backup_file in self.backup_files:
@@ -488,15 +486,41 @@ class ElasticBackup:
         if not request.ok:
             print(request.text)
 
-    def restore_from_file(self):
-        """ restore all available backup files """
+    def unpack_zip_backup(self):
+        """ extract backup zip and return filelist """
         cache_dir = self.config['application']['cache_dir']
+        backup_dir = os.path.join(cache_dir, 'backup')
         all_available_backups = [
-            i for i in os.listdir(cache_dir) if
-            i.startswith('ta_') and i.endswith('.json')
+            i for i in os.listdir(backup_dir) if
+            i.startswith('ta_') and i.endswith('.zip')
         ]
-        for file_name in all_available_backups:
+        all_available_backups.sort()
+        newest_backup = all_available_backups[-1]
+        file_path = os.path.join(backup_dir, newest_backup)
+
+        with zipfile.ZipFile(file_path, 'r') as z:
+            zip_content = z.namelist()
+            z.extractall(backup_dir)
+
+        return zip_content
+
+    def restore_json_files(self, zip_content):
+        """ go through the unpacked files and restore """
+
+        cache_dir = self.config['application']['cache_dir']
+        backup_dir = os.path.join(cache_dir, 'backup')
+
+        for json_f in zip_content:
+
+            file_name = os.path.join(backup_dir, json_f)
+
+            if not json_f.startswith('es_') or not json_f.endswith('.json'):
+                os.remove(file_name)
+                continue
+
+            print('restoring: ' + json_f)
             self.post_bulk_restore(file_name)
+            os.remove(file_name)
 
 
 def backup_all_indexes():
@@ -519,7 +543,8 @@ def restore_from_backup():
     index_check(force_restore=True)
     # recreate
     backup_handler = ElasticBackup(INDEX_CONFIG)
-    backup_handler.restore_from_file()
+    zip_content = backup_handler.unpack_zip_backup()
+    backup_handler.restore_json_files(zip_content)
 
 
 def index_check(force_restore=False):

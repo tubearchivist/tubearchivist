@@ -6,18 +6,16 @@ Functionality:
 """
 
 import json
-import shutil
 import os
-
+import shutil
 from datetime import datetime
 from time import sleep
 
 import requests
 import yt_dlp as youtube_dl
-
-from home.src.index import YoutubeChannel, index_new_video
 from home.src.config import AppConfig
-from home.src.helper import clean_string, DurationConverter, set_message
+from home.src.helper import DurationConverter, clean_string, set_message
+from home.src.index import YoutubeChannel, index_new_video
 
 
 class PendingList:
@@ -72,7 +70,7 @@ class PendingList:
             elif isinstance(video, tuple):
                 youtube_id = video[0]
             if youtube_id in all_downloaded:
-                # skip already downlaoded
+                # skip already downloaded
                 continue
             video = self.get_youtube_details(youtube_id)
             # skip on download error

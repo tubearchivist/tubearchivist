@@ -6,19 +6,16 @@ Functionality:
 """
 
 import json
+import os
 import re
-
 from datetime import datetime
 from time import sleep
-import os
 
 import requests
 import yt_dlp as youtube_dl
-
 from bs4 import BeautifulSoup
-
 from home.src.config import AppConfig
-from home.src.helper import clean_string, DurationConverter
+from home.src.helper import DurationConverter, clean_string
 
 
 class YoutubeChannel:
@@ -216,7 +213,7 @@ class YoutubeChannel:
 
 
 class YoutubeVideo:
-    """ represents a signle youtube video """
+    """ represents a single youtube video """
 
     CONFIG = AppConfig().config
     ES_URL = CONFIG['application']['es_url']

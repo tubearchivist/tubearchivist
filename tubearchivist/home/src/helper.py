@@ -10,8 +10,8 @@ import string
 import subprocess
 import unicodedata
 
-import requests
 import redis
+import requests
 
 REDIS_HOST = os.environ.get('REDIS_HOST')
 
@@ -108,7 +108,7 @@ def get_lock(lock_key):
 
 def monitor_cache_dir(cache_dir):
     """
-    look at download cache dir directly as alterative progress info
+    look at download cache dir directly as alternative progress info
     """
     dl_cache = os.path.join(cache_dir, 'download')
     cache_file = os.listdir(dl_cache)

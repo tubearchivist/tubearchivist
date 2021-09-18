@@ -8,28 +8,18 @@ Functionality:
 import json
 import os
 import re
-import subprocess
 import shutil
-
+import subprocess
 from datetime import datetime
-from time import sleep
 from math import ceil
+from time import sleep
 
 import requests
-
-from home.src.download import ChannelSubscription, PendingList, VideoDownloader
 from home.src.config import AppConfig
-from home.src.index import (
-    YoutubeChannel,
-    YoutubeVideo,
-    index_new_video
-)
-from home.src.helper import (
-    get_total_hits,
-    clean_string,
-    set_message,
-    get_message
-)
+from home.src.download import ChannelSubscription, PendingList, VideoDownloader
+from home.src.helper import (clean_string, get_message, get_total_hits,
+                             set_message)
+from home.src.index import YoutubeChannel, YoutubeVideo, index_new_video
 
 
 class Reindex:
@@ -211,7 +201,7 @@ class FilesystemScanner:
     def __init__(self):
         self.all_downloaded = self.get_all_downloaded()
         self.all_indexed = self.get_all_indexed()
-        self.missmatch = None
+        self.mismatch = None
         self.to_rename = None
         self.to_index = None
         self.to_delete = None
@@ -296,7 +286,7 @@ class FilesystemScanner:
 
                     break
 
-        self.missmatch = to_fix
+        self.mismatch = to_fix
         self.to_rename = to_rename
 
     def rename_files(self):
@@ -307,11 +297,11 @@ class FilesystemScanner:
             new_path = os.path.join(self.VIDEOS, channel, expected_filename)
             os.rename(old_path, new_path)
 
-    def send_missmatch_bulk(self):
+    def send_mismatch_bulk(self):
         """ build bulk update """
         bulk_list = []
-        for video_missmatch in self.missmatch:
-            youtube_id, media_url = video_missmatch
+        for video_mismatch in self.mismatch:
+            youtube_id, media_url = video_mismatch
             action = {"update": {"_id": youtube_id, "_index": 'ta_video'}}
             source = {"doc": {"media_url": media_url}}
             bulk_list.append(json.dumps(action))
@@ -430,7 +420,7 @@ class ManualImport:
         video_file, ext = os.path.splitext(file_name)
 
         # make sure youtube_id is in filename
-        if not youtube_id in video_file:
+        if youtube_id not in video_file:
             video_file = f'{video_file}_{youtube_id}'
 
         # move, convert if needed
@@ -444,7 +434,7 @@ class ManualImport:
             dest_path = os.path.join(self.CACHE_DIR, 'download', new_file)
             subprocess.run(
                 ["ffmpeg", "-i", video_path, dest_path,
-                "-loglevel", "warning", "-stats"], check=True
+                 "-loglevel", "warning", "-stats"], check=True
             )
 
 
@@ -454,8 +444,8 @@ def scan_filesystem():
     filesystem_handler.list_comarison()
     if filesystem_handler.to_rename:
         filesystem_handler.rename_files()
-    if filesystem_handler.missmatch:
-        filesystem_handler.send_missmatch_bulk()
+    if filesystem_handler.mismatch:
+        filesystem_handler.send_mismatch_bulk()
     if filesystem_handler.to_delete:
         filesystem_handler.delete_from_index()
     if filesystem_handler.to_index:

@@ -1,39 +1,26 @@
 """
 Functionality:
 - all views for home app
-- process post data recieved from frontend via ajax
+- process post data received from frontend via ajax
 """
 
-import urllib.parse
 import json
-
+import urllib.parse
 from datetime import datetime
 from time import sleep
 
 import requests
-
-from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from django.views import View
+from django.shortcuts import redirect, render
 from django.utils.http import urlencode
-
-from home.src.download import PendingList, ChannelSubscription
-from home.src.searching import SearchHandler, Pagination
+from django.views import View
 from home.src.config import AppConfig
-from home.src.helper import (
-    process_url_list,
-    get_dl_message,
-    get_message,
-    set_message
-)
-from home.tasks import (
-    update_subscribed,
-    download_pending,
-    extrac_dl,
-    download_single,
-    run_manual_import,
-    run_backup
-)
+from home.src.download import ChannelSubscription, PendingList
+from home.src.helper import (get_dl_message, get_message, process_url_list,
+                             set_message)
+from home.src.searching import Pagination, SearchHandler
+from home.tasks import (download_pending, download_single, extrac_dl,
+                        run_backup, run_manual_import, update_subscribed)
 
 
 class HomeView(View):
@@ -220,7 +207,7 @@ class DownloadView(View):
 
 
 class ChannelIdView(View):
-    """ resolves to /chanel/<channel-id>/
+    """ resolves to /channel/<channel-id>/
     display single channel page from channel_id
     """
 

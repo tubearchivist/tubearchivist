@@ -9,14 +9,11 @@ Functionality:
 import math
 import os
 import urllib.parse
-
 from datetime import datetime
 
 import requests
-
-from PIL import Image
-
 from home.src.config import AppConfig
+from PIL import Image
 
 
 class SearchHandler:
@@ -72,7 +69,7 @@ class SearchHandler:
 
     @staticmethod
     def vid_cache_link(hit):
-        """ download thumbnails into chache """
+        """ download thumbnails into cache """
         vid_thumb = hit['source']['vid_thumb_url']
         youtube_id = hit['source']['youtube_id']
         channel_id_hit = hit['source']['channel']['channel_id']
