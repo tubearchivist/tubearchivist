@@ -72,7 +72,7 @@ class PendingList:
             elif isinstance(video, tuple):
                 youtube_id = video[0]
             if youtube_id in all_downloaded:
-                # skip already downlaoded
+                # skip already downloaded
                 continue
             video = self.get_youtube_details(youtube_id)
             # skip on download error

@@ -436,7 +436,7 @@ class ElasticBackup:
         return file_content
 
     def write_es_json(self, file_content, index_name):
-        """ write nd json file for es _bulk API to disk """
+        """ write nd-json file for es _bulk API to disk """
         cache_dir = self.config['application']['cache_dir']
         file_name = f'es_{index_name}-{self.timestamp}.json'
         file_path = os.path.join(cache_dir, 'backup', file_name)
