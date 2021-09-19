@@ -1,3 +1,8 @@
 from django.test import TestCase  # noqa: F401 - Unused import
 
-# Create your tests here.
+class SimpleTestCase(TestCase):
+    def setUp(self):
+        pass
+
+    def test_simple(self):
+        pass
