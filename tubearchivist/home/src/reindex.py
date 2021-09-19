@@ -307,11 +307,11 @@ class FilesystemScanner:
             new_path = os.path.join(self.VIDEOS, channel, expected_filename)
             os.rename(old_path, new_path)
 
-    def send_missmatch_bulk(self):
+    def send_mismatch_bulk(self):
         """ build bulk update """
         bulk_list = []
-        for video_missmatch in self.mismatch:
-            youtube_id, media_url = video_missmatch
+        for video_mismatch in self.mismatch:
+            youtube_id, media_url = video_mismatch
             action = {"update": {"_id": youtube_id, "_index": 'ta_video'}}
             source = {"doc": {"media_url": media_url}}
             bulk_list.append(json.dumps(action))
@@ -455,7 +455,7 @@ def scan_filesystem():
     if filesystem_handler.to_rename:
         filesystem_handler.rename_files()
     if filesystem_handler.mismatch:
-        filesystem_handler.send_missmatch_bulk()
+        filesystem_handler.send_mismatch_bulk()
     if filesystem_handler.to_delete:
         filesystem_handler.delete_from_index()
     if filesystem_handler.to_index:
