@@ -9,7 +9,7 @@
         <h2>Color scheme</h2>
         <div class="settings-item">
             <p>Current color scheme: <span class="settings-current">{{ config.application.colors }}</span></p>
-            <i>Select yout preferred color scheme between dark and light mode.</i><br>
+            <i>Select your preferred color scheme between dark and light mode.</i><br>
             <select name="application.colors" id="application.colors">
                 <option value="" disabled selected> -- change color scheme -- </option>
                 <option value="dark">dark mode</option>
@@ -55,7 +55,7 @@
     <div class="settings-group">
         <h2 id="subscriptions">Subscriptions</h2>
         <div class="settings-item">
-            <p>Currend channel page size: <span class="settings-current">{{ config.subscriptions.channel_size }}</span></p>
+            <p>Current channel page size: <span class="settings-current">{{ config.subscriptions.channel_size }}</span></p>
             <i>Recent videos to check on check pending, max recommended 50.</i><br>
             <input type="number" name="subscriptions.channel_size" id="subscriptions.channel_size">
         </div>
@@ -72,17 +72,17 @@
         <h2 id="downloads">Downloads</h2>
         <div class="settings-item">
             <p>Current download limit: <span class="settings-current">{{ config.downloads.limit_count }}</span></p>
-            <i>Limit the count of videos getting downloaded on every run. 0 (zero) to deactivate.</i><br>
+            <i>Limit the number of videos getting downloaded on every run. 0 (zero) to deactivate.</i><br>
             <input type="number" name="downloads.limit_count" id="downloads.limit_count">
         </div>
         <div class="settings-item">
-            <p>Currend Download speed limit: <span class="settings-current">{{ config.downloads.limit_speed }}</span></p>
+            <p>Current download speed limit: <span class="settings-current">{{ config.downloads.limit_speed }}</span></p>
             <i>Limit download speed. 0 (zero) to deactivate.</i><br>
             <input type="number" name="downloads.limit_speed" id="downloads.limit_speed"><span>KB/sec</span>
         </div>
         <div class="settings-item">
             <p>Current scraping sleep interval: <span class="settings-current">{{ config.downloads.sleep_interval }}</p>
-            <i>Seconds to sleep between calls to youtube. Might be necessary to avoid throttling. Recommended 3.</i><br>
+            <i>Seconds to sleep between calls to YouTube. Might be necessary to avoid throttling. Recommended 3.</i><br>
             <input type="number" name="downloads.sleep_interval" id="downloads.sleep_interval">
         </div>
         <div class="settings-item">
