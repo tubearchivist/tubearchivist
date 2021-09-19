@@ -216,7 +216,7 @@ class YoutubeChannel:
 
 
 class YoutubeVideo:
-    """ represents a signle youtube video """
+    """ represents a single youtube video """
 
     CONFIG = AppConfig().config
     ES_URL = CONFIG['application']['es_url']

@@ -1,7 +1,7 @@
 """
 Functionality:
 - all views for home app
-- process post data recieved from frontend via ajax
+- process post data received from frontend via ajax
 """
 
 import urllib.parse
@@ -220,7 +220,7 @@ class DownloadView(View):
 
 
 class ChannelIdView(View):
-    """ resolves to /chanel/<channel-id>/
+    """ resolves to /channel/<channel-id>/
     display single channel page from channel_id
     """
 

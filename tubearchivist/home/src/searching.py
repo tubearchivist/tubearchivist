@@ -72,7 +72,7 @@ class SearchHandler:
 
     @staticmethod
     def vid_cache_link(hit):
-        """ download thumbnails into chache """
+        """ download thumbnails into cache """
         vid_thumb = hit['source']['vid_thumb_url']
         youtube_id = hit['source']['youtube_id']
         channel_id_hit = hit['source']['channel']['channel_id']
