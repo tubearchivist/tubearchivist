@@ -94,6 +94,7 @@ def run_manual_import():
         if have_lock:
             my_lock.release()
 
+
 @shared_task
 def run_backup():
     """ called from settings page, dump backup to zip file """

@@ -430,7 +430,7 @@ class ManualImport:
         video_file, ext = os.path.splitext(file_name)
 
         # make sure youtube_id is in filename
-        if not youtube_id in video_file:
+        if youtube_id not in video_file:
             video_file = f'{video_file}_{youtube_id}'
 
         # move, convert if needed
@@ -444,7 +444,7 @@ class ManualImport:
             dest_path = os.path.join(self.CACHE_DIR, 'download', new_file)
             subprocess.run(
                 ["ffmpeg", "-i", video_path, dest_path,
-                "-loglevel", "warning", "-stats"], check=True
+                 "-loglevel", "warning", "-stats"], check=True
             )
 
 
