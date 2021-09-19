@@ -54,15 +54,48 @@ function sync_test {
 
 function sync_docker {
 
+    # check things
+    if [[ $(git branch --show-current) != 'master' ]]; then
+        echo 'you are not on master, dummy!'
+        return
+    fi
+
     if [[ $(systemctl is-active docker) != 'active' ]]; then
         echo "starting docker"
         sudo systemctl start docker
     fi
 
-    sudo docker build -t bbilly1/tubearchivist:latest .
+    echo "latest tags:"
+    git tag
+
+    echo "latest docker images:"
+    sudo docker image ls bbilly1/tubearchivist
+
+    printf "\ncreate new version:\n"
+    read -r VERSION
+
+    # start build
+    sudo docker build -t bbilly1/tubearchivist:latest -t bbilly1/tubearchivist:"$VERSION" .
+
+    printf "\nlatest images:\n"
+    sudo docker image ls bbilly1/tubearchivist
+
+    read -s "Push?"
+
+    # push to docker
+    echo "pushing latest:"
     sudo docker push bbilly1/tubearchivist:latest
+    echo "pushing $VERSION"
+    sudo docker push bbilly1/tubearchivist:"$VERSION"
+
+    # create release tag
+    echo "commits since last version:"
+    git log "$(git describe --tags --abbrev=0)"..HEAD --oneline
+    git tag -a "$VERSION" -m "new release version $VERSION"
+    git push all "$VERSION"
 
 }
+
 
 # check package versions in requirements.txt for updates
 python version_check.py

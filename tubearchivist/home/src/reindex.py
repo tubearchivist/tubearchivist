@@ -8,28 +8,18 @@ Functionality:
 import json
 import os
 import re
-import subprocess
 import shutil
-
+import subprocess
 from datetime import datetime
-from time import sleep
 from math import ceil
+from time import sleep
 
 import requests
-
-from home.src.download import ChannelSubscription, PendingList, VideoDownloader
 from home.src.config import AppConfig
-from home.src.index import (
-    YoutubeChannel,
-    YoutubeVideo,
-    index_new_video
-)
-from home.src.helper import (
-    get_total_hits,
-    clean_string,
-    set_message,
-    get_message
-)
+from home.src.download import ChannelSubscription, PendingList, VideoDownloader
+from home.src.helper import (clean_string, get_message, get_total_hits,
+                             set_message)
+from home.src.index import YoutubeChannel, YoutubeVideo, index_new_video
 
 
 class Reindex:
@@ -430,7 +420,7 @@ class ManualImport:
         video_file, ext = os.path.splitext(file_name)
 
         # make sure youtube_id is in filename
-        if not youtube_id in video_file:
+        if youtube_id not in video_file:
             video_file = f'{video_file}_{youtube_id}'
 
         # move, convert if needed
@@ -444,7 +434,7 @@ class ManualImport:
             dest_path = os.path.join(self.CACHE_DIR, 'download', new_file)
             subprocess.run(
                 ["ffmpeg", "-i", video_path, dest_path,
-                "-loglevel", "warning", "-stats"], check=True
+                 "-loglevel", "warning", "-stats"], check=True
             )
 
 

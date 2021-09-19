@@ -9,14 +9,11 @@ Functionality:
 import math
 import os
 import urllib.parse
-
 from datetime import datetime
 
 import requests
-
-from PIL import Image
-
 from home.src.config import AppConfig
+from PIL import Image
 
 
 class SearchHandler:
