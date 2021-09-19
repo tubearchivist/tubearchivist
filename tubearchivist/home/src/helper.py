@@ -148,7 +148,7 @@ class DurationConverter:
         minutes = (duration_sec - (hours * 3600)) // 60
         secs = duration_sec - (hours * 3600) - (minutes * 60)
 
-        duration_str = str()
+        duration_str = ''
         if hours:
             duration_str = str(hours).zfill(2) + ':'
         if minutes:

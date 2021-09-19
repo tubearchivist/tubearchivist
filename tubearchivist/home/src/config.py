@@ -21,7 +21,7 @@ class AppConfig:
         """ get config from default file or redis if changed """
         config = self.get_config_redis()
         if not config:
-            with open('home/config.json', 'r', encoding="utf-8") as f:
+            with open('home/config.json', encoding="utf-8") as f:
                 config_str = f.read()
                 config = json.loads(config_str)
 

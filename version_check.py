@@ -32,7 +32,7 @@ class Requirements:
         """ read out requirements.txt """
 
         all_requirements = []
-        with open(self.FILE_PATH, 'r', encoding='utf-8') as f:
+        with open(self.FILE_PATH, encoding='utf-8') as f:
             dependencies = f.readlines()
 
         for dependency in dependencies:

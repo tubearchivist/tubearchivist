@@ -394,7 +394,7 @@ class ManualImport:
     def extract_id_from_json(self, json_file):
         """ open json file and extract id """
         json_path = os.path.join(self.CACHE_DIR, 'import', json_file)
-        with open(json_path, 'r', encoding='utf-8') as f:
+        with open(json_path, encoding='utf-8') as f:
             json_content = f.read()
 
         youtube_id = json.loads(json_content)['id']

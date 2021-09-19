@@ -480,7 +480,7 @@ class ElasticBackup:
         headers = {'Content-type': 'application/x-ndjson'}
         file_path = os.path.join(cache_dir, file_name)
 
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             query_str = f.read()
 
         url = es_url + '/_bulk'
