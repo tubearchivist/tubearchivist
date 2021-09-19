@@ -454,6 +454,19 @@ class VideoDownloader:
         external = False
         if external:
             obs['external_downloader'] = 'aria2c'
+
+
+        postprocessors = []
+
+        if self.config['downloads']['add_metadata']:
+            postprocessors.append({
+                'key': 'FFmpegMetadata',
+                'add_chapters': True,
+                'add_metadata': True,
+            })
+
+        obs['postprocessors'] = postprocessors
+
         # check if already in cache to continue from there
         cache_dir = self.config['application']['cache_dir']
         all_cached = os.listdir(cache_dir + '/download/')
