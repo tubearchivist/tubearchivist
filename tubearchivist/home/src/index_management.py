@@ -481,6 +481,9 @@ class ElasticBackup:
         with open(file_path, 'r', encoding='utf-8') as f:
             query_str = f.read()
 
+        if not query_str.strip():
+            return
+
         url = es_url + '/_bulk'
         request = requests.post(url, data=query_str, headers=headers)
         if not request.ok:
