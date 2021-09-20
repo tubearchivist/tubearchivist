@@ -12,7 +12,9 @@ from .tasks import app as celery_app
 def sync_redis_state():
     """ make sure redis gets the config.json values """
     print('sync redis')
-    config = AppConfig().config
+    config_handler = AppConfig()
+    config_handler.load_new_defaults()
+    config = config_handler.config
     sort_order = config['archive']['sort']
     set_message('sort_order', sort_order, expire=False)
     hide_watched = bool(int(config['archive']['hide_watched']))

@@ -21,15 +21,32 @@ class AppConfig:
         """ get config from default file or redis if changed """
         config = self.get_config_redis()
         if not config:
-            with open('home/config.json', 'r', encoding="utf-8") as f:
-                config_str = f.read()
-                config = json.loads(config_str)
+            config = self.get_config_file()
 
-        config['application']['REDIS_HOST'] = os.environ.get('REDIS_HOST')
-        config['application']['es_url'] = os.environ.get('ES_URL')
-        config['application']['HOST_UID'] = int(os.environ.get('HOST_UID'))
-        config['application']['HOST_GID'] = int(os.environ.get('HOST_GID'))
+        config['application'].update(self.get_config_env())
         return config
+
+    def get_config_file(self):
+        """ read the defaults from config.json """
+        with open('home/config.json', 'r', encoding="utf-8") as f:
+            config_str = f.read()
+            config_file = json.loads(config_str)
+
+        config_file['application'].update(self.get_config_env())
+
+        return config_file
+
+    @staticmethod
+    def get_config_env():
+        """ read environment application variables """
+        application = {
+            'REDIS_HOST': os.environ.get('REDIS_HOST'),
+            'es_url': os.environ.get('ES_URL'),
+            'HOST_UID': int(os.environ.get('HOST_UID')),
+            'HOST_GID': int(os.environ.get('HOST_GID'))
+        }
+
+        return application
 
     @staticmethod
     def get_config_redis():
@@ -48,13 +65,39 @@ class AppConfig:
             if len(to_write):
                 if to_write == '0':
                     to_write = False
+                elif to_write == '1':
+                    to_write = True
                 elif to_write.isdigit():
                     to_write = int(to_write)
 
                 config_dict, config_value = key.split('.')
                 config[config_dict][config_value] = to_write
 
-        with open('home/config.json', 'w', encoding="utf-8") as f:
-            f.write(json.dumps(config))
-
         set_message('config', config, expire=False)
+
+    def load_new_defaults(self):
+        """ check config.json for missing defaults """
+        default_config = self.get_config_file()
+        redis_config = self.get_config_redis()
+
+        # check for customizations
+        if not redis_config:
+            return
+
+        needs_update = False
+
+        for key, value in default_config.items():
+            # missing whole main key
+            if key not in redis_config:
+                redis_config.update({key: value})
+                needs_update = True
+                continue
+
+            # missing nested values
+            for sub_key, sub_value in value.items():
+                if sub_key not in redis_config[key].keys():
+                    redis_config[key].update({sub_key: sub_value})
+                    needs_update = True
+
+        if needs_update:
+            set_message('config', redis_config, expire=False)
