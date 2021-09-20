@@ -20,7 +20,8 @@ from home.src.helper import (get_dl_message, get_message, process_url_list,
                              set_message)
 from home.src.searching import Pagination, SearchHandler
 from home.tasks import (download_pending, download_single, extrac_dl,
-                        run_backup, run_manual_import, update_subscribed)
+                        run_backup, run_manual_import, run_restore_backup,
+                        update_subscribed)
 
 
 class HomeView(View):
@@ -461,7 +462,7 @@ class PostData:
         "watched", "rescan_pending", "ignore", "dl_pending",
         "unsubscribe", "sort_order", "hide_watched", "show_subed_only",
         "channel-search", "video-search", "dlnow", "manual-import",
-        "db-backup"
+        "db-backup", "db-restore"
     ]
 
     def __init__(self, post_dict):
@@ -536,6 +537,9 @@ class PostData:
             elif task == 'db-backup':
                 print('backing up database')
                 run_backup.delay()
+            elif task == 'db-restore':
+                print('restoring index from backup zip')
+                run_restore_backup.delay()
         return {'success': True}
 
     def search_channels(self, search_query):

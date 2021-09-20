@@ -493,6 +493,11 @@ button:hover {
     min-width: 300px;
 }
 
+.danger-zone {
+    background-color: var(--highlight-error);
+    padding: 3px;
+}
+
 /* about */
 .about-section {
     padding: 20px 0;

@@ -102,6 +102,17 @@ function dbBackup() {
     toReplace.appendChild(message);
 }
 
+function dbRestore() {
+    var payload = JSON.stringify({'db-restore': true});
+    sendPost(payload)
+    // clear button
+    var message = document.createElement('p');
+    message.innerText = 'restoring from backup';
+    var toReplace = document.getElementById('db-restore');
+    toReplace.innerHTML = '';
+    toReplace.appendChild(message);
+}
+
 // player
 function createPlayer(button) {
     var mediaUrl = button.getAttribute('data-src');

@@ -10,7 +10,7 @@ from celery import Celery, shared_task
 from home.src.config import AppConfig
 from home.src.download import ChannelSubscription, PendingList, VideoDownloader
 from home.src.helper import get_lock
-from home.src.index_management import backup_all_indexes
+from home.src.index_management import backup_all_indexes, restore_from_backup
 from home.src.reindex import ManualImport, reindex_old_documents
 
 CONFIG = AppConfig().config
@@ -94,3 +94,10 @@ def run_backup():
     """ called from settings page, dump backup to zip file """
     backup_all_indexes()
     print('backup finished')
+
+
+@shared_task
+def run_restore_backup():
+    """ called from settings page, dump backup to zip file """
+    restore_from_backup()
+    print('index restore finished')
