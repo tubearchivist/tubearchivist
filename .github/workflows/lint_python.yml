@@ -28,6 +28,8 @@ jobs:
           pip install -r requirements.txt
           python3 -c "import home"
           python3 manage.py test || true
+        env:
+          REDIS_HOST: redis
       # - run: mkdir --parents --verbose .mypy_cache
       # - run: mypy --ignore-missing-imports --install-types --non-interactive .
       # - run: shopt -s globstar && pyupgrade --py36-plus **/*.py || true
