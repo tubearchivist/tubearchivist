@@ -1,0 +1,23 @@
+name: lint_python
+on: [pull_request, push]
+jobs:
+  lint_python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - run: pip install --upgrade pip wheel
+      - run: pip install bandit black codespell flake8 flake8-bugbear
+                         flake8-comprehensions isort mypy pyupgrade safety
+      - run: bandit --recursive  --skip B105,B108,B404,B603,B607 .
+      - run: black --check . || true
+      - run: codespell --ignore-words-list="nd"
+      - run: flake8 . --count --max-complexity=15 --max-line-length=88
+                      --show-source --statistics
+      - run: isort --check-only --profile black . || true
+      - run: pip install -r tubearchivist/requirements.txt
+      - run: mkdir --parents --verbose .mypy_cache
+      - run: mypy --ignore-missing-imports --install-types --non-interactive .
+      - run: python3 tubearchivist/manage.py test || true
+      - run: shopt -s globstar && pyupgrade --py36-plus **/*.py || true
+      - run: safety check
