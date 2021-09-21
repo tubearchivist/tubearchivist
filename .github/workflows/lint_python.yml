@@ -23,9 +23,11 @@ jobs:
       - run: flake8 . --count --max-complexity=16 --max-line-length=79
                       --show-source --statistics
       - run: isort --check-only --profile black --line-length 79 .
-      - run: pip install -r tubearchivist/requirements.txt
-      - run: python3 -c "import tubearchivist.home"
-      - run: python3 tubearchivist/manage.py test || true
+      - run: |
+          cd tubearchivist
+          pip install -r requirements.txt
+          python3 -c "import home"
+          python3 manage.py test || true
       # - run: mkdir --parents --verbose .mypy_cache
       # - run: mypy --ignore-missing-imports --install-types --non-interactive .
       # - run: shopt -s globstar && pyupgrade --py36-plus **/*.py || true
