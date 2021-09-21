@@ -13,7 +13,7 @@ jobs:
       - run: black --check -l 79 . || true
       - run: codespell
       - run: flake8 . --count --max-complexity=15 --max-line-length=79
-                      --show-source --statistics
+                      --show-source --statistics || true
       - run: isort --check-only --profile black -l 79 . || true
       # - run: pip install -r tubearchivist/requirements.txt
       # - run: mkdir --parents --verbose .mypy_cache
