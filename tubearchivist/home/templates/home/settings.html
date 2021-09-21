@@ -106,6 +106,15 @@
             <input type="text" name="downloads.format" id="downloads.format">
             <br>
         </div>
+        <div class="settings-item">
+            <p>Current metadata embed setting: <span class="settings-current">{{ config.downloads.add_metadata }}</span></p>
+            <i>Metadata is not embedded into the downloaded files by default.</i><br>
+            <select name="downloads.add_metadata" id="downloads.add_metadata"">
+                <option value="" disabled selected> -- change metadata embed -- </option>
+                <option value="0">don't embed metadata</option>
+                <option value="1">embed metadata</option>
+            </select>
+        </div>
     </div>
     <button type="submit">Update Settings</button>
 </form>

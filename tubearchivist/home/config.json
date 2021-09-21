@@ -14,7 +14,8 @@
         "limit_count": 5,
         "limit_speed": false,
         "sleep_interval": 3,
-        "format": false
+        "format": false,
+        "add_metadata": false
     },
     "application": {
         "cache_dir": "/cache",
