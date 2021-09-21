@@ -19,11 +19,11 @@ from home.src.helper import DurationConverter, clean_string
 
 
 class YoutubeChannel:
-    """ represents a single youtube channel """
+    """represents a single youtube channel"""
 
     CONFIG = AppConfig().config
-    ES_URL = CONFIG['application']['es_url']
-    CACHE_DIR = CONFIG['application']['cache_dir']
+    ES_URL = CONFIG["application"]["es_url"]
+    CACHE_DIR = CONFIG["application"]["cache_dir"]
 
     def __init__(self, channel_id):
         self.channel_id = channel_id
@@ -32,193 +32,187 @@ class YoutubeChannel:
         self.channel_dict = self.build_channel_dict()
 
     def build_channel_dict(self, scrape=False):
-        """ combine the dicts build from extracted json payload """
+        """combine the dicts build from extracted json payload"""
         if scrape:
             channel_dict = False
         else:
             channel_dict = self.get_es_channel()
         if not channel_dict:
-            print('scrape data from youtube')
+            print("scrape data from youtube")
             self.scrape_channel()
             channel_dict = self.parse_channel_main()
             channel_dict.update(self.parse_channel_meta())
-            self.source = 'scraped'
+            self.source = "scraped"
         return channel_dict
 
     def get_es_channel(self):
-        """ get from elastic search first if possible """
+        """get from elastic search first if possible"""
         channel_id = self.channel_id
-        url = f'{self.ES_URL}/ta_channel/_doc/{channel_id}'
+        url = f"{self.ES_URL}/ta_channel/_doc/{channel_id}"
         response = requests.get(url)
         if response.ok:
-            channel_source = response.json()['_source']
-            self.source = 'elastic'
+            channel_source = response.json()["_source"]
+            self.source = "elastic"
             return channel_source
         return False
 
     def scrape_channel(self):
-        """ scrape channel page for additional infos """
+        """scrape channel page for additional infos"""
         channel_id = self.channel_id
-        url = f'https://www.youtube.com/channel/{channel_id}/about?hl=en'
-        cookies = {
-            'CONSENT': 'YES+xxxxxxxxxxxxxxxxxxxxxxxxxxx'
-        }
+        url = f"https://www.youtube.com/channel/{channel_id}/about?hl=en"
+        cookies = {"CONSENT": "YES+xxxxxxxxxxxxxxxxxxxxxxxxxxx"}
         response = requests.get(url, cookies=cookies)
         if response.ok:
             channel_page = response.text
         else:
-            print(f'failed to extract channel info for: {channel_id}')
+            print(f"failed to extract channel info for: {channel_id}")
             raise ConnectionError
-        soup = BeautifulSoup(channel_page, 'html.parser')
+        soup = BeautifulSoup(channel_page, "html.parser")
         # load script into json
-        all_scripts = soup.find('body').find_all('script')
+        all_scripts = soup.find("body").find_all("script")
         for script in all_scripts:
-            if 'var ytInitialData = ' in str(script):
+            if "var ytInitialData = " in str(script):
                 script_content = str(script)
                 break
         # extract payload
-        script_content = script_content.split('var ytInitialData = ')[1]
-        json_raw = script_content.rstrip(';</script>')
+        script_content = script_content.split("var ytInitialData = ")[1]
+        json_raw = script_content.rstrip(";</script>")
         json_data = json.loads(json_raw)
         # add to self
         self.json_data = json_data
 
     def parse_channel_main(self):
-        """ extract maintab values from scraped channel json data """
-        main_tab = self.json_data['header']['c4TabbedHeaderRenderer']
-        channel_name = main_tab['title']
+        """extract maintab values from scraped channel json data"""
+        main_tab = self.json_data["header"]["c4TabbedHeaderRenderer"]
+        channel_name = main_tab["title"]
         last_refresh = int(datetime.now().strftime("%s"))
         # channel_subs
         try:
-            sub_text_simple = main_tab['subscriberCountText']['simpleText']
-            sub_text = sub_text_simple.split(' ')[0]
-            if sub_text[-1] == 'K':
-                channel_subs = int(float(sub_text.replace('K', ''))*1000)
-            elif sub_text[-1] == 'M':
-                channel_subs = int(float(sub_text.replace('M', ''))*1000000)
+            sub_text_simple = main_tab["subscriberCountText"]["simpleText"]
+            sub_text = sub_text_simple.split(" ")[0]
+            if sub_text[-1] == "K":
+                channel_subs = int(float(sub_text.replace("K", "")) * 1000)
+            elif sub_text[-1] == "M":
+                channel_subs = int(float(sub_text.replace("M", "")) * 1000000)
             elif int(sub_text) >= 0:
                 channel_subs = int(sub_text)
             else:
-                message = f'{sub_text} not dealt with'
+                message = f"{sub_text} not dealt with"
                 print(message)
         except KeyError:
             channel_subs = 0
         # banner
         try:
-            all_banners = main_tab['banner']['thumbnails']
-            banner = sorted(all_banners, key=lambda k: k['width'])[-1]['url']
+            all_banners = main_tab["banner"]["thumbnails"]
+            banner = sorted(all_banners, key=lambda k: k["width"])[-1]["url"]
         except KeyError:
             banner = False
         # build and return dict
         main_channel_dict = {
-            'channel_active': True,
-            'channel_last_refresh': last_refresh,
-            'channel_subs': channel_subs,
-            'channel_banner_url': banner,
-            'channel_name': channel_name,
-            'channel_id': self.channel_id
+            "channel_active": True,
+            "channel_last_refresh": last_refresh,
+            "channel_subs": channel_subs,
+            "channel_banner_url": banner,
+            "channel_name": channel_name,
+            "channel_id": self.channel_id,
         }
         return main_channel_dict
 
     def parse_channel_meta(self):
-        """ extract meta tab values from channel payload """
+        """extract meta tab values from channel payload"""
         # meta tab
         json_data = self.json_data
-        meta_tab = json_data['metadata']['channelMetadataRenderer']
-        description = meta_tab['description']
-        all_thumbs = meta_tab['avatar']['thumbnails']
-        thumb_url = sorted(all_thumbs, key=lambda k: k['width'])[-1]['url']
+        meta_tab = json_data["metadata"]["channelMetadataRenderer"]
+        description = meta_tab["description"]
+        all_thumbs = meta_tab["avatar"]["thumbnails"]
+        thumb_url = sorted(all_thumbs, key=lambda k: k["width"])[-1]["url"]
         # stats tab
-        renderer = 'twoColumnBrowseResultsRenderer'
-        all_tabs = json_data['contents'][renderer]['tabs']
+        renderer = "twoColumnBrowseResultsRenderer"
+        all_tabs = json_data["contents"][renderer]["tabs"]
         for tab in all_tabs:
-            if 'tabRenderer' in tab.keys():
-                if tab['tabRenderer']['title'] == 'About':
-                    about_tab = (tab['tabRenderer']['content']
-                                 ['sectionListRenderer']['contents'][0]
-                                 ['itemSectionRenderer']['contents'][0]
-                                 ['channelAboutFullMetadataRenderer'])
+            if "tabRenderer" in tab.keys():
+                if tab["tabRenderer"]["title"] == "About":
+                    about_tab = tab["tabRenderer"]["content"][
+                        "sectionListRenderer"
+                    ]["contents"][0]["itemSectionRenderer"]["contents"][0][
+                        "channelAboutFullMetadataRenderer"
+                    ]
                     break
         try:
-            channel_views_text = about_tab['viewCountText']['simpleText']
+            channel_views_text = about_tab["viewCountText"]["simpleText"]
             channel_views = int(re.sub(r"\D", "", channel_views_text))
         except KeyError:
             channel_views = 0
 
         meta_channel_dict = {
-            'channel_description': description,
-            'channel_thumb_url': thumb_url,
-            'channel_views': channel_views
+            "channel_description": description,
+            "channel_thumb_url": thumb_url,
+            "channel_views": channel_views,
         }
 
         return meta_channel_dict
 
     def upload_to_es(self):
-        """ upload channel data to elastic search """
-        url = f'{self.ES_URL}/ta_channel/_doc/{self.channel_id}'
+        """upload channel data to elastic search"""
+        url = f"{self.ES_URL}/ta_channel/_doc/{self.channel_id}"
         response = requests.put(url, json=self.channel_dict)
-        print(f'added {self.channel_id} to es')
+        print(f"added {self.channel_id} to es")
         if not response.ok:
             print(response.text)
 
     def clear_cache(self):
-        """ delete banner and thumb from cache if available """
-        channel_cache = os.path.join(self.CACHE_DIR, 'channels')
-        thumb = os.path.join(channel_cache, self.channel_id + '_thumb.jpg')
-        banner = os.path.join(channel_cache, self.channel_id + '_banner.jpg')
+        """delete banner and thumb from cache if available"""
+        channel_cache = os.path.join(self.CACHE_DIR, "channels")
+        thumb = os.path.join(channel_cache, self.channel_id + "_thumb.jpg")
+        banner = os.path.join(channel_cache, self.channel_id + "_banner.jpg")
         if os.path.exists(thumb):
             os.remove(thumb)
         if os.path.exists(banner):
             os.remove(banner)
 
     def sync_to_videos(self):
-        """ sync new channel_dict to all videos of channel """
-        headers = {'Content-type': 'application/json'}
+        """sync new channel_dict to all videos of channel"""
+        headers = {"Content-type": "application/json"}
         channel_id = self.channel_id
         # add ingest pipeline
         processors = []
         for field, value in self.channel_dict.items():
             line = {"set": {"field": "channel." + field, "value": value}}
             processors.append(line)
-        data = {
-            "description": channel_id,
-            "processors": processors
-        }
+        data = {"description": channel_id, "processors": processors}
         payload = json.dumps(data)
-        url = self.ES_URL + '/_ingest/pipeline/' + channel_id
+        url = self.ES_URL + "/_ingest/pipeline/" + channel_id
         request = requests.put(url, data=payload, headers=headers)
         if not request.ok:
             print(request.text)
         # apply pipeline
-        data = {
-            "query": {"match": {"channel.channel_id": channel_id}}
-        }
+        data = {"query": {"match": {"channel.channel_id": channel_id}}}
         payload = json.dumps(data)
-        url = self.ES_URL + '/ta_video/_update_by_query?pipeline=' + channel_id
+        url = self.ES_URL + "/ta_video/_update_by_query?pipeline=" + channel_id
         request = requests.post(url, data=payload, headers=headers)
         if not request.ok:
             print(request.text)
 
     def get_total_hits(self):
-        """ get total channels indexed """
-        headers = {'Content-type': 'application/json'}
+        """get total channels indexed"""
+        headers = {"Content-type": "application/json"}
         data = {"query": {"match_all": {}}}
         payload = json.dumps(data)
-        url = f'{self.ES_URL}/ta_channel/_search?filter_path=hits.total'
+        url = f"{self.ES_URL}/ta_channel/_search?filter_path=hits.total"
         request = requests.post(url, data=payload, headers=headers)
         if not request.ok:
             print(request.text)
-        total_hits = json.loads(request.text)['hits']['total']['value']
+        total_hits = json.loads(request.text)["hits"]["total"]["value"]
         return total_hits
 
 
 class YoutubeVideo:
-    """ represents a single youtube video """
+    """represents a single youtube video"""
 
     CONFIG = AppConfig().config
-    ES_URL = CONFIG['application']['es_url']
-    CACHE_DIR = CONFIG['application']['cache_dir']
-    VIDEOS = CONFIG['application']['videos']
+    ES_URL = CONFIG["application"]["es_url"]
+    CACHE_DIR = CONFIG["application"]["cache_dir"]
+    VIDEOS = CONFIG["application"]["videos"]
 
     def __init__(self, youtube_id):
         self.youtube_id = youtube_id
@@ -226,8 +220,8 @@ class YoutubeVideo:
         self.vid_dict = self.get_wrapper()
 
     def get_wrapper(self):
-        """ wrapper to loop around youtube_dl to retry on failure """
-        print(f'get video data for {self.youtube_id}')
+        """wrapper to loop around youtube_dl to retry on failure"""
+        print(f"get video data for {self.youtube_id}")
         for i in range(3):
             try:
                 vid_dict = self.get_youtubedl_vid_data()
@@ -241,63 +235,63 @@ class YoutubeVideo:
         return vid_dict
 
     def get_youtubedl_vid_data(self):
-        """ parse youtubedl extract info """
+        """parse youtubedl extract info"""
         youtube_id = self.youtube_id
         obs = {
-            'quiet': True,
-            'default_search': 'ytsearch',
-            'skip_download': True
+            "quiet": True,
+            "default_search": "ytsearch",
+            "skip_download": True,
         }
         try:
             vid = youtube_dl.YoutubeDL(obs).extract_info(youtube_id)
         except (
-                youtube_dl.utils.ExtractorError,
-                youtube_dl.utils.DownloadError
-                ):
-            print('failed to get info for ' + youtube_id)
+            youtube_dl.utils.ExtractorError,
+            youtube_dl.utils.DownloadError,
+        ):
+            print("failed to get info for " + youtube_id)
             return False
         # extract
-        self.channel_id = vid['channel_id']
-        upload_date = vid['upload_date']
+        self.channel_id = vid["channel_id"]
+        upload_date = vid["upload_date"]
         upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
         published = upload_date_time.strftime("%Y-%m-%d")
         last_refresh = int(datetime.now().strftime("%s"))
         # likes
         try:
-            like_count = vid['like_count']
+            like_count = vid["like_count"]
         except KeyError:
             like_count = 0
         try:
-            dislike_count = vid['dislike_count']
+            dislike_count = vid["dislike_count"]
         except KeyError:
             dislike_count = 0
         # build dicts
         stats = {
-            "view_count": vid['view_count'],
+            "view_count": vid["view_count"],
             "like_count": like_count,
             "dislike_count": dislike_count,
-            "average_rating": vid['average_rating']
+            "average_rating": vid["average_rating"],
         }
         vid_basic = {
-            "title": vid['title'],
-            "description": vid['description'],
-            "category": vid['categories'],
-            "vid_thumb_url": vid['thumbnail'],
-            "tags": vid['tags'],
+            "title": vid["title"],
+            "description": vid["description"],
+            "category": vid["categories"],
+            "vid_thumb_url": vid["thumbnail"],
+            "tags": vid["tags"],
             "published": published,
             "stats": stats,
             "vid_last_refresh": last_refresh,
             "date_downloaded": last_refresh,
             "youtube_id": youtube_id,
             "active": True,
-            "channel": False
+            "channel": False,
         }
 
         return vid_basic
 
     def add_player(self, missing_vid):
-        """ add player information for new videos """
-        cache_path = self.CACHE_DIR + '/download/'
+        """add player information for new videos"""
+        cache_path = self.CACHE_DIR + "/download/"
         videos = self.VIDEOS
 
         if missing_vid:
@@ -318,24 +312,24 @@ class YoutubeVideo:
         player = {
             "watched": False,
             "duration": duration,
-            "duration_str": duration_str
+            "duration_str": duration_str,
         }
-        self.vid_dict['player'] = player
+        self.vid_dict["player"] = player
 
     def build_file_path(self, channel_name):
-        """ build media_url from where file will be located """
+        """build media_url from where file will be located"""
         clean_channel_name = clean_string(channel_name)
-        timestamp = self.vid_dict['published'].replace('-', '')
-        youtube_id = self.vid_dict['youtube_id']
-        title = self.vid_dict['title']
+        timestamp = self.vid_dict["published"].replace("-", "")
+        youtube_id = self.vid_dict["youtube_id"]
+        title = self.vid_dict["title"]
         clean_title = clean_string(title)
-        filename = f'{timestamp}_{youtube_id}_{clean_title}.mp4'
+        filename = f"{timestamp}_{youtube_id}_{clean_title}.mp4"
         media_url = os.path.join(clean_channel_name, filename)
-        self.vid_dict['media_url'] = media_url
+        self.vid_dict["media_url"] = media_url
 
     def get_es_data(self):
-        """ get current data from elastic search """
-        url = self.ES_URL + '/ta_video/_doc/' + self.youtube_id
+        """get current data from elastic search"""
+        url = self.ES_URL + "/ta_video/_doc/" + self.youtube_id
         response = requests.get(url)
         if not response.ok:
             print(response.text)
@@ -343,48 +337,48 @@ class YoutubeVideo:
         return es_vid_dict
 
     def upload_to_es(self):
-        """ upload channel data to elastic search """
-        url = f'{self.ES_URL}/ta_video/_doc/{self.youtube_id}'
+        """upload channel data to elastic search"""
+        url = f"{self.ES_URL}/ta_video/_doc/{self.youtube_id}"
         response = requests.put(url, json=self.vid_dict)
         if not response.ok:
             print(response.text)
 
     def delete_cache(self):
-        """ delete thumbnail from cache if exist """
-        video_cache = os.path.join(self.CACHE_DIR, 'videos')
-        thumb = os.path.join(video_cache, self.youtube_id + '.jpg')
+        """delete thumbnail from cache if exist"""
+        video_cache = os.path.join(self.CACHE_DIR, "videos")
+        thumb = os.path.join(video_cache, self.youtube_id + ".jpg")
         if os.path.exists(thumb):
             os.remove(thumb)
 
     def deactivate(self):
-        """ deactivate document on extractor error """
+        """deactivate document on extractor error"""
         youtube_id = self.youtube_id
-        headers = {'Content-type': 'application/json'}
-        url = f'{self.ES_URL}/ta_video/_update/{youtube_id}'
+        headers = {"Content-type": "application/json"}
+        url = f"{self.ES_URL}/ta_video/_update/{youtube_id}"
         data = {"script": "ctx._source.active = false"}
         json_str = json.dumps(data)
         response = requests.post(url, data=json_str, headers=headers)
-        print(f'deactivated {youtube_id}')
+        print(f"deactivated {youtube_id}")
         if not response.ok:
             print(response.text)
 
 
 def index_new_video(youtube_id, missing_vid=False):
-    """ combine video and channel classes for new video index """
+    """combine video and channel classes for new video index"""
     vid_handler = YoutubeVideo(youtube_id)
     if not vid_handler.vid_dict:
-        raise ValueError('failed to get metadata for ' + youtube_id)
+        raise ValueError("failed to get metadata for " + youtube_id)
 
     channel_handler = YoutubeChannel(vid_handler.channel_id)
     # add filepath to vid_dict
-    channel_name = channel_handler.channel_dict['channel_name']
+    channel_name = channel_handler.channel_dict["channel_name"]
     vid_handler.build_file_path(channel_name)
     # add channel and player to video
     vid_handler.add_player(missing_vid)
-    vid_handler.vid_dict['channel'] = channel_handler.channel_dict
+    vid_handler.vid_dict["channel"] = channel_handler.channel_dict
     # add new channel to es
-    if channel_handler.source == 'scraped':
-        channel_handler.channel_dict['channel_subscribed'] = False
+    if channel_handler.source == "scraped":
+        channel_handler.channel_dict["channel_subscribed"] = False
         channel_handler.upload_to_es()
     # upload video to es
     vid_handler.upload_to_es()

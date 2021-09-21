@@ -14,17 +14,17 @@ from home.src.index_management import backup_all_indexes, restore_from_backup
 from home.src.reindex import ManualImport, reindex_old_documents
 
 CONFIG = AppConfig().config
-REDIS_HOST = CONFIG['application']['REDIS_HOST']
+REDIS_HOST = CONFIG["application"]["REDIS_HOST"]
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'home.settings')
-app = Celery('tasks', broker='redis://' + REDIS_HOST)
-app.config_from_object('django.conf:settings', namespace='CELERY')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "home.settings")
+app = Celery("tasks", broker="redis://" + REDIS_HOST)
+app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()
 
 
 @shared_task
 def update_subscribed():
-    """ look for missing videos and add to pending """
+    """look for missing videos and add to pending"""
     channel_handler = ChannelSubscription()
     missing_videos = channel_handler.find_missing()
     if missing_videos:
@@ -36,10 +36,10 @@ def update_subscribed():
 
 @shared_task
 def download_pending():
-    """ download latest pending videos """
+    """download latest pending videos"""
     pending_handler = PendingList()
     pending_vids = pending_handler.get_all_pending()[0]
-    to_download = [i['youtube_id'] for i in pending_vids]
+    to_download = [i["youtube_id"] for i in pending_vids]
     to_download.reverse()
     if to_download:
         download_handler = VideoDownloader(to_download)
@@ -48,14 +48,14 @@ def download_pending():
 
 @shared_task
 def download_single(youtube_id):
-    """ start download single video now """
+    """start download single video now"""
     download_handler = VideoDownloader([youtube_id])
     download_handler.download_list()
 
 
 @shared_task
 def extrac_dl(youtube_ids):
-    """ parse list passed and add to pending """
+    """parse list passed and add to pending"""
     pending_handler = PendingList()
     missing_videos = pending_handler.parse_url_list(youtube_ids)
     pending_handler.add_to_pending(missing_videos)
@@ -63,17 +63,17 @@ def extrac_dl(youtube_ids):
 
 @shared_task
 def check_reindex():
-    """ run the reindex main command """
+    """run the reindex main command"""
     reindex_old_documents()
 
 
 @shared_task
 def run_manual_import():
-    """ called from settings page, to go through import folder """
+    """called from settings page, to go through import folder"""
 
-    print('starting media file import')
+    print("starting media file import")
     have_lock = False
-    my_lock = get_lock('manual_import')
+    my_lock = get_lock("manual_import")
 
     try:
         have_lock = my_lock.acquire(blocking=False)
@@ -91,13 +91,13 @@ def run_manual_import():
 
 @shared_task
 def run_backup():
-    """ called from settings page, dump backup to zip file """
+    """called from settings page, dump backup to zip file"""
     backup_all_indexes()
-    print('backup finished')
+    print("backup finished")
 
 
 @shared_task
 def run_restore_backup():
-    """ called from settings page, dump backup to zip file """
+    """called from settings page, dump backup to zip file"""
     restore_from_backup()
-    print('index restore finished')
+    print("index restore finished")

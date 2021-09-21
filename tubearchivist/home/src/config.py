@@ -12,71 +12,71 @@ from home.src.helper import get_message, set_message
 
 
 class AppConfig:
-    """ handle user settings and application variables """
+    """handle user settings and application variables"""
 
     def __init__(self):
         self.config = self.get_config()
 
     def get_config(self):
-        """ get config from default file or redis if changed """
+        """get config from default file or redis if changed"""
         config = self.get_config_redis()
         if not config:
             config = self.get_config_file()
 
-        config['application'].update(self.get_config_env())
+        config["application"].update(self.get_config_env())
         return config
 
     def get_config_file(self):
-        """ read the defaults from config.json """
-        with open('home/config.json', 'r', encoding="utf-8") as f:
+        """read the defaults from config.json"""
+        with open("home/config.json", "r", encoding="utf-8") as f:
             config_str = f.read()
             config_file = json.loads(config_str)
 
-        config_file['application'].update(self.get_config_env())
+        config_file["application"].update(self.get_config_env())
 
         return config_file
 
     @staticmethod
     def get_config_env():
-        """ read environment application variables """
+        """read environment application variables"""
         application = {
-            'REDIS_HOST': os.environ.get('REDIS_HOST'),
-            'es_url': os.environ.get('ES_URL'),
-            'HOST_UID': int(os.environ.get('HOST_UID')),
-            'HOST_GID': int(os.environ.get('HOST_GID'))
+            "REDIS_HOST": os.environ.get("REDIS_HOST"),
+            "es_url": os.environ.get("ES_URL"),
+            "HOST_UID": int(os.environ.get("HOST_UID")),
+            "HOST_GID": int(os.environ.get("HOST_GID")),
         }
 
         return application
 
     @staticmethod
     def get_config_redis():
-        """ read config json set from redis to overwrite defaults """
-        config = get_message('config')
+        """read config json set from redis to overwrite defaults"""
+        config = get_message("config")
         if not list(config.values())[0]:
             return False
 
         return config
 
     def update_config(self, form_post):
-        """ update config values from settings form """
+        """update config values from settings form"""
         config = self.config
         for key, value in form_post.items():
             to_write = value[0]
             if len(to_write):
-                if to_write == '0':
+                if to_write == "0":
                     to_write = False
-                elif to_write == '1':
+                elif to_write == "1":
                     to_write = True
                 elif to_write.isdigit():
                     to_write = int(to_write)
 
-                config_dict, config_value = key.split('.')
+                config_dict, config_value = key.split(".")
                 config[config_dict][config_value] = to_write
 
-        set_message('config', config, expire=False)
+        set_message("config", config, expire=False)
 
     def load_new_defaults(self):
-        """ check config.json for missing defaults """
+        """check config.json for missing defaults"""
         default_config = self.get_config_file()
         redis_config = self.get_config_redis()
 
@@ -100,4 +100,4 @@ class AppConfig:
                     needs_update = True
 
         if needs_update:
-            set_message('config', redis_config, expire=False)
+            set_message("config", redis_config, expire=False)
