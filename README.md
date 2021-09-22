@@ -81,7 +81,7 @@ Detect the YouTube ID from filename, this accepts the default yt-dlp naming conv
 - Follow the logs to monitor progress and errors: `docker-compose logs -f tubearchivist`.
 
 ## Backup and restore
-From the settings page you can backup your metadata into a zip file. The file will get stored at *cache/backup* and will contain the necessary files to restore the Elasticsearch index formated **nd-json** files as well a complete export of the index in a set of conventional **json** files.  
+From the settings page you can backup your metadata into a zip file. The file will get stored at *cache/backup* and will contain the necessary files to restore the Elasticsearch index formatted **nd-json** files as well a complete export of the index in a set of conventional **json** files.  
 
 The restore functionality will expect the same zip file in *cache/backup* and will recreate the index from the snapshot.  
 
