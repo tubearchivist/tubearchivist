@@ -15,7 +15,7 @@ import requests
 import yt_dlp as youtube_dl
 from bs4 import BeautifulSoup
 from home.src.config import AppConfig
-from home.src.helper import DurationConverter, clean_string
+from home.src.helper import DurationConverter, clean_string, process_url_list
 
 
 class YoutubeChannel:
@@ -361,6 +361,78 @@ class YoutubeVideo:
         print(f"deactivated {youtube_id}")
         if not response.ok:
             print(response.text)
+
+
+class WatchState:
+    """handle watched checkbox for videos and channels"""
+
+    CONFIG = AppConfig().config
+    ES_URL = CONFIG["application"]["es_url"]
+    HEADERS = {"Content-type": "application/json"}
+
+    def __init__(self, youtube_id):
+        self.youtube_id = youtube_id
+        self.stamp = int(datetime.now().strftime("%s"))
+
+    def mark_as_watched(self):
+        """update es with new watched value"""
+        url_type = self.dedect_type()
+        if url_type == "video":
+            self.mark_vid_watched()
+        elif url_type == "channel":
+            self.mark_channel_watched()
+
+        print(f"marked {self.youtube_id} as watched")
+
+    def dedect_type(self):
+        """find youtube id type"""
+        url_process = process_url_list([self.youtube_id])
+        url_type = url_process[0]["type"]
+
+        return url_type
+
+    def mark_vid_watched(self):
+        """change watched status of single video"""
+        url = self.ES_URL + "/ta_video/_update/" + self.youtube_id
+        data = {
+            "doc": {"player": {"watched": True, "watched_date": self.stamp}}
+        }
+        payload = json.dumps(data)
+        request = requests.post(url, data=payload, headers=self.HEADERS)
+        if not request.ok:
+            print(request.text)
+
+    def mark_channel_watched(self):
+        """change watched status of every video in channel"""
+        es_url = self.ES_URL
+        headers = self.HEADERS
+        youtube_id = self.youtube_id
+        # create pipeline
+        data = {
+            "description": youtube_id,
+            "processors": [
+                {"set": {"field": "player.watched", "value": True}},
+                {"set": {"field": "player.watched_date", "value": self.stamp}},
+            ],
+        }
+        payload = json.dumps(data)
+        url = f"{es_url}/_ingest/pipeline/{youtube_id}"
+        request = requests.put(url, data=payload, headers=headers)
+        if not request.ok:
+            print(request.text)
+            raise ValueError("failed to post ingest pipeline")
+
+        # apply pipeline
+        must_list = [
+            {"term": {"channel.channel_id": {"value": youtube_id}}},
+            {"term": {"player.watched": {"value": False}}},
+        ]
+        data = {"query": {"bool": {"must": must_list}}}
+        payload = json.dumps(data)
+        url = f"{es_url}/ta_video/_update_by_query?pipeline={youtube_id}"
+        request = requests.post(url, data=payload, headers=headers)
+        if not request.ok:
+            print(request.text)
 
 
 def index_new_video(youtube_id, missing_vid=False):
