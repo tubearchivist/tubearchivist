@@ -80,6 +80,12 @@ Detect the YouTube ID from filename, this accepts the default yt-dlp naming conv
 - Maybe start with a subset of your files to import to make sure everything goes well...
 - Follow the logs to monitor progress and errors: `docker-compose logs -f tubearchivist`.
 
+## Backup and restore
+From the settings page you can backup your metadata into a zip file. The file will get stored at *cache/backup* and will contain the necessary files to restore the Elasticsearch index formated **nd-json** files as well a complete export of the index in a set of conventional **json** files.  
+
+The restore functionality will expect the same zip file in *cache/backup* and will recreate the index from the snapshot.  
+
+BE AWARE: This will **replace** your current index with the one from the backup file.
 
 ## Potential pitfalls
 ### vm.max_map_count
@@ -111,12 +117,15 @@ This should be considered as a **minimal viable product**, there is an extensive
 - [ ] User roles
 - [ ] Delete videos and channel
 - [ ] Create playlists
-- [ ] Backup and restore
 - [ ] Podcast mode to serve channel as mp3
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
+- [ ] Dynamic download queue
+- [ ] Un-ignore videos
+- [X] Backup and restore [2021-09-22]
 - [X] Scan your file system to index already downloaded videos [2021-09-14]
 
 ### UI
+- [ ] Create a github wiki for user documentation
 - [ ] Show similar videos on video page
 - [ ] Multi language support
 - [ ] Grid and list view for both channel and video list pages
