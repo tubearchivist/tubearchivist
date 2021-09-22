@@ -108,7 +108,8 @@ function sync_docker {
     printf "\nlatest images:\n"
     sudo docker image ls bbilly1/tubearchivist
 
-    read -s "Push?"
+    echo "continue?"
+    read -rn 1
 
     # push to docker
     echo "pushing latest:"
