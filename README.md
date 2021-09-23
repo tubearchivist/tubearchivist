@@ -109,6 +109,11 @@ chown 1000:0 /path/to/mount/point
 ```
 This will match the permissions with the **UID** and **GID** of elasticsearch within the container and should fix the issue.
 
+## Updating Tube Archivist
+You will see the current version number of **Tube Archivist** in the footer of the interface so you can compare it with the latest release to make sure you are running the *latest and greatest*.  
+* There can be breaking changes between updates, particularly as the application grows, new environment variables or settings might be required. Any breaking changes will be marked in the **release notes**.  
+* All testing is done with the Elasticsearch version number as mentioned in the provided *docker-compose.yml* file. Running an older version of Elasticsearch is most likely not going to result in any issues, but it's still recommended to run the same version as mentioned.
+
 ## Roadmap
 This should be considered as a **minimal viable product**, there is an extensive list of future functions and improvements planned.
 
