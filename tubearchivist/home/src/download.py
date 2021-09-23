@@ -14,7 +14,12 @@ from time import sleep
 import requests
 import yt_dlp as youtube_dl
 from home.src.config import AppConfig
-from home.src.helper import DurationConverter, clean_string, set_message
+from home.src.helper import (
+    DurationConverter,
+    RedisQueue,
+    clean_string,
+    set_message,
+)
 from home.src.index import YoutubeChannel, index_new_video
 
 
@@ -147,7 +152,7 @@ class PendingList:
             "size": 50,
             "query": {"match_all": {}},
             "pit": {"id": pit_id, "keep_alive": "1m"},
-            "sort": [{"timestamp": {"order": "desc"}}],
+            "sort": [{"timestamp": {"order": "asc"}}],
         }
         query_str = json.dumps(data)
         url = self.ES_URL + "/_search"
@@ -400,19 +405,24 @@ def playlist_extractor(playlist_id):
 
 
 class VideoDownloader:
-    """handle the video download functionality"""
+    """
+    handle the video download functionality
+    if not initiated with list, take from queue
+    """
 
-    def __init__(self, youtube_id_list):
+    def __init__(self, youtube_id_list=False):
         self.youtube_id_list = youtube_id_list
         self.config = AppConfig().config
 
-    def download_list(self):
-        """download the list of youtube_ids"""
-        limit_count = self.config["downloads"]["limit_count"]
-        if limit_count:
-            self.youtube_id_list = self.youtube_id_list[:limit_count]
+    def run_queue(self):
+        """setup download queue in redis loop until no more items"""
+        queue = RedisQueue("dl_queue")
 
-        for youtube_id in self.youtube_id_list:
+        while True:
+            youtube_id = queue.get_next()
+            if not youtube_id:
+                break
+
             try:
                 self.dl_single_vid(youtube_id)
             except youtube_dl.utils.DownloadError:
@@ -421,8 +431,14 @@ class VideoDownloader:
             vid_dict = index_new_video(youtube_id)
             self.move_to_archive(vid_dict)
             self.delete_from_pending(youtube_id)
-            if self.config["downloads"]["sleep_interval"]:
-                sleep(self.config["downloads"]["sleep_interval"])
+
+    @staticmethod
+    def add_pending():
+        """add pending videos to download queue"""
+        all_pending, _ = PendingList().get_all_pending()
+        to_add = [i["youtube_id"] for i in all_pending]
+        queue = RedisQueue("dl_queue")
+        queue.add_list(to_add)
 
     @staticmethod
     def progress_hook(response):

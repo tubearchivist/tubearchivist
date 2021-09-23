@@ -185,7 +185,7 @@ class DownloadView(View):
             "size": page_size,
             "from": page_from,
             "query": {"term": {"status": {"value": "pending"}}},
-            "sort": [{"timestamp": {"order": "desc"}}],
+            "sort": [{"timestamp": {"order": "asc"}}],
         }
         return data
 
