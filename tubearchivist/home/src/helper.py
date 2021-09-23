@@ -127,6 +127,41 @@ def monitor_cache_dir(cache_dir):
     return mess_dict
 
 
+class RedisQueue:
+    """dynamically interact with the download queue in redis"""
+
+    def __init__(self, key):
+        self.key = key
+        self.conn = redis.Redis(host=REDIS_HOST)
+
+    def get_all(self):
+        """return all elements in list"""
+        result = self.conn.execute_command("LRANGE", self.key, 0, -1)
+        all_elements = [i.decode() for i in result]
+        return all_elements
+
+    def add_list(self, to_add):
+        """add list to queue"""
+        self.conn.execute_command("RPUSH", self.key, *to_add)
+
+    def add_priority(self, to_add):
+        """add single video to front of queue"""
+        self.conn.execute_command("LPUSH", self.key, to_add)
+
+    def get_next(self):
+        """return next element in the queue, False if none"""
+        result = self.conn.execute_command("LPOP", self.key)
+        if not result:
+            return False
+
+        next_element = result.decode()
+        return next_element
+
+    def clear(self):
+        """delete list from redis"""
+        self.conn.execute_command("DEL", self.key)
+
+
 class DurationConverter:
     """
     using ffmpeg to get and parse duration from filepath
