@@ -195,16 +195,16 @@ class DownloadView(View):
         download_post = dict(request.POST)
         if "vid-url" in download_post.keys():
             url_str = download_post["vid-url"]
-            print("adding to queue")
-            youtube_ids = process_url_list(url_str)
-            if not youtube_ids:
+            try:
+                youtube_ids = process_url_list(url_str)
+            except ValueError:
                 # failed to process
-                print(url_str)
+                print(f"failed to parse: {url_str}")
                 mess_dict = {
                     "status": "downloading",
                     "level": "error",
                     "title": "Failed to extract links.",
-                    "message": "",
+                    "message": "Not a video, channel or playlist ID or URL",
                 }
                 set_message("progress:download", mess_dict)
                 return redirect("downloads")

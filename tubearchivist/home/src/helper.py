@@ -46,6 +46,9 @@ def process_url_list(url_str):
     url_list = re.split("\n+", url_str[0])
     youtube_ids = []
     for url in url_list:
+        if "/c/" in url or "/user/" in url:
+            raise ValueError("user name is not unique, use channel ID")
+
         url_clean = url.strip().strip("/").split("/")[-1]
         for i in to_replace:
             url_clean = url_clean.replace(i, "")
