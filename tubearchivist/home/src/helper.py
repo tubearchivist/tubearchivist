@@ -88,6 +88,12 @@ def get_message(key):
     return json_str
 
 
+def del_message(key):
+    """delete key from redis"""
+    redis_connection = redis.Redis(host=REDIS_HOST)
+    redis_connection.execute_command("DEL", key)
+
+
 def get_dl_message(cache_dir):
     """get latest message if available"""
     redis_connection = redis.Redis(host=REDIS_HOST)

@@ -27,6 +27,7 @@ from home.tasks import (
     download_pending,
     download_single,
     extrac_dl,
+    kill_dl,
     run_backup,
     run_manual_import,
     run_restore_backup,
@@ -481,6 +482,7 @@ class PostData:
             "ignore": self.ignore,
             "dl_pending": self.dl_pending,
             "queue": self.queue_handler,
+            "kill_queue": self.kill_queue,
             "unsubscribe": self.unsubscribe,
             "sort_order": self.sort_order,
             "hide_watched": self.hide_watched,
@@ -520,7 +522,10 @@ class PostData:
     def dl_pending():
         """start the download queue"""
         print("download pending")
-        download_pending.delay()
+        running = download_pending.delay()
+        task_id = running.id
+        print("set task id: " + task_id)
+        set_message("dl_queue_id", task_id, expire=False)
         return {"success": True}
 
     def queue_handler(self):
@@ -530,6 +535,14 @@ class PostData:
             print("stopping download queue")
             RedisQueue("dl_queue").clear()
 
+        return {"success": True}
+
+    @staticmethod
+    def kill_queue():
+        """brutally murder the celery task"""
+        task_id = get_message("dl_queue_id")
+        print("brutally killing " + task_id)
+        kill_dl(task_id)
         return {"success": True}
 
     def unsubscribe(self):

@@ -9,7 +9,7 @@ import os
 from celery import Celery, shared_task
 from home.src.config import AppConfig
 from home.src.download import ChannelSubscription, PendingList, VideoDownloader
-from home.src.helper import RedisQueue, get_lock
+from home.src.helper import RedisQueue, del_message, get_lock, set_message
 from home.src.index_management import backup_all_indexes, restore_from_backup
 from home.src.reindex import ManualImport, reindex_old_documents
 
@@ -128,3 +128,25 @@ def run_restore_backup():
     """called from settings page, dump backup to zip file"""
     restore_from_backup()
     print("index restore finished")
+
+
+def kill_dl(task_id):
+    """kill download worker task by ID"""
+    app.control.revoke(task_id, terminate=True)
+    del_message("dl_queue_id")
+    RedisQueue("dl_queue").clear()
+
+    # clear cache
+    cache_dir = os.path.join(CONFIG["application"]["cache_dir"], "download")
+    for cached in os.listdir(cache_dir):
+        to_delete = os.path.join(cache_dir, cached)
+        os.remove(to_delete)
+
+    # notify
+    mess_dict = {
+        "status": "downloading",
+        "level": "error",
+        "title": "Brutally killing download queue",
+        "message": "",
+    }
+    set_message("progress:download", mess_dict)
