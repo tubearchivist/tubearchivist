@@ -15,6 +15,7 @@ from django.views import View
 from home.src.config import AppConfig
 from home.src.download import ChannelSubscription, PendingList
 from home.src.helper import (
+    RedisQueue,
     get_dl_message,
     get_message,
     process_url_list,
@@ -506,10 +507,12 @@ class PostData:
 
     def ignore(self):
         """ignore from download queue"""
-        print("ignore video")
+        id_to_ignore = self.exec_val
+        print("ignore video " + id_to_ignore)
         handler = PendingList()
-        ignore_list = self.exec_val
-        handler.ignore_from_pending([ignore_list])
+        handler.ignore_from_pending([id_to_ignore])
+        # also clear from redis queue
+        RedisQueue("dl_queue").clear_item(id_to_ignore)
         return {"success": True}
 
     @staticmethod
