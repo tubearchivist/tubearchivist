@@ -418,6 +418,10 @@ class VideoDownloader:
         """setup download queue in redis loop until no more items"""
         queue = RedisQueue("dl_queue")
 
+        limit_queue = self.config["downloads"]["limit_count"]
+        if limit_queue:
+            queue.trim(limit_queue - 1)
+
         while True:
             youtube_id = queue.get_next()
             if not youtube_id:

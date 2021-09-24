@@ -166,6 +166,10 @@ class RedisQueue:
         """remove single item from list if it's there"""
         self.conn.execute_command("LREM", self.key, 0, to_clear)
 
+    def trim(self, size):
+        """trim the queue based on settings amount"""
+        self.conn.execute_command("LTRIM", self.key, 0, size)
+
 
 class DurationConverter:
     """

@@ -15,10 +15,13 @@ function checkMessage() {
     req.open('GET', '/downloads/progress', true);
     req.onload = function() {
         var dlProgress = req.response;
+        var dlStatus = dlProgress['status'];
         if (dlProgress['status']) {
             buildDownloadMessage(dlProgress);
             handleInterval();
-            buildDownloadIcons();
+            if (dlStatus == 'downloading') {
+                buildDownloadIcons();
+            };
         };
     };
     req.send();
