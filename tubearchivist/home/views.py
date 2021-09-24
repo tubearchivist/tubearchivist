@@ -480,6 +480,7 @@ class PostData:
             "rescan_pending": self.rescan_pending,
             "ignore": self.ignore,
             "dl_pending": self.dl_pending,
+            "queue": self.queue_handler,
             "unsubscribe": self.unsubscribe,
             "sort_order": self.sort_order,
             "hide_watched": self.hide_watched,
@@ -520,6 +521,15 @@ class PostData:
         """start the download queue"""
         print("download pending")
         download_pending.delay()
+        return {"success": True}
+
+    def queue_handler(self):
+        """queue controls from frontend"""
+        to_execute = self.exec_val
+        if to_execute == "stop":
+            print("stopping download queue")
+            RedisQueue("dl_queue").clear()
+
         return {"success": True}
 
     def unsubscribe(self):

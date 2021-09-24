@@ -458,10 +458,21 @@ button:hover {
 }
 
 .dl-desc {
-    padding-left: 15px;
+    padding: 0 15px;
     width: 75%;
 }
 
+.dl-control-icons {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.dl-control-icons img {
+    width: 30px;
+    filter: var(--img-filter);
+    cursor: pointer;
+}
 
 /* status message */
 .download-progress {

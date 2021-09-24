@@ -18,6 +18,7 @@ function checkMessage() {
         if (dlProgress['status']) {
             buildDownloadMessage(dlProgress);
             handleInterval();
+            buildDownloadIcons();
         };
     };
     req.send();
@@ -71,3 +72,20 @@ function buildDownloadMessage(dlProgress) {
     message.appendChild(messageText);
     box.appendChild(message);
 };
+
+
+// add dl control icons
+function buildDownloadIcons() {
+    var box = document.getElementById('downloadControl');
+    var iconBox = document.createElement('div');
+    iconBox.classList = 'dl-control-icons';
+    var stopIcon = document.createElement('img');
+    stopIcon.setAttribute('id', "stop-icon");
+    stopIcon.setAttribute('title', "Stop Download Queue");
+    stopIcon.setAttribute('src', "/static/img/icon-stop.svg");
+    stopIcon.setAttribute('alt', "stop icon");
+    stopIcon.setAttribute('onclick', 'stopQueue()');
+    // stich together
+    iconBox.appendChild(stopIcon);
+    box.appendChild(iconBox);
+}

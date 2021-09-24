@@ -79,6 +79,13 @@ function downloadNow(button) {
     }, 500);
 }
 
+function stopQueue() {
+    var payload = JSON.stringify({'queue': 'stop'});
+    sendPost(payload);
+    document.getElementById('stop-icon').remove();
+}
+
+
 // settings page buttons
 function manualImport() {
     var payload = JSON.stringify({'manual-import': true});
