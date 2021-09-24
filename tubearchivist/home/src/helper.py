@@ -146,6 +146,7 @@ class RedisQueue:
 
     def add_priority(self, to_add):
         """add single video to front of queue"""
+        self.clear_item(to_add)
         self.conn.execute_command("LPUSH", self.key, to_add)
 
     def get_next(self):
@@ -160,6 +161,10 @@ class RedisQueue:
     def clear(self):
         """delete list from redis"""
         self.conn.execute_command("DEL", self.key)
+
+    def clear_item(self, to_clear):
+        """remove single item from list if it's there"""
+        self.conn.execute_command("LREM", self.key, 0, to_clear)
 
 
 class DurationConverter:
