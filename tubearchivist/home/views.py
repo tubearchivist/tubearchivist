@@ -573,7 +573,10 @@ class PostData:
         """start downloading single vid now"""
         youtube_id = self.exec_val
         print("downloading: " + youtube_id)
-        download_single.delay(youtube_id=youtube_id)
+        running = download_single.delay(youtube_id=youtube_id)
+        task_id = running.id
+        print("set task id: " + task_id)
+        set_message("dl_queue_id", task_id, expire=False)
         return {"success": True}
 
     @staticmethod

@@ -76,6 +76,7 @@ function downloadNow(button) {
     document.getElementById(youtube_id).remove();
     setTimeout(function(){
         handleInterval();
+        buildDownloadIcons();
     }, 500);
 }
 
