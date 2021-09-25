@@ -21,6 +21,7 @@ from home.src.helper import (
     clean_string,
     get_message,
     get_total_hits,
+    ignore_filelist,
     set_message,
 )
 from home.src.index import YoutubeChannel, YoutubeVideo, index_new_video
@@ -209,12 +210,15 @@ class FilesystemScanner:
 
     def get_all_downloaded(self):
         """get a list of all video files downloaded"""
-        all_channels = os.listdir(self.VIDEOS)
+        channels = os.listdir(self.VIDEOS)
+        all_channels = ignore_filelist(channels)
         all_channels.sort()
         all_downloaded = []
         for channel_name in all_channels:
             channel_path = os.path.join(self.VIDEOS, channel_name)
-            for video in os.listdir(channel_path):
+            videos = os.listdir(channel_path)
+            all_videos = ignore_filelist(videos)
+            for video in all_videos:
                 youtube_id = video[9:20]
                 all_downloaded.append((channel_name, video, youtube_id))
 
@@ -339,8 +343,8 @@ class ManualImport:
 
     def import_folder_parser(self):
         """detect files in import folder"""
-
-        to_import = os.listdir(self.IMPORT_DIR)
+        import_files = os.listdir(self.IMPORT_DIR)
+        to_import = ignore_filelist(import_files)
         to_import.sort()
         video_files = [i for i in to_import if not i.endswith(".json")]
 

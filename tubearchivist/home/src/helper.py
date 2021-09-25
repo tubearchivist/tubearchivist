@@ -40,6 +40,19 @@ def clean_string(file_name):
     return cleaned
 
 
+def ignore_filelist(filelist):
+    """ignore temp files for os.listdir sanitizer"""
+    to_ignore = ["Icon\r\r", "Temporary Items", "Network Trash Folder"]
+    cleaned = []
+    for file_name in filelist:
+        if file_name.startswith(".") or file_name in to_ignore:
+            continue
+
+        cleaned.append(file_name)
+
+    return cleaned
+
+
 def process_url_list(url_str):
     """parse url_list to find valid youtube video or channel ids"""
     to_replace = ["watch?v=", "playlist?list="]
@@ -118,7 +131,8 @@ def monitor_cache_dir(cache_dir):
     look at download cache dir directly as alternative progress info
     """
     dl_cache = os.path.join(cache_dir, "download")
-    cache_file = os.listdir(dl_cache)
+    all_cache_file = os.listdir(dl_cache)
+    cache_file = ignore_filelist(all_cache_file)
     if cache_file:
         filename = cache_file[0][12:].replace("_", " ").split(".")[0]
         mess_dict = {

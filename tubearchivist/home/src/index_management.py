@@ -13,6 +13,7 @@ from datetime import datetime
 
 import requests
 from home.src.config import AppConfig
+from home.src.helper import ignore_filelist
 
 # expected mapping and settings
 INDEX_CONFIG = [
@@ -433,9 +434,11 @@ class ElasticBackup:
         """extract backup zip and return filelist"""
         cache_dir = self.config["application"]["cache_dir"]
         backup_dir = os.path.join(cache_dir, "backup")
+        backup_files = os.listdir(backup_dir)
+        all_backup_files = ignore_filelist(backup_files)
         all_available_backups = [
             i
-            for i in os.listdir(backup_dir)
+            for i in all_backup_files
             if i.startswith("ta_") and i.endswith(".zip")
         ]
         all_available_backups.sort()

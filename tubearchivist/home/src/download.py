@@ -18,6 +18,7 @@ from home.src.helper import (
     DurationConverter,
     RedisQueue,
     clean_string,
+    ignore_filelist,
     set_message,
 )
 from home.src.index import YoutubeChannel, index_new_video
@@ -219,11 +220,13 @@ class PendingList:
 
     def get_all_downloaded(self):
         """get a list of all videos in archive"""
-        all_channel_folders = os.listdir(self.VIDEOS)
+        channel_folders = os.listdir(self.VIDEOS)
+        all_channel_folders = ignore_filelist(channel_folders)
         all_downloaded = []
         for channel_folder in all_channel_folders:
             channel_path = os.path.join(self.VIDEOS, channel_folder)
-            all_videos = os.listdir(channel_path)
+            videos = os.listdir(channel_path)
+            all_videos = ignore_filelist(videos)
             youtube_vids = [i[9:20] for i in all_videos]
             for youtube_id in youtube_vids:
                 all_downloaded.append(youtube_id)
@@ -506,7 +509,8 @@ class VideoDownloader:
 
         # check if already in cache to continue from there
         cache_dir = self.config["application"]["cache_dir"]
-        all_cached = os.listdir(cache_dir + "/download/")
+        cached = os.listdir(cache_dir + "/download/")
+        all_cached = ignore_filelist(cached)
         for file_name in all_cached:
             if youtube_id in file_name:
                 obs["outtmpl"] = cache_dir + "/download/" + file_name
@@ -531,7 +535,9 @@ class VideoDownloader:
         os.makedirs(new_folder, exist_ok=True)
         # find real filename
         cache_dir = self.config["application"]["cache_dir"]
-        for file_str in os.listdir(cache_dir + "/download"):
+        cached = os.listdir(cache_dir + "/download/")
+        all_cached = ignore_filelist(cached)
+        for file_str in all_cached:
             if youtube_id in file_str:
                 old_file = file_str
         old_file_path = os.path.join(cache_dir, "download", old_file)

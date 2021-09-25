@@ -13,6 +13,7 @@ from datetime import datetime
 
 import requests
 from home.src.config import AppConfig
+from home.src.helper import ignore_filelist
 from PIL import Image
 
 
@@ -105,7 +106,8 @@ class SearchHandler:
     def cache_dl_vids(self, all_videos):
         """video thumbs links for cache"""
         vid_cache = os.path.join(self.CACHE_DIR, "videos")
-        all_vid_cached = os.listdir(vid_cache)
+        vid_cached = os.listdir(vid_cache)
+        all_vid_cached = ignore_filelist(vid_cached)
         # videos
         for video_dict in all_videos:
             youtube_id = video_dict["youtube_id"]
@@ -124,7 +126,8 @@ class SearchHandler:
     def cache_dl_chan(self, all_channels):
         """download channel thumbs"""
         chan_cache = os.path.join(self.CACHE_DIR, "channels")
-        all_chan_cached = os.listdir(chan_cache)
+        chan_cached = os.listdir(chan_cache)
+        all_chan_cached = ignore_filelist(chan_cached)
         for channel_dict in all_channels:
             channel_id_cache = channel_dict["channel_id"]
             channel_banner_url = channel_dict["chan_banner"]
