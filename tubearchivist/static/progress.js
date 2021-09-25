@@ -82,13 +82,22 @@ function buildDownloadIcons() {
     var box = document.getElementById('downloadControl');
     var iconBox = document.createElement('div');
     iconBox.classList = 'dl-control-icons';
+    // stop icon
     var stopIcon = document.createElement('img');
     stopIcon.setAttribute('id', "stop-icon");
     stopIcon.setAttribute('title', "Stop Download Queue");
     stopIcon.setAttribute('src', "/static/img/icon-stop.svg");
     stopIcon.setAttribute('alt', "stop icon");
     stopIcon.setAttribute('onclick', 'stopQueue()');
+    // kill icon
+    var killIcon = document.createElement('img');
+    killIcon.setAttribute('id', "kill-icon");
+    killIcon.setAttribute('title', "Kill Download Queue");
+    killIcon.setAttribute('src', "/static/img/icon-close.svg");
+    killIcon.setAttribute('alt', "kill icon");
+    killIcon.setAttribute('onclick', 'killQueue()');
     // stich together
     iconBox.appendChild(stopIcon);
+    iconBox.appendChild(killIcon);
     box.appendChild(iconBox);
 }

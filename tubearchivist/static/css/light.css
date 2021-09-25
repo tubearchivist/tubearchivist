@@ -7,4 +7,5 @@
     --accent-font-dark: #259485;
     --accent-font-light: #35b399;
     --img-filter: invert(50%) sepia(9%) saturate(2940%) hue-rotate(122deg) brightness(94%) contrast(90%);
+    --img-filter-error: invert(83%) sepia(35%) saturate(1238%) hue-rotate(297deg) brightness(103%) contrast(97%);
 }

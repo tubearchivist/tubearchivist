@@ -482,7 +482,6 @@ class PostData:
             "ignore": self.ignore,
             "dl_pending": self.dl_pending,
             "queue": self.queue_handler,
-            "kill_queue": self.kill_queue,
             "unsubscribe": self.unsubscribe,
             "sort_order": self.sort_order,
             "hide_watched": self.hide_watched,
@@ -534,15 +533,11 @@ class PostData:
         if to_execute == "stop":
             print("stopping download queue")
             RedisQueue("dl_queue").clear()
+        elif to_execute == "kill":
+            task_id = get_message("dl_queue_id")
+            print("brutally killing " + task_id)
+            kill_dl(task_id)
 
-        return {"success": True}
-
-    @staticmethod
-    def kill_queue():
-        """brutally murder the celery task"""
-        task_id = get_message("dl_queue_id")
-        print("brutally killing " + task_id)
-        kill_dl(task_id)
         return {"success": True}
 
     def unsubscribe(self):

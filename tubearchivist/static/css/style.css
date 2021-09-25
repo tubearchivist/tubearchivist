@@ -470,8 +470,16 @@ button:hover {
 
 .dl-control-icons img {
     width: 30px;
-    filter: var(--img-filter);
     cursor: pointer;
+    margin: 5px;
+}
+
+#stop-icon {
+    filter: var(--img-filter);
+}
+
+#kill-icon {
+    filter: var(--img-filter-error);
 }
 
 /* status message */

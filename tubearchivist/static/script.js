@@ -85,6 +85,11 @@ function stopQueue() {
     document.getElementById('stop-icon').remove();
 }
 
+function killQueue() {
+    var payload = JSON.stringify({'queue': 'kill'});
+    sendPost(payload);
+    document.getElementById('kill-icon').remove();
+}
 
 // settings page buttons
 function manualImport() {
