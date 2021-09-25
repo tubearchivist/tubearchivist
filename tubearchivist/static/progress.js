@@ -15,13 +15,13 @@ function checkMessage() {
     req.open('GET', '/downloads/progress', true);
     req.onload = function() {
         var dlProgress = req.response;
-        var dlStatus = dlProgress['status'];
+        // var dlStatus = dlProgress['status'];
         if (dlProgress['status']) {
             buildDownloadMessage(dlProgress);
             handleInterval();
-            if (dlStatus == 'downloading') {
-                buildDownloadIcons();
-            };
+            // if (dlStatus == 'downloading') {
+            //     buildDownloadIcons();
+            // };
         };
     };
     req.send();
@@ -74,12 +74,14 @@ function buildDownloadMessage(dlProgress) {
     message.appendChild(title);
     message.appendChild(messageText);
     box.appendChild(message);
+    if (dlStatus == 'downloading' && dlLevel != 'error') {
+        box.appendChild(buildDownloadIcons());
+    };
 };
 
 
 // add dl control icons
 function buildDownloadIcons() {
-    var box = document.getElementById('downloadControl');
     var iconBox = document.createElement('div');
     iconBox.classList = 'dl-control-icons';
     // stop icon
@@ -99,5 +101,6 @@ function buildDownloadIcons() {
     // stich together
     iconBox.appendChild(stopIcon);
     iconBox.appendChild(killIcon);
-    box.appendChild(iconBox);
+    
+    return iconBox
 }
