@@ -11,7 +11,7 @@
         "channel_size": 50
     },
     "downloads": {
-        "limit_count": 5,
+        "limit_count": false,
         "limit_speed": false,
         "sleep_interval": 3,
         "format": false,
