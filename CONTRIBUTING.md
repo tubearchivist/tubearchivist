@@ -8,6 +8,14 @@ If you haven't already, the best place to start is the README. This will give yo
 If you notice something is not working as expected, check to see if it has been previously reported in the [open issues](https://github.com/bbilly1/tubearchivist/issues).
 If it has not yet been disclosed, go ahead and create an issue.
 
+## Wiki
+
+WIP: The wiki is where all user functions are explained in detail. These pages are mirrored into the **docs** folder of the repo. This allows for pull requests and all other features like regular code. Make any changes there, and I'll sync them  with the wiki tab.
+
+## Implementing a new feature
+
+Do you see anything on the roadmap that you would like to take a closer look at but you are not sure, what's the best way to tackle that? Or anything not on there yet you'd like to implement but are not sure how? Open up an issue and we try to find a solution together.
+
 ## Making changes
 
 To fix a bug or implement a feature, fork the repository and make all changes to the testing branch. When ready, create a pull request.
