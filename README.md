@@ -2,6 +2,20 @@
 
 <center><h1>Your self hosted YouTube media server</h1></center>
 
+## Table of contents:
+* [Core functionality](#core-functionality)
+* [Screenshots](#screenshots)
+* [Problem Tube Archivist tries to solve](#problem-tube-archivist-tries-to-solve)
+* [Installing and updating](#installing-and-updating)
+* [Getting Started](#getting-started)
+* [Import your existing library](#import-your-existing-library)
+* [Backup and restore](#backup-and-restore)
+* [Potential pitfalls](#potential-pitfalls)
+* [Roadmap](#roadmap)
+* [Known limitations](#known-limitations)
+* [Donate](#donate)
+
+------------------------
 
 ## Core functionality
 * Subscribe to your favorite YouTube channels
@@ -29,7 +43,7 @@
 ## Problem Tube Archivist tries to solve
 Once your YouTube video collection grows, it becomes hard to search and find a specific video. That's where Tube Archivist comes in: By indexing your video collection with metadata from YouTube, you can organize, search and enjoy your archived YouTube videos without hassle offline through a convenient web interface.
 
-## Installation
+## Installing and updating
 Take a look at the example `docker-compose.yml` file provided. Tube Archivist depends on three main components split up into separate docker containers:  
 
 ### Tube Archivist
@@ -51,6 +65,33 @@ Follow the [documentation](https://www.elastic.co/guide/en/elasticsearch/referen
 Functions as a cache and temporary link between the application and the file system. Used to store and display messages and configuration variables.
   - Needs to be accessible over the default port `6379`
   - Takes an optional volume at **/data** to make your configuration changes permanent.
+
+### Updating Tube Archivist
+You will see the current version number of **Tube Archivist** in the footer of the interface so you can compare it with the latest release to make sure you are running the *latest and greatest*.  
+* There can be breaking changes between updates, particularly as the application grows, new environment variables or settings might be required for you to set in the your docker-compose file. Any breaking changes will be marked in the **release notes**.  
+* All testing and development is done with the Elasticsearch version number as mentioned in the provided *docker-compose.yml* file. This will be updated when a new release of Elasticsearch is available. Running an older version of Elasticsearch is most likely not going to result in any issues, but it's still recommended to run the same version as mentioned.
+
+## Potential pitfalls
+### vm.max_map_count
+**Elastic Search** in Docker requires the kernel setting of the host machine `vm.max_map_count` to be set to at least 262144.
+
+To temporary set the value run:  
+```
+sudo sysctl -w vm.max_map_count=262144
+```  
+
+To apply the change permanently depends on your host operating system:  
+- For example on Ubuntu Server add `vm.max_map_count = 262144` to the file */etc/sysctl.conf*.
+- On Arch based systems create a file */etc/sysctl.d/max_map_count.conf* with the content `vm.max_map_count = 262144`. 
+- On any other platform look up in the documentation on how to pass kernel parameters.
+
+### Permissions for elasticsearch
+If you see a message similar to `AccessDeniedException[/usr/share/elasticsearch/data/nodes]` when initially starting elasticsearch, that means the container is not allowed to write files to the volume.  
+That's most likely the case when you run `docker-compose` as an unprivileged user. To fix that issue, shutdown the container and on your host machine run:
+```
+chown 1000:0 /path/to/mount/point
+```
+This will match the permissions with the **UID** and **GID** of elasticsearch within the container and should fix the issue.
 
 ## Getting Started
 1. Go through the **settings** page and look at the available options. Particularly set *Download Format* to your desired video quality before downloading. **Tube Archivist** downloads the best available quality by default.
@@ -87,33 +128,6 @@ The restore functionality will expect the same zip file in *cache/backup* and wi
 
 BE AWARE: This will **replace** your current index with the one from the backup file.
 
-## Potential pitfalls
-### vm.max_map_count
-**Elastic Search** in Docker requires the kernel setting of the host machine `vm.max_map_count` to be set to at least 262144.
-
-To temporary set the value run:  
-```
-sudo sysctl -w vm.max_map_count=262144
-```  
-
-To apply the change permanently depends on your host operating system:  
-- For example on Ubuntu Server add `vm.max_map_count = 262144` to the file */etc/sysctl.conf*.
-- On Arch based systems create a file */etc/sysctl.d/max_map_count.conf* with the content `vm.max_map_count = 262144`. 
-- On any other platform look up in the documentation on how to pass kernel parameters.
-
-### Permissions for elasticsearch
-If you see a message similar to `AccessDeniedException[/usr/share/elasticsearch/data/nodes]` when initially starting elasticsearch, that means the container is not allowed to write files to the volume.  
-That's most likely the case when you run `docker-compose` as an unprivileged user. To fix that issue, shutdown the container and on your host machine run:
-```
-chown 1000:0 /path/to/mount/point
-```
-This will match the permissions with the **UID** and **GID** of elasticsearch within the container and should fix the issue.
-
-## Updating Tube Archivist
-You will see the current version number of **Tube Archivist** in the footer of the interface so you can compare it with the latest release to make sure you are running the *latest and greatest*.  
-* There can be breaking changes between updates, particularly as the application grows, new environment variables or settings might be required. Any breaking changes will be marked in the **release notes**.  
-* All testing is done with the Elasticsearch version number as mentioned in the provided *docker-compose.yml* file. Running an older version of Elasticsearch is most likely not going to result in any issues, but it's still recommended to run the same version as mentioned.
-
 ## Roadmap
 This should be considered as a **minimal viable product**, there is an extensive list of future functions and improvements planned.
 
@@ -141,3 +155,11 @@ This should be considered as a **minimal viable product**, there is an extensive
 - Video files created by Tube Archivist need to be **mp4** video files for best browser compatibility.
 - Every limitation of **yt-dlp** will also be present in Tube Archivist. If **yt-dlp** can't download or extract a video for any reason, Tube Archivist won't be able to either.
 - For now this is meant to be run in a trusted network environment.
+
+
+## Donate
+The best donation to **Tube Archivist** is your time, take a look at the [contribution page](CONTRIBUTING) to get started.  
+Second best way to support the development is to provide for caffeinated beverages:
+* [Paypal.me](https://paypal.me/bbilly1) for a one time coffee
+* [Paypal Subscription](https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-03770005GR991451KMFGVPMQ) for a monthly coffee
+* [co-fi.com](https://ko-fi.com/bbilly1) for an alternative platform
