@@ -104,7 +104,8 @@ def get_message(key):
 def del_message(key):
     """delete key from redis"""
     redis_connection = redis.Redis(host=REDIS_HOST)
-    redis_connection.execute_command("DEL", key)
+    response = redis_connection.execute_command("DEL", key)
+    return response
 
 
 def get_dl_message(cache_dir):
