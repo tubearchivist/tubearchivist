@@ -3,7 +3,7 @@
 import os
 
 from home.src.config import AppConfig
-from home.src.helper import set_message
+from home.src.helper import del_message, set_message
 from home.src.index_management import index_check
 
 from .tasks import app as celery_app
@@ -36,7 +36,16 @@ def make_folders():
             continue
 
 
+def release_lock():
+    """make sure there are no leftover locks set in redis on container start"""
+    all_locks = ["manual_import", "downloading"]
+    for lock in all_locks:
+        print("release leftover lock: " + lock)
+        del_message(lock)
+
+
 __all__ = ("celery_app",)
 make_folders()
 sync_redis_state()
 index_check()
+release_lock()
