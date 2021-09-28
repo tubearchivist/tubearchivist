@@ -5,16 +5,16 @@
 Welcome to the official Tube Archivist Wiki. This is an up-to-date documentation of user functionality.
 
 Table of contents:
-* [Main](Main): Tube Archivist landing page
-* [Channels](Channels): Browse your channels, handle subscriptions
-* [Downloads](Downloads): Scanning subscriptions, handle download queue
-* [Settings](Settings): All the configuration options
+* [Main](Main.md): Tube Archivist landing page
+* [Channels](Channels.md): Browse your channels, handle subscriptions
+* [Downloads](Downloads.md): Scanning subscriptions, handle download queue
+* [Settings](Settings.md): All the configuration options
 
 ## Getting Started
-1. [Subscribe](Channels#channels-overview) to some of your favourite YouTube channels.
-2. [Scan](Downloads#rescan-subscriptions) subscriptions to add the latest videos to the download queue.
-3. [Add](Downloads#add-to-download-queue) additional videos, channels or playlist - ignore the ones you don't want to download.
-4. [Download](Downloads#download-queue) and let **Tube Archivist** do it's thing.
+1. [Subscribe](Channels.md#channels-overview) to some of your favourite YouTube channels.
+2. [Scan](Downloads.md#rescan-subscriptions) subscriptions to add the latest videos to the download queue.
+3. [Add](Downloads.md#add-to-download-queue) additional videos, channels or playlist - ignore the ones you don't want to download.
+4. [Download](Downloads.md#download-queue) and let **Tube Archivist** do it's thing.
 5. Sit back and enjoy your archived and indexed collection!
 
 ## General Navigation
