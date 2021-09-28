@@ -23,6 +23,8 @@ def sync_redis_state():
     redis_archivist.set_message(
         "show_subed_only", show_subed_only, expire=False
     )
+    filter_view = config["archive"]["filter_view"]
+    redis_archivist.set_message("filter_view", filter_view, expire=False)
 
 
 def make_folders():

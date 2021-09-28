@@ -144,43 +144,45 @@ class DownloadView(View):
         """handle get requests"""
         config = AppConfig().config
         colors = config["application"]["colors"]
+        filter_view = RedisArchivist().get_message("filter_view")
 
         page_get = int(request.GET.get("page", 0))
         pagination_handler = Pagination(page_get)
 
         url = config["application"]["es_url"] + "/ta_download/_search"
-        data = self.build_data(pagination_handler)
+        data = self.build_data(pagination_handler, filter_view)
         search = SearchHandler(url, data, cache=False)
 
         videos_hits = search.get_data()
         max_hits = search.max_hits
 
         if videos_hits:
-            all_pending = [i["source"] for i in videos_hits]
+            all_video_hits = [i["source"] for i in videos_hits]
             pagination_handler.validate(max_hits)
             pagination = pagination_handler.pagination
         else:
-            all_pending = False
+            all_video_hits = False
             pagination = False
 
         context = {
-            "pending": all_pending,
+            "all_video_hits": all_video_hits,
             "max_hits": max_hits,
             "pagination": pagination,
             "title": "Downloads",
             "colors": colors,
+            "filter_view": filter_view,
         }
         return render(request, "home/downloads.html", context)
 
     @staticmethod
-    def build_data(pagination_handler):
+    def build_data(pagination_handler, filter_view):
         """build data dict for search"""
         page_size = pagination_handler.pagination["page_size"]
         page_from = pagination_handler.pagination["page_from"]
         data = {
             "size": page_size,
             "from": page_from,
-            "query": {"term": {"status": {"value": "pending"}}},
+            "query": {"term": {"status": {"value": filter_view}}},
             "sort": [{"timestamp": {"order": "asc"}}],
         }
         return data
@@ -481,6 +483,9 @@ class PostData:
             "hide_watched": self.hide_watched,
             "show_subed_only": self.show_subed_only,
             "dlnow": self.dlnow,
+            "show_ignored_only": self.show_ignored_only,
+            "forgetIgnore": self.forget_ignore,
+            "addSingle": self.add_single,
             "manual-import": self.manual_import,
             "db-backup": self.db_backup,
             "db-restore": self.db_restore,
@@ -575,6 +580,29 @@ class PostData:
         task_id = running.id
         print("set task id: " + task_id)
         RedisArchivist().set_message("dl_queue_id", task_id, expire=False)
+        return {"success": True}
+
+    def show_ignored_only(self):
+        """switch view on /downloads/ to show ignored only"""
+        show_value = self.exec_val
+        print("Download view: " + show_value)
+        RedisArchivist().set_message("filter_view", show_value, expire=False)
+        return {"success": True}
+
+    def forget_ignore(self):
+        """delete from ta_download index"""
+        youtube_id = self.exec_val
+        print("forgetting from download index: " + youtube_id)
+        PendingList().delete_from_pending(youtube_id)
+        return {"success": True}
+
+    def add_single(self):
+        """add single youtube_id to download queue"""
+        youtube_id = self.exec_val
+        print("add vid to dl queue: " + youtube_id)
+        PendingList().delete_from_pending(youtube_id)
+        youtube_ids = process_url_list([youtube_id])
+        extrac_dl.delay(youtube_ids)
         return {"success": True}
 
     @staticmethod

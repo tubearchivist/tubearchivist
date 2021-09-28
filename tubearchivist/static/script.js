@@ -79,6 +79,35 @@ function downloadNow(button) {
     }, 500);
 }
 
+function showIgnoredOnly(showValue) {
+    var payload = JSON.stringify({'show_ignored_only': showValue});
+    console.log(payload);
+    sendPost(payload);
+    setTimeout(function(){
+        window.location.replace("/downloads/");
+        return false;
+    }, 500);
+}
+
+function forgetIgnore(button) {
+    var youtube_id = button.getAttribute('data-id');
+    var payload = JSON.stringify({'forgetIgnore': youtube_id});
+    console.log(payload);
+    sendPost(payload);
+    document.getElementById("dl-" + youtube_id).remove();
+}
+
+function addSingle(button) {
+    var youtube_id = button.getAttribute('data-id');
+    var payload = JSON.stringify({'addSingle': youtube_id});
+    console.log(payload);
+    sendPost(payload);
+    document.getElementById("dl-" + youtube_id).remove();
+    setTimeout(function(){
+        handleInterval();
+    }, 500);
+}
+
 function stopQueue() {
     var payload = JSON.stringify({'queue': 'stop'});
     sendPost(payload);

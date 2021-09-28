@@ -27,30 +27,51 @@
         </div>
     </div>
 </div>
-<h2>Download queue</h2>
+<div class="padding-box">
+    <span>Change show / hide ignored only </span><span class="settings-current">{{ filter_view }}</span>
+    <select name="showIgnoredOnly" id="showIgnoredOnly" onchange="showIgnoredOnly(this.value)">
+        <option value="" disabled selected> -- change -- </option>
+        <option value="ignore">show ignored only</option>
+        <option value="pending">show download queue</option>
+    </select>
+</div>
+{% if filter_view == "ignore" %}
+    <h2>Ignored from download</h2>
+{% else %}
+    <h2>Download queue</h2>
+{% endif %}
 <div>
-    {% if pending %}
-        <h3>Total pending downloads: {{ max_hits }}</h3>
-        {% for video in pending %}
+    {% if all_video_hits %}
+        <h3>Total videos found: {{ max_hits }}</h3>
+        {% for video in all_video_hits %}
             <div class="dl-item" id="dl-{{ video.youtube_id }}">
                 <div class="dl-thumb">
                     <img src="{{ video.vid_thumb_url }}" alt="video_thumb">
                 </div>
                 <div class="dl-desc">
-                    <h3>{{ video.title }}</h3>
+                    {% if filter_view == "ignore" %}
+                        <h3>Ignore: {{ video.title }}</h3>
+                    {% else %}
+                        <h3>Download: {{ video.title }}</h3>
+                    {% endif %}
                     {% if video.channel_indexed %}
                         <a href="{% url 'channel_id' video.channel_id %}">{{ video.channel_name }}</a>
                     {% else %}
                         <span>{{ video.channel_name }}</span>
                     {% endif %}
                     <p>Published: {{ video.published }} | Duration: {{ video.duration }} | {{ video.youtube_id }}</p>
-                    <button data-id="{{ video.youtube_id }}" onclick="toIgnore(this)">Ignore</button>
-                    <button id="{{ video.youtube_id }}" data-id="{{ video.youtube_id }}" onclick="downloadNow(this)">Download now</button>
+                    {% if filter_view == "ignore" %}
+                        <button data-id="{{ video.youtube_id }}" onclick="forgetIgnore(this)">Forget</button>
+                        <button data-id="{{ video.youtube_id }}" onclick="addSingle(this)">Add to queue</button>
+                    {% else %}
+                        <button data-id="{{ video.youtube_id }}" onclick="toIgnore(this)">Ignore</button>
+                        <button id="{{ video.youtube_id }}" data-id="{{ video.youtube_id }}" onclick="downloadNow(this)">Download now</button>
+                    {% endif %}
                 </div>
             </div>
         {% endfor %}
     {% else %}
-        <h3>No pending downloads</h3>
+        <h3>No videos found</h3>
     {% endif %}
 </div>
 <script type="text/javascript" src="{% static 'progress.js' %}"></script>

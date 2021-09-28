@@ -1,6 +1,7 @@
 {
     "archive": {
         "sort": "published",
+        "filter_view": "pending",
         "hide_watched": false,
         "show_subed_only": false,
         "page_size": 12
