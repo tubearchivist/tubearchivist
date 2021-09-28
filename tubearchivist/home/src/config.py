@@ -8,7 +8,7 @@ Functionality:
 import json
 import os
 
-from home.src.helper import get_message, set_message
+from home.src.helper import RedisArchivist
 
 
 class AppConfig:
@@ -51,7 +51,7 @@ class AppConfig:
     @staticmethod
     def get_config_redis():
         """read config json set from redis to overwrite defaults"""
-        config = get_message("config")
+        config = RedisArchivist().get_message("config")
         if not list(config.values())[0]:
             return False
 
@@ -73,7 +73,7 @@ class AppConfig:
                 config_dict, config_value = key.split(".")
                 config[config_dict][config_value] = to_write
 
-        set_message("config", config, expire=False)
+        RedisArchivist().set_message("config", config, expire=False)
 
     def load_new_defaults(self):
         """check config.json for missing defaults"""
@@ -100,4 +100,4 @@ class AppConfig:
                     needs_update = True
 
         if needs_update:
-            set_message("config", redis_config, expire=False)
+            RedisArchivist().set_message("config", redis_config, expire=False)

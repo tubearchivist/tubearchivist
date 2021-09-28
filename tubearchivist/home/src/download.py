@@ -16,10 +16,10 @@ import yt_dlp as youtube_dl
 from home.src.config import AppConfig
 from home.src.helper import (
     DurationConverter,
+    RedisArchivist,
     RedisQueue,
     clean_string,
     ignore_filelist,
-    set_message,
 )
 from home.src.index import YoutubeChannel, index_new_video
 
@@ -43,7 +43,7 @@ class PendingList:
                 "title": "Adding to download queue.",
                 "message": "Extracting lists",
             }
-            set_message("progress:download", mess_dict)
+            RedisArchivist().set_message("progress:download", mess_dict)
             # extract
             url = entry["url"]
             url_type = entry["type"]
@@ -98,7 +98,7 @@ class PendingList:
                 "title": "Adding to download queue.",
                 "message": "Processing IDs...",
             }
-            set_message("progress:download", mess_dict)
+            RedisArchivist().set_message("progress:download", mess_dict)
         # add last newline
         bulk_list.append("\n")
         query_str = "\n".join(bulk_list)
@@ -264,7 +264,7 @@ class PendingList:
             "title": "Added to ignore list",
             "message": "",
         }
-        set_message("progress:download", mess_dict)
+        RedisArchivist().set_message("progress:download", mess_dict)
         if not request.ok:
             print(request)
 
@@ -350,7 +350,7 @@ class ChannelSubscription:
         for channel in all_channels:
             channel_id = channel["channel_id"]
             last_videos = self.get_last_youtube_videos(channel_id)
-            set_message(
+            RedisArchivist().set_message(
                 "progress:download",
                 {
                     "status": "rescan",
@@ -468,7 +468,7 @@ class VideoDownloader:
             "title": title,
             "message": message,
         }
-        set_message("progress:download", mess_dict)
+        RedisArchivist().set_message("progress:download", mess_dict)
 
     def dl_single_vid(self, youtube_id):
         """download single video"""

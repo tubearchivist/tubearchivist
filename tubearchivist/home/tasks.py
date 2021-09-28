@@ -9,7 +9,7 @@ import os
 from celery import Celery, shared_task
 from home.src.config import AppConfig
 from home.src.download import ChannelSubscription, PendingList, VideoDownloader
-from home.src.helper import RedisQueue, del_message, get_lock, set_message
+from home.src.helper import RedisArchivist, RedisQueue
 from home.src.index_management import backup_all_indexes, restore_from_backup
 from home.src.reindex import ManualImport, reindex_old_documents
 
@@ -39,7 +39,7 @@ def download_pending():
     """download latest pending videos"""
 
     have_lock = False
-    my_lock = get_lock("downloading")
+    my_lock = RedisArchivist().get_lock("downloading")
 
     try:
         have_lock = my_lock.acquire(blocking=False)
@@ -65,7 +65,7 @@ def download_single(youtube_id):
 
     # start queue if needed
     have_lock = False
-    my_lock = get_lock("downloading")
+    my_lock = RedisArchivist().get_lock("downloading")
 
     try:
         have_lock = my_lock.acquire(blocking=False)
@@ -100,7 +100,7 @@ def run_manual_import():
 
     print("starting media file import")
     have_lock = False
-    my_lock = get_lock("manual_import")
+    my_lock = RedisArchivist().get_lock("manual_import")
 
     try:
         have_lock = my_lock.acquire(blocking=False)
@@ -133,7 +133,7 @@ def run_restore_backup():
 def kill_dl(task_id):
     """kill download worker task by ID"""
     app.control.revoke(task_id, terminate=True)
-    _ = del_message("dl_queue_id")
+    _ = RedisArchivist().del_message("dl_queue_id")
     RedisQueue("dl_queue").clear()
 
     # clear cache
@@ -149,4 +149,4 @@ def kill_dl(task_id):
         "title": "Brutally killing download queue",
         "message": "",
     }
-    set_message("progress:download", mess_dict)
+    RedisArchivist().set_message("progress:download", mess_dict)

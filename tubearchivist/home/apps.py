@@ -4,7 +4,7 @@ import os
 
 from django.apps import AppConfig
 from home.src.config import AppConfig as ArchivistConfig
-from home.src.helper import del_message, set_message
+from home.src.helper import RedisArchivist
 from home.src.index_management import index_check
 
 
@@ -15,11 +15,14 @@ def sync_redis_state():
     config_handler.load_new_defaults()
     config = config_handler.config
     sort_order = config["archive"]["sort"]
-    set_message("sort_order", sort_order, expire=False)
+    redis_archivist = RedisArchivist()
+    redis_archivist.set_message("sort_order", sort_order, expire=False)
     hide_watched = bool(int(config["archive"]["hide_watched"]))
-    set_message("hide_watched", hide_watched, expire=False)
+    redis_archivist.set_message("hide_watched", hide_watched, expire=False)
     show_subed_only = bool(int(config["archive"]["show_subed_only"]))
-    set_message("show_subed_only", show_subed_only, expire=False)
+    redis_archivist.set_message(
+        "show_subed_only", show_subed_only, expire=False
+    )
 
 
 def make_folders():
@@ -39,7 +42,7 @@ def release_lock():
     """make sure there are no leftover locks set in redis on container start"""
     all_locks = ["manual_import", "downloading", "dl_queue", "dl_queue_id"]
     for lock in all_locks:
-        response = del_message(lock)
+        response = RedisArchivist().del_message(lock)
         if response:
             print("deleted leftover key from redis: " + lock)
 

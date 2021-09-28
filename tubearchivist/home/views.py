@@ -14,13 +14,7 @@ from django.utils.http import urlencode
 from django.views import View
 from home.src.config import AppConfig
 from home.src.download import ChannelSubscription, PendingList
-from home.src.helper import (
-    RedisQueue,
-    get_dl_message,
-    get_message,
-    process_url_list,
-    set_message,
-)
+from home.src.helper import RedisArchivist, RedisQueue, process_url_list
 from home.src.index import WatchState
 from home.src.searching import Pagination, SearchForm, SearchHandler
 from home.tasks import (
@@ -114,8 +108,8 @@ class HomeView(View):
         """read needed values from redis"""
         config_handler = AppConfig().config
         colors = config_handler["application"]["colors"]
-        sort_order = get_message("sort_order")
-        hide_watched = get_message("hide_watched")
+        sort_order = RedisArchivist().get_message("sort_order")
+        hide_watched = RedisArchivist().get_message("hide_watched")
         return colors, sort_order, hide_watched
 
     @staticmethod
@@ -208,7 +202,7 @@ class DownloadView(View):
                     "title": "Failed to extract links.",
                     "message": "Not a video, channel or playlist ID or URL",
                 }
-                set_message("progress:download", mess_dict)
+                RedisArchivist().set_message("progress:download", mess_dict)
                 return redirect("downloads")
 
             print(youtube_ids)
@@ -322,7 +316,7 @@ class ChannelView(View):
             "query": {"match_all": {}},
             "sort": [{"channel_name.keyword": {"order": "asc"}}],
         }
-        show_subed_only = get_message("show_subed_only")
+        show_subed_only = RedisArchivist().get_message("show_subed_only")
         if show_subed_only:
             data["query"] = {"term": {"channel_subscribed": {"value": True}}}
         search = SearchHandler(url, data)
@@ -442,7 +436,7 @@ def progress(request):
     """endpoint for download progress ajax calls"""
     config = AppConfig().config
     cache_dir = config["application"]["cache_dir"]
-    json_data = get_dl_message(cache_dir)
+    json_data = RedisArchivist().get_dl_message(cache_dir)
     return JsonResponse(json_data)
 
 
@@ -524,7 +518,7 @@ class PostData:
         running = download_pending.delay()
         task_id = running.id
         print("set task id: " + task_id)
-        set_message("dl_queue_id", task_id, expire=False)
+        RedisArchivist().set_message("dl_queue_id", task_id, expire=False)
         return {"success": True}
 
     def queue_handler(self):
@@ -534,7 +528,7 @@ class PostData:
             print("stopping download queue")
             RedisQueue("dl_queue").clear()
         elif to_execute == "kill":
-            task_id = get_message("dl_queue_id")
+            task_id = RedisArchivist().get_message("dl_queue_id")
             print("brutally killing " + task_id)
             kill_dl(task_id)
 
@@ -552,21 +546,25 @@ class PostData:
     def sort_order(self):
         """change the sort between published to downloaded"""
         sort_order = self.exec_val
-        set_message("sort_order", sort_order, expire=False)
+        RedisArchivist().set_message("sort_order", sort_order, expire=False)
         return {"success": True}
 
     def hide_watched(self):
         """toggle if to show watched vids or not"""
         hide_watched = bool(int(self.exec_val))
         print(f"hide watched: {hide_watched}")
-        set_message("hide_watched", hide_watched, expire=False)
+        RedisArchivist().set_message(
+            "hide_watched", hide_watched, expire=False
+        )
         return {"success": True}
 
     def show_subed_only(self):
         """show or hide subscribed channels only on channels page"""
         show_subed_only = bool(int(self.exec_val))
         print(f"show subed only: {show_subed_only}")
-        set_message("show_subed_only", show_subed_only, expire=False)
+        RedisArchivist().set_message(
+            "show_subed_only", show_subed_only, expire=False
+        )
         return {"success": True}
 
     def dlnow(self):
@@ -576,7 +574,7 @@ class PostData:
         running = download_single.delay(youtube_id=youtube_id)
         task_id = running.id
         print("set task id: " + task_id)
-        set_message("dl_queue_id", task_id, expire=False)
+        RedisArchivist().set_message("dl_queue_id", task_id, expire=False)
         return {"success": True}
 
     @staticmethod

@@ -13,8 +13,6 @@ import unicodedata
 import redis
 import requests
 
-REDIS_HOST = os.environ.get("REDIS_HOST")
-
 
 def get_total_hits(index, es_url, match_field):
     """get total hits from index"""
@@ -82,78 +80,87 @@ def process_url_list(url_str):
     return youtube_ids
 
 
-def set_message(key, message, expire=True):
-    """write new message to redis"""
-    redis_connection = redis.Redis(host=REDIS_HOST)
-    redis_connection.execute_command("JSON.SET", key, ".", json.dumps(message))
-    if expire:
-        redis_connection.execute_command("EXPIRE", key, 20)
+class RedisArchivist:
+    """collection of methods to interact with redis"""
 
+    REDIS_HOST = os.environ.get("REDIS_HOST")
 
-def get_message(key):
-    """get any message from JSON key"""
-    redis_connection = redis.Redis(host=REDIS_HOST)
-    reply = redis_connection.execute_command("JSON.GET", key)
-    if reply:
-        json_str = json.loads(reply)
-    else:
-        json_str = {"status": False}
-    return json_str
+    def __init__(self):
+        self.redis_connection = redis.Redis(host=self.REDIS_HOST)
 
+    def set_message(self, key, message, expire=True):
+        """write new message to redis"""
+        self.redis_connection.execute_command(
+            "JSON.SET", key, ".", json.dumps(message)
+        )
 
-def del_message(key):
-    """delete key from redis"""
-    redis_connection = redis.Redis(host=REDIS_HOST)
-    response = redis_connection.execute_command("DEL", key)
-    return response
+        if expire:
+            self.redis_connection.execute_command("EXPIRE", key, 20)
 
+    def get_message(self, key):
+        """get message dict from redis"""
+        reply = self.redis_connection.execute_command("JSON.GET", key)
+        if reply:
+            json_str = json.loads(reply)
+        else:
+            json_str = {"status": False}
 
-def get_dl_message(cache_dir):
-    """get latest message if available"""
-    redis_connection = redis.Redis(host=REDIS_HOST)
-    reply = redis_connection.execute_command("JSON.GET", "progress:download")
-    if reply:
-        json_str = json.loads(reply)
-    elif json_str := monitor_cache_dir(cache_dir):
-        json_str = monitor_cache_dir(cache_dir)
-    else:
-        json_str = {"status": False}
-    return json_str
+        return json_str
 
+    def del_message(self, key):
+        """delete key from redis"""
+        response = self.redis_connection.execute_command("DEL", key)
+        return response
 
-def get_lock(lock_key):
-    """handle lock for task management"""
-    redis_lock = redis.Redis(host=REDIS_HOST).lock(lock_key)
-    return redis_lock
+    def get_lock(self, lock_key):
+        """handle lock for task management"""
+        redis_lock = self.redis_connection.lock(lock_key)
+        return redis_lock
 
+    def get_dl_message(self, cache_dir):
+        """get latest download progress message if available"""
+        reply = self.redis_connection.execute_command(
+            "JSON.GET", "progress:download"
+        )
+        if reply:
+            json_str = json.loads(reply)
+        elif json_str := self.monitor_cache_dir(cache_dir):
+            json_str = self.monitor_cache_dir(cache_dir)
+        else:
+            json_str = {"status": False}
 
-def monitor_cache_dir(cache_dir):
-    """
-    look at download cache dir directly as alternative progress info
-    """
-    dl_cache = os.path.join(cache_dir, "download")
-    all_cache_file = os.listdir(dl_cache)
-    cache_file = ignore_filelist(all_cache_file)
-    if cache_file:
-        filename = cache_file[0][12:].replace("_", " ").split(".")[0]
-        mess_dict = {
-            "status": "downloading",
-            "level": "info",
-            "title": "Downloading: " + filename,
-            "message": "",
-        }
-    else:
-        return False
+        return json_str
 
-    return mess_dict
+    @staticmethod
+    def monitor_cache_dir(cache_dir):
+        """
+        look at download cache dir directly as alternative progress info
+        """
+        dl_cache = os.path.join(cache_dir, "download")
+        all_cache_file = os.listdir(dl_cache)
+        cache_file = ignore_filelist(all_cache_file)
+        if cache_file:
+            filename = cache_file[0][12:].replace("_", " ").split(".")[0]
+            mess_dict = {
+                "status": "downloading",
+                "level": "info",
+                "title": "Downloading: " + filename,
+                "message": "",
+            }
+        else:
+            return False
+
+        return mess_dict
 
 
 class RedisQueue:
     """dynamically interact with the download queue in redis"""
 
+    REDIS_HOST = os.environ.get("REDIS_HOST")
+
     def __init__(self, key):
         self.key = key
-        self.conn = redis.Redis(host=REDIS_HOST)
+        self.conn = redis.Redis(host=self.REDIS_HOST)
 
     def get_all(self):
         """return all elements in list"""

@@ -18,11 +18,10 @@ import requests
 from home.src.config import AppConfig
 from home.src.download import ChannelSubscription, PendingList, VideoDownloader
 from home.src.helper import (
+    RedisArchivist,
     clean_string,
-    get_message,
     get_total_hits,
     ignore_filelist,
-    set_message,
 )
 from home.src.index import YoutubeChannel, YoutubeVideo, index_new_video
 
@@ -128,7 +127,7 @@ class Reindex:
                 "title": "Scraping all youtube channels",
                 "message": message,
             }
-            set_message("progress:download", mess_dict)
+            RedisArchivist().set_message("progress:download", mess_dict)
             channel_index = YoutubeChannel(channel_id)
             subscribed = channel_index.channel_dict["channel_subscribed"]
             channel_index.channel_dict = channel_index.build_channel_dict(
@@ -472,7 +471,7 @@ def reindex_old_documents():
     """daily refresh of old documents"""
     # check needed last run
     now = int(datetime.now().strftime("%s"))
-    last_reindex = get_message("last_reindex")
+    last_reindex = RedisArchivist().get_message("last_reindex")
     if isinstance(last_reindex, int) and now - last_reindex < 60 * 60 * 24:
         return
     # continue if needed
@@ -480,4 +479,4 @@ def reindex_old_documents():
     reindex_handler.check_outdated()
     reindex_handler.reindex()
     # set timestamp
-    set_message("last_reindex", now, expire=False)
+    RedisArchivist().set_message("last_reindex", now, expire=False)
