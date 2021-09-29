@@ -8,7 +8,7 @@ Switch between the easy on the eyes dark theme and the burning bright theme.
 
 ## Archive View
 These default values will get applied on container restart. 
-- **Default Sort**: This defines the default sort order as described on the [Main](Main.md) page.
+- **Default Sort**: This defines the default sort order as described on the [Main](Main) page.
 - **Default Hide Watched**: Hide watched videos by default.
 - **Show Subscribed Channels Only**: This controls the filter on the *Channel Overview Page*. 
 - **Page Size**: Defines how many results get displayed on a given page. Same value goes for all archive views.

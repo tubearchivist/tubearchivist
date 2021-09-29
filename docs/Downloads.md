@@ -3,17 +3,17 @@ Accessible at `/downloads/` of your Tube Archivist, this page handles all the do
 
 
 ## Rescan Subscriptions
-The **Rescan subscriptions** icon <img src="../tubearchivist/static/img/icon-rescan.svg?raw=true" alt="rescan icon" width="20px" style="filter:invert(50%) sepia(9%) saturate(2940%) hue-rotate(122deg) brightness(94%) contrast(90%);margin:0 5px;"> will start a background task to look for new videos from the channels you are subscribed to. You can define the channel page size on the [settings page](Settings.md#subscriptions). With the default channel page size, expect this process to take around 2-3 seconds for each channel you are subscribed to. A status message will show the progress.
+The **Rescan Subscriptions** icon <img src="assets/icon-rescan.png?raw=true" alt="rescan icon" width="20px" style="margin:0 5px;"> will start a background task to look for new videos from the channels you are subscribed to. You can define the channel page size on the [settings page](Settings#subscriptions). With the default channel page size, expect this process to take around 2-3 seconds for each channel you are subscribed to. A status message will show the progress.
 
 Then for every video found, **Tube Archivist** will skip the video if it has already been downloaded or if you added it to the *ignored* list before. All the other videos will get added to the download queue. Expect this to take around 1 second for each video as **Tube Archivist** needs to grab some additional metadata. New videos will get added at the bottom of the download queue.
 
 ## Download Queue
-The **Download Queue** icon <img src="../tubearchivist/static/img/icon-download.svg?raw=true" alt="download icon" width="20px" style="filter:invert(50%) sepia(9%) saturate(2940%) hue-rotate(122deg) brightness(94%) contrast(90%);margin:0 5px;"> will start the download process starting from the top of the queue. Take a look at the relevant settings on the [Settings Page](Settings.md#downloads). Once the process started, a progress message will show with additional details and controls: 
-- The stop icon <img src="../tubearchivist/static/img/icon-stop.svg?raw=true" alt="stop icon" width="20px" style="filter:invert(50%) sepia(9%) saturate(2940%) hue-rotate(122deg) brightness(94%) contrast(90%);margin:0 5px;"> will gracefully stop the download process, once the current video has been finished successfully.
-- The cancel icon <img src="../tubearchivist/static/img/icon-close.svg?raw=true" alt="close icon" width="20px" style="filter:invert(16%) sepia(60%) saturate(3717%) hue-rotate(349deg) brightness(86%) contrast(120%);margin:0 5px;"> is equivalent to killing the process and will stop the download immediately. Any leftover files will get deleted, the canceled video will still be available in the download queue.
+The **Download Queue** icon <img src="assets/icon-download.png?raw=true" alt="download icon" width="20px" style="margin:0 5px;"> will start the download process starting from the top of the queue. Take a look at the relevant settings on the [Settings Page](Settings#downloads). Once the process started, a progress message will show with additional details and controls: 
+- The stop icon <img src="assets/icon-stop.png?raw=true" alt="stop icon" width="20px" style="margin:0 5px;"> will gracefully stop the download process, once the current video has been finished successfully.
+- The cancel icon <img src="assets/icon-close-red.png?raw=true" alt="close icon" width="20px" style="margin:0 5px;"> is equivalent to killing the process and will stop the download immediately. Any leftover files will get deleted, the canceled video will still be available in the download queue.
 
 ## Add to Download Queue
-The **Add to Download Queue** icon <img src="../tubearchivist/static/img/icon-add.svg?raw=true" alt="add icon" width="20px" style="filter:invert(50%) sepia(9%) saturate(2940%) hue-rotate(122deg) brightness(94%) contrast(90%);margin:0 5px;"> opens a text field to manually add videos to the download queue. You have a few options:
+The **Add to Download Queue** icon <img src="assets/icon-add.png?raw=true" alt="add icon" width="20px" style="margin:0 5px;"> opens a text field to manually add videos to the download queue. You have a few options:
 - Add a link to a YouTube video. For example *https://www.youtube.com/watch?v=2tdiKTSdE9Y*.
 - Add a YouTube video ID. For example *2tdiKTSdE9Y*.
 - Add a link to a YouTube video by providing the shortened URL, for example *https://youtu.be/2tdiKTSdE9Y*.

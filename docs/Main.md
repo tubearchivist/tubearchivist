@@ -7,4 +7,4 @@ This is the landing page, when you first open **Tube Archivist**. You have a few
 - With **Hide Watched** you can filter out videos you have already marked as watched to only show unwatched videos. 
 - You can use those two options together to for example filter the list to *Hide Watched* videos **and** sort by date downloaded.
 
-Additionally the search icon <img src="../tubearchivist/static/img/icon-search.svg?raw=true" alt="search icon" width="20px" style="filter:invert(50%) sepia(9%) saturate(2940%) hue-rotate(122deg) brightness(94%) contrast(90%);margin:0 5px;"> opens a text field to search your collection.
+Additionally the search icon <img src="assets/icon-search.png?raw=true" alt="search icon" width="20px" style="margin:0 5px;"> opens a text field to search your collection.
