@@ -12,6 +12,21 @@ If it has not yet been disclosed, go ahead and create an issue.
 
 WIP: The wiki is where all user functions are explained in detail. These pages are mirrored into the **docs** folder of the repo. This allows for pull requests and all other features like regular code. Make any changes there, and I'll sync them  with the wiki tab.
 
+## Development Environment
+
+I have learned the hard way, that working on a dockerized application outside of docker is very error prone and in general not a good idea. So if you want to test your changes, it's best to run them in a docker testing environment.  
+
+This is my setup I have landed on, YMMV:
+- Clone the repo, work on it with your favorite code editor in your local filesystem. *testing* branch is the where all the changes are happening, might be unstable and is WIP.
+- Then I have a VM on KVM hypervisor running standard Ubuntu Server LTS with docker installed. The VM keeps my projects separate and offers convenient snapshot functionality. The VM also offers ways to simulate lowend environments by limiting CPU cores and memory. But you could also just run docker on your host system.
+- The `Dockerfile` is structured in a way that the actual application code is in the last layer so rebuilding the image with only code changes utilizes the build cache for everything else and will take just 2-3 secs.
+- Take a look at the `deploy.sh` file. I have my local DNS resolve `tubearchivist.local` to the IP of the VM for convenience. To deploy the latest changes and rebuild the application to the testing VM run:
+```bash
+./deploy.sh test
+```
+- The command above will also copy the file `tubarchivist/testing.sh` into the working folder of the container. Running this script will install additional debugging tools I regularly use in testing. 
+- This `deploy.sh` file is not meant to be universally usable for every possible environment but could serve as an idea on how to automatically rebuild containers to test changes - customize to your liking. 
+
 ## Implementing a new feature
 
 Do you see anything on the roadmap that you would like to take a closer look at but you are not sure, what's the best way to tackle that? Or anything not on there yet you'd like to implement but are not sure how? Open up an issue and we try to find a solution together.
