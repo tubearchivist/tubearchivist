@@ -66,6 +66,12 @@ Functions as a cache and temporary link between the application and the file sys
   - Needs to be accessible over the default port `6379`
   - Takes an optional volume at **/data** to make your configuration changes permanent.
 
+### Redis on a custom port
+For some architectures it might be required to run Redis JSON on a nonstandard port. To for example change the Redis port to **6380**, set the following values:
+- Set the environment variable `REDIS_PORT=6380` to the *tubearchivist* service.
+- For the *archivist-redis* service, change the ports to `6380:6380`
+- Additionally set the following value to the *archivist-redis* service: `command: --port 6380 --loadmodule /usr/lib/redis/modules/rejson.so`
+
 ### Updating Tube Archivist
 You will see the current version number of **Tube Archivist** in the footer of the interface so you can compare it with the latest release to make sure you are running the *latest and greatest*.  
 * There can be breaking changes between updates, particularly as the application grows, new environment variables or settings might be required for you to set in the your docker-compose file. Any breaking changes will be marked in the **release notes**.  

@@ -14,10 +14,14 @@ from home.src.index_management import backup_all_indexes, restore_from_backup
 from home.src.reindex import ManualImport, reindex_old_documents
 
 CONFIG = AppConfig().config
-REDIS_HOST = CONFIG["application"]["REDIS_HOST"]
+REDIS_HOST = os.environ.get("REDIS_HOST")
+REDIS_PORT = os.environ.get("REDIS_PORT")
+
+if not REDIS_PORT:
+    REDIS_PORT = 6379
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "home.settings")
-app = Celery("tasks", broker="redis://" + REDIS_HOST)
+app = Celery("tasks", broker=f"redis://{REDIS_HOST}:{REDIS_PORT}")
 app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()
 

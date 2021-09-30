@@ -84,9 +84,15 @@ class RedisArchivist:
     """collection of methods to interact with redis"""
 
     REDIS_HOST = os.environ.get("REDIS_HOST")
+    REDIS_PORT = os.environ.get("REDIS_PORT")
+
+    if not REDIS_PORT:
+        REDIS_PORT = 6379
 
     def __init__(self):
-        self.redis_connection = redis.Redis(host=self.REDIS_HOST)
+        self.redis_connection = redis.Redis(
+            host=self.REDIS_HOST, port=self.REDIS_PORT
+        )
 
     def set_message(self, key, message, expire=True):
         """write new message to redis"""
@@ -157,10 +163,14 @@ class RedisQueue:
     """dynamically interact with the download queue in redis"""
 
     REDIS_HOST = os.environ.get("REDIS_HOST")
+    REDIS_PORT = os.environ.get("REDIS_PORT")
+
+    if not REDIS_PORT:
+        REDIS_PORT = 6379
 
     def __init__(self, key):
         self.key = key
-        self.conn = redis.Redis(host=self.REDIS_HOST)
+        self.conn = redis.Redis(host=self.REDIS_HOST, port=self.REDIS_PORT)
 
     def get_all(self):
         """return all elements in list"""
