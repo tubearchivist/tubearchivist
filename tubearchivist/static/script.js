@@ -43,6 +43,18 @@ function unsubscribe(channel_id) {
     document.getElementById(channel_id).remove();
 }
 
+function changeView(image) {
+    var sourcePage = image.getAttribute("data-origin");
+    var newView = image.getAttribute("data-value");
+    var payload = JSON.stringify({'change_view': sourcePage + ":" + newView});
+    console.log(payload);
+    sendPost(payload);
+    setTimeout(function(){
+        location.reload();
+        return false;
+    }, 500);
+}
+
 // download page buttons
 function rescanPending() {
     var payload = JSON.stringify({'rescan_pending': true});

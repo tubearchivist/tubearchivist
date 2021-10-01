@@ -31,6 +31,10 @@
         </form>
     </div>
 </div>
+<div class="view-icons">
+    <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="grid" alt="grid view">
+    <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="list" alt="list view">
+</div>
 <div id="player" class="video-player"></div>
 <div class="video-list">
     {% if videos %}

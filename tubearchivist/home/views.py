@@ -39,7 +39,7 @@ class HomeView(View):
 
     def get(self, request):
         """return home search results"""
-        colors, sort_order, hide_watched = self.read_config()
+        colors, view_style, sort_order, hide_watched = self.read_config()
         # handle search
         search_get = request.GET.get("search", False)
         if search_get:
@@ -66,6 +66,7 @@ class HomeView(View):
             "sortorder": sort_order,
             "hide_watched": hide_watched,
             "colors": colors,
+            "view_style": view_style,
         }
         return render(request, "home/home.html", context)
 
@@ -108,9 +109,10 @@ class HomeView(View):
         """read needed values from redis"""
         config_handler = AppConfig().config
         colors = config_handler["application"]["colors"]
+        view_style = config_handler["default_view"]["home"]
         sort_order = RedisArchivist().get_message("sort_order")
         hide_watched = RedisArchivist().get_message("hide_watched")
-        return colors, sort_order, hide_watched
+        return colors, view_style, sort_order, hide_watched
 
     @staticmethod
     def post(request):
@@ -474,6 +476,7 @@ class PostData:
         """map dict key and return function to execute"""
         exec_map = {
             "watched": self.watched,
+            "change_view": self.change_view,
             "rescan_pending": self.rescan_pending,
             "ignore": self.ignore,
             "dl_pending": self.dl_pending,
@@ -497,6 +500,14 @@ class PostData:
     def watched(self):
         """mark as watched"""
         WatchState(self.exec_val).mark_as_watched()
+        return {"success": True}
+
+    def change_view(self):
+        """process view changes in home, channel, and downloads"""
+        origin, new_view = self.exec_val.split(":")
+        print(f"change view on page {origin} to {new_view}")
+        update_dict = {f"default_view.{origin}": [new_view]}
+        AppConfig().update_config(update_dict)
         return {"success": True}
 
     @staticmethod

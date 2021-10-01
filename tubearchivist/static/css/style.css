@@ -211,6 +211,19 @@ button:hover {
     filter: var(--img-filter);
 }
 
+.view-icons {
+    display: flex;
+    justify-content: end;
+    margin-top: 15px;
+}
+
+.view-icons img {
+    width: 30px;
+    margin: 5px 10px;
+    cursor: pointer;
+    filter: var(--img-filter);
+}
+
 #search-box {
     display: none;
     flex: auto;
