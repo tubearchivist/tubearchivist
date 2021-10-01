@@ -47,7 +47,6 @@ function changeView(image) {
     var sourcePage = image.getAttribute("data-origin");
     var newView = image.getAttribute("data-value");
     var payload = JSON.stringify({'change_view': sourcePage + ":" + newView});
-    console.log(payload);
     sendPost(payload);
     setTimeout(function(){
         location.reload();

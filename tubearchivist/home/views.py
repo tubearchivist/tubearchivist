@@ -223,9 +223,9 @@ class ChannelIdView(View):
 
     def get(self, request, channel_id_detail):
         """get method"""
-        es_url, colors = self.read_config()
+        es_url, colors, view_style = self.read_config()
         context = self.get_channel_videos(request, channel_id_detail, es_url)
-        context.update({"colors": colors})
+        context.update({"colors": colors, "view_style": view_style})
         return render(request, "home/channel_id.html", context)
 
     @staticmethod
@@ -234,7 +234,8 @@ class ChannelIdView(View):
         config = AppConfig().config
         es_url = config["application"]["es_url"]
         colors = config["application"]["colors"]
-        return es_url, colors
+        view_style = config["default_view"]["home"]
+        return es_url, colors, view_style
 
     def get_channel_videos(self, request, channel_id_detail, es_url):
         """get channel from video index"""

@@ -36,12 +36,12 @@
     <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="list" alt="list view">
 </div>
 <div id="player" class="video-player"></div>
-<div class="video-list">
+<div class="video-list {{ view_style }}">
     {% if videos %}
         {% for video in videos %}
-            <div class="video-item">
+            <div class="video-item {{ view_style }}">
                 <a href="#player" data-src="/media/{{ video.source.media_url }}" data-thumb="/cache/videos/{{ video.source.youtube_id }}.jpg" data-title="{{ video.source.title }}" data-channel="{{ video.source.channel.channel_name }}" data-id="{{ video.source.youtube_id }}" onclick="createPlayer(this)">
-                    <div class="video-thumb-wrap">
+                    <div class="video-thumb-wrap {{ view_style }}">
                         <div class="video-thumb">
                             <img src="/cache/videos/{{ video.source.youtube_id }}.jpg" alt="video-thumb">
                         </div>
@@ -50,7 +50,7 @@
                         </div>
                     </div>
                 </a>
-                <div class="video-desc">
+                <div class="video-desc {{ view_style }}">
                     <div class="video-desc-player" id="video-info-{{ video.source.youtube_id }}">
                         {% if video.source.player.watched %}
                             <img src="{% static 'img/icon-seen.svg' %}" alt="seen-icon" id="{{ video.source.youtube_id }}" class="seen-icon">
