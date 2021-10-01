@@ -10,8 +10,8 @@ RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recomm
     nginx \
     curl && rm -rf /var/lib/apt/lists/*
 
-# get newes patched ffmpeg and ffprobe builds
-RUN curl -s https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/autobuild-2021-09-28-12-38 \
+# get newest patched ffmpeg and ffprobe builds
+RUN curl -s https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest \
     | grep browser_download_url \
     | grep linux64 \
     | grep ffmpeg-n \
