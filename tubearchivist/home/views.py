@@ -310,7 +310,7 @@ class ChannelView(View):
 
     def get(self, request):
         """handle http get requests"""
-        es_url, colors = self.read_config()
+        es_url, colors, view_style = self.read_config()
         page_get = int(request.GET.get("page", 0))
         pagination_handler = Pagination(page_get)
         page_size = pagination_handler.pagination["page_size"]
@@ -337,6 +337,7 @@ class ChannelView(View):
             "show_subed_only": show_subed_only,
             "title": "Channels",
             "colors": colors,
+            "view_style": view_style,
         }
         return render(request, "home/channel.html", context)
 
@@ -346,7 +347,8 @@ class ChannelView(View):
         config = AppConfig().config
         es_url = config["application"]["es_url"]
         colors = config["application"]["colors"]
-        return es_url, colors
+        view_style = config["default_view"]["channel"]
+        return es_url, colors, view_style
 
     def post(self, request):
         """handle http post requests"""

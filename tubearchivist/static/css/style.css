@@ -454,12 +454,35 @@ button:hover {
 }
 
 /* channel overview page */
-.channel-item {
+.channel-list.list {
+    display: block;
+}
+
+.channel-list.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+}
+
+.channel-item.list {
     padding: 20px 0;
 }
 
-.channel-banner img {
+.channel-item.grid > .info-box {
+    display: block;
+}
+
+.channel-banner.grid {
+    overflow: hidden;
+}
+
+.channel-banner.list img {
     width: 100%;
+}
+
+.channel-banner.grid img {
+    width: 250%;
+    transform: translateX(-30%);
 }
 
 
@@ -649,7 +672,8 @@ button:hover {
         width: 90%;
     }
     .video-list.grid,
-    .dl-list.grid {
+    .dl-list.grid,
+    .channel-list.grid {
         grid-template-columns: 1fr 1fr;
     }
     .dl-thumb.list {
@@ -674,6 +698,7 @@ button:hover {
     }
     .video-list.grid,
     .dl-list.grid,
+    .channel-list.grid,
     .video-item.list {
         grid-template-columns: 1fr;
     }

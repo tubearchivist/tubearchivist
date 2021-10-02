@@ -30,6 +30,10 @@
         </form>
     </div>
 </div>
+<div class="view-icons">
+    <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="channel" data-value="grid" alt="grid view">
+    <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="channel" data-value="list" alt="list view">
+</div>
 <div class="padding-box">
     <h2>Total matching channels: {{ max_hits }}</h2>
     <span>Change show / hide subscribed only </span><span class="settings-current">{{ show_subed_only }}</span>
@@ -39,18 +43,18 @@
         <option value="1">show subscribed channels only</option>
     </select>
 </div>
-<div>
+<div class="channel-list {{ view_style }}">
     {% if channels %}
         {% for channel in channels %}
-        <div class="channel-item">
+        <div class="channel-item {{ view_style }}">
             {% if channel.source.channel_banner_url %}
-                <div class="channel-banner">
+                <div class="channel-banner {{ view_style }}">
                     <a href="{% url 'channel_id' channel.source.channel_id %}">
                         <img src="/cache/channels/{{ channel.source.channel_id }}_banner.jpg" alt="{{ channel.source.channel_id }}-banner">
                     </a>
                 </div>
             {% endif %}
-            <div class="info-box info-box-2">
+            <div class="info-box info-box-2 {{ view_style }}">
                 <div class="info-box-item">
                     <div class="round-img">
                         <a href="{% url 'channel_id' channel.source.channel_id %}">
