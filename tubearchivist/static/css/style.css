@@ -475,10 +475,26 @@ button:hover {
     cursor: pointer;
 }
 
-.dl-item {
+.dl-list.list {
+    display: block;
+}
+
+.dl-list.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-gap: 1rem;
+}
+
+.dl-item.list {
     display: flex;
     margin: 15px 0;
     align-items: center;
+    background-color: var(--highlight-bg);
+}
+
+.dl-item.grid {
+    display: flex;
+    flex-wrap: wrap;
     background-color: var(--highlight-bg);
 }
 
@@ -486,17 +502,26 @@ button:hover {
     width: 30px;
 }
 
-.dl-thumb {
+.dl-thumb.list {
     width: 25%;
+}
+
+.dl-thumb.grid {
+    width: 100%;
 }
 
 .dl-item img {
     width: 100%;
 }
 
-.dl-desc {
+.dl-desc.list {
     padding: 0 15px;
     width: 75%;
+}
+
+.dl-desc.grid {
+    padding: 15px;
+    width: 100%;
 }
 
 .dl-control-icons {
@@ -623,8 +648,12 @@ button:hover {
     .boxed-content {
         width: 90%;
     }
-    .video-list.grid {
+    .video-list.grid,
+    .dl-list.grid {
         grid-template-columns: 1fr 1fr;
+    }
+    .dl-thumb.list {
+        width: 35%;
     }
     .video-item.list {
         display: grid;
@@ -644,6 +673,7 @@ button:hover {
         word-wrap: anywhere;
     }
     .video-list.grid,
+    .dl-list.grid,
     .video-item.list {
         grid-template-columns: 1fr;
     }

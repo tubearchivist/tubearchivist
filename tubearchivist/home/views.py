@@ -146,6 +146,7 @@ class DownloadView(View):
         """handle get requests"""
         config = AppConfig().config
         colors = config["application"]["colors"]
+        view_style = config["default_view"]["downloads"]
         filter_view = RedisArchivist().get_message("filter_view")
 
         page_get = int(request.GET.get("page", 0))
@@ -173,6 +174,7 @@ class DownloadView(View):
             "title": "Downloads",
             "colors": colors,
             "filter_view": filter_view,
+            "view_style": view_style,
         }
         return render(request, "home/downloads.html", context)
 
