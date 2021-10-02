@@ -19,6 +19,7 @@ I have learned the hard way, that working on a dockerized application outside of
 This is my setup I have landed on, YMMV:
 - Clone the repo, work on it with your favorite code editor in your local filesystem. *testing* branch is the where all the changes are happening, might be unstable and is WIP.
 - Then I have a VM on KVM hypervisor running standard Ubuntu Server LTS with docker installed. The VM keeps my projects separate and offers convenient snapshot functionality. The VM also offers ways to simulate lowend environments by limiting CPU cores and memory. But you could also just run docker on your host system.
+- Additionally to the required services as listed in the example docker-compose file, the **Dev Tools** of [Kibana](https://www.elastic.co/guide/en/kibana/current/docker.html) are invaluable for running and testing Elasticsearch queries.
 - The `Dockerfile` is structured in a way that the actual application code is in the last layer so rebuilding the image with only code changes utilizes the build cache for everything else and will take just 2-3 secs.
 - Take a look at the `deploy.sh` file. I have my local DNS resolve `tubearchivist.local` to the IP of the VM for convenience. To deploy the latest changes and rebuild the application to the testing VM run:
 ```bash
