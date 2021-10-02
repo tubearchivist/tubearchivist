@@ -60,22 +60,40 @@ def process_url_list(url_str):
     youtube_ids = []
     for url in url_list:
         if "/c/" in url or "/user/" in url:
-            raise ValueError("user name is not unique, use channel ID")
-
-        url_clean = url.strip().strip("/").split("/")[-1]
-        for i in to_replace:
-            url_clean = url_clean.replace(i, "")
-        url_no_param = url_clean.split("&")[0]
-        str_len = len(url_no_param)
-        if str_len == 11:
-            link_type = "video"
-        elif str_len == 24:
-            link_type = "channel"
-        elif str_len == 34:
-            link_type = "playlist"
+            #raise ValueError("user name is not unique, use channel ID")
+            url_splitter = url.strip().strip("/").split("/")
+            def condition(x): return x == "c" or x == "user"
+            split_reference = [idx for idx, element in enumerate(url_splitter) if condition(element)]
+            url_splitter_no_param = url.split("&")[0]
+            html = requests.get(url_splitter_no_param)
+            if html.status_code != 200:
+              raise ValueError("not a valid url: " + url)
+            tag_find = html.text.find("<link rel=\"canonical\"")
+            if tag_find == -1:
+              raise ValueError("not a valid url: " + url)
+            tag_str = html.text[tag_find:html.text.find(">",tag_find)+1]
+            href_link_split = tag_str.split(" ")
+            condition = "href"
+            split_reference = [idx for idx, element in enumerate(href_link_split) if condition in element]
+            channel_link = href_link_split[split_reference[0]].strip().strip("\"").split("\"")[1]
+            ids = process_url_list([channel_link])
+            url_no_param = ids[0]["url"]
+            link_type = ids[0]["type"]
         else:
-            # unable to parse
-            raise ValueError("not a valid url: " + url)
+            url_clean = url.strip().strip("/").split("/")[-1]
+            for i in to_replace:
+                url_clean = url_clean.replace(i, "")
+            url_no_param = url_clean.split("&")[0]
+            str_len = len(url_no_param)
+            if str_len == 11:
+                link_type = "video"
+            elif str_len == 24:
+                link_type = "channel"
+            elif str_len == 34:
+                link_type = "playlist"
+            else:
+                # unable to parse
+                raise ValueError("not a valid url: " + url)
 
         youtube_ids.append({"url": url_no_param, "type": link_type})
 
