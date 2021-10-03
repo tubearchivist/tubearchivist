@@ -115,18 +115,18 @@ This should be considered as a **minimal viable product**, there is an extensive
 - [ ] Create playlists
 - [ ] Podcast mode to serve channel as mp3
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
-- [ ] Un-ignore videos
 - [ ] Add thumbnail embed option
+- [X] Un-ignore videos [2021-10-03]
 - [X] Dynamic download queue [2021-09-26]
 - [X] Backup and restore [2021-09-22]
 - [X] Scan your file system to index already downloaded videos [2021-09-14]
 
 ### UI
-- [ ] Create a github wiki for user documentation
 - [ ] Show similar videos on video page
 - [ ] Multi language support
-- [ ] Grid and list view for both channel and video list pages
 - [ ] Show total video downloaded vs total videos available in channel
+- [X] Grid and list view for both channel and video list pages [2021-10-03]
+- [X] Create a github wiki for user documentation [2021-10-03]
 
 
 ## Known limitations
