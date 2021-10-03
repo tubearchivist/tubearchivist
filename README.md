@@ -3,13 +3,12 @@
 <center><h1>Your self hosted YouTube media server</h1></center>
 
 ## Table of contents:
+* [Wiki](https://github.com/bbilly1/tubearchivist/wiki) for a detailed documentation
 * [Core functionality](#core-functionality)
 * [Screenshots](#screenshots)
 * [Problem Tube Archivist tries to solve](#problem-tube-archivist-tries-to-solve)
 * [Installing and updating](#installing-and-updating)
 * [Getting Started](#getting-started)
-* [Import your existing library](#import-your-existing-library)
-* [Backup and restore](#backup-and-restore)
 * [Potential pitfalls](#potential-pitfalls)
 * [Roadmap](#roadmap)
 * [Known limitations](#known-limitations)
@@ -106,34 +105,6 @@ This will match the permissions with the **UID** and **GID** of elasticsearch wi
 4. Click on *Download queue* and let Tube Archivist to it's thing. 
 5. Enjoy your archived collection!
   
-## Import your existing library
-So far this depends on the video you are trying to import to be still available on YouTube to get the metadata. Add the files you like to import to the */cache/import* folder. Then start the process from the settings page *Manual media files import*. Make sure to follow one of the two methods below.
-
-### Method 1:
-Add a matching *.json* file with the media file. Both files need to have the same base name, for example:
-- For the media file: \<base-name>.mp4
-- For the JSON file: \<base-name>.info.json
-- Alternate JSON file: \<base-name>.json
-
-**Tube Archivist** then looks for the 'id' key within the JSON file to identify the video.
-
-### Method 2:
-Detect the YouTube ID from filename, this accepts the default yt-dlp naming convention for file names like:
-- \<base-name>[\<youtube-id>].mp4
-- The YouTube ID in square brackets at the end of the filename is the crucial part.
-
-### Some notes:
-- This will **consume** the files you put into the import folder: Files will get converted to mp4 if needed (this might take a long time...) and moved to the archive, *.json* files will get deleted upon completion to avoid having duplicates on the next run.
-- Maybe start with a subset of your files to import to make sure everything goes well...
-- Follow the logs to monitor progress and errors: `docker-compose logs -f tubearchivist`.
-
-## Backup and restore
-From the settings page you can backup your metadata into a zip file. The file will get stored at *cache/backup* and will contain the necessary files to restore the Elasticsearch index formatted **nd-json** files as well a complete export of the index in a set of conventional **json** files.  
-
-The restore functionality will expect the same zip file in *cache/backup* and will recreate the index from the snapshot.  
-
-BE AWARE: This will **replace** your current index with the one from the backup file.
-
 ## Roadmap
 This should be considered as a **minimal viable product**, there is an extensive list of future functions and improvements planned.
 
@@ -161,11 +132,11 @@ This should be considered as a **minimal viable product**, there is an extensive
 ## Known limitations
 - Video files created by Tube Archivist need to be **mp4** video files for best browser compatibility.
 - Every limitation of **yt-dlp** will also be present in Tube Archivist. If **yt-dlp** can't download or extract a video for any reason, Tube Archivist won't be able to either.
-- For now this is meant to be run in a trusted network environment.
+- For now this is meant to be run in a trusted network environment. There is *no* security.
 
 
 ## Donate
-The best donation to **Tube Archivist** is your time, take a look at the [contribution page](CONTRIBUTING) to get started.  
+The best donation to **Tube Archivist** is your time, take a look at the [contribution page](CONTRIBUTING.md) to get started.  
 Second best way to support the development is to provide for caffeinated beverages:
 * [Paypal.me](https://paypal.me/bbilly1) for a one time coffee
 * [Paypal Subscription](https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-03770005GR991451KMFGVPMQ) for a monthly coffee
