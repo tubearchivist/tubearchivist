@@ -8,6 +8,13 @@ from home.src.helper import RedisArchivist
 from home.src.index_management import index_check
 
 
+def sync_redis_state():
+    """make sure redis gets new config.json values"""
+    print("sync redis")
+    config_handler = ArchivistConfig()
+    config_handler.load_new_defaults()
+
+
 def make_folders():
     """make needed cache folders here so docker doesn't mess it up"""
     folders = ["download", "channels", "videos", "import", "backup"]
@@ -39,4 +46,5 @@ class HomeConfig(AppConfig):
     def ready(self):
         release_lock()
         index_check()
+        sync_redis_state()
         make_folders()
