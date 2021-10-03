@@ -13,13 +13,6 @@
                 <option value="downloaded">date downloaded</option>
             </select>
         </p>
-        <p>Hide watched videos <span class="settings-current">{{ hide_watched }}</span>
-            <select name="watched" id="watched" onchange="hideWatched(this.value)">
-                <option value="" disabled selected> -- change hide watched -- </option>
-                <option value="0">show watched videos</option>
-                <option value="1">hide watched videos</option>
-            </select>
-        </p>
     </div>
     <div class="search-form icon-text">
         <div class="search-icon">
@@ -31,9 +24,24 @@
         </form>
     </div>
 </div>
-<div class="view-icons">
-    <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="grid" alt="grid view">
-    <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="list" alt="list view">
+<div class="view-controls">
+    <div class="toggle">
+        <span>Hide watched videos:</span>
+        <div class="toggleBox">
+            <input 
+                id="hide_watched" onclick="toggleCheckbox(this)" type="checkbox"
+                {% if hide_watched %}
+                    checked
+                {% endif %}
+                >
+            <label for="" class="onbtn">On</label>
+            <label for="" class="ofbtn">Off</label>
+        </div>
+    </div>
+    <div class="view-icons">
+        <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="grid" alt="grid view">
+        <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="list" alt="list view">
+    </div>
 </div>
 <div id="player" class="video-player"></div>
 <div class="video-list {{ view_style }}">
