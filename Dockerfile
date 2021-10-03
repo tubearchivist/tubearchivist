@@ -13,8 +13,7 @@ RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recomm
 # get newest patched ffmpeg and ffprobe builds
 RUN curl -s https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest \
     | grep browser_download_url \
-    | grep linux64 \
-    | grep ffmpeg-n \
+    | grep linux64-nonfree.tar.xz \
     | cut -d '"' -f 4 \
     | xargs curl -L --output ffmpeg.tar.xz && \
     tar -xf ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ "ffmpeg" && \
