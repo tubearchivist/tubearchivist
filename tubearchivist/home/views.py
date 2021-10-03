@@ -147,13 +147,13 @@ class DownloadView(View):
         config = AppConfig().config
         colors = config["application"]["colors"]
         view_style = config["default_view"]["downloads"]
-        filter_view = RedisArchivist().get_message("filter_view")
+        show_ignored_only = RedisArchivist().get_message("show_ignored_only")["status"]
 
         page_get = int(request.GET.get("page", 0))
         pagination_handler = Pagination(page_get)
 
         url = config["application"]["es_url"] + "/ta_download/_search"
-        data = self.build_data(pagination_handler, filter_view)
+        data = self.build_data(pagination_handler, show_ignored_only)
         search = SearchHandler(url, data, cache=False)
 
         videos_hits = search.get_data()
@@ -173,16 +173,21 @@ class DownloadView(View):
             "pagination": pagination,
             "title": "Downloads",
             "colors": colors,
-            "filter_view": filter_view,
+            "show_ignored_only": show_ignored_only,
             "view_style": view_style,
         }
         return render(request, "home/downloads.html", context)
 
     @staticmethod
-    def build_data(pagination_handler, filter_view):
+    def build_data(pagination_handler, show_ignored_only):
         """build data dict for search"""
         page_size = pagination_handler.pagination["page_size"]
         page_from = pagination_handler.pagination["page_from"]
+        if show_ignored_only:
+            filter_view = "ignore"
+        else:
+            filter_view = "pending"
+
         data = {
             "size": page_size,
             "from": page_from,
@@ -601,8 +606,10 @@ class PostData:
     def show_ignored_only(self):
         """switch view on /downloads/ to show ignored only"""
         show_value = self.exec_val
-        print("Download view: " + show_value)
-        RedisArchivist().set_message("filter_view", show_value, expire=False)
+        print(f"Filter download view ignored only: {show_value}")
+        RedisArchivist().set_message(
+            "show_ignored_only", {"status": show_value}, expire=False
+        )
         return {"success": True}
 
     def forget_ignore(self):

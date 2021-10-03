@@ -54,6 +54,22 @@ function changeView(image) {
     }, 500);
 }
 
+function toggleCheckbox(checkbox) {
+    // pass checkbox id as key and checkbox.checked as value
+    var toggleId = checkbox.id;
+    var toggleVal = checkbox.checked;
+    var payloadDict = {};
+    payloadDict[toggleId] = toggleVal;
+    var payload = JSON.stringify(payloadDict);
+    console.log(payload);
+    sendPost(payload);
+    setTimeout(function(){
+        var currPage = window.location.pathname;
+        window.location.replace(currPage);
+        return false;
+    }, 500);
+}
+
 // download page buttons
 function rescanPending() {
     var payload = JSON.stringify({'rescan_pending': true});
@@ -87,16 +103,6 @@ function downloadNow(button) {
     document.getElementById(youtube_id).remove();
     setTimeout(function(){
         handleInterval();
-    }, 500);
-}
-
-function showIgnoredOnly(showValue) {
-    var payload = JSON.stringify({'show_ignored_only': showValue});
-    console.log(payload);
-    sendPost(payload);
-    setTimeout(function(){
-        window.location.replace("/downloads/");
-        return false;
     }, 500);
 }
 

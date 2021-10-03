@@ -138,6 +138,73 @@ button:hover {
     text-decoration: underline;
 }
 
+/* toggle on-off */
+.toggle {
+    display: flex;
+    align-items: center;
+}
+
+.toggleBox > input[type="checkbox"] {
+    position: relative;
+    width: 70px;
+    height: 30px;
+    background-color: var(--accent-font-dark);
+    border-color: var(--accent-font-dark);
+    appearance: none;
+    border-radius: 15px;
+    transition: 0.4s;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+.toggleBox > input:checked[type="checkbox"] {
+    background-color: var(--accent-font-light);
+    border-color: var(--accent-font-light);
+}
+
+.toggleBox > input[type="checkbox"]::before {
+    z-index: 2;
+    position: absolute;
+    content: "";
+    left: 0;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    border-radius: 50%;
+    transform: scale(1.1);
+    transition: 0.4s;
+}
+
+.toggleBox > input:checked[type="checkbox"]::before {
+    left: 40px;
+}
+
+.toggleBox {
+    margin-left: 10px;
+    position: relative;
+    display: inline;
+}
+
+.toggleBox > label {
+    position: absolute;
+    color: var(--main-font);
+    pointer-events: none;
+}
+
+.toggleBox > .onbtn {
+    bottom: 15px;
+    left: 15px;
+    font-family: Sen-Regular, sans-serif;
+}
+
+.toggleBox > .ofbtn {
+    bottom: 15px;
+    right: 15px;
+    font-family: Sen-Regular, sans-serif;
+    color: var(--main-font);
+}
+
 /* navigation */
 .top-nav {
     display: block;
@@ -209,6 +276,14 @@ button:hover {
     width: 100%;
     cursor: pointer;
     filter: var(--img-filter);
+}
+
+.view-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 2px solid;
+    border-color: var(--accent-font-dark);
+    margin-bottom: 20px;
 }
 
 .view-icons {
@@ -712,6 +787,9 @@ button:hover {
     }
     .footer {
         text-align: center;
+    }
+    .toggle {
+        flex-wrap: wrap;
     }
     .top-nav {
         flex-wrap: wrap-reverse;

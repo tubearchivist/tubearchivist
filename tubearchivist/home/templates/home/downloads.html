@@ -27,19 +27,26 @@
         </div>
     </div>
 </div>
-<div class="padding-box">
-    <span>Change show / hide ignored only </span><span class="settings-current">{{ filter_view }}</span>
-    <select name="showIgnoredOnly" id="showIgnoredOnly" onchange="showIgnoredOnly(this.value)">
-        <option value="" disabled selected> -- change -- </option>
-        <option value="ignore">show ignored only</option>
-        <option value="pending">show download queue</option>
-    </select>
+<div class="view-controls">
+    <div class="toggle">
+        <span>Show only ignored videos:</span>
+        <div class="toggleBox">
+            <input 
+                id="show_ignored_only" onclick="toggleCheckbox(this)" type="checkbox"
+                {% if show_ignored_only %}
+                    checked
+                {% endif %}
+                >
+            <label for="" class="onbtn">On</label>
+            <label for="" class="ofbtn">Off</label>
+        </div>
+    </div>
+    <div class="view-icons">
+        <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="downloads" data-value="grid" alt="grid view">
+        <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="downloads" data-value="list" alt="list view">
+    </div>
 </div>
-<div class="view-icons">
-    <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="downloads" data-value="grid" alt="grid view">
-    <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="downloads" data-value="list" alt="list view">
-</div>
-{% if filter_view == "ignore" %}
+{% if show_ignored_only %}
     <h2>Ignored from download</h2>
 {% else %}
     <h2>Download queue</h2>
@@ -53,7 +60,7 @@
                     <img src="{{ video.vid_thumb_url }}" alt="video_thumb">
                 </div>
                 <div class="dl-desc {{ view_style }}">
-                    {% if filter_view == "ignore" %}
+                    {% if show_ignored_only %}
                         <h3>Ignore: {{ video.title }}</h3>
                     {% else %}
                         <h3>Download: {{ video.title }}</h3>
@@ -64,7 +71,7 @@
                         <span>{{ video.channel_name }}</span>
                     {% endif %}
                     <p>Published: {{ video.published }} | Duration: {{ video.duration }} | {{ video.youtube_id }}</p>
-                    {% if filter_view == "ignore" %}
+                    {% if show_ignored_only %}
                         <button data-id="{{ video.youtube_id }}" onclick="forgetIgnore(this)">Forget</button>
                         <button data-id="{{ video.youtube_id }}" onclick="addSingle(this)">Add to queue</button>
                     {% else %}
