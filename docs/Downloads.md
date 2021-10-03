@@ -8,7 +8,7 @@ The **Rescan Subscriptions** icon <img src="assets/icon-rescan.png?raw=true" alt
 Then for every video found, **Tube Archivist** will skip the video if it has already been downloaded or if you added it to the *ignored* list before. All the other videos will get added to the download queue. Expect this to take around 1 second for each video as **Tube Archivist** needs to grab some additional metadata. New videos will get added at the bottom of the download queue.
 
 ## Download Queue
-The **Download Queue** icon <img src="assets/icon-download.png?raw=true" alt="download icon" width="20px" style="margin:0 5px;"> will start the download process starting from the top of the queue. Take a look at the relevant settings on the [Settings Page](Settings#downloads). Once the process started, a progress message will show with additional details and controls: 
+The **Start Download** icon <img src="assets/icon-download.png?raw=true" alt="download icon" width="20px" style="margin:0 5px;"> will start the download process starting from the top of the queue. Take a look at the relevant settings on the [Settings Page](Settings#downloads). Once the process started, a progress message will show with additional details and controls: 
 - The stop icon <img src="assets/icon-stop.png?raw=true" alt="stop icon" width="20px" style="margin:0 5px;"> will gracefully stop the download process, once the current video has been finished successfully.
 - The cancel icon <img src="assets/icon-close-red.png?raw=true" alt="close icon" width="20px" style="margin:0 5px;"> is equivalent to killing the process and will stop the download immediately. Any leftover files will get deleted, the canceled video will still be available in the download queue.
 
@@ -20,9 +20,10 @@ The **Add to Download Queue** icon <img src="assets/icon-add.png?raw=true" alt="
 - Add a Channel ID or Channel URL to add every available video to the download queue. This will ignore the channel page size as described before and is meant for an initial download of the whole channel. You can still ignore selected videos before starting the download.
 - Add a playlist ID or URL to add every available video in the list to the download queue, for example *https://www.youtube.com/playlist?list=PL96C35uN7xGLLeET0dOWaKHkAlPsrkcha* or *PL96C35uN7xGLLeET0dOWaKHkAlPsrkcha*. Note that when you add a link to a video in a playlist, Tube Archivist assumes you want to download only the specific video and not the whole playlist, for example *https://www.youtube.com/watch?v=CINVwWHlzTY&list=PL96C35uN7xGLLeET0dOWaKHkAlPsrkcha* will only add one video *CINVwWHlzTY* to the queue.
 - Add one link per line.
+- **Note**: Adding a link to a YouTube channel name is not yet supported, for example: *https://www.youtube.com/c/TomScottGo* will fail.
 
 ## The Download Queue
-Below the three buttons you find the download queue. New items will get added at the bottom of the queue, the next video to download once you click on **Download queue** will be the first in the list.
+Below the three buttons you find the download queue. New items will get added at the bottom of the queue, the next video to download once you click on **Start Download** will be the first in the list.
 
 Every video has two buttons:
 - **Ignore**: This will remove that video from the download queue and this video will not get added again, even when you **Rescan Subscriptions**.
