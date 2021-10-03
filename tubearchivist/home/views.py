@@ -147,7 +147,8 @@ class DownloadView(View):
         config = AppConfig().config
         colors = config["application"]["colors"]
         view_style = config["default_view"]["downloads"]
-        show_ignored_only = RedisArchivist().get_message("show_ignored_only")["status"]
+        ignored = RedisArchivist().get_message("show_ignored_only")
+        show_ignored_only = ignored["status"]
 
         page_get = int(request.GET.get("page", 0))
         pagination_handler = Pagination(page_get)

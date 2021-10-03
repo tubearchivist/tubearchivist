@@ -8,24 +8,6 @@ function sortChange(sortValue) {
     }, 500);
 }
 
-function hideWatched(hideValue) {
-    var payload = JSON.stringify({'hide_watched': hideValue});
-    sendPost(payload);
-    setTimeout(function(){
-        location.reload();
-        return false;
-    }, 500);
-}
-
-function showSubscribedOnly(showValue) {
-    var payload = JSON.stringify({'show_subed_only': showValue});
-    sendPost(payload);
-    setTimeout(function(){
-        location.reload();
-        return false;
-    }, 500);
-}
-
 function isWatched(youtube_id) {
     var payload = JSON.stringify({'watched': youtube_id});
     sendPost(payload);
