@@ -111,6 +111,8 @@ class HomeView(View):
         colors = config_handler["application"]["colors"]
         view_style = config_handler["default_view"]["home"]
         sort_order = RedisArchivist().get_message("sort_order")
+        if not sort_order:
+            sort_order = "published"
         hide_watched = RedisArchivist().get_message("hide_watched")
         return colors, view_style, sort_order, hide_watched
 

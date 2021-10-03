@@ -473,6 +473,7 @@ button:hover {
 .info-box {
     display: grid;
     grid-gap: 1rem;
+    margin: 1rem 0;
 }
 
 .info-box-3 {

@@ -43,7 +43,6 @@ function toggleCheckbox(checkbox) {
     var payloadDict = {};
     payloadDict[toggleId] = toggleVal;
     var payload = JSON.stringify(payloadDict);
-    console.log(payload);
     sendPost(payload);
     setTimeout(function(){
         var currPage = window.location.pathname;
@@ -91,7 +90,6 @@ function downloadNow(button) {
 function forgetIgnore(button) {
     var youtube_id = button.getAttribute('data-id');
     var payload = JSON.stringify({'forgetIgnore': youtube_id});
-    console.log(payload);
     sendPost(payload);
     document.getElementById("dl-" + youtube_id).remove();
 }
@@ -99,7 +97,6 @@ function forgetIgnore(button) {
 function addSingle(button) {
     var youtube_id = button.getAttribute('data-id');
     var payload = JSON.stringify({'addSingle': youtube_id});
-    console.log(payload);
     sendPost(payload);
     document.getElementById("dl-" + youtube_id).remove();
     setTimeout(function(){

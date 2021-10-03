@@ -8,25 +8,6 @@ from home.src.helper import RedisArchivist
 from home.src.index_management import index_check
 
 
-def sync_redis_state():
-    """make sure redis gets the config.json values"""
-    print("sync redis")
-    config_handler = ArchivistConfig()
-    config_handler.load_new_defaults()
-    config = config_handler.config
-    sort_order = config["archive"]["sort"]
-    redis_archivist = RedisArchivist()
-    redis_archivist.set_message("sort_order", sort_order, expire=False)
-    hide_watched = bool(int(config["archive"]["hide_watched"]))
-    redis_archivist.set_message("hide_watched", hide_watched, expire=False)
-    show_subed_only = bool(int(config["archive"]["show_subed_only"]))
-    redis_archivist.set_message(
-        "show_subed_only", show_subed_only, expire=False
-    )
-    filter_view = config["archive"]["filter_view"]
-    redis_archivist.set_message("filter_view", filter_view, expire=False)
-
-
 def make_folders():
     """make needed cache folders here so docker doesn't mess it up"""
     folders = ["download", "channels", "videos", "import", "backup"]
@@ -58,5 +39,4 @@ class HomeConfig(AppConfig):
     def ready(self):
         release_lock()
         index_check()
-        sync_redis_state()
         make_folders()

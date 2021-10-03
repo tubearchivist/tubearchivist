@@ -20,33 +20,6 @@
     <div class="settings-group">
         <h2>Archive View</h2>
         <div class="settings-item">
-            <p>Current default Sort: <span class="settings-current">{{ config.archive.sort }}</span></p>
-            <i>Change how the home view and channels view sorts by defaults.</i><br>
-            <select name="archive.sort" id="archive.sort"">
-                <option value="" disabled selected> -- change sort order -- </option>
-                <option value="published">date published</option>
-                <option value="downloaded">date downloaded</option>
-            </select>
-        </div>
-        <div class="settings-item">
-            <p>Current default hide watched: <span class="settings-current">{{ config.archive.hide_watched }}</span></p>
-            <i>Show or hide watched videos by default.</i><br>
-            <select name="archive.hide_watched" id="archive.hide_watched"">
-                <option value="" disabled selected> -- change visibility -- </option>
-                <option value="0">show watched</option>
-                <option value="1">hide watched</option>
-            </select>
-        </div>
-        <div class="settings-item">
-            <p>Current default show subscribed channels only: <span class="settings-current">{{ config.archive.show_subed_only }}</span></p>
-            <i>Show subscribed channels only by default.</i><br>
-            <select name="archive.show_subed_only" id="archive.show_subed_only"">
-                <option value="" disabled selected> -- change visibility -- </option>
-                <option value="0">show subscribed only</option>
-                <option value="1">hide not subscribed</option>
-            </select>
-        </div>
-        <div class="settings-item">
             <p>Current page size: <span class="settings-current">{{ config.archive.page_size }}</span></p>
             <i>Result of videos showing in archive page</i><br>
             <input type="number" name="archive.page_size" id="archive.page_size">
