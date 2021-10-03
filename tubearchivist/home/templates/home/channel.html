@@ -30,19 +30,26 @@
         </form>
     </div>
 </div>
-<div class="view-icons">
-    <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="channel" data-value="grid" alt="grid view">
-    <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="channel" data-value="list" alt="list view">
+<div class="view-controls">
+    <div class="toggle">
+        <span>Show only subscribed channels:</span>
+        <div class="toggleBox">
+            <input 
+                id="show_subed_only" onclick="toggleCheckbox(this)" type="checkbox"
+                {% if show_subed_only %}
+                    checked
+                {% endif %}
+                >
+            <label for="" class="onbtn">On</label>
+            <label for="" class="ofbtn">Off</label>
+        </div>
+    </div>
+    <div class="view-icons">
+        <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="channel" data-value="grid" alt="grid view">
+        <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="channel" data-value="list" alt="list view">
+    </div>
 </div>
-<div class="padding-box">
-    <h2>Total matching channels: {{ max_hits }}</h2>
-    <span>Change show / hide subscribed only </span><span class="settings-current">{{ show_subed_only }}</span>
-    <select name="watched" id="watched" onchange="showSubscribedOnly(this.value)">
-        <option value="" disabled selected> -- change -- </option>
-        <option value="0">show all channels</option>
-        <option value="1">show subscribed channels only</option>
-    </select>
-</div>
+<h2>Total matching channels: {{ max_hits }}</h2>
 <div class="channel-list {{ view_style }}">
     {% if channels %}
         {% for channel in channels %}
