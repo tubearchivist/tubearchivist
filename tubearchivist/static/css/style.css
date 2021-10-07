@@ -1,12 +1,12 @@
 @font-face {
 font-family: 'Sen-Bold';
-    src:  url('../font/Sen-Bold.ttf.woff');
+    src:  url('../font/Sen-Bold.woff');
     font-family: 'Sen-Bold';
 }
 
 @font-face {
 font-family: 'Sen-Regular';
-    src:  url('../font/Sen-Regular.ttf.woff');
+    src:  url('../font/Sen-Regular.woff');
     font-family: 'Sen-Regular';
 }
 
