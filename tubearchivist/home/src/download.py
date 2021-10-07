@@ -470,8 +470,8 @@ class VideoDownloader:
         }
         RedisArchivist().set_message("progress:download", mess_dict)
 
-    def dl_single_vid(self, youtube_id):
-        """download single video"""
+    def build_obs(self):
+        """build obs dictionary for yt-dlp"""
         obs = {
             "default_search": "ytsearch",
             "merge_output_format": "mp4",
@@ -485,6 +485,7 @@ class VideoDownloader:
             "quiet": True,
             "continuedl": True,
             "retries": 3,
+            "writethumbnail": False,
         }
         if self.config["downloads"]["format"]:
             obs["format"] = self.config["downloads"]["format"]
@@ -505,15 +506,29 @@ class VideoDownloader:
                 }
             )
 
+        if self.config["downloads"]["add_thumbnail"]:
+            postprocessors.append(
+                {
+                    "key": "EmbedThumbnail",
+                    "already_have_thumbnail": True,
+                }
+            )
+            obs["writethumbnail"] = True
+
         obs["postprocessors"] = postprocessors
 
+        return obs
+
+    def dl_single_vid(self, youtube_id):
+        """download single video"""
+        dl_cache = self.config["application"]["cache_dir"] + "/download/"
+        obs = self.build_obs()
+
         # check if already in cache to continue from there
-        cache_dir = self.config["application"]["cache_dir"]
-        cached = os.listdir(cache_dir + "/download/")
-        all_cached = ignore_filelist(cached)
+        all_cached = ignore_filelist(os.listdir(dl_cache))
         for file_name in all_cached:
             if youtube_id in file_name:
-                obs["outtmpl"] = cache_dir + "/download/" + file_name
+                obs["outtmpl"] = os.path.join(dl_cache, file_name)
         with youtube_dl.YoutubeDL(obs) as ydl:
             try:
                 ydl.download([youtube_id])
@@ -521,6 +536,14 @@ class VideoDownloader:
                 print("retry failed download: " + youtube_id)
                 sleep(10)
                 ydl.download([youtube_id])
+
+        if obs["writethumbnail"]:
+            # webp files don't get cleaned up automatically
+            all_cached = ignore_filelist(os.listdir(dl_cache))
+            to_clean = [i for i in all_cached if not i.endswith(".mp4")]
+            for file_name in to_clean:
+                file_path = os.path.join(dl_cache, file_name)
+                os.remove(file_path)
 
     def move_to_archive(self, vid_dict):
         """move downloaded video from cache to archive"""

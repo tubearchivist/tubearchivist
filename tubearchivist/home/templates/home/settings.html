@@ -88,6 +88,15 @@
                 <option value="1">embed metadata</option>
             </select>
         </div>
+        <div class="settings-item">
+            <p>Current thumbnail embed setting: <span class="settings-current">{{ config.downloads.add_thumbnail }}</span></p>
+            <i>Embed thumbnail into the mediafile.</i><br>
+            <select name="downloads.add_thumbnail" id="downloads.add_thumbnail"">
+                <option value="" disabled selected> -- change thumbnail embed -- </option>
+                <option value="0">don't embed thumbnail</option>
+                <option value="1">embed thumbnail</option>
+            </select>
+        </div>
     </div>
     <button type="submit">Update Settings</button>
 </form>
