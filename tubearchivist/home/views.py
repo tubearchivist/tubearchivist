@@ -489,6 +489,7 @@ class PostData:
         """map dict key and return function to execute"""
         exec_map = {
             "watched": self.watched,
+            "un_watched": self.un_watched,
             "change_view": self.change_view,
             "rescan_pending": self.rescan_pending,
             "ignore": self.ignore,
@@ -513,6 +514,11 @@ class PostData:
     def watched(self):
         """mark as watched"""
         WatchState(self.exec_val).mark_as_watched()
+        return {"success": True}
+
+    def un_watched(self):
+        """mark as unwatched"""
+        WatchState(self.exec_val).mark_as_unwatched()
         return {"success": True}
 
     def change_view(self):

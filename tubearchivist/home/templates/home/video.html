@@ -34,7 +34,7 @@
             <p>Last refreshed: {{ video.vid_last_refresh }}</p>
             <p class="video-info-watched">Watched:
                 {% if video.player.watched %}
-                    <img src="{% static 'img/icon-seen.svg' %}" alt="seen-icon" class="seen-icon" id="{{ video.youtube_id }}">
+                    <img src="{% static 'img/icon-seen.svg' %}" alt="seen-icon" id="{{ video.youtube_id }}" onclick="isUnwatched(this.id)" class="seen-icon" title="Mark as unwatched">
                 {% else %}
                     <img src="{% static 'img/icon-unseen.svg' %}" alt="unseen-icon" id="{{ video.youtube_id }}" onclick="isWatched(this.id)" class="unseen-icon" title="Mark as watched.">
                 {% endif %}

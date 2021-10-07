@@ -384,6 +384,16 @@ class WatchState:
 
         print(f"marked {self.youtube_id} as watched")
 
+    def mark_as_unwatched(self):
+        """revert watched state to false"""
+        url_type = self.dedect_type()
+        if url_type == "video":
+            self.mark_vid_watched(revert=True)
+        elif url_type == "channel":
+            self.mark_channel_watched(revert=True)
+
+        print(f"revert {self.youtube_id} as unwatched")
+
     def dedect_type(self):
         """find youtube id type"""
         url_process = process_url_list([self.youtube_id])
@@ -391,18 +401,21 @@ class WatchState:
 
         return url_type
 
-    def mark_vid_watched(self):
+    def mark_vid_watched(self, revert=False):
         """change watched status of single video"""
         url = self.ES_URL + "/ta_video/_update/" + self.youtube_id
         data = {
             "doc": {"player": {"watched": True, "watched_date": self.stamp}}
         }
+        if revert:
+            data["doc"]["player"]["watched"] = False
+
         payload = json.dumps(data)
         request = requests.post(url, data=payload, headers=self.HEADERS)
         if not request.ok:
             print(request.text)
 
-    def mark_channel_watched(self):
+    def mark_channel_watched(self, revert=False):
         """change watched status of every video in channel"""
         es_url = self.ES_URL
         headers = self.HEADERS
@@ -415,6 +428,9 @@ class WatchState:
                 {"set": {"field": "player.watched_date", "value": self.stamp}},
             ],
         }
+        if revert:
+            data["processors"][0]["set"]["value"] = False
+
         payload = json.dumps(data)
         url = f"{es_url}/_ingest/pipeline/{youtube_id}"
         request = requests.put(url, data=payload, headers=headers)

@@ -440,12 +440,9 @@ button:hover {
 }
 
 .unseen-icon,
+.seen-icon,
 .close-button {
     cursor: pointer;
-    filter: var(--img-filter);
-}
-
-.seen-icon {
     filter: var(--img-filter);
 }
 
