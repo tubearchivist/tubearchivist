@@ -1,9 +1,9 @@
 beautifulsoup4==4.10.0
 celery==5.1.2
-Django==3.2.7
+Django==3.2.8
 Pillow==8.3.2
 redis==3.5.3
 requests==2.26.0
-uWSGI==2.0.19.1
+uWSGI==2.0.20
 whitenoise==5.3.0
 yt_dlp==2021.9.25
