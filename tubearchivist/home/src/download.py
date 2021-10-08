@@ -548,30 +548,25 @@ class VideoDownloader:
     def move_to_archive(self, vid_dict):
         """move downloaded video from cache to archive"""
         videos = self.config["application"]["videos"]
-        channel_name = vid_dict["channel"]["channel_name"]
-        channel_name_clean = clean_string(channel_name)
-        media_url = vid_dict["media_url"]
-        youtube_id = vid_dict["youtube_id"]
-        # make archive folder
-        videos = self.config["application"]["videos"]
-        new_folder = os.path.join(videos, channel_name_clean)
-        os.makedirs(new_folder, exist_ok=True)
+        host_uid = self.config["application"]["HOST_UID"]
+        host_gid = self.config["application"]["HOST_GID"]
+        channel_name = clean_string(vid_dict["channel"]["channel_name"])
+        # make archive folder with correct permissions
+        new_folder = os.path.join(videos, channel_name)
+        if not os.path.exists(new_folder):
+            os.makedirs(new_folder)
+            os.chown(new_folder, host_uid, host_gid)
         # find real filename
         cache_dir = self.config["application"]["cache_dir"]
-        cached = os.listdir(cache_dir + "/download/")
-        all_cached = ignore_filelist(cached)
+        all_cached = ignore_filelist(os.listdir(cache_dir + "/download/"))
         for file_str in all_cached:
-            if youtube_id in file_str:
+            if vid_dict["youtube_id"] in file_str:
                 old_file = file_str
         old_file_path = os.path.join(cache_dir, "download", old_file)
-        new_file_path = os.path.join(videos, media_url)
-        # move and fix permission
+        new_file_path = os.path.join(videos, vid_dict["media_url"])
+        # move media file and fix permission
         shutil.move(old_file_path, new_file_path)
-        os.chown(
-            new_file_path,
-            self.config["application"]["HOST_UID"],
-            self.config["application"]["HOST_GID"],
-        )
+        os.chown(new_file_path, host_uid, host_gid)
 
     def delete_from_pending(self, youtube_id):
         """delete downloaded video from pending index if its there"""
