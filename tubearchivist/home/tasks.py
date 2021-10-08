@@ -11,7 +11,11 @@ from home.src.config import AppConfig
 from home.src.download import ChannelSubscription, PendingList, VideoDownloader
 from home.src.helper import RedisArchivist, RedisQueue
 from home.src.index_management import backup_all_indexes, restore_from_backup
-from home.src.reindex import ManualImport, reindex_old_documents
+from home.src.reindex import (
+    ManualImport,
+    reindex_old_documents,
+    scan_filesystem
+)
 
 CONFIG = AppConfig().config
 REDIS_HOST = os.environ.get("REDIS_HOST")
@@ -154,3 +158,9 @@ def kill_dl(task_id):
         "message": "",
     }
     RedisArchivist().set_message("progress:download", mess_dict)
+
+
+@shared_task
+def rescan_filesystem():
+    """check the media folder for missmatches"""
+    scan_filesystem()

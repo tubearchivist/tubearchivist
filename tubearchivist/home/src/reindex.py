@@ -297,6 +297,7 @@ class FilesystemScanner:
         """rename media files as identified by find_bad_media_url"""
         for bad_filename in self.to_rename:
             channel, filename, expected_filename = bad_filename
+            print(f"renaming [{filename}] to [{expected_filename}]")
             old_path = os.path.join(self.VIDEOS, channel, filename)
             new_path = os.path.join(self.VIDEOS, channel, expected_filename)
             os.rename(old_path, new_path)
@@ -306,6 +307,7 @@ class FilesystemScanner:
         bulk_list = []
         for video_mismatch in self.mismatch:
             youtube_id, media_url = video_mismatch
+            print(f"{youtube_id}: fixing media url {media_url}")
             action = {"update": {"_id": youtube_id, "_index": "ta_video"}}
             source = {"doc": {"media_url": media_url}}
             bulk_list.append(json.dumps(action))
@@ -323,7 +325,8 @@ class FilesystemScanner:
     def delete_from_index(self):
         """find indexed but deleted mediafile"""
         for indexed in self.to_delete:
-            youtube_id, _ = indexed
+            youtube_id = indexed[0]
+            print(f"deleting {youtube_id} from index")
             url = self.ES_URL + "/ta_video/_doc/" + youtube_id
             request = requests.delete(url)
             if not request.ok:
@@ -456,12 +459,16 @@ def scan_filesystem():
     filesystem_handler = FilesystemScanner()
     filesystem_handler.list_comarison()
     if filesystem_handler.to_rename:
+        print("renaming files")
         filesystem_handler.rename_files()
     if filesystem_handler.mismatch:
+        print("fixing media urls in index")
         filesystem_handler.send_mismatch_bulk()
     if filesystem_handler.to_delete:
+        print("delete metadata from index")
         filesystem_handler.delete_from_index()
     if filesystem_handler.to_index:
+        print("index new videos")
         for missing_vid in filesystem_handler.to_index:
             youtube_id = missing_vid[2]
             index_new_video(youtube_id, missing_vid=missing_vid)

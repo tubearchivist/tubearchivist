@@ -156,11 +156,22 @@ function dbBackup() {
 
 function dbRestore() {
     var payload = JSON.stringify({'db-restore': true});
-    sendPost(payload)
+    sendPost(payload);
     // clear button
     var message = document.createElement('p');
     message.innerText = 'restoring from backup';
     var toReplace = document.getElementById('db-restore');
+    toReplace.innerHTML = '';
+    toReplace.appendChild(message);
+}
+
+function fsRescan() {
+    var payload = JSON.stringify({'fs-rescan': true});
+    sendPost(payload);
+    // clear button
+    var message = document.createElement('p');
+    message.innerText = 'File system scan in progress';
+    var toReplace = document.getElementById('fs-rescan');
     toReplace.innerHTML = '';
     toReplace.appendChild(message);
 }

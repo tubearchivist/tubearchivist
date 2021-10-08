@@ -22,6 +22,7 @@ from home.tasks import (
     download_single,
     extrac_dl,
     kill_dl,
+    rescan_filesystem,
     run_backup,
     run_manual_import,
     run_restore_backup,
@@ -506,6 +507,7 @@ class PostData:
             "manual-import": self.manual_import,
             "db-backup": self.db_backup,
             "db-restore": self.db_restore,
+            "fs-rescan": self.fs_rescan,
             "channel-search": self.channel_search,
         }
 
@@ -656,6 +658,13 @@ class PostData:
         """restore es zip from settings page"""
         print("restoring index from backup zip")
         run_restore_backup.delay()
+        return {"success": True}
+
+    @staticmethod
+    def fs_rescan():
+        """start file system rescan task"""
+        print("start filesystem scan")
+        rescan_filesystem.delay()
         return {"success": True}
 
     def channel_search(self):
