@@ -144,6 +144,7 @@ class Reindex:
     def reindex_single_video(youtube_id):
         """refresh data for single video"""
         vid_handler = YoutubeVideo(youtube_id)
+        vid_handler.get_vid_dict()
         if not vid_handler.vid_dict:
             # stop if deactivated
             vid_handler.deactivate()

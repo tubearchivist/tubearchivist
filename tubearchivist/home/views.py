@@ -15,7 +15,7 @@ from django.views import View
 from home.src.config import AppConfig
 from home.src.download import ChannelSubscription, PendingList
 from home.src.helper import RedisArchivist, RedisQueue, process_url_list
-from home.src.index import WatchState
+from home.src.index import WatchState, YoutubeVideo
 from home.src.searching import Pagination, SearchForm, SearchHandler
 from home.tasks import (
     download_pending,
@@ -509,6 +509,7 @@ class PostData:
             "db-restore": self.db_restore,
             "fs-rescan": self.fs_rescan,
             "channel-search": self.channel_search,
+            "delete-video": self.delete_video,
         }
 
         return exec_map[self.to_exec]
@@ -673,3 +674,9 @@ class PostData:
         print("searching for: " + search_query)
         search_results = SearchForm().search_channels(search_query)
         return search_results
+
+    def delete_video(self):
+        """delete media file, metadata and thumb"""
+        youtube_id = self.exec_val
+        YoutubeVideo(youtube_id).delete_media_file()
+        return {"success": True}

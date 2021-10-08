@@ -217,11 +217,12 @@ class YoutubeVideo:
     def __init__(self, youtube_id):
         self.youtube_id = youtube_id
         self.channel_id = None
-        self.vid_dict = self.get_wrapper()
+        self.vid_dict = None
 
-    def get_wrapper(self):
+    def get_vid_dict(self):
         """wrapper to loop around youtube_dl to retry on failure"""
         print(f"get video data for {self.youtube_id}")
+        vid_dict = False
         for i in range(3):
             try:
                 vid_dict = self.get_youtubedl_vid_data()
@@ -232,7 +233,7 @@ class YoutubeVideo:
             else:
                 break
 
-        return vid_dict
+        self.vid_dict = vid_dict
 
     def get_youtubedl_vid_data(self):
         """parse youtubedl extract info"""
@@ -362,6 +363,22 @@ class YoutubeVideo:
         if not response.ok:
             print(response.text)
 
+    def delete_media_file(self):
+        """delete video file, meta data, thumbnails"""
+        # delete media file
+        es_vid_dict = self.get_es_data()
+        media_url = es_vid_dict["_source"]["media_url"]
+        print(f"delete {media_url} from file system")
+        to_delete = os.path.join(self.VIDEOS, media_url)
+        os.remove(to_delete)
+        # delete from index
+        url = f"{self.ES_URL}/ta_video/_doc/{self.youtube_id}"
+        response = requests.delete(url)
+        if not response.ok:
+            print(response.text)
+        # delete thumbs from cache
+        self.delete_cache()
+
 
 class WatchState:
     """handle watched checkbox for videos and channels"""
@@ -454,6 +471,7 @@ class WatchState:
 def index_new_video(youtube_id, missing_vid=False):
     """combine video and channel classes for new video index"""
     vid_handler = YoutubeVideo(youtube_id)
+    vid_handler.get_vid_dict()
     if not vid_handler.vid_dict:
         raise ValueError("failed to get metadata for " + youtube_id)
 
