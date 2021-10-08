@@ -14,7 +14,7 @@ from home.src.index_management import backup_all_indexes, restore_from_backup
 from home.src.reindex import (
     ManualImport,
     reindex_old_documents,
-    scan_filesystem
+    scan_filesystem,
 )
 
 CONFIG = AppConfig().config
@@ -45,7 +45,6 @@ def update_subscribed():
 @shared_task
 def download_pending():
     """download latest pending videos"""
-
     have_lock = False
     my_lock = RedisArchivist().get_lock("downloading")
 
@@ -66,11 +65,9 @@ def download_pending():
 @shared_task
 def download_single(youtube_id):
     """start download single video now"""
-
     queue = RedisQueue("dl_queue")
     queue.add_priority(youtube_id)
     print("Added to queue with priority: " + youtube_id)
-
     # start queue if needed
     have_lock = False
     my_lock = RedisArchivist().get_lock("downloading")
@@ -105,7 +102,6 @@ def check_reindex():
 @shared_task
 def run_manual_import():
     """called from settings page, to go through import folder"""
-
     print("starting media file import")
     have_lock = False
     my_lock = RedisArchivist().get_lock("manual_import")
@@ -162,5 +158,5 @@ def kill_dl(task_id):
 
 @shared_task
 def rescan_filesystem():
-    """check the media folder for missmatches"""
+    """check the media folder for mismatches"""
     scan_filesystem()
