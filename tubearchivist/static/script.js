@@ -178,18 +178,15 @@ function fsRescan() {
 
 // delete from file system
 function deleteConfirm() {
-    console.log("confirm delete");
     to_show = document.getElementById("delete-button");
     document.getElementById("delete-item").style.display = 'none';
     to_show.style.display = "block";
 }
 
-function deleteItem(button) {
+function deleteVideo(button) {
     var to_delete = button.getAttribute("data-id");
     var to_redirect = button.getAttribute("data-redirect");
     var payload = JSON.stringify({"delete-video": to_delete});
-    console.log(payload);
-    console.log(to_redirect);
     sendPost(payload);
     setTimeout(function(){
         var redirect = "/channel/" + to_redirect;
@@ -198,8 +195,17 @@ function deleteItem(button) {
     }, 1000);
 }
 
+function deleteChannel(button) {
+    var to_delete = button.getAttribute("data-id");
+    var payload = JSON.stringify({"delete-channel": to_delete});
+    sendPost(payload);
+    setTimeout(function(){
+        window.location.replace("/channel/");
+        return false;
+    }, 1000);
+}
+
 function cancelDelete() {
-    console.log("cancel delete");
     document.getElementById("delete-button").style.display = 'none';
     document.getElementById("delete-item").style.display = 'block';
 }

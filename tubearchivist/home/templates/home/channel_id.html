@@ -38,20 +38,24 @@
             </p>
         </div>
     </div>
-    {% if videos %}
     <div class="info-box-item">
         <div>
             {% if channel_info.channel_views >= 1000000 %}
                 <p>Channel views: {{ channel_info.channel_views|intword }}</p>
-            {% else %}
+            {% elif channel_info.channel_views > 0 %}
                 <p>Channel views: {{ channel_info.channel_views|intcomma }}</p>
             {% endif %}
-            <p>Total Videos archived: {{ max_hits }}</p>
-            <p>Watched: <button title="Mark all videos from {{ channel_info.channel_name }} as watched" type="button" id="{{ channel_info.channel_id }}" onclick="isWatched(this.id)">Mark as watched</button></p>
+            {% if max_hits %}
+                <p>Total Videos archived: {{ max_hits }}</p>
+                <p>Watched: <button title="Mark all videos from {{ channel_info.channel_name }} as watched" type="button" id="{{ channel_info.channel_id }}" onclick="isWatched(this.id)">Mark as watched</button></p>
+            {% endif %}
             <p>Channel id: {{ channel_info.channel_id }}</p>
+            <button onclick="deleteConfirm()" id="delete-item">Delete Channel</button>
+            <div class="delete-confirm" id="delete-button">
+                <span>Delete {{ channel_info.channel_name }} including all videos? </span><button class="danger-button" onclick="deleteChannel(this)" data-id="{{ channel_info.channel_id }}">Delete</button> <button onclick="cancelDelete()">Cancel</button>
+            </div>
         </div>
     </div>
-    {% endif %}
 </div>
 {% if channel_info.channel_description %}
     <div class="info-box-item description-box">
