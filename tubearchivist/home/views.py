@@ -15,7 +15,7 @@ from django.views import View
 from home.src.config import AppConfig
 from home.src.download import ChannelSubscription, PendingList
 from home.src.helper import RedisArchivist, RedisQueue, process_url_list
-from home.src.index import WatchState, YoutubeVideo
+from home.src.index import WatchState, YoutubeChannel, YoutubeVideo
 from home.src.searching import Pagination, SearchForm, SearchHandler
 from home.tasks import (
     download_pending,
@@ -510,6 +510,7 @@ class PostData:
             "fs-rescan": self.fs_rescan,
             "channel-search": self.channel_search,
             "delete-video": self.delete_video,
+            "delete-channel": self.delete_channel,
         }
 
         return exec_map[self.to_exec]
@@ -679,4 +680,10 @@ class PostData:
         """delete media file, metadata and thumb"""
         youtube_id = self.exec_val
         YoutubeVideo(youtube_id).delete_media_file()
+        return {"success": True}
+
+    def delete_channel(self):
+        """delete channel and all matching videos"""
+        channel_id = self.exec_val
+        YoutubeChannel(channel_id).delete_channel()
         return {"success": True}

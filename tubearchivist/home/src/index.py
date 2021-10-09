@@ -24,6 +24,7 @@ class YoutubeChannel:
     CONFIG = AppConfig().config
     ES_URL = CONFIG["application"]["es_url"]
     CACHE_DIR = CONFIG["application"]["cache_dir"]
+    VIDEOS = CONFIG["application"]["videos"]
 
     def __init__(self, channel_id):
         self.channel_id = channel_id
@@ -193,17 +194,60 @@ class YoutubeChannel:
         if not request.ok:
             print(request.text)
 
-    def get_total_hits(self):
-        """get total channels indexed"""
+    def get_folder_path(self):
+        """get folder where media files get stored"""
         headers = {"Content-type": "application/json"}
-        data = {"query": {"match_all": {}}}
+        # get media url
+        data = {
+            "size": 1,
+            "query": {
+                "term": {"channel.channel_id": {"value": self.channel_id}}
+            },
+            "sort": [{"published": {"order": "desc"}}],
+        }
         payload = json.dumps(data)
-        url = f"{self.ES_URL}/ta_channel/_search?filter_path=hits.total"
-        request = requests.post(url, data=payload, headers=headers)
-        if not request.ok:
-            print(request.text)
-        total_hits = json.loads(request.text)["hits"]["total"]["value"]
-        return total_hits
+        url = self.ES_URL + "/ta_video/_search"
+        response = requests.post(url, data=payload, headers=headers)
+        if not response.ok:
+            print(response.text)
+        json_data = json.loads(response.text)
+        # get folder
+        media_url = json_data["hits"]["hits"][0]["_source"]["media_url"]
+        folder_name = os.path.split(media_url)[0]
+        folder_path = os.path.join(self.VIDEOS, folder_name)
+        return folder_path
+
+    def delete_es_videos(self):
+        """delete all channel documents from elasticsearch"""
+        headers = {"Content-type": "application/json"}
+        data = {
+            "query": {
+                "term": {"channel.channel_id": {"value": self.channel_id}}
+            }
+        }
+        payload = json.dumps(data)
+        url = self.ES_URL + "/ta_video/_delete_by_query"
+        response = requests.post(url, data=payload, headers=headers)
+        if not response.ok:
+            print(response.text)
+
+    def delete_channel(self):
+        """delete channel and all videos"""
+        print(f"deleting {self.channel_id} and all matching media files")
+        folder_path = self.get_folder_path()
+        print("delete all media files")
+        all_videos = os.listdir(folder_path)
+        for video in all_videos:
+            video_path = os.path.join(folder_path, video)
+            os.remove(video_path)
+        os.rmdir(folder_path)
+
+        print("delete indexed videos")
+        self.delete_es_videos()
+        url = self.ES_URL + "/ta_channel/_doc/" + self.channel_id
+        response = requests.delete(url)
+        if not response.ok:
+            print(response.text)
 
 
 class YoutubeVideo:
