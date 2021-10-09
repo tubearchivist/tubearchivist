@@ -205,6 +205,19 @@ button:hover {
     color: var(--main-font);
 }
 
+/* delete button */
+.delete-confirm {
+    display: none;
+}
+
+.danger-button {
+    background-color: var(--highlight-error);
+}
+
+.danger-button:hover {
+    background-color: var(--highlight-error-light);
+}
+
 /* navigation */
 .top-nav {
     display: block;
@@ -658,6 +671,10 @@ button:hover {
     background-color: var(--highlight-error);
 }
 
+.download-progress.error h3 {
+    color: #fff;
+}
+
 /* settings */
 .settings-group {
     background-color: var(--highlight-bg);
@@ -675,6 +692,7 @@ button:hover {
 
 .danger-zone {
     background-color: var(--highlight-error);
+    color: #fff;
     padding: 3px;
 }
 
