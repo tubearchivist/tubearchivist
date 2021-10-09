@@ -196,24 +196,8 @@ class YoutubeChannel:
 
     def get_folder_path(self):
         """get folder where media files get stored"""
-        headers = {"Content-type": "application/json"}
-        # get media url
-        data = {
-            "size": 1,
-            "query": {
-                "term": {"channel.channel_id": {"value": self.channel_id}}
-            },
-            "sort": [{"published": {"order": "desc"}}],
-        }
-        payload = json.dumps(data)
-        url = self.ES_URL + "/ta_video/_search"
-        response = requests.post(url, data=payload, headers=headers)
-        if not response.ok:
-            print(response.text)
-        json_data = json.loads(response.text)
-        # get folder
-        media_url = json_data["hits"]["hits"][0]["_source"]["media_url"]
-        folder_name = os.path.split(media_url)[0]
+        channel_name = self.channel_dict["channel_name"]
+        folder_name = clean_string(channel_name)
         folder_path = os.path.join(self.VIDEOS, folder_name)
         return folder_path
 
