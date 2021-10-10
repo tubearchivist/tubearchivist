@@ -408,6 +408,12 @@ class VideoView(View):
         look_up = SearchHandler(url, data)
         video_hit = look_up.get_data()
         video_data = video_hit[0]["source"]
+        try:
+            rating = video_data["stats"]["average_rating"]
+            video_data["stats"]["average_rating"] = self.star_creator(rating)
+        except KeyError:
+            video_data["stats"]["average_rating"] = False
+
         video_title = video_data["title"]
         context = {"video": video_data, "title": video_title, "colors": colors}
         return render(request, "home/video.html", context)
@@ -419,6 +425,20 @@ class VideoView(View):
         es_url = config["application"]["es_url"]
         colors = config["application"]["colors"]
         return es_url, colors
+
+    @staticmethod
+    def star_creator(rating):
+        """convert rating float to stars"""
+        stars = []
+        for _ in range(1, 6):
+            if rating >= 0.75:
+                stars.append("full")
+            elif 0.25 < rating < 0.75:
+                stars.append("half")
+            else:
+                stars.append("empty")
+            rating = rating - 1
+        return stars
 
 
 class SettingsView(View):

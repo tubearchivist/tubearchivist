@@ -528,7 +528,8 @@ button:hover {
     margin-left: 5px;
 }
 
-.thumb-icon img {
+.thumb-icon img,
+.rating-stars img {
     width: 20px;
     margin: 0;
     filter: var(--img-filter);

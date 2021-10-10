@@ -56,7 +56,11 @@
             <p>Views: {{ video.stats.view_count|intcomma }}</p>
             <p class="thumb-icon like"><img src="{% static 'img/icon-thumb.svg' %}" alt="thumbs-up">: {{ video.stats.like_count|intcomma }}</p>
             <p class="thumb-icon dislike"><img src="{% static 'img/icon-thumb.svg' %}" alt="thumbs-down">: {{ video.stats.dislike_count|intcomma }}</p>
-            <p>Rating: {{ video.stats.average_rating }}</p>
+            <p class="rating-stars">Rating: 
+                {% for star in video.stats.average_rating %}
+                    <img src="/static/img/icon-star-{{ star }}.svg" alt="{{ star }}">
+                {% endfor %}
+            </p>
         </div>
     </div>
 </div>
