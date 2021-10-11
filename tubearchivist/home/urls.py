@@ -19,7 +19,7 @@ urlpatterns = [
     path("downloads/", DownloadView.as_view(), name="downloads"),
     path("settings/", SettingsView.as_view(), name="settings"),
     path("process/", views.process, name="process"),
-    path("downloads/progress", views.progress, name="progress"),
+    path("downloads/progress/", views.progress, name="progress"),
     path("channel/", ChannelView.as_view(), name="channel"),
     path(
         "channel/<slug:channel_id_detail>/",

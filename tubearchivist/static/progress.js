@@ -32,7 +32,7 @@ function handleInterval() {
     var watchDownload = setInterval(function() {
         var req = new XMLHttpRequest();
         req.responseType = 'json';
-        req.open('GET', '/downloads/progress', true);
+        req.open('GET', '/downloads/progress/', true);
         req.onload = function() {
             var dlProgress = req.response;
             if (dlProgress['status']) {
