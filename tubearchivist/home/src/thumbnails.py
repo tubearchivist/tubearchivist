@@ -7,7 +7,7 @@ import os
 
 import requests
 from home.src.config import AppConfig
-from home.src.download import PendingList
+from home.src.download import ChannelSubscription, PendingList
 from home.src.helper import RedisArchivist, ignore_filelist
 from PIL import Image
 
@@ -18,9 +18,10 @@ class ThumbManager:
     CONFIG = AppConfig().config
     CACHE_DIR = CONFIG["application"]["cache_dir"]
     VIDEO_DIR = os.path.join(CACHE_DIR, "videos")
+    CHANNEL_DIR = os.path.join(CACHE_DIR, "channels")
 
     def get_all_thumbs(self):
-        """raise exception if cache not clean"""
+        """get all video artwork"""
         all_thumb_folders = ignore_filelist(os.listdir(self.VIDEO_DIR))
         all_thumbs = []
         for folder in all_thumb_folders:
@@ -67,14 +68,31 @@ class ThumbManager:
 
         return missing_thumbs
 
-    def download_missing(self, missing_thumbs):
+    def get_missing_channels(self):
+        """get all channel artwork"""
+        all_channel_art = os.listdir(self.CHANNEL_DIR)
+        cached_channel_ids = {i[0:24] for i in all_channel_art}
+        channels = ChannelSubscription().get_channels(subscribed_only=False)
+
+        missing_channels = []
+        for channel in channels:
+            channel_id = channel["channel_id"]
+            if not channel_id in cached_channel_ids:
+                channel_banner = channel["channel_banner_url"]
+                channel_thumb = channel["channel_thumb_url"]
+                missing_channels.append(
+                    (channel_id, channel_thumb, channel_banner)
+                )
+
+        return missing_channels
+
+    def download_vid(self, missing_thumbs):
         """download all missing thumbnails from list"""
         print(f"downloading {len(missing_thumbs)} thumbnails")
-        vid_cache = os.path.join(self.CACHE_DIR, "videos")
         # videos
         for youtube_id, thumb_url in missing_thumbs:
             folder_name = youtube_id[0].lower()
-            folder_path = os.path.join(vid_cache, folder_name)
+            folder_path = os.path.join(self.VIDEO_DIR, folder_name)
             thumb_path_part = self.vid_thumb_path(youtube_id)
             thumb_path = os.path.join(self.CACHE_DIR, thumb_path_part)
 
@@ -98,6 +116,27 @@ class ThumbManager:
             }
             RedisArchivist().set_message("progress:download", mess_dict)
 
+    def download_chan(self, missing_channels):
+        """download needed artwork for channels"""
+        print(f"downloading {len(missing_channels)} channel artwork")
+        for channel in missing_channels:
+            channel_id, channel_thumb, channel_banner  = channel
+
+            thumb_path = os.path.join(
+                self.CHANNEL_DIR, channel_id + "_thumb.jpg"
+            )
+            img_raw = requests.get(channel_thumb, stream=True).content
+            with open(thumb_path, "wb") as f:
+                f.write(img_raw)
+
+            if channel_banner:
+                banner_path = os.path.join(
+                    self.CHANNEL_DIR, channel_id + "_banner.jpg"
+                )
+                img_raw = requests.get(channel_banner, stream=True).content
+                with open(banner_path, "wb") as f:
+                    f.write(img_raw)
+
     @staticmethod
     def vid_thumb_path(youtube_id):
         """build expected path for video thumbnail from youtube_id"""
@@ -111,4 +150,6 @@ def validate_thumbnails():
     """check if all thumbnails are there and organized correctly"""
     handler = ThumbManager()
     thumbs_to_download = handler.get_missing_thumbs()
-    handler.download_missing(thumbs_to_download)
+    handler.download_vid(thumbs_to_download)
+    missing_channels = handler.get_missing_channels()
+    handler.download_chan(missing_channels)
