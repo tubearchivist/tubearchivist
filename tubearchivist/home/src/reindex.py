@@ -24,6 +24,7 @@ from home.src.helper import (
     ignore_filelist,
 )
 from home.src.index import YoutubeChannel, YoutubeVideo, index_new_video
+from home.src.thumbnails import ThumbManager
 
 
 class Reindex:
@@ -162,7 +163,7 @@ class Reindex:
         vid_handler.vid_dict["channel"] = channel_dict
         # update
         vid_handler.upload_to_es()
-        vid_handler.delete_cache()
+        ThumbManager().delete_vid_thumb(youtube_id)
 
     @staticmethod
     def reindex_single_channel(channel_id):
@@ -175,7 +176,7 @@ class Reindex:
         channel_handler.channel_dict["channel_subscribed"] = subscribed
         channel_handler.upload_to_es()
         channel_handler.sync_to_videos()
-        channel_handler.clear_cache()
+        ThumbManager().delete_chan_thumb(channel_id)
 
     def reindex(self):
         """reindex what's needed"""

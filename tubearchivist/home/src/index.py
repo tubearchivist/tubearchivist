@@ -171,16 +171,6 @@ class YoutubeChannel:
         if not response.ok:
             print(response.text)
 
-    def clear_cache(self):
-        """delete banner and thumb from cache if available"""
-        channel_cache = os.path.join(self.CACHE_DIR, "channels")
-        thumb = os.path.join(channel_cache, self.channel_id + "_thumb.jpg")
-        banner = os.path.join(channel_cache, self.channel_id + "_banner.jpg")
-        if os.path.exists(thumb):
-            os.remove(thumb)
-        if os.path.exists(banner):
-            os.remove(banner)
-
     def sync_to_videos(self):
         """sync new channel_dict to all videos of channel"""
         headers = {"Content-type": "application/json"}
@@ -235,6 +225,7 @@ class YoutubeChannel:
             video_path = os.path.join(folder_path, video)
             os.remove(video_path)
         os.rmdir(folder_path)
+        ThumbManager().delete_chan_thumb(self.channel_id)
 
         print("delete indexed videos")
         self.delete_es_videos()
@@ -382,13 +373,6 @@ class YoutubeVideo:
         if not response.ok:
             print(response.text)
 
-    def delete_cache(self):
-        """delete thumbnail from cache if exist"""
-        video_cache = os.path.join(self.CACHE_DIR, "videos")
-        thumb = os.path.join(video_cache, self.youtube_id + ".jpg")
-        if os.path.exists(thumb):
-            os.remove(thumb)
-
     def deactivate(self):
         """deactivate document on extractor error"""
         youtube_id = self.youtube_id
@@ -415,7 +399,7 @@ class YoutubeVideo:
         if not response.ok:
             print(response.text)
         # delete thumbs from cache
-        self.delete_cache()
+        ThumbManager().delete_vid_thumb(self.youtube_id)
 
 
 class WatchState:

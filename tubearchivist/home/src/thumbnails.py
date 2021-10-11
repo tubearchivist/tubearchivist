@@ -156,6 +156,22 @@ class ThumbManager:
         thumb_path = os.path.join(folder_path, youtube_id + ".jpg")
         return thumb_path
 
+    def delete_vid_thumb(self, youtube_id):
+        """delete video thumbnail if exists"""
+        thumb_path = self.vid_thumb_path(youtube_id)
+        to_delete = os.path.join(self.CACHE_DIR, thumb_path)
+        if os.path.exists(to_delete):
+            os.remove(to_delete)
+
+    def delete_chan_thumb(self, channel_id):
+        """delete all artwork of channel"""
+        thumb = os.path.join(self.CHANNEL_DIR, channel_id + "_thumb.jpg")
+        banner = os.path.join(self.CHANNEL_DIR, channel_id + "_banner.jpg")
+        if os.path.exists(thumb):
+            os.remove(thumb)
+        if os.path.exists(banner):
+            os.remove(banner)
+
 
 def validate_thumbnails():
     """check if all thumbnails are there and organized correctly"""
