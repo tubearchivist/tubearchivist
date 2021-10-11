@@ -138,7 +138,9 @@ def run_restore_backup():
 
 def kill_dl(task_id):
     """kill download worker task by ID"""
-    app.control.revoke(task_id, terminate=True)
+    if task_id:
+        app.control.revoke(task_id, terminate=True)
+
     _ = RedisArchivist().del_message("dl_queue_id")
     RedisQueue("dl_queue").clear()
 

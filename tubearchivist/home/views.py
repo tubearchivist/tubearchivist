@@ -588,7 +588,10 @@ class PostData:
             RedisQueue("dl_queue").clear()
         elif to_execute == "kill":
             task_id = RedisArchivist().get_message("dl_queue_id")
-            print("brutally killing " + task_id)
+            if not task_id["status"]:
+                task_id = False
+            else:
+                print("brutally killing " + task_id)
             kill_dl(task_id)
 
         return {"success": True}
