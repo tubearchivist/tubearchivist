@@ -486,6 +486,7 @@ class VideoDownloader:
                 + self.config["application"]["file_template"]
             ),
             "progress_hooks": [self.progress_hook],
+            "noprogress": True,
             "quiet": True,
             "continuedl": True,
             "retries": 3,
