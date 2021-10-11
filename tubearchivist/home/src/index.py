@@ -16,6 +16,7 @@ import yt_dlp as youtube_dl
 from bs4 import BeautifulSoup
 from home.src.config import AppConfig
 from home.src.helper import DurationConverter, clean_string, process_url_list
+from home.src.thumbnails import ThumbManager
 
 
 class YoutubeChannel:
@@ -152,6 +153,15 @@ class YoutubeChannel:
         }
 
         return meta_channel_dict
+
+    def get_channel_art(self):
+        """download channel art for new channels"""
+        channel_id = self.channel_id
+        channel_thumb = self.channel_dict["channel_thumb_url"]
+        channel_banner = self.channel_dict["channel_banner_url"]
+        ThumbManager().download_chan(
+            [(channel_id, channel_thumb, channel_banner)]
+        )
 
     def upload_to_es(self):
         """upload channel data to elastic search"""
@@ -514,6 +524,7 @@ def index_new_video(youtube_id, missing_vid=False):
     if channel_handler.source == "scraped":
         channel_handler.channel_dict["channel_subscribed"] = False
         channel_handler.upload_to_es()
+        channel_handler.get_channel_art()
     # upload video to es
     vid_handler.upload_to_es()
     # return vid_dict for further processing

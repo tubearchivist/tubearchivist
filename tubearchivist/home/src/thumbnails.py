@@ -5,9 +5,9 @@ functionality:
 
 import os
 
+import home.src.download as download
 import requests
 from home.src.config import AppConfig
-from home.src.download import ChannelSubscription, PendingList
 from home.src.helper import RedisArchivist, ignore_filelist
 from PIL import Image
 
@@ -50,8 +50,8 @@ class ThumbManager:
     def get_missing_thumbs(self):
         """get a list of all missing thumbnails"""
         all_thumbs = self.get_all_thumbs()
-        all_indexed = PendingList().get_all_indexed()
-        all_in_queue, all_ignored = PendingList().get_all_pending()
+        all_indexed = download.PendingList().get_all_indexed()
+        all_in_queue, all_ignored = download.PendingList().get_all_pending()
 
         missing_thumbs = []
         for video in all_indexed:
@@ -72,12 +72,14 @@ class ThumbManager:
         """get all channel artwork"""
         all_channel_art = os.listdir(self.CHANNEL_DIR)
         cached_channel_ids = {i[0:24] for i in all_channel_art}
-        channels = ChannelSubscription().get_channels(subscribed_only=False)
+        channels = download.ChannelSubscription().get_channels(
+            subscribed_only=False
+        )
 
         missing_channels = []
         for channel in channels:
             channel_id = channel["channel_id"]
-            if not channel_id in cached_channel_ids:
+            if channel_id not in cached_channel_ids:
                 channel_banner = channel["channel_banner_url"]
                 channel_thumb = channel["channel_thumb_url"]
                 missing_channels.append(
@@ -120,7 +122,8 @@ class ThumbManager:
         """download needed artwork for channels"""
         print(f"downloading {len(missing_channels)} channel artwork")
         for channel in missing_channels:
-            channel_id, channel_thumb, channel_banner  = channel
+            print(channel)
+            channel_id, channel_thumb, channel_banner = channel
 
             thumb_path = os.path.join(
                 self.CHANNEL_DIR, channel_id + "_thumb.jpg"
@@ -136,6 +139,14 @@ class ThumbManager:
                 img_raw = requests.get(channel_banner, stream=True).content
                 with open(banner_path, "wb") as f:
                     f.write(img_raw)
+
+            mess_dict = {
+                "status": "pending",
+                "level": "info",
+                "title": "Adding to download queue.",
+                "message": "Downloading Channel Art...",
+            }
+            RedisArchivist().set_message("progress:download", mess_dict)
 
     @staticmethod
     def vid_thumb_path(youtube_id):

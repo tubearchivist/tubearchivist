@@ -92,7 +92,7 @@ def extrac_dl(youtube_ids):
     pending_handler = PendingList()
     missing_videos = pending_handler.parse_url_list(youtube_ids)
     all_videos_added = pending_handler.add_to_pending(missing_videos)
-    ThumbManager().download_missing(all_videos_added)
+    ThumbManager().download_vid(all_videos_added)
 
 
 @shared_task
