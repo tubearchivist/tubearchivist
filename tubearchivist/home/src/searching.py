@@ -14,6 +14,7 @@ from datetime import datetime
 import requests
 from home.src.config import AppConfig
 from home.src.helper import ignore_filelist
+from home.src.thumbnails import ThumbManager
 from PIL import Image
 
 
@@ -63,8 +64,9 @@ class SearchHandler:
                     all_channels.append(channel_dict)
         if self.cache:
             # validate cache
-            self.cache_dl_vids(all_videos)
-            self.cache_dl_chan(all_channels)
+            pass
+            # self.cache_dl_vids(all_videos)
+            # self.cache_dl_chan(all_channels)
 
         return return_value
 
@@ -167,6 +169,11 @@ class SearchHandler:
             date_refresh = datetime.fromtimestamp(vid_last_refresh)
             date_str = datetime.strftime(date_refresh, "%d %b, %Y")
             hit["source"]["vid_last_refresh"] = date_str
+
+        if "vid_thumb_url" in hit_keys:
+            youtube_id = hit["source"]["youtube_id"]
+            thumb_path = ThumbManager().vid_thumb_path(youtube_id)
+            hit["source"]["vid_thumb_url"] = thumb_path
 
         if "channel_last_refresh" in hit_keys:
             refreshed = hit["source"]["channel_last_refresh"]

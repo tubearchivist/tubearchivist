@@ -16,6 +16,7 @@ from home.src.reindex import (
     reindex_old_documents,
     scan_filesystem,
 )
+from home.src.thumbnails import ThumbManager
 
 CONFIG = AppConfig().config
 REDIS_HOST = os.environ.get("REDIS_HOST")
@@ -90,7 +91,8 @@ def extrac_dl(youtube_ids):
     """parse list passed and add to pending"""
     pending_handler = PendingList()
     missing_videos = pending_handler.parse_url_list(youtube_ids)
-    pending_handler.add_to_pending(missing_videos)
+    all_videos_added = pending_handler.add_to_pending(missing_videos)
+    ThumbManager().download_missing(all_videos_added)
 
 
 @shared_task

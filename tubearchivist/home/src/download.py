@@ -70,6 +70,7 @@ class PendingList:
         all_downloaded = self.get_all_downloaded()
         # loop
         bulk_list = []
+        all_videos_added = []
         for video in missing_videos:
             if isinstance(video, str):
                 youtube_id = video
@@ -79,6 +80,7 @@ class PendingList:
                 # skip already downloaded
                 continue
             video = self.get_youtube_details(youtube_id)
+            thumb_url = video["vid_thumb_url"]
             # skip on download error
             if not video:
                 continue
@@ -91,6 +93,7 @@ class PendingList:
             action = {"create": {"_id": youtube_id, "_index": "ta_download"}}
             bulk_list.append(json.dumps(action))
             bulk_list.append(json.dumps(video))
+            all_videos_added.append((youtube_id, thumb_url))
             # notify
             mess_dict = {
                 "status": "pending",
@@ -107,6 +110,8 @@ class PendingList:
         request = requests.post(url, data=query_str, headers=headers)
         if not request.ok:
             print(request)
+
+        return all_videos_added
 
     @staticmethod
     def get_youtube_details(youtube_id):
@@ -165,12 +170,11 @@ class PendingList:
             all_hits = json_data["hits"]["hits"]
             if all_hits:
                 for hit in all_hits:
-                    youtube_id = hit["_source"]["youtube_id"]
                     status = hit["_source"]["status"]
                     if status == "pending":
                         all_pending.append(hit["_source"])
                     elif status == "ignore":
-                        all_ignore.append(youtube_id)
+                        all_ignore.append(hit["_source"])
                     search_after = hit["sort"]
                 # update search_after with last hit data
                 data["search_after"] = search_after
@@ -342,9 +346,9 @@ class ChannelSubscription:
         all_channels = self.get_channels()
         pending_handler = PendingList()
         all_pending, all_ignore = pending_handler.get_all_pending()
-        all_pending_ids = [i["youtube_id"] for i in all_pending]
+        all_ids = [i["youtube_id"] for i in all_ignore + all_pending]
         all_downloaded = pending_handler.get_all_downloaded()
-        to_ignore = all_pending_ids + all_ignore + all_downloaded
+        to_ignore = all_ids + all_downloaded
         missing_videos = []
         counter = 1
         for channel in all_channels:

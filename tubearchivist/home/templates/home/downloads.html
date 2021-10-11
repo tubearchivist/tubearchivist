@@ -57,7 +57,7 @@
         {% for video in all_video_hits %}
             <div class="dl-item {{ view_style }}" id="dl-{{ video.youtube_id }}">
                 <div class="dl-thumb {{ view_style }}">
-                    <img src="{{ video.vid_thumb_url }}" alt="video_thumb">
+                    <img src="/cache/{{ video.vid_thumb_url }}" alt="video_thumb">
                 </div>
                 <div class="dl-desc {{ view_style }}">
                     {% if show_ignored_only %}

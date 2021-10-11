@@ -6,6 +6,7 @@ from django.apps import AppConfig
 from home.src.config import AppConfig as ArchivistConfig
 from home.src.helper import RedisArchivist
 from home.src.index_management import index_check
+from home.src.thumbnails import validate_thumbnails
 
 
 def sync_redis_state():
@@ -48,3 +49,4 @@ class HomeConfig(AppConfig):
         index_check()
         sync_redis_state()
         make_folders()
+        validate_thumbnails()
