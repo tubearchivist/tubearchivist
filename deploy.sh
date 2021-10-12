@@ -23,7 +23,7 @@ function sync_blackhole {
         --exclude "db.sqlite3" \
         . -e ssh "$host":tubearchivist
 
-    echo "$PASS" | ssh "$host" 'sudo -S docker build -t bbilly1/tubearchivist:latest tubearchivist 2>/dev/null'
+    echo "$PASS" | ssh "$host" 'sudo -S docker buildx build --platform linux/amd64,linux/arm64 -t bbilly1/tubearchivist:latest tubearchivist 2>/dev/null'
     echo "$PASS" | ssh "$host" 'sudo -S docker-compose up -d 2>/dev/null'
 
 }
@@ -43,7 +43,7 @@ function sync_test {
 
     rsync -r --progress --delete docker-compose.yml -e ssh "$host":docker
 
-    ssh "$host" 'docker build -t bbilly1/tubearchivist:latest tubearchivist'
+    ssh "$host" 'docker buildx build --platform linux/amd64,linux/arm64 -t bbilly1/tubearchivist:latest tubearchivist'
     ssh "$host" 'docker-compose -f docker/docker-compose.yml up -d'
 
     ssh "$host" 'docker cp tubearchivist/tubearchivist/testing.sh tubearchivist:/app/testing.sh'
@@ -103,7 +103,7 @@ function sync_docker {
     read -r VERSION
 
     # start build
-    sudo docker build -t bbilly1/tubearchivist:latest -t bbilly1/tubearchivist:"$VERSION" .
+    sudo docker buildx build --platform linux/amd64,linux/arm64 -t bbilly1/tubearchivist:latest -t bbilly1/tubearchivist:"$VERSION" .
 
     printf "\nlatest images:\n"
     sudo docker image ls bbilly1/tubearchivist
@@ -112,10 +112,10 @@ function sync_docker {
     read -rn 1
 
     # push to docker
-    echo "pushing latest:"
-    sudo docker push bbilly1/tubearchivist:latest
-    echo "pushing $VERSION"
-    sudo docker push bbilly1/tubearchivist:"$VERSION"
+    echo "pushing multiarch latest and $VERSION:"
+    sudo docker buildx build --platform linux/amd64,linux/arm64 -t bbilly1/tubearchivist:latest -t bbilly1/tubearchivist:"$VERSION" --push .
+    #sudo docker push bbilly1/tubearchivist:latest
+    #sudo docker push bbilly1/tubearchivist:"$VERSION"
 
     # create release tag
     echo "commits since last version:"
