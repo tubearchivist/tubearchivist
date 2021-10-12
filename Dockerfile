@@ -1,6 +1,7 @@
 # build the tube archivist image from default python slim image
 
 FROM python:3.9.7-slim-bullseye
+ARG TARGETPLATFORM
 
 ENV PYTHONUNBUFFERED 1
 
@@ -10,15 +11,19 @@ RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recomm
     nginx \
     curl && rm -rf /var/lib/apt/lists/*
 
-# get newest patched ffmpeg and ffprobe builds
-RUN curl -s https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest \
-    | grep browser_download_url \
-    | grep linux64-nonfree.tar.xz \
-    | cut -d '"' -f 4 \
-    | xargs curl -L --output ffmpeg.tar.xz && \
-    tar -xf ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ "ffmpeg" && \
-    tar -xf ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ "ffprobe" && \
-    rm ffmpeg.tar.xz
+# get newest patched ffmpeg and ffprobe builds for amd64 fall back to repo ffmpeg for arm64
+RUN if [ "$TARGETPLATFORM" = "linux/amd64" ] ; then \
+    curl -s https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest \
+        | grep browser_download_url \
+        | grep linux64-gpl-4.4.tar.xz \
+        | cut -d '"' -f 4 \
+        | xargs curl -L --output ffmpeg.tar.xz && \
+        tar -xf ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ "ffmpeg" && \
+        tar -xf ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ "ffprobe" && \
+        rm ffmpeg.tar.xz \
+    ; elif [ "$TARGETPLATFORM" = "linux/arm64" ] ; then \
+        apt-get -y update && apt-get -y install --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/* \
+    ; fi
 
 # copy config files
 COPY nginx.conf /etc/nginx/conf.d/
