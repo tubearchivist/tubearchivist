@@ -5,11 +5,16 @@
 # blackhole for local production
 # docker to publish
 
+# create builder:
+# docker buildx create --name tubearchivist
+# docker buildx use tubearchivist
+# docker buildx inspect --bootstrap
+
 set -e
 
 function sync_blackhole {
 
-    # docker commands need sudo
+    # docker commands need sudo, only build amd64
     host="blackhole.local"
 
     read -sp 'Password: ' remote_pw
@@ -23,7 +28,7 @@ function sync_blackhole {
         --exclude "db.sqlite3" \
         . -e ssh "$host":tubearchivist
 
-    echo "$PASS" | ssh "$host" 'sudo -S docker buildx build --platform linux/amd64,linux/arm64 -t bbilly1/tubearchivist:latest tubearchivist 2>/dev/null'
+    echo "$PASS" | ssh "$host" 'sudo -S docker buildx build --platform linux/amd64 -t bbilly1/tubearchivist:latest tubearchivist --load 2>/dev/null'
     echo "$PASS" | ssh "$host" 'sudo -S docker-compose up -d 2>/dev/null'
 
 }
@@ -31,6 +36,8 @@ function sync_blackhole {
 function sync_test {
 
     # docker commands don't need sudo in testing vm
+    # pass argument to build for specific platform
+
     host="tubearchivist.local"
 
     rsync -a --progress --delete-after \
@@ -43,7 +50,17 @@ function sync_test {
 
     rsync -r --progress --delete docker-compose.yml -e ssh "$host":docker
 
-    ssh "$host" 'docker buildx build --platform linux/amd64,linux/arm64 -t bbilly1/tubearchivist:latest tubearchivist'
+    if [[ $1 = "amd64" ]]; then
+        platform="linux/amd64"
+    elif [[ $1 = "arm64" ]]; then
+        platform="linux/arm64"
+    elif [[ $1 = "multi" ]]; then
+        platform="linux/amd64,linux/arm64"
+    else
+        platform="linux/amd64"
+    fi
+
+    ssh "$host" "docker buildx build --platform $platform -t bbilly1/tubearchivist:latest tubearchivist --load"
     ssh "$host" 'docker-compose -f docker/docker-compose.yml up -d'
 
     ssh "$host" 'docker cp tubearchivist/tubearchivist/testing.sh tubearchivist:/app/testing.sh'
@@ -133,7 +150,7 @@ python version_check.py
 if [[ $1 == "blackhole" ]]; then
     sync_blackhole
 elif [[ $1 == "test" ]]; then
-    sync_test
+    sync_test "$2"
 elif [[ $1 == "validate" ]]; then
     validate "$2"
 elif [[ $1 == "docker" ]]; then
