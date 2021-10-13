@@ -6,9 +6,7 @@
     <h1>Channel: {{ channel_info.channel_name }}</h1>
 </div>
 <div class="channel-banner">
-    {% if channel_info.channel_banner_url %}
-        <a href="/channel/{{ channel_info.channel_id }}/"><img src="/cache/channels/{{ channel_info.channel_id }}_banner.jpg" alt="channel_banner"></a>
-    {% endif %}
+    <a href="/channel/{{ channel_info.channel_id }}/"><img src="/cache/channels/{{ channel_info.channel_id }}_banner.jpg" alt="channel_banner"></a>
 </div>
 <div class="info-box info-box-3">
     <div class="info-box-item">

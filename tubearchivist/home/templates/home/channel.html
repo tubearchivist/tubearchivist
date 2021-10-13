@@ -54,13 +54,11 @@
     {% if channels %}
         {% for channel in channels %}
         <div class="channel-item {{ view_style }}">
-            {% if channel.source.channel_banner_url %}
-                <div class="channel-banner {{ view_style }}">
-                    <a href="{% url 'channel_id' channel.source.channel_id %}">
-                        <img src="/cache/channels/{{ channel.source.channel_id }}_banner.jpg" alt="{{ channel.source.channel_id }}-banner">
-                    </a>
-                </div>
-            {% endif %}
+            <div class="channel-banner {{ view_style }}">
+                <a href="{% url 'channel_id' channel.source.channel_id %}">
+                    <img src="/cache/channels/{{ channel.source.channel_id }}_banner.jpg" alt="{{ channel.source.channel_id }}-banner">
+                </a>
+            </div>
             <div class="info-box info-box-2 {{ view_style }}">
                 <div class="info-box-item">
                     <div class="round-img">

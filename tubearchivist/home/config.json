@@ -22,6 +22,7 @@
         "add_thumbnail": false
     },
     "application": {
+        "app_root": "/app",
         "cache_dir": "/cache",
         "videos": "/youtube",
         "file_template": "%(id)s_%(title)s.mp4",

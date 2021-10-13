@@ -88,6 +88,34 @@ class ThumbManager:
 
         return missing_channels
 
+    def get_raw_img(self, img_url, thumb_type):
+        """get raw image from youtube and handle 404"""
+        app_root = self.CONFIG["application"]["app_root"]
+        default_map = {
+            "video": os.path.join(
+                app_root, "static/img/default-video-thumb.jpg"
+            ),
+            "icon": os.path.join(
+                app_root, "static/img/default-channel-icon.jpg"
+            ),
+            "banner": os.path.join(
+                app_root, "static/img/default-channel-banner.jpg"
+            ),
+        }
+        if img_url:
+            response = requests.get(img_url, stream=True)
+        else:
+            response = False
+        if not response or response.status_code == 404:
+            # use default
+            img_raw = Image.open(default_map[thumb_type])
+        else:
+            # use response
+            img_obj = response.raw
+            img_raw = Image.open(img_obj)
+
+        return img_raw
+
     def download_vid(self, missing_thumbs):
         """download all missing thumbnails from list"""
         print(f"downloading {len(missing_thumbs)} thumbnails")
@@ -99,16 +127,15 @@ class ThumbManager:
             thumb_path = os.path.join(self.CACHE_DIR, thumb_path_part)
 
             os.makedirs(folder_path, exist_ok=True)
-            img_raw = requests.get(thumb_url, stream=True).raw
-            img = Image.open(img_raw)
+            img_raw = self.get_raw_img(thumb_url, "video")
 
-            width, height = img.size
+            width, height = img_raw.size
             if not width / height == 16 / 9:
                 new_height = width / 16 * 9
                 offset = (height - new_height) / 2
-                img = img.crop((0, offset, width, height - offset))
+                img_raw = img_raw.crop((0, offset, width, height - offset))
 
-            img.convert("RGB").save(thumb_path)
+            img_raw.convert("RGB").save(thumb_path)
 
             mess_dict = {
                 "status": "pending",
@@ -122,23 +149,19 @@ class ThumbManager:
         """download needed artwork for channels"""
         print(f"downloading {len(missing_channels)} channel artwork")
         for channel in missing_channels:
-            print(channel)
             channel_id, channel_thumb, channel_banner = channel
 
             thumb_path = os.path.join(
                 self.CHANNEL_DIR, channel_id + "_thumb.jpg"
             )
-            img_raw = requests.get(channel_thumb, stream=True).content
-            with open(thumb_path, "wb") as f:
-                f.write(img_raw)
+            img_raw = self.get_raw_img(channel_thumb, "icon")
+            img_raw.convert("RGB").save(thumb_path)
 
-            if channel_banner:
-                banner_path = os.path.join(
-                    self.CHANNEL_DIR, channel_id + "_banner.jpg"
-                )
-                img_raw = requests.get(channel_banner, stream=True).content
-                with open(banner_path, "wb") as f:
-                    f.write(img_raw)
+            banner_path = os.path.join(
+                self.CHANNEL_DIR, channel_id + "_banner.jpg"
+            )
+            img_raw = self.get_raw_img(channel_banner, "banner")
+            img_raw.convert("RGB").save(banner_path)
 
             mess_dict = {
                 "status": "pending",
