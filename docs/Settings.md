@@ -23,6 +23,7 @@ Settings related to the download process.
 Additional settings passed to yt-dlp.
 - **Format**: This controls which streams get downloaded and is equivalent to passing `--format` to yt-dlp. Use one of the recommended one or look at the documentation of [yt-dlp](https://github.com/yt-dlp/yt-dlp#format-selection). Please note: The option `--merge-output-format mp4` is automatically passed to yt-dlp to guarantee browser compatibility.
 - **Embed Metadata**: This saves the available tags directly into the media file by passing `--embed-metadata` to yt-dlp.
+- **Embed Thumbnail**: This will save the thumbnail into the media file by passing `--embed-thumbnail` to yt-dlp.
 
 
 # Actions
@@ -58,3 +59,11 @@ BE AWARE: This will **not** backup any media files, just the metadata from the E
 The restore functionality will expect the same zip file in *cache/backup* as created from the **Backup database** function. This will recreate the index from the snapshot. If there are multiple backup files in the folder, the newest one will take priority. 
 
 BE AWARE: This will **replace** your current index with the one from the backup file. This won't restore any media files.
+
+## Rescan Filesystem
+This function will go through all your media files and looks at the whole index to try to find any issues:
+- Should the filename not match with the indexed media url, this will rename the video files correctly and update the index with the new link.
+- When you delete media files from the filesystem outside of the Tube Archivist interface, this will delete leftover metadata from the index.
+- When you have media files that are not indexed yet, this will grab the metadata from YouTube like it was a newly downloaded video. This can be useful when restoring from an older backup file with missing metadata but already downloaded mediafiles. NOTE: This only works if the media files are named in the same convention as Tube Archivist does, particularly the YouTube ID needs to be at the same index in the filename, alternatively see above for *Manual Media Files Import*.
+
+BE AWARE: There is no undo.

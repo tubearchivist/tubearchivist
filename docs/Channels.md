@@ -21,3 +21,4 @@ Each channel will get a dedicated channel detail page accessible at `/channel/<c
 - If you are subscribed to the channel, an *Unsubscribe* button will show.
 - You can *Show* the channel description, that matches with the *About* tab on YouTube.
 - The **Mark as Watched** button will mark all videos of this channel as watched.
+- The button **Delete Channel** will delete the channel plus all videos of this channel, both media files and metadata.
