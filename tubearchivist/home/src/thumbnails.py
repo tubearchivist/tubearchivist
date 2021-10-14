@@ -4,6 +4,7 @@ functionality:
 """
 
 import os
+from collections import Counter
 from time import sleep
 
 import home.src.download as download
@@ -78,7 +79,8 @@ class ThumbManager:
     def get_missing_channels(self):
         """get all channel artwork"""
         all_channel_art = os.listdir(self.CHANNEL_DIR)
-        cached_channel_ids = {i[0:24] for i in all_channel_art}
+        files = [i[0:24] for i in all_channel_art]
+        cached_channel_ids = [k for (k, v) in Counter(files).items() if v > 1]
         channels = download.ChannelSubscription().get_channels(
             subscribed_only=False
         )
