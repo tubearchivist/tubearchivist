@@ -163,7 +163,13 @@ class Reindex:
         vid_handler.vid_dict["channel"] = channel_dict
         # update
         vid_handler.upload_to_es()
-        ThumbManager().delete_vid_thumb(youtube_id)
+        thumb_handler = ThumbManager()
+        thumb_handler.delete_vid_thumb(youtube_id)
+        to_download = (
+            youtube_id,
+            vid_handler.vid_dict["channel"]["vid_thumb_url"],
+        )
+        thumb_handler.download_vid([to_download])
 
     @staticmethod
     def reindex_single_channel(channel_id):
@@ -174,9 +180,15 @@ class Reindex:
             scrape=True
         )
         channel_handler.channel_dict["channel_subscribed"] = subscribed
+        # update
         channel_handler.upload_to_es()
         channel_handler.sync_to_videos()
-        ThumbManager().delete_chan_thumb(channel_id)
+        thumb_handler = ThumbManager()
+        thumb_handler.delete_chan_thumb(channel_id)
+        channel_thumb = channel_handler.channel_dict["channel_thumb_url"]
+        channel_banner = channel_handler.channel_dict["channel_banner_url"]
+        to_download = (channel_id, channel_thumb, channel_banner)
+        thumb_handler.download_chan([to_download])
 
     def reindex(self):
         """reindex what's needed"""
