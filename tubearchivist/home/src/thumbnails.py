@@ -4,6 +4,7 @@ functionality:
 """
 
 import os
+from time import sleep
 
 import home.src.download as download
 import requests
@@ -110,6 +111,10 @@ class ThumbManager:
         }
         if img_url:
             response = requests.get(img_url, stream=True)
+            if not response.ok and not response.status_code == 404:
+                print("retry thumbnail download for " + img_url)
+                sleep(5)
+                response = requests.get(img_url, stream=True)
         else:
             response = False
         if not response or response.status_code == 404:
