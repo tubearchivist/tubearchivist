@@ -97,7 +97,12 @@ class ThumbManager:
 
     def get_raw_img(self, img_url, thumb_type):
         """get raw image from youtube and handle 404"""
-        app_root = self.CONFIG["application"]["app_root"]
+        try:
+            app_root = self.CONFIG["application"]["app_root"]
+        except KeyError:
+            # lazy keyerror fix to not have to deal with a strange startup
+            # racing contition between the threads in HomeConfig.ready()
+            app_root = "/app"
         default_map = {
             "video": os.path.join(
                 app_root, "static/img/default-video-thumb.jpg"
@@ -129,8 +134,11 @@ class ThumbManager:
 
     def download_vid(self, missing_thumbs):
         """download all missing thumbnails from list"""
-        print(f"downloading {len(missing_thumbs)} thumbnails")
+        total = len(missing_thumbs)
+        print(f"downloading {total} thumbnails")
         # videos
+        # counter as update path from v0.0.5, remove in future version
+        counter = 0
         for youtube_id, thumb_url in missing_thumbs:
             folder_name = youtube_id[0].lower()
             folder_path = os.path.join(self.VIDEO_DIR, folder_name)
@@ -155,6 +163,9 @@ class ThumbManager:
                 "message": "Downloading Thumbnails...",
             }
             RedisArchivist().set_message("progress:download", mess_dict)
+            if counter % 50 == 0 and counter != 0:
+                print(f"thumbnail progress: {counter}/{total}")
+            counter = counter + 1
 
     def download_chan(self, missing_channels):
         """download needed artwork for channels"""
