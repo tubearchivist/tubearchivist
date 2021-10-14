@@ -7,15 +7,12 @@ Functionality:
 """
 
 import math
-import os
 import urllib.parse
 from datetime import datetime
 
 import requests
 from home.src.config import AppConfig
-from home.src.helper import ignore_filelist
 from home.src.thumbnails import ThumbManager
-from PIL import Image
 
 
 class SearchHandler:
@@ -24,11 +21,10 @@ class SearchHandler:
     CONFIG = AppConfig().config
     CACHE_DIR = CONFIG["application"]["cache_dir"]
 
-    def __init__(self, url, data, cache=True):
+    def __init__(self, url, data):
         self.max_hits = None
         self.url = url
         self.data = data
-        self.cache = cache
 
     def get_data(self):
         """get the data"""
@@ -62,11 +58,6 @@ class SearchHandler:
                 channel_dict = self.channel_cache_link(hit)
                 if channel_dict not in all_channels:
                     all_channels.append(channel_dict)
-        if self.cache:
-            # validate cache
-            pass
-            # self.cache_dl_vids(all_videos)
-            # self.cache_dl_chan(all_channels)
 
         return return_value
 
@@ -104,50 +95,6 @@ class SearchHandler:
             "chan_banner": chan_banner,
         }
         return channel_dict
-
-    def cache_dl_vids(self, all_videos):
-        """video thumbs links for cache"""
-        vid_cache = os.path.join(self.CACHE_DIR, "videos")
-        vid_cached = os.listdir(vid_cache)
-        all_vid_cached = ignore_filelist(vid_cached)
-        # videos
-        for video_dict in all_videos:
-            youtube_id = video_dict["youtube_id"]
-            if not youtube_id + ".jpg" in all_vid_cached:
-                cache_path = os.path.join(vid_cache, youtube_id + ".jpg")
-                thumb_url = video_dict["vid_thumb"]
-                img_raw = requests.get(thumb_url, stream=True).raw
-                img = Image.open(img_raw)
-                width, height = img.size
-                if not width / height == 16 / 9:
-                    new_height = width / 16 * 9
-                    offset = (height - new_height) / 2
-                    img = img.crop((0, offset, width, height - offset))
-                img.convert("RGB").save(cache_path)
-
-    def cache_dl_chan(self, all_channels):
-        """download channel thumbs"""
-        chan_cache = os.path.join(self.CACHE_DIR, "channels")
-        chan_cached = os.listdir(chan_cache)
-        all_chan_cached = ignore_filelist(chan_cached)
-        for channel_dict in all_channels:
-            channel_id_cache = channel_dict["channel_id"]
-            channel_banner_url = channel_dict["chan_banner"]
-            channel_banner = channel_id_cache + "_banner.jpg"
-            channel_thumb_url = channel_dict["chan_thumb"]
-            channel_thumb = channel_id_cache + "_thumb.jpg"
-            # thumb
-            if channel_thumb_url and channel_thumb not in all_chan_cached:
-                cache_path = os.path.join(chan_cache, channel_thumb)
-                img_raw = requests.get(channel_thumb_url, stream=True).content
-                with open(cache_path, "wb") as f:
-                    f.write(img_raw)
-            # banner
-            if channel_banner_url and channel_banner not in all_chan_cached:
-                cache_path = os.path.join(chan_cache, channel_banner)
-                img_raw = requests.get(channel_banner_url, stream=True).content
-                with open(cache_path, "wb") as f:
-                    f.write(img_raw)
 
     @staticmethod
     def hit_cleanup(hit):
@@ -215,7 +162,7 @@ class SearchForm:
                 }
             },
         }
-        look_up = SearchHandler(url, data, cache=False)
+        look_up = SearchHandler(url, data)
         search_results = look_up.get_data()
         return {"results": search_results}
 

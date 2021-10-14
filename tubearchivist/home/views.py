@@ -158,7 +158,7 @@ class DownloadView(View):
 
         url = config["application"]["es_url"] + "/ta_download/_search"
         data = self.build_data(pagination_handler, show_ignored_only)
-        search = SearchHandler(url, data, cache=False)
+        search = SearchHandler(url, data)
 
         videos_hits = search.get_data()
         max_hits = search.max_hits
