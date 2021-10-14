@@ -38,7 +38,8 @@ def update_subscribed():
     missing_videos = channel_handler.find_missing()
     if missing_videos:
         pending_handler = PendingList()
-        pending_handler.add_to_pending(missing_videos)
+        all_videos_added = pending_handler.add_to_pending(missing_videos)
+        ThumbManager().download_vid(all_videos_added)
     # check if reindex is needed
     check_reindex.delay()
 
