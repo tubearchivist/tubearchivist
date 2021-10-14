@@ -394,6 +394,8 @@ class ChannelSubscription:
             print(request.text)
         # sync to videos
         channel_handler.sync_to_videos()
+        if channel_handler.source == "scraped":
+            channel_handler.get_channel_art()
 
 
 def playlist_extractor(playlist_id):
