@@ -21,7 +21,7 @@ class ThumbManager:
     CHANNEL_DIR = os.path.join(CACHE_DIR, "channels")
 
     def get_all_thumbs(self):
-        """get all video artwork"""
+        """get all video artwork already downloaded"""
         all_thumb_folders = ignore_filelist(os.listdir(self.VIDEO_DIR))
         all_thumbs = []
         for folder in all_thumb_folders:
@@ -47,26 +47,32 @@ class ThumbManager:
         os.makedirs(folder_path, exist_ok=True)
         os.rename(old_file, new_file)
 
-    def get_missing_thumbs(self):
+    def get_needed_thumbs(self, missing_only=False):
         """get a list of all missing thumbnails"""
         all_thumbs = self.get_all_thumbs()
         all_indexed = download.PendingList().get_all_indexed()
         all_in_queue, all_ignored = download.PendingList().get_all_pending()
 
-        missing_thumbs = []
+        needed_thumbs = []
         for video in all_indexed:
             youtube_id = video["_source"]["youtube_id"]
-            if youtube_id + ".jpg" not in all_thumbs:
-                thumb_url = video["_source"]["vid_thumb_url"]
-                missing_thumbs.append((youtube_id, thumb_url))
+            thumb_url = video["_source"]["vid_thumb_url"]
+            if missing_only:
+                if youtube_id + ".jpg" not in all_thumbs:
+                    needed_thumbs.append((youtube_id, thumb_url))
+            else:
+                needed_thumbs.append((youtube_id, thumb_url))
 
         for video in all_in_queue + all_ignored:
             youtube_id = video["youtube_id"]
-            if youtube_id + ".jpg" not in all_thumbs:
-                thumb_url = video["vid_thumb_url"]
-                missing_thumbs.append((youtube_id, thumb_url))
+            thumb_url = video["vid_thumb_url"]
+            if missing_only:
+                if youtube_id + ".jpg" not in all_thumbs:
+                    needed_thumbs.append((youtube_id, thumb_url))
+            else:
+                needed_thumbs.append((youtube_id, thumb_url))
 
-        return missing_thumbs
+        return needed_thumbs
 
     def get_missing_channels(self):
         """get all channel artwork"""
@@ -195,11 +201,23 @@ class ThumbManager:
         if os.path.exists(banner):
             os.remove(banner)
 
+    def cleanup_downloaded(self):
+        """find downloaded thumbnails without video indexed"""
+        all_thumbs = self.get_all_thumbs()
+        all_indexed = self.get_needed_thumbs()
+        all_needed_thumbs = [i[0] + ".jpg" for i in all_indexed]
+        for thumb in all_thumbs:
+            if thumb not in all_needed_thumbs:
+                # cleanup
+                youtube_id = thumb.rstrip(".jpg")
+                self.delete_vid_thumb(youtube_id)
+
 
 def validate_thumbnails():
     """check if all thumbnails are there and organized correctly"""
     handler = ThumbManager()
-    thumbs_to_download = handler.get_missing_thumbs()
+    thumbs_to_download = handler.get_needed_thumbs(missing_only=True)
     handler.download_vid(thumbs_to_download)
     missing_channels = handler.get_missing_channels()
     handler.download_chan(missing_channels)
+    handler.cleanup_downloaded()
