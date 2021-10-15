@@ -165,11 +165,8 @@ class Reindex:
         vid_handler.upload_to_es()
         thumb_handler = ThumbManager()
         thumb_handler.delete_vid_thumb(youtube_id)
-        to_download = (
-            youtube_id,
-            vid_handler.vid_dict["channel"]["vid_thumb_url"],
-        )
-        thumb_handler.download_vid([to_download])
+        to_download = (youtube_id, vid_handler.vid_dict["vid_thumb_url"])
+        thumb_handler.download_vid([to_download], notify=False)
 
     @staticmethod
     def reindex_single_channel(channel_id):

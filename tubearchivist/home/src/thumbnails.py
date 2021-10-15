@@ -134,7 +134,7 @@ class ThumbManager:
 
         return img_raw
 
-    def download_vid(self, missing_thumbs):
+    def download_vid(self, missing_thumbs, notify=True):
         """download all missing thumbnails from list"""
         total = len(missing_thumbs)
         print(f"downloading {total} thumbnails")
@@ -158,13 +158,15 @@ class ThumbManager:
 
             img_raw.convert("RGB").save(thumb_path)
 
-            mess_dict = {
-                "status": "pending",
-                "level": "info",
-                "title": "Adding to download queue.",
-                "message": "Downloading Thumbnails...",
-            }
-            RedisArchivist().set_message("progress:download", mess_dict)
+            if notify:
+                mess_dict = {
+                    "status": "pending",
+                    "level": "info",
+                    "title": "Adding to download queue.",
+                    "message": "Downloading Thumbnails...",
+                }
+                RedisArchivist().set_message("progress:download", mess_dict)
+
             if counter % 50 == 0 and counter != 0:
                 print(f"thumbnail progress: {counter}/{total}")
             counter = counter + 1
