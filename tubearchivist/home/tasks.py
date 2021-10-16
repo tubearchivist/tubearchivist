@@ -114,7 +114,8 @@ def run_manual_import():
         if have_lock:
             import_handler = ManualImport()
             if import_handler.identified:
-                import_handler.process_import()
+                all_videos_added = import_handler.process_import()
+                ThumbManager().download_vid(all_videos_added)
         else:
             print("Did not acquire lock form import.")
 

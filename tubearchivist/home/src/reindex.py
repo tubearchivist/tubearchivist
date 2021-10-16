@@ -413,6 +413,8 @@ class ManualImport:
     def process_import(self):
         """go through identified media files"""
 
+        all_videos_added = []
+
         for media_file in self.identified:
             json_file = media_file["json_file"]
             video_file = media_file["video_file"]
@@ -425,6 +427,9 @@ class ManualImport:
             # identify and archive
             vid_dict = index_new_video(youtube_id)
             VideoDownloader([youtube_id]).move_to_archive(vid_dict)
+            youtube_id = vid_dict["youtube_id"]
+            thumb_url = vid_dict["vid_thumb_url"]
+            all_videos_added.append((youtube_id, thumb_url))
 
             # cleanup
             if os.path.exists(video_path):
@@ -432,6 +437,8 @@ class ManualImport:
             if json_file:
                 json_path = os.path.join(self.CACHE_DIR, "import", json_file)
                 os.remove(json_path)
+
+        return all_videos_added
 
     def move_to_cache(self, video_path, youtube_id):
         """move identified video file to cache, convert to mp4"""
