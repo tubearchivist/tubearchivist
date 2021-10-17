@@ -80,7 +80,6 @@ class PendingList:
                 # skip already downloaded
                 continue
             video = self.get_youtube_details(youtube_id)
-            thumb_url = video["vid_thumb_url"]
             # skip on download error
             if not video:
                 continue
@@ -89,6 +88,7 @@ class PendingList:
                 video["channel_indexed"] = True
             else:
                 video["channel_indexed"] = False
+            thumb_url = video["vid_thumb_url"]
             video["status"] = "pending"
             action = {"create": {"_id": youtube_id, "_index": "ta_download"}}
             bulk_list.append(json.dumps(action))
@@ -125,6 +125,9 @@ class PendingList:
             vid = youtube_dl.YoutubeDL(obs).extract_info(youtube_id)
         except youtube_dl.utils.DownloadError:
             print("failed to extract info for: " + youtube_id)
+            return False
+        # stop if video is streaming live now
+        if vid["is_live"]:
             return False
         # parse response
         seconds = vid["duration"]
