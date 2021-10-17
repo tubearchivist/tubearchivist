@@ -455,6 +455,18 @@ class VideoDownloader:
         """add pending videos to download queue"""
         all_pending, _ = PendingList().get_all_pending()
         to_add = [i["youtube_id"] for i in all_pending]
+        if not to_add:
+            # there is nothing pending
+            print("download queue is empty")
+            mess_dict = {
+                "status": "downloading",
+                "level": "error",
+                "title": "Download queue is empty",
+                "message": "",
+            }
+            RedisArchivist().set_message("progress:download", mess_dict)
+            return
+
         queue = RedisQueue("dl_queue")
         queue.add_list(to_add)
 
