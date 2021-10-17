@@ -237,6 +237,10 @@ class DurationConverter:
     @staticmethod
     def get_str(duration_sec):
         """takes duration in sec and returns clean string"""
+        if not duration_sec:
+            # failed to extract
+            return "NA"
+
         hours = duration_sec // 3600
         minutes = (duration_sec - (hours * 3600)) // 60
         secs = duration_sec - (hours * 3600) - (minutes * 60)

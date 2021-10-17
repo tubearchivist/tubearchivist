@@ -129,6 +129,8 @@ class PendingList:
         # parse response
         seconds = vid["duration"]
         duration_str = DurationConverter.get_str(seconds)
+        if duration_str == "NA":
+            print(f"skip extracting duration for: {youtube_id}")
         upload_date = vid["upload_date"]
         upload_dt = datetime.strptime(upload_date, "%Y%m%d")
         published = upload_dt.strftime("%Y-%m-%d")
