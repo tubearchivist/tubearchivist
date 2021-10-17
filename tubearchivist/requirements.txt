@@ -1,7 +1,7 @@
 beautifulsoup4==4.10.0
 celery==5.1.2
 Django==3.2.8
-Pillow==8.3.2
+Pillow==8.4.0
 redis==3.5.3
 requests==2.26.0
 uWSGI==2.0.20

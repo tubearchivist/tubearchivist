@@ -73,8 +73,14 @@ For some architectures it might be required to run Redis JSON on a nonstandard p
 
 ### Updating Tube Archivist
 You will see the current version number of **Tube Archivist** in the footer of the interface so you can compare it with the latest release to make sure you are running the *latest and greatest*.  
-* There can be breaking changes between updates, particularly as the application grows, new environment variables or settings might be required for you to set in the your docker-compose file. Any breaking changes will be marked in the **release notes**.  
+* There can be breaking changes between updates, particularly as the application grows, new environment variables or settings might be required for you to set in the your docker-compose file. *Always* check the **release notes**: Any breaking changes will be marked there.  
 * All testing and development is done with the Elasticsearch version number as mentioned in the provided *docker-compose.yml* file. This will be updated when a new release of Elasticsearch is available. Running an older version of Elasticsearch is most likely not going to result in any issues, but it's still recommended to run the same version as mentioned.
+
+### Alternative installation instructions:
+- **arm64**: Newest Tube Archivist container is multi arch, so is Elasticsearch. RedisJSON doesn't offer arm builds, you can use `bbilly1/rejson`, an unofficial rebuild for arm64.
+  - NOTE: This is untested, looking for feedback.
+- **Synology**: There is a [discussion thread](https://github.com/bbilly1/tubearchivist/discussions/48) with Synology installation instructions.
+- **Unraid**: There is a [template](https://github.com/pairofcrocs/unraid-templates/) and forum [thread](https://forums.unraid.net/topic/114073-support-crocs-tube-archivist/) with additional information.
 
 ## Potential pitfalls
 ### vm.max_map_count
@@ -111,11 +117,11 @@ This should be considered as a **minimal viable product**, there is an extensive
 ### Functionality
 - [ ] Access control
 - [ ] User roles
-- [ ] Delete videos and channel
 - [ ] Create playlists
 - [ ] Podcast mode to serve channel as mp3
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
-- [ ] Add thumbnail embed option
+- [X] Delete videos and channel [2021-10-16]
+- [X] Add thumbnail embed option [2021-10-16]
 - [X] Un-ignore videos [2021-10-03]
 - [X] Dynamic download queue [2021-09-26]
 - [X] Backup and restore [2021-09-22]

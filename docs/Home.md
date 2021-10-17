@@ -1,7 +1,4 @@
 # Tube Archivist Wiki
-
-**WIP**: This is work in progress!
-
 Welcome to the official Tube Archivist Wiki. This is an up-to-date documentation of user functionality.
 
 Table of contents:
@@ -24,6 +21,6 @@ Table of contents:
 * Hover over the playing video to show additional control options.
 
 
-An empty checkbox icon <img src="assets/icon-unseen.png?raw=true" alt="unseen icon" width="20px" style="margin:0 5px;"> will show for videos you haven't marked as watched. Click on it and the icon will change to a filled checkbox <img src="assets/icon-seen.png?raw=true" alt="seen icon" width="20px" style="margin:0 5px;"> indicating it as watched.
+An empty checkbox icon <img src="assets/icon-unseen.png?raw=true" alt="unseen icon" width="20px" style="margin:0 5px;"> will show for videos you haven't marked as watched. Click on it and the icon will change to a filled checkbox <img src="assets/icon-seen.png?raw=true" alt="seen icon" width="20px" style="margin:0 5px;"> indicating it as watched - click again to revert.
 
 When available the <img src="assets/icon-gridview.png?raw=true" alt="gridview icon" width="20px" style="margin:0 5px;"> gridview icon will display the list in a grid, the <img src="assets/icon-listview.png?raw=true" alt="listview icon" width="20px" style="margin:0 5px;"> listview icon will arrange the items in a list.
