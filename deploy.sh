@@ -10,6 +10,9 @@
 # docker buildx use tubearchivist
 # docker buildx inspect --bootstrap
 
+# more details:
+# https://github.com/bbilly1/tubearchivist/issues/6
+
 set -e
 
 function sync_blackhole {
@@ -119,20 +122,14 @@ function sync_docker {
     printf "\ncreate new version:\n"
     read -r VERSION
 
-    # start build
-    sudo docker buildx build --platform linux/amd64,linux/arm64 -t bbilly1/tubearchivist:latest -t bbilly1/tubearchivist:"$VERSION" .
-
-    printf "\nlatest images:\n"
-    sudo docker image ls bbilly1/tubearchivist
-
-    echo "continue?"
+    echo "build and push $VERSION?"
     read -rn 1
 
-    # push to docker
-    echo "pushing multiarch latest and $VERSION:"
-    sudo docker buildx build --platform linux/amd64,linux/arm64 -t bbilly1/tubearchivist:latest -t bbilly1/tubearchivist:"$VERSION" --push .
-    #sudo docker push bbilly1/tubearchivist:latest
-    #sudo docker push bbilly1/tubearchivist:"$VERSION"
+    # start build
+    sudo docker buildx build \
+        --platform linux/amd64,linux/arm64 \
+        -t bbilly1/tubearchivist:latest \
+        -t bbilly1/tubearchivist:"$VERSION" --push .
 
     # create release tag
     echo "commits since last version:"
