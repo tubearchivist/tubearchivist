@@ -80,7 +80,10 @@ You will see the current version number of **Tube Archivist** in the footer of t
 - **arm64**: Newest Tube Archivist container is multi arch, so is Elasticsearch. RedisJSON doesn't offer arm builds, you can use `bbilly1/rejson`, an unofficial rebuild for arm64.
   - NOTE: This is untested, looking for feedback.
 - **Synology**: There is a [discussion thread](https://github.com/bbilly1/tubearchivist/discussions/48) with Synology installation instructions.
-- **Unraid**: There is a [template](https://github.com/pairofcrocs/unraid-templates/) and forum [thread](https://forums.unraid.net/topic/114073-support-crocs-tube-archivist/) with additional information.
+- **Unraid**: The three containers needed are all in the Community Applications. First install `TubeArchivist RedisJSON` followed by `TubeArchivist ES`, and finally you can install `TubeArchivist`.
+
+If you have unraid specific issues, report those to the [support thread](https://forums.unraid.net/topic/114073-support-crocs-tube-archivist/ "support thread").
+
 
 ## Potential pitfalls
 ### vm.max_map_count
