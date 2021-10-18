@@ -514,6 +514,63 @@ button:hover {
     margin-bottom: 10px;
 }
 
+/* login */
+.login-page {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    align-content: center;
+}
+
+.login-page > * {
+    width: 100%;
+}
+
+.login-page img {
+    width: 100%;
+    max-width: 200px;
+    max-height: 200px;
+    margin-bottom: 40px;
+}
+
+.login-page form {
+    margin: 30px 0;
+}
+
+.login-page input {
+    min-width: 200px;
+}
+
+.login-links a {
+    text-decoration: underline;
+    margin: 30px 0;
+    padding: 20px;
+}
+
+.footer-colors {
+    grid-row-start: 2;
+    grid-row-end: 3;
+    display: flex;
+}
+
+.footer-colors div {
+    padding: 20px 0;
+    width: 33.33%;
+}
+
+.col-1 {
+    background-color: var(--highlight-bg);
+}
+
+.col-2 {
+    background-color: var(--accent-font-dark);
+}
+
+.col-3 {
+    background-color: var(--accent-font-light);
+}
+
 /* video page */
 .video-main video {
     max-height: 70vh;

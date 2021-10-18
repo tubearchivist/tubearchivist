@@ -126,6 +126,27 @@ class HomeView(View):
         return redirect(search_url, permanent=True)
 
 
+class LoginView(View):
+    """resolves to /login/
+    Greeting and login page
+    """
+
+    def get(self, request):
+        """handle get requests"""
+        colors = self.read_config()
+        context = {
+            "colors": colors,
+        }
+        return render(request, "home/login.html", context)
+
+    @staticmethod
+    def read_config():
+        """read needed values from redis"""
+        config_handler = AppConfig().config
+        colors = config_handler["application"]["colors"]
+        return colors
+
+
 class AboutView(View):
     """resolves to /about/
     show helpful how to information

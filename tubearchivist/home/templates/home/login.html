@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TA | Welcome</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+    {% if colors == "dark" %}
+        <link rel="stylesheet" href="{% static 'css/dark.css' %}">
+    {% else %}
+        <link rel="stylesheet" href="{% static 'css/light.css' %}">
+    {% endif %}
+</head>
+<body>
+    <div class="boxed-content login-page">
+        {% if colors == 'dark' %}
+            <img src="{% static 'img/logo-tube-archivist-dark.png' %}" alt="tube-archivist-logo">
+        {% endif %}
+        {% if colors == 'light' %}
+            <img src="{% static 'img/logo-tube-archivist-light.png' %}" alt="tube-archivist-banner">
+        {% endif %}
+        <h1>Tube Archivist</h1>
+        <h2>Your Self Hosted YouTube Media Server</h2>
+        <form action="/login/" method="POST" name="login">
+            {% csrf_token %}
+            <input type="text" name="user" id="user" placeholder="Username"><br>
+            <input type="password" name="password" id="password" placeholder="Password"><br>
+            <button type="submit">Login</button>
+        </form>
+        <p class="login-links"><span><a href="https://github.com/bbilly1/tubearchivist" target="_blank">Github</a></span> <span><a href="https://github.com/bbilly1/tubearchivist#donate" target="_blank">Donate</a></span></p>
+    </div>
+    <div class="footer-colors">
+        <div class="col-1"></div>
+        <div class="col-2"></div>
+        <div class="col-3"></div>
+    </div>
+</body>
+</html>

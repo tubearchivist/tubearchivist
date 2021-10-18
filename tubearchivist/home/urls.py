@@ -7,6 +7,7 @@ from home.views import (
     ChannelView,
     DownloadView,
     HomeView,
+    LoginView,
     SettingsView,
     VideoView,
 )
@@ -15,6 +16,7 @@ from . import views
 
 urlpatterns = [
     path("", HomeView.as_view(), name="home"),
+    path("login/", LoginView.as_view(), name="login"),
     path("about/", AboutView.as_view(), name="about"),
     path("downloads/", DownloadView.as_view(), name="downloads"),
     path("settings/", SettingsView.as_view(), name="settings"),
