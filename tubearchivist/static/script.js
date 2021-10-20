@@ -230,6 +230,7 @@ function createPlayer(button) {
     videoPlayer.setAttribute('controls', true);
     videoPlayer.setAttribute('autoplay', true);
     videoPlayer.setAttribute('width', '100%');
+    videoPlayer.setAttribute('playsinline', true);
     videoPlayer.setAttribute('poster', mediaThumb);
     playerElement.appendChild(videoPlayer);
     // title bar
