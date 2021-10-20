@@ -1,0 +1,6 @@
+1. Watch all cluster members come up.
+  $ kubectl get pods --namespace={{ .Release.Namespace }} -l app={{ template "elasticsearch.uname" . }} -w
+{{- if .Values.tests.enabled -}}
+2. Test cluster health using Helm test.
+  $ helm --namespace={{ .Release.Namespace }} test {{ .Release.Name }}
+{{- end -}}

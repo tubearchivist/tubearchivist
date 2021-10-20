@@ -1,0 +1,77 @@
+---
+{{- if .Values.service.enabled -}}
+kind: Service
+apiVersion: v1
+metadata:
+{{- if eq .Values.nodeGroup "master" }}
+  name: {{ template "elasticsearch.masterService" . }}
+{{- else }}
+  name: {{ template "elasticsearch.uname" . }}
+{{- end }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{ .Chart.Name }}"
+    app: "{{ template "elasticsearch.uname" . }}"
+{{- if .Values.service.labels }}
+{{ toYaml .Values.service.labels | indent 4}}
+{{- end }}
+  annotations:
+{{ toYaml .Values.service.annotations | indent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    release: {{ .Release.Name | quote }}
+    chart: "{{ .Chart.Name }}"
+    app: "{{ template "elasticsearch.uname" . }}"
+  ports:
+  - name: {{ .Values.service.httpPortName | default "http" }}
+    protocol: TCP
+    port: {{ .Values.httpPort }}
+{{- if .Values.service.nodePort }}
+    nodePort: {{ .Values.service.nodePort }}
+{{- end }}
+  - name: {{ .Values.service.transportPortName | default "transport" }}
+    protocol: TCP
+    port: {{ .Values.transportPort }}
+{{- if .Values.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+{{- end }}
+{{- with .Values.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+{{ toYaml . | indent 4 }}
+{{- end }}
+{{- if .Values.service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+{{- end }}
+{{- end }}
+---
+kind: Service
+apiVersion: v1
+metadata:
+{{- if eq .Values.nodeGroup "master" }}
+  name: {{ template "elasticsearch.masterService" . }}-headless
+{{- else }}
+  name: {{ template "elasticsearch.uname" . }}-headless
+{{- end }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{ .Chart.Name }}"
+    app: "{{ template "elasticsearch.uname" . }}"
+{{- if .Values.service.labelsHeadless }}
+{{ toYaml .Values.service.labelsHeadless | indent 4 }}
+{{- end }}
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  clusterIP: None # This is needed for statefulset hostnames like elasticsearch-0 to resolve
+  # Create endpoints also if the related pod isn't ready
+  publishNotReadyAddresses: true
+  selector:
+    app: "{{ template "elasticsearch.uname" . }}"
+  ports:
+  - name: {{ .Values.service.httpPortName | default "http" }}
+    port: {{ .Values.httpPort }}
+  - name: {{ .Values.service.transportPortName | default "transport" }}
+    port: {{ .Values.transportPort }}

@@ -1,0 +1,29 @@
+http:
+  http://localhost:9200/_cluster/health:
+    status: 200
+    timeout: 2000
+    username: "{{ .Env.ELASTIC_USERNAME }}"
+    password: "{{ .Env.ELASTIC_PASSWORD }}"
+    body:
+      - "green"
+      - '"number_of_nodes":1'
+      - '"number_of_data_nodes":1'
+
+  http://localhost:9200:
+    status: 200
+    timeout: 2000
+    username: "{{ .Env.ELASTIC_USERNAME }}"
+    password: "{{ .Env.ELASTIC_PASSWORD }}"
+    body:
+      - '"cluster_name" : "config"'
+      - "You Know, for Search"
+
+command:
+  "elasticsearch-keystore list":
+    exit-status: 0
+    stdout:
+      - keystore.seed
+      - bootstrap.password
+      - xpack.notification.slack.account.monitoring.secure_url
+      - xpack.notification.slack.account.otheraccount.secure_url
+      - xpack.watcher.encryption_key

@@ -1,0 +1,26 @@
+---
+
+# Temporarily set to 3 so we can scale up/down the old a new cluster
+# one at a time whilst always keeping 3 masters running
+replicas: 1
+
+esMajorVersion: 6
+
+extraEnvs:
+  - name: discovery.zen.ping.unicast.hosts
+    value: "my-release-elasticsearch-discovery"
+
+clusterName: "elasticsearch"
+nodeGroup: "master"
+
+roles:
+  master: "true"
+  ingest: "false"
+  data: "false"
+
+volumeClaimTemplate:
+  accessModes: [ "ReadWriteOnce" ]
+  storageClassName: "standard"
+  resources:
+    requests:
+      storage: 4Gi

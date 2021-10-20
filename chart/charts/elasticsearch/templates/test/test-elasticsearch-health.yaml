@@ -1,0 +1,36 @@
+---
+{{- if .Values.tests.enabled -}}
+apiVersion: v1
+kind: Pod
+metadata:
+{{- if .Values.healthNameOverride }}
+  name: {{ .Values.healthNameOverride | quote }}
+{{- else }}
+  name: "{{ .Release.Name }}-{{ randAlpha 5 | lower }}-test"
+{{- end }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  securityContext:
+{{ toYaml .Values.podSecurityContext | indent 4 }}
+  containers:
+{{- if .Values.healthNameOverride }}
+  - name: {{ .Values.healthNameOverride | quote }}
+{{- else }}
+  - name: "{{ .Release.Name }}-{{ randAlpha 5 | lower }}-test"
+{{- end }}
+    image: "{{ .Values.image }}:{{ .Values.imageTag }}"
+    imagePullPolicy: "{{ .Values.imagePullPolicy }}"
+    command:
+      - "sh"
+      - "-c"
+      - |
+        #!/usr/bin/env bash -e
+        curl -XGET --fail '{{ template "elasticsearch.uname" . }}:{{ .Values.httpPort }}/_cluster/health?{{ .Values.clusterHealthCheckParams }}'
+  {{- if .Values.imagePullSecrets }}
+  imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 4 }}
+  {{- end }}
+  restartPolicy: Never
+{{- end -}}

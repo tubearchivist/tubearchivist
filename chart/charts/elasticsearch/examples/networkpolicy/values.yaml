@@ -1,0 +1,37 @@
+networkPolicy:
+  http:
+    enabled: true
+    explicitNamespacesSelector:
+      # Accept from namespaces with all those different rules (from whitelisted Pods)
+      matchLabels:
+        role: frontend-http
+      matchExpressions:
+        - {key: role, operator: In, values: [frontend-http]}
+    additionalRules:
+      - podSelector:
+          matchLabels:
+            role: frontend-http
+      - podSelector:
+          matchExpressions:
+            - key: role
+              operator: In
+              values:
+                - frontend-http
+  transport:
+    enabled: true
+    allowExternal: true
+    explicitNamespacesSelector:
+      matchLabels:
+        role: frontend-transport
+      matchExpressions:
+        - {key: role, operator: In, values: [frontend-transport]}
+    additionalRules:
+      - podSelector:
+          matchLabels:
+            role: frontend-transport
+      - podSelector:
+          matchExpressions:
+            - key: role
+              operator: In
+              values:
+                - frontend-transport

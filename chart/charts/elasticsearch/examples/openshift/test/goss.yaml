@@ -1,0 +1,16 @@
+http:
+  http://localhost:9200/_cluster/health:
+    status: 200
+    timeout: 2000
+    body:
+      - "green"
+      - '"number_of_nodes":3'
+      - '"number_of_data_nodes":3'
+
+  http://localhost:9200:
+    status: 200
+    timeout: 2000
+    body:
+      - '"number" : "7.15.0"'
+      - '"cluster_name" : "elasticsearch"'
+      - "You Know, for Search"

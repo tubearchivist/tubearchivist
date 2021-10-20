@@ -1,0 +1,14 @@
+---
+
+clusterName: "multi"
+nodeGroup: "client"
+
+roles:
+  master: "false"
+  ingest: "false"
+  data: "false"
+  ml: "false"
+  remote_cluster_client: "false"
+
+persistence:
+  enabled: false

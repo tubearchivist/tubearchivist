@@ -1,0 +1,32 @@
+---
+
+clusterName: "config"
+replicas: 1
+
+extraEnvs:
+  - name: ELASTIC_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: elastic-config-credentials
+        key: password
+  - name: ELASTIC_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: elastic-config-credentials
+        key: username
+
+# This is just a dummy file to make sure that
+# the keystore can be mounted at the same time
+# as a custom elasticsearch.yml
+esConfig:
+  elasticsearch.yml: |
+    xpack.security.enabled: true
+    path.data: /usr/share/elasticsearch/data
+
+keystore:
+  - secretName: elastic-config-secret
+  - secretName: elastic-config-slack
+  - secretName: elastic-config-custom-path
+    items:
+    - key: slack_url
+      path: xpack.notification.slack.account.otheraccount.secure_url

@@ -1,0 +1,23 @@
+---
+
+replicas: 2
+
+clusterName: "elasticsearch"
+nodeGroup: "client"
+
+esMajorVersion: 6
+
+roles:
+  master: "false"
+  ingest: "false"
+  data: "false"
+
+volumeClaimTemplate:
+  accessModes: [ "ReadWriteOnce" ]
+  storageClassName: "standard"
+  resources:
+    requests:
+      storage: 1Gi # Currently needed till pvcs are made optional
+
+persistence:
+  enabled: false

@@ -1,0 +1,1 @@
+1. Get the application URL by running these commands:

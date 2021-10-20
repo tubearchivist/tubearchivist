@@ -1,0 +1,44 @@
+http:
+  https://security-master:9200/_cluster/health:
+    status: 200
+    timeout: 2000
+    allow-insecure: true
+    username: "{{ .Env.ELASTIC_USERNAME }}"
+    password: "{{ .Env.ELASTIC_PASSWORD }}"
+    body:
+      - "green"
+      - '"number_of_nodes":3'
+      - '"number_of_data_nodes":3'
+
+  https://localhost:9200/:
+    status: 200
+    timeout: 2000
+    allow-insecure: true
+    username: "{{ .Env.ELASTIC_USERNAME }}"
+    password: "{{ .Env.ELASTIC_PASSWORD }}"
+    body:
+      - '"cluster_name" : "security"'
+      - "You Know, for Search"
+
+  https://localhost:9200/_xpack/license:
+    status: 200
+    timeout: 2000
+    allow-insecure: true
+    username: "{{ .Env.ELASTIC_USERNAME }}"
+    password: "{{ .Env.ELASTIC_PASSWORD }}"
+    body:
+      - "active"
+      - "basic"
+
+file:
+  /usr/share/elasticsearch/config/elasticsearch.yml:
+    exists: true
+    contains:
+      - "xpack.security.enabled: true"
+      - "xpack.security.transport.ssl.enabled: true"
+      - "xpack.security.transport.ssl.verification_mode: certificate"
+      - "xpack.security.transport.ssl.keystore.path: /usr/share/elasticsearch/config/certs/elastic-certificates.p12"
+      - "xpack.security.transport.ssl.truststore.path: /usr/share/elasticsearch/config/certs/elastic-certificates.p12"
+      - "xpack.security.http.ssl.enabled: true"
+      - "xpack.security.http.ssl.truststore.path: /usr/share/elasticsearch/config/certs/elastic-certificates.p12"
+      - "xpack.security.http.ssl.keystore.path: /usr/share/elasticsearch/config/certs/elastic-certificates.p12"

@@ -1,0 +1,38 @@
+kernel-param:
+  vm.max_map_count:
+    value: "262144"
+
+http:
+  http://elasticsearch-master:9200/_cluster/health:
+    status: 200
+    timeout: 2000
+    body:
+      - "green"
+      - '"number_of_nodes":3'
+      - '"number_of_data_nodes":3'
+
+  http://localhost:9200:
+    status: 200
+    timeout: 2000
+    body:
+      - '"number" : "7.15.0"'
+      - '"cluster_name" : "elasticsearch"'
+      - "You Know, for Search"
+
+file:
+  /usr/share/elasticsearch/data:
+    exists: true
+    mode: "2775"
+    owner: root
+    group: elasticsearch
+    filetype: directory
+
+mount:
+  /usr/share/elasticsearch/data:
+    exists: true
+
+user:
+  elasticsearch:
+    exists: true
+    uid: 1000
+    gid: 1000
