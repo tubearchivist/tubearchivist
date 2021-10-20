@@ -39,11 +39,23 @@ class AppConfig:
     @staticmethod
     def get_config_env():
         """read environment application variables"""
+        host_uid_env = os.environ.get("HOST_UID")
+        if host_uid_env:
+            host_uid = int(host_uid_env)
+        else:
+            host_uid = False
+
+        host_gid_env = os.environ.get("HOST_GID")
+        if host_gid_env:
+            host_gid = int(host_gid_env)
+        else:
+            host_gid = False
+
         application = {
             "REDIS_HOST": os.environ.get("REDIS_HOST"),
             "es_url": os.environ.get("ES_URL"),
-            "HOST_UID": int(os.environ.get("HOST_UID")),
-            "HOST_GID": int(os.environ.get("HOST_GID")),
+            "HOST_UID": host_uid,
+            "HOST_GID": host_gid,
         }
 
         return application

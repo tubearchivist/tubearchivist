@@ -51,7 +51,7 @@ The main Python application that displays and serves your video collection, buil
   - Needs a mandatory volume for the video archive at **/youtube**
   - And another recommended volume to save the cache for thumbnails and artwork at **/cache**.
   - The environment variables `ES_URL` and `REDIS_HOST` are needed to tell Tube Archivist where Elasticsearch and Redis respectively are located.
-  - The environment variables `HOST_UID` and `HOST_GID` allows Tube Archivist to `chown` the video files to the main host system user instead of the container user.
+  - The environment variables `HOST_UID` and `HOST_GID` allows Tube Archivist to `chown` the video files to the main host system user instead of the container user. Those two variables are optional, not setting them will disable that functionality. That might be needed if the underlying filesystem doesn't support `chown` like *NFS*. 
 
 ### Elasticsearch
 Stores video meta data and makes everything searchable. Also keeps track of the download queue.
