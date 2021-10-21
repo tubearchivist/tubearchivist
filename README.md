@@ -108,7 +108,10 @@ chown 1000:0 /path/to/mount/point
 This will match the permissions with the **UID** and **GID** of elasticsearch within the container and should fix the issue.
 
 ## Getting Started
-1. Go through the **settings** page and look at the available options. Particularly set *Download Format* to your desired video quality before downloading. **Tube Archivist** downloads the best available quality by default.
+1. Go through the **settings** page and look at the available options. Particularly set *Download Format* to your desired video quality before downloading. **Tube Archivist** downloads the best available quality by default. To support iOS or MacOS a compatible format must be specified. For example:
+```
+bestvideo[VCODEC=avc1]+bestaudio[ACODEC=mp4a]/mp4
+```
 2. Subscribe to some of your favorite YouTube channels on the **channels** page. 
 3. On the **downloads** page, click on *Rescan subscriptions* to add videos from the subscribed channels to your Download queue or click on *Add to download queue* to manually add Video IDs, links, channels or playlists.
 4. Click on *Start download* and let **Tube Archivist** to it's thing. 
