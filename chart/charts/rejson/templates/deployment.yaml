@@ -38,13 +38,17 @@ spec:
               containerPort: 6379
               protocol: TCP
           # livenessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: http
+          #   exec:
+          #     command:
+          #       - sh
+          #       - -c
+          #       - /health/ping_liveness_local.sh 5
           # readinessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: http
+          #   exec:
+          #     command:
+          #       - sh
+          #       - -c
+          #       - /health/ping_liveness_local.sh 5
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
