@@ -14,6 +14,16 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
+env:
+  - name: ES_URL
+    value: http://elasticsearch-master:9200
+  - name: REDIS_HOST
+    value: tubearchivist-rejson
+  - name: HOST_GID
+    value: "1000"
+  - name: HOST_UID
+    value: "1000"
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
