@@ -27,6 +27,13 @@ spec:
       serviceAccountName: {{ include "chart.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: youtube
+          persistentVolumeClaim:
+            claimName: {{ include "chart.fullname" . }}-pvc-youtube
+        - name: cache
+          persistentVolumeClaim:
+            claimName: {{ include "chart.fullname" . }}-pvc-cache
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -35,6 +42,10 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             {{- toYaml .Values.env | nindent 12 }}
+          {{- with .Values.persistence }}
+          volumeMounts:
+            {{- toYaml .volumeMounts | nindent 12 }}
+          {{- end }}
           ports:
             - name: http
               containerPort: 8000

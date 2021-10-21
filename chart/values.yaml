@@ -24,6 +24,16 @@ env:
   - name: HOST_UID
     value: "1000"
 
+persistence:
+  enabled: false
+  storageClassName: "nfs-home-lab"
+  size: 10Gi
+  volumeMounts:
+    - mountPath: "/youtube"
+      name: youtube
+    - mountPath: "/cache"
+      name: cache
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -53,21 +63,22 @@ service:
   port: 80
 
 ingress:
-  enabled: false
-  className: ""
+  enabled: true
+  className: "traefik"
   annotations:
-    {}
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: chart-example.local
+    - host: tube.home.stiforr.tech
       paths:
         - path: /
           pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+  tls:
+    - secretName: tube-cert
+      hosts:
+        - tube.home.stiforr.tech
 
 resources:
   {}
