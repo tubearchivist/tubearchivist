@@ -26,8 +26,9 @@
         <h2>Your Self Hosted YouTube Media Server</h2>
         <form action="/login/" method="POST" name="login">
             {% csrf_token %}
-            <input type="text" name="user" id="user" placeholder="Username"><br>
-            <input type="password" name="password" id="password" placeholder="Password"><br>
+            {% for field in form %}
+                {{ field }}<br>
+            {% endfor %}
             <button type="submit">Login</button>
         </form>
         <p class="login-links"><span><a href="https://github.com/bbilly1/tubearchivist" target="_blank">Github</a></span> <span><a href="https://github.com/bbilly1/tubearchivist#donate" target="_blank">Donate</a></span></p>

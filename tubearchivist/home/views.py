@@ -8,6 +8,10 @@ import json
 import urllib.parse
 from time import sleep
 
+from django import forms
+from django.contrib.auth import login
+from django.contrib.auth.forms import AuthenticationForm
+from django.forms.widgets import PasswordInput, TextInput
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils.http import urlencode
@@ -126,6 +130,17 @@ class HomeView(View):
         return redirect(search_url, permanent=True)
 
 
+class CustomAuthForm(AuthenticationForm):
+    """better styled login form"""
+
+    username = forms.CharField(
+        widget=TextInput(attrs={"placeholder": "Username"}), label=False
+    )
+    password = forms.CharField(
+        widget=PasswordInput(attrs={"placeholder": "Password"}), label=False
+    )
+
+
 class LoginView(View):
     """resolves to /login/
     Greeting and login page
@@ -134,10 +149,22 @@ class LoginView(View):
     def get(self, request):
         """handle get requests"""
         colors = self.read_config()
+        form = CustomAuthForm()
         context = {
             "colors": colors,
+            "form": form,
         }
         return render(request, "home/login.html", context)
+
+    @staticmethod
+    def post(request):
+        """handle login post request"""
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+
+        return redirect("/")
 
     @staticmethod
     def read_config():

@@ -1,5 +1,6 @@
 """ all home app urls """
 
+from django.contrib.auth.decorators import login_required
 from django.urls import path
 from home.views import (
     AboutView,
@@ -10,23 +11,29 @@ from home.views import (
     LoginView,
     SettingsView,
     VideoView,
+    process,
+    progress,
 )
 
-from . import views
-
 urlpatterns = [
-    path("", HomeView.as_view(), name="home"),
+    path("", login_required(HomeView.as_view()), name="home"),
     path("login/", LoginView.as_view(), name="login"),
     path("about/", AboutView.as_view(), name="about"),
-    path("downloads/", DownloadView.as_view(), name="downloads"),
-    path("settings/", SettingsView.as_view(), name="settings"),
-    path("process/", views.process, name="process"),
-    path("downloads/progress/", views.progress, name="progress"),
-    path("channel/", ChannelView.as_view(), name="channel"),
+    path(
+        "downloads/", login_required(DownloadView.as_view()), name="downloads"
+    ),
+    path("settings/", login_required(SettingsView.as_view()), name="settings"),
+    path("process/", login_required(process), name="process"),
+    path("downloads/progress/", login_required(progress), name="progress"),
+    path("channel/", login_required(ChannelView.as_view()), name="channel"),
     path(
         "channel/<slug:channel_id_detail>/",
-        ChannelIdView.as_view(),
+        login_required(ChannelIdView.as_view()),
         name="channel_id",
     ),
-    path("video/<slug:video_id>/", VideoView.as_view(), name="video"),
+    path(
+        "video/<slug:video_id>/",
+        login_required(VideoView.as_view()),
+        name="video",
+    ),
 ]
