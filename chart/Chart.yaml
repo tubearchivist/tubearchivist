@@ -22,3 +22,10 @@ version: 0.1.0
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "v0.0.6"
+dependencies:
+  - name: rejson
+    version: "0.1.0"
+    repository: "file://charts/rejson"
+  - name: elasticsearch
+    version: "7.15.0"
+    repository: "https://Helm.elastic.co"
