@@ -1,6 +1,8 @@
 """ all home app urls """
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LogoutView
 from django.urls import path
 from home.views import (
     AboutView,
@@ -18,6 +20,12 @@ from home.views import (
 urlpatterns = [
     path("", login_required(HomeView.as_view()), name="home"),
     path("login/", LoginView.as_view(), name="login"),
+    path(
+        "logout/",
+        LogoutView.as_view(),
+        {"next_page": settings.LOGOUT_REDIRECT_URL},
+        name="logout",
+    ),
     path("about/", AboutView.as_view(), name="about"),
     path(
         "downloads/", login_required(DownloadView.as_view()), name="downloads"

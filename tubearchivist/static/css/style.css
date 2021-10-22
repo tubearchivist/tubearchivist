@@ -250,7 +250,7 @@ button:hover {
 
 .nav-icons img {
     width: 40px;
-    padding: 0 10px;
+    padding: 0 5px;
     filter: var(--img-filter);
 }
 
