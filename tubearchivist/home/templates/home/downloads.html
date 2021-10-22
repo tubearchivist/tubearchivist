@@ -58,13 +58,14 @@
             <div class="dl-item {{ view_style }}" id="dl-{{ video.youtube_id }}">
                 <div class="dl-thumb {{ view_style }}">
                     <img src="/cache/{{ video.vid_thumb_url }}" alt="video_thumb">
+                    {% if show_ignored_only %}
+                        <span>ignored</span>
+                    {% else %}
+                        <span>queued</span>
+                    {% endif %}
                 </div>
                 <div class="dl-desc {{ view_style }}">
-                    {% if show_ignored_only %}
-                        <h3>Ignore: {{ video.title }}</h3>
-                    {% else %}
-                        <h3>Download: {{ video.title }}</h3>
-                    {% endif %}
+                    <h3>{{ video.title }}</h3>
                     {% if video.channel_indexed %}
                         <a href="{% url 'channel_id' video.channel_id %}">{{ video.channel_name }}</a>
                     {% else %}
