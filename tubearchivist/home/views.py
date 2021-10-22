@@ -161,10 +161,13 @@ class LoginView(View):
         """handle login post request"""
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
+            next_url = request.POST.get('next') or "home"
+            print(f"next url: {next_url}")
             user = form.get_user()
             login(request, user)
+            return redirect(next_url)
 
-        return redirect("/")
+        return redirect("login")
 
     @staticmethod
     def read_config():
