@@ -24,6 +24,9 @@
         {% endif %}
         <h1>Tube Archivist</h1>
         <h2>Your Self Hosted YouTube Media Server</h2>
+        {% if form_error %}
+            <p class="danger-zone">Failed to login.</p>
+        {% endif %}
         <form action="/login/" method="POST" name="login">
             {% csrf_token %}
             {% for field in form %}
