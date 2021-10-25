@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-PW_HASH = hashlib.sha256(environ.get("DJANGO_SUPERUSER_PASSWORD").encode())
+PW_HASH = hashlib.sha256(environ.get("TA_PASSWORD").encode())
 SECRET_KEY = PW_HASH.hexdigest()
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -108,6 +108,8 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",  # noqa: E501
     },
 ]
+
+AUTH_USER_MODEL = "home.Account"
 
 
 # Internationalization

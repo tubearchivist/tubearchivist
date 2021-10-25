@@ -15,7 +15,9 @@ done
 
 python manage.py makemigrations
 python manage.py migrate
-python manage.py createsuperuser --noinput
+export DJANGO_SUPERUSER_PASSWORD=$TA_PASSWORD && \
+    python manage.py createsuperuser --noinput --name "$TA_USERNAME"
+
 python manage.py collectstatic --noinput -c
 nginx &
 celery -A home.tasks worker --loglevel=INFO &
