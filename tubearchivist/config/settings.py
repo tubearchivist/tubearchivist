@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import hashlib
 from os import environ, path
 from pathlib import Path
 
@@ -22,8 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "Fvid^aUL6LohRZz*kZFvq85B&JW&kB9o*#jdzWsdWE8*XkCLR8"
+PW_HASH = hashlib.sha256(environ.get("DJANGO_SUPERUSER_PASSWORD").encode())
+SECRET_KEY = PW_HASH.hexdigest()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(environ.get("DJANGO_DEBUG"))
