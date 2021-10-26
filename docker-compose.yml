@@ -24,8 +24,8 @@ services:
     image: redislabs/rejson:latest
     container_name: archivist-redis
     restart: always
-    ports:
-      - 6379:6379
+    expose:
+      - "6379"
     volumes:
       - ./volumes/tubearchivist/redis:/data
     depends_on:
@@ -43,5 +43,5 @@ services:
         hard: -1
     volumes:
       - ./volumes/tubearchivist/es:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
+    expose:
+      - "9200"
