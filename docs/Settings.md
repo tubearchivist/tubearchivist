@@ -17,6 +17,7 @@ Settings related to the channel management.
 Settings related to the download process.
 - **Download Limit**: Stop the download process after downloading the set quantity of videos.
 - **Download Speed Limit**: Set your download speed limit in KB/s. This will pass the option `--limit-rate` to yt-dlp.
+- **Throttled Rate Limit**: Restart download if the download speed drops below this value in KB/s. This will pass the option `--throttled-rate` to yt-dlp. Using this option might have a negative effect if you have an unstable or slow internet connection.
 - **Sleep Interval**: Time in seconds to sleep between requests to YouTube. It's a good idea to set this to **3** seconds. Might be necessary to avoid throttling.
 
 ## Download Format

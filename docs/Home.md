@@ -6,6 +6,7 @@ Table of contents:
 * [Channels](Channels): Browse your channels, handle subscriptions
 * [Downloads](Downloads): Scanning subscriptions, handle download queue
 * [Settings](Settings): All the configuration options
+* [Users](Users): User management admin interface
 
 ## Getting Started
 1. [Subscribe](Channels#channels-overview) to some of your favourite YouTube channels.
