@@ -19,7 +19,8 @@
         "sleep_interval": 3,
         "format": false,
         "add_metadata": false,
-        "add_thumbnail": false
+        "add_thumbnail": false,
+        "throttledratelimit": false
     },
     "application": {
         "app_root": "/app",

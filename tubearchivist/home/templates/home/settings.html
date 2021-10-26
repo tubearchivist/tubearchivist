@@ -54,6 +54,11 @@
             <input type="number" name="downloads.limit_speed" id="downloads.limit_speed"><span>KB/sec</span>
         </div>
         <div class="settings-item">
+            <p>Current throttled rate limit: <span class="settings-current">{{ config.downloads.throttledratelimit }}</span></p>
+            <i>Assume the download is being throttled below this speed and restart. 0 (zero) to deactivate, e.g. 100KB/sec</i><br>
+            <input type="number" name="downloads.throttledratelimit" id="downloads.throttledratelimit"><span>KB/sec</span>
+        </div>
+        <div class="settings-item">
             <p>Current scraping sleep interval: <span class="settings-current">{{ config.downloads.sleep_interval }}</p>
             <i>Seconds to sleep between calls to YouTube. Might be necessary to avoid throttling. Recommended 3.</i><br>
             <input type="number" name="downloads.sleep_interval" id="downloads.sleep_interval">

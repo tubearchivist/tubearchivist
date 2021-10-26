@@ -515,6 +515,11 @@ class VideoDownloader:
             obs["format"] = self.config["downloads"]["format"]
         if self.config["downloads"]["limit_speed"]:
             obs["ratelimit"] = self.config["downloads"]["limit_speed"] * 1024
+
+        throttle = self.config["downloads"]["throttledratelimit"]
+        if throttle:
+            obs["throttledratelimit"] = throttle * 1024
+
         external = False
         if external:
             obs["external_downloader"] = "aria2c"
