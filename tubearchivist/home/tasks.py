@@ -27,7 +27,7 @@ if not REDIS_PORT:
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "home.settings")
 app = Celery("tasks", broker=f"redis://{REDIS_HOST}:{REDIS_PORT}")
-app.config_from_object("django.conf:settings", namespace="CELERY")
+app.config_from_object("django.conf:settings", namespace="ta:")
 app.autodiscover_tasks()
 
 
