@@ -58,6 +58,7 @@ class HomeView(View):
         url = self.ES_URL + "/ta_video/_search"
         data = self.build_data(
             pagination_handler,
+            view_config["sort_by"],
             view_config["sort_order"],
             search_get,
             view_config["hide_watched"],
@@ -70,7 +71,8 @@ class HomeView(View):
         context = {
             "videos": videos_hits,
             "pagination": pagination_handler.pagination,
-            "sortorder": view_config["sort_order"],
+            "sort_by": view_config["sort_by"],
+            "sort_order": view_config["sort_order"],
             "hide_watched": view_config["hide_watched"],
             "colors": view_config["colors"],
             "view_style": view_config["view_style"],
@@ -78,27 +80,31 @@ class HomeView(View):
         return render(request, "home/home.html", context)
 
     @staticmethod
-    def build_data(pagination_handler, sort_order, search_get, hide_watched):
+    def build_data(
+        pagination_handler, sort_by, sort_order, search_get, hide_watched
+    ):
         """build the data dict for the search query"""
         page_size = pagination_handler.pagination["page_size"]
         page_from = pagination_handler.pagination["page_from"]
+
+        # overwrite sort_by to match key
+        if sort_by == "views":
+            sort_by = "stats.view_count"
+        elif sort_by == "likes":
+            sort_by = "stats.like_count"
+        elif sort_by == "downloaded":
+            sort_by = "date_downloaded"
+
         data = {
             "size": page_size,
             "from": page_from,
             "query": {"match_all": {}},
-            "sort": [
-                {"published": {"order": "desc"}},
-                {"date_downloaded": {"order": "desc"}},
-            ],
+            "sort": [{sort_by: {"order": sort_order}}],
         }
-        # define sort
-        if sort_order == "downloaded":
-            del data["sort"][0]
-        if search_get:
-            del data["sort"]
         if hide_watched:
             data["query"] = {"term": {"player.watched": {"value": False}}}
         if search_get:
+            del data["sort"]
             query = {
                 "multi_match": {
                     "query": search_get,
@@ -109,6 +115,8 @@ class HomeView(View):
             }
             data["query"] = query
 
+        print(data)
+
         return data
 
     @staticmethod
@@ -117,13 +125,19 @@ class HomeView(View):
         config_handler = AppConfig().config
         colors = config_handler["application"]["colors"]
         view_style = config_handler["default_view"]["home"]
+
+        sort_by = RedisArchivist().get_message("sort_by")
+        if sort_by == {"status": False}:
+            sort_by = "published"
         sort_order = RedisArchivist().get_message("sort_order")
-        if not sort_order:
-            sort_order = "published"
+        if sort_order == {"status": False}:
+            sort_order = "desc"
+
         hide_watched = RedisArchivist().get_message("hide_watched")
         view_config = {
             "colors": colors,
             "view_style": view_style,
+            "sort_by": sort_by,
             "sort_order": sort_order,
             "hide_watched": hide_watched,
         }
@@ -664,7 +678,12 @@ class PostData:
     def sort_order(self):
         """change the sort between published to downloaded"""
         sort_order = self.exec_val
-        RedisArchivist().set_message("sort_order", sort_order, expire=False)
+        if sort_order in ["asc", "desc"]:
+            RedisArchivist().set_message(
+                "sort_order", sort_order, expire=False
+            )
+        else:
+            RedisArchivist().set_message("sort_by", sort_order, expire=False)
         return {"success": True}
 
     def hide_watched(self):

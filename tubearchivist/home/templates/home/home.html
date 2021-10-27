@@ -6,11 +6,25 @@
 </div>
 <div class="info-box info-box-2">
     <div class="sort">
-        <p>Sort order from <span class="settings-current">{{ sortorder }}</span>
+        <p>Sort by <span class="settings-current">{{ sort_by }}</span>
             <select name="sort" id="sort" onchange="sortChange(this.value)">
-                <option value="" disabled selected> -- change sort order -- </option>
+                <option value="" disabled selected> -- change sort by -- </option>
                 <option value="published">date published</option>
                 <option value="downloaded">date downloaded</option>
+                <option value="views">views</option>
+                <option value="likes">likes</option>
+            </select>
+            <select name="sord-order" id="sort-order" onchange="sortChange(this.value)">
+                {% if sort_order == "asc" %}
+                    <option value="asc" selected>asc</option>
+                {% else %}
+                    <option value="asc">asc</option>
+                {% endif %}
+                {% if sort_order == "desc" %}
+                    <option value="desc" selected>desc</option>
+                {% else %}
+                    <option value="desc">desc</option>
+                {% endif %}
             </select>
         </p>
     </div>
