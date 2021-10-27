@@ -44,7 +44,7 @@ class HomeView(View):
 
     def get(self, request):
         """return home search results"""
-        colors, view_style, sort_order, hide_watched = self.read_config()
+        view_config = self.read_config()
         # handle search
         search_get = request.GET.get("search", False)
         if search_get:
@@ -56,9 +56,11 @@ class HomeView(View):
         pagination_handler = Pagination(page_get, search_encoded)
 
         url = self.ES_URL + "/ta_video/_search"
-
         data = self.build_data(
-            pagination_handler, sort_order, search_get, hide_watched
+            pagination_handler,
+            view_config["sort_order"],
+            search_get,
+            view_config["hide_watched"],
         )
 
         search = SearchHandler(url, data)
@@ -68,10 +70,10 @@ class HomeView(View):
         context = {
             "videos": videos_hits,
             "pagination": pagination_handler.pagination,
-            "sortorder": sort_order,
-            "hide_watched": hide_watched,
-            "colors": colors,
-            "view_style": view_style,
+            "sortorder": view_config["sort_order"],
+            "hide_watched": view_config["hide_watched"],
+            "colors": view_config["colors"],
+            "view_style": view_config["view_style"],
         }
         return render(request, "home/home.html", context)
 
@@ -119,7 +121,13 @@ class HomeView(View):
         if not sort_order:
             sort_order = "published"
         hide_watched = RedisArchivist().get_message("hide_watched")
-        return colors, view_style, sort_order, hide_watched
+        view_config = {
+            "colors": colors,
+            "view_style": view_style,
+            "sort_order": sort_order,
+            "hide_watched": hide_watched,
+        }
+        return view_config
 
     @staticmethod
     def post(request):
