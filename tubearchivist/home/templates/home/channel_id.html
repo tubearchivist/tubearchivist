@@ -34,6 +34,11 @@
                 false
             {% endif %}
             </p>
+            <p>Channel id: {{ channel_info.channel_id }}</p>
+            <button onclick="deleteConfirm()" id="delete-item">Delete Channel</button>
+            <div class="delete-confirm" id="delete-button">
+                <span>Delete {{ channel_info.channel_name }} including all videos? </span><button class="danger-button" onclick="deleteChannel(this)" data-id="{{ channel_info.channel_id }}">Delete</button> <button onclick="cancelDelete()">Cancel</button>
+            </div>
         </div>
     </div>
     <div class="info-box-item">
@@ -47,11 +52,6 @@
                 <p>Total Videos archived: {{ max_hits }}</p>
                 <p>Watched: <button title="Mark all videos from {{ channel_info.channel_name }} as watched" type="button" id="{{ channel_info.channel_id }}" onclick="isWatched(this.id)">Mark as watched</button></p>
             {% endif %}
-            <p>Channel id: {{ channel_info.channel_id }}</p>
-            <button onclick="deleteConfirm()" id="delete-item">Delete Channel</button>
-            <div class="delete-confirm" id="delete-button">
-                <span>Delete {{ channel_info.channel_name }} including all videos? </span><button class="danger-button" onclick="deleteChannel(this)" data-id="{{ channel_info.channel_id }}">Delete</button> <button onclick="cancelDelete()">Cancel</button>
-            </div>
         </div>
     </div>
 </div>
@@ -63,12 +63,49 @@
         </div>
     </div>
 {% endif %}
-<div class="view-icons">
-    <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="grid" alt="grid view">
-    <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="list" alt="list view">
-</div>
 <div id="player" class="video-player"></div>
-<h2>Videos</h2>
+<div class="sort">
+    <p>Sort by <span class="settings-current">{{ sort_by }}</span>
+        <select name="sort" id="sort" onchange="sortChange(this.value)">
+            <option value="" disabled selected> -- change sort by -- </option>
+            <option value="published">date published</option>
+            <option value="downloaded">date downloaded</option>
+            <option value="views">views</option>
+            <option value="likes">likes</option>
+        </select>
+        <select name="sord-order" id="sort-order" onchange="sortChange(this.value)">
+            {% if sort_order == "asc" %}
+                <option value="asc" selected>asc</option>
+            {% else %}
+                <option value="asc">asc</option>
+            {% endif %}
+            {% if sort_order == "desc" %}
+                <option value="desc" selected>desc</option>
+            {% else %}
+                <option value="desc">desc</option>
+            {% endif %}
+        </select>
+    </p>
+</div>
+<div class="view-controls">
+    <div class="toggle">
+        <span>Hide watched videos:</span>
+        <div class="toggleBox">
+            <input 
+                id="hide_watched" onclick="toggleCheckbox(this)" type="checkbox"
+                {% if hide_watched %}
+                    checked
+                {% endif %}
+                >
+            <label for="" class="onbtn">On</label>
+            <label for="" class="ofbtn">Off</label>
+        </div>
+    </div>
+    <div class="view-icons">
+        <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="grid" alt="grid view">
+        <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="list" alt="list view">
+    </div>
+</div>
 <div class="video-list {{ view_style }}">
     {% if videos %}
         {% for video in videos %}

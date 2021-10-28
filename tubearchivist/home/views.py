@@ -302,27 +302,47 @@ class ChannelIdView(View):
 
     def get(self, request, channel_id_detail):
         """get method"""
-        es_url, colors, view_style = self.read_config()
-        context = self.get_channel_videos(request, channel_id_detail, es_url)
-        context.update({"colors": colors, "view_style": view_style})
+        # es_url, colors, view_style = self.read_config()
+        view_config = self.read_config()
+        context = self.get_channel_videos(
+            request, channel_id_detail, view_config
+        )
+        context.update(view_config)
         return render(request, "home/channel_id.html", context)
 
     @staticmethod
     def read_config():
         """read config file"""
         config = AppConfig().config
-        es_url = config["application"]["es_url"]
-        colors = config["application"]["colors"]
-        view_style = config["default_view"]["home"]
-        return es_url, colors, view_style
 
-    def get_channel_videos(self, request, channel_id_detail, es_url):
+        sort_by = RedisArchivist().get_message("sort_by")
+        if sort_by == {"status": False}:
+            sort_by = "published"
+        sort_order = RedisArchivist().get_message("sort_order")
+        if sort_order == {"status": False}:
+            sort_order = "desc"
+        hide_watched = RedisArchivist().get_message("hide_watched")
+
+        view_config = {
+            "colors": config["application"]["colors"],
+            "es_url": config["application"]["es_url"],
+            "view_style": config["default_view"]["home"],
+            "sort_by": sort_by,
+            "sort_order": sort_order,
+            "hide_watched": hide_watched,
+        }
+        # return es_url, colors, view_style
+        return view_config
+
+    def get_channel_videos(self, request, channel_id_detail, view_config):
         """get channel from video index"""
         page_get = int(request.GET.get("page", 0))
         pagination_handler = Pagination(page_get)
         # get data
-        url = es_url + "/ta_video/_search"
-        data = self.build_data(pagination_handler, channel_id_detail)
+        url = view_config["es_url"] + "/ta_video/_search"
+        data = self.build_data(
+            pagination_handler, channel_id_detail, view_config
+        )
         search = SearchHandler(url, data)
         videos_hits = search.get_data()
         max_hits = search.max_hits
@@ -334,7 +354,7 @@ class ChannelIdView(View):
         else:
             # get details from channel index when when no hits
             channel_info, channel_name = self.get_channel_info(
-                channel_id_detail, es_url
+                channel_id_detail, view_config["es_url"]
             )
             videos_hits = False
             pagination = False
@@ -350,21 +370,43 @@ class ChannelIdView(View):
         return context
 
     @staticmethod
-    def build_data(pagination_handler, channel_id_detail):
+    def build_data(pagination_handler, channel_id_detail, view_config):
         """build data dict for search"""
-        page_size = pagination_handler.pagination["page_size"]
-        page_from = pagination_handler.pagination["page_from"]
+        sort_by = view_config["sort_by"]
+        sort_order = view_config["sort_order"]
+
+        # overwrite sort_by to match key
+        if sort_by == "views":
+            sort_by = "stats.view_count"
+        elif sort_by == "likes":
+            sort_by = "stats.like_count"
+        elif sort_by == "downloaded":
+            sort_by = "date_downloaded"
+
         data = {
-            "size": page_size,
-            "from": page_from,
+            "size": pagination_handler.pagination["page_size"],
+            "from": pagination_handler.pagination["page_from"],
             "query": {
-                "term": {"channel.channel_id": {"value": channel_id_detail}}
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "channel.channel_id": {
+                                    "value": channel_id_detail
+                                }
+                            }
+                        }
+                    ]
+                }
             },
-            "sort": [
-                {"published": {"order": "desc"}},
-                {"date_downloaded": {"order": "desc"}},
-            ],
+            "sort": [{sort_by: {"order": sort_order}}],
         }
+        if view_config["hide_watched"]:
+            to_append = {"term": {"player.watched": {"value": False}}}
+            data["query"]["bool"]["must"].append(to_append)
+
+        print(data)
+
         return data
 
     @staticmethod
