@@ -14,13 +14,13 @@ import redis
 import requests
 
 
-def get_total_hits(index, es_url, match_field):
+def get_total_hits(index, es_url, es_auth, match_field):
     """get total hits from index"""
     headers = {"Content-type": "application/json"}
     data = {"query": {"match": {match_field: True}}}
     payload = json.dumps(data)
     url = f"{es_url}/{index}/_search?filter_path=hits.total"
-    request = requests.post(url, data=payload, headers=headers)
+    request = requests.post(url, data=payload, headers=headers, auth=es_auth)
     if not request.ok:
         print(request.text)
     total_json = json.loads(request.text)

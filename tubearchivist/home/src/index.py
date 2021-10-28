@@ -24,6 +24,7 @@ class YoutubeChannel:
 
     CONFIG = AppConfig().config
     ES_URL = CONFIG["application"]["es_url"]
+    ES_AUTH = CONFIG["application"]["es_auth"]
     CACHE_DIR = CONFIG["application"]["cache_dir"]
     VIDEOS = CONFIG["application"]["videos"]
 
@@ -51,7 +52,7 @@ class YoutubeChannel:
         """get from elastic search first if possible"""
         channel_id = self.channel_id
         url = f"{self.ES_URL}/ta_channel/_doc/{channel_id}"
-        response = requests.get(url)
+        response = requests.get(url, auth=self.ES_AUTH)
         if response.ok:
             channel_source = response.json()["_source"]
             self.source = "elastic"
@@ -63,7 +64,7 @@ class YoutubeChannel:
         channel_id = self.channel_id
         url = f"https://www.youtube.com/channel/{channel_id}/about?hl=en"
         cookies = {"CONSENT": "YES+xxxxxxxxxxxxxxxxxxxxxxxxxxx"}
-        response = requests.get(url, cookies=cookies)
+        response = requests.get(url, cookies=cookies, auth=self.ES_AUTH)
         if response.ok:
             channel_page = response.text
         else:
@@ -166,7 +167,7 @@ class YoutubeChannel:
     def upload_to_es(self):
         """upload channel data to elastic search"""
         url = f"{self.ES_URL}/ta_channel/_doc/{self.channel_id}"
-        response = requests.put(url, json=self.channel_dict)
+        response = requests.put(url, json=self.channel_dict, auth=self.ES_AUTH)
         print(f"added {self.channel_id} to es")
         if not response.ok:
             print(response.text)
@@ -183,14 +184,18 @@ class YoutubeChannel:
         data = {"description": channel_id, "processors": processors}
         payload = json.dumps(data)
         url = self.ES_URL + "/_ingest/pipeline/" + channel_id
-        request = requests.put(url, data=payload, headers=headers)
+        request = requests.put(
+            url, data=payload, headers=headers, auth=self.ES_AUTH
+        )
         if not request.ok:
             print(request.text)
         # apply pipeline
         data = {"query": {"match": {"channel.channel_id": channel_id}}}
         payload = json.dumps(data)
         url = self.ES_URL + "/ta_video/_update_by_query?pipeline=" + channel_id
-        request = requests.post(url, data=payload, headers=headers)
+        request = requests.post(
+            url, data=payload, headers=headers, auth=self.ES_AUTH
+        )
         if not request.ok:
             print(request.text)
 
@@ -211,7 +216,9 @@ class YoutubeChannel:
         }
         payload = json.dumps(data)
         url = self.ES_URL + "/ta_video/_delete_by_query"
-        response = requests.post(url, data=payload, headers=headers)
+        response = requests.post(
+            url, data=payload, headers=headers, auth=self.ES_AUTH
+        )
         if not response.ok:
             print(response.text)
 
@@ -230,7 +237,7 @@ class YoutubeChannel:
         print("delete indexed videos")
         self.delete_es_videos()
         url = self.ES_URL + "/ta_channel/_doc/" + self.channel_id
-        response = requests.delete(url)
+        response = requests.delete(url, auth=self.ES_AUTH)
         if not response.ok:
             print(response.text)
 
@@ -240,6 +247,7 @@ class YoutubeVideo:
 
     CONFIG = AppConfig().config
     ES_URL = CONFIG["application"]["es_url"]
+    ES_AUTH = CONFIG["application"]["es_auth"]
     CACHE_DIR = CONFIG["application"]["cache_dir"]
     VIDEOS = CONFIG["application"]["videos"]
 
@@ -360,7 +368,7 @@ class YoutubeVideo:
     def get_es_data(self):
         """get current data from elastic search"""
         url = self.ES_URL + "/ta_video/_doc/" + self.youtube_id
-        response = requests.get(url)
+        response = requests.get(url, auth=self.ES_AUTH)
         if not response.ok:
             print(response.text)
         es_vid_dict = json.loads(response.text)
@@ -369,7 +377,7 @@ class YoutubeVideo:
     def upload_to_es(self):
         """upload channel data to elastic search"""
         url = f"{self.ES_URL}/ta_video/_doc/{self.youtube_id}"
-        response = requests.put(url, json=self.vid_dict)
+        response = requests.put(url, json=self.vid_dict, auth=self.ES_AUTH)
         if not response.ok:
             print(response.text)
 
@@ -380,7 +388,9 @@ class YoutubeVideo:
         url = f"{self.ES_URL}/ta_video/_update/{youtube_id}"
         data = {"script": "ctx._source.active = false"}
         json_str = json.dumps(data)
-        response = requests.post(url, data=json_str, headers=headers)
+        response = requests.post(
+            url, data=json_str, headers=headers, auth=self.ES_AUTH
+        )
         print(f"deactivated {youtube_id}")
         if not response.ok:
             print(response.text)
@@ -395,7 +405,7 @@ class YoutubeVideo:
         os.remove(to_delete)
         # delete from index
         url = f"{self.ES_URL}/ta_video/_doc/{self.youtube_id}"
-        response = requests.delete(url)
+        response = requests.delete(url, auth=self.ES_AUTH)
         if not response.ok:
             print(response.text)
         # delete thumbs from cache
@@ -407,6 +417,7 @@ class WatchState:
 
     CONFIG = AppConfig().config
     ES_URL = CONFIG["application"]["es_url"]
+    ES_AUTH = CONFIG["application"]["es_auth"]
     HEADERS = {"Content-type": "application/json"}
 
     def __init__(self, youtube_id):
@@ -450,7 +461,9 @@ class WatchState:
             data["doc"]["player"]["watched"] = False
 
         payload = json.dumps(data)
-        request = requests.post(url, data=payload, headers=self.HEADERS)
+        request = requests.post(
+            url, data=payload, headers=self.HEADERS, auth=self.ES_AUTH
+        )
         if not request.ok:
             print(request.text)
 
@@ -472,7 +485,9 @@ class WatchState:
 
         payload = json.dumps(data)
         url = f"{es_url}/_ingest/pipeline/{youtube_id}"
-        request = requests.put(url, data=payload, headers=headers)
+        request = requests.put(
+            url, data=payload, headers=headers, auth=self.ES_AUTH
+        )
         if not request.ok:
             print(request.text)
             raise ValueError("failed to post ingest pipeline")
@@ -485,7 +500,9 @@ class WatchState:
         data = {"query": {"bool": {"must": must_list}}}
         payload = json.dumps(data)
         url = f"{es_url}/ta_video/_update_by_query?pipeline={youtube_id}"
-        request = requests.post(url, data=payload, headers=headers)
+        request = requests.post(
+            url, data=payload, headers=headers, auth=self.ES_AUTH
+        )
         if not request.ok:
             print(request.text)
 

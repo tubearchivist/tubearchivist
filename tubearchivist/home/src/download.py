@@ -29,6 +29,7 @@ class PendingList:
 
     CONFIG = AppConfig().config
     ES_URL = CONFIG["application"]["es_url"]
+    ES_AUTH = CONFIG["application"]["es_auth"]
     VIDEOS = CONFIG["application"]["videos"]
 
     @staticmethod
@@ -107,7 +108,9 @@ class PendingList:
         query_str = "\n".join(bulk_list)
         headers = {"Content-type": "application/x-ndjson"}
         url = self.ES_URL + "/_bulk"
-        request = requests.post(url, data=query_str, headers=headers)
+        request = requests.post(
+            url, data=query_str, headers=headers, auth=self.ES_AUTH
+        )
         if not request.ok:
             print(request)
 
@@ -155,7 +158,7 @@ class PendingList:
         headers = {"Content-type": "application/json"}
         # get PIT ID
         url = self.ES_URL + "/ta_download/_pit?keep_alive=1m"
-        response = requests.post(url)
+        response = requests.post(url, auth=self.ES_AUTH)
         json_data = json.loads(response.text)
         pit_id = json_data["id"]
         # query
@@ -170,7 +173,9 @@ class PendingList:
         all_pending = []
         all_ignore = []
         while True:
-            response = requests.get(url, data=query_str, headers=headers)
+            response = requests.get(
+                url, data=query_str, headers=headers, auth=self.ES_AUTH
+            )
             json_data = json.loads(response.text)
             all_hits = json_data["hits"]["hits"]
             if all_hits:
@@ -188,7 +193,12 @@ class PendingList:
                 break
         # clean up PIT
         query_str = json.dumps({"id": pit_id})
-        requests.delete(self.ES_URL + "/_pit", data=query_str, headers=headers)
+        requests.delete(
+            self.ES_URL + "/_pit",
+            data=query_str,
+            headers=headers,
+            auth=self.ES_AUTH,
+        )
         return all_pending, all_ignore
 
     def get_all_indexed(self):
@@ -196,7 +206,7 @@ class PendingList:
         headers = {"Content-type": "application/json"}
         # get PIT ID
         url = self.ES_URL + "/ta_video/_pit?keep_alive=1m"
-        response = requests.post(url)
+        response = requests.post(url, auth=self.ES_AUTH)
         json_data = json.loads(response.text)
         pit_id = json_data["id"]
         # query
@@ -210,7 +220,9 @@ class PendingList:
         url = self.ES_URL + "/_search"
         all_indexed = []
         while True:
-            response = requests.get(url, data=query_str, headers=headers)
+            response = requests.get(
+                url, data=query_str, headers=headers, auth=self.ES_AUTH
+            )
             json_data = json.loads(response.text)
             all_hits = json_data["hits"]["hits"]
             if all_hits:
@@ -224,7 +236,12 @@ class PendingList:
                 break
         # clean up PIT
         query_str = json.dumps({"id": pit_id})
-        requests.delete(self.ES_URL + "/_pit", data=query_str, headers=headers)
+        requests.delete(
+            self.ES_URL + "/_pit",
+            data=query_str,
+            headers=headers,
+            auth=self.ES_AUTH,
+        )
         return all_indexed
 
     def get_all_downloaded(self):
@@ -244,7 +261,7 @@ class PendingList:
     def delete_from_pending(self, youtube_id):
         """delete the youtube_id from ta_download"""
         url = f"{self.ES_URL}/ta_download/_doc/{youtube_id}"
-        response = requests.delete(url)
+        response = requests.delete(url, auth=self.ES_AUTH)
         if not response.ok:
             print(response.text)
 
@@ -266,7 +283,9 @@ class PendingList:
 
         headers = {"Content-type": "application/x-ndjson"}
         url = self.ES_URL + "/_bulk"
-        request = requests.post(url, data=query_str, headers=headers)
+        request = requests.post(
+            url, data=query_str, headers=headers, auth=self.ES_AUTH
+        )
         mess_dict = {
             "status": "ignore",
             "level": "info",
@@ -284,6 +303,7 @@ class ChannelSubscription:
     def __init__(self):
         config = AppConfig().config
         self.es_url = config["application"]["es_url"]
+        self.es_auth = config["application"]["es_auth"]
         self.channel_size = config["subscriptions"]["channel_size"]
 
     def get_channels(self, subscribed_only=True):
@@ -291,7 +311,7 @@ class ChannelSubscription:
         headers = {"Content-type": "application/json"}
         # get PIT ID
         url = self.es_url + "/ta_channel/_pit?keep_alive=1m"
-        response = requests.post(url)
+        response = requests.post(url, auth=self.es_auth)
         json_data = json.loads(response.text)
         pit_id = json_data["id"]
         # query
@@ -313,7 +333,9 @@ class ChannelSubscription:
         url = self.es_url + "/_search"
         all_channels = []
         while True:
-            response = requests.get(url, data=query_str, headers=headers)
+            response = requests.get(
+                url, data=query_str, headers=headers, auth=self.es_auth
+            )
             json_data = json.loads(response.text)
             all_hits = json_data["hits"]["hits"]
             if all_hits:
@@ -328,7 +350,12 @@ class ChannelSubscription:
                 break
         # clean up PIT
         query_str = json.dumps({"id": pit_id})
-        requests.delete(self.es_url + "/_pit", data=query_str, headers=headers)
+        requests.delete(
+            self.es_url + "/_pit",
+            data=query_str,
+            headers=headers,
+            auth=self.es_auth,
+        )
         return all_channels
 
     def get_last_youtube_videos(self, channel_id, limit=True):
@@ -394,7 +421,9 @@ class ChannelSubscription:
             url = self.es_url + "/ta_channel/_update/" + channel_id
             payload = json.dumps({"doc": channel_dict})
         # update channel
-        request = requests.post(url, data=payload, headers=headers)
+        request = requests.post(
+            url, data=payload, headers=headers, auth=self.es_auth
+        )
         if not request.ok:
             print(request.text)
         # sync to videos
@@ -602,7 +631,8 @@ class VideoDownloader:
     def delete_from_pending(self, youtube_id):
         """delete downloaded video from pending index if its there"""
         es_url = self.config["application"]["es_url"]
+        es_auth = self.config["application"]["es_auth"]
         url = f"{es_url}/ta_download/_doc/{youtube_id}"
-        response = requests.delete(url)
+        response = requests.delete(url, auth=es_auth)
         if not response.ok and not response.status_code == 404:
             print(response.text)

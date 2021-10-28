@@ -20,6 +20,7 @@ class SearchHandler:
 
     CONFIG = AppConfig().config
     CACHE_DIR = CONFIG["application"]["cache_dir"]
+    ES_AUTH = CONFIG["application"]["es_auth"]
 
     def __init__(self, url, data):
         self.max_hits = None
@@ -29,9 +30,11 @@ class SearchHandler:
     def get_data(self):
         """get the data"""
         if self.data:
-            response = requests.get(self.url, json=self.data).json()
+            response = requests.get(
+                self.url, json=self.data, auth=self.ES_AUTH
+            ).json()
         else:
-            response = requests.get(self.url).json()
+            response = requests.get(self.url, auth=self.ES_AUTH).json()
 
         if "hits" in response.keys():
             self.max_hits = response["hits"]["total"]["value"]

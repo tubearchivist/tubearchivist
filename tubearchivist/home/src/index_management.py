@@ -164,6 +164,7 @@ class ElasticIndex:
 
     CONFIG = AppConfig().config
     ES_URL = CONFIG["application"]["es_url"]
+    ES_AUTH = CONFIG["application"]["es_auth"]
     HEADERS = {"Content-type": "application/json"}
 
     def __init__(self, index_name, expected_map, expected_set):
@@ -176,7 +177,7 @@ class ElasticIndex:
         """check if index already exists and return mapping if it does"""
         index_name = self.index_name
         url = f"{self.ES_URL}/ta_{index_name}"
-        response = requests.get(url)
+        response = requests.get(url, auth=self.ES_AUTH)
         exists = response.ok
 
         if exists:
@@ -274,7 +275,9 @@ class ElasticIndex:
         query = {"source": {"index": source}, "dest": {"index": destination}}
         data = json.dumps(query)
         url = self.ES_URL + "/_reindex?refresh=true"
-        response = requests.post(url=url, data=data, headers=self.HEADERS)
+        response = requests.post(
+            url=url, data=data, headers=self.HEADERS, auth=self.ES_AUTH
+        )
         if not response.ok:
             print(response.text)
 
@@ -284,7 +287,7 @@ class ElasticIndex:
             url = f"{self.ES_URL}/ta_{self.index_name}_backup"
         else:
             url = f"{self.ES_URL}/ta_{self.index_name}"
-        response = requests.delete(url)
+        response = requests.delete(url, auth=self.ES_AUTH)
         if not response.ok:
             print(response.text)
 
@@ -301,7 +304,9 @@ class ElasticIndex:
         # create
         url = f"{self.ES_URL}/ta_{self.index_name}"
         data = json.dumps(payload)
-        response = requests.put(url=url, data=data, headers=self.HEADERS)
+        response = requests.put(
+            url=url, data=data, headers=self.HEADERS, auth=self.ES_AUTH
+        )
         if not response.ok:
             print(response.text)
 
@@ -319,9 +324,10 @@ class ElasticBackup:
         """export all documents of a single index"""
         headers = {"Content-type": "application/json"}
         es_url = self.config["application"]["es_url"]
+        es_auth = self.config["application"]["es_auth"]
         # get PIT ID
         url = f"{es_url}/ta_{index_name}/_pit?keep_alive=1m"
-        response = requests.post(url)
+        response = requests.post(url, auth=es_auth)
         json_data = json.loads(response.text)
         pit_id = json_data["id"]
         # build query
@@ -336,7 +342,9 @@ class ElasticBackup:
         # loop until nothing left
         all_results = []
         while True:
-            response = requests.get(url, data=query_str, headers=headers)
+            response = requests.get(
+                url, data=query_str, headers=headers, auth=es_auth
+            )
             json_data = json.loads(response.text)
             all_hits = json_data["hits"]["hits"]
             if all_hits:
@@ -350,7 +358,9 @@ class ElasticBackup:
                 break
         # clean up PIT
         query_str = json.dumps({"id": pit_id})
-        requests.delete(es_url + "/_pit", data=query_str, headers=headers)
+        requests.delete(
+            es_url + "/_pit", data=query_str, headers=headers, auth=es_auth
+        )
 
         return all_results
 
@@ -416,6 +426,7 @@ class ElasticBackup:
         """send bulk to es"""
         cache_dir = self.config["application"]["cache_dir"]
         es_url = self.config["application"]["es_url"]
+        es_auth = self.config["application"]["es_auth"]
         headers = {"Content-type": "application/x-ndjson"}
         file_path = os.path.join(cache_dir, file_name)
 
@@ -426,7 +437,9 @@ class ElasticBackup:
             return
 
         url = es_url + "/_bulk"
-        request = requests.post(url, data=query_str, headers=headers)
+        request = requests.post(
+            url, data=query_str, headers=headers, auth=es_auth
+        )
         if not request.ok:
             print(request.text)
 

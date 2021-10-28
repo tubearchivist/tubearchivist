@@ -1,8 +1,12 @@
 #!/bin/bash
 # startup script inside the container for tubearchivist
 
+if [[ -z "$ELASTIC_USER" ]]; then
+    export ELASTIC_USER=elastic
+fi
+
 counter=0
-until curl "$ES_URL" -fs; do
+until curl -u "$ELASTIC_USER":"$ELASTIC_PASSWORD" "$ES_URL" -fs; do
     echo "waiting for elastic search to start"
     counter=$((counter+1))
     if [[ $counter -eq 12 ]]; then

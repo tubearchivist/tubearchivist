@@ -51,9 +51,13 @@ class AppConfig:
         else:
             host_gid = False
 
+        es_pass = os.environ.get("ELASTIC_PASSWORD")
+        es_user = os.environ.get("ELASTIC_USER", default="elastic")
+
         application = {
             "REDIS_HOST": os.environ.get("REDIS_HOST"),
             "es_url": os.environ.get("ES_URL"),
+            "es_auth": (es_user, es_pass),
             "HOST_UID": host_uid,
             "HOST_GID": host_gid,
         }

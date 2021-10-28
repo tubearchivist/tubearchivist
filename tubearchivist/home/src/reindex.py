@@ -35,6 +35,7 @@ class Reindex:
         config = AppConfig().config
         self.sleep_interval = config["downloads"]["sleep_interval"]
         self.es_url = config["application"]["es_url"]
+        self.es_auth = config["application"]["auth"]
         self.refresh_interval = 90
         # scan
         self.video_daily, self.channel_daily = self.get_daily()
@@ -43,10 +44,12 @@ class Reindex:
 
     def get_daily(self):
         """get daily refresh values"""
-        total_videos = get_total_hits("ta_video", self.es_url, "active")
+        total_videos = get_total_hits(
+            "ta_video", self.es_url, self.es_auth, "active"
+        )
         video_daily = ceil(total_videos / self.refresh_interval * 1.2)
         total_channels = get_total_hits(
-            "ta_channel", self.es_url, "channel_active"
+            "ta_channel", self.es_url, self.es_auth, "channel_active"
         )
         channel_daily = ceil(total_channels / self.refresh_interval * 1.2)
         return (video_daily, channel_daily)
@@ -72,7 +75,9 @@ class Reindex:
         }
         query_str = json.dumps(data)
         url = self.es_url + "/ta_video/_search"
-        response = requests.get(url, data=query_str, headers=headers)
+        response = requests.get(
+            url, data=query_str, headers=headers, auth=self.es_auth
+        )
         if not response.ok:
             print(response.text)
         response_dict = json.loads(response.text)
@@ -100,7 +105,9 @@ class Reindex:
         }
         query_str = json.dumps(data)
         url = self.es_url + "/ta_channel/_search"
-        response = requests.get(url, data=query_str, headers=headers)
+        response = requests.get(
+            url, data=query_str, headers=headers, auth=self.es_auth
+        )
         if not response.ok:
             print(response.text)
         response_dict = json.loads(response.text)
@@ -208,6 +215,7 @@ class FilesystemScanner:
 
     CONFIG = AppConfig().config
     ES_URL = CONFIG["application"]["es_url"]
+    ES_AUTH = CONFIG["application"]["es_auth"]
     VIDEOS = CONFIG["application"]["videos"]
 
     def __init__(self):
@@ -329,7 +337,9 @@ class FilesystemScanner:
         # make the call
         headers = {"Content-type": "application/x-ndjson"}
         url = self.ES_URL + "/_bulk"
-        request = requests.post(url, data=query_str, headers=headers)
+        request = requests.post(
+            url, data=query_str, headers=headers, auth=self.ES_AUTH
+        )
         if not request.ok:
             print(request.text)
 
@@ -339,7 +349,7 @@ class FilesystemScanner:
             youtube_id = indexed[0]
             print(f"deleting {youtube_id} from index")
             url = self.ES_URL + "/ta_video/_doc/" + youtube_id
-            request = requests.delete(url)
+            request = requests.delete(url, auth=self.ES_AUTH)
             if not request.ok:
                 print(request.text)
 

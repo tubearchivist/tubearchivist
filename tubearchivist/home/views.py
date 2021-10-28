@@ -115,8 +115,6 @@ class HomeView(View):
             }
             data["query"] = query
 
-        print(data)
-
         return data
 
     @staticmethod
