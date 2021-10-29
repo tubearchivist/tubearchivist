@@ -44,7 +44,7 @@ class HomeView(View):
 
     def get(self, request):
         """return home search results"""
-        view_config = self.read_config()
+        view_config = self.read_config(user_id=request.user.id)
         # handle search
         search_get = request.GET.get("search", False)
         if search_get:
@@ -118,11 +118,15 @@ class HomeView(View):
         return data
 
     @staticmethod
-    def read_config():
+    def read_config(user_id):
         """read needed values from redis"""
         config_handler = AppConfig().config
         colors = config_handler["application"]["colors"]
-        view_style = config_handler["default_view"]["home"]
+
+        view_key = f"{user_id}:view:home"
+        view_style = RedisArchivist().get_message(view_key)["status"]
+        if not view_style:
+            view_style = config_handler["default_view"]["home"]
 
         sort_by = RedisArchivist().get_message("sort_by")
         if sort_by == {"status": False}:
@@ -215,17 +219,15 @@ class DownloadView(View):
 
     def get(self, request):
         """handle get requests"""
-        config = AppConfig().config
-        colors = config["application"]["colors"]
-        view_style = config["default_view"]["downloads"]
-        ignored = RedisArchivist().get_message("show_ignored_only")
-        show_ignored_only = ignored["status"]
+        view_config = self.read_config(user_id=request.user.id)
 
         page_get = int(request.GET.get("page", 0))
         pagination_handler = Pagination(page_get)
 
-        url = config["application"]["es_url"] + "/ta_download/_search"
-        data = self.build_data(pagination_handler, show_ignored_only)
+        url = view_config["es_url"] + "/ta_download/_search"
+        data = self.build_data(
+            pagination_handler, view_config["show_ignored_only"]
+        )
         search = SearchHandler(url, data)
 
         videos_hits = search.get_data()
@@ -244,11 +246,35 @@ class DownloadView(View):
             "max_hits": max_hits,
             "pagination": pagination,
             "title": "Downloads",
-            "colors": colors,
-            "show_ignored_only": show_ignored_only,
-            "view_style": view_style,
+            "colors": view_config["colors"],
+            "show_ignored_only": view_config["show_ignored_only"],
+            "view_style": view_config["view_style"],
         }
         return render(request, "home/downloads.html", context)
+
+    @staticmethod
+    def read_config(user_id):
+        """read config vars"""
+        config = AppConfig().config
+        colors = config["application"]["colors"]
+
+        view_key = f"{user_id}:view:downloads"
+        view_style = RedisArchivist().get_message(view_key)["status"]
+        if not view_style:
+            view_style = config["default_view"]["downloads"]
+
+        ignored = RedisArchivist().get_message("show_ignored_only")
+        show_ignored_only = ignored["status"]
+
+        es_url = config["application"]["es_url"]
+
+        view_config = {
+            "es_url": es_url,
+            "colors": colors,
+            "view_style": view_style,
+            "show_ignored_only": show_ignored_only
+        }
+        return view_config
 
     @staticmethod
     def build_data(pagination_handler, show_ignored_only):
@@ -429,7 +455,7 @@ class ChannelView(View):
 
     def get(self, request):
         """handle http get requests"""
-        es_url, colors, view_style = self.read_config()
+        es_url, colors, view_style = self.read_config(user_id=request.user.id)
         page_get = int(request.GET.get("page", 0))
         pagination_handler = Pagination(page_get)
         page_size = pagination_handler.pagination["page_size"]
@@ -461,12 +487,17 @@ class ChannelView(View):
         return render(request, "home/channel.html", context)
 
     @staticmethod
-    def read_config():
+    def read_config(user_id):
         """read config file"""
         config = AppConfig().config
         es_url = config["application"]["es_url"]
         colors = config["application"]["colors"]
-        view_style = config["default_view"]["channel"]
+
+        view_key = f"{user_id}:view:channel"
+        view_style = RedisArchivist().get_message(view_key)["status"]
+        if not view_style:
+            view_style = config["default_view"]["channel"]
+
         return es_url, colors, view_style
 
     def post(self, request):
@@ -591,8 +622,9 @@ def progress(request):
 def process(request):
     """handle all the buttons calls via POST ajax"""
     if request.method == "POST":
+        current_user = request.user.id
         post_dict = json.loads(request.body.decode())
-        post_handler = PostData(post_dict)
+        post_handler = PostData(post_dict, current_user)
         if post_handler.to_exec:
             task_result = post_handler.run_task()
             return JsonResponse(task_result)
@@ -606,9 +638,10 @@ class PostData:
     handover long running tasks to celery
     """
 
-    def __init__(self, post_dict):
+    def __init__(self, post_dict, current_user):
         self.post_dict = post_dict
         self.to_exec, self.exec_val = list(post_dict.items())[0]
+        self.current_user = current_user
 
     def run_task(self):
         """execute and return task result"""
@@ -658,9 +691,9 @@ class PostData:
     def change_view(self):
         """process view changes in home, channel, and downloads"""
         origin, new_view = self.exec_val.split(":")
-        print(f"change view on page {origin} to {new_view}")
-        update_dict = {f"default_view.{origin}": [new_view]}
-        AppConfig().update_config(update_dict)
+        key = f"{self.current_user}:view:{origin}"
+        print(f"change view: {key} to {new_view}")
+        RedisArchivist().set_message(key, {"status": new_view}, expire=False)
         return {"success": True}
 
     @staticmethod
