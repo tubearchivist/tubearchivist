@@ -263,7 +263,7 @@ class DownloadView(View):
         if not view_style:
             view_style = config["default_view"]["downloads"]
 
-        ignored = RedisArchivist().get_message("show_ignored_only")
+        ignored = RedisArchivist().get_message(f"{user_id}:show_ignored_only")
         show_ignored_only = ignored["status"]
 
         es_url = config["application"]["es_url"]
@@ -272,7 +272,7 @@ class DownloadView(View):
             "es_url": es_url,
             "colors": colors,
             "view_style": view_style,
-            "show_ignored_only": show_ignored_only
+            "show_ignored_only": show_ignored_only,
         }
         return view_config
 
@@ -790,10 +790,10 @@ class PostData:
     def show_ignored_only(self):
         """switch view on /downloads/ to show ignored only"""
         show_value = self.exec_val
+        key = f"{self.current_user}:show_ignored_only"
+        value = {"status": show_value}
         print(f"Filter download view ignored only: {show_value}")
-        RedisArchivist().set_message(
-            "show_ignored_only", {"status": show_value}, expire=False
-        )
+        RedisArchivist().set_message(key, value, expire=False)
         return {"success": True}
 
     def forget_ignore(self):
