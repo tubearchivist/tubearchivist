@@ -135,7 +135,8 @@ class HomeView(View):
         if sort_order == {"status": False}:
             sort_order = "desc"
 
-        hide_watched = RedisArchivist().get_message("hide_watched")
+        hide_watched_key = f"{user_id}:hide_watched"
+        hide_watched = RedisArchivist().get_message(hide_watched_key)["status"]
         view_config = {
             "colors": colors,
             "view_style": view_style,
@@ -329,7 +330,7 @@ class ChannelIdView(View):
     def get(self, request, channel_id_detail):
         """get method"""
         # es_url, colors, view_style = self.read_config()
-        view_config = self.read_config()
+        view_config = self.read_config(user_id=request.user.id)
         context = self.get_channel_videos(
             request, channel_id_detail, view_config
         )
@@ -337,7 +338,7 @@ class ChannelIdView(View):
         return render(request, "home/channel_id.html", context)
 
     @staticmethod
-    def read_config():
+    def read_config(user_id):
         """read config file"""
         config = AppConfig().config
 
@@ -347,7 +348,8 @@ class ChannelIdView(View):
         sort_order = RedisArchivist().get_message("sort_order")
         if sort_order == {"status": False}:
             sort_order = "desc"
-        hide_watched = RedisArchivist().get_message("hide_watched")
+        hide_watched_key = f"{user_id}:hide_watched"
+        hide_watched = RedisArchivist().get_message(hide_watched_key)["status"]
 
         view_config = {
             "colors": config["application"]["colors"],
@@ -770,18 +772,17 @@ class PostData:
 
     def hide_watched(self):
         """toggle if to show watched vids or not"""
-        hide_watched = bool(int(self.exec_val))
-        print(f"hide watched: {hide_watched}")
-        RedisArchivist().set_message(
-            "hide_watched", hide_watched, expire=False
-        )
+        key = f"{self.current_user}:hide_watched"
+        message = {"status": bool(int(self.exec_val))}
+        print(f"toggle {key}: {message}")
+        RedisArchivist().set_message(key, message, expire=False)
         return {"success": True}
 
     def show_subed_only(self):
         """show or hide subscribed channels only on channels page"""
         key = f"{self.current_user}:show_subed_only"
         message = {"status": bool(int(self.exec_val))}
-        print(f"show {key}: {message}")
+        print(f"toggle {key}: {message}")
         RedisArchivist().set_message(key, message, expire=False)
         return {"success": True}
 
