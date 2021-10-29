@@ -86,10 +86,22 @@ class AppConfig:
                 elif to_write.isdigit():
                     to_write = int(to_write)
 
-                config_dict, config_value = key.split(".")
+                config_dict, config_value = key.split("_", maxsplit=1)
                 config[config_dict][config_value] = to_write
 
         RedisArchivist().set_message("config", config, expire=False)
+
+    @staticmethod
+    def set_user_config(form_post, user_id):
+        """set values in redis for user settings"""
+        for key, value in form_post.items():
+            to_write = value[0]
+            if len(to_write):
+                if to_write.isdigit():
+                    to_write = int(to_write)
+                message = {"status": to_write}
+                redis_key = f"{user_id}:{key}"
+                RedisArchivist().set_message(redis_key, message, expire=False)
 
     def load_new_defaults(self):
         """check config.json for missing defaults"""

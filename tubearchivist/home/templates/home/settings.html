@@ -1,20 +1,16 @@
 {% extends "home/base.html" %}
 {% block content %}
 <div class="title-bar">
-    <h1>Settings</h1>
+    <h1>User Configurations</h1>
 </div>
-<form action="/settings/" method="POST" name="settings-update">
+<form action="/settings/" method="POST" name="user-update">
     {% csrf_token %}
     <div class="settings-group">
         <h2>Color scheme</h2>
         <div class="settings-item">
             <p>Current color scheme: <span class="settings-current">{{ config.application.colors }}</span></p>
             <i>Select your preferred color scheme between dark and light mode.</i><br>
-            <select name="application.colors" id="application.colors">
-                <option value="" disabled selected> -- change color scheme -- </option>
-                <option value="dark">dark mode</option>
-                <option value="light">light mode</option>
-            </select>
+            {{ user_form.colors }}
         </div>
     </div>
     <div class="settings-group">
@@ -22,15 +18,22 @@
         <div class="settings-item">
             <p>Current page size: <span class="settings-current">{{ config.archive.page_size }}</span></p>
             <i>Result of videos showing in archive page</i><br>
-            <input type="number" name="archive.page_size" id="archive.page_size">
+            {{ user_form.page_size }}
         </div>
     </div>
+    <button type="submit" name="user-settings">Update User Configurations</button>
+</form>
+<div class="title-bar">
+    <h1>Application Configurations</h1>
+</div>
+<form action="/settings/" method="POST" name="application-update">
+    {% csrf_token %}
     <div class="settings-group">
         <h2 id="subscriptions">Subscriptions</h2>
         <div class="settings-item">
             <p>Current channel page size: <span class="settings-current">{{ config.subscriptions.channel_size }}</span></p>
             <i>Recent videos to check on check pending, max recommended 50.</i><br>
-            <input type="number" name="subscriptions.channel_size" id="subscriptions.channel_size">
+            {{ app_form.subscriptions_channel_size }}
         </div>
         <div class="settings-item">
             <p>Auto scan subscribed channels:</p>
@@ -46,22 +49,22 @@
         <div class="settings-item">
             <p>Current download limit: <span class="settings-current">{{ config.downloads.limit_count }}</span></p>
             <i>Limit the number of videos getting downloaded on every run. 0 (zero) to deactivate.</i><br>
-            <input type="number" name="downloads.limit_count" id="downloads.limit_count">
+            {{ app_form.downloads_limit_count }}
         </div>
         <div class="settings-item">
             <p>Current download speed limit: <span class="settings-current">{{ config.downloads.limit_speed }}</span></p>
             <i>Limit download speed. 0 (zero) to deactivate.</i><br>
-            <input type="number" name="downloads.limit_speed" id="downloads.limit_speed"><span>KB/sec</span>
+            {{ app_form.downloads_limit_speed }}
         </div>
         <div class="settings-item">
             <p>Current throttled rate limit: <span class="settings-current">{{ config.downloads.throttledratelimit }}</span></p>
             <i>Assume the download is being throttled below this speed and restart. 0 (zero) to deactivate, e.g. 100KB/sec</i><br>
-            <input type="number" name="downloads.throttledratelimit" id="downloads.throttledratelimit"><span>KB/sec</span>
+            {{ app_form.downloads_throttledratelimit }}
         </div>
         <div class="settings-item">
             <p>Current scraping sleep interval: <span class="settings-current">{{ config.downloads.sleep_interval }}</p>
             <i>Seconds to sleep between calls to YouTube. Might be necessary to avoid throttling. Recommended 3.</i><br>
-            <input type="number" name="downloads.sleep_interval" id="downloads.sleep_interval">
+            {{ app_form.downloads_sleep_interval }}
         </div>
         <div class="settings-item">
             <p>External downloader:</p>
@@ -82,29 +85,21 @@
                 <li><span class="settings-current">0</span>: deactivate and download the best quality possible as decided by yt-dlp.</li>
             </ul>
             <i>Make sure your custom format gets merged into a single file. Check out the <a href="https://github.com/yt-dlp/yt-dlp#format-selection" target="_blank">documentation</a> for valid configurations.</i><br>
-            <input type="text" name="downloads.format" id="downloads.format">
+            {{ app_form.downloads_format }}
             <br>
         </div>
         <div class="settings-item">
             <p>Current metadata embed setting: <span class="settings-current">{{ config.downloads.add_metadata }}</span></p>
             <i>Metadata is not embedded into the downloaded files by default.</i><br>
-            <select name="downloads.add_metadata" id="downloads.add_metadata"">
-                <option value="" disabled selected> -- change metadata embed -- </option>
-                <option value="0">don't embed metadata</option>
-                <option value="1">embed metadata</option>
-            </select>
+            {{ app_form.downloads_add_metadata }}
         </div>
         <div class="settings-item">
             <p>Current thumbnail embed setting: <span class="settings-current">{{ config.downloads.add_thumbnail }}</span></p>
             <i>Embed thumbnail into the mediafile.</i><br>
-            <select name="downloads.add_thumbnail" id="downloads.add_thumbnail"">
-                <option value="" disabled selected> -- change thumbnail embed -- </option>
-                <option value="0">don't embed thumbnail</option>
-                <option value="1">embed thumbnail</option>
-            </select>
+            {{ app_form.downloads_add_thumbnail }}
         </div>
     </div>
-    <button type="submit">Update Settings</button>
+    <button type="submit" name="application-settings">Update Application Configurations</button>
 </form>
 <div class="title-bar">
     <h1>Actions</h1>

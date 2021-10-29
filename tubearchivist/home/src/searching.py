@@ -12,6 +12,7 @@ from datetime import datetime
 
 import requests
 from home.src.config import AppConfig
+from home.src.helper import RedisArchivist
 from home.src.thumbnails import ThumbManager
 
 
@@ -181,12 +182,22 @@ class Pagination:
     figure out the pagination based on page size and total_hits
     """
 
-    def __init__(self, page_get, search_get=False):
-        config = AppConfig().config
-        self.page_size = config["archive"]["page_size"]
+    def __init__(self, page_get, user_id, search_get=False):
+        self.user_id = user_id
+        self.page_size = self.get_page_size()
         self.page_get = page_get
         self.search_get = search_get
         self.pagination = self.first_guess()
+
+    def get_page_size(self):
+        """get default or user modified page_size"""
+        key = f"{self.user_id}:page_size"
+        page_size = RedisArchivist().get_message(key)["status"]
+        if not page_size:
+            config = AppConfig().config
+            page_size = config["archive"]["page_size"]
+
+        return page_size
 
     def first_guess(self):
         """build first guess before api call"""

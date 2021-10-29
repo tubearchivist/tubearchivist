@@ -11,7 +11,6 @@ from time import sleep
 from django import forms
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
-from django.forms.widgets import PasswordInput, TextInput
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils.http import urlencode
@@ -21,6 +20,11 @@ from home.src.download import ChannelSubscription, PendingList
 from home.src.helper import RedisArchivist, RedisQueue, process_url_list
 from home.src.index import WatchState, YoutubeChannel, YoutubeVideo
 from home.src.searching import Pagination, SearchForm, SearchHandler
+from home.forms import (
+    ApplicationSettingsForm,
+    CustomAuthForm,
+    UserSettingsForm
+)
 from home.tasks import (
     download_pending,
     download_single,
@@ -44,7 +48,8 @@ class HomeView(View):
 
     def get(self, request):
         """return home search results"""
-        view_config = self.read_config(user_id=request.user.id)
+        user_id = request.user.id
+        view_config = self.read_config(user_id)
         # handle search
         search_get = request.GET.get("search", False)
         if search_get:
@@ -53,7 +58,9 @@ class HomeView(View):
             search_encoded = False
         # define page size
         page_get = int(request.GET.get("page", 0))
-        pagination_handler = Pagination(page_get, search_encoded)
+        pagination_handler = Pagination(
+            page_get, user_id, search_get=search_encoded
+        )
 
         url = self.ES_URL + "/ta_video/_search"
         data = self.build_data(
@@ -157,17 +164,6 @@ class HomeView(View):
         return redirect(search_url, permanent=True)
 
 
-class CustomAuthForm(AuthenticationForm):
-    """better styled login form"""
-
-    username = forms.CharField(
-        widget=TextInput(attrs={"placeholder": "Username"}), label=False
-    )
-    password = forms.CharField(
-        widget=PasswordInput(attrs={"placeholder": "Password"}), label=False
-    )
-
-
 class LoginView(View):
     """resolves to /login/
     Greeting and login page
@@ -222,10 +218,11 @@ class DownloadView(View):
 
     def get(self, request):
         """handle get requests"""
-        view_config = self.read_config(user_id=request.user.id)
+        user_id = request.user.id
+        view_config = self.read_config(user_id)
 
         page_get = int(request.GET.get("page", 0))
-        pagination_handler = Pagination(page_get)
+        pagination_handler = Pagination(page_get, user_id)
 
         url = view_config["es_url"] + "/ta_download/_search"
         data = self.build_data(
@@ -370,7 +367,7 @@ class ChannelIdView(View):
     def get_channel_videos(self, request, channel_id_detail, view_config):
         """get channel from video index"""
         page_get = int(request.GET.get("page", 0))
-        pagination_handler = Pagination(page_get)
+        pagination_handler = Pagination(page_get, request.user.id)
         # get data
         url = view_config["es_url"] + "/ta_video/_search"
         data = self.build_data(
@@ -465,7 +462,7 @@ class ChannelView(View):
         user_id = request.user.id
         view_config = self.read_config(user_id=user_id)
         page_get = int(request.GET.get("page", 0))
-        pagination_handler = Pagination(page_get)
+        pagination_handler = Pagination(page_get, user_id)
         page_size = pagination_handler.pagination["page_size"]
         page_from = pagination_handler.pagination["page_from"]
         # get
@@ -610,18 +607,35 @@ class SettingsView(View):
         config = AppConfig().config
         colors = config["application"]["colors"]
 
-        context = {"title": "Settings", "config": config, "colors": colors}
+        user_form = UserSettingsForm()
+        app_form = ApplicationSettingsForm()
+
+        context = {
+            "title": "Settings",
+            "config": config,
+            "colors": colors,
+            "user_form": user_form,
+            "app_form": app_form,
+        }
 
         return render(request, "home/settings.html", context)
 
     @staticmethod
     def post(request):
         """handle form post to update settings"""
-        form_post = dict(request.POST)
-        del form_post["csrfmiddlewaretoken"]
-        print(form_post)
-        config_handler = AppConfig()
-        config_handler.update_config(form_post)
+
+        form_response = forms.Form(request.POST)
+        if form_response.is_valid():
+            form_post = dict(request.POST)
+            print(form_post)
+            del form_post["csrfmiddlewaretoken"]
+            config_handler = AppConfig()
+            if "application-settings" in form_post:
+                del form_post["application-settings"]
+                config_handler.update_config(form_post)
+            elif "user-settings" in form_post:
+                del form_post["user-settings"]
+                config_handler.set_user_config(form_post, request.user.id)
 
         return redirect("settings", permanent=True)
 
