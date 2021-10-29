@@ -128,12 +128,14 @@ class HomeView(View):
         if not view_style:
             view_style = config_handler["default_view"]["home"]
 
-        sort_by = RedisArchivist().get_message("sort_by")
-        if sort_by == {"status": False}:
-            sort_by = "published"
-        sort_order = RedisArchivist().get_message("sort_order")
-        if sort_order == {"status": False}:
-            sort_order = "desc"
+        sort_by = RedisArchivist().get_message(f"{user_id}:sort_by")["status"]
+        if not sort_by:
+            sort_by = config_handler["archive"]["sort_by"]
+
+        sort_order_key = f"{user_id}:sort_order"
+        sort_order = RedisArchivist().get_message(sort_order_key)["status"]
+        if not sort_order:
+            sort_order = config_handler["archive"]["sort_order"]
 
         hide_watched_key = f"{user_id}:hide_watched"
         hide_watched = RedisArchivist().get_message(hide_watched_key)["status"]
@@ -342,12 +344,15 @@ class ChannelIdView(View):
         """read config file"""
         config = AppConfig().config
 
-        sort_by = RedisArchivist().get_message("sort_by")
-        if sort_by == {"status": False}:
-            sort_by = "published"
-        sort_order = RedisArchivist().get_message("sort_order")
-        if sort_order == {"status": False}:
-            sort_order = "desc"
+        sort_by = RedisArchivist().get_message(f"{user_id}:sort_by")["status"]
+        if not sort_by:
+            sort_by = config["archive"]["sort_by"]
+
+        sort_order_key = f"{user_id}:sort_order"
+        sort_order = RedisArchivist().get_message(sort_order_key)["status"]
+        if not sort_order:
+            sort_order = config["archive"]["sort_order"]
+
         hide_watched_key = f"{user_id}:hide_watched"
         hide_watched = RedisArchivist().get_message(hide_watched_key)["status"]
 
@@ -761,13 +766,15 @@ class PostData:
 
     def sort_order(self):
         """change the sort between published to downloaded"""
-        sort_order = self.exec_val
-        if sort_order in ["asc", "desc"]:
+        sort_order = {"status": self.exec_val}
+        if self.exec_val in ["asc", "desc"]:
             RedisArchivist().set_message(
-                "sort_order", sort_order, expire=False
+                f"{self.current_user}:sort_order", sort_order, expire=False
             )
         else:
-            RedisArchivist().set_message("sort_by", sort_order, expire=False)
+            RedisArchivist().set_message(
+                f"{self.current_user}:sort_by", sort_order, expire=False
+            )
         return {"success": True}
 
     def hide_watched(self):

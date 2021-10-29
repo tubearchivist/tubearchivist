@@ -1,6 +1,7 @@
 {
     "archive": {
-        "sort": "published",
+        "sort_by": "published",
+        "sort_order": "desc",
         "page_size": 12
     },
     "default_view": {
