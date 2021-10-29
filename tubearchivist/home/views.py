@@ -455,21 +455,21 @@ class ChannelView(View):
 
     def get(self, request):
         """handle http get requests"""
-        es_url, colors, view_style = self.read_config(user_id=request.user.id)
+        user_id = request.user.id
+        view_config = self.read_config(user_id=user_id)
         page_get = int(request.GET.get("page", 0))
         pagination_handler = Pagination(page_get)
         page_size = pagination_handler.pagination["page_size"]
         page_from = pagination_handler.pagination["page_from"]
         # get
-        url = es_url + "/ta_channel/_search"
+        url = view_config["es_url"] + "/ta_channel/_search"
         data = {
             "size": page_size,
             "from": page_from,
             "query": {"match_all": {}},
             "sort": [{"channel_name.keyword": {"order": "asc"}}],
         }
-        show_subed_only = RedisArchivist().get_message("show_subed_only")
-        if show_subed_only:
+        if view_config["show_subed_only"]:
             data["query"] = {"term": {"channel_subscribed": {"value": True}}}
         search = SearchHandler(url, data)
         channel_hits = search.get_data()
@@ -479,10 +479,10 @@ class ChannelView(View):
             "channels": channel_hits,
             "max_hits": max_hits,
             "pagination": pagination_handler.pagination,
-            "show_subed_only": show_subed_only,
+            "show_subed_only": view_config["show_subed_only"],
             "title": "Channels",
-            "colors": colors,
-            "view_style": view_style,
+            "colors": view_config["colors"],
+            "view_style": view_config["view_style"],
         }
         return render(request, "home/channel.html", context)
 
@@ -490,7 +490,6 @@ class ChannelView(View):
     def read_config(user_id):
         """read config file"""
         config = AppConfig().config
-        es_url = config["application"]["es_url"]
         colors = config["application"]["colors"]
 
         view_key = f"{user_id}:view:channel"
@@ -498,7 +497,17 @@ class ChannelView(View):
         if not view_style:
             view_style = config["default_view"]["channel"]
 
-        return es_url, colors, view_style
+        sub_only_key = f"{user_id}:show_subed_only"
+        show_subed_only = RedisArchivist().get_message(sub_only_key)["status"]
+
+        view_config = {
+            "es_url": config["application"]["es_url"],
+            "view_style": view_style,
+            "show_subed_only": show_subed_only,
+            "colors": colors,
+        }
+
+        return view_config
 
     def post(self, request):
         """handle http post requests"""
@@ -770,11 +779,10 @@ class PostData:
 
     def show_subed_only(self):
         """show or hide subscribed channels only on channels page"""
-        show_subed_only = bool(int(self.exec_val))
-        print(f"show subed only: {show_subed_only}")
-        RedisArchivist().set_message(
-            "show_subed_only", show_subed_only, expire=False
-        )
+        key = f"{self.current_user}:show_subed_only"
+        message = {"status": bool(int(self.exec_val))}
+        print(f"show {key}: {message}")
+        RedisArchivist().set_message(key, message, expire=False)
         return {"success": True}
 
     def dlnow(self):
