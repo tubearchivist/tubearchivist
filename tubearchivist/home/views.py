@@ -15,16 +15,16 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils.http import urlencode
 from django.views import View
+from home.forms import (
+    ApplicationSettingsForm,
+    CustomAuthForm,
+    UserSettingsForm,
+)
 from home.src.config import AppConfig
 from home.src.download import ChannelSubscription, PendingList
 from home.src.helper import RedisArchivist, RedisQueue, process_url_list
 from home.src.index import WatchState, YoutubeChannel, YoutubeVideo
 from home.src.searching import Pagination, SearchForm, SearchHandler
-from home.forms import (
-    ApplicationSettingsForm,
-    CustomAuthForm,
-    UserSettingsForm
-)
 from home.tasks import (
     download_pending,
     download_single,
@@ -127,27 +127,26 @@ class HomeView(View):
     @staticmethod
     def read_config(user_id):
         """read needed values from redis"""
-        config_handler = AppConfig().config
-        colors = config_handler["application"]["colors"]
+        config_handler = AppConfig(user_id)
 
         view_key = f"{user_id}:view:home"
         view_style = RedisArchivist().get_message(view_key)["status"]
         if not view_style:
-            view_style = config_handler["default_view"]["home"]
+            view_style = config_handler.config["default_view"]["home"]
 
         sort_by = RedisArchivist().get_message(f"{user_id}:sort_by")["status"]
         if not sort_by:
-            sort_by = config_handler["archive"]["sort_by"]
+            sort_by = config_handler.config["archive"]["sort_by"]
 
         sort_order_key = f"{user_id}:sort_order"
         sort_order = RedisArchivist().get_message(sort_order_key)["status"]
         if not sort_order:
-            sort_order = config_handler["archive"]["sort_order"]
+            sort_order = config_handler.config["archive"]["sort_order"]
 
         hide_watched_key = f"{user_id}:hide_watched"
         hide_watched = RedisArchivist().get_message(hide_watched_key)["status"]
         view_config = {
-            "colors": colors,
+            "colors": config_handler.colors,
             "view_style": view_style,
             "sort_by": sort_by,
             "sort_order": sort_order,
@@ -169,10 +168,11 @@ class LoginView(View):
     Greeting and login page
     """
 
-    def get(self, request):
+    @staticmethod
+    def get(request):
         """handle get requests"""
         failed = bool(request.GET.get("failed"))
-        colors = self.read_config()
+        colors = AppConfig(request.user.id).colors
         form = CustomAuthForm()
         context = {"colors": colors, "form": form, "form_error": failed}
         return render(request, "home/login.html", context)
@@ -189,13 +189,6 @@ class LoginView(View):
 
         return redirect("/login?failed=true")
 
-    @staticmethod
-    def read_config():
-        """read needed values from redis"""
-        config_handler = AppConfig().config
-        colors = config_handler["application"]["colors"]
-        return colors
-
 
 class AboutView(View):
     """resolves to /about/
@@ -205,8 +198,7 @@ class AboutView(View):
     @staticmethod
     def get(request):
         """handle http get"""
-        config = AppConfig().config
-        colors = config["application"]["colors"]
+        colors = AppConfig(request.user.id).colors
         context = {"title": "About", "colors": colors}
         return render(request, "home/about.html", context)
 
@@ -255,22 +247,20 @@ class DownloadView(View):
     @staticmethod
     def read_config(user_id):
         """read config vars"""
-        config = AppConfig().config
-        colors = config["application"]["colors"]
-
+        config_handler = AppConfig(user_id)
         view_key = f"{user_id}:view:downloads"
         view_style = RedisArchivist().get_message(view_key)["status"]
         if not view_style:
-            view_style = config["default_view"]["downloads"]
+            view_style = config_handler.config["default_view"]["downloads"]
 
         ignored = RedisArchivist().get_message(f"{user_id}:show_ignored_only")
         show_ignored_only = ignored["status"]
 
-        es_url = config["application"]["es_url"]
+        es_url = config_handler.config["application"]["es_url"]
 
         view_config = {
             "es_url": es_url,
-            "colors": colors,
+            "colors": config_handler.colors,
             "view_style": view_style,
             "show_ignored_only": show_ignored_only,
         }
@@ -339,7 +329,8 @@ class ChannelIdView(View):
     @staticmethod
     def read_config(user_id):
         """read config file"""
-        config = AppConfig().config
+        config_handler = AppConfig(user_id)
+        config = config_handler.config
 
         sort_by = RedisArchivist().get_message(f"{user_id}:sort_by")["status"]
         if not sort_by:
@@ -354,14 +345,13 @@ class ChannelIdView(View):
         hide_watched = RedisArchivist().get_message(hide_watched_key)["status"]
 
         view_config = {
-            "colors": config["application"]["colors"],
+            "colors": config_handler.colors,
             "es_url": config["application"]["es_url"],
             "view_style": config["default_view"]["home"],
             "sort_by": sort_by,
             "sort_order": sort_order,
             "hide_watched": hide_watched,
         }
-        # return es_url, colors, view_style
         return view_config
 
     def get_channel_videos(self, request, channel_id_detail, view_config):
@@ -493,22 +483,20 @@ class ChannelView(View):
     @staticmethod
     def read_config(user_id):
         """read config file"""
-        config = AppConfig().config
-        colors = config["application"]["colors"]
-
+        config_handler = AppConfig(user_id)
         view_key = f"{user_id}:view:channel"
         view_style = RedisArchivist().get_message(view_key)["status"]
         if not view_style:
-            view_style = config["default_view"]["channel"]
+            view_style = config_handler.config["default_view"]["channel"]
 
         sub_only_key = f"{user_id}:show_subed_only"
         show_subed_only = RedisArchivist().get_message(sub_only_key)["status"]
 
         view_config = {
-            "es_url": config["application"]["es_url"],
+            "es_url": config_handler.config["application"]["es_url"],
             "view_style": view_style,
             "show_subed_only": show_subed_only,
-            "colors": colors,
+            "colors": config_handler.colors,
         }
 
         return view_config
@@ -556,7 +544,7 @@ class VideoView(View):
 
     def get(self, request, video_id):
         """get single video"""
-        es_url, colors = self.read_config()
+        es_url, colors = self.read_config(user_id=request.user.id)
         url = f"{es_url}/ta_video/_doc/{video_id}"
         data = None
         look_up = SearchHandler(url, data)
@@ -573,11 +561,11 @@ class VideoView(View):
         return render(request, "home/video.html", context)
 
     @staticmethod
-    def read_config():
+    def read_config(user_id):
         """read config file"""
-        config = AppConfig().config
-        es_url = config["application"]["es_url"]
-        colors = config["application"]["colors"]
+        config_handler = AppConfig(user_id)
+        es_url = config_handler.config["application"]["es_url"]
+        colors = config_handler.colors
         return es_url, colors
 
     @staticmethod
@@ -604,15 +592,15 @@ class SettingsView(View):
     @staticmethod
     def get(request):
         """read and display current settings"""
-        config = AppConfig().config
-        colors = config["application"]["colors"]
+        config_handler = AppConfig(request.user.id)
+        colors = config_handler.colors
 
         user_form = UserSettingsForm()
         app_form = ApplicationSettingsForm()
 
         context = {
             "title": "Settings",
-            "config": config,
+            "config": config_handler.config,
             "colors": colors,
             "user_form": user_form,
             "app_form": app_form,

@@ -14,14 +14,22 @@ from home.src.helper import RedisArchivist
 class AppConfig:
     """handle user settings and application variables"""
 
-    def __init__(self):
+    def __init__(self, user_id=False):
+        self.user_id = user_id
         self.config = self.get_config()
+        self.colors = self.get_colors()
 
     def get_config(self):
         """get config from default file or redis if changed"""
         config = self.get_config_redis()
         if not config:
             config = self.get_config_file()
+
+        if self.user_id:
+            key = f"{self.user_id}:page_size"
+            page_size = RedisArchivist().get_message(key)["status"]
+            if page_size:
+                config["archive"]["page_size"] = page_size
 
         config["application"].update(self.get_config_env())
         return config
@@ -102,6 +110,19 @@ class AppConfig:
                 message = {"status": to_write}
                 redis_key = f"{user_id}:{key}"
                 RedisArchivist().set_message(redis_key, message, expire=False)
+
+    def get_colors(self):
+        """overwrite config if user has set custom values"""
+        colors = False
+        if self.user_id:
+            col_dict = RedisArchivist().get_message(f"{self.user_id}:colors")
+            colors = col_dict["status"]
+
+        if not colors:
+            colors = self.config["application"]["colors"]
+
+        self.config["application"]["colors"] = colors
+        return colors
 
     def load_new_defaults(self):
         """check config.json for missing defaults"""
