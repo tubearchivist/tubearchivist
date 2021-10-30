@@ -166,3 +166,22 @@ def kill_dl(task_id):
 def rescan_filesystem():
     """check the media folder for mismatches"""
     scan_filesystem()
+
+
+@shared_task
+def subscribe_to(youtube_ids):
+    """take a list of urls to subscribe to"""
+    for youtube_id in youtube_ids:
+        if youtube_id["type"] == "video":
+            to_sub = youtube_id["url"]
+            vid_details = PendingList().get_youtube_details(to_sub)
+            channel_id_sub = vid_details["channel_id"]
+        elif youtube_id["type"] == "channel":
+            channel_id_sub = youtube_id["url"]
+        else:
+            raise ValueError("failed to subscribe to: " + youtube_id)
+
+        ChannelSubscription().change_subscribe(
+            channel_id_sub, channel_subscribed=True
+        )
+        print("subscribed to: " + channel_id_sub)

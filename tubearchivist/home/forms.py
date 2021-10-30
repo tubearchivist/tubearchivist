@@ -98,3 +98,17 @@ class AddToQueueForm(forms.Form):
             }
         ),
     )
+
+
+class SubscribeToChannelForm(forms.Form):
+    """text area form to subscribe to multiple channels"""
+
+    subscribe = forms.CharField(
+        label=False,
+        widget=forms.Textarea(
+            attrs={
+                "rows": 3,
+                "placeholder": "Input channel ID, URL or Video of a channel",
+            }
+        ),
+    )

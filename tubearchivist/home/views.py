@@ -20,6 +20,7 @@ from home.forms import (
     ApplicationSettingsForm,
     ChannelSearchForm,
     CustomAuthForm,
+    SubscribeToChannelForm,
     UserSettingsForm,
     VideoSearchForm,
 )
@@ -37,6 +38,7 @@ from home.tasks import (
     run_backup,
     run_manual_import,
     run_restore_backup,
+    subscribe_to,
     update_subscribed,
 )
 
@@ -466,13 +468,12 @@ class ChannelView(View):
         view_config = self.read_config(user_id=user_id)
         page_get = int(request.GET.get("page", 0))
         pagination_handler = Pagination(page_get, user_id)
-        page_size = pagination_handler.pagination["page_size"]
-        page_from = pagination_handler.pagination["page_from"]
+
         # get
         url = view_config["es_url"] + "/ta_channel/_search"
         data = {
-            "size": page_size,
-            "from": page_from,
+            "size": pagination_handler.pagination["page_size"],
+            "from": pagination_handler.pagination["page_from"],
             "query": {"match_all": {}},
             "sort": [{"channel_name.keyword": {"order": "asc"}}],
         }
@@ -480,13 +481,14 @@ class ChannelView(View):
             data["query"] = {"term": {"channel_subscribed": {"value": True}}}
         search = SearchHandler(url, data)
         channel_hits = search.get_data()
-        max_hits = search.max_hits
         pagination_handler.validate(search.max_hits)
         search_form = ChannelSearchForm()
+        subscribe_form = SubscribeToChannelForm()
         context = {
             "search_form": search_form,
+            "subscribe_form": subscribe_form,
             "channels": channel_hits,
-            "max_hits": max_hits,
+            "max_hits": search.max_hits,
             "pagination": pagination_handler.pagination,
             "show_subed_only": view_config["show_subed_only"],
             "title": "Channels",
@@ -516,40 +518,18 @@ class ChannelView(View):
 
         return view_config
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         """handle http post requests"""
-        subscriptions_post = dict(request.POST)
-        print(subscriptions_post)
-        subscriptions_post = dict(request.POST)
-        if "subscribe" in subscriptions_post.keys():
-            sub_str = subscriptions_post["subscribe"]
-            try:
-                youtube_ids = process_url_list(sub_str)
-                self.subscribe_to(youtube_ids)
-            except ValueError:
-                print("parsing subscribe ids failed!")
-                print(sub_str)
+        subscribe_form = SubscribeToChannelForm(data=request.POST)
+        if subscribe_form.is_valid():
+            vid_url_list = [request.POST.get("subscribe")]
+            youtube_ids = process_url_list(vid_url_list)
+            print(youtube_ids)
+            subscribe_to.delay(youtube_ids)
 
         sleep(1)
         return redirect("channel", permanent=True)
-
-    @staticmethod
-    def subscribe_to(youtube_ids):
-        """process the subscribe ids"""
-        for youtube_id in youtube_ids:
-            if youtube_id["type"] == "video":
-                to_sub = youtube_id["url"]
-                vid_details = PendingList().get_youtube_details(to_sub)
-                channel_id_sub = vid_details["channel_id"]
-            elif youtube_id["type"] == "channel":
-                channel_id_sub = youtube_id["url"]
-            else:
-                raise ValueError("failed to subscribe to: " + youtube_id)
-
-            ChannelSubscription().change_subscribe(
-                channel_id_sub, channel_subscribed=True
-            )
-            print("subscribed to: " + channel_id_sub)
 
 
 class VideoView(View):

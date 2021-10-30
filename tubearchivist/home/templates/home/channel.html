@@ -12,7 +12,7 @@
         <div class="show-form">
             <form id="hidden-form" action="/channel/" method="post">
                 {% csrf_token %}
-                <textarea rows="3" placeholder="Input channel ID, channel URL or Video of a channel" id="subscribe" name="subscribe"></textarea>
+                {{ subscribe_form }}
                 <button type="submit">Subscribe</button>
             </form>
         </div>
@@ -24,7 +24,6 @@
         </div>
         <form onSubmit="return channelRedirect();" id="search-box">
             {% csrf_token %}
-            <!-- <input name="videoSearch" list="resultBox" type="text" id="searchInput" autocomplete="off" oninput="searchChannels(this.value)"> -->
             {{ search_form }}
             <datalist id="resultBox">
             </datalist>
