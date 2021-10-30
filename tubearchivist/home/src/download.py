@@ -32,6 +32,10 @@ class PendingList:
     ES_AUTH = CONFIG["application"]["es_auth"]
     VIDEOS = CONFIG["application"]["videos"]
 
+    def __init__(self):
+        self.all_channel_ids = False
+        self.all_downloaded = False
+
     @staticmethod
     def parse_url_list(youtube_ids):
         """extract youtube ids from list"""
@@ -66,43 +70,11 @@ class PendingList:
         # check if channel is indexed
         channel_handler = ChannelSubscription()
         all_indexed = channel_handler.get_channels(subscribed_only=False)
-        all_channel_ids = [i["channel_id"] for i in all_indexed]
+        self.all_channel_ids = [i["channel_id"] for i in all_indexed]
         # check if already there
-        all_downloaded = self.get_all_downloaded()
-        # loop
-        bulk_list = []
-        all_videos_added = []
-        for video in missing_videos:
-            if isinstance(video, str):
-                youtube_id = video
-            elif isinstance(video, tuple):
-                youtube_id = video[0]
-            if youtube_id in all_downloaded:
-                # skip already downloaded
-                continue
-            video = self.get_youtube_details(youtube_id)
-            # skip on download error
-            if not video:
-                continue
+        self.all_downloaded = self.get_all_downloaded()
 
-            if video["channel_id"] in all_channel_ids:
-                video["channel_indexed"] = True
-            else:
-                video["channel_indexed"] = False
-            thumb_url = video["vid_thumb_url"]
-            video["status"] = "pending"
-            action = {"create": {"_id": youtube_id, "_index": "ta_download"}}
-            bulk_list.append(json.dumps(action))
-            bulk_list.append(json.dumps(video))
-            all_videos_added.append((youtube_id, thumb_url))
-            # notify
-            mess_dict = {
-                "status": "pending",
-                "level": "info",
-                "title": "Adding to download queue.",
-                "message": "Processing IDs...",
-            }
-            RedisArchivist().set_message("progress:download", mess_dict)
+        bulk_list, all_videos_added = self.build_bulk(missing_videos)
         # add last newline
         bulk_list.append("\n")
         query_str = "\n".join(bulk_list)
@@ -115,6 +87,44 @@ class PendingList:
             print(request)
 
         return all_videos_added
+
+    def build_bulk(self, missing_videos):
+        """build the bulk lists"""
+        bulk_list = []
+        all_videos_added = []
+        counter = 1
+        for youtube_id in missing_videos:
+            # check if already downloaded
+            if youtube_id in self.all_downloaded:
+                continue
+
+            video = self.get_youtube_details(youtube_id)
+            # skip on download error
+            if not video:
+                continue
+
+            channel_indexed = video["channel_id"] in self.all_channel_ids
+            video["channel_indexed"] = channel_indexed
+            thumb_url = video["vid_thumb_url"]
+            video["status"] = "pending"
+            action = {"create": {"_id": youtube_id, "_index": "ta_download"}}
+            bulk_list.append(json.dumps(action))
+            bulk_list.append(json.dumps(video))
+            all_videos_added.append((youtube_id, thumb_url))
+            # notify
+            progress = f"{counter}/{len(missing_videos)}"
+            mess_dict = {
+                "status": "pending",
+                "level": "info",
+                "title": "Adding new videos to download queue.",
+                "message": "Progress: " + progress,
+            }
+            RedisArchivist().set_message("progress:download", mess_dict)
+            if counter % 25 == 0:
+                print("adding to queue progress: " + progress)
+            counter = counter + 1
+
+        return bulk_list, all_videos_added
 
     @staticmethod
     def get_youtube_details(youtube_id):
@@ -391,7 +401,7 @@ class ChannelSubscription:
                 {
                     "status": "rescan",
                     "level": "info",
-                    "title": "Rescanning: Looking for new videos.",
+                    "title": "Scanning channels: Looking for new videos.",
                     "message": f"Progress: {counter}/{len(all_channels)}",
                 },
             )
