@@ -16,6 +16,7 @@ from django.shortcuts import redirect, render
 from django.utils.http import urlencode
 from django.views import View
 from home.forms import (
+    AddToQueueForm,
     ApplicationSettingsForm,
     ChannelSearchForm,
     CustomAuthForm,
@@ -242,7 +243,9 @@ class DownloadView(View):
             all_video_hits = False
             pagination = False
 
+        add_form = AddToQueueForm()
         context = {
+            "add_form": add_form,
             "all_video_hits": all_video_hits,
             "max_hits": max_hits,
             "pagination": pagination,
@@ -296,14 +299,15 @@ class DownloadView(View):
     @staticmethod
     def post(request):
         """handle post requests"""
-        download_post = dict(request.POST)
-        if "vid-url" in download_post.keys():
-            url_str = download_post["vid-url"]
+        to_queue = AddToQueueForm(data=request.POST)
+        if to_queue.is_valid():
+            vid_url_list = [request.POST.get("vid_url")]
+            print(vid_url_list)
             try:
-                youtube_ids = process_url_list(url_str)
+                youtube_ids = process_url_list(vid_url_list)
             except ValueError:
                 # failed to process
-                print(f"failed to parse: {url_str}")
+                print(f"failed to parse: {vid_url_list}")
                 mess_dict = {
                     "status": "downloading",
                     "level": "error",

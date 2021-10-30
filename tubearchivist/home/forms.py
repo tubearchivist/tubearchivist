@@ -84,3 +84,17 @@ class ChannelSearchForm(forms.Form):
             }
         ),
     )
+
+
+class AddToQueueForm(forms.Form):
+    """text area form to add to downloads"""
+
+    vid_url = forms.CharField(
+        label=False,
+        widget=forms.Textarea(
+            attrs={
+                "rows": 4,
+                "placeholder": "Enter Video Urls or IDs here...",
+            }
+        ),
+    )

@@ -21,7 +21,8 @@
         <div class="show-form">
             <form id='hidden-form' action="/downloads/" method="post">
                 {% csrf_token %}
-                <textarea rows="4" placeholder="Enter Video Urls or IDs here..." id="vid-url" name="vid-url"></textarea>
+                <!-- <textarea rows="4" placeholder="Enter Video Urls or IDs here..." id="vid-url" name="vid-url"></textarea> -->
+                {{ add_form }}
                 <button type="submit">Add to download queue</button>
             </form>
         </div>
