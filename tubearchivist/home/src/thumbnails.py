@@ -117,7 +117,11 @@ class ThumbManager:
             ),
         }
         if img_url:
-            response = requests.get(img_url, stream=True)
+            try:
+                response = requests.get(img_url, stream=True)
+            except ConnectionError:
+                sleep(5)
+                response = requests.get(img_url, stream=True)
             if not response.ok and not response.status_code == 404:
                 print("retry thumbnail download for " + img_url)
                 sleep(5)
@@ -136,16 +140,13 @@ class ThumbManager:
 
     def download_vid(self, missing_thumbs, notify=True):
         """download all missing thumbnails from list"""
-        total = len(missing_thumbs)
-        print(f"downloading {total} thumbnails")
-        # videos
-        # counter as update path from v0.0.5, remove in future version
-        counter = 0
+        print(f"downloading {len(missing_thumbs)} thumbnails")
+        counter = 1
         for youtube_id, thumb_url in missing_thumbs:
-            folder_name = youtube_id[0].lower()
-            folder_path = os.path.join(self.VIDEO_DIR, folder_name)
-            thumb_path_part = self.vid_thumb_path(youtube_id)
-            thumb_path = os.path.join(self.CACHE_DIR, thumb_path_part)
+            folder_path = os.path.join(self.VIDEO_DIR, youtube_id[0].lower())
+            thumb_path = os.path.join(
+                self.CACHE_DIR, self.vid_thumb_path(youtube_id)
+            )
 
             os.makedirs(folder_path, exist_ok=True)
             img_raw = self.get_raw_img(thumb_url, "video")
@@ -158,17 +159,18 @@ class ThumbManager:
 
             img_raw.convert("RGB").save(thumb_path)
 
+            progress = f"{counter}/{len(missing_thumbs)}"
             if notify:
                 mess_dict = {
                     "status": "pending",
                     "level": "info",
-                    "title": "Adding to download queue.",
-                    "message": "Downloading Thumbnails...",
+                    "title": "Downloading Thumbnails",
+                    "message": "Progress: " + progress,
                 }
                 RedisArchivist().set_message("progress:download", mess_dict)
 
-            if counter % 50 == 0 and counter != 0:
-                print(f"thumbnail progress: {counter}/{total}")
+            if counter % 25 == 0:
+                print("thumbnail progress: " + progress)
             counter = counter + 1
 
     def download_chan(self, missing_channels):
