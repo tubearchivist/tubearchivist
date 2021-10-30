@@ -55,12 +55,14 @@ class PendingList:
             if url_type == "video":
                 missing_videos.append(url)
             elif url_type == "channel":
-                youtube_ids = ChannelSubscription().get_last_youtube_videos(
+                video_results = ChannelSubscription().get_last_youtube_videos(
                     url, limit=False
                 )
+                youtube_ids = [i[0] for i in video_results]
                 missing_videos = missing_videos + youtube_ids
             elif url_type == "playlist":
-                youtube_ids = playlist_extractor(url)
+                video_results = playlist_extractor(url)
+                youtube_ids = [i[0] for i in video_results]
                 missing_videos = missing_videos + youtube_ids
 
         return missing_videos
