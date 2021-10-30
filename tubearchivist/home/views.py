@@ -440,8 +440,6 @@ class ChannelIdView(View):
             to_append = {"term": {"player.watched": {"value": False}}}
             data["query"]["bool"]["must"].append(to_append)
 
-        print(data)
-
         return data
 
     @staticmethod
