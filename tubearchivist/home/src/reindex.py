@@ -35,7 +35,7 @@ class Reindex:
         config = AppConfig().config
         self.sleep_interval = config["downloads"]["sleep_interval"]
         self.es_url = config["application"]["es_url"]
-        self.es_auth = config["application"]["auth"]
+        self.es_auth = config["application"]["es_auth"]
         self.refresh_interval = 90
         # scan
         self.video_daily, self.channel_daily = self.get_daily()
