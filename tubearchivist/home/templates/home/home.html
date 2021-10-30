@@ -34,7 +34,7 @@
         </div>
         <form action="/" method="POST" id="search-box">
             {% csrf_token %}
-            <input name="videoSearch" list="resultBox" type="text" id="searchInput" autocomplete="off">
+            {{ search_form }}
         </form>
     </div>
 </div>

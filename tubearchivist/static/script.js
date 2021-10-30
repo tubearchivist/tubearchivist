@@ -372,7 +372,7 @@ function showSearch() {
     } else {
         searchBox.style.display = "";
     }
-    var inputBox = document.getElementById('searchInput');
+    var inputBox = document.getElementById('id_searchInput');
     inputBox.focus();
 }
 

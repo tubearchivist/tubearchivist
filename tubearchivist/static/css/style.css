@@ -62,7 +62,7 @@ ul {
     margin-left: 20px;
 }
 
-td, span {
+td, span, label {
     font-family: Sen-Regular, sans-serif;
     color: var(--main-font);
 }

@@ -60,3 +60,27 @@ class ApplicationSettingsForm(forms.Form):
     downloads_add_thumbnail = forms.ChoiceField(
         widget=forms.Select, choices=THUMBNAIL_CHOICES, required=False
     )
+
+
+class VideoSearchForm(forms.Form):
+    """search videos form"""
+
+    searchInput = forms.CharField(
+        label="Search your videos",
+        widget=forms.TextInput(attrs={"autocomplete": "off"}),
+    )
+
+
+class ChannelSearchForm(forms.Form):
+    """search for channels"""
+
+    searchInput = forms.CharField(
+        label="",
+        widget=forms.TextInput(
+            attrs={
+                "oninput": "searchChannels(this.value)",
+                "autocomplete": "off",
+                "list": "resultBox",
+            }
+        ),
+    )

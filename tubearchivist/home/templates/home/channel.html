@@ -20,11 +20,12 @@
     <div class="search-form icon-text">
         <div class="search-icon">
             <img src="{% static 'img/icon-search.svg' %}" alt="search-icon" onclick="showSearch()">
-            <p>Search Channels</p>
+            <p>Search your Channels</p>
         </div>
         <form onSubmit="return channelRedirect();" id="search-box">
             {% csrf_token %}
-            <input name="videoSearch" list="resultBox" type="text" id="searchInput" autocomplete="off" oninput="searchChannels(this.value)">
+            <!-- <input name="videoSearch" list="resultBox" type="text" id="searchInput" autocomplete="off" oninput="searchChannels(this.value)"> -->
+            {{ search_form }}
             <datalist id="resultBox">
             </datalist>
         </form>

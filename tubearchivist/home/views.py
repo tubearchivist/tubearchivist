@@ -17,8 +17,10 @@ from django.utils.http import urlencode
 from django.views import View
 from home.forms import (
     ApplicationSettingsForm,
+    ChannelSearchForm,
     CustomAuthForm,
     UserSettingsForm,
+    VideoSearchForm,
 )
 from home.src.config import AppConfig
 from home.src.download import ChannelSubscription, PendingList
@@ -75,7 +77,10 @@ class HomeView(View):
         videos_hits = search.get_data()
         max_hits = search.max_hits
         pagination_handler.validate(max_hits)
+
+        search_form = VideoSearchForm()
         context = {
+            "search_form": search_form,
             "videos": videos_hits,
             "pagination": pagination_handler.pagination,
             "sort_by": view_config["sort_by"],
@@ -157,10 +162,14 @@ class HomeView(View):
     @staticmethod
     def post(request):
         """handle post from search form"""
-        post_data = dict(request.POST)
-        search_query = post_data["videoSearch"][0]
-        search_url = "/?" + urlencode({"search": search_query})
-        return redirect(search_url, permanent=True)
+        search_form = VideoSearchForm(data=request.POST)
+        if search_form.is_valid():
+            search_query = request.POST.get("searchInput")
+            print(search_query)
+            search_url = "/?" + urlencode({"search": search_query})
+            return redirect(search_url, permanent=True)
+
+        return redirect("home")
 
 
 class LoginView(View):
@@ -469,7 +478,9 @@ class ChannelView(View):
         channel_hits = search.get_data()
         max_hits = search.max_hits
         pagination_handler.validate(search.max_hits)
+        search_form = ChannelSearchForm()
         context = {
+            "search_form": search_form,
             "channels": channel_hits,
             "max_hits": max_hits,
             "pagination": pagination_handler.pagination,
