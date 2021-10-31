@@ -9,9 +9,11 @@ import re
 import string
 import subprocess
 import unicodedata
+from urllib.parse import parse_qs, urlparse
 
 import redis
 import requests
+import yt_dlp as youtube_dl
 
 
 def get_total_hits(index, es_url, es_auth, match_field):
@@ -51,33 +53,90 @@ def ignore_filelist(filelist):
     return cleaned
 
 
-def process_url_list(url_str):
-    """parse url_list to find valid youtube video or channel ids"""
-    to_replace = ["watch?v=", "playlist?list="]
-    url_list = re.split("\n+", url_str[0])
-    youtube_ids = []
-    for url in url_list:
-        if "/c/" in url or "/user/" in url:
-            raise ValueError("user name is not unique, use channel ID")
+class UrlListParser:
+    """take a multi line string and detect valid youtube ids"""
 
-        url_clean = url.strip().strip("/").split("/")[-1]
-        for i in to_replace:
-            url_clean = url_clean.replace(i, "")
-        url_no_param = url_clean.split("&")[0]
-        str_len = len(url_no_param)
+    def __init__(self, url_str):
+        self.url_list = [i.strip() for i in url_str.split()]
+
+    def process_list(self):
+        """loop through the list"""
+        youtube_ids = []
+        for url in self.url_list:
+            parsed = urlparse(url)
+            print(f"processing: {url}")
+            print(parsed)
+            if not parsed.netloc:
+                # is not a url
+                id_type = self.find_valid_id(url)
+                youtube_id = url
+            elif parsed.path:
+                # is a url
+                youtube_id, id_type = self.detect_from_url(parsed)
+            else:
+                # not detected
+                raise ValueError(f"failed to detect {url}")
+
+            youtube_ids.append({"url": youtube_id, "type": id_type})
+
+        return youtube_ids
+
+    def detect_from_url(self, parsed):
+        """detect from parsed url"""
+        if parsed.netloc == "youtu.be":
+            # shortened
+            youtube_id = parsed.path.strip("/")
+            return youtube_id, "video"
+
+        if parsed.query:
+            # detect from query string
+            query_parsed = parse_qs(parsed.query)
+            if "v" in query_parsed.keys():
+                youtube_id = query_parsed["v"][0]
+                return youtube_id, "video"
+
+            if "list" in query_parsed.keys():
+                youtube_id = query_parsed["list"][0]
+                return youtube_id, "playlist"
+
+        if parsed.path.startswith("/channel/"):
+            # channel id in url
+            youtube_id = parsed.path.split("/")[2]
+            return youtube_id, "channel"
+
+        # dedect channel with yt_dlp
+        youtube_id = self.extract_channel_name(parsed.geturl())
+        return youtube_id, "channel"
+
+    @staticmethod
+    def find_valid_id(id_str):
+        """dedect valid id from length of string"""
+        str_len = len(id_str)
         if str_len == 11:
-            link_type = "video"
+            id_type = "video"
         elif str_len == 24:
-            link_type = "channel"
+            id_type = "channel"
         elif str_len == 34:
-            link_type = "playlist"
+            id_type = "playlist"
         else:
             # unable to parse
-            raise ValueError("not a valid url: " + url)
+            raise ValueError("not a valid id_str: " + id_str)
 
-        youtube_ids.append({"url": url_no_param, "type": link_type})
+        return id_type
 
-    return youtube_ids
+    @staticmethod
+    def extract_channel_name(url):
+        """find channel id from channel name with yt-dlp help"""
+        obs = {
+            "default_search": "ytsearch",
+            "quiet": True,
+            "skip_download": True,
+            "extract_flat": True,
+            "playlistend": 0,
+        }
+        url_info = youtube_dl.YoutubeDL(obs).extract_info(url, download=False)
+        channel_id = url_info["channel_id"]
+        return channel_id
 
 
 class RedisArchivist:

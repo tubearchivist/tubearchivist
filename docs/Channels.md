@@ -10,9 +10,9 @@ Accessible at `/channel/` of your Tube Archivist, the **Overview Page** shows a 
 The **Subscribe to Channels** button <img src="assets/icon-add.png?raw=true" alt="add icon" width="20px" style="margin:0 5px;"> opens a text field to subscribe to a channel. You have a few options:
 - Enter the YouTube channel ID, a 25 character alphanumeric string. For example *UCBa659QWEk1AI4Tg--mrJ2A*
 - Enter the URL to the channel page on YouTube. For example *https://www.youtube.com/channel/UCBa659QWEk1AI4Tg--mrJ2A*
+- Enter the channel name for example: *https://www.youtube.com/c/TomScottGo*.
 - Enter the video URL for any video and let Tube Archivist extract the channel ID for you. For example *https://www.youtube.com/watch?v=2tdiKTSdE9Y*
 - Add one per line.
-- **Note**: Adding a link to a YouTube channel name is not yet supported, for example: *https://www.youtube.com/c/TomScottGo* will fail.
 
 The search icon <img src="assets/icon-search.png?raw=true" alt="search icon" width="20px" style="margin:0 5px;"> opens a text box to search for indexed channel names. Possible matches will show as you type. 
 

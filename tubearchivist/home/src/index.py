@@ -15,7 +15,7 @@ import requests
 import yt_dlp as youtube_dl
 from bs4 import BeautifulSoup
 from home.src.config import AppConfig
-from home.src.helper import DurationConverter, clean_string, process_url_list
+from home.src.helper import DurationConverter, UrlListParser, clean_string
 from home.src.thumbnails import ThumbManager
 
 
@@ -446,9 +446,8 @@ class WatchState:
 
     def dedect_type(self):
         """find youtube id type"""
-        url_process = process_url_list([self.youtube_id])
+        url_process = UrlListParser(self.youtube_id).process_list()
         url_type = url_process[0]["type"]
-
         return url_type
 
     def mark_vid_watched(self, revert=False):

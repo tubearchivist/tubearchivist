@@ -26,7 +26,7 @@ from home.forms import (
 )
 from home.src.config import AppConfig
 from home.src.download import ChannelSubscription, PendingList
-from home.src.helper import RedisArchivist, RedisQueue, process_url_list
+from home.src.helper import RedisArchivist, RedisQueue, UrlListParser
 from home.src.index import WatchState, YoutubeChannel, YoutubeVideo
 from home.src.searching import Pagination, SearchForm, SearchHandler
 from home.tasks import (
@@ -303,13 +303,13 @@ class DownloadView(View):
         """handle post requests"""
         to_queue = AddToQueueForm(data=request.POST)
         if to_queue.is_valid():
-            vid_url_list = [request.POST.get("vid_url")]
-            print(vid_url_list)
+            url_str = request.POST.get("vid_url")
+            print(url_str)
             try:
-                youtube_ids = process_url_list(vid_url_list)
+                youtube_ids = UrlListParser(url_str).process_list()
             except ValueError:
                 # failed to process
-                print(f"failed to parse: {vid_url_list}")
+                print(f"failed to parse: {url_str}")
                 mess_dict = {
                     "status": "downloading",
                     "level": "error",
@@ -521,8 +521,8 @@ class ChannelView(View):
         """handle http post requests"""
         subscribe_form = SubscribeToChannelForm(data=request.POST)
         if subscribe_form.is_valid():
-            vid_url_list = [request.POST.get("subscribe")]
-            youtube_ids = process_url_list(vid_url_list)
+            url_str = request.POST.get("subscribe")
+            youtube_ids = UrlListParser(url_str).process_list()
             print(youtube_ids)
             subscribe_to.delay(youtube_ids)
 
@@ -819,7 +819,7 @@ class PostData:
         youtube_id = self.exec_val
         print("add vid to dl queue: " + youtube_id)
         PendingList().delete_from_pending(youtube_id)
-        youtube_ids = process_url_list([youtube_id])
+        youtube_ids = UrlListParser(youtube_id).process_list()
         extrac_dl.delay(youtube_ids)
         return {"success": True}
 
