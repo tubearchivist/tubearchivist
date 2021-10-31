@@ -70,6 +70,8 @@ class UrlListParser:
                 # is not a url
                 id_type = self.find_valid_id(url)
                 youtube_id = url
+            elif "youtube.com" not in url:
+                raise ValueError(f"{url} is not a youtube link")
             elif parsed.path:
                 # is a url
                 youtube_id, id_type = self.detect_from_url(parsed)
@@ -86,6 +88,7 @@ class UrlListParser:
         if parsed.netloc == "youtu.be":
             # shortened
             youtube_id = parsed.path.strip("/")
+            _ = self.find_valid_id(youtube_id)
             return youtube_id, "video"
 
         if parsed.query:
@@ -93,6 +96,7 @@ class UrlListParser:
             query_parsed = parse_qs(parsed.query)
             if "v" in query_parsed.keys():
                 youtube_id = query_parsed["v"][0]
+                _ = self.find_valid_id(youtube_id)
                 return youtube_id, "video"
 
             if "list" in query_parsed.keys():
@@ -102,6 +106,7 @@ class UrlListParser:
         if parsed.path.startswith("/channel/"):
             # channel id in url
             youtube_id = parsed.path.split("/")[2]
+            _ = self.find_valid_id(youtube_id)
             return youtube_id, "channel"
 
         # dedect channel with yt_dlp
@@ -135,7 +140,12 @@ class UrlListParser:
             "playlistend": 0,
         }
         url_info = youtube_dl.YoutubeDL(obs).extract_info(url, download=False)
-        channel_id = url_info["channel_id"]
+        try:
+            channel_id = url_info["channel_id"]
+        except KeyError as error:
+            print(f"failed to extract channel id from {url}")
+            raise ValueError from error
+
         return channel_id
 
 
