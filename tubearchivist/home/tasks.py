@@ -9,7 +9,7 @@ import os
 from celery import Celery, shared_task
 from home.src.config import AppConfig
 from home.src.download import ChannelSubscription, PendingList, VideoDownloader
-from home.src.helper import RedisArchivist, RedisQueue
+from home.src.helper import RedisArchivist, RedisQueue, UrlListParser
 from home.src.index_management import backup_all_indexes, restore_from_backup
 from home.src.reindex import (
     ManualImport,
@@ -169,8 +169,9 @@ def rescan_filesystem():
 
 
 @shared_task
-def subscribe_to(youtube_ids):
+def subscribe_to(url_str):
     """take a list of urls to subscribe to"""
+    youtube_ids = UrlListParser(url_str).process_list()
     for youtube_id in youtube_ids:
         if youtube_id["type"] == "video":
             to_sub = youtube_id["url"]
@@ -185,3 +186,7 @@ def subscribe_to(youtube_ids):
             channel_id_sub, channel_subscribed=True
         )
         print("subscribed to: " + channel_id_sub)
+        # notify
+        RedisArchivist().set_message(
+            "progress:subscribe", {"status": "subscribing"}
+        )
