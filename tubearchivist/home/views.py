@@ -347,6 +347,11 @@ class ChannelIdView(View):
         config_handler = AppConfig(user_id)
         config = config_handler.config
 
+        view_key = f"{user_id}:view:home"
+        view_style = RedisArchivist().get_message(view_key)["status"]
+        if not view_style:
+            view_style = config_handler.config["default_view"]["home"]
+
         sort_by = RedisArchivist().get_message(f"{user_id}:sort_by")["status"]
         if not sort_by:
             sort_by = config["archive"]["sort_by"]
@@ -362,7 +367,7 @@ class ChannelIdView(View):
         view_config = {
             "colors": config_handler.colors,
             "es_url": config["application"]["es_url"],
-            "view_style": config["default_view"]["home"],
+            "view_style": view_style,
             "sort_by": sort_by,
             "sort_order": sort_order,
             "hide_watched": hide_watched,
