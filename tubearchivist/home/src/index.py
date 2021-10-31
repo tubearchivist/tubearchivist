@@ -227,11 +227,15 @@ class YoutubeChannel:
         print(f"deleting {self.channel_id} and all matching media files")
         folder_path = self.get_folder_path()
         print("delete all media files")
-        all_videos = os.listdir(folder_path)
-        for video in all_videos:
-            video_path = os.path.join(folder_path, video)
-            os.remove(video_path)
-        os.rmdir(folder_path)
+        try:
+            all_videos = os.listdir(folder_path)
+            for video in all_videos:
+                video_path = os.path.join(folder_path, video)
+                os.remove(video_path)
+            os.rmdir(folder_path)
+        except FileNotFoundError:
+            print(f"no videos found for {folder_path}")
+
         ThumbManager().delete_chan_thumb(self.channel_id)
 
         print("delete indexed videos")
