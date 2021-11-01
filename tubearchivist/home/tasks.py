@@ -169,6 +169,14 @@ def rescan_filesystem():
 
 
 @shared_task
+def re_sync_thumbs():
+    """sync thumbnails to mediafiles"""
+    handler = ThumbManager()
+    video_list = handler.get_thumb_list()
+    handler.write_all_thumbs(video_list)
+
+
+@shared_task
 def subscribe_to(url_str):
     """take a list of urls to subscribe to"""
     youtube_ids = UrlListParser(url_str).process_list()

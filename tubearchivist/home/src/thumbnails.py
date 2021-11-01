@@ -11,6 +11,7 @@ import home.src.download as download
 import requests
 from home.src.config import AppConfig
 from home.src.helper import RedisArchivist, ignore_filelist
+from mutagen.mp4 import MP4, MP4Cover
 from PIL import Image
 
 
@@ -18,6 +19,7 @@ class ThumbManager:
     """handle thumbnails related functions"""
 
     CONFIG = AppConfig().config
+    MEDIA_DIR = CONFIG["application"]["videos"]
     CACHE_DIR = CONFIG["application"]["cache_dir"]
     VIDEO_DIR = os.path.join(CACHE_DIR, "videos")
     CHANNEL_DIR = os.path.join(CACHE_DIR, "channels")
@@ -233,6 +235,48 @@ class ThumbManager:
                 # cleanup
                 youtube_id = thumb.rstrip(".jpg")
                 self.delete_vid_thumb(youtube_id)
+
+    def get_thumb_list(self):
+        """get list of mediafiles and matching thumbnails"""
+        all_indexed = download.PendingList().get_all_indexed()
+        video_list = []
+        for video in all_indexed:
+            youtube_id = video["_source"]["youtube_id"]
+            media_url = os.path.join(
+                self.MEDIA_DIR, video["_source"]["media_url"]
+            )
+            thumb_path = os.path.join(
+                self.CACHE_DIR, self.vid_thumb_path(youtube_id)
+            )
+            video_list.append(
+                {
+                    "media_url": media_url,
+                    "thumb_path": thumb_path,
+                }
+            )
+
+        return video_list
+
+    @staticmethod
+    def write_all_thumbs(video_list):
+        """rewrite the thumbnail into media file"""
+
+        print("start video thumbnail embed process")
+        counter = 1
+        for video in video_list:
+            # loop through all videos
+            media_url = video["media_url"]
+            thumb_path = video["thumb_path"]
+
+            mutagen_vid = MP4(media_url)
+            with open(thumb_path, "rb") as f:
+                mutagen_vid["covr"] = [
+                    MP4Cover(f.read(), imageformat=MP4Cover.FORMAT_JPEG)
+                ]
+            mutagen_vid.save()
+            if counter % 50 == 0:
+                print(f"thumbnail write progress {counter}/{len(video_list)}")
+            counter = counter + 1
 
 
 def validate_thumbnails():
