@@ -48,10 +48,12 @@ Take a look at the example `docker-compose.yml` file provided. Tube Archivist de
 ### Tube Archivist
 The main Python application that displays and serves your video collection, built with Django.
   - Serves the interface on port `8000`
-  - Needs a mandatory volume for the video archive at **/youtube**
-  - And another recommended volume to save the cache for thumbnails and artwork at **/cache**.
+  - Needs a volume for the video archive at **/youtube**
+  - And another volume to save application data at **/cache**.
   - The environment variables `ES_URL` and `REDIS_HOST` are needed to tell Tube Archivist where Elasticsearch and Redis respectively are located.
   - The environment variables `HOST_UID` and `HOST_GID` allows Tube Archivist to `chown` the video files to the main host system user instead of the container user. Those two variables are optional, not setting them will disable that functionality. That might be needed if the underlying filesystem doesn't support `chown` like *NFS*. 
+  - Change the environment variables `TA_USERNAME` and `TA_PASSWORD` to create the initial credentials. 
+  - `ELASTIC_PASSWORD` is for the password for Elasticsearch. The environment variable `ELASTIC_USER` is optional, should you want to change the username from the default *elastic*.
 
 ### Elasticsearch
 Stores video meta data and makes everything searchable. Also keeps track of the download queue.
@@ -63,7 +65,7 @@ Follow the [documentation](https://www.elastic.co/guide/en/elasticsearch/referen
 ### Redis JSON
 Functions as a cache and temporary link between the application and the file system. Used to store and display messages and configuration variables.
   - Needs to be accessible over the default port `6379`
-  - Takes an optional volume at **/data** to make your configuration changes permanent.
+  - Needs a volume at **/data** to make your configuration changes permanent.
 
 ### Redis on a custom port
 For some architectures it might be required to run Redis JSON on a nonstandard port. To for example change the Redis port to **6380**, set the following values:
@@ -80,9 +82,7 @@ You will see the current version number of **Tube Archivist** in the footer of t
 - **arm64**: Newest Tube Archivist container is multi arch, so is Elasticsearch. RedisJSON doesn't offer arm builds, you can use `bbilly1/rejson`, an unofficial rebuild for arm64.
   - NOTE: This is untested, looking for feedback.
 - **Synology**: There is a [discussion thread](https://github.com/bbilly1/tubearchivist/discussions/48) with Synology installation instructions.
-- **Unraid**: The three containers needed are all in the Community Applications. First install `TubeArchivist RedisJSON` followed by `TubeArchivist ES`, and finally you can install `TubeArchivist`.
-
-If you have unraid specific issues, report those to the [support thread](https://forums.unraid.net/topic/114073-support-crocs-tube-archivist/ "support thread").
+- **Unraid**: The three containers needed are all in the Community Applications. First install `TubeArchivist RedisJSON` followed by `TubeArchivist ES`, and finally you can install `TubeArchivist`. If you have unraid specific issues, report those to the [support thread](https://forums.unraid.net/topic/114073-support-crocs-tube-archivist/ "support thread").
 
 
 ## Potential pitfalls
@@ -121,11 +121,13 @@ bestvideo[VCODEC=avc1]+bestaudio[ACODEC=mp4a]/mp4
 This should be considered as a **minimal viable product**, there is an extensive list of future functions and improvements planned.
 
 ### Functionality
-- [ ] Access control
 - [ ] User roles
 - [ ] Create playlists
 - [ ] Podcast mode to serve channel as mp3
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
+- [ ] Optional automatic deletion of watched items after a specified time
+- [ ] Subtitle download & indexing
+- [X] Access control [2021-11-01]
 - [X] Delete videos and channel [2021-10-16]
 - [X] Add thumbnail embed option [2021-10-16]
 - [X] Un-ignore videos [2021-10-03]
@@ -144,7 +146,8 @@ This should be considered as a **minimal viable product**, there is an extensive
 ## Known limitations
 - Video files created by Tube Archivist need to be **mp4** video files for best browser compatibility.
 - Every limitation of **yt-dlp** will also be present in Tube Archivist. If **yt-dlp** can't download or extract a video for any reason, Tube Archivist won't be able to either.
-- For now this is meant to be run in a trusted network environment. There is *no* security.
+- For now this is meant to be run in a trusted network environment. Not everything is properly authenticated.
+- There is currently no flexibility in naming of the media files.
 
 
 ## Donate
