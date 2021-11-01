@@ -261,7 +261,6 @@ class ThumbManager:
     def write_all_thumbs(video_list):
         """rewrite the thumbnail into media file"""
 
-        print("start video thumbnail embed process")
         counter = 1
         for video in video_list:
             # loop through all videos

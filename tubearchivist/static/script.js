@@ -143,6 +143,17 @@ function manualImport() {
     toReplace.appendChild(message);
 }
 
+function reEmbed() {
+    var payload = JSON.stringify({'re-embed': true});
+    sendPost(payload);
+    // clear button
+    var message = document.createElement('p');
+    message.innerText = 'processing thumbnails';
+    var toReplace = document.getElementById('re-embed');
+    toReplace.innerHTML = '';
+    toReplace.appendChild(message);
+}
+
 function dbBackup() {
     var payload = JSON.stringify({'db-backup': true});
     sendPost(payload)

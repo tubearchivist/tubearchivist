@@ -34,6 +34,7 @@ from home.tasks import (
     download_single,
     extrac_dl,
     kill_dl,
+    re_sync_thumbs,
     rescan_filesystem,
     run_backup,
     run_manual_import,
@@ -689,6 +690,7 @@ class PostData:
             "forgetIgnore": self.forget_ignore,
             "addSingle": self.add_single,
             "manual-import": self.manual_import,
+            "re-embed": self.re_embed,
             "db-backup": self.db_backup,
             "db-restore": self.db_restore,
             "fs-rescan": self.fs_rescan,
@@ -838,6 +840,13 @@ class PostData:
         """run manual import from settings page"""
         print("starting manual import")
         run_manual_import.delay()
+        return {"success": True}
+
+    @staticmethod
+    def re_embed():
+        """rewrite thumbnails into media files"""
+        print("start video thumbnail embed process")
+        re_sync_thumbs.delay()
         return {"success": True}
 
     @staticmethod

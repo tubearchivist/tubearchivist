@@ -51,6 +51,9 @@ Detect the YouTube ID from filename, this accepts the default yt-dlp naming conv
 - Maybe start with a subset of your files to import to make sure everything goes well...
 - Follow the logs to monitor progress and errors: `docker-compose logs -f tubearchivist`.
 
+## Embed thumbnails into media file
+This will write or overwrite all thumbnails in the media file using the downloaded thumbnail. This is only necessary if you didn't download the files with the option *Embed Thumbnail* enabled or want to make sure all media files get the newest thumbnail. Follow the docker-compose logs to monitor progress.
+
 ## Backup Database
 This will backup your metadata into a zip file. The file will get stored at *cache/backup* and will contain the necessary files to restore the Elasticsearch index formatted **nd-json** files plus a complete export of the index in a set of conventional **json** files.  
 
