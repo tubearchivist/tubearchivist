@@ -2,17 +2,15 @@
 {% block content %}
 {% load static %}
 {% load humanize %}
-<div class="title-bar">
-    <h1>Video: {{ video.title }}</h1>
-</div>
 <div class="video-main">
     <video 
         src="/media/{{ video.media_url }}" 
         poster="/cache/{{ video.vid_thumb_url }}" controls preload="false" 
         type='video/mp4' width="100%" playsinline>
     </video>
+    <h1>{{ video.title }}</h1>
 </div>
-<div class="info-box info-box-3 padding-box">
+<div class="info-box info-box-3">
     <div class="info-box-item">
         <div class="round-img">
             <a href="{% url 'channel_id' video.channel.channel_id %}">

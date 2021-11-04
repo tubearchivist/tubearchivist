@@ -118,7 +118,6 @@ button:hover {
 
 .top-banner {
     text-align: center;
-    margin-top: 10px;
 }
 
 .top-banner img {
@@ -483,7 +482,10 @@ button:hover {
 .info-box {
     display: grid;
     grid-gap: 1rem;
-    margin: 1rem 0;
+}
+
+.description-box {
+    margin-top: 1rem;
 }
 
 .info-box-3 {
@@ -578,9 +580,15 @@ button:hover {
 }
 
 /* video page */
+.video-main {
+    margin-bottom: 1rem;
+}
+
 .video-main video {
     max-height: 70vh;
+    margin-bottom: 1rem;
 }
+
 .video-info-watched {
     display: flex;
     align-items: center;
@@ -614,7 +622,7 @@ button:hover {
 }
 
 .channel-item.list {
-    padding: 20px 0;
+    padding-bottom: 1rem;
 }
 
 .channel-item.grid > .info-box {
