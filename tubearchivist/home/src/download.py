@@ -21,7 +21,7 @@ from home.src.helper import (
     clean_string,
     ignore_filelist,
 )
-from home.src.index import YoutubeChannel, index_new_video
+from home.src.index import YoutubeChannel, YoutubePlaylist, index_new_video
 
 
 class PendingList:
@@ -61,8 +61,8 @@ class PendingList:
                 youtube_ids = [i[0] for i in video_results]
                 missing_videos = missing_videos + youtube_ids
             elif url_type == "playlist":
-                video_results = playlist_extractor(url)
-                youtube_ids = [i[0] for i in video_results]
+                video_results = YoutubePlaylist(url).get_entries()
+                youtube_ids = [i["youtube_id"] for i in video_results]
                 missing_videos = missing_videos + youtube_ids
 
         return missing_videos
@@ -442,21 +442,6 @@ class ChannelSubscription:
         channel_handler.sync_to_videos()
         if channel_handler.source == "scraped":
             channel_handler.get_channel_art()
-
-
-def playlist_extractor(playlist_id):
-    """return youtube_ids from a playlist_id"""
-    url = "https://www.youtube.com/playlist?list=" + playlist_id
-    obs = {
-        "default_search": "ytsearch",
-        "quiet": True,
-        "ignoreerrors": True,
-        "skip_download": True,
-        "extract_flat": True,
-    }
-    playlist = youtube_dl.YoutubeDL(obs).extract_info(url, download=False)
-    playlist_vids = [(i["id"], i["title"]) for i in playlist["entries"]]
-    return playlist_vids
 
 
 class VideoDownloader:

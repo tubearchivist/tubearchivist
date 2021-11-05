@@ -416,6 +416,93 @@ class YoutubeVideo:
         ThumbManager().delete_vid_thumb(self.youtube_id)
 
 
+class YoutubePlaylist:
+    """represent a single playlist on YouTube"""
+
+    CONFIG = AppConfig().config
+    ES_URL = CONFIG["application"]["es_url"]
+    ES_AUTH = CONFIG["application"]["es_auth"]
+
+    def __init__(self, playlist_id):
+        self.playlist_id = playlist_id
+        self.stamp = int(datetime.now().strftime("%s"))
+
+    def get_playlist_dict(self, scrape=False):
+        """get data from es or youtube"""
+        print(f"get playlist with id {self.playlist_id}")
+        if scrape:
+            playlist_dict = self.get_youtube_playlist()
+        else:
+            playlist_dict = self.get_es_playlist()
+            if not playlist_dict:
+                playlist_dict = self.get_youtube_playlist()
+
+        return playlist_dict
+
+    def get_youtube_playlist(self):
+        """get meta data dict from youtube"""
+        url = "https://www.youtube.com/playlist?list=" + self.playlist_id
+        obs = {
+            "default_search": "ytsearch",
+            "quiet": True,
+            "ignoreerrors": True,
+            "skip_download": True,
+            "extract_flat": True,
+            "playlistend": 0,
+        }
+        playlist = youtube_dl.YoutubeDL(obs).extract_info(url, download=False)
+
+        playlist_es = {
+            "playlist_id": self.playlist_id,
+            "playlist_active": True,
+            "playlist_subscribed": False,
+            "playlist_name": playlist["title"],
+            "playlist_channel": playlist["channel"],
+            "playlist_channel_id": playlist["channel_id"],
+            "playlist_thumbnail": playlist["thumbnails"][-1]["url"],
+            "playlist_description": playlist["description"] or False,
+            "playlist_last_refresh": self.stamp,
+        }
+
+        return playlist_es
+
+    def get_es_playlist(self):
+        """get indexed data from es"""
+        url = f"{self.ES_URL}/ta_playlist/_doc/{self.playlist_id}"
+        response = requests.get(url, auth=self.ES_AUTH)
+        if response.ok:
+            return json.loads(response.text)
+
+        return False
+
+    def get_entries(self, playlistend=False):
+        """get all videos in playlist"""
+        url = "https://www.youtube.com/playlist?list=" + self.playlist_id
+        obs = {
+            "default_search": "ytsearch",
+            "quiet": True,
+            "ignoreerrors": True,
+            "skip_download": True,
+            "extract_flat": True,
+        }
+        if playlistend:
+            obs["playlistend"] = playlistend
+
+        playlist = youtube_dl.YoutubeDL(obs).extract_info(url, download=False)
+
+        all_members = []
+        for idx, entry in enumerate(playlist["entries"]):
+            to_append = {
+                "youtube_id": entry["id"],
+                "title": entry["title"],
+                "uploader": entry["uploader"],
+                "idx": idx,
+            }
+            all_members.append(to_append)
+
+        return all_members
+
+
 class WatchState:
     """handle watched checkbox for videos and channels"""
 
