@@ -245,6 +245,22 @@ class YoutubeChannel:
         if not response.ok:
             print(response.text)
 
+    def get_all_playlists(self):
+        """get all playlists owned by this channel"""
+        url = (
+            f"https://www.youtube.com/channel/{self.channel_id}"
+            + "/playlists?view=1&sort=dd&shelf_id=0"
+        )
+        obs = {
+            "quiet": True,
+            "skip_download": True,
+            "extract_flat": True,
+        }
+        playlists = youtube_dl.YoutubeDL(obs).extract_info(url)
+        all_entries = [(i["id"], i["title"]) for i in playlists["entries"]]
+
+        return all_entries
+
 
 class YoutubeVideo:
     """represents a single youtube video"""
@@ -502,6 +518,16 @@ class YoutubePlaylist:
             all_members.append(to_append)
 
         return all_members
+
+    def upload_to_es(self):
+        """add playlist to es with its entries"""
+        playlist = self.get_playlist_dict()
+        playlist["playlist_entries"] = self.get_entries()
+
+        url = f"{self.ES_URL}/ta_playlist/_doc/{self.playlist_id}"
+        response = requests.put(url, json=playlist, auth=self.ES_AUTH)
+        if not response.ok:
+            print(response.text)
 
 
 class WatchState:
