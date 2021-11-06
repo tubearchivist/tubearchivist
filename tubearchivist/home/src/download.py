@@ -135,6 +135,7 @@ class PendingList:
             "default_search": "ytsearch",
             "quiet": True,
             "skip_download": True,
+            "check_formats": True,
         }
         try:
             vid = youtube_dl.YoutubeDL(obs).extract_info(youtube_id)
