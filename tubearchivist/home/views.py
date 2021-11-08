@@ -541,6 +541,28 @@ class ChannelView(View):
         return redirect("channel", permanent=True)
 
 
+class PlaylistView(View):
+    """resolves to /playlist/
+    show all playlists indexed
+    """
+
+    def get(self, request):
+        """handle http get requests"""
+        view_config = self.read_config(user_id=request.user.id)
+        context = {"title": "Playlists", "colors": view_config["colors"]}
+        return render(request, "home/playlist.html", context)
+
+    @staticmethod
+    def read_config(user_id):
+        """read config file"""
+        config_handler = AppConfig(user_id)
+        view_config = {
+            "es_url": config_handler.config["application"]["es_url"],
+            "colors": config_handler.colors,
+        }
+        return view_config
+
+
 class VideoView(View):
     """resolves to /video/<video-id>/
     display details about a single video

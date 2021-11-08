@@ -1,0 +1,55 @@
+{% extends "home/base.html" %}
+{% load static %}
+{% block content %}
+<div class="title-bar">
+    <h1>Playlists</h1>
+</div>
+<div class="info-box info-box-2">
+    <div class="icon-text">
+        {% if running == "subscribing" %}
+            <p>Subscribing in progress, refresh.</p>
+        {% else %}
+            <img id="add-icon" onclick="showForm()" src="{% static 'img/icon-add.svg' %}" alt="add-icon">
+            <p>Subscribe to Playlist</p>
+            <div class="show-form">
+                <form id="hidden-form" action="/playlist/" method="post">
+                    {% csrf_token %}
+                    {{ subscribe_form }}
+                    <button type="submit">Subscribe</button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+    <div class="search-form icon-text">
+        <div class="search-icon">
+            <img src="{% static 'img/icon-search.svg' %}" alt="search-icon" onclick="showSearch()">
+            <p>Search your Playlists</p>
+        </div>
+        <form onSubmit="return playlistRedirect();" id="search-box">
+            {% csrf_token %}
+            {{ search_form }}
+            <datalist id="resultBox">
+            </datalist>
+        </form>
+    </div>
+</div>
+<div class="view-controls">
+    <div class="toggle">
+        <span>Show only subscribed playlists:</span>
+        <div class="toggleBox">
+            <input 
+                id="show_subed_only" onclick="toggleCheckbox(this)" type="checkbox"
+                {% if show_subed_only %}
+                    checked
+                {% endif %}
+                >
+            <label for="" class="onbtn">On</label>
+            <label for="" class="ofbtn">Off</label>
+        </div>
+    </div>
+    <div class="view-icons">
+        <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="playlist" data-value="grid" alt="grid view">
+        <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="playlist" data-value="list" alt="list view">
+    </div>
+</div>
+{% endblock content %}
