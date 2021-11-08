@@ -154,6 +154,15 @@ INDEX_CONFIG = [
             "number_of_replicas": "0",
         },
     },
+    {
+        "index_name": "playlist",
+        "expected_map": {
+            "playlist_description": {"type": "text"},
+        },
+        "expected_set": {
+            "number_of_replicas": "0",
+        },
+    },
 ]
 
 

@@ -509,10 +509,13 @@ class YoutubePlaylist:
 
         all_members = []
         for idx, entry in enumerate(playlist["entries"]):
+            uploader = entry["uploader"]
+            if not uploader:
+                continue
             to_append = {
                 "youtube_id": entry["id"],
                 "title": entry["title"],
-                "uploader": entry["uploader"],
+                "uploader": uploader,
                 "idx": idx,
             }
             all_members.append(to_append)

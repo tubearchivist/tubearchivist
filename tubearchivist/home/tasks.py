@@ -10,6 +10,7 @@ from celery import Celery, shared_task
 from home.src.config import AppConfig
 from home.src.download import ChannelSubscription, PendingList, VideoDownloader
 from home.src.helper import RedisArchivist, RedisQueue, UrlListParser
+from home.src.index import YoutubeChannel, YoutubePlaylist
 from home.src.index_management import backup_all_indexes, restore_from_backup
 from home.src.reindex import (
     ManualImport,
@@ -198,3 +199,15 @@ def subscribe_to(url_str):
         RedisArchivist().set_message(
             "progress:subscribe", {"status": "subscribing"}
         )
+
+
+@shared_task()
+def index_channel_playlists(channel_id):
+    """add all playlists of channel to index"""
+    channel_handler = YoutubeChannel(channel_id)
+    all_playlists = channel_handler.get_all_playlists()
+
+    for playlist_id, playlist_title in all_playlists:
+        print("add playlist: " + playlist_title)
+        playlist_handler = YoutubePlaylist(playlist_id)
+        playlist_handler.upload_to_es()
