@@ -548,17 +548,44 @@ class PlaylistView(View):
 
     def get(self, request):
         """handle http get requests"""
-        view_config = self.read_config(user_id=request.user.id)
-        context = {"title": "Playlists", "colors": view_config["colors"]}
+        user_id = request.user.id
+        view_config = self.read_config(user_id=user_id)
+        page_get = int(request.GET.get("page", 0))
+        pagination_handler = Pagination(page_get, user_id)
+
+        url = view_config["es_url"] + "/ta_playlist/_search"
+        data = {
+            "size": pagination_handler.pagination["page_size"],
+            "from": pagination_handler.pagination["page_from"],
+            "query": {"match_all": {}},
+            "sort": [{"playlist_name.keyword": {"order": "asc"}}],
+        }
+        search = SearchHandler(url, data)
+        playlist_hits = search.get_data()
+        pagination_handler.validate(search.max_hits)
+
+        context = {
+            "title": "Playlists",
+            "colors": view_config["colors"],
+            "pagination": pagination_handler.pagination,
+            "playlists": playlist_hits,
+            "view_style": view_config["view_style"],
+        }
         return render(request, "home/playlist.html", context)
 
     @staticmethod
     def read_config(user_id):
         """read config file"""
         config_handler = AppConfig(user_id)
+        view_key = f"{user_id}:view:playlist"
+        view_style = RedisArchivist().get_message(view_key)["status"]
+        if not view_style:
+            view_style = config_handler.config["default_view"]["channel"]
+
         view_config = {
             "es_url": config_handler.config["application"]["es_url"],
             "colors": config_handler.colors,
+            "view_style": view_style,
         }
         return view_config
 
