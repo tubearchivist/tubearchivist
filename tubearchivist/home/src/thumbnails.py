@@ -23,6 +23,7 @@ class ThumbManager:
     CACHE_DIR = CONFIG["application"]["cache_dir"]
     VIDEO_DIR = os.path.join(CACHE_DIR, "videos")
     CHANNEL_DIR = os.path.join(CACHE_DIR, "channels")
+    PLAYLIST_DIR = os.path.join(CACHE_DIR, "playlists")
 
     def get_all_thumbs(self):
         """get all video artwork already downloaded"""
@@ -98,6 +99,24 @@ class ThumbManager:
                 )
 
         return missing_channels
+
+    def get_missing_playlists(self):
+        """get all missing playlist artwork"""
+        all_downloaded = ignore_filelist(os.listdir(self.PLAYLIST_DIR))
+        all_ids_downloaded = [i.replace(".jpg", "") for i in all_downloaded]
+
+        playlists = download.PlaylistSubscription().get_playlists(
+            subscribed_only=False
+        )
+
+        missing_playlists = []
+        for playlist in playlists:
+            playlist_id = playlist["playlist_id"]
+            if playlist_id not in all_ids_downloaded:
+                playlist_thumb = playlist["playlist_thumbnail"]
+                missing_playlists.append((playlist_id, playlist_thumb))
+
+        return missing_playlists
 
     def get_raw_img(self, img_url, thumb_type):
         """get raw image from youtube and handle 404"""
@@ -201,6 +220,23 @@ class ThumbManager:
             }
             RedisArchivist().set_message("progress:download", mess_dict)
 
+    def download_playlist(self, missing_playlists):
+        """download needed artwork for playlists"""
+        print(f"downloading {len(missing_playlists)} playlist artwork")
+        for playlist in missing_playlists:
+            playlist_id, playlist_thumb_url = playlist
+            thumb_path = os.path.join(self.PLAYLIST_DIR, playlist_id + ".jpg")
+            img_raw = self.get_raw_img(playlist_thumb_url, "video")
+            img_raw.convert("RGB").save(thumb_path)
+
+            mess_dict = {
+                "status": "pending",
+                "level": "info",
+                "title": "Adding to download queue.",
+                "message": "Downloading Playlist Art...",
+            }
+            RedisArchivist().set_message("progress:download", mess_dict)
+
     @staticmethod
     def vid_thumb_path(youtube_id):
         """build expected path for video thumbnail from youtube_id"""
@@ -285,4 +321,6 @@ def validate_thumbnails():
     handler.download_vid(thumbs_to_download)
     missing_channels = handler.get_missing_channels()
     handler.download_chan(missing_channels)
+    missing_playlists = handler.get_missing_playlists()
+    handler.download_playlist(missing_playlists)
     handler.cleanup_downloaded()

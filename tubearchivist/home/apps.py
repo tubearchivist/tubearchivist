@@ -18,7 +18,14 @@ def sync_redis_state():
 
 def make_folders():
     """make needed cache folders here so docker doesn't mess it up"""
-    folders = ["download", "channels", "videos", "import", "backup"]
+    folders = [
+        "download",
+        "channels",
+        "videos",
+        "playlists",
+        "import",
+        "backup",
+    ]
     config = ArchivistConfig().config
     cache_dir = config["application"]["cache_dir"]
     for folder in folders:

@@ -445,6 +445,68 @@ class ChannelSubscription:
             channel_handler.get_channel_art()
 
 
+class PlaylistSubscription:
+    """manage the playlist download functionality"""
+
+    def __init__(self):
+        config = AppConfig().config
+        self.es_url = config["application"]["es_url"]
+        self.es_auth = config["application"]["es_auth"]
+        self.channel_size = config["subscriptions"]["channel_size"]
+
+    def get_playlists(self, subscribed_only=True):
+        """get a list of all playlists"""
+        headers = {"Content-type": "application/json"}
+        # get PIT ID
+        url = self.es_url + "/ta_playlist/_pit?keep_alive=1m"
+        response = requests.post(url, auth=self.es_auth)
+        json_data = json.loads(response.text)
+        pit_id = json_data["id"]
+        # query
+        if subscribed_only:
+            data = {
+                "query": {"term": {"playlist_subscribed": {"value": True}}},
+                "size": 50,
+                "pit": {"id": pit_id, "keep_alive": "1m"},
+                "sort": [{"playlist_channel.keyword": {"order": "desc"}}],
+            }
+        else:
+            data = {
+                "query": {"match_all": {}},
+                "size": 50,
+                "pit": {"id": pit_id, "keep_alive": "1m"},
+                "sort": [{"playlist_channel.keyword": {"order": "desc"}}],
+            }
+        query_str = json.dumps(data)
+        url = self.es_url + "/_search"
+        all_playlists = []
+        while True:
+            response = requests.get(
+                url, data=query_str, headers=headers, auth=self.es_auth
+            )
+            json_data = json.loads(response.text)
+            all_hits = json_data["hits"]["hits"]
+            if all_hits:
+                for hit in all_hits:
+                    source = hit["_source"]
+                    search_after = hit["sort"]
+                    all_playlists.append(source)
+                # update search_after with last hit data
+                data["search_after"] = search_after
+                query_str = json.dumps(data)
+            else:
+                break
+        # clean up PIT
+        query_str = json.dumps({"id": pit_id})
+        requests.delete(
+            self.es_url + "/_pit",
+            data=query_str,
+            headers=headers,
+            auth=self.es_auth,
+        )
+        return all_playlists
+
+
 class VideoDownloader:
     """
     handle the video download functionality
