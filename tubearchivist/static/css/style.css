@@ -646,6 +646,50 @@ button:hover {
     transform: translateX(-30%);
 }
 
+/* playlist overview page */
+.playlist-list.list {
+    display: grid;
+    grid-template-columns: unset;
+    gap: 1rem;
+}
+
+.playlist-list.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+}
+
+.playlist-item {
+    overflow: hidden;
+}
+
+.playlist-item.list {
+    display: flex;
+}
+
+.playlist-thumbnail img {
+    width: 100%;
+}
+
+.playlist-desc.grid {
+    padding: 10px;
+    height: 100%;
+    background-color: var(--highlight-bg);
+}
+
+.playlist-desc.list {
+    width: 100%;
+    padding: 10px;
+    height: unset;
+    background-color: var(--highlight-bg);
+    display: flex;
+    flex-wrap: wrap-reverse;
+    align-content: center;
+}
+
+.playlist-desc.list > * {
+    width: 100%;
+}
 
 /* download page */
 .icon-text {
@@ -751,6 +795,7 @@ button:hover {
     background-color: var(--highlight-bg);
     text-align: center;
     padding: 30px 0 15px 0;
+    margin-bottom: 1rem;
 }
 
 .download-progress.info {

@@ -52,4 +52,21 @@
         <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="playlist" data-value="list" alt="list view">
     </div>
 </div>
+<div class="playlist-list {{ view_style }}">
+    {% if playlists %}
+        {% for playlist in playlists %}
+        <div class="playlist-item {{ view_style }}">
+            <div class="playlist-thumbnail">
+                <img src="/cache/playlists/{{ playlist.source.playlist_id }}.jpg" alt="{{ playlist.source.playlist_id }}-thumbnail">
+            </div>
+            <div class="playlist-desc {{ view_style }}">
+                <h3>{{ playlist.source.playlist_channel }}</h3>
+                <h2>{{ playlist.source.playlist_name }}</h2>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <h2>No playlists found...</h2>
+    {% endif %}
+</div>
 {% endblock content %}
