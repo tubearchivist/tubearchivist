@@ -108,7 +108,30 @@ INDEX_CONFIG = [
             "published": {"type": "date"},
             "playlist": {
                 "properties": {
+                    "playlist_id": {"type": "keyword"},
                     "playlist_description": {"type": "text"},
+                    "playlist_name": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256,
+                                "normalizer": "to_lower",
+                            }
+                        },
+                    },
+                    "playlist_channel": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256,
+                                "normalizer": "to_lower",
+                            }
+                        },
+                    },
+                    "playlist_channel_id": {"type": "keyword"},
+                    "playlist_thumbnail": {"type": "keyword"},
                 }
             },
             "playlist_position": {
@@ -172,9 +195,37 @@ INDEX_CONFIG = [
     {
         "index_name": "playlist",
         "expected_map": {
+            "playlist_id": {"type": "keyword"},
             "playlist_description": {"type": "text"},
+            "playlist_name": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256,
+                        "normalizer": "to_lower",
+                    }
+                },
+            },
+            "playlist_channel": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256,
+                        "normalizer": "to_lower",
+                    }
+                },
+            },
+            "playlist_channel_id": {"type": "keyword"},
+            "playlist_thumbnail": {"type": "keyword"},
         },
         "expected_set": {
+            "analysis": {
+                "normalizer": {
+                    "to_lower": {"type": "custom", "filter": ["lowercase"]}
+                }
+            },
             "number_of_replicas": "0",
         },
     },
