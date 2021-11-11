@@ -201,7 +201,7 @@ def subscribe_to(url_str):
         )
 
 
-@shared_task()
+@shared_task
 def index_channel_playlists(channel_id):
     """add all playlists of channel to index"""
     channel_handler = YoutubeChannel(channel_id)
@@ -210,4 +210,10 @@ def index_channel_playlists(channel_id):
     for playlist_id, playlist_title in all_playlists:
         print("add playlist: " + playlist_title)
         playlist_handler = YoutubePlaylist(playlist_id)
+        playlist_handler.get_playlist_dict()
         playlist_handler.upload_to_es()
+
+    if all_playlists:
+        handler = ThumbManager()
+        missing_playlists = handler.get_missing_playlists()
+        handler.download_playlist(missing_playlists)
