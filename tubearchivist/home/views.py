@@ -541,6 +541,137 @@ class ChannelView(View):
         return redirect("channel", permanent=True)
 
 
+class PlaylistIdView(View):
+    """resolves to /playlist/<playlist_id>
+    show all videos in a playlist
+    """
+
+    def get(self, request, playlist_id_detail):
+        """handle get request"""
+        view_config = self.read_config(user_id=request.user.id)
+        context = self.get_playlist_videos(
+            request, playlist_id_detail, view_config
+        )
+        context.update(view_config)
+        return render(request, "home/playlist_id.html", context)
+
+    @staticmethod
+    def read_config(user_id):
+        """build config dict"""
+        config_handler = AppConfig(user_id)
+        config = config_handler.config
+
+        view_key = f"{user_id}:view:home"
+        view_style = RedisArchivist().get_message(view_key)["status"]
+        if not view_style:
+            view_style = config_handler.config["default_view"]["home"]
+
+        sort_by = RedisArchivist().get_message(f"{user_id}:sort_by")["status"]
+        if not sort_by:
+            sort_by = config["archive"]["sort_by"]
+
+        sort_order_key = f"{user_id}:sort_order"
+        sort_order = RedisArchivist().get_message(sort_order_key)["status"]
+        if not sort_order:
+            sort_order = config["archive"]["sort_order"]
+
+        hide_watched_key = f"{user_id}:hide_watched"
+        hide_watched = RedisArchivist().get_message(hide_watched_key)["status"]
+
+        view_config = {
+            "colors": config_handler.colors,
+            "es_url": config["application"]["es_url"],
+            "view_style": view_style,
+            "sort_by": sort_by,
+            "sort_order": sort_order,
+            "hide_watched": hide_watched,
+        }
+        return view_config
+
+    def get_playlist_videos(self, request, playlist_id_detail, view_config):
+        """get matching videos for playlist"""
+        page_get = int(request.GET.get("page", 0))
+        pagination_handler = Pagination(page_get, request.user.id)
+        # get data
+        url = view_config["es_url"] + "/ta_video/_search"
+        data = self.build_data(
+            pagination_handler, playlist_id_detail, view_config
+        )
+
+        search = SearchHandler(url, data)
+        videos_hits = search.get_data()
+        max_hits = search.max_hits
+
+        if max_hits:
+            source = videos_hits[0]["source"]
+            channel_info = source["channel"]
+            playlist_name = source["playlist"]["playlist_name"]
+            pagination_handler.validate(max_hits)
+            pagination = pagination_handler.pagination
+        else:
+            channel_info = False
+            pagination = False
+
+        context = {
+            "playlist_name": playlist_name,
+            "channel_info": channel_info,
+            "videos": videos_hits,
+            "max_hits": max_hits,
+            "pagination": pagination,
+            "title": "Playlist: " + playlist_name,
+        }
+
+        return context
+
+    @staticmethod
+    def build_data(pagination_handler, playlist_id_detail, view_config):
+        """build data query for es"""
+        sort_by = view_config["sort_by"]
+
+        # overwrite sort_by to match key
+        if sort_by == "views":
+            sort_by = "stats.view_count"
+        elif sort_by == "likes":
+            sort_by = "stats.like_count"
+        elif sort_by == "downloaded":
+            sort_by = "date_downloaded"
+
+        data = {
+            "size": pagination_handler.pagination["page_size"],
+            "from": pagination_handler.pagination["page_from"],
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "playlist.playlist_id": {
+                                    "value": playlist_id_detail
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "sort": [{"playlist_position.playlist_index": {"order": "asc"}}],
+        }
+        if view_config["hide_watched"]:
+            to_append = {"term": {"player.watched": {"value": False}}}
+            data["query"]["bool"]["must"].append(to_append)
+
+        return data
+
+    @staticmethod
+    def get_channel_info(channel_id_detail, es_url):
+        """get channel info from channel index if no videos"""
+        url = f"{es_url}/ta_channel/_doc/{channel_id_detail}"
+        data = False
+        search = SearchHandler(url, data)
+        channel_data = search.get_data()
+        channel_info = channel_data[0]["source"]
+        channel_name = channel_info["channel_name"]
+        return channel_info, channel_name
+
+
 class PlaylistView(View):
     """resolves to /playlist/
     show all playlists indexed

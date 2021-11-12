@@ -11,6 +11,7 @@ from home.views import (
     DownloadView,
     HomeView,
     LoginView,
+    PlaylistIdView,
     PlaylistView,
     SettingsView,
     VideoView,
@@ -46,4 +47,9 @@ urlpatterns = [
         name="video",
     ),
     path("playlist/", login_required(PlaylistView.as_view()), name="playlist"),
+    path(
+        "playlist/<slug:playlist_id_detail>/",
+        login_required(PlaylistIdView.as_view()),
+        name="playlist_id",
+    ),
 ]
