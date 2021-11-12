@@ -121,6 +121,12 @@ class SearchHandler:
             date_str = datetime.strftime(date_refresh, "%d %b, %Y")
             hit["source"]["vid_last_refresh"] = date_str
 
+        if "playlist_last_refresh" in hit_keys:
+            playlist_last_refresh = hit["source"]["playlist_last_refresh"]
+            date_refresh = datetime.fromtimestamp(playlist_last_refresh)
+            date_str = datetime.strftime(date_refresh, "%d %b, %Y")
+            hit["source"]["playlist_last_refresh"] = date_str
+
         if "vid_thumb_url" in hit_keys:
             youtube_id = hit["source"]["youtube_id"]
             thumb_path = ThumbManager().vid_thumb_path(youtube_id)

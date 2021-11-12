@@ -2,6 +2,9 @@
 {% load static %}
 {% load humanize %}
 {% block content %}
+<div class="title-bar">
+    <h1>{{ playlist_info.playlist_name }}</h1>
+</div>
 <div class="info-box info-box-3">
     <div class="info-box-item">
         <div class="round-img">
@@ -18,7 +21,35 @@
             {% endif %}
         </div>
     </div>
+    <div class="info-box-item">
+        <div>
+            <p>Last refreshed: {{ playlist_info.playlist_last_refresh }}</p>
+            <p>Subscribed: 
+                {% if playlist_info.playlist_subscribed %}
+                    <button type="button" id="{{ playlist_info.playlist_id }}" onclick="unsubscribe(this.id)" title="Unsubscribe from {{ playlist_info.playlist_name }}">Unsubscribe</button>
+                {% else %}
+                    false
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    <div class="info-box-item">
+        <div>
+            {% if max_hits %}
+            <p>Total Videos archived: {{ playlist_info.playlist_entries|length }}/{{ max_hits }}</p>
+            <p>Watched: <button title="Mark all videos from {{ playlist_info.playlist_name }} as watched" type="button" id="{{ playlist_info.playlist_id }}" onclick="isWatched(this.id)">Mark as watched</button></p>
+            {% endif %}
+        </div>
+    </div>
 </div>
+{% if playlist_info.playlist_description %}
+    <div class="info-box-item description-box">
+        <p>Description: <button onclick="textReveal()" id="text-reveal-button">Show</button></p>
+        <div id="text-reveal" class="description-text">
+            {{ playlist_info.playlist_description|linebreaks }}
+        </div>
+    </div>
+{% endif %}
 <div id="player" class="video-player"></div>
 <div class="view-controls">
     <div class="toggle">

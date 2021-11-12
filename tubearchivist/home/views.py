@@ -601,18 +601,25 @@ class PlaylistIdView(View):
         search = SearchHandler(url, data)
         videos_hits = search.get_data()
         max_hits = search.max_hits
+        playlist_info = self.get_playlist_info(
+            playlist_id_detail, view_config["es_url"]
+        )
+        playlist_name = playlist_info["playlist_name"]
 
         if max_hits:
             source = videos_hits[0]["source"]
             channel_info = source["channel"]
-            playlist_name = source["playlist"]["playlist_name"]
             pagination_handler.validate(max_hits)
             pagination = pagination_handler.pagination
         else:
-            channel_info = False
+            channel_info = self.get_channel_info(
+                playlist_info["playlist_channel_id"], view_config["es_url"]
+            )
+            videos_hits = False
             pagination = False
 
         context = {
+            "playlist_info": playlist_info,
             "playlist_name": playlist_name,
             "channel_info": channel_info,
             "videos": videos_hits,
@@ -664,12 +671,19 @@ class PlaylistIdView(View):
     def get_channel_info(channel_id_detail, es_url):
         """get channel info from channel index if no videos"""
         url = f"{es_url}/ta_channel/_doc/{channel_id_detail}"
-        data = False
-        search = SearchHandler(url, data)
+        search = SearchHandler(url, data=False)
         channel_data = search.get_data()
         channel_info = channel_data[0]["source"]
-        channel_name = channel_info["channel_name"]
-        return channel_info, channel_name
+        return channel_info
+
+    @staticmethod
+    def get_playlist_info(playlist_id_detail, es_url):
+        """get playlist info header to no fail if playlist is empty"""
+        url = f"{es_url}/ta_playlist/_doc/{playlist_id_detail}"
+        search = SearchHandler(url, data=False)
+        playlist_data = search.get_data()
+        playlist_info = playlist_data[0]["source"]
+        return playlist_info
 
 
 class PlaylistView(View):
