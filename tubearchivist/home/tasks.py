@@ -17,7 +17,7 @@ from home.src.reindex import (
     reindex_old_documents,
     scan_filesystem,
 )
-from home.src.thumbnails import ThumbManager
+from home.src.thumbnails import ThumbManager, validate_thumbnails
 
 CONFIG = AppConfig().config
 REDIS_HOST = os.environ.get("REDIS_HOST")
@@ -167,6 +167,7 @@ def kill_dl(task_id):
 def rescan_filesystem():
     """check the media folder for mismatches"""
     scan_filesystem()
+    validate_thumbnails()
 
 
 @shared_task
