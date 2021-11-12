@@ -70,7 +70,7 @@ class UrlListParser:
                 # is not a url
                 id_type = self.find_valid_id(url)
                 youtube_id = url
-            elif "youtube.com" not in url:
+            elif "youtube.com" not in url and "youtu.be" not in url:
                 raise ValueError(f"{url} is not a youtube link")
             elif parsed.path:
                 # is a url
