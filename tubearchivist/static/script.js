@@ -187,6 +187,18 @@ function fsRescan() {
     toReplace.appendChild(message);
 }
 
+function findPlaylists(button) {
+    var channel_id = button.getAttribute("data-id");
+    var payload = JSON.stringify({'find-playlists': channel_id});
+    sendPost(payload);
+    // clear button
+    var message = document.createElement('p');
+    message.innerText = 'Scraping for playlists in progress';
+    var toReplace = document.getElementById('find-playlists-button');
+    toReplace.innerHTML = '';
+    toReplace.appendChild(message);
+}
+
 // delete from file system
 function deleteConfirm() {
     to_show = document.getElementById("delete-button");
