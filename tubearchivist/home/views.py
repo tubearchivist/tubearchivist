@@ -33,6 +33,7 @@ from home.tasks import (
     download_pending,
     download_single,
     extrac_dl,
+    index_channel_playlists,
     kill_dl,
     re_sync_thumbs,
     rescan_filesystem,
@@ -634,6 +635,7 @@ class PlaylistIdView(View):
     def build_data(pagination_handler, playlist_id_detail, view_config):
         """build data query for es"""
         sort_by = view_config["sort_by"]
+        sort_order = view_config["sort_order"]
 
         # overwrite sort_by to match key
         if sort_by == "views":
@@ -649,17 +651,11 @@ class PlaylistIdView(View):
             "query": {
                 "bool": {
                     "must": [
-                        {
-                            "term": {
-                                "playlist.playlist_id": {
-                                    "value": playlist_id_detail
-                                }
-                            }
-                        }
+                        {"match": {"playlist.keyword": playlist_id_detail}}
                     ]
                 }
             },
-            "sort": [{"playlist_position.playlist_index": {"order": "asc"}}],
+            "sort": [{sort_by: {"order": sort_order}}],
         }
         if view_config["hide_watched"]:
             to_append = {"term": {"player.watched": {"value": False}}}
@@ -891,6 +887,7 @@ class PostData:
             "channel-search": self.channel_search,
             "delete-video": self.delete_video,
             "delete-channel": self.delete_channel,
+            "find-playlists": self.find_playlists,
         }
 
         return exec_map[self.to_exec]
@@ -1081,4 +1078,10 @@ class PostData:
         """delete channel and all matching videos"""
         channel_id = self.exec_val
         YoutubeChannel(channel_id).delete_channel()
+        return {"success": True}
+
+    def find_playlists(self):
+        """add all playlists of a channel"""
+        channel_id = self.exec_val
+        index_channel_playlists.delay(channel_id)
         return {"success": True}

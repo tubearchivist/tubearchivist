@@ -107,42 +107,14 @@ INDEX_CONFIG = [
             "youtube_id": {"type": "keyword"},
             "published": {"type": "date"},
             "playlist": {
-                "properties": {
-                    "playlist_id": {"type": "keyword"},
-                    "playlist_description": {"type": "text"},
-                    "playlist_name": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256,
-                                "normalizer": "to_lower",
-                            }
-                        },
-                    },
-                    "playlist_channel": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256,
-                                "normalizer": "to_lower",
-                            }
-                        },
-                    },
-                    "playlist_channel_id": {"type": "keyword"},
-                    "playlist_thumbnail": {"type": "keyword"},
-                }
-            },
-            "playlist_position": {
-                "properties": {
-                    "playlist_next_id": {"type": "keyword"},
-                    "playlist_next_title": {"type": "text"},
-                    "playlist_next_channel_name": {"type": "text"},
-                    "playlist_prev_id": {"type": "keyword"},
-                    "playlist_prev_title": {"type": "text"},
-                    "playlist_prev_channel_name": {"type": "text"},
-                }
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256,
+                        "normalizer": "to_lower",
+                    }
+                },
             },
         },
         "expected_set": {

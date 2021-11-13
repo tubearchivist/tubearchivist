@@ -214,7 +214,6 @@ def index_channel_playlists(channel_id):
         playlist_handler.get_playlist_dict()
         playlist_handler.upload_to_es()
         playlist_handler.add_vids_to_playlist()
-        playlist_handler.playlist_position()
 
     if all_playlists:
         handler = ThumbManager()

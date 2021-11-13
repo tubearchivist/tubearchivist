@@ -535,46 +535,27 @@ class YoutubePlaylist:
             print(response.text)
 
     def add_vids_to_playlist(self):
-        """sync the playlistdict to video dict"""
-        print("sync playlist meta data for " + self.playlist_id)
+        """sync the playlist id to videos"""
         playlist_dict = self.playlist_dict
-        all_entries = playlist_dict["playlist_entries"]
-        vid_ids = [i["youtube_id"] for i in all_entries]
-
-        to_add = {
-            key: val
-            for key, val in playlist_dict.items()
-            if key != "playlist_entries"
-        }
-        bulk_list = []
-        for youtube_id in vid_ids:
-            action = {"update": {"_id": youtube_id, "_index": "ta_video"}}
-            source = {"doc": {"playlist": to_add}}
-            bulk_list.append(json.dumps(action))
-            bulk_list.append(json.dumps(source))
-
-        # add last newline
-        bulk_list.append("\n")
-        query_str = "\n".join(bulk_list)
-
-        headers = {"Content-type": "application/x-ndjson"}
-        url = self.ES_URL + "/_bulk"
-        response = requests.post(
-            url, data=query_str, headers=headers, auth=self.ES_AUTH
+        script = (
+            'if (!ctx._source.containsKey("playlist")) '
+            + "{ctx._source.playlist = [params.playlist]} "
+            + "else if (!ctx._source.playlist.contains(params.playlist)) "
+            + "{ctx._source.playlist.add(params.playlist)} "
+            + "else {ctx.op = 'none'}"
         )
-        if not response.ok:
-            print(response.text)
-
-    def playlist_position(self):
-        """sync playlist_position to video dict"""
-        all_entries = self.playlist_dict["playlist_entries"]
 
         bulk_list = []
-        for idx, entry in enumerate(all_entries):
+        for entry in playlist_dict["playlist_entries"]:
             youtube_id = entry["youtube_id"]
-            playlist_position = self.get_position_dict(all_entries, idx)
             action = {"update": {"_id": youtube_id, "_index": "ta_video"}}
-            source = {"doc": {"playlist_position": playlist_position}}
+            source = {
+                "script": {
+                    "source": script,
+                    "lang": "painless",
+                    "params": {"playlist": self.playlist_id},
+                }
+            }
             bulk_list.append(json.dumps(action))
             bulk_list.append(json.dumps(source))
 
@@ -588,48 +569,6 @@ class YoutubePlaylist:
         )
         if not response.ok:
             print(response.text)
-
-    @staticmethod
-    def get_position_dict(all_entries, idx):
-        """get previous and next videos in playlist"""
-        playlist_position = {"playlist_index": idx}
-        if idx == 0:
-            playlist_position.update(
-                {
-                    "playlist_prev_id": False,
-                    "playlist_prev_title": False,
-                    "playlist_prev_channel_name": False,
-                }
-            )
-        else:
-            prev_vid = all_entries[idx - 1]
-            playlist_position.update(
-                {
-                    "playlist_prev_id": prev_vid["youtube_id"],
-                    "playlist_prev_title": prev_vid["title"],
-                    "playlist_prev_channel_name": prev_vid["uploader"],
-                }
-            )
-
-        if idx == len(all_entries) - 1:
-            playlist_position.update(
-                {
-                    "playlist_next_id": False,
-                    "playlist_next_title": False,
-                    "playlist_next_channel_name": False,
-                }
-            )
-        else:
-            next_vid = all_entries[idx + 1]
-            playlist_position.update(
-                {
-                    "playlist_next_id": next_vid["youtube_id"],
-                    "playlist_next_title": next_vid["title"],
-                    "playlist_next_channel_name": next_vid["uploader"],
-                }
-            )
-
-        return playlist_position
 
 
 class WatchState:
