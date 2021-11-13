@@ -594,18 +594,22 @@ class PlaylistIdView(View):
         page_get = int(request.GET.get("page", 0))
         pagination_handler = Pagination(page_get, request.user.id)
         # get data
+        playlist_info = self.get_playlist_info(
+            playlist_id_detail, view_config["es_url"]
+        )
+        sort = {
+            i["youtube_id"]: i["idx"]
+            for i in playlist_info["playlist_entries"]
+        }
+        playlist_name = playlist_info["playlist_name"]
         url = view_config["es_url"] + "/ta_video/_search"
         data = self.build_data(
-            pagination_handler, playlist_id_detail, view_config
+            pagination_handler, playlist_id_detail, view_config, sort
         )
 
         search = SearchHandler(url, data)
         videos_hits = search.get_data()
         max_hits = search.max_hits
-        playlist_info = self.get_playlist_info(
-            playlist_id_detail, view_config["es_url"]
-        )
-        playlist_name = playlist_info["playlist_name"]
 
         if max_hits:
             source = videos_hits[0]["source"]
@@ -632,10 +636,9 @@ class PlaylistIdView(View):
         return context
 
     @staticmethod
-    def build_data(pagination_handler, playlist_id_detail, view_config):
+    def build_data(pagination_handler, playlist_id_detail, view_config, sort):
         """build data query for es"""
         sort_by = view_config["sort_by"]
-        sort_order = view_config["sort_order"]
 
         # overwrite sort_by to match key
         if sort_by == "views":
@@ -644,6 +647,12 @@ class PlaylistIdView(View):
             sort_by = "stats.like_count"
         elif sort_by == "downloaded":
             sort_by = "date_downloaded"
+
+        script = (
+            "if(params.scores.containsKey(doc['youtube_id'].value)) "
+            + "{return params.scores[doc['youtube_id'].value];} "
+            + "return 100000;"
+        )
 
         data = {
             "size": pagination_handler.pagination["page_size"],
@@ -655,7 +664,19 @@ class PlaylistIdView(View):
                     ]
                 }
             },
-            "sort": [{sort_by: {"order": sort_order}}],
+            "sort": [
+                {
+                    "_script": {
+                        "type": "number",
+                        "script": {
+                            "lang": "painless",
+                            "source": script,
+                            "params": {"scores": sort},
+                        },
+                        "order": "asc",
+                    }
+                }
+            ],
         }
         if view_config["hide_watched"]:
             to_append = {"term": {"player.watched": {"value": False}}}
