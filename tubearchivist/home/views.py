@@ -719,7 +719,9 @@ class PlaylistView(View):
         data = {
             "size": pagination_handler.pagination["page_size"],
             "from": pagination_handler.pagination["page_from"],
-            "query": {"match_all": {}},
+            "query": {
+                "term": {"playlist_entries.downloaded": {"value": True}}
+            },
             "sort": [{"playlist_name.keyword": {"order": "asc"}}],
         }
         search = SearchHandler(url, data)
