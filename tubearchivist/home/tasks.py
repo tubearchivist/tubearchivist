@@ -208,9 +208,14 @@ def index_channel_playlists(channel_id):
     channel_handler = YoutubeChannel(channel_id)
     all_playlists = channel_handler.get_all_playlists()
 
+    all_indexed = PendingList().get_all_indexed()
+    all_youtube_ids = [i["_source"]["youtube_id"] for i in all_indexed]
+
     for playlist_id, playlist_title in all_playlists:
         print("add playlist: " + playlist_title)
-        playlist_handler = YoutubePlaylist(playlist_id)
+        playlist_handler = YoutubePlaylist(
+            playlist_id, all_youtube_ids=all_youtube_ids
+        )
         playlist_handler.get_playlist_dict()
         playlist_handler.upload_to_es()
         playlist_handler.add_vids_to_playlist()

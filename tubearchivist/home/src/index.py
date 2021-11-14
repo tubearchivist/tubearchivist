@@ -440,9 +440,10 @@ class YoutubePlaylist:
     ES_URL = CONFIG["application"]["es_url"]
     ES_AUTH = CONFIG["application"]["es_auth"]
 
-    def __init__(self, playlist_id):
+    def __init__(self, playlist_id, all_youtube_ids=False):
         self.playlist_id = playlist_id
         self.stamp = int(datetime.now().strftime("%s"))
+        self.all_youtube_ids = all_youtube_ids
         self.playlist_dict = False
 
     def get_playlist_dict(self, scrape=False):
@@ -514,13 +515,16 @@ class YoutubePlaylist:
         all_members = []
         for idx, entry in enumerate(playlist["entries"]):
             uploader = entry["uploader"]
+            youtube_id = entry["id"]
+            downloaded = youtube_id in self.all_youtube_ids
             if not uploader:
                 continue
             to_append = {
-                "youtube_id": entry["id"],
+                "youtube_id": youtube_id,
                 "title": entry["title"],
                 "uploader": uploader,
                 "idx": idx,
+                "downloaded": downloaded,
             }
             all_members.append(to_append)
 
