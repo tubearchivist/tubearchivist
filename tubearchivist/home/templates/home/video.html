@@ -72,39 +72,41 @@
         </div>
     </div>
 {% endif %}
-{% for playlist_item in playlist_nav %}
-    <div class="playlist-wrap">
-        <a href="{% url 'playlist_id' playlist_item.playlist_meta.playlist_id %}">
-            <h3>Playlist: {{ playlist_item.playlist_meta.playlist_name }}</h3>
-        </a>
-        <div class="playlist-nav">    
-            <div class="playlist-nav-item">
-                {% if playlist_item.playlist_previous %}
-                    <a href="{% url 'video' playlist_item.playlist_previous.youtube_id %}">
-                        <img src="/cache/{{ playlist_item.playlist_previous.vid_thumb }}" alt="previous thumbnail">
-                    </a>
-                    <div class="playlist-desc">
-                        <p>Previous:</p>
+{% if playlist_nav %}
+    {% for playlist_item in playlist_nav %}
+        <div class="playlist-wrap">
+            <a href="{% url 'playlist_id' playlist_item.playlist_meta.playlist_id %}">
+                <h3>Playlist: {{ playlist_item.playlist_meta.playlist_name }}</h3>
+            </a>
+            <div class="playlist-nav">    
+                <div class="playlist-nav-item">
+                    {% if playlist_item.playlist_previous %}
                         <a href="{% url 'video' playlist_item.playlist_previous.youtube_id %}">
-                            <h3>{{ playlist_item.playlist_previous.title }}</h3>
+                            <img src="/cache/{{ playlist_item.playlist_previous.vid_thumb }}" alt="previous thumbnail">
                         </a>
-                    </div>
-                {% endif %}
-            </div>
-            <div class="playlist-nav-item">
-                {% if playlist_item.playlist_next %}
-                    <div class="playlist-desc">
-                        <p>Next:</p>
+                        <div class="playlist-desc">
+                            <p>Previous:</p>
+                            <a href="{% url 'video' playlist_item.playlist_previous.youtube_id %}">
+                                <h3>{{ playlist_item.playlist_previous.title }}</h3>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="playlist-nav-item">
+                    {% if playlist_item.playlist_next %}
+                        <div class="playlist-desc">
+                            <p>Next:</p>
+                            <a href="{% url 'video' playlist_item.playlist_next.youtube_id %}">
+                                <h3>{{ playlist_item.playlist_next.title }}</h3>
+                            </a>
+                        </div>
                         <a href="{% url 'video' playlist_item.playlist_next.youtube_id %}">
-                            <h3>{{ playlist_item.playlist_next.title }}</h3>
+                            <img src="/cache/{{ playlist_item.playlist_next.vid_thumb }}" alt="previous thumbnail">
                         </a>
-                    </div>
-                    <a href="{% url 'video' playlist_item.playlist_next.youtube_id %}">
-                        <img src="/cache/{{ playlist_item.playlist_next.vid_thumb }}" alt="previous thumbnail">
-                    </a>
-                {% endif %}
+                    {% endif %}
+                </div>
             </div>
         </div>
-    </div>
-{% endfor %}
+    {% endfor %}
+{% endif %}
 {% endblock content %}
