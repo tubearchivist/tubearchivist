@@ -610,6 +610,36 @@ button:hover {
     transform: rotate(180deg);
 }
 
+.playlist-wrap {
+    background-color: var(--highlight-bg);
+    margin: 1rem 0;
+    padding: 1rem;
+}
+
+.playlist-wrap > a > h3 {
+    text-align: center;
+}
+
+.playlist-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-bottom: 10px;
+}
+
+.playlist-nav-item {
+    display: flex;
+    justify-content: space-between;
+}
+
+.playlist-nav-item img {
+    width: 200px;
+}
+
+.playlist-desc {
+    padding: 5px;
+    width: 100%;
+}
+
 /* channel overview page */
 .channel-list.list {
     display: block;

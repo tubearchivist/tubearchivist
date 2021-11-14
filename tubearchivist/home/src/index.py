@@ -574,6 +574,43 @@ class YoutubePlaylist:
         if not response.ok:
             print(response.text)
 
+    def build_nav(self, youtube_id):
+        """find next and previous in playlist of a given youtube_id"""
+        all_entries_available = self.playlist_dict["playlist_entries"]
+        all_entries = [i for i in all_entries_available if i["downloaded"]]
+        current = [i for i in all_entries if i["youtube_id"] == youtube_id]
+        # stop if not found or playlist of 1
+        if not current or not len(all_entries) > 1:
+            return False
+
+        current_idx = current[0]["idx"]
+        if current_idx == 0:
+            previous_item = False
+        else:
+            previous_item = all_entries[current_idx - 1]
+            prev_thumb = ThumbManager().vid_thumb_path(
+                previous_item["youtube_id"]
+            )
+            previous_item["vid_thumb"] = prev_thumb
+
+        if current_idx == len(all_entries) - 1:
+            next_item = False
+        else:
+            next_item = all_entries[current_idx + 1]
+            next_thumb = ThumbManager().vid_thumb_path(next_item["youtube_id"])
+            next_item["vid_thumb"] = next_thumb
+
+        nav = {
+            "playlist_meta": {
+                "playlist_id": self.playlist_id,
+                "playlist_name": self.playlist_dict["playlist_name"],
+                "playlist_channel": self.playlist_dict["playlist_channel"],
+            },
+            "playlist_previous": previous_item,
+            "playlist_next": next_item,
+        }
+        return nav
+
 
 class WatchState:
     """handle watched checkbox for videos and channels"""

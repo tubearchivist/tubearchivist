@@ -27,7 +27,12 @@ from home.forms import (
 from home.src.config import AppConfig
 from home.src.download import ChannelSubscription, PendingList
 from home.src.helper import RedisArchivist, RedisQueue, UrlListParser
-from home.src.index import WatchState, YoutubeChannel, YoutubeVideo
+from home.src.index import (
+    WatchState,
+    YoutubeChannel,
+    YoutubePlaylist,
+    YoutubeVideo,
+)
 from home.src.searching import Pagination, SearchForm, SearchHandler
 from home.tasks import (
     download_pending,
@@ -773,9 +778,33 @@ class VideoView(View):
         except KeyError:
             video_data["stats"]["average_rating"] = False
 
+        if "playlist" in video_data.keys():
+            playlists = video_data["playlist"]
+            playlist_nav = self.build_playlists(video_id, playlists)
+        else:
+            playlist_nav = False
+
         video_title = video_data["title"]
-        context = {"video": video_data, "title": video_title, "colors": colors}
+        context = {
+            "video": video_data,
+            "playlist_nav": playlist_nav,
+            "title": video_title,
+            "colors": colors,
+        }
         return render(request, "home/video.html", context)
+
+    @staticmethod
+    def build_playlists(video_id, playlists):
+        """build playlist nav if available"""
+        all_navs = []
+        for playlist_id in playlists:
+            handler = YoutubePlaylist(playlist_id)
+            handler.get_playlist_dict()
+            nav = handler.build_nav(video_id)
+            if nav:
+                all_navs.append(nav)
+
+        return all_navs
 
     @staticmethod
     def read_config(user_id):
