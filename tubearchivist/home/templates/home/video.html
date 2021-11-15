@@ -76,7 +76,7 @@
     {% for playlist_item in playlist_nav %}
         <div class="playlist-wrap">
             <a href="{% url 'playlist_id' playlist_item.playlist_meta.playlist_id %}">
-                <h3>Playlist: {{ playlist_item.playlist_meta.playlist_name }}</h3>
+                <h3>Playlist [{{ playlist_item.playlist_meta.current_idx|add:"1" }}]: {{ playlist_item.playlist_meta.playlist_name }}</h3>
             </a>
             <div class="playlist-nav">    
                 <div class="playlist-nav-item">
@@ -87,7 +87,7 @@
                         <div class="playlist-desc">
                             <p>Previous:</p>
                             <a href="{% url 'video' playlist_item.playlist_previous.youtube_id %}">
-                                <h3>{{ playlist_item.playlist_previous.title }}</h3>
+                                <h3>[{{ playlist_item.playlist_previous.idx|add:"1" }}] {{ playlist_item.playlist_previous.title }}</h3>
                             </a>
                         </div>
                     {% endif %}
@@ -97,7 +97,7 @@
                         <div class="playlist-desc">
                             <p>Next:</p>
                             <a href="{% url 'video' playlist_item.playlist_next.youtube_id %}">
-                                <h3>{{ playlist_item.playlist_next.title }}</h3>
+                                <h3>[{{ playlist_item.playlist_next.idx|add:"1" }}] {{ playlist_item.playlist_next.title }}</h3>
                             </a>
                         </div>
                         <a href="{% url 'video' playlist_item.playlist_next.youtube_id %}">

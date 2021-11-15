@@ -602,6 +602,7 @@ class YoutubePlaylist:
 
         nav = {
             "playlist_meta": {
+                "current_idx": current_idx,
                 "playlist_id": self.playlist_id,
                 "playlist_name": self.playlist_dict["playlist_name"],
                 "playlist_channel": self.playlist_dict["playlist_channel"],
