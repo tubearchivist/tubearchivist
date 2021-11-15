@@ -25,11 +25,9 @@
             <img src="{% static 'img/icon-search.svg' %}" alt="search-icon" onclick="showSearch()">
             <p>Search your Playlists</p>
         </div>
-        <form onSubmit="return playlistRedirect();" id="search-box">
+        <form action="/playlist/" method="POST" id="search-box">
             {% csrf_token %}
             {{ search_form }}
-            <datalist id="resultBox">
-            </datalist>
         </form>
     </div>
 </div>

@@ -86,6 +86,15 @@ class ChannelSearchForm(forms.Form):
     )
 
 
+class PlaylistSearchForm(forms.Form):
+    """search for playlists"""
+
+    searchInput = forms.CharField(
+        label="",
+        widget=forms.TextInput(attrs={"autocomplete": "off"}),
+    )
+
+
 class AddToQueueForm(forms.Form):
     """text area form to add to downloads"""
 

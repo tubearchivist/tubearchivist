@@ -20,6 +20,7 @@ from home.forms import (
     ApplicationSettingsForm,
     ChannelSearchForm,
     CustomAuthForm,
+    PlaylistSearchForm,
     SubscribeToChannelForm,
     UserSettingsForm,
     VideoSearchForm,
@@ -717,10 +718,39 @@ class PlaylistView(View):
         """handle http get requests"""
         user_id = request.user.id
         view_config = self.read_config(user_id=user_id)
+
+        # handle search
+        search_get = request.GET.get("search", False)
+        if search_get:
+            search_encoded = urllib.parse.quote(search_get)
+        else:
+            search_encoded = False
+        # define page size
         page_get = int(request.GET.get("page", 0))
-        pagination_handler = Pagination(page_get, user_id)
+        pagination_handler = Pagination(
+            page_get, user_id, search_get=search_encoded
+        )
 
         url = view_config["es_url"] + "/ta_playlist/_search"
+        data = self.build_data(pagination_handler, search_get)
+        search = SearchHandler(url, data)
+        playlist_hits = search.get_data()
+        pagination_handler.validate(search.max_hits)
+        search_form = PlaylistSearchForm()
+
+        context = {
+            "search_form": search_form,
+            "title": "Playlists",
+            "colors": view_config["colors"],
+            "pagination": pagination_handler.pagination,
+            "playlists": playlist_hits,
+            "view_style": view_config["view_style"],
+        }
+        return render(request, "home/playlist.html", context)
+
+    @staticmethod
+    def build_data(pagination_handler, search_get):
+        """build data object for query"""
         data = {
             "size": pagination_handler.pagination["page_size"],
             "from": pagination_handler.pagination["page_from"],
@@ -729,18 +759,28 @@ class PlaylistView(View):
             },
             "sort": [{"playlist_name.keyword": {"order": "asc"}}],
         }
-        search = SearchHandler(url, data)
-        playlist_hits = search.get_data()
-        pagination_handler.validate(search.max_hits)
-
-        context = {
-            "title": "Playlists",
-            "colors": view_config["colors"],
-            "pagination": pagination_handler.pagination,
-            "playlists": playlist_hits,
-            "view_style": view_config["view_style"],
-        }
-        return render(request, "home/playlist.html", context)
+        if search_get:
+            data["query"] = {
+                "bool": {
+                    "should": [
+                        {
+                            "multi_match": {
+                                "query": search_get,
+                                "fields": [
+                                    "playlist_channel_id",
+                                    "playlist_channel",
+                                    "playlist_name",
+                                ],
+                            }
+                        }
+                    ],
+                    "filter": [
+                        {"term": {"playlist_entries.downloaded": True}}
+                    ],
+                    "minimum_should_match": 1,
+                }
+            }
+        return data
 
     @staticmethod
     def read_config(user_id):
@@ -757,6 +797,18 @@ class PlaylistView(View):
             "view_style": view_style,
         }
         return view_config
+
+    @staticmethod
+    def post(request):
+        """handle post from search form"""
+        search_form = PlaylistSearchForm(data=request.POST)
+        if search_form.is_valid():
+            search_query = request.POST.get("searchInput")
+            print(search_query)
+            search_url = "/playlist/?" + urlencode({"search": search_query})
+            return redirect(search_url, permanent=True)
+
+        return redirect("playlist")
 
 
 class VideoView(View):
