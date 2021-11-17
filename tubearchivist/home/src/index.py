@@ -516,7 +516,10 @@ class YoutubePlaylist:
         for idx, entry in enumerate(playlist["entries"]):
             uploader = entry["uploader"]
             youtube_id = entry["id"]
-            downloaded = youtube_id in self.all_youtube_ids
+            if self.all_youtube_ids:
+                downloaded = youtube_id in self.all_youtube_ids
+            else:
+                downloaded = False
             if not uploader:
                 continue
             to_append = {
