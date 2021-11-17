@@ -21,7 +21,12 @@ from home.src.helper import (
     clean_string,
     ignore_filelist,
 )
-from home.src.index import YoutubeChannel, YoutubePlaylist, index_new_video
+from home.src.index import (
+    IndexPaginate,
+    YoutubeChannel,
+    YoutubePlaylist,
+    index_new_video,
+)
 
 
 class PendingList:
@@ -166,52 +171,24 @@ class PendingList:
         }
         return youtube_details
 
-    def get_all_pending(self):
+    @staticmethod
+    def get_all_pending():
         """get a list of all pending videos in ta_download"""
-        headers = {"Content-type": "application/json"}
-        # get PIT ID
-        url = self.ES_URL + "/ta_download/_pit?keep_alive=1m"
-        response = requests.post(url, auth=self.ES_AUTH)
-        json_data = json.loads(response.text)
-        pit_id = json_data["id"]
-        # query
         data = {
-            "size": 50,
             "query": {"match_all": {}},
-            "pit": {"id": pit_id, "keep_alive": "1m"},
             "sort": [{"timestamp": {"order": "asc"}}],
         }
-        query_str = json.dumps(data)
-        url = self.ES_URL + "/_search"
+        all_results = IndexPaginate("ta_download", data).get_results()
+
         all_pending = []
         all_ignore = []
-        while True:
-            response = requests.get(
-                url, data=query_str, headers=headers, auth=self.ES_AUTH
-            )
-            json_data = json.loads(response.text)
-            all_hits = json_data["hits"]["hits"]
-            if all_hits:
-                for hit in all_hits:
-                    status = hit["_source"]["status"]
-                    if status == "pending":
-                        all_pending.append(hit["_source"])
-                    elif status == "ignore":
-                        all_ignore.append(hit["_source"])
-                    search_after = hit["sort"]
-                # update search_after with last hit data
-                data["search_after"] = search_after
-                query_str = json.dumps(data)
-            else:
-                break
-        # clean up PIT
-        query_str = json.dumps({"id": pit_id})
-        requests.delete(
-            self.ES_URL + "/_pit",
-            data=query_str,
-            headers=headers,
-            auth=self.ES_AUTH,
-        )
+
+        for result in all_results:
+            if result["status"] == "pending":
+                all_pending.append(result)
+            elif result["status"] == "ignore":
+                all_ignore.append(result)
+
         return all_pending, all_ignore
 
     def get_all_indexed(self):
