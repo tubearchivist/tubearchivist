@@ -265,56 +265,19 @@ class ChannelSubscription:
         self.es_auth = config["application"]["es_auth"]
         self.channel_size = config["subscriptions"]["channel_size"]
 
-    def get_channels(self, subscribed_only=True):
+    @staticmethod
+    def get_channels(subscribed_only=True):
         """get a list of all channels subscribed to"""
-        headers = {"Content-type": "application/json"}
-        # get PIT ID
-        url = self.es_url + "/ta_channel/_pit?keep_alive=1m"
-        response = requests.post(url, auth=self.es_auth)
-        json_data = json.loads(response.text)
-        pit_id = json_data["id"]
-        # query
+        data = {
+            "sort": [{"channel_name.keyword": {"order": "asc"}}],
+        }
         if subscribed_only:
-            data = {
-                "query": {"term": {"channel_subscribed": {"value": True}}},
-                "size": 50,
-                "pit": {"id": pit_id, "keep_alive": "1m"},
-                "sort": [{"channel_name.keyword": {"order": "asc"}}],
-            }
+            data["query"] = {"term": {"channel_subscribed": {"value": True}}}
         else:
-            data = {
-                "query": {"match_all": {}},
-                "size": 50,
-                "pit": {"id": pit_id, "keep_alive": "1m"},
-                "sort": [{"channel_name.keyword": {"order": "asc"}}],
-            }
-        query_str = json.dumps(data)
-        url = self.es_url + "/_search"
-        all_channels = []
-        while True:
-            response = requests.get(
-                url, data=query_str, headers=headers, auth=self.es_auth
-            )
-            json_data = json.loads(response.text)
-            all_hits = json_data["hits"]["hits"]
-            if all_hits:
-                for hit in all_hits:
-                    source = hit["_source"]
-                    search_after = hit["sort"]
-                    all_channels.append(source)
-                # update search_after with last hit data
-                data["search_after"] = search_after
-                query_str = json.dumps(data)
-            else:
-                break
-        # clean up PIT
-        query_str = json.dumps({"id": pit_id})
-        requests.delete(
-            self.es_url + "/_pit",
-            data=query_str,
-            headers=headers,
-            auth=self.es_auth,
-        )
+            data["query"] = {"match_all": {}}
+
+        all_channels = IndexPaginate("ta_channel", data).get_results()
+
         return all_channels
 
     def get_last_youtube_videos(self, channel_id, limit=True):
@@ -400,56 +363,19 @@ class PlaylistSubscription:
         self.es_auth = config["application"]["es_auth"]
         self.channel_size = config["subscriptions"]["channel_size"]
 
-    def get_playlists(self, subscribed_only=True):
+    @staticmethod
+    def get_playlists(subscribed_only=True):
         """get a list of all playlists"""
-        headers = {"Content-type": "application/json"}
-        # get PIT ID
-        url = self.es_url + "/ta_playlist/_pit?keep_alive=1m"
-        response = requests.post(url, auth=self.es_auth)
-        json_data = json.loads(response.text)
-        pit_id = json_data["id"]
-        # query
+        data = {
+            "sort": [{"playlist_channel.keyword": {"order": "desc"}}],
+        }
         if subscribed_only:
-            data = {
-                "query": {"term": {"playlist_subscribed": {"value": True}}},
-                "size": 50,
-                "pit": {"id": pit_id, "keep_alive": "1m"},
-                "sort": [{"playlist_channel.keyword": {"order": "desc"}}],
-            }
+            data["query"] = {"term": {"playlist_subscribed": {"value": True}}}
         else:
-            data = {
-                "query": {"match_all": {}},
-                "size": 50,
-                "pit": {"id": pit_id, "keep_alive": "1m"},
-                "sort": [{"playlist_channel.keyword": {"order": "desc"}}],
-            }
-        query_str = json.dumps(data)
-        url = self.es_url + "/_search"
-        all_playlists = []
-        while True:
-            response = requests.get(
-                url, data=query_str, headers=headers, auth=self.es_auth
-            )
-            json_data = json.loads(response.text)
-            all_hits = json_data["hits"]["hits"]
-            if all_hits:
-                for hit in all_hits:
-                    source = hit["_source"]
-                    search_after = hit["sort"]
-                    all_playlists.append(source)
-                # update search_after with last hit data
-                data["search_after"] = search_after
-                query_str = json.dumps(data)
-            else:
-                break
-        # clean up PIT
-        query_str = json.dumps({"id": pit_id})
-        requests.delete(
-            self.es_url + "/_pit",
-            data=query_str,
-            headers=headers,
-            auth=self.es_auth,
-        )
+            data["query"] = {"match_all": {}}
+
+        all_playlists = IndexPaginate("ta_playlist", data).get_results()
+
         return all_playlists
 
 
