@@ -403,6 +403,38 @@ class PlaylistSubscription:
 
         return True
 
+    def find_missing(self):
+        """find videos in subscribed playlists not downloaded yet"""
+        all_playlists = self.get_playlists()
+        pending_handler = PendingList()
+        all_pending, all_ignore = pending_handler.get_all_pending()
+        all_ids = [i["youtube_id"] for i in all_ignore + all_pending]
+        all_downloaded = pending_handler.get_all_downloaded()
+        to_ignore = all_ids + all_downloaded
+
+        missing_videos = []
+        counter = 1
+        for playlist in all_playlists:
+            playlist_entries = playlist["playlist_entries"]
+            all_missing = [i for i in playlist_entries if not i["downloaded"]]
+
+            RedisArchivist().set_message(
+                "progress:download",
+                {
+                    "status": "rescan",
+                    "level": "info",
+                    "title": "Scanning playlists: Looking for new videos.",
+                    "message": f"Progress: {counter}/{len(all_playlists)}",
+                },
+            )
+            for video in all_missing:
+                youtube_id = video["youtube_id"]
+                if youtube_id not in to_ignore:
+                    missing_videos.append(youtube_id)
+            counter = counter + 1
+
+        return missing_videos
+
 
 class VideoDownloader:
     """

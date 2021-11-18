@@ -40,8 +40,17 @@ app.autodiscover_tasks()
 @shared_task
 def update_subscribed():
     """look for missing videos and add to pending"""
+    message = {
+        "status": "rescan",
+        "level": "info",
+        "title": "Start rescanning channels and playlists.",
+    }
+    RedisArchivist().set_message("progress:download", message)
     channel_handler = ChannelSubscription()
-    missing_videos = channel_handler.find_missing()
+    missing_from_channels = channel_handler.find_missing()
+    playlist_handler = PlaylistSubscription()
+    missing_from_playlists = playlist_handler.find_missing()
+    missing_videos = missing_from_channels + missing_from_playlists
     if missing_videos:
         pending_handler = PendingList()
         all_videos_added = pending_handler.add_to_pending(missing_videos)
@@ -257,3 +266,8 @@ def subscribe_to_playlist(url_str):
             PlaylistSubscription().change_subscribe(
                 playlist_id, subscribe_status=True
             )
+
+    if new_playlists:
+        handler = ThumbManager()
+        missing_playlists = handler.get_missing_playlists()
+        handler.download_playlist(missing_playlists)
