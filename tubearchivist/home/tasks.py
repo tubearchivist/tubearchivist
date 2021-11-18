@@ -71,6 +71,7 @@ def download_pending():
             downloader = VideoDownloader()
             downloader.add_pending()
             downloader.run_queue()
+            downloader.validate_playlists()
         else:
             print("Did not acquire download lock.")
 

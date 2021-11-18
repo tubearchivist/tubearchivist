@@ -637,3 +637,18 @@ class VideoDownloader:
         response = requests.delete(url, auth=es_auth)
         if not response.ok and not response.status_code == 404:
             print(response.text)
+
+    def validate_playlists(self):
+        """update playlists"""
+        print("sync playlists")
+        all_indexed = PendingList().get_all_indexed()
+        all_youtube_ids = [i["youtube_id"] for i in all_indexed]
+        for channel_id in self.channels:
+            playlists = YoutubeChannel(channel_id).get_indexed_playlists()
+            all_playlist_ids = [i["playlist_id"] for i in playlists]
+            for playlist_id in all_playlist_ids:
+                playlist_handler = YoutubePlaylist(
+                    playlist_id, all_youtube_ids=all_youtube_ids
+                )
+                _ = playlist_handler.update_playlist()
+                playlist_handler.add_vids_to_playlist()
