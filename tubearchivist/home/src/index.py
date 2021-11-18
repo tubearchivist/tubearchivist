@@ -588,6 +588,14 @@ class YoutubePlaylist:
         if not response.ok:
             print(response.text)
 
+    def update_playlist(self):
+        """update metadata for playlist with data from YouTube"""
+        subscribed = self.get_es_playlist()["playlist_subscribed"]
+        self.get_playlist_dict(scrape=True)
+        self.playlist_dict["playlist_subscribed"] = subscribed
+        self.upload_to_es()
+        return self.playlist_dict
+
     def build_nav(self, youtube_id):
         """find next and previous in playlist of a given youtube_id"""
         all_entries_available = self.playlist_dict["playlist_entries"]

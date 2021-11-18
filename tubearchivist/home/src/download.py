@@ -402,19 +402,26 @@ class PlaylistSubscription:
 
         return True
 
-    def find_missing(self):
-        """find videos in subscribed playlists not downloaded yet"""
-        all_playlists = self.get_playlists()
+    @staticmethod
+    def get_to_ignore():
+        """get all youtube_ids already downloaded or ignored"""
         pending_handler = PendingList()
         all_pending, all_ignore = pending_handler.get_all_pending()
         all_ids = [i["youtube_id"] for i in all_ignore + all_pending]
         all_downloaded = pending_handler.get_all_downloaded()
         to_ignore = all_ids + all_downloaded
+        return to_ignore
+
+    def find_missing(self):
+        """find videos in subscribed playlists not downloaded yet"""
+        all_playlists = [i["playlist_id"] for i in self.get_playlists()]
+        to_ignore = self.get_to_ignore()
 
         missing_videos = []
         counter = 1
-        for playlist in all_playlists:
+        for playlist_id in all_playlists:
             size_limit = self.config["subscriptions"]["channel_size"]
+            playlist = YoutubePlaylist(playlist_id).update_playlist()
             if size_limit:
                 playlist_entries = playlist["playlist_entries"][:size_limit]
             else:
@@ -448,6 +455,7 @@ class VideoDownloader:
     def __init__(self, youtube_id_list=False):
         self.youtube_id_list = youtube_id_list
         self.config = AppConfig().config
+        self.channels = set()
 
     def run_queue(self):
         """setup download queue in redis loop until no more items"""
@@ -468,6 +476,7 @@ class VideoDownloader:
                 print("failed to download " + youtube_id)
                 continue
             vid_dict = index_new_video(youtube_id)
+            self.channels.add(vid_dict["channel"]["channel_id"])
             self.move_to_archive(vid_dict)
             self.delete_from_pending(youtube_id)
 
