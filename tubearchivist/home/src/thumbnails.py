@@ -60,8 +60,8 @@ class ThumbManager:
 
         needed_thumbs = []
         for video in all_indexed:
-            youtube_id = video["_source"]["youtube_id"]
-            thumb_url = video["_source"]["vid_thumb_url"]
+            youtube_id = video["youtube_id"]
+            thumb_url = video["vid_thumb_url"]
             if missing_only:
                 if youtube_id + ".jpg" not in all_thumbs:
                     needed_thumbs.append((youtube_id, thumb_url))
@@ -277,10 +277,8 @@ class ThumbManager:
         all_indexed = download.PendingList().get_all_indexed()
         video_list = []
         for video in all_indexed:
-            youtube_id = video["_source"]["youtube_id"]
-            media_url = os.path.join(
-                self.MEDIA_DIR, video["_source"]["media_url"]
-            )
+            youtube_id = video["youtube_id"]
+            media_url = os.path.join(self.MEDIA_DIR, video["media_url"])
             thumb_path = os.path.join(
                 self.CACHE_DIR, self.vid_thumb_path(youtube_id)
             )

@@ -191,47 +191,16 @@ class PendingList:
 
         return all_pending, all_ignore
 
-    def get_all_indexed(self):
+    @staticmethod
+    def get_all_indexed():
         """get a list of all videos indexed"""
-        headers = {"Content-type": "application/json"}
-        # get PIT ID
-        url = self.ES_URL + "/ta_video/_pit?keep_alive=1m"
-        response = requests.post(url, auth=self.ES_AUTH)
-        json_data = json.loads(response.text)
-        pit_id = json_data["id"]
-        # query
+
         data = {
-            "size": 500,
             "query": {"match_all": {}},
-            "pit": {"id": pit_id, "keep_alive": "1m"},
             "sort": [{"published": {"order": "desc"}}],
         }
-        query_str = json.dumps(data)
-        url = self.ES_URL + "/_search"
-        all_indexed = []
-        while True:
-            response = requests.get(
-                url, data=query_str, headers=headers, auth=self.ES_AUTH
-            )
-            json_data = json.loads(response.text)
-            all_hits = json_data["hits"]["hits"]
-            if all_hits:
-                for hit in all_hits:
-                    all_indexed.append(hit)
-                    search_after = hit["sort"]
-                # update search_after with last hit data
-                data["search_after"] = search_after
-                query_str = json.dumps(data)
-            else:
-                break
-        # clean up PIT
-        query_str = json.dumps({"id": pit_id})
-        requests.delete(
-            self.ES_URL + "/_pit",
-            data=query_str,
-            headers=headers,
-            auth=self.ES_AUTH,
-        )
+        all_indexed = IndexPaginate("ta_video", data).get_results()
+
         return all_indexed
 
     def get_all_downloaded(self):

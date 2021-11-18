@@ -249,10 +249,10 @@ class FilesystemScanner:
         all_indexed_raw = index_handler.get_all_indexed()
         all_indexed = []
         for video in all_indexed_raw:
-            youtube_id = video["_id"]
-            media_url = video["_source"]["media_url"]
-            published = video["_source"]["published"]
-            title = video["_source"]["title"]
+            youtube_id = video["youtube_id"]
+            media_url = video["media_url"]
+            published = video["published"]
+            title = video["title"]
             all_indexed.append((youtube_id, media_url, published, title))
         return all_indexed
 

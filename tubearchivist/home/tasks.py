@@ -209,7 +209,7 @@ def index_channel_playlists(channel_id):
     all_playlists = channel_handler.get_all_playlists()
 
     all_indexed = PendingList().get_all_indexed()
-    all_youtube_ids = [i["_source"]["youtube_id"] for i in all_indexed]
+    all_youtube_ids = [i["youtube_id"] for i in all_indexed]
 
     for playlist_id, playlist_title in all_playlists:
         print("add playlist: " + playlist_title)
