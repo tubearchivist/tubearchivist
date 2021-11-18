@@ -1,5 +1,5 @@
 beautifulsoup4==4.10.0
-celery==5.2.0
+celery==5.2.1
 Django==3.2.9
 Pillow==8.4.0
 redis==3.5.3
