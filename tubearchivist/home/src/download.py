@@ -378,6 +378,31 @@ class PlaylistSubscription:
 
         return all_playlists
 
+    def change_subscribe(self, playlist_id, subscribe_status):
+        """change the subscribe status of a playlist"""
+        playlist_handler = YoutubePlaylist(playlist_id)
+        playlist_handler.get_playlist_dict()
+        subed_now = playlist_handler.playlist_dict["playlist_subscribed"]
+
+        if subed_now == subscribe_status:
+            # status already as expected, do nothing
+            return False
+
+        # update subscribed status
+        print(f"changing status of {playlist_id} to {subscribe_status}")
+        headers = {"Content-type": "application/json"}
+        url = f"{self.es_url}/ta_playlist/_update/{playlist_id}"
+        payload = json.dumps(
+            {"doc": {"playlist_subscribed": subscribe_status}}
+        )
+        response = requests.post(
+            url, data=payload, headers=headers, auth=self.es_auth
+        )
+        if not response.ok:
+            print(response.text)
+
+        return True
+
 
 class VideoDownloader:
     """

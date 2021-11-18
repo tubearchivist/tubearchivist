@@ -8,7 +8,12 @@ import os
 
 from celery import Celery, shared_task
 from home.src.config import AppConfig
-from home.src.download import ChannelSubscription, PendingList, VideoDownloader
+from home.src.download import (
+    ChannelSubscription,
+    PendingList,
+    PlaylistSubscription,
+    VideoDownloader,
+)
 from home.src.helper import RedisArchivist, RedisQueue, UrlListParser
 from home.src.index import YoutubeChannel, YoutubePlaylist
 from home.src.index_management import backup_all_indexes, restore_from_backup
@@ -224,3 +229,31 @@ def index_channel_playlists(channel_id):
         handler = ThumbManager()
         missing_playlists = handler.get_missing_playlists()
         handler.download_playlist(missing_playlists)
+
+
+@shared_task
+def subscribe_to_playlist(url_str):
+    """process url string to subscribe to playlists"""
+    new_playlists = UrlListParser(url_str).process_list()
+    all_indexed = PendingList().get_all_indexed()
+    all_youtube_ids = [i["youtube_id"] for i in all_indexed]
+
+    for playlist in new_playlists:
+        url_type = playlist["type"]
+        playlist_id = playlist["url"]
+        if not url_type == "playlist":
+            print(f"{playlist_id} not a playlist, skipping...")
+            continue
+
+        playlist_handler = YoutubePlaylist(
+            playlist_id, all_youtube_ids=all_youtube_ids
+        )
+        if not playlist_handler.get_es_playlist():
+            playlist_handler.get_playlist_dict()
+            playlist_handler.playlist_dict["playlist_subscribed"] = True
+            playlist_handler.upload_to_es()
+            playlist_handler.add_vids_to_playlist()
+        else:
+            PlaylistSubscription().change_subscribe(
+                playlist_id, subscribe_status=True
+            )
