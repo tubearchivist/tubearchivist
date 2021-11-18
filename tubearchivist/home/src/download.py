@@ -358,10 +358,7 @@ class PlaylistSubscription:
     """manage the playlist download functionality"""
 
     def __init__(self):
-        config = AppConfig().config
-        self.es_url = config["application"]["es_url"]
-        self.es_auth = config["application"]["es_auth"]
-        self.channel_size = config["subscriptions"]["channel_size"]
+        self.config = AppConfig().config
 
     @staticmethod
     def get_playlists(subscribed_only=True):
@@ -380,6 +377,8 @@ class PlaylistSubscription:
 
     def change_subscribe(self, playlist_id, subscribe_status):
         """change the subscribe status of a playlist"""
+        es_url = self.config["application"]["es_url"]
+        es_auth = self.config["application"]["es_auth"]
         playlist_handler = YoutubePlaylist(playlist_id)
         playlist_handler.get_playlist_dict()
         subed_now = playlist_handler.playlist_dict["playlist_subscribed"]
@@ -391,12 +390,12 @@ class PlaylistSubscription:
         # update subscribed status
         print(f"changing status of {playlist_id} to {subscribe_status}")
         headers = {"Content-type": "application/json"}
-        url = f"{self.es_url}/ta_playlist/_update/{playlist_id}"
+        url = f"{es_url}/ta_playlist/_update/{playlist_id}"
         payload = json.dumps(
             {"doc": {"playlist_subscribed": subscribe_status}}
         )
         response = requests.post(
-            url, data=payload, headers=headers, auth=self.es_auth
+            url, data=payload, headers=headers, auth=es_auth
         )
         if not response.ok:
             print(response.text)
@@ -415,7 +414,11 @@ class PlaylistSubscription:
         missing_videos = []
         counter = 1
         for playlist in all_playlists:
-            playlist_entries = playlist["playlist_entries"]
+            size_limit = self.config["subscriptions"]["channel_size"]
+            if size_limit:
+                playlist_entries = playlist["playlist_entries"][:size_limit]
+            else:
+                playlist_entries = playlist["playlist_entries"]
             all_missing = [i for i in playlist_entries if not i["downloaded"]]
 
             RedisArchivist().set_message(
