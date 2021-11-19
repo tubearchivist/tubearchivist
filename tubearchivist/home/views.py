@@ -782,9 +782,6 @@ class PlaylistView(View):
                             }
                         }
                     ],
-                    "filter": [
-                        {"term": {"playlist_entries.downloaded": True}}
-                    ],
                     "minimum_should_match": 1,
                 }
             }

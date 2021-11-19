@@ -232,6 +232,14 @@ def index_channel_playlists(channel_id):
             playlist_id, all_youtube_ids=all_youtube_ids
         )
         playlist_handler.get_playlist_dict()
+        # don't add if no videos downloaded
+        downloaded = [
+            i
+            for i in playlist_handler.playlist_dict["playlist_entries"]
+            if i["downloaded"]
+        ]
+        if not downloaded:
+            continue
         playlist_handler.upload_to_es()
         playlist_handler.add_vids_to_playlist()
 
