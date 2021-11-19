@@ -244,31 +244,11 @@ def index_channel_playlists(channel_id):
 @shared_task
 def subscribe_to_playlist(url_str):
     """process url string to subscribe to playlists"""
+    RedisArchivist().set_message(
+        "progress:subscribe", {"status": "subscribing"}
+    )
     new_playlists = UrlListParser(url_str).process_list()
-    all_indexed = PendingList().get_all_indexed()
-    all_youtube_ids = [i["youtube_id"] for i in all_indexed]
 
-    for playlist in new_playlists:
-        url_type = playlist["type"]
-        playlist_id = playlist["url"]
-        if not url_type == "playlist":
-            print(f"{playlist_id} not a playlist, skipping...")
-            continue
-
-        playlist_handler = YoutubePlaylist(
-            playlist_id, all_youtube_ids=all_youtube_ids
-        )
-        if not playlist_handler.get_es_playlist():
-            playlist_handler.get_playlist_dict()
-            playlist_handler.playlist_dict["playlist_subscribed"] = True
-            playlist_handler.upload_to_es()
-            playlist_handler.add_vids_to_playlist()
-        else:
-            PlaylistSubscription().change_subscribe(
-                playlist_id, subscribe_status=True
-            )
-
-    if new_playlists:
-        handler = ThumbManager()
-        missing_playlists = handler.get_missing_playlists()
-        handler.download_playlist(missing_playlists)
+    new_thumbs = PlaylistSubscription().process_url_str(new_playlists)
+    if new_thumbs:
+        ThumbManager().download_playlist(new_thumbs)

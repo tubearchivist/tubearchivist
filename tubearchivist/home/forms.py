@@ -121,3 +121,17 @@ class SubscribeToChannelForm(forms.Form):
             }
         ),
     )
+
+
+class SubscribeToPlaylistForm(forms.Form):
+    """text area form to subscribe to multiple playlists"""
+
+    subscribe = forms.CharField(
+        label=False,
+        widget=forms.Textarea(
+            attrs={
+                "rows": 3,
+                "placeholder": "Input playlist IDs",
+            }
+        ),
+    )

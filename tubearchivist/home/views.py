@@ -22,6 +22,7 @@ from home.forms import (
     CustomAuthForm,
     PlaylistSearchForm,
     SubscribeToChannelForm,
+    SubscribeToPlaylistForm,
     UserSettingsForm,
     VideoSearchForm,
 )
@@ -47,6 +48,7 @@ from home.tasks import (
     run_manual_import,
     run_restore_backup,
     subscribe_to,
+    subscribe_to_playlist,
     update_subscribed,
 )
 
@@ -737,8 +739,10 @@ class PlaylistView(View):
         playlist_hits = search.get_data()
         pagination_handler.validate(search.max_hits)
         search_form = PlaylistSearchForm()
+        subscribe_form = SubscribeToChannelForm()
 
         context = {
+            "subscribe_form": subscribe_form,
             "search_form": search_form,
             "title": "Playlists",
             "colors": view_config["colors"],
@@ -746,6 +750,7 @@ class PlaylistView(View):
             "pagination": pagination_handler.pagination,
             "playlists": playlist_hits,
             "view_style": view_config["view_style"],
+            "running": view_config["running"],
         }
         return render(request, "home/playlist.html", context)
 
@@ -796,12 +801,14 @@ class PlaylistView(View):
 
         sub_only_key = f"{user_id}:show_subed_only"
         show_subed_only = RedisArchivist().get_message(sub_only_key)["status"]
+        running = RedisArchivist().get_message("progress:subscribe")["status"]
 
         view_config = {
             "es_url": config_handler.config["application"]["es_url"],
             "colors": config_handler.colors,
             "view_style": view_style,
             "show_subed_only": show_subed_only,
+            "running": running,
         }
         return view_config
 
@@ -815,6 +822,13 @@ class PlaylistView(View):
             search_url = "/playlist/?" + urlencode({"search": search_query})
             return redirect(search_url, permanent=True)
 
+        subscribe_form = SubscribeToPlaylistForm(data=request.POST)
+        if subscribe_form.is_valid():
+            url_str = request.POST.get("subscribe")
+            print(url_str)
+            subscribe_to_playlist.delay(url_str)
+
+        sleep(1)
         return redirect("playlist")
 
 
