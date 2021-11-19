@@ -408,7 +408,7 @@ class YoutubeVideo:
 
     def upload_to_es(self):
         """upload channel data to elastic search"""
-        url = f"{self.ES_URL}/ta_video/_doc/{self.youtube_id}"
+        url = f"{self.ES_URL}/ta_video/_doc/{self.youtube_id}/?refresh=true"
         response = requests.put(url, json=self.vid_dict, auth=self.ES_AUTH)
         if not response.ok:
             print(response.text)
