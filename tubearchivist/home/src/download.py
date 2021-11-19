@@ -677,12 +677,29 @@ class VideoDownloader:
         print("sync playlists")
         all_indexed = PendingList().get_all_indexed()
         all_youtube_ids = [i["youtube_id"] for i in all_indexed]
+        c_counter = 1
         for channel_id in self.channels:
             playlists = YoutubeChannel(channel_id).get_indexed_playlists()
             all_playlist_ids = [i["playlist_id"] for i in playlists]
+            p_counter = 1
             for playlist_id in all_playlist_ids:
                 playlist_handler = YoutubePlaylist(
                     playlist_id, all_youtube_ids=all_youtube_ids
                 )
                 _ = playlist_handler.update_playlist()
                 playlist_handler.add_vids_to_playlist()
+                # notify
+                title = (
+                    "Processing playlists for channels: "
+                    + f"{c_counter}/{len(self.channels)}"
+                )
+                message = f"Progress: {p_counter}/{len(all_playlist_ids)}"
+                mess_dict = {
+                    "status": "downloading",
+                    "level": "info",
+                    "title": title,
+                    "message": message,
+                }
+                RedisArchivist().set_message("progress:download", mess_dict)
+                p_counter = p_counter + 1
+            c_counter = c_counter + 1
