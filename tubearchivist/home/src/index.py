@@ -654,6 +654,8 @@ class WatchState:
             self.mark_vid_watched()
         elif url_type == "channel":
             self.mark_channel_watched()
+        elif url_type == "playlist":
+            self.mark_playlist_watched()
 
         print(f"marked {self.youtube_id} as watched")
 
@@ -662,13 +664,12 @@ class WatchState:
         url_type = self.dedect_type()
         if url_type == "video":
             self.mark_vid_watched(revert=True)
-        elif url_type == "channel":
-            self.mark_channel_watched(revert=True)
 
         print(f"revert {self.youtube_id} as unwatched")
 
     def dedect_type(self):
         """find youtube id type"""
+        print(self.youtube_id)
         url_process = UrlListParser(self.youtube_id).process_list()
         url_type = url_process[0]["type"]
         return url_type
@@ -689,41 +690,60 @@ class WatchState:
         if not request.ok:
             print(request.text)
 
-    def mark_channel_watched(self, revert=False):
+    def mark_channel_watched(self):
         """change watched status of every video in channel"""
-        es_url = self.ES_URL
-        headers = self.HEADERS
-        youtube_id = self.youtube_id
-        # create pipeline
         data = {
-            "description": youtube_id,
-            "processors": [
-                {"set": {"field": "player.watched", "value": True}},
-                {"set": {"field": "player.watched_date", "value": self.stamp}},
-            ],
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "channel.channel_id": {
+                                    "value": self.youtube_id
+                                }
+                            }
+                        },
+                        {"term": {"player.watched": {"value": False}}},
+                    ]
+                }
+            },
+            "script": {
+                "source": "ctx._source.player['watched'] = true",
+                "lang": "painless",
+            },
         }
-        if revert:
-            data["processors"][0]["set"]["value"] = False
-
         payload = json.dumps(data)
-        url = f"{es_url}/_ingest/pipeline/{youtube_id}"
-        request = requests.put(
-            url, data=payload, headers=headers, auth=self.ES_AUTH
+        url = f"{self.ES_URL}/ta_video/_update_by_query"
+        request = requests.post(
+            url, data=payload, headers=self.HEADERS, auth=self.ES_AUTH
         )
         if not request.ok:
             print(request.text)
-            raise ValueError("failed to post ingest pipeline")
 
-        # apply pipeline
-        must_list = [
-            {"term": {"channel.channel_id": {"value": youtube_id}}},
-            {"term": {"player.watched": {"value": False}}},
-        ]
-        data = {"query": {"bool": {"must": must_list}}}
+    def mark_playlist_watched(self):
+        """change watched state of all videos in playlist"""
+        data = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "playlist.keyword": {"value": self.youtube_id}
+                            }
+                        },
+                        {"term": {"player.watched": {"value": False}}},
+                    ]
+                }
+            },
+            "script": {
+                "source": "ctx._source.player['watched'] = true",
+                "lang": "painless",
+            },
+        }
         payload = json.dumps(data)
-        url = f"{es_url}/ta_video/_update_by_query?pipeline={youtube_id}"
+        url = f"{self.ES_URL}/ta_video/_update_by_query"
         request = requests.post(
-            url, data=payload, headers=headers, auth=self.ES_AUTH
+            url, data=payload, headers=self.HEADERS, auth=self.ES_AUTH
         )
         if not request.ok:
             print(request.text)

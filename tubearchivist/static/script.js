@@ -21,6 +21,17 @@ function isWatched(youtube_id) {
     document.getElementById(youtube_id).replaceWith(seenIcon);
 }
 
+function isWatchedButton(button) {
+    youtube_id = button.getAttribute("data-id");
+    var payload = JSON.stringify({'watched': youtube_id});
+    button.remove();
+    sendPost(payload);
+    setTimeout(function(){
+        location.reload();
+        return false;
+    }, 1000);
+}
+
 function isUnwatched(youtube_id) {
     var payload = JSON.stringify({'un_watched': youtube_id});
     sendPost(payload);

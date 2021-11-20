@@ -37,7 +37,7 @@
         <div>
             {% if max_hits %}
             <p>Total Videos archived: {{ playlist_info.playlist_entries|length }}/{{ max_hits }}</p>
-            <p>Watched: <button title="Mark all videos from {{ playlist_info.playlist_name }} as watched" type="button" id="{{ playlist_info.playlist_id }}" onclick="isWatched(this.id)">Mark as watched</button></p>
+            <p>Watched: <button title="Mark all videos from {{ playlist_info.playlist_name }} as watched" type="button" id="watched-button" data-id="{{ playlist_info.playlist_id }}" onclick="isWatchedButton(this)">Mark as watched</button></p>
             {% endif %}
         </div>
     </div>
