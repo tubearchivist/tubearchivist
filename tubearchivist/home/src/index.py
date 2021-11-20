@@ -634,6 +634,54 @@ class YoutubePlaylist:
         }
         return nav
 
+    def delete_metadata(self):
+        """delete metadata for playlist"""
+        script = (
+            "ctx._source.playlist.removeAll("
+            + "Collections.singleton(params.playlist)) "
+        )
+        data = {
+            "query": {
+                "term": {"playlist.keyword": {"value": self.playlist_id}}
+            },
+            "script": {
+                "source": script,
+                "lang": "painless",
+                "params": {"playlist": self.playlist_id},
+            },
+        }
+        payload = json.dumps(data)
+        url = f"{self.ES_URL}/ta_video/_update_by_query"
+        headers = {"Content-type": "application/json"}
+        response = requests.post(
+            url, data=payload, headers=headers, auth=self.ES_AUTH
+        )
+        if not response.ok:
+            print(response.text)
+
+        self.delete_playlist()
+
+    def delete_videos_playlist(self):
+        """delete playlist with all videos"""
+        print(f"delete playlist {self.playlist_id} with all videos")
+        self.get_playlist_dict()
+        all_youtube_id = [
+            i["youtube_id"]
+            for i in self.playlist_dict["playlist_entries"]
+            if i["downloaded"]
+        ]
+        for youtube_id in all_youtube_id:
+            YoutubeVideo(youtube_id).delete_media_file()
+
+        self.delete_playlist()
+
+    def delete_playlist(self):
+        """delete only playlist document"""
+        url = f"{self.ES_URL}/ta_playlist/_doc/{self.playlist_id}"
+        response = requests.delete(url, auth=self.ES_AUTH)
+        if not response.ok:
+            print(response.text)
+
 
 class WatchState:
     """handle watched checkbox for videos and channels"""
