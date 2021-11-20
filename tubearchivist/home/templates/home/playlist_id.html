@@ -31,12 +31,19 @@
                     false
                 {% endif %}
             </p>
+            <button onclick="deleteConfirm()" id="delete-item">Delete Playlist</button>
+            <div class="delete-confirm" id="delete-button">
+                <span>Delete {{ playlist_info.playlist_name }}?</span>
+                <button onclick="deletePlaylist(this)" data-action="metadata" data-id="{{ playlist_info.playlist_id }}">Delete metadata</button>
+                <button onclick="deletePlaylist(this)" data-action="all" class="danger-button" data-id="{{ playlist_info.playlist_id }}">Delete all</button><br>
+                <button onclick="cancelDelete()">Cancel</button>
+            </div>
         </div>
     </div>
     <div class="info-box-item">
         <div>
             {% if max_hits %}
-            <p>Total Videos archived: {{ playlist_info.playlist_entries|length }}/{{ max_hits }}</p>
+            <p>Total Videos archived: {{ max_hits }}/{{ playlist_info.playlist_entries|length }}</p>
             <p>Watched: <button title="Mark all videos from {{ playlist_info.playlist_name }} as watched" type="button" id="watched-button" data-id="{{ playlist_info.playlist_id }}" onclick="isWatchedButton(this)">Mark as watched</button></p>
             {% endif %}
         </div>

@@ -239,6 +239,23 @@ function deleteChannel(button) {
     }, 1000);
 }
 
+function deletePlaylist(button) {
+    var playlist_id = button.getAttribute("data-id");
+    var playlist_action = button.getAttribute("data-action");
+    var payload = JSON.stringify({
+        "delete-playlist": {
+            "playlist-id": playlist_id,
+            "playlist-action": playlist_action
+        }
+    });
+    console.log(payload);
+    sendPost(payload);
+    setTimeout(function(){
+        window.location.replace("/playlist/");
+        return false;
+    }, 1000);
+}
+
 function cancelDelete() {
     document.getElementById("delete-button").style.display = 'none';
     document.getElementById("delete-item").style.display = 'block';

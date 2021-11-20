@@ -209,6 +209,10 @@ button:hover {
     display: none;
 }
 
+.delete-confirm button {
+    margin: 3px 0;
+}
+
 .danger-button {
     background-color: var(--highlight-error);
 }

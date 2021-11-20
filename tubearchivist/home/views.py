@@ -1009,6 +1009,7 @@ class PostData:
             "channel-search": self.channel_search,
             "delete-video": self.delete_video,
             "delete-channel": self.delete_channel,
+            "delete-playlist": self.delete_playlist,
             "find-playlists": self.find_playlists,
         }
 
@@ -1200,6 +1201,19 @@ class PostData:
         """delete channel and all matching videos"""
         channel_id = self.exec_val
         YoutubeChannel(channel_id).delete_channel()
+        return {"success": True}
+
+    def delete_playlist(self):
+        """delete playlist, only metadata or incl all videos"""
+        playlist_dict = self.exec_val
+        playlist_id = playlist_dict["playlist-id"]
+        playlist_action = playlist_dict["playlist-action"]
+        print(f"delete {playlist_action} from playlist {playlist_id}")
+        if playlist_action == "metadata":
+            YoutubePlaylist(playlist_id).delete_metadata()
+        elif playlist_action == "all":
+            YoutubePlaylist(playlist_id).delete_videos_playlist()
+
         return {"success": True}
 
     def find_playlists(self):
