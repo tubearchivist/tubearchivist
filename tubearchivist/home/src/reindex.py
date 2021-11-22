@@ -23,7 +23,12 @@ from home.src.helper import (
     get_total_hits,
     ignore_filelist,
 )
-from home.src.index import YoutubeChannel, YoutubeVideo, index_new_video
+from home.src.index import (
+    YoutubeChannel,
+    YoutubePlaylist,
+    YoutubeVideo,
+    index_new_video,
+)
 from home.src.thumbnails import ThumbManager
 
 
@@ -38,9 +43,9 @@ class Reindex:
         self.es_auth = config["application"]["es_auth"]
         self.refresh_interval = 90
         # scan
-        self.video_daily, self.channel_daily = self.get_daily()
         self.all_youtube_ids = False
         self.all_channel_ids = False
+        self.all_playlist_ids = False
 
     def get_daily(self):
         """get daily refresh values"""
@@ -52,14 +57,16 @@ class Reindex:
             "ta_channel", self.es_url, self.es_auth, "channel_active"
         )
         channel_daily = ceil(total_channels / self.refresh_interval * 1.2)
-        return (video_daily, channel_daily)
+        playlist_daily = get_total_hits(
+            "ta_playlist", self.es_url, self.es_auth, "playlist_active"
+        )
+        return (video_daily, channel_daily, playlist_daily)
 
-    def get_outdated_vids(self):
+    def get_outdated_vids(self, size):
         """get daily videos to refresh"""
         headers = {"Content-type": "application/json"}
         now = int(datetime.now().strftime("%s"))
         now_3m = now - 3 * 30 * 24 * 60 * 60
-        size = self.video_daily
         data = {
             "size": size,
             "query": {
@@ -84,12 +91,11 @@ class Reindex:
         all_youtube_ids = [i["_id"] for i in response_dict["hits"]["hits"]]
         return all_youtube_ids
 
-    def get_outdated_channels(self):
+    def get_outdated_channels(self, size):
         """get daily channels to refresh"""
         headers = {"Content-type": "application/json"}
         now = int(datetime.now().strftime("%s"))
         now_3m = now - 3 * 30 * 24 * 60 * 60
-        size = self.channel_daily
         data = {
             "size": size,
             "query": {
@@ -114,10 +120,41 @@ class Reindex:
         all_channel_ids = [i["_id"] for i in response_dict["hits"]["hits"]]
         return all_channel_ids
 
+    def get_outdated_playlists(self, size):
+        """get daily outdated playlists to refresh"""
+        headers = {"Content-type": "application/json"}
+        now = int(datetime.now().strftime("%s"))
+        now_3m = now - 3 * 30 * 24 * 60 * 60
+        data = {
+            "size": size,
+            "query": {
+                "bool": {
+                    "must": [
+                        {"match": {"playlist_active": True}},
+                        {"range": {"playlist_last_refresh": {"lte": now_3m}}},
+                    ]
+                }
+            },
+            "sort": [{"playlist_last_refresh": {"order": "asc"}}],
+            "_source": False,
+        }
+        query_str = json.dumps(data)
+        url = self.es_url + "/ta_playlist/_search"
+        response = requests.get(
+            url, data=query_str, headers=headers, auth=self.es_auth
+        )
+        if not response.ok:
+            print(response.text)
+        response_dict = json.loads(response.text)
+        all_playlist_ids = [i["_id"] for i in response_dict["hits"]["hits"]]
+        return all_playlist_ids
+
     def check_outdated(self):
         """add missing vids and channels"""
-        self.all_youtube_ids = self.get_outdated_vids()
-        self.all_channel_ids = self.get_outdated_channels()
+        video_daily, channel_daily, playlist_daily = self.get_daily()
+        self.all_youtube_ids = self.get_outdated_vids(video_daily)
+        self.all_channel_ids = self.get_outdated_channels(channel_daily)
+        self.all_playlist_ids = self.get_outdated_playlists(playlist_daily)
 
     def rescrape_all_channels(self):
         """sync new data from channel to all matching videos"""
@@ -163,11 +200,18 @@ class Reindex:
         date_downloaded = es_vid_dict["_source"]["date_downloaded"]
         channel_dict = es_vid_dict["_source"]["channel"]
         channel_name = channel_dict["channel_name"]
+        try:
+            playlist = es_vid_dict["_source"]["playlist"]
+        except KeyError:
+            playlist = False
+
         vid_handler.build_file_path(channel_name)
         # add to vid_dict
         vid_handler.vid_dict["player"] = player
         vid_handler.vid_dict["date_downloaded"] = date_downloaded
         vid_handler.vid_dict["channel"] = channel_dict
+        if playlist:
+            vid_handler.vid_dict["playlist"] = playlist
         # update
         vid_handler.upload_to_es()
         thumb_handler = ThumbManager()
@@ -194,6 +238,17 @@ class Reindex:
         to_download = (channel_id, channel_thumb, channel_banner)
         thumb_handler.download_chan([to_download])
 
+    @staticmethod
+    def reindex_single_playlist(playlist_id, all_indexed_ids):
+        """refresh playlist data"""
+        playlist_handler = YoutubePlaylist(
+            playlist_id, all_youtube_ids=all_indexed_ids
+        )
+        playlist = playlist_handler.update_playlist()
+        playlist_thumbnail = (playlist_id, playlist["playlist_thumbnail"])
+        thumb_handler = ThumbManager()
+        thumb_handler.download_playlist([playlist_thumbnail])
+
     def reindex(self):
         """reindex what's needed"""
         # videos
@@ -208,6 +263,15 @@ class Reindex:
             self.reindex_single_channel(channel_id)
             if self.sleep_interval:
                 sleep(self.sleep_interval)
+        # playlist
+        print(f"reindexing {len(self.all_playlist_ids)} playlists")
+        if self.all_playlist_ids:
+            all_indexed = PendingList().get_all_indexed()
+            all_indexed_ids = [i["youtube_id"] for i in all_indexed]
+            for playlist_id in self.all_playlist_ids:
+                self.reindex_single_playlist(playlist_id, all_indexed_ids)
+                if self.sleep_interval:
+                    sleep(self.sleep_interval)
 
 
 class FilesystemScanner:
