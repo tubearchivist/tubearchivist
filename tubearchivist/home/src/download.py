@@ -141,6 +141,7 @@ class PendingList:
             "quiet": True,
             "skip_download": True,
             "check_formats": True,
+            "noplaylist": True,
         }
         try:
             vid = youtube_dl.YoutubeDL(obs).extract_info(youtube_id)
@@ -574,6 +575,7 @@ class VideoDownloader:
             "continuedl": True,
             "retries": 3,
             "writethumbnail": False,
+            "noplaylist": True,
         }
         if self.config["downloads"]["format"]:
             obs["format"] = self.config["downloads"]["format"]

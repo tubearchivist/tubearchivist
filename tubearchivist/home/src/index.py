@@ -311,6 +311,7 @@ class YoutubeVideo:
             "default_search": "ytsearch",
             "skip_download": True,
             "check_formats": True,
+            "noplaylist": True,
         }
         try:
             vid = youtube_dl.YoutubeDL(obs).extract_info(youtube_id)
