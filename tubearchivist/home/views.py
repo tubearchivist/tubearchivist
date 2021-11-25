@@ -1005,6 +1005,7 @@ class PostData:
             "show_ignored_only": self.show_ignored_only,
             "forgetIgnore": self.forget_ignore,
             "addSingle": self.add_single,
+            "deleteQueue": self.delete_queue,
             "manual-import": self.manual_import,
             "re-embed": self.re_embed,
             "db-backup": self.db_backup,
@@ -1170,6 +1171,16 @@ class PostData:
         PendingList().delete_from_pending(youtube_id)
         youtube_ids = UrlListParser(youtube_id).process_list()
         extrac_dl.delay(youtube_ids)
+        return {"success": True}
+
+    def delete_queue(self):
+        """delete download queue"""
+        status = self.exec_val
+        print("deleting from download queue: " + status)
+        if status == "pending":
+            PendingList().delete_pending("pending")
+        elif status == "ignore":
+            PendingList().delete_pending("ignore")
         return {"success": True}
 
     @staticmethod

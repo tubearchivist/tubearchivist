@@ -824,6 +824,11 @@ button:hover {
     filter: var(--img-filter-error);
 }
 
+.title-split {
+    display: flex;
+    justify-content: space-between;
+}
+
 /* status message */
 .download-progress {
     background-color: var(--highlight-bg);

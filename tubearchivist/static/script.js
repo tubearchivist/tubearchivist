@@ -138,6 +138,17 @@ function addSingle(button) {
     }, 500);
 }
 
+function deleteQueue(button) {
+    var to_delete = button.getAttribute('data-id');
+    var payload = JSON.stringify({'deleteQueue': to_delete});
+    console.log(payload);
+    sendPost(payload);
+    setTimeout(function(){
+        location.reload();
+        return false;
+    }, 1000);
+}
+
 function stopQueue() {
     var payload = JSON.stringify({'queue': 'stop'});
     sendPost(payload);

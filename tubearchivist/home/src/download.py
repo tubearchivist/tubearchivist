@@ -225,6 +225,18 @@ class PendingList:
         if not response.ok:
             print(response.text)
 
+    def delete_pending(self, status):
+        """delete download queue based on status value"""
+        data = {"query": {"term": {"status": {"value": status}}}}
+        payload = json.dumps(data)
+        url = self.ES_URL + "/ta_download/_delete_by_query"
+        headers = {"Content-type": "application/json"}
+        response = requests.post(
+            url, data=payload, headers=headers, auth=self.ES_AUTH
+        )
+        if not response.ok:
+            print(response.text)
+
     def ignore_from_pending(self, ignore_list):
         """build the bulk query string"""
 

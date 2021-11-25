@@ -21,7 +21,6 @@
         <div class="show-form">
             <form id='hidden-form' action="/downloads/" method="post">
                 {% csrf_token %}
-                <!-- <textarea rows="4" placeholder="Enter Video Urls or IDs here..." id="vid-url" name="vid-url"></textarea> -->
                 {{ add_form }}
                 <button type="submit">Add to download queue</button>
             </form>
@@ -47,11 +46,15 @@
         <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="downloads" data-value="list" alt="list view">
     </div>
 </div>
-{% if show_ignored_only %}
-    <h2>Ignored from download</h2>
-{% else %}
-    <h2>Download queue</h2>
-{% endif %}
+<div class="title-split">
+    {% if show_ignored_only %}
+        <h2>Ignored from download</h2>
+        <button onclick="deleteQueue(this)" data-id="ignore" title="Delete all previously ignored videos from the queue">Delete all ignored</button>
+    {% else %}
+        <h2>Download queue</h2>
+        <button onclick="deleteQueue(this)" data-id="pending" title="Delete all pending videos from the queue">Delete all queued</button>
+    {% endif %}
+</div>
 <h3>Total videos: {{ max_hits }}</h3>
 <div class="dl-list {{ view_style }}">
     {% if all_video_hits %}
