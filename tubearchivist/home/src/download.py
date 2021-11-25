@@ -423,7 +423,6 @@ class PlaylistSubscription:
             return False
 
         # update subscribed status
-        print(f"changing status of {playlist_id} to {subscribe_status}")
         headers = {"Content-type": "application/json"}
         url = f"{es_url}/ta_playlist/_update/{playlist_id}"
         payload = json.dumps(

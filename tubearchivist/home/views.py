@@ -27,7 +27,11 @@ from home.forms import (
     VideoSearchForm,
 )
 from home.src.config import AppConfig
-from home.src.download import ChannelSubscription, PendingList
+from home.src.download import (
+    ChannelSubscription,
+    PendingList,
+    PlaylistSubscription,
+)
 from home.src.helper import RedisArchivist, RedisQueue, UrlListParser
 from home.src.index import (
     WatchState,
@@ -1077,12 +1081,24 @@ class PostData:
         return {"success": True}
 
     def unsubscribe(self):
-        """unsubscribe from channel"""
-        channel_id_unsub = self.exec_val
-        print("unsubscribe from " + channel_id_unsub)
-        ChannelSubscription().change_subscribe(
-            channel_id_unsub, channel_subscribed=False
-        )
+        """unsubscribe from channels or playlists"""
+        id_unsub = self.exec_val
+        print("unsubscribe from " + id_unsub)
+        to_unsub_list = UrlListParser(id_unsub).process_list()
+        for to_unsub in to_unsub_list:
+            unsub_type = to_unsub["type"]
+            unsub_id = to_unsub["url"]
+            if unsub_type == "playlist":
+                PlaylistSubscription().change_subscribe(
+                    unsub_id, subscribe_status=False
+                )
+            elif unsub_type == "channel":
+                ChannelSubscription().change_subscribe(
+                    unsub_id, channel_subscribed=False
+                )
+            else:
+                raise ValueError("failed to process " + id_unsub)
+
         return {"success": True}
 
     def sort_order(self):

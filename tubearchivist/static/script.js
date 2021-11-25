@@ -45,10 +45,10 @@ function isUnwatched(youtube_id) {
     document.getElementById(youtube_id).replaceWith(unseenIcon);
 }
 
-function unsubscribe(channel_id) {
-    var payload = JSON.stringify({'unsubscribe': channel_id});
+function unsubscribe(id_unsub) {
+    var payload = JSON.stringify({'unsubscribe': id_unsub});
     sendPost(payload);
-    document.getElementById(channel_id).remove();
+    document.getElementById(id_unsub).remove();
 }
 
 function changeView(image) {
