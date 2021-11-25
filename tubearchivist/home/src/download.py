@@ -92,6 +92,7 @@ class PendingList:
         )
         if not request.ok:
             print(request)
+            raise ValueError("failed to add video to download queue")
 
         return all_videos_added
 
@@ -267,6 +268,7 @@ class PendingList:
         RedisArchivist().set_message("progress:download", mess_dict)
         if not request.ok:
             print(request)
+            raise ValueError("failed to set video to ignore")
 
 
 class ChannelSubscription:
@@ -361,6 +363,7 @@ class ChannelSubscription:
         )
         if not request.ok:
             print(request.text)
+            raise ValueError("failed change subscribe status")
         # sync to videos
         channel_handler.sync_to_videos()
         if channel_handler.source == "scraped":
@@ -445,6 +448,7 @@ class PlaylistSubscription:
         )
         if not response.ok:
             print(response.text)
+            raise ValueError("failed to change subscribe status")
 
         return True
 

@@ -171,6 +171,7 @@ class YoutubeChannel:
         print(f"added {self.channel_id} to es")
         if not response.ok:
             print(response.text)
+            raise ValueError("failed to add channel to index")
 
     def sync_to_videos(self):
         """sync new channel_dict to all videos of channel"""
@@ -408,11 +409,12 @@ class YoutubeVideo:
         return es_vid_dict
 
     def upload_to_es(self):
-        """upload channel data to elastic search"""
+        """upload video data to elastic search"""
         url = f"{self.ES_URL}/ta_video/_doc/{self.youtube_id}/?refresh=true"
         response = requests.put(url, json=self.vid_dict, auth=self.ES_AUTH)
         if not response.ok:
             print(response.text)
+            raise ValueError("failed to add video to index")
 
     def deactivate(self):
         """deactivate document on extractor error"""
@@ -552,6 +554,7 @@ class YoutubePlaylist:
         response = requests.put(url, json=playlist, auth=self.ES_AUTH)
         if not response.ok:
             print(response.text)
+            raise ValueError("failed to add playlist to index")
 
     def add_vids_to_playlist(self):
         """sync the playlist id to videos"""
@@ -738,6 +741,7 @@ class WatchState:
         )
         if not request.ok:
             print(request.text)
+            raise ValueError("failed to mark video as watched")
 
     def mark_channel_watched(self):
         """change watched status of every video in channel"""
@@ -768,6 +772,7 @@ class WatchState:
         )
         if not request.ok:
             print(request.text)
+            raise ValueError("failed mark channel as watched")
 
     def mark_playlist_watched(self):
         """change watched state of all videos in playlist"""
@@ -796,6 +801,7 @@ class WatchState:
         )
         if not request.ok:
             print(request.text)
+            raise ValueError("failed mark playlist as watched")
 
 
 class IndexPaginate:
