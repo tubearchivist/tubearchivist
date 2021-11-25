@@ -224,7 +224,7 @@ button:hover {
 /* navigation */
 .top-nav {
     display: block;
-    padding: 15px 0;
+    padding: 5px 0;
     position: relative;
 }
 
@@ -936,13 +936,15 @@ button:hover {
     }
     .video-list.grid,
     .dl-list.grid,
-    .channel-list.grid {
+    .channel-list.grid,
+    .playlist-list.grid {
         grid-template-columns: 1fr 1fr;
     }
     .dl-thumb.list {
         width: 35%;
     }
-    .video-item.list {
+    .video-item.list,
+    .playlist-item.list {
         display: grid;
         grid-template-columns: 35% auto;
     }
@@ -951,6 +953,16 @@ button:hover {
     }
     .two-col > div {
         width: 100%;
+    }
+    .top-nav {
+        flex-wrap: wrap-reverse;
+        display: flex;
+    }
+    .nav-icons {
+        width: 100%;
+        justify-content: center;
+        position: unset;
+        transform: unset;
     }
 }
 
@@ -962,8 +974,13 @@ button:hover {
     .video-list.grid,
     .dl-list.grid,
     .channel-list.grid,
-    .video-item.list {
+    .video-item.list,
+    .playlist-list.list,
+    .playlist-list.grid {
         grid-template-columns: 1fr;
+    }
+    .playlist-item.list {
+        display: block;
     }
     .video-desc.grid {
         height: unset;
@@ -979,25 +996,19 @@ button:hover {
     .toggle {
         flex-wrap: wrap;
     }
-    .top-nav {
-        flex-wrap: wrap-reverse;
-        display: flex;
-    }
-    .nav-icons {
-        width: 100%;
-        justify-content: center;
-        position: unset;
-        transform: unset;
+    .nav-items {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
     }
     .nav-item {
-        padding: unset;
+        padding: 5px 0;
         margin: 15px;
+        text-align: center;
     }
     .sort {
         display: block;
     }
     .sort select {
-        width: 100%;
         margin: unset;
     }
     .info-box-2,
