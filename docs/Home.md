@@ -3,9 +3,11 @@ Welcome to the official Tube Archivist Wiki. This is an up-to-date documentation
 
 Table of contents:
 * [Main](Main): Tube Archivist landing page
-* [Channels](Channels): Browse your channels, handle subscriptions
+* [Channels](Channels): Browse your channels, handle channel subscriptions
+* [Playlists](Playlists): Browse your indexed playlists, handle playlist subscriptions
 * [Downloads](Downloads): Scanning subscriptions, handle download queue
 * [Settings](Settings): All the configuration options
+* [Video](Video): All details of a single video and playlist navigation.
 * [Users](Users): User management admin interface
 
 ## Getting Started
