@@ -31,6 +31,11 @@
                     false
                 {% endif %}
             </p>
+            {% if playlist_info.playlist_active %}
+                <p>Youtube: <a href="https://www.youtube.com/playlist?list={{ playlist_info.playlist_id }}" target="_blank">Active</a></p>
+            {% else %}
+                <p>Youtube: Deactivated</p>
+            {% endif %}
             <button onclick="deleteConfirm()" id="delete-item">Delete Playlist</button>
             <div class="delete-confirm" id="delete-button">
                 <span>Delete {{ playlist_info.playlist_name }}?</span>

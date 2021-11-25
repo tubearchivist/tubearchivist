@@ -31,7 +31,11 @@
                 false
             {% endif %}
             </p>
-            <p>Channel id: {{ channel_info.channel_id }}</p>
+            {% if channel_info.channel_active %}
+                <p>Youtube: <a href="https://www.youtube.com/channel/{{ channel_info.channel_id }}" target="_blank">Active</a></p>
+            {% else %}
+                <p>Youtube: Deactivated</p>
+            {% endif %}
             <button onclick="deleteConfirm()" id="delete-item">Delete Channel</button>
             <div class="delete-confirm" id="delete-button">
                 <span>Delete {{ channel_info.channel_name }} including all videos? </span><button class="danger-button" onclick="deleteChannel(this)" data-id="{{ channel_info.channel_id }}">Delete</button> <button onclick="cancelDelete()">Cancel</button>

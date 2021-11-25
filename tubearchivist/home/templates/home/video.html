@@ -38,11 +38,10 @@
                 {% endif %}
             </p>
             {% if video.active %}
-                <p>Youtube: Active</p>
+                <p>Youtube: <a href="https://www.youtube.com/watch?v={{ video.youtube_id }}" target="_blank">Active</a></p>
             {% else %}
                 <p>Youtube: Deactivated</p>
             {% endif %}
-            <p>Video ID: {{ video.youtube_id }}</p>
             <button onclick="deleteConfirm()" id="delete-item">Delete Video</button>
             <div class="delete-confirm" id="delete-button">
                 <span>Are you sure? </span><button class="danger-button" onclick="deleteVideo(this)" data-id="{{ video.youtube_id }}" data-redirect = "{{ video.channel.channel_id }}">Delete</button> <button onclick="cancelDelete()">Cancel</button>
