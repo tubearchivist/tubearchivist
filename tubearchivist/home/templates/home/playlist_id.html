@@ -28,7 +28,7 @@
                 {% if playlist_info.playlist_subscribed %}
                     <button type="button" id="{{ playlist_info.playlist_id }}" onclick="unsubscribe(this.id)" title="Unsubscribe from {{ playlist_info.playlist_name }}">Unsubscribe</button>
                 {% else %}
-                    false
+                    <button type="button" id="{{ playlist_info.playlist_id }}" onclick="subscribe(this.id)" title="Subscribe to {{ playlist_info.playlist_name }}">Subscribe</button>
                 {% endif %}
             </p>
             {% if playlist_info.playlist_active %}

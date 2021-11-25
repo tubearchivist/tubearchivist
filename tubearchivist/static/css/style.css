@@ -717,7 +717,7 @@ button:hover {
     height: unset;
     background-color: var(--highlight-bg);
     display: flex;
-    flex-wrap: wrap-reverse;
+    flex-wrap: wrap;
     align-content: center;
 }
 

@@ -62,6 +62,14 @@
             <div class="playlist-desc {{ view_style }}">
                 <a href="{% url 'channel_id' playlist.source.playlist_channel_id %}"><h3>{{ playlist.source.playlist_channel }}</h3></a>
                 <a href="{% url 'playlist_id' playlist.source.playlist_id %}"><h2>{{ playlist.source.playlist_name }}</h2></a>
+                <p>Last refreshed: {{ playlist.source.playlist_last_refresh }}</p>
+                <p>Subscribed: 
+                    {% if playlist.source.playlist_subscribed %}
+                        <button type="button" id="{{ playlist.source.playlist_id }}" onclick="unsubscribe(this.id)" title="Unsubscribe from {{ playlist.source.playlist_name }}">Unsubscribe</button>
+                    {% else %}
+                        <button type="button" id="{{ playlist.source.playlist_id }}" onclick="subscribe(this.id)" title="Subscribe to {{ playlist.source.playlist_name }}">Subscribe</button>
+                    {% endif %}
+                </p>
             </div>
         </div>
         {% endfor %}

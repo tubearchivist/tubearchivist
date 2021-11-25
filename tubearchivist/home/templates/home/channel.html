@@ -86,7 +86,7 @@
                         {% if channel.source.channel_subscribed %}
                             <button type="button" id="{{ channel.source.channel_id }}" onclick="unsubscribe(this.id)" title="Unsubscribe from {{ channel.source.channel_name }}">Unsubscribe</button>
                         {% else %}
-                            false
+                            <button type="button" id="{{ channel.source.channel_id }}" onclick="subscribe(this.id)" title="Subscribe to {{ channel.source.channel_name }}">Subscribe</button>
                         {% endif %}
                         </p>
                     </div>

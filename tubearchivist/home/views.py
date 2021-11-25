@@ -997,6 +997,7 @@ class PostData:
             "dl_pending": self.dl_pending,
             "queue": self.queue_handler,
             "unsubscribe": self.unsubscribe,
+            "subscribe": self.subscribe,
             "sort_order": self.sort_order,
             "hide_watched": self.hide_watched,
             "show_subed_only": self.show_subed_only,
@@ -1098,6 +1099,13 @@ class PostData:
             else:
                 raise ValueError("failed to process " + id_unsub)
 
+        return {"success": True}
+
+    def subscribe(self):
+        """subscribe to channel or playlist, called from js buttons"""
+        id_sub = self.exec_val
+        print("subscribe to " + id_sub)
+        subscribe_to.delay(id_sub)
         return {"success": True}
 
     def sort_order(self):
