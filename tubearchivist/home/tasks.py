@@ -196,21 +196,26 @@ def re_sync_thumbs():
 @shared_task
 def subscribe_to(url_str):
     """take a list of urls to subscribe to"""
-    youtube_ids = UrlListParser(url_str).process_list()
-    for youtube_id in youtube_ids:
-        if youtube_id["type"] == "video":
-            to_sub = youtube_id["url"]
-            vid_details = PendingList().get_youtube_details(to_sub)
+    to_subscribe_list = UrlListParser(url_str).process_list()
+    for item in to_subscribe_list:
+        to_sub_id = item["url"]
+        if item["type"] == "playlist":
+            new_thumbs = PlaylistSubscription().process_url_str([item])
+            if new_thumbs:
+                ThumbManager().download_playlist(new_thumbs)
+            continue
+
+        if item["type"] == "video":
+            vid_details = PendingList().get_youtube_details(to_sub_id)
             channel_id_sub = vid_details["channel_id"]
-        elif youtube_id["type"] == "channel":
-            channel_id_sub = youtube_id["url"]
+        elif item["type"] == "channel":
+            channel_id_sub = to_sub_id
         else:
-            raise ValueError("failed to subscribe to: " + youtube_id)
+            raise ValueError("failed to subscribe to: " + to_sub_id)
 
         ChannelSubscription().change_subscribe(
             channel_id_sub, channel_subscribed=True
         )
-        print("subscribed to: " + channel_id_sub)
         # notify
         RedisArchivist().set_message(
             "progress:subscribe", {"status": "subscribing"}
@@ -247,16 +252,3 @@ def index_channel_playlists(channel_id):
         handler = ThumbManager()
         missing_playlists = handler.get_missing_playlists()
         handler.download_playlist(missing_playlists)
-
-
-@shared_task
-def subscribe_to_playlist(url_str):
-    """process url string to subscribe to playlists"""
-    RedisArchivist().set_message(
-        "progress:subscribe", {"status": "subscribing"}
-    )
-    new_playlists = UrlListParser(url_str).process_list()
-
-    new_thumbs = PlaylistSubscription().process_url_str(new_playlists)
-    if new_thumbs:
-        ThumbManager().download_playlist(new_thumbs)

@@ -52,7 +52,6 @@ from home.tasks import (
     run_manual_import,
     run_restore_backup,
     subscribe_to,
-    subscribe_to_playlist,
     update_subscribed,
 )
 
@@ -827,7 +826,7 @@ class PlaylistView(View):
         if subscribe_form.is_valid():
             url_str = request.POST.get("subscribe")
             print(url_str)
-            subscribe_to_playlist.delay(url_str)
+            subscribe_to.delay(url_str)
 
         sleep(1)
         return redirect("playlist")
