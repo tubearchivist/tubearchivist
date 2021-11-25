@@ -576,6 +576,7 @@ class VideoDownloader:
             "retries": 3,
             "writethumbnail": False,
             "noplaylist": True,
+            "check_formats": True,
         }
         if self.config["downloads"]["format"]:
             obs["format"] = self.config["downloads"]["format"]
