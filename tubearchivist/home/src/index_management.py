@@ -529,6 +529,15 @@ class ElasticBackup:
             self.post_bulk_restore(file_name)
             os.remove(file_name)
 
+    def index_exists(self, index_name):
+        """check if index already exists to skip"""
+        es_url = self.config["application"]["es_url"]
+        es_auth = self.config["application"]["es_auth"]
+        url = f"{es_url}/ta_{index_name}"
+        response = requests.get(url, auth=es_auth)
+
+        return response.ok
+
 
 def backup_all_indexes():
     """backup all es indexes to disk"""
@@ -536,6 +545,8 @@ def backup_all_indexes():
 
     for index in backup_handler.index_config:
         index_name = index["index_name"]
+        if not backup_handler.index_exists(index_name):
+            continue
         all_results = backup_handler.get_all_documents(index_name)
         file_content = backup_handler.build_bulk(all_results)
         backup_handler.write_es_json(file_content, index_name)
