@@ -585,7 +585,7 @@ button:hover {
 
 /* video page */
 .video-main {
-    margin-bottom: 1rem;
+    margin: 1rem 0;
 }
 
 .video-main video {
@@ -664,6 +664,7 @@ button:hover {
 }
 
 .channel-banner img {
+    margin-top: 1rem;
     width: 100%;
 }
 
@@ -1031,5 +1032,16 @@ button:hover {
     }
     .dl-desc {
         padding: 15px;
+    }
+    .playlist-nav {
+        display: block;
+        grid-template-columns: unset;
+    }
+    .playlist-nav-item {
+        display: block;
+        justify-content: unset;
+    }
+    .playlist-nav-item img {
+        width: 100%;
     }
 }
