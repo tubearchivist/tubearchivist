@@ -611,20 +611,20 @@ class YoutubePlaylist:
 
         current_idx = all_entries.index(current[0])
         if current_idx == 0:
-            next_item = False
-        else:
-            next_item = all_entries[current_idx - 1]
-            next_thumb = ThumbManager().vid_thumb_path(next_item["youtube_id"])
-            next_item["vid_thumb"] = next_thumb
-
-        if current_idx == len(all_entries) - 1:
             previous_item = False
         else:
-            previous_item = all_entries[current_idx + 1]
+            previous_item = all_entries[current_idx - 1]
             prev_thumb = ThumbManager().vid_thumb_path(
                 previous_item["youtube_id"]
             )
             previous_item["vid_thumb"] = prev_thumb
+
+        if current_idx == len(all_entries) - 1:
+            next_item = False
+        else:
+            next_item = all_entries[current_idx + 1]
+            next_thumb = ThumbManager().vid_thumb_path(next_item["youtube_id"])
+            next_item["vid_thumb"] = next_thumb
 
         nav = {
             "playlist_meta": {
