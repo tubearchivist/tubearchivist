@@ -415,6 +415,7 @@ class PlaylistSubscription:
                 playlist_handler.add_vids_to_playlist()
                 thumb = playlist_handler.playlist_dict["playlist_thumbnail"]
                 new_thumbs.append((playlist_id, thumb))
+                self.channel_validate(playlist_handler)
             else:
                 self.change_subscribe(playlist_id, subscribe_status=True)
 
@@ -424,6 +425,16 @@ class PlaylistSubscription:
             )
 
         return new_thumbs
+
+    @staticmethod
+    def channel_validate(playlist_handler):
+        """make sure channel of playlist is there"""
+        channel_id = playlist_handler.playlist_dict["playlist_channel_id"]
+        channel_handler = YoutubeChannel(channel_id)
+        if channel_handler.source == "scraped":
+            channel_handler.channel_dict["channel_subscribed"] = False
+            channel_handler.upload_to_es()
+            channel_handler.get_channel_art()
 
     def change_subscribe(self, playlist_id, subscribe_status):
         """change the subscribe status of a playlist"""
@@ -533,6 +544,13 @@ class VideoDownloader:
     @staticmethod
     def add_pending():
         """add pending videos to download queue"""
+        mess_dict = {
+            "status": "downloading",
+            "level": "info",
+            "title": "Looking for videos to download",
+            "message": "",
+        }
+        RedisArchivist().set_message("progress:download", mess_dict)
         all_pending, _ = PendingList().get_all_pending()
         to_add = [i["youtube_id"] for i in all_pending]
         if not to_add:
@@ -690,9 +708,22 @@ class VideoDownloader:
         if not response.ok and not response.status_code == 404:
             print(response.text)
 
+    def add_subscribed_channels(self):
+        """add all channels subscribed to refresh"""
+        all_subscribed = PlaylistSubscription().get_playlists()
+        if not all_subscribed:
+            return
+
+        channel_ids = [i["playlist_channel_id"] for i in all_subscribed]
+        for channel_id in channel_ids:
+            self.channels.add(channel_id)
+
+        return
+
     def validate_playlists(self):
-        """update playlists"""
+        """look for playlist needing to update"""
         print("sync playlists")
+        self.add_subscribed_channels()
         all_indexed = PendingList().get_all_indexed()
         all_youtube_ids = [i["youtube_id"] for i in all_indexed]
         c_counter = 1
