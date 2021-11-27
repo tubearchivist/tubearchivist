@@ -140,9 +140,10 @@ class PendingList:
         obs = {
             "default_search": "ytsearch",
             "quiet": True,
-            "skip_download": True,
-            "check_formats": True,
+            "check_formats": "selected",
             "noplaylist": True,
+            "writethumbnail": True,
+            "simulate": True,
         }
         try:
             vid = youtube_dl.YoutubeDL(obs).extract_info(youtube_id)
@@ -617,7 +618,7 @@ class VideoDownloader:
             "retries": 3,
             "writethumbnail": False,
             "noplaylist": True,
-            "check_formats": True,
+            "check_formats": "selected",
         }
         if self.config["downloads"]["format"]:
             obs["format"] = self.config["downloads"]["format"]

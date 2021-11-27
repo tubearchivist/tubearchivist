@@ -311,7 +311,7 @@ class YoutubeVideo:
             "quiet": True,
             "default_search": "ytsearch",
             "skip_download": True,
-            "check_formats": True,
+            "check_formats": "selected",
             "noplaylist": True,
         }
         try:
