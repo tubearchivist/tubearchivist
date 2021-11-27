@@ -613,24 +613,21 @@ class PlaylistIdView(View):
             for i in playlist_info["playlist_entries"]
         }
         playlist_name = playlist_info["playlist_name"]
-        url = view_config["es_url"] + "/ta_video/_search"
         data = self.build_data(
             pagination_handler, playlist_id_detail, view_config, sort
         )
-
-        search = SearchHandler(url, data)
+        search = SearchHandler(
+            view_config["es_url"] + "/ta_video/_search", data
+        )
         videos_hits = search.get_data()
-        max_hits = search.max_hits
+        channel_info = self.get_channel_info(
+            playlist_info["playlist_channel_id"], view_config["es_url"]
+        )
 
-        if max_hits:
-            source = videos_hits[0]["source"]
-            channel_info = source["channel"]
-            pagination_handler.validate(max_hits)
+        if search.max_hits:
+            pagination_handler.validate(search.max_hits)
             pagination = pagination_handler.pagination
         else:
-            channel_info = self.get_channel_info(
-                playlist_info["playlist_channel_id"], view_config["es_url"]
-            )
             videos_hits = False
             pagination = False
 
@@ -639,7 +636,7 @@ class PlaylistIdView(View):
             "playlist_name": playlist_name,
             "channel_info": channel_info,
             "videos": videos_hits,
-            "max_hits": max_hits,
+            "max_hits": search.max_hits,
             "pagination": pagination,
             "title": "Playlist: " + playlist_name,
         }
