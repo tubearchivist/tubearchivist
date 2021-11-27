@@ -52,12 +52,12 @@
             {{ app_form.downloads_limit_count }}
         </div>
         <div class="settings-item">
-            <p>Current download speed limit: <span class="settings-current">{{ config.downloads.limit_speed }}KB/s</span></p>
+            <p>Current download speed limit in KB/s: <span class="settings-current">{{ config.downloads.limit_speed }}</span></p>
             <i>Limit download speed. 0 (zero) to deactivate, e.g. 1000 (1MB/s). Speeds are in KB/s.</i><br>
             {{ app_form.downloads_limit_speed }}
         </div>
         <div class="settings-item">
-            <p>Current throttled rate limit: <span class="settings-current">{{ config.downloads.throttledratelimit }}KB/s</span></p>
+            <p>Current throttled rate limit in KB/s: <span class="settings-current">{{ config.downloads.throttledratelimit }}</span></p>
             <i>Download will restart if speeds drop below specified amount. 0 (zero) to deactivate, e.g. 100. Speeds are in KB/s.</i><br>
             {{ app_form.downloads_throttledratelimit }}
         </div>
