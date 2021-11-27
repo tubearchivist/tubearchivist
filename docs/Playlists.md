@@ -5,7 +5,9 @@ The playlists are organized in two different levels, similar as the channels:
 Accessible at `/playlist/` of your Tube Archivist, this **Overview Page** shows a list of all playlists you have indexed over all your channels.
 - You can filter that list to show only subscribed to playlists with the toggle.
 
-The **Subscribe to Channels** button <img src="assets/icon-add.png?raw=true" alt="add icon" width="20px" style="margin:0 5px;"> opens a text field to subscribe to playlists. You have a few options:
+You can index playlists of a channel from the channel detail page as described [here](Channels#channel-detail).
+
+The **Subscribe to Playlist** button <img src="assets/icon-add.png?raw=true" alt="add icon" width="20px" style="margin:0 5px;"> opens a text field to subscribe to playlists. You have a few options:
 - Enter the YouTube playlist id, for example: *PL96C35uN7xGLLeET0dOWaKHkAlPsrkcha*
 - Enter the Youtube dedicated playlist url, for example: *https://www.youtube.com/playlist?list=PL96C35uN7xGLLeET0dOWaKHkAlPsrkcha*
 - Add one per line.
