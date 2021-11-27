@@ -245,9 +245,14 @@ class Reindex:
             playlist_id, all_youtube_ids=all_indexed_ids
         )
         playlist = playlist_handler.update_playlist()
+        if not playlist:
+            playlist_handler.deactivate()
+            return
+
         playlist_thumbnail = (playlist_id, playlist["playlist_thumbnail"])
         thumb_handler = ThumbManager()
         thumb_handler.download_playlist([playlist_thumbnail])
+        return
 
     def reindex(self):
         """reindex what's needed"""

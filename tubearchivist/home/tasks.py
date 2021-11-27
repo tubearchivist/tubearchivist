@@ -237,6 +237,9 @@ def index_channel_playlists(channel_id):
             playlist_id, all_youtube_ids=all_youtube_ids
         )
         playlist_handler.get_playlist_dict()
+        if not playlist_handler.playlist_dict:
+            # skip if not available
+            continue
         # don't add if no videos downloaded
         downloaded = [
             i

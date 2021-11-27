@@ -378,14 +378,17 @@ class PlaylistSubscription:
 
     @staticmethod
     def get_playlists(subscribed_only=True):
-        """get a list of all playlists"""
+        """get a list of all active playlists"""
         data = {
             "sort": [{"playlist_channel.keyword": {"order": "desc"}}],
         }
+        data["query"] = {
+            "bool": {"must": [{"term": {"playlist_active": {"value": True}}}]}
+        }
         if subscribed_only:
-            data["query"] = {"term": {"playlist_subscribed": {"value": True}}}
-        else:
-            data["query"] = {"match_all": {}}
+            data["query"]["bool"]["must"].append(
+                {"term": {"playlist_subscribed": {"value": True}}}
+            )
 
         all_playlists = IndexPaginate("ta_playlist", data).get_results()
 
@@ -482,7 +485,12 @@ class PlaylistSubscription:
         counter = 1
         for playlist_id in all_playlists:
             size_limit = self.config["subscriptions"]["channel_size"]
-            playlist = YoutubePlaylist(playlist_id).update_playlist()
+            playlist_handler = YoutubePlaylist(playlist_id)
+            playlist = playlist_handler.update_playlist()
+            if not playlist:
+                playlist_handler.deactivate()
+                continue
+
             if size_limit:
                 playlist_entries = playlist["playlist_entries"][:size_limit]
             else:
@@ -735,7 +743,11 @@ class VideoDownloader:
                 playlist_handler = YoutubePlaylist(
                     playlist_id, all_youtube_ids=all_youtube_ids
                 )
-                _ = playlist_handler.update_playlist()
+                playlist_dict = playlist_handler.update_playlist()
+                if not playlist_dict:
+                    playlist_handler.deactivate()
+                    continue
+
                 playlist_handler.add_vids_to_playlist()
                 # notify
                 title = (

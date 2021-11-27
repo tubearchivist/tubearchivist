@@ -466,6 +466,8 @@ class YoutubePlaylist:
 
         if scrape:
             playlist_dict = self.get_youtube_playlist()
+            if not playlist_dict:
+                return False
             playlist_dict["playlist_entries"] = self.get_entries()
         else:
             playlist_dict = self.get_es_playlist()
@@ -474,6 +476,7 @@ class YoutubePlaylist:
                 playlist_dict["playlist_entries"] = self.get_entries()
 
         self.playlist_dict = playlist_dict
+        return True
 
     def get_youtube_playlist(self):
         """get meta data dict from youtube"""
@@ -481,12 +484,20 @@ class YoutubePlaylist:
         obs = {
             "default_search": "ytsearch",
             "quiet": True,
-            "ignoreerrors": True,
             "skip_download": True,
             "extract_flat": True,
             "playlistend": 0,
         }
-        playlist = youtube_dl.YoutubeDL(obs).extract_info(url, download=False)
+        try:
+            playlist = youtube_dl.YoutubeDL(obs).extract_info(
+                url, download=False
+            )
+        except (
+            youtube_dl.utils.ExtractorError,
+            youtube_dl.utils.DownloadError,
+        ):
+            print("failed to get info for " + self.playlist_id)
+            return False
 
         playlist_es = {
             "playlist_id": self.playlist_id,
@@ -517,14 +528,22 @@ class YoutubePlaylist:
         obs = {
             "default_search": "ytsearch",
             "quiet": True,
-            "ignoreerrors": True,
             "skip_download": True,
             "extract_flat": True,
         }
         if playlistend:
             obs["playlistend"] = playlistend
 
-        playlist = youtube_dl.YoutubeDL(obs).extract_info(url, download=False)
+        try:
+            playlist = youtube_dl.YoutubeDL(obs).extract_info(
+                url, download=False
+            )
+        except (
+            youtube_dl.utils.ExtractorError,
+            youtube_dl.utils.DownloadError,
+        ):
+            print("failed to get plealist entries for " + self.playlist_id)
+            return False
 
         all_members = []
         for idx, entry in enumerate(playlist["entries"]):
@@ -596,6 +615,10 @@ class YoutubePlaylist:
         """update metadata for playlist with data from YouTube"""
         subscribed = self.get_es_playlist()["playlist_subscribed"]
         self.get_playlist_dict(scrape=True)
+        if not self.playlist_dict:
+            # return false to deactivate
+            return False
+
         self.playlist_dict["playlist_subscribed"] = subscribed
         self.upload_to_es()
         return self.playlist_dict
@@ -683,6 +706,19 @@ class YoutubePlaylist:
         """delete only playlist document"""
         url = f"{self.ES_URL}/ta_playlist/_doc/{self.playlist_id}"
         response = requests.delete(url, auth=self.ES_AUTH)
+        if not response.ok:
+            print(response.text)
+
+    def deactivate(self):
+        """deactivate document on extractor error"""
+        headers = {"Content-type": "application/json"}
+        url = f"{self.ES_URL}/ta_playlist/_update/{self.playlist_id}"
+        data = {"script": "ctx._source.playlist_active = false"}
+        json_str = json.dumps(data)
+        response = requests.post(
+            url, data=json_str, headers=headers, auth=self.ES_AUTH
+        )
+        print(f"deactivated {self.playlist_id}")
         if not response.ok:
             print(response.text)
 
