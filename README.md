@@ -79,8 +79,7 @@ You will see the current version number of **Tube Archivist** in the footer of t
 * All testing and development is done with the Elasticsearch version number as mentioned in the provided *docker-compose.yml* file. This will be updated when a new release of Elasticsearch is available. Running an older version of Elasticsearch is most likely not going to result in any issues, but it's still recommended to run the same version as mentioned.
 
 ### Alternative installation instructions:
-- **arm64**: Newest Tube Archivist container is multi arch, so is Elasticsearch. RedisJSON doesn't offer arm builds, you can use `bbilly1/rejson`, an unofficial rebuild for arm64.
-  - NOTE: This is untested, looking for feedback.
+- **arm64**: The Tube Archivist container is multi arch, so is Elasticsearch. RedisJSON doesn't offer arm builds, you can use `bbilly1/rejson`, an unofficial rebuild for arm64.
 - **Synology**: There is a [discussion thread](https://github.com/bbilly1/tubearchivist/discussions/48) with Synology installation instructions.
 - **Unraid**: The three containers needed are all in the Community Applications. First install `TubeArchivist RedisJSON` followed by `TubeArchivist ES`, and finally you can install `TubeArchivist`. If you have unraid specific issues, report those to the [support thread](https://forums.unraid.net/topic/114073-support-crocs-tube-archivist/ "support thread").
 
@@ -111,7 +110,7 @@ This will match the permissions with the **UID** and **GID** of elasticsearch wi
 The Elasticsearch index will turn to *read only* if the disk usage of the container goes above 95% until the usage drops below 90% again. Similar to that, TubeArchivist will become all sorts of messed up when running out of disk space. There are some error messages in the logs when that happens, but it's best to make sure to have enough disk space before starting to download.
 
 ## Getting Started
-1. Go through the **settings** page and look at the available options. Particularly set *Download Format* to your desired video quality before downloading. **Tube Archivist** downloads the best available quality by default. To support iOS or MacOS a compatible format must be specified. For example:
+1. Go through the **settings** page and look at the available options. Particularly set *Download Format* to your desired video quality before downloading. **Tube Archivist** downloads the best available quality by default. To support iOS or MacOS and some other browsers a compatible format must be specified. For example:
 ```
 bestvideo[VCODEC=avc1]+bestaudio[ACODEC=mp4a]/mp4
 ```
