@@ -228,6 +228,10 @@ def index_channel_playlists(channel_id):
     channel_handler = YoutubeChannel(channel_id)
     all_playlists = channel_handler.get_all_playlists()
 
+    if not all_playlists:
+        print(f"no playlists found for channel {channel_id}")
+        return
+
     all_indexed = PendingList().get_all_indexed()
     all_youtube_ids = [i["youtube_id"] for i in all_indexed]
 
@@ -255,3 +259,5 @@ def index_channel_playlists(channel_id):
         handler = ThumbManager()
         missing_playlists = handler.get_missing_playlists()
         handler.download_playlist(missing_playlists)
+
+    return
