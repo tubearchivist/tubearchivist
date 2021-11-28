@@ -123,12 +123,13 @@ bestvideo[VCODEC=avc1]+bestaudio[ACODEC=mp4a]/mp4
 This should be considered as a **minimal viable product**, there is an extensive list of future functions and improvements planned.
 
 ### Functionality
+- [ ] Auto rescan and auto download on a schedule
 - [ ] User roles
-- [ ] Create playlists
 - [ ] Podcast mode to serve channel as mp3
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
 - [ ] Optional automatic deletion of watched items after a specified time
 - [ ] Subtitle download & indexing
+- [X] Create playlists [2021-11-27]
 - [X] Access control [2021-11-01]
 - [X] Delete videos and channel [2021-10-16]
 - [X] Add thumbnail embed option [2021-10-16]
@@ -138,6 +139,7 @@ This should be considered as a **minimal viable product**, there is an extensive
 - [X] Scan your file system to index already downloaded videos [2021-09-14]
 
 ### UI
+- [ ] Fancy advanced unified search interface
 - [ ] Show similar videos on video page
 - [ ] Multi language support
 - [ ] Show total video downloaded vs total videos available in channel
