@@ -738,9 +738,7 @@ class PlaylistView(View):
         data = {
             "size": pagination_handler.pagination["page_size"],
             "from": pagination_handler.pagination["page_from"],
-            "query": {
-                "term": {"playlist_entries.downloaded": {"value": True}}
-            },
+            "query": {"match_all": {}},
             "sort": [{"playlist_name.keyword": {"order": "asc"}}],
         }
         if view_config["show_subed_only"]:
