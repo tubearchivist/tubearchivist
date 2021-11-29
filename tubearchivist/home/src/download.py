@@ -40,9 +40,9 @@ class PendingList:
     def __init__(self):
         self.all_channel_ids = False
         self.all_downloaded = False
+        self.missing_from_playlists = []
 
-    @staticmethod
-    def parse_url_list(youtube_ids):
+    def parse_url_list(self, youtube_ids):
         """extract youtube ids from list"""
         missing_videos = []
         for entry in youtube_ids:
@@ -66,6 +66,7 @@ class PendingList:
                 youtube_ids = [i[0] for i in video_results]
                 missing_videos = missing_videos + youtube_ids
             elif url_type == "playlist":
+                self.missing_from_playlists.append(entry)
                 video_results = YoutubePlaylist(url).get_entries()
                 youtube_ids = [i["youtube_id"] for i in video_results]
                 missing_videos = missing_videos + youtube_ids
@@ -395,7 +396,7 @@ class PlaylistSubscription:
 
         return all_playlists
 
-    def process_url_str(self, new_playlists):
+    def process_url_str(self, new_playlists, subscribed=True):
         """process playlist subscribe form url_str"""
         all_indexed = PendingList().get_all_indexed()
         all_youtube_ids = [i["youtube_id"] for i in all_indexed]
@@ -409,17 +410,17 @@ class PlaylistSubscription:
                 print(f"{playlist_id} not a playlist, skipping...")
                 continue
 
-            playlist_handler = YoutubePlaylist(
+            playlisr = YoutubePlaylist(
                 playlist_id, all_youtube_ids=all_youtube_ids
             )
-            if not playlist_handler.get_es_playlist():
-                playlist_handler.get_playlist_dict()
-                playlist_handler.playlist_dict["playlist_subscribed"] = True
-                playlist_handler.upload_to_es()
-                playlist_handler.add_vids_to_playlist()
-                thumb = playlist_handler.playlist_dict["playlist_thumbnail"]
+            if not playlisr.get_es_playlist():
+                playlisr.get_playlist_dict()
+                playlisr.playlist_dict["playlist_subscribed"] = subscribed
+                playlisr.upload_to_es()
+                playlisr.add_vids_to_playlist()
+                thumb = playlisr.playlist_dict["playlist_thumbnail"]
                 new_thumbs.append((playlist_id, thumb))
-                self.channel_validate(playlist_handler)
+                self.channel_validate(playlisr)
             else:
                 self.change_subscribe(playlist_id, subscribe_status=True)
 

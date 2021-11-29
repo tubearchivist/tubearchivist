@@ -21,7 +21,9 @@ The **Add to Download Queue** icon <img src="assets/icon-add.png?raw=true" alt="
 - Add a link to a YouTube video by providing the shortened URL, for example *https://youtu.be/2tdiKTSdE9Y*.
 - Add a Channel ID or Channel URL to add every available video to the download queue. This will ignore the channel page size as described before and is meant for an initial download of the whole channel. You can still ignore selected videos before starting the download.
 - Add a channel name like for example *https://www.youtube.com/c/TomScottGo*.
-- Add a playlist ID or URL to add every available video in the list to the download queue, for example *https://www.youtube.com/playlist?list=PL96C35uN7xGLLeET0dOWaKHkAlPsrkcha* or *PL96C35uN7xGLLeET0dOWaKHkAlPsrkcha*. Note that when you add a link to a video in a playlist, Tube Archivist assumes you want to download only the specific video and not the whole playlist, for example *https://www.youtube.com/watch?v=CINVwWHlzTY&list=PL96C35uN7xGLLeET0dOWaKHkAlPsrkcha* will only add one video *CINVwWHlzTY* to the queue.
+- Add a playlist ID or URL to add every available video in the list to the download queue, for example *https://www.youtube.com/playlist?list=PL96C35uN7xGLLeET0dOWaKHkAlPsrkcha* or *PL96C35uN7xGLLeET0dOWaKHkAlPsrkcha*. 
+  - Note: When adding a playlist to the queue, this playlist will automatically get [indexed](Playlists#playlist-detail).
+  - Note: When you add a link to a video in a playlist, Tube Archivist assumes you want to download only the specific video and not the whole playlist, for example *https://www.youtube.com/watch?v=CINVwWHlzTY&list=PL96C35uN7xGLLeET0dOWaKHkAlPsrkcha* will only add one video *CINVwWHlzTY* to the queue.
 - Add one link per line.
 
 ## The Download Queue

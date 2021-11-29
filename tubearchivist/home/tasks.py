@@ -2,6 +2,8 @@
 Functionality:
 - initiate celery app
 - collect tasks
+- user config changes won't get applied here
+  because tasks are initiated at application start
 """
 
 import os
@@ -26,10 +28,7 @@ from home.src.thumbnails import ThumbManager, validate_thumbnails
 
 CONFIG = AppConfig().config
 REDIS_HOST = os.environ.get("REDIS_HOST")
-REDIS_PORT = os.environ.get("REDIS_PORT")
-
-if not REDIS_PORT:
-    REDIS_PORT = 6379
+REDIS_PORT = os.environ.get("REDIS_PORT") or 6379
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "home.settings")
 app = Celery("tasks", broker=f"redis://{REDIS_HOST}:{REDIS_PORT}")
@@ -109,7 +108,16 @@ def extrac_dl(youtube_ids):
     pending_handler = PendingList()
     missing_videos = pending_handler.parse_url_list(youtube_ids)
     all_videos_added = pending_handler.add_to_pending(missing_videos)
-    ThumbManager().download_vid(all_videos_added)
+    missing_playlists = pending_handler.missing_from_playlists
+
+    thumb_handler = ThumbManager()
+    if missing_playlists:
+        new_thumbs = PlaylistSubscription().process_url_str(
+            missing_playlists, subscribed=False
+        )
+        thumb_handler.download_playlist(new_thumbs)
+
+    thumb_handler.download_vid(all_videos_added)
 
 
 @shared_task
