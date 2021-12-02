@@ -18,6 +18,7 @@ services:
       - TA_USERNAME=tubearchivist
       - TA_PASSWORD=verysecret
       - ELASTIC_PASSWORD=verysecret
+      - TZ=America/New_York
     depends_on:
       - archivist-es
       - archivist-redis
