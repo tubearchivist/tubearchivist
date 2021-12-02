@@ -8,6 +8,7 @@ Functionality:
 import json
 import os
 
+from celery.schedules import crontab
 from home.src.helper import RedisArchivist
 
 
@@ -150,3 +151,58 @@ class AppConfig:
 
         if needs_update:
             RedisArchivist().set_message("config", redis_config, expire=False)
+
+
+class ScheduleBuilder:
+    """build schedule dicts for beat"""
+
+    SCHEDULES = [
+        "update_subscribed",
+        "download_pending",
+        "check_reindex",
+        "thumbnail_check",
+        "run_backup",
+    ]
+
+    def __init__(self):
+        self.config = AppConfig().config
+
+    def update_schedule_conf(self, form_post):
+        """process form post"""
+        print("processing form, restart container for changes to take effect")
+        redis_config = self.config
+        for key, value in form_post.items():
+            if key in self.SCHEDULES and value[0]:
+                print(f"change schedule for {key} to {value[0]}")
+                if value[0] == "0":
+                    to_write = False
+                else:
+                    keys = ["minute", "hour", "day_of_week"]
+                    to_write = dict(zip(keys, value[0].split()))
+                redis_config["scheduler"][key] = to_write
+        RedisArchivist().set_message("config", redis_config, expire=False)
+
+    def build_schedule(self):
+        """build schedule dict as expected by app.conf.beat_schedule"""
+        schedule_dict = {}
+
+        for schedule_item in self.SCHEDULES:
+            item_conf = self.config["scheduler"][schedule_item]
+            if not item_conf:
+                continue
+
+            minute = item_conf["minute"]
+            hour = item_conf["hour"]
+            day_of_week = item_conf["day_of_week"]
+            schedule_name = f"schedule_{schedule_item}"
+            to_add = {
+                schedule_name: {
+                    "task": schedule_item,
+                    "schedule": crontab(
+                        minute=minute, hour=hour, day_of_week=day_of_week
+                    ),
+                }
+            }
+            schedule_dict.update(to_add)
+
+        return schedule_dict

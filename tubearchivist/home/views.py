@@ -21,12 +21,13 @@ from home.forms import (
     ChannelSearchForm,
     CustomAuthForm,
     PlaylistSearchForm,
+    SchedulerSettingsForm,
     SubscribeToChannelForm,
     SubscribeToPlaylistForm,
     UserSettingsForm,
     VideoSearchForm,
 )
-from home.src.config import AppConfig
+from home.src.config import AppConfig, ScheduleBuilder
 from home.src.frontend import PostData
 from home.src.helper import RedisArchivist, UrlListParser
 from home.src.index import YoutubePlaylist
@@ -889,6 +890,7 @@ class SettingsView(View):
 
         user_form = UserSettingsForm()
         app_form = ApplicationSettingsForm()
+        scheduler_form = SchedulerSettingsForm()
 
         context = {
             "title": "Settings",
@@ -896,6 +898,7 @@ class SettingsView(View):
             "colors": colors,
             "user_form": user_form,
             "app_form": app_form,
+            "scheduler_form": scheduler_form,
         }
 
         return render(request, "home/settings.html", context)
@@ -916,6 +919,10 @@ class SettingsView(View):
             elif "user-settings" in form_post:
                 del form_post["user-settings"]
                 config_handler.set_user_config(form_post, request.user.id)
+            elif "scheduler-settings" in form_post:
+                del form_post["scheduler-settings"]
+                print(form_post)
+                ScheduleBuilder().update_schedule_conf(form_post)
 
         return redirect("settings", permanent=True)
 
