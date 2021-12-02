@@ -38,7 +38,13 @@ def make_folders():
 
 def release_lock():
     """make sure there are no leftover locks set in redis on container start"""
-    all_locks = ["manual_import", "downloading", "dl_queue", "dl_queue_id"]
+    all_locks = [
+        "manual_import",
+        "downloading",
+        "dl_queue",
+        "dl_queue_id",
+        "rescan",
+    ]
     for lock in all_locks:
         response = RedisArchivist().del_message(lock)
         if response:

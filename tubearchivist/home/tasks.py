@@ -45,17 +45,28 @@ def update_subscribed():
         "title": "Start rescanning channels and playlists.",
     }
     RedisArchivist().set_message("progress:download", message)
-    channel_handler = ChannelSubscription()
-    missing_from_channels = channel_handler.find_missing()
-    playlist_handler = PlaylistSubscription()
-    missing_from_playlists = playlist_handler.find_missing()
-    missing_videos = missing_from_channels + missing_from_playlists
-    if missing_videos:
-        pending_handler = PendingList()
-        all_videos_added = pending_handler.add_to_pending(missing_videos)
-        ThumbManager().download_vid(all_videos_added)
-    # check if reindex is needed
-    check_reindex.delay()
+
+    have_lock = False
+    my_lock = RedisArchivist().get_lock("rescan")
+
+    try:
+        have_lock = my_lock.acquire(blocking=False)
+        if have_lock:
+            channel_handler = ChannelSubscription()
+            missing_from_channels = channel_handler.find_missing()
+            playlist_handler = PlaylistSubscription()
+            missing_from_playlists = playlist_handler.find_missing()
+            missing = missing_from_channels + missing_from_playlists
+            if missing:
+                pending_handler = PendingList()
+                all_videos_added = pending_handler.add_to_pending(missing)
+                ThumbManager().download_vid(all_videos_added)
+        else:
+            print("Did not acquire rescan lock.")
+
+    finally:
+        if have_lock:
+            my_lock.release()
 
 
 @shared_task(name="download_pending")
