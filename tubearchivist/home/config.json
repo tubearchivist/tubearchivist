@@ -29,5 +29,12 @@
         "videos": "/youtube",
         "file_template": "%(id)s_%(title)s.mp4",
         "colors": "dark"
+    },
+    "scheduler": {
+        "update_subscribed": false,
+        "download_pending": false,
+        "check_reindex": false,
+        "thumbnail_check": false,
+        "run_backup": false
     }
 }

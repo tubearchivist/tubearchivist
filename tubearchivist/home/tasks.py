@@ -9,7 +9,7 @@ Functionality:
 import os
 
 from celery import Celery, shared_task
-from home.src.config import AppConfig
+from home.src.config import AppConfig, ScheduleBuilder
 from home.src.download import (
     ChannelSubscription,
     PendingList,
@@ -30,13 +30,13 @@ CONFIG = AppConfig().config
 REDIS_HOST = os.environ.get("REDIS_HOST")
 REDIS_PORT = os.environ.get("REDIS_PORT") or 6379
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "home.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 app = Celery("tasks", broker=f"redis://{REDIS_HOST}:{REDIS_PORT}")
 app.config_from_object("django.conf:settings", namespace="ta:")
 app.autodiscover_tasks()
 
 
-@shared_task
+@shared_task(name="update_subscribed")
 def update_subscribed():
     """look for missing videos and add to pending"""
     message = {
@@ -58,7 +58,7 @@ def update_subscribed():
     check_reindex.delay()
 
 
-@shared_task
+@shared_task(name="download_pending")
 def download_pending():
     """download latest pending videos"""
     have_lock = False
@@ -120,7 +120,7 @@ def extrac_dl(youtube_ids):
     thumb_handler.download_vid(all_videos_added)
 
 
-@shared_task
+@shared_task(name="check_reindex")
 def check_reindex():
     """run the reindex main command"""
     reindex_old_documents()
@@ -148,7 +148,7 @@ def run_manual_import():
             my_lock.release()
 
 
-@shared_task
+@shared_task(name="run_backup")
 def run_backup():
     """called from settings page, dump backup to zip file"""
     backup_all_indexes()
@@ -190,6 +190,12 @@ def kill_dl(task_id):
 def rescan_filesystem():
     """check the media folder for mismatches"""
     scan_filesystem()
+    validate_thumbnails()
+
+
+@shared_task(name="thumbnail_check")
+def thumbnail_check():
+    """validate thumbnails"""
     validate_thumbnails()
 
 
@@ -269,3 +275,6 @@ def index_channel_playlists(channel_id):
         handler.download_playlist(missing_playlists)
 
     return
+
+
+app.conf.beat_schedule = ScheduleBuilder().build_schedule()
