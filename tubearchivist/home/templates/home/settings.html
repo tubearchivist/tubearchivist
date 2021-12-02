@@ -102,6 +102,40 @@
     <button type="submit" name="application-settings">Update Application Configurations</button>
 </form>
 <div class="title-bar">
+    <h1>Scheduler setup</h1>
+</div>
+<form action="/settings/" method="POST" name="scheduler-update">
+    {% csrf_token %}
+    <div class="settings-group">
+        <div class="settings-item">
+            <h2>Rescan Subscriptions</h2>
+            <p>Periodically rescan your subscriptions.</p>
+            {{ scheduler_form.update_subscribed }}
+        </div>
+        <div class="settings-item">
+            <h2>Start download</h2>
+            <p>Periodically download videos.</p>
+            {{ scheduler_form.download_pending }}
+        </div>
+        <div class="settings-item">
+            <h2>Refresh Metadata</h2>
+            <p>Periodically refresh metadata from YouTube.</p>
+            {{ scheduler_form.check_reindex }}
+        </div>
+        <div class="settings-item">
+            <h2>Thumbnail check</h2>
+            <p>Periodically check and cleanup thumbnails.</p>
+            {{ scheduler_form.thumbnail_check }}
+        </div>
+        <div class="settings-item">
+            <h2>Index backup</h2>
+            <p>Periodically backup metadata.</p>
+            {{ scheduler_form.run_backup }}
+        </div>
+    </div>
+    <button type="submit" name="scheduler-settings">Update Scheduler Settings</button>
+</form>
+<div class="title-bar">
     <h1>Actions</h1>
 </div>
 <div class="settings-group">

@@ -62,6 +62,16 @@ class ApplicationSettingsForm(forms.Form):
     )
 
 
+class SchedulerSettingsForm(forms.Form):
+    """handle scheduler settings"""
+
+    update_subscribed = forms.CharField(required=False)
+    download_pending = forms.CharField(required=False)
+    check_reindex = forms.CharField(required=False)
+    thumbnail_check = forms.CharField(required=False)
+    run_backup = forms.CharField(required=False)
+
+
 class VideoSearchForm(forms.Form):
     """search videos form"""
 
