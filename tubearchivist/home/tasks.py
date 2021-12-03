@@ -34,6 +34,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 app = Celery("tasks", broker=f"redis://{REDIS_HOST}:{REDIS_PORT}")
 app.config_from_object("django.conf:settings", namespace="ta:")
 app.autodiscover_tasks()
+app.conf.timezone = os.environ.get("TZ") or "UTC"
 
 
 @shared_task(name="update_subscribed")
