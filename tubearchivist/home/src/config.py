@@ -156,13 +156,13 @@ class AppConfig:
 class ScheduleBuilder:
     """build schedule dicts for beat"""
 
-    SCHEDULES = [
-        "update_subscribed",
-        "download_pending",
-        "check_reindex",
-        "thumbnail_check",
-        "run_backup",
-    ]
+    SCHEDULES = {
+        "update_subscribed": "0 8 *",
+        "download_pending": "0 16 *",
+        "check_reindex": "0 12 *",
+        "thumbnail_check": "0 17 *",
+        "run_backup": "0 18 0",
+    }
 
     def __init__(self):
         self.config = AppConfig().config
@@ -172,15 +172,34 @@ class ScheduleBuilder:
         print("processing form, restart container for changes to take effect")
         redis_config = self.config
         for key, value in form_post.items():
-            if key in self.SCHEDULES and value[0]:
-                print(f"change schedule for {key} to {value[0]}")
-                if value[0] == "0":
-                    to_write = False
-                else:
-                    keys = ["minute", "hour", "day_of_week"]
-                    to_write = dict(zip(keys, value[0].split()))
+            to_check = value[0]
+            if key in self.SCHEDULES.keys() and to_check:
+                to_write = self.value_builder(key, to_check)
                 redis_config["scheduler"][key] = to_write
         RedisArchivist().set_message("config", redis_config, expire=False)
+
+    def value_builder(self, key, to_check):
+        """validate single cron form entry and return cron dict"""
+        print(f"change schedule for {key} to {to_check}")
+        if to_check == "0":
+            # deactivate this schedule
+            return False
+
+        keys = ["minute", "hour", "day_of_week"]
+        if to_check == "auto":
+            # set to sensible default
+            values = self.SCHEDULES[key].split()
+        else:
+            values = to_check.split()
+
+        if len(keys) != len(values):
+            raise ValueError(f"failed to parse {to_check} for {key}")
+
+        to_write = dict(zip(keys, values))
+        if "*" in to_write["minute"]:
+            raise ValueError("too frequent: wildcard in minutes not supported")
+
+        return to_write
 
     def build_schedule(self):
         """build schedule dict as expected by app.conf.beat_schedule"""
