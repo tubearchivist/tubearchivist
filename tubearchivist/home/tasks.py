@@ -44,7 +44,7 @@ def update_subscribed():
         "status": "message:rescan",
         "level": "info",
         "title": "Rescanning channels and playlists.",
-        "message": "Looking for new videos."
+        "message": "Looking for new videos.",
     }
     RedisArchivist().set_message("message:rescan", message)
 
@@ -259,6 +259,15 @@ def subscribe_to(url_str):
 def index_channel_playlists(channel_id):
     """add all playlists of channel to index"""
     channel_handler = YoutubeChannel(channel_id)
+    channel_name = channel_handler.channel_dict["channel_name"]
+    # notify
+    mess_dict = {
+        "status": "message:playlistscan",
+        "level": "info",
+        "title": "Looking for playlists",
+        "message": f'Scanning channel "{channel_name}" in progress',
+    }
+    RedisArchivist().set_message("message:playlistscan", mess_dict)
     all_playlists = channel_handler.get_all_playlists()
 
     if not all_playlists:
@@ -268,7 +277,16 @@ def index_channel_playlists(channel_id):
     all_indexed = PendingList().get_all_indexed()
     all_youtube_ids = [i["youtube_id"] for i in all_indexed]
 
+    counter = 1
     for playlist_id, playlist_title in all_playlists:
+        # notify
+        mess_dict = {
+            "status": "message:playlistscan",
+            "level": "info",
+            "title": "Scanning channel for playlists",
+            "message": f"Progress: {counter}/{len(all_playlists)}",
+        }
+        RedisArchivist().set_message("message:playlistscan", mess_dict)
         print("add playlist: " + playlist_title)
         playlist_handler = YoutubePlaylist(
             playlist_id, all_youtube_ids=all_youtube_ids
@@ -287,6 +305,7 @@ def index_channel_playlists(channel_id):
             continue
         playlist_handler.upload_to_es()
         playlist_handler.add_vids_to_playlist()
+        counter = counter + 1
 
     if all_playlists:
         handler = ThumbManager()
