@@ -183,12 +183,12 @@ class ThumbManager:
             progress = f"{counter}/{len(missing_thumbs)}"
             if notify:
                 mess_dict = {
-                    "status": "pending",
+                    "status": "message:download",
                     "level": "info",
-                    "title": "Downloading Thumbnails",
-                    "message": "Progress: " + progress,
+                    "title": "Processing Videos",
+                    "message": "Downloading Thumbnails, Progress: " + progress,
                 }
-                RedisArchivist().set_message("progress:download", mess_dict)
+                RedisArchivist().set_message("message:download", mess_dict)
 
             if counter % 25 == 0:
                 print("thumbnail progress: " + progress)
@@ -213,12 +213,12 @@ class ThumbManager:
             img_raw.convert("RGB").save(banner_path)
 
             mess_dict = {
-                "status": "pending",
+                "status": "message:download",
                 "level": "info",
-                "title": "Adding to download queue.",
-                "message": "Downloading Channel Art...",
+                "title": "Processing Channels",
+                "message": "Downloading Channel Art.",
             }
-            RedisArchivist().set_message("progress:download", mess_dict)
+            RedisArchivist().set_message("message:download", mess_dict)
 
     def download_playlist(self, missing_playlists):
         """download needed artwork for playlists"""
@@ -230,12 +230,12 @@ class ThumbManager:
             img_raw.convert("RGB").save(thumb_path)
 
             mess_dict = {
-                "status": "pending",
+                "status": "message:download",
                 "level": "info",
-                "title": "Adding to download queue.",
-                "message": "Downloading Playlist Art...",
+                "title": "Processing Playlists",
+                "message": "Downloading Playlist Art.",
             }
-            RedisArchivist().set_message("progress:download", mess_dict)
+            RedisArchivist().set_message("message:download", mess_dict)
 
     @staticmethod
     def vid_thumb_path(youtube_id):

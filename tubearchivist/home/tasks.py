@@ -41,11 +41,12 @@ app.conf.timezone = os.environ.get("TZ") or "UTC"
 def update_subscribed():
     """look for missing videos and add to pending"""
     message = {
-        "status": "rescan",
+        "status": "message:rescan",
         "level": "info",
-        "title": "Start rescanning channels and playlists.",
+        "title": "Rescanning channels and playlists.",
+        "message": "Looking for new videos."
     }
-    RedisArchivist().set_message("progress:download", message)
+    RedisArchivist().set_message("message:rescan", message)
 
     have_lock = False
     my_lock = RedisArchivist().get_lock("rescan")
@@ -190,12 +191,12 @@ def kill_dl(task_id):
 
     # notify
     mess_dict = {
-        "status": "downloading",
+        "status": "message:download",
         "level": "error",
-        "title": "Brutally killing download queue",
-        "message": "",
+        "title": "Canceling download process",
+        "message": "Canceling download queue now.",
     }
-    RedisArchivist().set_message("progress:download", mess_dict)
+    RedisArchivist().set_message("message:download", mess_dict)
 
 
 @shared_task

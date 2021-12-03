@@ -48,12 +48,12 @@ class PendingList:
         for entry in youtube_ids:
             # notify
             mess_dict = {
-                "status": "pending",
+                "status": "message:add",
                 "level": "info",
                 "title": "Adding to download queue.",
                 "message": "Extracting lists",
             }
-            RedisArchivist().set_message("progress:download", mess_dict)
+            RedisArchivist().set_message("message:add", mess_dict)
             # extract
             url = entry["url"]
             url_type = entry["type"]
@@ -123,12 +123,12 @@ class PendingList:
             # notify
             progress = f"{counter}/{len(missing_videos)}"
             mess_dict = {
-                "status": "pending",
+                "status": "message:add",
                 "level": "info",
                 "title": "Adding new videos to download queue.",
                 "message": "Progress: " + progress,
             }
-            RedisArchivist().set_message("progress:download", mess_dict)
+            RedisArchivist().set_message("message:add", mess_dict)
             if counter % 25 == 0:
                 print("adding to queue progress: " + progress)
             counter = counter + 1
@@ -261,13 +261,6 @@ class PendingList:
         request = requests.post(
             url, data=query_str, headers=headers, auth=self.ES_AUTH
         )
-        mess_dict = {
-            "status": "ignore",
-            "level": "info",
-            "title": "Added to ignore list",
-            "message": "",
-        }
-        RedisArchivist().set_message("progress:download", mess_dict)
         if not request.ok:
             print(request)
             raise ValueError("failed to set video to ignore")
@@ -325,15 +318,13 @@ class ChannelSubscription:
         for channel in all_channels:
             channel_id = channel["channel_id"]
             last_videos = self.get_last_youtube_videos(channel_id)
-            RedisArchivist().set_message(
-                "progress:download",
-                {
-                    "status": "rescan",
-                    "level": "info",
-                    "title": "Scanning channels: Looking for new videos.",
-                    "message": f"Progress: {counter}/{len(all_channels)}",
-                },
-            )
+            message = {
+                "status": "message:rescan",
+                "level": "info",
+                "title": "Scanning channels: Looking for new videos.",
+                "message": f"Progress: {counter}/{len(all_channels)}",
+            }
+            RedisArchivist().set_message("message:rescan", message=message)
             for video in last_videos:
                 youtube_id = video[0]
                 if youtube_id not in to_ignore:
@@ -506,15 +497,14 @@ class PlaylistSubscription:
                 playlist_entries = playlist["playlist_entries"]
             all_missing = [i for i in playlist_entries if not i["downloaded"]]
 
-            RedisArchivist().set_message(
-                "progress:download",
-                {
-                    "status": "rescan",
-                    "level": "info",
-                    "title": "Scanning playlists: Looking for new videos.",
-                    "message": f"Progress: {counter}/{len(all_playlists)}",
-                },
-            )
+            message = {
+                "status": "message:rescan",
+                "level": "info",
+                "title": "Scanning playlists: Looking for new videos.",
+                "message": f"Progress: {counter}/{len(all_playlists)}",
+            }
+            RedisArchivist().set_message("message:rescan", message=message)
+
             for video in all_missing:
                 youtube_id = video["youtube_id"]
                 if youtube_id not in to_ignore:
@@ -562,24 +552,24 @@ class VideoDownloader:
     def add_pending():
         """add pending videos to download queue"""
         mess_dict = {
-            "status": "downloading",
+            "status": "message:download",
             "level": "info",
             "title": "Looking for videos to download",
-            "message": "",
+            "message": "Scanning your download queue.",
         }
-        RedisArchivist().set_message("progress:download", mess_dict)
+        RedisArchivist().set_message("message:download", mess_dict)
         all_pending, _ = PendingList().get_all_pending()
         to_add = [i["youtube_id"] for i in all_pending]
         if not to_add:
             # there is nothing pending
             print("download queue is empty")
             mess_dict = {
-                "status": "downloading",
+                "status": "message:download",
                 "level": "error",
                 "title": "Download queue is empty",
-                "message": "",
+                "message": "Add some videos to the queue first.",
             }
-            RedisArchivist().set_message("progress:download", mess_dict)
+            RedisArchivist().set_message("message:download", mess_dict)
             return
 
         queue = RedisQueue("dl_queue")
@@ -606,7 +596,7 @@ class VideoDownloader:
             "title": title,
             "message": message,
         }
-        RedisArchivist().set_message("progress:download", mess_dict)
+        RedisArchivist().set_message("message:download", mess_dict)
 
     def build_obs(self):
         """build obs dictionary for yt-dlp"""
@@ -765,11 +755,11 @@ class VideoDownloader:
                 )
                 message = f"Progress: {p_counter}/{len(all_playlist_ids)}"
                 mess_dict = {
-                    "status": "downloading",
+                    "status": "message:download",
                     "level": "info",
                     "title": title,
                     "message": message,
                 }
-                RedisArchivist().set_message("progress:download", mess_dict)
+                RedisArchivist().set_message("message:download", mess_dict)
                 p_counter = p_counter + 1
             c_counter = c_counter + 1

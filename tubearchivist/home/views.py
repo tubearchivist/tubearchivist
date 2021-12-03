@@ -303,12 +303,12 @@ class DownloadView(View):
                 # failed to process
                 print(f"failed to parse: {url_str}")
                 mess_dict = {
-                    "status": "downloading",
+                    "status": "message:add",
                     "level": "error",
                     "title": "Failed to extract links.",
                     "message": "Not a video, channel or playlist ID or URL",
                 }
-                RedisArchivist().set_message("progress:download", mess_dict)
+                RedisArchivist().set_message("message:add", mess_dict)
                 return redirect("downloads")
 
             print(youtube_ids)

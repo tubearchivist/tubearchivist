@@ -165,14 +165,6 @@ class Reindex:
 
         counter = 1
         for channel_id in all_channel_ids:
-            message = f"Progress: {counter}/{len(all_channels)}"
-            mess_dict = {
-                "status": "scraping",
-                "level": "info",
-                "title": "Scraping all youtube channels",
-                "message": message,
-            }
-            RedisArchivist().set_message("progress:download", mess_dict)
             channel_index = YoutubeChannel(channel_id)
             subscribed = channel_index.channel_dict["channel_subscribed"]
             channel_index.channel_dict = channel_index.build_channel_dict(
