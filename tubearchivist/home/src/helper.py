@@ -153,11 +153,8 @@ class RedisArchivist:
     """collection of methods to interact with redis"""
 
     REDIS_HOST = os.environ.get("REDIS_HOST")
-    REDIS_PORT = os.environ.get("REDIS_PORT")
+    REDIS_PORT = os.environ.get("REDIS_PORT") or 6379
     NAME_SPACE = "ta:"
-
-    if not REDIS_PORT:
-        REDIS_PORT = 6379
 
     def __init__(self):
         self.redis_connection = redis.Redis(
@@ -171,8 +168,12 @@ class RedisArchivist:
         )
 
         if expire:
+            if isinstance(expire, bool):
+                secs = 20
+            else:
+                secs = expire
             self.redis_connection.execute_command(
-                "EXPIRE", self.NAME_SPACE + key, 20
+                "EXPIRE", self.NAME_SPACE + key, secs
             )
 
     def get_message(self, key):
