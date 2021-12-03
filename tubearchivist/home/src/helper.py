@@ -155,6 +155,14 @@ class RedisArchivist:
     REDIS_HOST = os.environ.get("REDIS_HOST")
     REDIS_PORT = os.environ.get("REDIS_PORT") or 6379
     NAME_SPACE = "ta:"
+    CHANNELS = [
+        "download",
+        "add",
+        "rescan",
+        "subchannel",
+        "subplaylist",
+        "playlistscan",
+    ]
 
     def __init__(self):
         self.redis_connection = redis.Redis(
@@ -200,19 +208,19 @@ class RedisArchivist:
         redis_lock = self.redis_connection.lock(self.NAME_SPACE + lock_key)
         return redis_lock
 
-    def get_dl_message(self, cache_dir):
-        """get latest download progress message if available"""
-        reply = self.redis_connection.execute_command(
-            "JSON.GET", self.NAME_SPACE + "progress:download"
-        )
-        if reply:
-            json_str = json.loads(reply)
-        elif json_str := self.monitor_cache_dir(cache_dir):
-            json_str = self.monitor_cache_dir(cache_dir)
-        else:
-            json_str = {"status": False}
+    def get_progress(self):
+        """get a list of all progress messages"""
+        all_messages = []
+        for channel in self.CHANNELS:
+            key = "message:" + channel
+            reply = self.redis_connection.execute_command(
+                "JSON.GET", self.NAME_SPACE + key
+            )
+            if reply:
+                json_str = json.loads(reply)
+                all_messages.append(json_str)
 
-        return json_str
+        return all_messages
 
     @staticmethod
     def monitor_cache_dir(cache_dir):

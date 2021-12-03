@@ -402,7 +402,7 @@ class PlaylistSubscription:
         all_youtube_ids = [i["youtube_id"] for i in all_indexed]
 
         new_thumbs = []
-
+        counter = 1
         for playlist in new_playlists:
             url_type = playlist["type"]
             playlist_id = playlist["url"]
@@ -425,9 +425,16 @@ class PlaylistSubscription:
                 self.change_subscribe(playlist_id, subscribe_status=True)
 
             # notify
+            message = {
+                "status": "message:subplaylist",
+                "level": "info",
+                "title": "Subscribing to Playlists",
+                "message": f"Processing {counter} of {len(new_playlists)}",
+            }
             RedisArchivist().set_message(
-                "progress:subscribe", {"status": "subscribing"}
+                "message:subplaylist", message=message
             )
+            counter = counter + 1
 
         return new_thumbs
 

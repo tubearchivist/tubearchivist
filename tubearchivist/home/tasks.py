@@ -223,6 +223,7 @@ def re_sync_thumbs():
 def subscribe_to(url_str):
     """take a list of urls to subscribe to"""
     to_subscribe_list = UrlListParser(url_str).process_list()
+    counter = 1
     for item in to_subscribe_list:
         to_sub_id = item["url"]
         if item["type"] == "playlist":
@@ -242,10 +243,15 @@ def subscribe_to(url_str):
         ChannelSubscription().change_subscribe(
             channel_id_sub, channel_subscribed=True
         )
-        # notify
-        RedisArchivist().set_message(
-            "progress:subscribe", {"status": "subscribing"}
-        )
+        # notify for channels
+        message = {
+            "status": "message:subchannel",
+            "level": "info",
+            "title": "Subscribing to Channels",
+            "message": f"Processing {counter} of {len(to_subscribe_list)}",
+        }
+        RedisArchivist().set_message("message:subchannel", message=message)
+        counter = counter + 1
 
 
 @shared_task

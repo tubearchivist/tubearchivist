@@ -521,9 +521,13 @@ class ChannelView(View):
         """handle http post requests"""
         subscribe_form = SubscribeToChannelForm(data=request.POST)
         if subscribe_form.is_valid():
-            RedisArchivist().set_message(
-                "progress:subscribe", {"status": "subscribing"}
-            )
+            message = {
+                "status": "message:subchannel",
+                "level": "info",
+                "title": "Subscribing to Channels",
+                "message": "Parsing form data",
+            }
+            RedisArchivist().set_message("message:subchannel", message=message)
             url_str = request.POST.get("subscribe")
             print(url_str)
             subscribe_to.delay(url_str)
@@ -800,6 +804,15 @@ class PlaylistView(View):
         if subscribe_form.is_valid():
             url_str = request.POST.get("subscribe")
             print(url_str)
+            message = {
+                "status": "message:subplaylist",
+                "level": "info",
+                "title": "Subscribing to Playlists",
+                "message": "Parsing form data",
+            }
+            RedisArchivist().set_message(
+                "message:subplaylist", message=message
+            )
             subscribe_to.delay(url_str)
 
         sleep(1)
@@ -929,10 +942,11 @@ class SettingsView(View):
 
 def progress(request):
     # pylint: disable=unused-argument
-    """endpoint for download progress ajax calls"""
-    config = AppConfig().config
-    cache_dir = config["application"]["cache_dir"]
-    json_data = RedisArchivist().get_dl_message(cache_dir)
+    """resolves to /progress/
+    return list of messages for frontend
+    """
+    all_messages = RedisArchivist().get_progress()
+    json_data = {"messages": all_messages}
     return JsonResponse(json_data)
 
 

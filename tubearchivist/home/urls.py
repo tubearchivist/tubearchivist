@@ -34,7 +34,7 @@ urlpatterns = [
     ),
     path("settings/", login_required(SettingsView.as_view()), name="settings"),
     path("process/", login_required(process), name="process"),
-    path("downloads/progress/", login_required(progress), name="progress"),
+    path("progress/", login_required(progress), name="progress"),
     path("channel/", login_required(ChannelView.as_view()), name="channel"),
     path(
         "channel/<slug:channel_id_detail>/",
