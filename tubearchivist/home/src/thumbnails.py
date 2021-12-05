@@ -183,12 +183,12 @@ class ThumbManager:
             progress = f"{counter}/{len(missing_thumbs)}"
             if notify:
                 mess_dict = {
-                    "status": "message:download",
+                    "status": "message:add",
                     "level": "info",
                     "title": "Processing Videos",
                     "message": "Downloading Thumbnails, Progress: " + progress,
                 }
-                RedisArchivist().set_message("message:download", mess_dict)
+                RedisArchivist().set_message("message:add", mess_dict)
 
             if counter % 25 == 0:
                 print("thumbnail progress: " + progress)
