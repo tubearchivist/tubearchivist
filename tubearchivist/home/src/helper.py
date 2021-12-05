@@ -233,7 +233,7 @@ class RedisArchivist:
         if cache_file:
             filename = cache_file[0][12:].replace("_", " ").split(".")[0]
             mess_dict = {
-                "status": "downloading",
+                "status": "message:download",
                 "level": "info",
                 "title": "Downloading: " + filename,
                 "message": "",

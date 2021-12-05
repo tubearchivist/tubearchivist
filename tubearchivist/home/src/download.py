@@ -591,7 +591,7 @@ class VideoDownloader:
         except KeyError:
             message = ""
         mess_dict = {
-            "status": "downloading",
+            "status": "message:download",
             "level": "info",
             "title": title,
             "message": message,
