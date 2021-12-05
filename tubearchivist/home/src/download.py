@@ -587,8 +587,10 @@ class VideoDownloader:
     def progress_hook(response):
         """process the progress_hooks from youtube_dl"""
         # title
-        filename = response["filename"][12:].replace("_", " ")
-        title = "Downloading: " + os.path.split(filename)[-1]
+        path = os.path.split(response["filename"])[-1][12:]
+        filename = os.path.splitext(os.path.splitext(path)[0])[0]
+        filename_clean = filename.replace("_", " ")
+        title = "Downloading: " + filename_clean
         # message
         try:
             percent = response["_percent_str"]
@@ -597,7 +599,7 @@ class VideoDownloader:
             eta = response["_eta_str"]
             message = f"{percent} of {size} at {speed} - time left: {eta}"
         except KeyError:
-            message = ""
+            message = "processing"
         mess_dict = {
             "status": "message:download",
             "level": "info",
@@ -741,12 +743,10 @@ class VideoDownloader:
         self.add_subscribed_channels()
         all_indexed = PendingList().get_all_indexed()
         all_youtube_ids = [i["youtube_id"] for i in all_indexed]
-        c_counter = 1
-        for channel_id in self.channels:
+        for id_c, channel_id in enumerate(self.channels):
             playlists = YoutubeChannel(channel_id).get_indexed_playlists()
             all_playlist_ids = [i["playlist_id"] for i in playlists]
-            p_counter = 1
-            for playlist_id in all_playlist_ids:
+            for id_p, playlist_id in enumerate(all_playlist_ids):
                 playlist_handler = YoutubePlaylist(
                     playlist_id, all_youtube_ids=all_youtube_ids
                 )
@@ -759,15 +759,18 @@ class VideoDownloader:
                 # notify
                 title = (
                     "Processing playlists for channels: "
-                    + f"{c_counter}/{len(self.channels)}"
+                    + f"{id_c + 1}/{len(self.channels)}"
                 )
-                message = f"Progress: {p_counter}/{len(all_playlist_ids)}"
+                message = f"Progress: {id_p + 1}/{len(all_playlist_ids)}"
                 mess_dict = {
                     "status": "message:download",
                     "level": "info",
                     "title": title,
                     "message": message,
                 }
-                RedisArchivist().set_message("message:download", mess_dict)
-                p_counter = p_counter + 1
-            c_counter = c_counter + 1
+                if id_p + 1 == len(all_playlist_ids):
+                    RedisArchivist().set_message(
+                        "message:download", mess_dict, expire=4
+                    )
+                else:
+                    RedisArchivist().set_message("message:download", mess_dict)
