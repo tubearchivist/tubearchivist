@@ -91,7 +91,7 @@ function rescanPending() {
     animate('rescan-icon', 'rotate-img');
     sendPost(payload);
     setTimeout(function(){
-        handleInterval();
+        checkMessages();
     }, 500);
 }
 
@@ -100,7 +100,7 @@ function dlPending() {
     animate('download-icon', 'bounce-img');
     sendPost(payload);
     setTimeout(function(){
-        handleInterval();
+        checkMessages();
     }, 500);
 }
 
@@ -117,7 +117,7 @@ function downloadNow(button) {
     sendPost(payload);
     document.getElementById(youtube_id).remove();
     setTimeout(function(){
-        handleInterval();
+        checkMessages();
     }, 500);
 }
 
@@ -134,7 +134,7 @@ function addSingle(button) {
     sendPost(payload);
     document.getElementById("dl-" + youtube_id).remove();
     setTimeout(function(){
-        handleInterval();
+        checkMessages();
     }, 500);
 }
 
