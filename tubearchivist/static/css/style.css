@@ -831,22 +831,22 @@ button:hover {
 }
 
 /* status message */
-.download-progress {
+.notification {
     background-color: var(--highlight-bg);
     text-align: center;
     padding: 30px 0 15px 0;
     margin-bottom: 1rem;
 }
 
-.download-progress.info {
+.notification.info {
     background-color: var(--highlight-bg);
 }
 
-.download-progress.error {
+.notification.error {
     background-color: var(--highlight-error);
 }
 
-.download-progress.error h3 {
+.notification.error h3 {
     color: #fff;
 }
 

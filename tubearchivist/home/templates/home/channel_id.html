@@ -66,6 +66,7 @@
         </div>
     </div>
 {% endif %}
+<div id="notifications" data="channel_id"></div>
 <div id="player" class="video-player"></div>
 <div class="sort">
     <p>Sort by <span class="settings-current">{{ sort_by }}</span>
@@ -142,4 +143,5 @@
         <h2>No videos found...</h2>
     {% endif %}
 </div>
+<script type="text/javascript" src="{% static 'progress.js' %}"></script>
 {% endblock content %}

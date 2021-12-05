@@ -4,6 +4,7 @@
 <div class="title-bar">
     <h1>Playlists</h1>
 </div>
+<div id="notifications" data="playlist"></div>
 <div class="info-box info-box-2">
     <div class="icon-text">
         {% if running == "subscribing" %}
@@ -77,4 +78,5 @@
         <h2>No playlists found...</h2>
     {% endif %}
 </div>
+<script type="text/javascript" src="{% static 'progress.js' %}"></script>
 {% endblock content %}
