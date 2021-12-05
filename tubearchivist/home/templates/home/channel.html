@@ -8,19 +8,15 @@
 <div id="notifications" data="channel"></div>
 <div class="info-box info-box-2">
     <div class="icon-text">
-        {% if running == "subscribing" %}
-            <p>Subscribing in progress, refresh.</p>
-        {% else %}
-            <img id="add-icon" onclick="showForm()" src="{% static 'img/icon-add.svg' %}" alt="add-icon">
-            <p>Subscribe to Channels</p>
-            <div class="show-form">
-                <form id="hidden-form" action="/channel/" method="post">
-                    {% csrf_token %}
-                    {{ subscribe_form }}
-                    <button type="submit">Subscribe</button>
-                </form>
-            </div>
-        {% endif %}
+        <img id="add-icon" onclick="showForm()" src="{% static 'img/icon-add.svg' %}" alt="add-icon">
+        <p>Subscribe to Channels</p>
+        <div class="show-form">
+            <form id="hidden-form" action="/channel/" method="post">
+                {% csrf_token %}
+                {{ subscribe_form }}
+                <button type="submit">Subscribe</button>
+            </form>
+        </div>
     </div>
     <div class="search-form icon-text">
         <div class="search-icon">

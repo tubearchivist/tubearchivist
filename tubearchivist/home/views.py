@@ -489,7 +489,6 @@ class ChannelView(View):
             "title": "Channels",
             "colors": view_config["colors"],
             "view_style": view_config["view_style"],
-            "running": view_config["running"],
         }
         return render(request, "home/channel.html", context)
 
@@ -499,7 +498,6 @@ class ChannelView(View):
         config_handler = AppConfig(user_id)
         view_key = f"{user_id}:view:channel"
         view_style = RedisArchivist().get_message(view_key)["status"]
-        running = RedisArchivist().get_message("progress:subscribe")["status"]
         if not view_style:
             view_style = config_handler.config["default_view"]["channel"]
 
@@ -511,7 +509,6 @@ class ChannelView(View):
             "view_style": view_style,
             "show_subed_only": show_subed_only,
             "colors": config_handler.colors,
-            "running": running,
         }
 
         return view_config
