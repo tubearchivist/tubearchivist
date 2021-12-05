@@ -401,25 +401,24 @@ class PlaylistSubscription:
         all_youtube_ids = [i["youtube_id"] for i in all_indexed]
 
         new_thumbs = []
-        counter = 1
-        for playlist in new_playlists:
+        for idx, playlist in enumerate(new_playlists):
             url_type = playlist["type"]
             playlist_id = playlist["url"]
             if not url_type == "playlist":
                 print(f"{playlist_id} not a playlist, skipping...")
                 continue
 
-            playlisr = YoutubePlaylist(
+            playlist_h = YoutubePlaylist(
                 playlist_id, all_youtube_ids=all_youtube_ids
             )
-            if not playlisr.get_es_playlist():
-                playlisr.get_playlist_dict()
-                playlisr.playlist_dict["playlist_subscribed"] = subscribed
-                playlisr.upload_to_es()
-                playlisr.add_vids_to_playlist()
-                thumb = playlisr.playlist_dict["playlist_thumbnail"]
+            if not playlist_h.get_es_playlist():
+                playlist_h.get_playlist_dict()
+                playlist_h.playlist_dict["playlist_subscribed"] = subscribed
+                playlist_h.upload_to_es()
+                playlist_h.add_vids_to_playlist()
+                thumb = playlist_h.playlist_dict["playlist_thumbnail"]
                 new_thumbs.append((playlist_id, thumb))
-                self.channel_validate(playlisr)
+                self.channel_validate(playlist_h)
             else:
                 self.change_subscribe(playlist_id, subscribe_status=True)
 
@@ -428,12 +427,11 @@ class PlaylistSubscription:
                 "status": "message:subplaylist",
                 "level": "info",
                 "title": "Subscribing to Playlists",
-                "message": f"Processing {counter} of {len(new_playlists)}",
+                "message": f"Processing {idx + 1} of {len(new_playlists)}",
             }
             RedisArchivist().set_message(
                 "message:subplaylist", message=message
             )
-            counter = counter + 1
 
         return new_thumbs
 
