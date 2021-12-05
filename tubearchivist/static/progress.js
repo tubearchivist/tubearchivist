@@ -39,17 +39,18 @@ function getMessages(dataOrigin) {
 
 // make div for all messages, return relevant
 function buildMessage(responseData, dataOrigin) {
-    var messages = responseData["messages"];
-    var notificationDiv = document.getElementById("notifications")
+    // filter relevan messages
+    var allMessages = responseData["messages"];
+    var messages = allMessages.filter(function(value) {
+        return messageTypes[dataOrigin].includes(value["status"])
+    }, dataOrigin);
+    // build divs
+    var notificationDiv = document.getElementById("notifications");
     var nots = notificationDiv.childElementCount;
     notificationDiv.innerHTML = "";
     for (let i = 0; i < messages.length; i++) {
         var messageData = messages[i];
         var messageStatus = messageData["status"];
-        if (! messageTypes[dataOrigin].includes(messageStatus)) {
-            messages.splice(i);
-            continue
-        };
         var messageBox = document.createElement("div");
         var title = document.createElement("h3");
         title.innerHTML = messageData["title"];
@@ -63,8 +64,8 @@ function buildMessage(responseData, dataOrigin) {
             checkDownloadIcons();
         };
     };
-    // reload on download page when no more notifications
-    if (nots > 0 && messages.length === 0 && dataOrigin === "download") {
+    // reload page when no more notifications
+    if (nots > 0 && messages.length === 0) {
         location.reload();
     };
     return messages
