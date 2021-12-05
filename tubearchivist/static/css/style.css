@@ -808,7 +808,7 @@ button:hover {
 .dl-control-icons {
     display: flex;
     justify-content: center;
-    padding: 10px 0;
+    padding-bottom: 10px;
 }
 
 .dl-control-icons img {
@@ -835,7 +835,7 @@ button:hover {
     background-color: var(--highlight-bg);
     text-align: center;
     padding: 30px 0 15px 0;
-    margin-bottom: 1rem;
+    margin: 1rem 0;
 }
 
 .notification.info {

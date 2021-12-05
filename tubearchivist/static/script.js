@@ -225,6 +225,9 @@ function findPlaylists(button) {
     var message = document.createElement('p');
     message.innerText = 'Scraping for playlists in progress';
     document.getElementById("find-playlists-button").replaceWith(message);
+    setTimeout(function(){
+        checkMessages();
+    }, 500);
 }
 
 // delete from file system

@@ -277,14 +277,13 @@ def index_channel_playlists(channel_id):
     all_indexed = PendingList().get_all_indexed()
     all_youtube_ids = [i["youtube_id"] for i in all_indexed]
 
-    counter = 1
-    for playlist_id, playlist_title in all_playlists:
+    for idx, (playlist_id, playlist_title) in enumerate(all_playlists):
         # notify
         mess_dict = {
             "status": "message:playlistscan",
             "level": "info",
             "title": "Scanning channel for playlists",
-            "message": f"Progress: {counter}/{len(all_playlists)}",
+            "message": f"Progress: {idx + 1}/{len(all_playlists)}",
         }
         RedisArchivist().set_message("message:playlistscan", mess_dict)
         print("add playlist: " + playlist_title)
@@ -305,7 +304,6 @@ def index_channel_playlists(channel_id):
             continue
         playlist_handler.upload_to_es()
         playlist_handler.add_vids_to_playlist()
-        counter = counter + 1
 
     if all_playlists:
         handler = ThumbManager()
