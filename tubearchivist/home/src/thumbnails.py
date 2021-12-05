@@ -162,8 +162,7 @@ class ThumbManager:
     def download_vid(self, missing_thumbs, notify=True):
         """download all missing thumbnails from list"""
         print(f"downloading {len(missing_thumbs)} thumbnails")
-        counter = 1
-        for youtube_id, thumb_url in missing_thumbs:
+        for idx, (youtube_id, thumb_url) in enumerate(missing_thumbs):
             folder_path = os.path.join(self.VIDEO_DIR, youtube_id[0].lower())
             thumb_path = os.path.join(
                 self.CACHE_DIR, self.vid_thumb_path(youtube_id)
@@ -177,10 +176,9 @@ class ThumbManager:
                 new_height = width / 16 * 9
                 offset = (height - new_height) / 2
                 img_raw = img_raw.crop((0, offset, width, height - offset))
-
             img_raw.convert("RGB").save(thumb_path)
 
-            progress = f"{counter}/{len(missing_thumbs)}"
+            progress = f"{idx + 1}/{len(missing_thumbs)}"
             if notify:
                 mess_dict = {
                     "status": "message:add",
@@ -188,11 +186,15 @@ class ThumbManager:
                     "title": "Processing Videos",
                     "message": "Downloading Thumbnails, Progress: " + progress,
                 }
-                RedisArchivist().set_message("message:add", mess_dict)
+                if idx + 1 == len(missing_thumbs):
+                    RedisArchivist().set_message(
+                        "message:add", mess_dict, expire=4
+                    )
+                else:
+                    RedisArchivist().set_message("message:add", mess_dict)
 
-            if counter % 25 == 0:
+            if idx + 1 % 25 == 0:
                 print("thumbnail progress: " + progress)
-            counter = counter + 1
 
     def download_chan(self, missing_channels):
         """download needed artwork for channels"""

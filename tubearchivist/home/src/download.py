@@ -101,8 +101,8 @@ class PendingList:
         """build the bulk lists"""
         bulk_list = []
         all_videos_added = []
-        counter = 1
-        for youtube_id in missing_videos:
+
+        for idx, youtube_id in enumerate(missing_videos):
             # check if already downloaded
             if youtube_id in self.all_downloaded:
                 continue
@@ -114,24 +114,27 @@ class PendingList:
 
             channel_indexed = video["channel_id"] in self.all_channel_ids
             video["channel_indexed"] = channel_indexed
-            thumb_url = video["vid_thumb_url"]
             video["status"] = "pending"
             action = {"create": {"_id": youtube_id, "_index": "ta_download"}}
             bulk_list.append(json.dumps(action))
             bulk_list.append(json.dumps(video))
-            all_videos_added.append((youtube_id, thumb_url))
+            all_videos_added.append((youtube_id, video["vid_thumb_url"]))
             # notify
-            progress = f"{counter}/{len(missing_videos)}"
+            progress = f"{idx + 1}/{len(missing_videos)}"
             mess_dict = {
                 "status": "message:add",
                 "level": "info",
                 "title": "Adding new videos to download queue.",
                 "message": "Progress: " + progress,
             }
-            RedisArchivist().set_message("message:add", mess_dict)
-            if counter % 25 == 0:
+            if idx + 1 == len(missing_videos):
+                RedisArchivist().set_message(
+                    "message:add", mess_dict, expire=4
+                )
+            else:
+                RedisArchivist().set_message("message:add", mess_dict)
+            if idx + 1 % 25 == 0:
                 print("adding to queue progress: " + progress)
-            counter = counter + 1
 
         return bulk_list, all_videos_added
 
@@ -313,23 +316,28 @@ class ChannelSubscription:
         all_ids = [i["youtube_id"] for i in all_ignore + all_pending]
         all_downloaded = pending_handler.get_all_downloaded()
         to_ignore = all_ids + all_downloaded
+
         missing_videos = []
-        counter = 1
-        for channel in all_channels:
+
+        for idx, channel in enumerate(all_channels):
             channel_id = channel["channel_id"]
             last_videos = self.get_last_youtube_videos(channel_id)
+            for video in last_videos:
+                if video[0] not in to_ignore:
+                    missing_videos.append(video[0])
+            # notify
             message = {
                 "status": "message:rescan",
                 "level": "info",
                 "title": "Scanning channels: Looking for new videos.",
-                "message": f"Progress: {counter}/{len(all_channels)}",
+                "message": f"Progress: {idx + 1}/{len(all_channels)}",
             }
-            RedisArchivist().set_message("message:rescan", message=message)
-            for video in last_videos:
-                youtube_id = video[0]
-                if youtube_id not in to_ignore:
-                    missing_videos.append(youtube_id)
-            counter = counter + 1
+            if idx + 1 == len(all_channels):
+                RedisArchivist().set_message(
+                    "message:rescan", message=message, expire=4
+                )
+            else:
+                RedisArchivist().set_message("message:rescan", message=message)
 
         return missing_videos
 
