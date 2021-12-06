@@ -1,92 +1,94 @@
 {% extends "home/base.html" %}
 {% load static %}
 {% block content %}
-<div class="title-bar">
-    <h1>Downloads</h1>
-</div>
-<div id="notifications" data="download"></div>
-<div id="downloadControl"></div>
-<div class="info-box info-box-3">
-    <div class="icon-text">
-        <img id="rescan-icon" onclick="rescanPending()" src="{% static 'img/icon-rescan.svg' %}" alt="rescan-icon">
-        <p>Rescan subscriptions</p>
+<div class="boxed-content">
+    <div class="title-bar">
+        <h1>Downloads</h1>
     </div>
-    <div class="icon-text">
-        <img id="download-icon" onclick="dlPending()" src="{% static 'img/icon-download.svg' %}" alt="download-icon">
-        <p>Start download</p>
-    </div>
-    <div class="icon-text">
-        <img id="add-icon" onclick="showForm()" src="{% static 'img/icon-add.svg' %}" alt="add-icon">
-        <p>Add to download queue</p>
-        <div class="show-form">
-            <form id='hidden-form' action="/downloads/" method="post">
-                {% csrf_token %}
-                {{ add_form }}
-                <button type="submit">Add to download queue</button>
-            </form>
+    <div id="notifications" data="download"></div>
+    <div id="downloadControl"></div>
+    <div class="info-box info-box-3">
+        <div class="icon-text">
+            <img id="rescan-icon" onclick="rescanPending()" src="{% static 'img/icon-rescan.svg' %}" alt="rescan-icon">
+            <p>Rescan subscriptions</p>
         </div>
-    </div>
-</div>
-<div class="view-controls">
-    <div class="toggle">
-        <span>Show only ignored videos:</span>
-        <div class="toggleBox">
-            <input 
-                id="show_ignored_only" onclick="toggleCheckbox(this)" type="checkbox"
-                {% if show_ignored_only %}
-                    checked
-                {% endif %}
-                >
-            <label for="" class="onbtn">On</label>
-            <label for="" class="ofbtn">Off</label>
+        <div class="icon-text">
+            <img id="download-icon" onclick="dlPending()" src="{% static 'img/icon-download.svg' %}" alt="download-icon">
+            <p>Start download</p>
         </div>
-    </div>
-    <div class="view-icons">
-        <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="downloads" data-value="grid" alt="grid view">
-        <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="downloads" data-value="list" alt="list view">
-    </div>
-</div>
-<div class="title-split">
-    {% if show_ignored_only %}
-        <h2>Ignored from download</h2>
-        <button onclick="deleteQueue(this)" data-id="ignore" title="Delete all previously ignored videos from the queue">Delete all ignored</button>
-    {% else %}
-        <h2>Download queue</h2>
-        <button onclick="deleteQueue(this)" data-id="pending" title="Delete all pending videos from the queue">Delete all queued</button>
-    {% endif %}
-</div>
-<h3>Total videos: {{ max_hits }}</h3>
-<div class="dl-list {{ view_style }}">
-    {% if all_video_hits %}
-        {% for video in all_video_hits %}
-            <div class="dl-item {{ view_style }}" id="dl-{{ video.youtube_id }}">
-                <div class="dl-thumb {{ view_style }}">
-                    <img src="/cache/{{ video.vid_thumb_url }}" alt="video_thumb">
-                    {% if show_ignored_only %}
-                        <span>ignored</span>
-                    {% else %}
-                        <span>queued</span>
-                    {% endif %}
-                </div>
-                <div class="dl-desc {{ view_style }}">
-                    <h3>{{ video.title }}</h3>
-                    {% if video.channel_indexed %}
-                        <a href="{% url 'channel_id' video.channel_id %}">{{ video.channel_name }}</a>
-                    {% else %}
-                        <span>{{ video.channel_name }}</span>
-                    {% endif %}
-                    <p>Published: {{ video.published }} | Duration: {{ video.duration }} | {{ video.youtube_id }}</p>
-                    {% if show_ignored_only %}
-                        <button data-id="{{ video.youtube_id }}" onclick="forgetIgnore(this)">Forget</button>
-                        <button data-id="{{ video.youtube_id }}" onclick="addSingle(this)">Add to queue</button>
-                    {% else %}
-                        <button data-id="{{ video.youtube_id }}" onclick="toIgnore(this)">Ignore</button>
-                        <button id="{{ video.youtube_id }}" data-id="{{ video.youtube_id }}" onclick="downloadNow(this)">Download now</button>
-                    {% endif %}
-                </div>
+        <div class="icon-text">
+            <img id="add-icon" onclick="showForm()" src="{% static 'img/icon-add.svg' %}" alt="add-icon">
+            <p>Add to download queue</p>
+            <div class="show-form">
+                <form id='hidden-form' action="/downloads/" method="post">
+                    {% csrf_token %}
+                    {{ add_form }}
+                    <button type="submit">Add to download queue</button>
+                </form>
             </div>
-        {% endfor %}
-    {% endif %}
+        </div>
+    </div>
+    <div class="view-controls">
+        <div class="toggle">
+            <span>Show only ignored videos:</span>
+            <div class="toggleBox">
+                <input 
+                    id="show_ignored_only" onclick="toggleCheckbox(this)" type="checkbox"
+                    {% if show_ignored_only %}
+                        checked
+                    {% endif %}
+                    >
+                <label for="" class="onbtn">On</label>
+                <label for="" class="ofbtn">Off</label>
+            </div>
+        </div>
+        <div class="view-icons">
+            <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="downloads" data-value="grid" alt="grid view">
+            <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="downloads" data-value="list" alt="list view">
+        </div>
+    </div>
+    <div class="title-split">
+        {% if show_ignored_only %}
+            <h2>Ignored from download</h2>
+            <button onclick="deleteQueue(this)" data-id="ignore" title="Delete all previously ignored videos from the queue">Delete all ignored</button>
+        {% else %}
+            <h2>Download queue</h2>
+            <button onclick="deleteQueue(this)" data-id="pending" title="Delete all pending videos from the queue">Delete all queued</button>
+        {% endif %}
+    </div>
+    <h3>Total videos: {{ max_hits }}</h3>
+    <div class="dl-list {{ view_style }}">
+        {% if all_video_hits %}
+            {% for video in all_video_hits %}
+                <div class="dl-item {{ view_style }}" id="dl-{{ video.youtube_id }}">
+                    <div class="dl-thumb {{ view_style }}">
+                        <img src="/cache/{{ video.vid_thumb_url }}" alt="video_thumb">
+                        {% if show_ignored_only %}
+                            <span>ignored</span>
+                        {% else %}
+                            <span>queued</span>
+                        {% endif %}
+                    </div>
+                    <div class="dl-desc {{ view_style }}">
+                        <h3>{{ video.title }}</h3>
+                        {% if video.channel_indexed %}
+                            <a href="{% url 'channel_id' video.channel_id %}">{{ video.channel_name }}</a>
+                        {% else %}
+                            <span>{{ video.channel_name }}</span>
+                        {% endif %}
+                        <p>Published: {{ video.published }} | Duration: {{ video.duration }} | {{ video.youtube_id }}</p>
+                        {% if show_ignored_only %}
+                            <button data-id="{{ video.youtube_id }}" onclick="forgetIgnore(this)">Forget</button>
+                            <button data-id="{{ video.youtube_id }}" onclick="addSingle(this)">Add to queue</button>
+                        {% else %}
+                            <button data-id="{{ video.youtube_id }}" onclick="toIgnore(this)">Ignore</button>
+                            <button id="{{ video.youtube_id }}" data-id="{{ video.youtube_id }}" onclick="downloadNow(this)">Download now</button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
 </div>
 <script type="text/javascript" src="{% static 'progress.js' %}"></script>
 {% endblock content %}

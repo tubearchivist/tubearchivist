@@ -2,146 +2,148 @@
 {% block content %}
 {% load static %}
 {% load humanize %}
-<div class="channel-banner">
-    <a href="/channel/{{ channel_info.channel_id }}/"><img src="/cache/channels/{{ channel_info.channel_id }}_banner.jpg" alt="channel_banner"></a>
-</div>
-<div class="info-box info-box-3">
-    <div class="info-box-item">
-        <div class="round-img">
-            <a href="{% url 'channel_id' channel_info.channel_id %}">
-                <img src="/cache/channels/{{ channel_info.channel_id }}_thumb.jpg" alt="channel-thumb">
-            </a>
-        </div>
-        <div>
-            <h3><a href="{% url 'channel_id' channel_info.channel_id %}">{{ channel_info.channel_name }}</a></h3>
-            {% if channel_info.channel_subs >= 1000000 %}
-                <span>Subscribers: {{ channel_info.channel_subs|intword }}</span>
-            {% else %}
-                <span>Subscribers: {{ channel_info.channel_subs|intcomma }}</span>
-            {% endif %}
-        </div>
+<div class="boxed-content">
+    <div class="channel-banner">
+        <a href="/channel/{{ channel_info.channel_id }}/"><img src="/cache/channels/{{ channel_info.channel_id }}_banner.jpg" alt="channel_banner"></a>
     </div>
-    <div class="info-box-item">
-        <div>
-            <p>Last refreshed: {{ channel_info.channel_last_refresh }}</p>
-            <p>Subscribed: 
-            {% if channel_info.channel_subscribed %}
-                <button type="button" id="{{ channel_info.channel_id }}" onclick="unsubscribe(this.id)" title="Unsubscribe from {{ channel_info.channel_name }}">Unsubscribe</button>
-            {% else %}
-                <button type="button" id="{{ channel_info.channel_id }}" onclick="subscribe(this.id)" title="Subscribe to {{ channel_info.channel_name }}">Subscribe</button>
-            {% endif %}
-            </p>
-            {% if channel_info.channel_active %}
-                <p>Youtube: <a href="https://www.youtube.com/channel/{{ channel_info.channel_id }}" target="_blank">Active</a></p>
-            {% else %}
-                <p>Youtube: Deactivated</p>
-            {% endif %}
-            <button onclick="deleteConfirm()" id="delete-item">Delete Channel</button>
-            <div class="delete-confirm" id="delete-button">
-                <span>Delete {{ channel_info.channel_name }} including all videos? </span><button class="danger-button" onclick="deleteChannel(this)" data-id="{{ channel_info.channel_id }}">Delete</button> <button onclick="cancelDelete()">Cancel</button>
+    <div class="info-box info-box-3">
+        <div class="info-box-item">
+            <div class="round-img">
+                <a href="{% url 'channel_id' channel_info.channel_id %}">
+                    <img src="/cache/channels/{{ channel_info.channel_id }}_thumb.jpg" alt="channel-thumb">
+                </a>
+            </div>
+            <div>
+                <h3><a href="{% url 'channel_id' channel_info.channel_id %}">{{ channel_info.channel_name }}</a></h3>
+                {% if channel_info.channel_subs >= 1000000 %}
+                    <span>Subscribers: {{ channel_info.channel_subs|intword }}</span>
+                {% else %}
+                    <span>Subscribers: {{ channel_info.channel_subs|intcomma }}</span>
+                {% endif %}
             </div>
         </div>
-    </div>
-    <div class="info-box-item">
-        <div>
-            {% if channel_info.channel_views >= 1000000 %}
-                <p>Channel views: {{ channel_info.channel_views|intword }}</p>
-            {% elif channel_info.channel_views > 0 %}
-                <p>Channel views: {{ channel_info.channel_views|intcomma }}</p>
-            {% endif %}
-            {% if max_hits %}
-                <p>Total Videos archived: {{ max_hits }}</p>
-                <p>Watched: <button title="Mark all videos from {{ channel_info.channel_name }} as watched" type="button" id="watched-button" data-id="{{ channel_info.channel_id }}" onclick="isWatchedButton(this)">Mark as watched</button></p>
-            {% endif %}
-            <button title="Search for playlists on YouTube for {{ channel_info.channel_name }}" type="button" id="find-playlists-button" data-id="{{ channel_info.channel_id }}" onclick="findPlaylists(this)">Find Playlists</button>
-            <a href="/playlist/?search={{ channel_info.channel_id }}" title="Show all playlists belonging to {{ channel_info.channel_name }}"><button>Show Playlists</button></a>
-        </div>
-    </div>
-</div>
-{% if channel_info.channel_description %}
-    <div class="info-box-item description-box">
-        <p>Description: <button onclick="textReveal()" id="text-reveal-button">Show</button></p>
-        <div id="text-reveal" class="description-text">
-            {{ channel_info.channel_description|linebreaks }}
-        </div>
-    </div>
-{% endif %}
-<div id="notifications" data="channel_id"></div>
-<div id="player" class="video-player"></div>
-<div class="sort">
-    <p>Sort by <span class="settings-current">{{ sort_by }}</span>
-        <select name="sort" id="sort" onchange="sortChange(this.value)">
-            <option value="" disabled selected> -- change sort by -- </option>
-            <option value="published">date published</option>
-            <option value="downloaded">date downloaded</option>
-            <option value="views">views</option>
-            <option value="likes">likes</option>
-        </select>
-        <select name="sord-order" id="sort-order" onchange="sortChange(this.value)">
-            {% if sort_order == "asc" %}
-                <option value="asc" selected>asc</option>
-            {% else %}
-                <option value="asc">asc</option>
-            {% endif %}
-            {% if sort_order == "desc" %}
-                <option value="desc" selected>desc</option>
-            {% else %}
-                <option value="desc">desc</option>
-            {% endif %}
-        </select>
-    </p>
-</div>
-<div class="view-controls">
-    <div class="toggle">
-        <span>Hide watched videos:</span>
-        <div class="toggleBox">
-            <input 
-                id="hide_watched" onclick="toggleCheckbox(this)" type="checkbox"
-                {% if hide_watched %}
-                    checked
+        <div class="info-box-item">
+            <div>
+                <p>Last refreshed: {{ channel_info.channel_last_refresh }}</p>
+                <p>Subscribed: 
+                {% if channel_info.channel_subscribed %}
+                    <button type="button" id="{{ channel_info.channel_id }}" onclick="unsubscribe(this.id)" title="Unsubscribe from {{ channel_info.channel_name }}">Unsubscribe</button>
+                {% else %}
+                    <button type="button" id="{{ channel_info.channel_id }}" onclick="subscribe(this.id)" title="Subscribe to {{ channel_info.channel_name }}">Subscribe</button>
                 {% endif %}
-                >
-            <label for="" class="onbtn">On</label>
-            <label for="" class="ofbtn">Off</label>
-        </div>
-    </div>
-    <div class="view-icons">
-        <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="grid" alt="grid view">
-        <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="list" alt="list view">
-    </div>
-</div>
-<div class="video-list {{ view_style }}">
-    {% if videos %}
-        {% for video in videos %}
-            <div class="video-item {{ view_style }}">
-                <a href="#player" data-src="/media/{{ video.source.media_url }}" data-thumb="/cache/{{ video.source.vid_thumb_url }}" data-title="{{ video.source.title }}" data-channel="{{ video.source.channel.channel_name }}" data-id="{{ video.source.youtube_id }}" onclick="createPlayer(this)">
-                    <div class="video-thumb-wrap {{ view_style }}">
-                        <div class="video-thumb">
-                            <img src="/cache/{{ video.source.vid_thumb_url }}" alt="video-thumb">
-                        </div>
-                        <div class="video-play">
-                            <img src="{% static 'img/icon-play.svg' %}" alt="play-icon">
-                        </div>
-                    </div>
-                </a>
-                <div class="video-desc {{ view_style }}">
-                    <div class="video-desc-player" id="video-info-{{ video.source.youtube_id }}">
-                        {% if video.source.player.watched %}
-                            <img src="{% static 'img/icon-seen.svg' %}" alt="seen-icon" id="{{ video.source.youtube_id }}" onclick="isUnwatched(this.id)" class="seen-icon" title="Mark as unwatched">
-                        {% else %}
-                            <img src="{% static 'img/icon-unseen.svg' %}" alt="unseen-icon" id="{{ video.source.youtube_id }}" onclick="isWatched(this.id)" class="unseen-icon" title="Mark as watched.">
-                        {% endif %}
-                        <span>{{ video.source.published }} | {{ video.source.player.duration_str }}</span>
-                    </div>
-                    <div>
-                        <a class="video-more" href="{% url 'video' video.source.youtube_id %}"><h2>{{ video.source.title }}</h2></a>
-                    </div>
+                </p>
+                {% if channel_info.channel_active %}
+                    <p>Youtube: <a href="https://www.youtube.com/channel/{{ channel_info.channel_id }}" target="_blank">Active</a></p>
+                {% else %}
+                    <p>Youtube: Deactivated</p>
+                {% endif %}
+                <button onclick="deleteConfirm()" id="delete-item">Delete Channel</button>
+                <div class="delete-confirm" id="delete-button">
+                    <span>Delete {{ channel_info.channel_name }} including all videos? </span><button class="danger-button" onclick="deleteChannel(this)" data-id="{{ channel_info.channel_id }}">Delete</button> <button onclick="cancelDelete()">Cancel</button>
                 </div>
             </div>
-        {% endfor %}
-    {% else %}
-        <h2>No videos found...</h2>
+        </div>
+        <div class="info-box-item">
+            <div>
+                {% if channel_info.channel_views >= 1000000 %}
+                    <p>Channel views: {{ channel_info.channel_views|intword }}</p>
+                {% elif channel_info.channel_views > 0 %}
+                    <p>Channel views: {{ channel_info.channel_views|intcomma }}</p>
+                {% endif %}
+                {% if max_hits %}
+                    <p>Total Videos archived: {{ max_hits }}</p>
+                    <p>Watched: <button title="Mark all videos from {{ channel_info.channel_name }} as watched" type="button" id="watched-button" data-id="{{ channel_info.channel_id }}" onclick="isWatchedButton(this)">Mark as watched</button></p>
+                {% endif %}
+                <button title="Search for playlists on YouTube for {{ channel_info.channel_name }}" type="button" id="find-playlists-button" data-id="{{ channel_info.channel_id }}" onclick="findPlaylists(this)">Find Playlists</button>
+                <a href="/playlist/?search={{ channel_info.channel_id }}" title="Show all playlists belonging to {{ channel_info.channel_name }}"><button>Show Playlists</button></a>
+            </div>
+        </div>
+    </div>
+    {% if channel_info.channel_description %}
+        <div class="info-box-item description-box">
+            <p>Description: <button onclick="textReveal()" id="text-reveal-button">Show</button></p>
+            <div id="text-reveal" class="description-text">
+                {{ channel_info.channel_description|linebreaks }}
+            </div>
+        </div>
     {% endif %}
+    <div id="notifications" data="channel_id"></div>
+    <div id="player" class="video-player"></div>
+    <div class="sort">
+        <p>Sort by <span class="settings-current">{{ sort_by }}</span>
+            <select name="sort" id="sort" onchange="sortChange(this.value)">
+                <option value="" disabled selected> -- change sort by -- </option>
+                <option value="published">date published</option>
+                <option value="downloaded">date downloaded</option>
+                <option value="views">views</option>
+                <option value="likes">likes</option>
+            </select>
+            <select name="sord-order" id="sort-order" onchange="sortChange(this.value)">
+                {% if sort_order == "asc" %}
+                    <option value="asc" selected>asc</option>
+                {% else %}
+                    <option value="asc">asc</option>
+                {% endif %}
+                {% if sort_order == "desc" %}
+                    <option value="desc" selected>desc</option>
+                {% else %}
+                    <option value="desc">desc</option>
+                {% endif %}
+            </select>
+        </p>
+    </div>
+    <div class="view-controls">
+        <div class="toggle">
+            <span>Hide watched videos:</span>
+            <div class="toggleBox">
+                <input 
+                    id="hide_watched" onclick="toggleCheckbox(this)" type="checkbox"
+                    {% if hide_watched %}
+                        checked
+                    {% endif %}
+                    >
+                <label for="" class="onbtn">On</label>
+                <label for="" class="ofbtn">Off</label>
+            </div>
+        </div>
+        <div class="view-icons">
+            <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="grid" alt="grid view">
+            <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="list" alt="list view">
+        </div>
+    </div>
+    <div class="video-list {{ view_style }}">
+        {% if videos %}
+            {% for video in videos %}
+                <div class="video-item {{ view_style }}">
+                    <a href="#player" data-src="/media/{{ video.source.media_url }}" data-thumb="/cache/{{ video.source.vid_thumb_url }}" data-title="{{ video.source.title }}" data-channel="{{ video.source.channel.channel_name }}" data-id="{{ video.source.youtube_id }}" onclick="createPlayer(this)">
+                        <div class="video-thumb-wrap {{ view_style }}">
+                            <div class="video-thumb">
+                                <img src="/cache/{{ video.source.vid_thumb_url }}" alt="video-thumb">
+                            </div>
+                            <div class="video-play">
+                                <img src="{% static 'img/icon-play.svg' %}" alt="play-icon">
+                            </div>
+                        </div>
+                    </a>
+                    <div class="video-desc {{ view_style }}">
+                        <div class="video-desc-player" id="video-info-{{ video.source.youtube_id }}">
+                            {% if video.source.player.watched %}
+                                <img src="{% static 'img/icon-seen.svg' %}" alt="seen-icon" id="{{ video.source.youtube_id }}" onclick="isUnwatched(this.id)" class="seen-icon" title="Mark as unwatched">
+                            {% else %}
+                                <img src="{% static 'img/icon-unseen.svg' %}" alt="unseen-icon" id="{{ video.source.youtube_id }}" onclick="isWatched(this.id)" class="unseen-icon" title="Mark as watched.">
+                            {% endif %}
+                            <span>{{ video.source.published }} | {{ video.source.player.duration_str }}</span>
+                        </div>
+                        <div>
+                            <a class="video-more" href="{% url 'video' video.source.youtube_id %}"><h2>{{ video.source.title }}</h2></a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <h2>No videos found...</h2>
+        {% endif %}
+    </div>
 </div>
 <script type="text/javascript" src="{% static 'progress.js' %}"></script>
 {% endblock content %}

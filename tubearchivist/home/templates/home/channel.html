@@ -2,98 +2,100 @@
 {% load static %}
 {% load humanize %}
 {% block content %}
-<div class="title-bar">
-    <h1>Channels</h1>
-</div>
-<div id="notifications" data="channel"></div>
-<div class="info-box info-box-2">
-    <div class="icon-text">
-        <img id="add-icon" onclick="showForm()" src="{% static 'img/icon-add.svg' %}" alt="add-icon">
-        <p>Subscribe to Channels</p>
-        <div class="show-form">
-            <form id="hidden-form" action="/channel/" method="post">
+<div class="boxed-content">
+    <div class="title-bar">
+        <h1>Channels</h1>
+    </div>
+    <div id="notifications" data="channel"></div>
+    <div class="info-box info-box-2">
+        <div class="icon-text">
+            <img id="add-icon" onclick="showForm()" src="{% static 'img/icon-add.svg' %}" alt="add-icon">
+            <p>Subscribe to Channels</p>
+            <div class="show-form">
+                <form id="hidden-form" action="/channel/" method="post">
+                    {% csrf_token %}
+                    {{ subscribe_form }}
+                    <button type="submit">Subscribe</button>
+                </form>
+            </div>
+        </div>
+        <div class="search-form icon-text">
+            <div class="search-icon">
+                <img src="{% static 'img/icon-search.svg' %}" alt="search-icon" onclick="showSearch()">
+                <p>Search your Channels</p>
+            </div>
+            <form onSubmit="return channelRedirect();" id="search-box">
                 {% csrf_token %}
-                {{ subscribe_form }}
-                <button type="submit">Subscribe</button>
+                {{ search_form }}
+                <datalist id="resultBox">
+                </datalist>
             </form>
         </div>
     </div>
-    <div class="search-form icon-text">
-        <div class="search-icon">
-            <img src="{% static 'img/icon-search.svg' %}" alt="search-icon" onclick="showSearch()">
-            <p>Search your Channels</p>
-        </div>
-        <form onSubmit="return channelRedirect();" id="search-box">
-            {% csrf_token %}
-            {{ search_form }}
-            <datalist id="resultBox">
-            </datalist>
-        </form>
-    </div>
-</div>
-<div class="view-controls">
-    <div class="toggle">
-        <span>Show only subscribed channels:</span>
-        <div class="toggleBox">
-            <input 
-                id="show_subed_only" onclick="toggleCheckbox(this)" type="checkbox"
-                {% if show_subed_only %}
-                    checked
-                {% endif %}
-                >
-            <label for="" class="onbtn">On</label>
-            <label for="" class="ofbtn">Off</label>
-        </div>
-    </div>
-    <div class="view-icons">
-        <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="channel" data-value="grid" alt="grid view">
-        <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="channel" data-value="list" alt="list view">
-    </div>
-</div>
-<h2>Total matching channels: {{ max_hits }}</h2>
-<div class="channel-list {{ view_style }}">
-    {% if channels %}
-        {% for channel in channels %}
-        <div class="channel-item {{ view_style }}">
-            <div class="channel-banner {{ view_style }}">
-                <a href="{% url 'channel_id' channel.source.channel_id %}">
-                    <img src="/cache/channels/{{ channel.source.channel_id }}_banner.jpg" alt="{{ channel.source.channel_id }}-banner">
-                </a>
+    <div class="view-controls">
+        <div class="toggle">
+            <span>Show only subscribed channels:</span>
+            <div class="toggleBox">
+                <input 
+                    id="show_subed_only" onclick="toggleCheckbox(this)" type="checkbox"
+                    {% if show_subed_only %}
+                        checked
+                    {% endif %}
+                    >
+                <label for="" class="onbtn">On</label>
+                <label for="" class="ofbtn">Off</label>
             </div>
-            <div class="info-box info-box-2 {{ view_style }}">
-                <div class="info-box-item">
-                    <div class="round-img">
-                        <a href="{% url 'channel_id' channel.source.channel_id %}">
-                            <img src="/cache/channels/{{ channel.source.channel_id }}_thumb.jpg" alt="channel-thumb">
-                        </a>
-                    </div>
-                    <div>
-                        <h3><a href="{% url 'channel_id' channel.source.channel_id %}">{{ channel.source.channel_name }}</a></h3>
-                        {% if channel.source.channel_subs >= 1000000 %}
-                            <p>Subscribers: {{ channel.source.channel_subs|intword }}</p>
-                        {% else %}
-                            <p>Subscribers: {{ channel.source.channel_subs|intcomma }}</p>
-                        {% endif %}
-                    </div>
+        </div>
+        <div class="view-icons">
+            <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="channel" data-value="grid" alt="grid view">
+            <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="channel" data-value="list" alt="list view">
+        </div>
+    </div>
+    <h2>Total matching channels: {{ max_hits }}</h2>
+    <div class="channel-list {{ view_style }}">
+        {% if channels %}
+            {% for channel in channels %}
+            <div class="channel-item {{ view_style }}">
+                <div class="channel-banner {{ view_style }}">
+                    <a href="{% url 'channel_id' channel.source.channel_id %}">
+                        <img src="/cache/channels/{{ channel.source.channel_id }}_banner.jpg" alt="{{ channel.source.channel_id }}-banner">
+                    </a>
                 </div>
-                <div class="info-box-item">
-                    <div>
-                        <p>Last refreshed: {{ channel.source.channel_last_refresh }}</p>
-                        <p>Subscribed: 
-                        {% if channel.source.channel_subscribed %}
-                            <button type="button" id="{{ channel.source.channel_id }}" onclick="unsubscribe(this.id)" title="Unsubscribe from {{ channel.source.channel_name }}">Unsubscribe</button>
-                        {% else %}
-                            <button type="button" id="{{ channel.source.channel_id }}" onclick="subscribe(this.id)" title="Subscribe to {{ channel.source.channel_name }}">Subscribe</button>
-                        {% endif %}
-                        </p>
+                <div class="info-box info-box-2 {{ view_style }}">
+                    <div class="info-box-item">
+                        <div class="round-img">
+                            <a href="{% url 'channel_id' channel.source.channel_id %}">
+                                <img src="/cache/channels/{{ channel.source.channel_id }}_thumb.jpg" alt="channel-thumb">
+                            </a>
+                        </div>
+                        <div>
+                            <h3><a href="{% url 'channel_id' channel.source.channel_id %}">{{ channel.source.channel_name }}</a></h3>
+                            {% if channel.source.channel_subs >= 1000000 %}
+                                <p>Subscribers: {{ channel.source.channel_subs|intword }}</p>
+                            {% else %}
+                                <p>Subscribers: {{ channel.source.channel_subs|intcomma }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="info-box-item">
+                        <div>
+                            <p>Last refreshed: {{ channel.source.channel_last_refresh }}</p>
+                            <p>Subscribed: 
+                            {% if channel.source.channel_subscribed %}
+                                <button type="button" id="{{ channel.source.channel_id }}" onclick="unsubscribe(this.id)" title="Unsubscribe from {{ channel.source.channel_name }}">Unsubscribe</button>
+                            {% else %}
+                                <button type="button" id="{{ channel.source.channel_id }}" onclick="subscribe(this.id)" title="Subscribe to {{ channel.source.channel_name }}">Subscribe</button>
+                            {% endif %}
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        {% endfor %}
-    {% else %}
-        <h2>No channels found...</h2>
-    {% endif %}
+            {% endfor %}
+        {% else %}
+            <h2>No channels found...</h2>
+        {% endif %}
+    </div>
 </div>
 <script type="text/javascript" src="{% static 'progress.js' %}"></script>
 {% endblock content %}
