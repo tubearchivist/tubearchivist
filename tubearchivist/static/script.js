@@ -287,13 +287,16 @@ function createPlayer(button) {
     var mediaThumb = button.getAttribute('data-thumb');
     var mediaTitle = button.getAttribute('data-title');
     var mediaChannel = button.getAttribute('data-channel');
+    var mediaChannelId = button.getAttribute('data-channel-id');
     var dataId = button.getAttribute('data-id');
     // get watched status
     var playedStatus = document.createDocumentFragment();
     playedStatus.appendChild(document.getElementById(dataId));
     // create player
     removePlayer();
-    var playerElement = document.getElementById('player');
+    var playerElement = document.createElement('div');
+    playerElement.classList.add("video-player");
+    // var playerElement = document.getElementById('player');
     playerElement.setAttribute('data-id', dataId);
     // playerElement.innerHTML = '';
     var videoPlayer = document.createElement('video');
@@ -306,7 +309,7 @@ function createPlayer(button) {
     playerElement.appendChild(videoPlayer);
     // title bar
     var titleBar = document.createElement('div');
-    titleBar.className = 'player-title';
+    titleBar.classList.add('player-title', 'boxed-content');
     // close
     var closeButton = document.createElement('img');
     closeButton.className = 'close-button';
@@ -318,25 +321,30 @@ function createPlayer(button) {
     titleBar.appendChild(closeButton);
     // played
     titleBar.appendChild(playedStatus);
-    playerElement.appendChild(titleBar);
-    // title
-    var videoTitle = document.createElement('p');
+    // video title
+    var videoTitleLink = document.createElement('a');
+    videoTitleLink.setAttribute('href', '/video/' + dataId + '/');
+    var videoTitle = document.createElement('h2');
     videoTitle.innerText = mediaTitle;
-    titleBar.appendChild(videoTitle);
-    var videoChannel = document.createElement('p');
-    videoChannel.innerText = mediaChannel
-    titleBar.appendChild(videoChannel);
-    // button
-    var videoButton = document.createElement('button');
-    videoButton.innerText = 'Details';
-    videoButton.setAttribute('onclick', "window.location.href='/video/" + dataId + "/';");
-    titleBar.appendChild(videoButton);
+    videoTitleLink.appendChild(videoTitle);
+    titleBar.appendChild(videoTitleLink);
+    // channel title
+    var channelTitleLink = document.createElement('a');
+    channelTitleLink.setAttribute('href', '/channel/' + mediaChannelId + '/');
+    var channelTitle = document.createElement('h3');
+    channelTitle.innerText = mediaChannel;
+    channelTitleLink.appendChild(channelTitle);
+    titleBar.appendChild(channelTitleLink);
+    // add titlebar
+    playerElement.appendChild(titleBar);
+    // add whole
+    document.getElementById("player").appendChild(playerElement);
 }
 
 function removePlayer() {
     var playerElement = document.getElementById('player');
     if (playerElement.hasChildNodes()) {
-        var youtubeId = playerElement.getAttribute('data-id');
+        var youtubeId = playerElement.childNodes[0].getAttribute("data-id");
         var playedStatus = document.createDocumentFragment();
         playedStatus.appendChild(document.getElementById(youtubeId));
         playerElement.innerHTML = '';
