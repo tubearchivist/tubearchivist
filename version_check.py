@@ -2,7 +2,6 @@
 """ check requirements.txt for outdated packages """
 
 import pathlib
-import sys
 
 import requests
 
@@ -109,8 +108,7 @@ def main():
         if input_response == "y":
             handler.apply_updates()
         else:
-            print("cancel update...")
-            sys.exit(1)
+            print("skip update...")
 
 
 if __name__ == "__main__":
