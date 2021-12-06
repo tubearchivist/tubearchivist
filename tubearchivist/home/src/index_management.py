@@ -191,6 +191,7 @@ INDEX_CONFIG = [
             },
             "playlist_channel_id": {"type": "keyword"},
             "playlist_thumbnail": {"type": "keyword"},
+            "playlist_last_refresh": {"type": "date"},
         },
         "expected_set": {
             "analysis": {
