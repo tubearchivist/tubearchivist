@@ -321,13 +321,6 @@ function createPlayer(button) {
     titleBar.appendChild(closeButton);
     // played
     titleBar.appendChild(playedStatus);
-    // video title
-    var videoTitleLink = document.createElement('a');
-    videoTitleLink.setAttribute('href', '/video/' + dataId + '/');
-    var videoTitle = document.createElement('h2');
-    videoTitle.innerText = mediaTitle;
-    videoTitleLink.appendChild(videoTitle);
-    titleBar.appendChild(videoTitleLink);
     // channel title
     var channelTitleLink = document.createElement('a');
     channelTitleLink.setAttribute('href', '/channel/' + mediaChannelId + '/');
@@ -335,6 +328,13 @@ function createPlayer(button) {
     channelTitle.innerText = mediaChannel;
     channelTitleLink.appendChild(channelTitle);
     titleBar.appendChild(channelTitleLink);
+    // video title
+    var videoTitleLink = document.createElement('a');
+    videoTitleLink.setAttribute('href', '/video/' + dataId + '/');
+    var videoTitle = document.createElement('h2');
+    videoTitle.innerText = mediaTitle;
+    videoTitleLink.appendChild(videoTitle);
+    titleBar.appendChild(videoTitleLink);
     // add titlebar
     playerElement.appendChild(titleBar);
     // add whole

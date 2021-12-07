@@ -436,7 +436,8 @@ button:hover {
     text-align: left;
 }
 
-.video-desc h3 {
+.video-desc h3,
+.player-title h3 {
     font-size: 0.9em;
     text-transform: uppercase;
 }
