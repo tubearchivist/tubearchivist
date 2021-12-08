@@ -342,7 +342,8 @@ button:hover {
     height: 100vh;
 }
 
-.video-player video {
+.video-player video,
+.video-main video {
     max-height: 80vh;
     width: 90%;
     max-width: 1500px;
