@@ -36,5 +36,6 @@ export DJANGO_SUPERUSER_PASSWORD=$TA_PASSWORD && \
 python manage.py collectstatic --noinput -c
 nginx &
 celery -A home.tasks worker --loglevel=INFO &
-celery -A home beat --loglevel=INFO &
+celery -A home beat --loglevel=INFO \
+    -s "${BEAT_SCHEDULE_PATH:-/cache/celerybeat-schedule}" &
 uwsgi --ini uwsgi.ini
