@@ -33,8 +33,10 @@
     "scheduler": {
         "update_subscribed": false,
         "download_pending": false,
-        "check_reindex": false,
-        "thumbnail_check": false,
-        "run_backup": false
+        "check_reindex":  {"minute": "0", "hour": "12", "day_of_week": "*"},
+        "check_reindex_days": 90,
+        "thumbnail_check": {"minute": "0", "hour": "17", "day_of_week": "*"},
+        "run_backup": {"minute": "0", "hour": "8", "day_of_week": "0"},
+        "run_backup_rotate": 5
     }
 }

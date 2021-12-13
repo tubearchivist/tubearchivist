@@ -36,14 +36,6 @@
                 <i>Recent videos for channels and playlist to check when running <b>Rescan subscriptions</b>, max recommended 50.</i><br>
                 {{ app_form.subscriptions_channel_size }}
             </div>
-            <div class="settings-item">
-                <p>Auto scan subscribed channels:</p>
-                <i>Coming soon</i>
-            </div>
-            <div class="settings-item">
-                <p>Auto download pending:</p>
-                <i>Coming soon</i>
-            </div>
         </div>
         <div class="settings-group">
             <h2 id="downloads">Downloads</h2>
@@ -66,10 +58,6 @@
                 <p>Current scraping sleep interval: <span class="settings-current">{{ config.downloads.sleep_interval }}</p>
                 <i>Seconds to sleep between calls to YouTube. Might be necessary to avoid throttling. Recommended 3.</i><br>
                 {{ app_form.downloads_sleep_interval }}
-            </div>
-            <div class="settings-item">
-                <p>External downloader:</p>
-                <i>Coming soon</i>
             </div>
         </div>
         <div class="settings-group">
@@ -103,35 +91,112 @@
         <button type="submit" name="application-settings">Update Application Configurations</button>
     </form>
     <div class="title-bar">
-        <h1>Scheduler setup</h1>
+        <h1>Scheduler Setup</h1>
+        <div class="settings-group">
+            <p>Schedule settings expect a cron like format, where the first value is minute, second is hour and third is day of the week.</p>
+            <p>Examples:</p>
+            <ul>
+                <li><span class="settings-current">0 15 *</span>: Run task every day at 15:00 in the afternoon.</li>
+                <li><span class="settings-current">30 8 */2</span>: Run task every second day of the week (Sun, Tue, Thu, Sat) at 08:30 in the morning.</li>
+                <li><span class="settings-current">0</span>: (zero), deactivate that task.</li>
+            </ul>
+            <p>Note:</p>
+            <ul>
+                <li>Changes in the scheduler settings require a container restart to take effect.</li>
+                <li>Avoid an unnecessary frequent schedule to not get blocked by YouTube. For that reason <i>*</i> or <i>wildcard</i> for minutes is not supported.</li>
+            </ul>
+        </div>
     </div>
     <form action="/settings/" method="POST" name="scheduler-update">
         {% csrf_token %}
         <div class="settings-group">
+            <h2>Rescan Subscriptions</h2>
             <div class="settings-item">
-                <h2>Rescan Subscriptions</h2>
-                <p>Periodically rescan your subscriptions.</p>
+                <p>Current rescan schedule: <span class="settings-current">
+                    {% if config.scheduler.update_subscribed %}
+                        {% for key, value in config.scheduler.update_subscribed.items %}
+                            {{ value }}
+                        {% endfor %}
+                    {% else %}
+                        False
+                    {% endif %}
+                </span></p>
+                <p>Periodically rescan your subscriptions:</p>
                 {{ scheduler_form.update_subscribed }}
             </div>
+        </div>
+        <div class="settings-group">
+            <h2>Start download</h2>
             <div class="settings-item">
-                <h2>Start download</h2>
-                <p>Periodically download videos.</p>
+                <p>Current Download schedule: <span class="settings-current">
+                    {% if config.scheduler.download_pending %}
+                        {% for key, value in config.scheduler.download_pending.items %}
+                            {{ value }}
+                        {% endfor %}
+                    {% else %}
+                        False
+                    {% endif %}
+                </span></p>
+                <p>Automatic video download schedule:</p>
                 {{ scheduler_form.download_pending }}
             </div>
+        </div>
+        <div class="settings-group">
+            <h2>Refresh Metadata</h2>
             <div class="settings-item">
-                <h2>Refresh Metadata</h2>
-                <p>Periodically refresh metadata from YouTube.</p>
+                <p>Current Metadata refresh schedule: <span class="settings-current">
+                    {% if config.scheduler.check_reindex %}
+                        {% for key, value in config.scheduler.check_reindex.items %}
+                            {{ value }}
+                        {% endfor %}
+                    {% else %}
+                        False
+                    {% endif %}
+                </span></p>
+                <p>Daily schedule to refresh metadata from YouTube:</p>
                 {{ scheduler_form.check_reindex }}
             </div>
             <div class="settings-item">
-                <h2>Thumbnail check</h2>
-                <p>Periodically check and cleanup thumbnails.</p>
+                <p>Current refresh for metadata older than, in days: <span class="settings-current">{{ config.scheduler.check_reindex_days }}</span></p>
+                <p>Refresh videos older than, in days:</p>
+                {{ scheduler_form.check_reindex_days }}
+            </div>
+        </div>
+        <div class="settings-group">
+            <h2>Thumbnail check</h2>
+            <div class="settings-item">
+                <p>Current thumbnail check schedule: <span class="settings-current">
+                    {% if config.scheduler.thumbnail_check %}
+                        {% for key, value in config.scheduler.thumbnail_check.items %}
+                            {{ value }}
+                        {% endfor %}
+                    {% else %}
+                        False
+                    {% endif %}
+                </span></p>
+                <p>Periodically check and cleanup thumbnails:</p>
                 {{ scheduler_form.thumbnail_check }}
             </div>
+        </div>
+        <div class="settings-group">
+            <h2>Index backup</h2>
             <div class="settings-item">
-                <h2>Index backup</h2>
-                <p>Periodically backup metadata.</p>
+                <p>Current index backup schedule: <span class="settings-current">
+                    {% if config.scheduler.run_backup %}
+                        {% for key, value in config.scheduler.run_backup.items %}
+                            {{ value }}
+                        {% endfor %}
+                    {% else %}
+                        False
+                    {% endif %}
+                </span></p>
+                <p>Automatically backup metadata to a zip file:</p>
                 {{ scheduler_form.run_backup }}
+            </div>
+            <div class="settings-item">
+                <p>Current backup files to keep: <span class="settings-current">{{ config.scheduler.run_backup_rotate }}</span></p>
+                <p>Max auto backups to keep:</p>
+                {{ scheduler_form.run_backup_rotate }}
             </div>
         </div>
         <button type="submit" name="scheduler-settings">Update Scheduler Settings</button>
