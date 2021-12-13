@@ -265,7 +265,7 @@ class PostData:
     def _db_backup():
         """backup es to zip from settings page"""
         print("backing up database")
-        run_backup.delay()
+        run_backup.delay("manual")
         return {"success": True}
 
     @staticmethod

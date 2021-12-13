@@ -362,9 +362,10 @@ class ElasticIndex:
 class ElasticBackup:
     """dump index to nd-json files for later bulk import"""
 
-    def __init__(self, index_config):
+    def __init__(self, index_config, reason):
         self.config = AppConfig().config
         self.index_config = index_config
+        self.reason = reason
         self.timestamp = datetime.now().strftime("%Y%m%d")
         self.backup_files = []
 
@@ -456,7 +457,7 @@ class ElasticBackup:
     def zip_it(self):
         """pack it up into single zip file"""
         cache_dir = self.config["application"]["cache_dir"]
-        file_name = f"ta_backup-{self.timestamp}.zip"
+        file_name = f"ta_backup-{self.timestamp}-{self.reason}.zip"
         backup_folder = os.path.join(cache_dir, "backup")
         backup_file = os.path.join(backup_folder, file_name)
 
@@ -540,9 +541,9 @@ class ElasticBackup:
         return response.ok
 
 
-def backup_all_indexes():
+def backup_all_indexes(reason):
     """backup all es indexes to disk"""
-    backup_handler = ElasticBackup(INDEX_CONFIG)
+    backup_handler = ElasticBackup(INDEX_CONFIG, reason)
 
     for index in backup_handler.index_config:
         index_name = index["index_name"]
@@ -561,7 +562,7 @@ def restore_from_backup():
     # delete
     index_check(force_restore=True)
     # recreate
-    backup_handler = ElasticBackup(INDEX_CONFIG)
+    backup_handler = ElasticBackup(INDEX_CONFIG, reason=False)
     zip_content = backup_handler.unpack_zip_backup()
     backup_handler.restore_json_files(zip_content)
 
@@ -594,7 +595,7 @@ def index_check(force_restore=False):
             # make backup before rebuild
             if not backed_up:
                 print("running backup first")
-                backup_all_indexes()
+                backup_all_indexes(reason="update")
                 backed_up = True
 
             print(f"applying new mappings to index ta_{index_name}...")

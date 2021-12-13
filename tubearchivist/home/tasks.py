@@ -162,9 +162,9 @@ def run_manual_import():
 
 
 @shared_task(name="run_backup")
-def run_backup():
+def run_backup(reason="auto"):
     """called from settings page, dump backup to zip file"""
-    backup_all_indexes()
+    backup_all_indexes(reason)
     print("backup finished")
 
 
