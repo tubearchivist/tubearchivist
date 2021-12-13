@@ -68,8 +68,10 @@ class SchedulerSettingsForm(forms.Form):
     update_subscribed = forms.CharField(required=False)
     download_pending = forms.CharField(required=False)
     check_reindex = forms.CharField(required=False)
+    check_reindex_days = forms.IntegerField(required=False)
     thumbnail_check = forms.CharField(required=False)
     run_backup = forms.CharField(required=False)
+    run_backup_rotate = forms.IntegerField(required=False)
 
 
 class VideoSearchForm(forms.Form):
