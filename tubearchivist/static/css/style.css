@@ -259,7 +259,7 @@ button:hover {
 
 /* top of page */
 .title-bar {
-    padding: 20px 0;
+    padding-top: 30px;
 }
 
 .sort {
@@ -480,6 +480,7 @@ button:hover {
 .info-box {
     display: grid;
     grid-gap: 1rem;
+    margin-top: 1rem;
 }
 
 .description-box {
