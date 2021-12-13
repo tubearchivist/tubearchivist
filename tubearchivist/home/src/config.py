@@ -163,6 +163,7 @@ class ScheduleBuilder:
         "thumbnail_check": "0 17 *",
         "run_backup": "0 18 0",
     }
+    CONFIG = ["check_reindex_days", "run_backup_rotate"]
 
     def __init__(self):
         self.config = AppConfig().config
@@ -173,9 +174,11 @@ class ScheduleBuilder:
         redis_config = self.config
         for key, value in form_post.items():
             to_check = value[0]
-            if key in self.SCHEDULES.keys() and to_check:
+            if key in self.SCHEDULES and to_check:
                 to_write = self.value_builder(key, to_check)
                 redis_config["scheduler"][key] = to_write
+            if key in self.CONFIG and to_check:
+                redis_config["scheduler"][key] = int(to_check)
         RedisArchivist().set_message("config", redis_config, expire=False)
 
     def value_builder(self, key, to_check):
