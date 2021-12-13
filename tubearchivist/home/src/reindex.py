@@ -41,7 +41,7 @@ class Reindex:
         self.sleep_interval = config["downloads"]["sleep_interval"]
         self.es_url = config["application"]["es_url"]
         self.es_auth = config["application"]["es_auth"]
-        self.refresh_interval = 90
+        self.refresh_interval = config["scheduler"]["check_reindex_days"]
         # scan
         self.all_youtube_ids = False
         self.all_channel_ids = False
@@ -57,23 +57,24 @@ class Reindex:
             "ta_channel", self.es_url, self.es_auth, "channel_active"
         )
         channel_daily = ceil(total_channels / self.refresh_interval * 1.2)
-        playlist_daily = get_total_hits(
+        total_playlists = get_total_hits(
             "ta_playlist", self.es_url, self.es_auth, "playlist_active"
         )
+        playlist_daily = ceil(total_playlists / self.refresh_interval * 1.2)
         return (video_daily, channel_daily, playlist_daily)
 
     def get_outdated_vids(self, size):
         """get daily videos to refresh"""
         headers = {"Content-type": "application/json"}
         now = int(datetime.now().strftime("%s"))
-        now_3m = now - 3 * 30 * 24 * 60 * 60
+        now_lte = now - self.refresh_interval * 24 * 60 * 60
         data = {
             "size": size,
             "query": {
                 "bool": {
                     "must": [
                         {"match": {"active": True}},
-                        {"range": {"vid_last_refresh": {"lte": now_3m}}},
+                        {"range": {"vid_last_refresh": {"lte": now_lte}}},
                     ]
                 }
             },
@@ -95,14 +96,14 @@ class Reindex:
         """get daily channels to refresh"""
         headers = {"Content-type": "application/json"}
         now = int(datetime.now().strftime("%s"))
-        now_3m = now - 3 * 30 * 24 * 60 * 60
+        now_lte = now - self.refresh_interval * 24 * 60 * 60
         data = {
             "size": size,
             "query": {
                 "bool": {
                     "must": [
                         {"match": {"channel_active": True}},
-                        {"range": {"channel_last_refresh": {"lte": now_3m}}},
+                        {"range": {"channel_last_refresh": {"lte": now_lte}}},
                     ]
                 }
             },
@@ -124,14 +125,14 @@ class Reindex:
         """get daily outdated playlists to refresh"""
         headers = {"Content-type": "application/json"}
         now = int(datetime.now().strftime("%s"))
-        now_3m = now - 3 * 30 * 24 * 60 * 60
+        now_lte = now - self.refresh_interval * 24 * 60 * 60
         data = {
             "size": size,
             "query": {
                 "bool": {
                     "must": [
                         {"match": {"playlist_active": True}},
-                        {"range": {"playlist_last_refresh": {"lte": now_3m}}},
+                        {"range": {"playlist_last_refresh": {"lte": now_lte}}},
                     ]
                 }
             },
