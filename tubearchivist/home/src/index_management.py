@@ -563,6 +563,28 @@ class ElasticBackup:
 
         return response.ok
 
+    def rotate_backup(self):
+        """delete old backups if needed"""
+        rotate = self.config["scheduler"]["run_backup_rotate"]
+        if not rotate:
+            return
+
+        all_backup_files = self.get_all_backup_files()
+        auto = [i for i in all_backup_files if i["reason"] == "auto"]
+
+        if len(auto) <= rotate:
+            print("no backup files to rotate")
+            return
+
+        cache_dir = self.config["application"]["cache_dir"]
+        backup_dir = os.path.join(cache_dir, "backup")
+
+        all_to_delete = auto[rotate:]
+        for to_delete in all_to_delete:
+            file_path = os.path.join(backup_dir, to_delete["filename"])
+            print(f"remove old backup file: {file_path}")
+            os.remove(file_path)
+
 
 def get_available_backups():
     """return dict of available backups for settings view"""
@@ -585,6 +607,9 @@ def backup_all_indexes(reason):
         backup_handler.write_ta_json(all_results, index_name)
 
     backup_handler.zip_it()
+
+    if reason == "auto":
+        backup_handler.rotate_backup()
 
 
 def restore_from_backup(filename):
