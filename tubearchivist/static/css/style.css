@@ -1048,6 +1048,15 @@ button:hover {
     .dl-desc {
         padding: 15px;
     }
+    .backup-grid-row {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 10px 0;
+        justify-content: center;
+    }
+    .backup-grid-row span {
+        padding: 5px 0;
+    }
     .playlist-nav {
         display: block;
         grid-template-columns: unset;
