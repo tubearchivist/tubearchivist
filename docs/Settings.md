@@ -60,7 +60,11 @@ This will backup your metadata into a zip file. The file will get stored at *cac
 BE AWARE: This will **not** backup any media files, just the metadata from the Elasticsearch.
 
 ## Restore From Backup
-The restore functionality will expect the same zip file in *cache/backup* as created from the **Backup database** function. This will recreate the index from the snapshot. If there are multiple backup files in the folder, the newest one will take priority. 
+The restore functionality will expect the same zip file in *cache/backup* as created from the **Backup database** function. This will recreate the index from the snapshot. There will be a list of all available backup to choose from. The *source* tag can have these different values:
+- **manual**: For backups manually created from here on the settings page.
+- **auto**: For backups automatically created via a sceduled task.
+- **update**: For backups created after a Tube Archivist update due to changes in the index.
+- **False**: Undefined.
 
 BE AWARE: This will **replace** your current index with the one from the backup file. This won't restore any media files.
 
