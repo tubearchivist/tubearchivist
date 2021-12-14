@@ -195,13 +195,14 @@ function dbBackup() {
     toReplace.appendChild(message);
 }
 
-function dbRestore() {
-    var payload = JSON.stringify({'db-restore': true});
+function dbRestore(button) {
+    var fileName = button.getAttribute("data-id");
+    var payload = JSON.stringify({'db-restore': fileName});
     sendPost(payload);
-    // clear button
+    // clear backup row
     var message = document.createElement('p');
     message.innerText = 'restoring from backup';
-    var toReplace = document.getElementById('db-restore');
+    var toReplace = document.getElementById(fileName);
     toReplace.innerHTML = '';
     toReplace.appendChild(message);
 }

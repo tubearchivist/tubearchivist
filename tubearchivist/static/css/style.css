@@ -62,7 +62,7 @@ ul {
     margin-left: 20px;
 }
 
-td, span, label {
+td, th, span, label {
     font-family: Sen-Regular, sans-serif;
     color: var(--main-font);
 }
@@ -864,6 +864,19 @@ button:hover {
     background-color: var(--highlight-error);
     color: #fff;
     padding: 3px;
+}
+
+.backup-grid-row {
+    display: grid;
+    grid-template-columns: 10% 10% 10% auto;
+    align-items: center;
+    padding: 5px 10px;
+    border-bottom: solid 1px;
+    border-color: var(--main-font);
+}
+
+.backup-grid-row > span {
+    margin-left: 10px;
 }
 
 /* about */
