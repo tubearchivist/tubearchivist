@@ -268,11 +268,11 @@ class PostData:
         run_backup.delay("manual")
         return {"success": True}
 
-    @staticmethod
-    def _db_restore():
+    def _db_restore(self):
         """restore es zip from settings page"""
         print("restoring index from backup zip")
-        run_restore_backup.delay()
+        filename = self.exec_val
+        run_restore_backup.delay(filename)
         return {"success": True}
 
     @staticmethod

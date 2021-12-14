@@ -492,8 +492,8 @@ class ElasticBackup:
         if not request.ok:
             print(request.text)
 
-    def unpack_zip_backup(self):
-        """extract backup zip and return filelist"""
+    def get_all_backup_files(self):
+        """build all available backup files for view"""
         cache_dir = self.config["application"]["cache_dir"]
         backup_dir = os.path.join(cache_dir, "backup")
         backup_files = os.listdir(backup_dir)
@@ -503,9 +503,32 @@ class ElasticBackup:
             for i in all_backup_files
             if i.startswith("ta_") and i.endswith(".zip")
         ]
-        all_available_backups.sort()
-        newest_backup = all_available_backups[-1]
-        file_path = os.path.join(backup_dir, newest_backup)
+        all_available_backups.sort(reverse=True)
+
+        backup_dicts = []
+        for backup_file in all_available_backups:
+            file_split = backup_file.split("-")
+            if len(file_split) == 2:
+                timestamp = file_split[1].strip(".zip")
+                reason = False
+            elif len(file_split) == 3:
+                timestamp = file_split[1]
+                reason = file_split[2].strip(".zip")
+
+            to_add = {
+                "filename": backup_file,
+                "timestamp": timestamp,
+                "reason": reason,
+            }
+            backup_dicts.append(to_add)
+
+        return backup_dicts
+
+    def unpack_zip_backup(self, filename):
+        """extract backup zip and return filelist"""
+        cache_dir = self.config["application"]["cache_dir"]
+        backup_dir = os.path.join(cache_dir, "backup")
+        file_path = os.path.join(backup_dir, filename)
 
         with zipfile.ZipFile(file_path, "r") as z:
             zip_content = z.namelist()
@@ -541,6 +564,13 @@ class ElasticBackup:
         return response.ok
 
 
+def get_available_backups():
+    """return dict of available backups for settings view"""
+    backup_handler = ElasticBackup(INDEX_CONFIG, reason=False)
+    all_backup_files = backup_handler.get_all_backup_files()
+    return all_backup_files
+
+
 def backup_all_indexes(reason):
     """backup all es indexes to disk"""
     backup_handler = ElasticBackup(INDEX_CONFIG, reason)
@@ -557,13 +587,13 @@ def backup_all_indexes(reason):
     backup_handler.zip_it()
 
 
-def restore_from_backup():
+def restore_from_backup(filename):
     """restore indexes from backup file"""
     # delete
     index_check(force_restore=True)
     # recreate
     backup_handler = ElasticBackup(INDEX_CONFIG, reason=False)
-    zip_content = backup_handler.unpack_zip_backup()
+    zip_content = backup_handler.unpack_zip_backup(filename)
     backup_handler.restore_json_files(zip_content)
 
 

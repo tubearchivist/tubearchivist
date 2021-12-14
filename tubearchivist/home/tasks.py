@@ -169,9 +169,9 @@ def run_backup(reason="auto"):
 
 
 @shared_task
-def run_restore_backup():
+def run_restore_backup(filename):
     """called from settings page, dump backup to zip file"""
-    restore_from_backup()
+    restore_from_backup(filename)
     print("index restore finished")
 
 

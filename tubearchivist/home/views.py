@@ -31,6 +31,7 @@ from home.src.config import AppConfig, ScheduleBuilder
 from home.src.frontend import PostData
 from home.src.helper import RedisArchivist, UrlListParser
 from home.src.index import YoutubePlaylist
+from home.src.index_management import get_available_backups
 from home.src.searching import Pagination, SearchHandler
 from home.tasks import extrac_dl, subscribe_to
 
@@ -898,6 +899,7 @@ class SettingsView(View):
         config_handler = AppConfig(request.user.id)
         colors = config_handler.colors
 
+        available_backups = get_available_backups()
         user_form = UserSettingsForm()
         app_form = ApplicationSettingsForm()
         scheduler_form = SchedulerSettingsForm()
@@ -906,6 +908,7 @@ class SettingsView(View):
             "title": "Settings",
             "config": config_handler.config,
             "colors": colors,
+            "available_backups": available_backups,
             "user_form": user_form,
             "app_form": app_form,
             "scheduler_form": scheduler_form,
