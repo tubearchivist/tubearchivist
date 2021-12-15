@@ -875,6 +875,9 @@ class VideoView(View):
     @staticmethod
     def star_creator(rating):
         """convert rating float to stars"""
+        if not rating:
+            return False
+
         stars = []
         for _ in range(1, 6):
             if rating >= 0.75:
