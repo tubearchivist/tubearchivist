@@ -11,7 +11,14 @@ class CustomAuthForm(AuthenticationForm):
     """better styled login form"""
 
     username = forms.CharField(
-        widget=TextInput(attrs={"placeholder": "Username"}), label=False
+        widget=TextInput(
+            attrs={
+                "placeholder": "Username",
+                "autofocus": True,
+                "autocomplete": True,
+            }
+        ),
+        label=False,
     )
     password = forms.CharField(
         widget=PasswordInput(attrs={"placeholder": "Password"}), label=False
