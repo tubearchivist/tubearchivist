@@ -173,6 +173,8 @@ class LoginView(View):
     Greeting and login page
     """
 
+    SEC_IN_DAY = 60 * 60 * 24
+
     @staticmethod
     def get(request):
         """handle get requests"""
@@ -182,11 +184,17 @@ class LoginView(View):
         context = {"colors": colors, "form": form, "form_error": failed}
         return render(request, "home/login.html", context)
 
-    @staticmethod
-    def post(request):
+    def post(self, request):
         """handle login post request"""
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
+            remember_me = request.POST.get("remember_me") or False
+            if remember_me == "on":
+                request.session.set_expiry(self.SEC_IN_DAY * 365)
+            else:
+                request.session.set_expiry(self.SEC_IN_DAY * 2)
+            print(f"expire session in {request.session.get_expiry_age()} secs")
+
             next_url = request.POST.get("next") or "home"
             user = form.get_user()
             login(request, user)

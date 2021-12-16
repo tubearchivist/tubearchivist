@@ -543,6 +543,10 @@ button:hover {
     min-width: 200px;
 }
 
+#id_remember_me {
+    min-width: unset;
+}
+
 .login-page button,
 .login-page .danger-zone {
     width: 210px;

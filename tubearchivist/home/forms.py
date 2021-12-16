@@ -16,6 +16,7 @@ class CustomAuthForm(AuthenticationForm):
     password = forms.CharField(
         widget=PasswordInput(attrs={"placeholder": "Password"}), label=False
     )
+    remember_me = forms.BooleanField(required=False)
 
 
 class UserSettingsForm(forms.Form):

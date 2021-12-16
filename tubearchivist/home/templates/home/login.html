@@ -29,9 +29,9 @@
         {% endif %}
         <form action="/login/" method="POST" name="login">
             {% csrf_token %}
-            {% for field in form %}
-                {{ field }}<br>
-            {% endfor %}
+            {{ form.username }}<br>
+            {{ form.password }}<br>
+            <p>Remember me: {{ form.remember_me }}</p>
             <input type="hidden" name="next" value="{{ request.GET.next }}" />
             <button type="submit">Login</button>
         </form>
