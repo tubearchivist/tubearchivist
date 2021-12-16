@@ -16,22 +16,20 @@
             <div>
                 <h3><a href="{% url 'channel_id' channel_info.channel_id %}">{{ channel_info.channel_name }}</a></h3>
                 {% if channel_info.channel_subs >= 1000000 %}
-                    <span>Subscribers: {{ channel_info.channel_subs|intword }}</span>
+                    <p>Subscribers: {{ channel_info.channel_subs|intword }}</p>
                 {% else %}
-                    <span>Subscribers: {{ channel_info.channel_subs|intcomma }}</span>
+                    <p>Subscribers: {{ channel_info.channel_subs|intcomma }}</p>
+                {% endif %}
+                {% if channel_info.channel_subscribed %}
+                    <button class="unsubscribe" type="button" id="{{ channel_info.channel_id }}" onclick="unsubscribe(this.id)" title="Unsubscribe from {{ channel_info.channel_name }}">Unsubscribe</button>
+                {% else %}
+                    <button type="button" id="{{ channel_info.channel_id }}" onclick="subscribe(this.id)" title="Subscribe to {{ channel_info.channel_name }}">Subscribe</button>
                 {% endif %}
             </div>
         </div>
         <div class="info-box-item">
             <div>
                 <p>Last refreshed: {{ channel_info.channel_last_refresh }}</p>
-                <p>Subscribed: 
-                {% if channel_info.channel_subscribed %}
-                    <button type="button" id="{{ channel_info.channel_id }}" onclick="unsubscribe(this.id)" title="Unsubscribe from {{ channel_info.channel_name }}">Unsubscribe</button>
-                {% else %}
-                    <button type="button" id="{{ channel_info.channel_id }}" onclick="subscribe(this.id)" title="Subscribe to {{ channel_info.channel_name }}">Subscribe</button>
-                {% endif %}
-                </p>
                 {% if channel_info.channel_active %}
                     <p>Youtube: <a href="https://www.youtube.com/channel/{{ channel_info.channel_id }}" target="_blank">Active</a></p>
                 {% else %}

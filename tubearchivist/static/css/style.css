@@ -102,6 +102,14 @@ button:hover {
     color: var(--main-bg);
 }
 
+.unsubscribe {
+    background-color: var(--accent-font-light);
+}
+
+.unsubscribe:hover {
+    background-color: var(--accent-font-dark);
+}
+
 .boxed-content {
     max-width: 1000px;
     width: 80%;
