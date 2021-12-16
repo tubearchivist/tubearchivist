@@ -8,6 +8,7 @@ Functionality:
 
 import os
 
+import home.apps as startup_apps
 from celery import Celery, shared_task
 from home.src.config import AppConfig, ScheduleBuilder
 from home.src.download import (
@@ -313,4 +314,9 @@ def index_channel_playlists(channel_id):
     return
 
 
-app.conf.beat_schedule = ScheduleBuilder().build_schedule()
+try:
+    app.conf.beat_schedule = ScheduleBuilder().build_schedule()
+except KeyError:
+    # update path from v0.0.8 to v0.0.9 to load new defaults
+    startup_apps.sync_redis_state()
+    app.conf.beat_schedule = ScheduleBuilder().build_schedule()
