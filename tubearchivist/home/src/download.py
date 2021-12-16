@@ -2,6 +2,7 @@
 Functionality:
 - handele the download queue
 - manage subscriptions to channels
+- manage subscriptions to playlists
 - downloading videos
 """
 
@@ -786,11 +787,11 @@ class VideoDownloader:
         now_lte = now - autodelete_days * 24 * 60 * 60
         data = {
             "query": {"range": {"player.watched_date": {"lte": now_lte}}},
-            "sort": [{"player.watched_date": {"order": "asc"}}]
+            "sort": [{"player.watched_date": {"order": "asc"}}],
         }
         all_to_delete = IndexPaginate("ta_video", data).get_results()
 
-        for to_delete in all_to_delete:            
+        for to_delete in all_to_delete:
             youtube_id = to_delete["youtube_id"]
             print(f"autodelete {youtube_id}")
             YoutubeVideo(youtube_id).delete_media_file()
