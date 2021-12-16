@@ -18,6 +18,7 @@
         "limit_count": false,
         "limit_speed": false,
         "sleep_interval": 3,
+        "autodelete_days": false,
         "format": false,
         "add_metadata": false,
         "add_thumbnail": false,

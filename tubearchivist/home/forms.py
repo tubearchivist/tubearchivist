@@ -60,6 +60,7 @@ class ApplicationSettingsForm(forms.Form):
     downloads_add_thumbnail = forms.ChoiceField(
         widget=forms.Select, choices=THUMBNAIL_CHOICES, required=False
     )
+    downloads_autodelete_days = forms.IntegerField(required=False)
 
 
 class SchedulerSettingsForm(forms.Form):

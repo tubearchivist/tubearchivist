@@ -25,6 +25,7 @@ from home.src.index import (
     IndexPaginate,
     YoutubeChannel,
     YoutubePlaylist,
+    YoutubeVideo,
     index_new_video,
 )
 
@@ -554,6 +555,11 @@ class VideoDownloader:
             self.move_to_archive(vid_dict)
             self.delete_from_pending(youtube_id)
 
+        autodelete_days = self.config["downloads"]["autodelete_days"]
+        if autodelete_days:
+            print(f"auto delete older than {autodelete_days} days")
+            self.auto_delete_watched(autodelete_days)
+
     @staticmethod
     def add_pending():
         """add pending videos to download queue"""
@@ -772,3 +778,19 @@ class VideoDownloader:
                     )
                 else:
                     RedisArchivist().set_message("message:download", mess_dict)
+
+    @staticmethod
+    def auto_delete_watched(autodelete_days):
+        """delete watched videos after x days"""
+        now = int(datetime.now().strftime("%s"))
+        now_lte = now - autodelete_days * 24 * 60 * 60
+        data = {
+            "query": {"range": {"player.watched_date": {"lte": now_lte}}},
+            "sort": [{"player.watched_date": {"order": "asc"}}]
+        }
+        all_to_delete = IndexPaginate("ta_video", data).get_results()
+
+        for to_delete in all_to_delete:            
+            youtube_id = to_delete["youtube_id"]
+            print(f"autodelete {youtube_id}")
+            YoutubeVideo(youtube_id).delete_media_file()
