@@ -14,6 +14,16 @@ for each in "${ENV_VARS[@]}"; do
     fi
 done
 
+# ugly nginx and uwsgi port overwrite with env vars
+if [[ -n "$TA_PORT" ]]; then
+    sed -i "s/8000/$TA_PORT/g" /etc/nginx/conf.d/nginx.conf
+fi
+
+if [[ -n "$TA_UWSGI_PORT" ]]; then
+    sed -i "s/8080/$TA_UWSGI_PORT/g" /etc/nginx/conf.d/nginx.conf
+    sed -i "s/8080/$TA_UWSGI_PORT/g" /app/uwsgi.ini
+fi
+
 # wait for elasticsearch
 counter=0
 until curl -u "$ELASTIC_USER":"$ELASTIC_PASSWORD" "$ES_URL" -fs; do
