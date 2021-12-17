@@ -20,7 +20,7 @@ I have learned the hard way, that working on a dockerized application outside of
 This is my setup I have landed on, YMMV:
 - Clone the repo, work on it with your favorite code editor in your local filesystem. *testing* branch is the where all the changes are happening, might be unstable and is WIP.
 - Then I have a VM on KVM hypervisor running standard Ubuntu Server LTS with docker installed. The VM keeps my projects separate and offers convenient snapshot functionality. The VM also offers ways to simulate lowend environments by limiting CPU cores and memory. But you could also just run docker on your host system.
-- The `Dockerfile` is structured in a way that the actual application code is in the last layer so rebuilding the image with only code changes utilizes the build cache for everything else and will take just 2-3 secs.
+- The `Dockerfile` is structured in a way that the actual application code is in the last layer so rebuilding the image with only code changes utilizes the build cache for everything else and will just take a few seconds.
 - Take a look at the `deploy.sh` file. I have my local DNS resolve `tubearchivist.local` to the IP of the VM for convenience. To deploy the latest changes and rebuild the application to the testing VM run:
 ```bash
 ./deploy.sh test
@@ -44,7 +44,12 @@ To fix a bug or implement a feature, fork the repository and make all changes to
 
 ## Releases
 
-Everything on the master branch is what's in the latest release and is what you get in your container when you `pull` either the *:latest* tag or the newest named version. If you want to test the newest changes and improvements, clone the repository and build the docker container with the Dockerfile from the testing branch.
+There are three different docker tags:
+- **latest**: As the name implies is the latest multiarch release for regular usage.
+- **unstable**: Intermediate amd64 builds for quick testing and improved collaboration. Don't mix with a *latest* installation, for your testing environment only. This is untested and WIP and will have breaking changes between commits that might require a reset to resolve. 
+- **semantic versioning**: There will be a handful named version tags that will also have a matching release and tag on github.
+
+If you want to see what's in your container, checkout the matching release tag. A merge to **master** usually means a *latest* or *unstable* release. If you want to preview changes in your testing environment, pull the *unstable* tag or clone the repository and build the docker container with the Dockerfile from the **testing** branch.
 
 ## Code formatting and linting
 

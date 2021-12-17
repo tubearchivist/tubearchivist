@@ -3,7 +3,8 @@
 # deploy all needed project files to different servers:
 # test for local vm for testing
 # blackhole for local production
-# docker to publish
+# unstable to publish intermediate releases
+# docker to publish regular release
 
 # create builder:
 # docker buildx create --name tubearchivist
@@ -51,7 +52,8 @@ function sync_test {
         --exclude "db.sqlite3" \
         . -e ssh "$host":tubearchivist
 
-    rsync -r --progress --delete docker-compose.yml -e ssh "$host":docker
+    # uncomment or copy your own docker-compose file
+    # rsync -r --progress --delete docker-compose.yml -e ssh "$host":docker
 
     if [[ $1 = "amd64" ]]; then
         platform="linux/amd64"
@@ -96,6 +98,22 @@ function validate {
     echo "running isort"
     isort --check-only --diff --profile black -l 79 "$check_path"
     printf "    \n> all validations passed\n"
+
+}
+
+
+# publish unstable tag to docker
+function sync_unsable {
+
+    if [[ $(systemctl is-active docker) != 'active' ]]; then
+        echo "starting docker"
+        sudo systemctl start docker
+    fi
+
+    # start amd64 build
+    sudo docker buildx build \
+        --platform linux/amd64 \
+        -t bbilly1/tubearchivist:unstable --push .
 
 }
 
@@ -152,8 +170,10 @@ elif [[ $1 == "validate" ]]; then
     validate "$2"
 elif [[ $1 == "docker" ]]; then
     sync_docker
+elif [[ $1 == "unstable" ]]; then
+    sync_unsable
 else
-    echo "valid options are: blackhole | test | validate | docker"
+    echo "valid options are: blackhole | test | validate | docker | unstable"
 fi
 
 
