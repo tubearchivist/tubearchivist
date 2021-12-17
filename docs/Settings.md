@@ -27,6 +27,38 @@ Additional settings passed to yt-dlp.
 - **Embed Metadata**: This saves the available tags directly into the media file by passing `--embed-metadata` to yt-dlp.
 - **Embed Thumbnail**: This will save the thumbnail into the media file by passing `--embed-thumbnail` to yt-dlp.
 
+# Scheduler Setup
+Schedule settings expect a cron like format, where the first value is minute, second is hour and third is day of the week. Day 0 is Sunday, day 1 is Monday etc.
+
+Examples:
+- **0 15 \***: Run task every day at 15:00 in the afternoon.
+- **30 8 \*/2**: Run task every second day of the week (Sun, Tue, Thu, Sat) at 08:30 in the morning.
+- **0 \*/3,8-17 \***: Execute every hour divisible by 3, and every hour during office hours (8 in the morning - 5 in the afternoon).
+- **0 8,16 \***: Execute every day at 8 in the morning and at 4 in the afternoon. 
+- **auto**: Sensible default.
+- **0**: (zero), deactivate that task.
+
+NOTE:
+- Changes in the scheduler settings require a container restart to take effect.
+- Avoid an unnecessary frequent schedule to not get blocked by YouTube. For that reason * or wildcards for minutes are not supported.
+
+## Rescan Subscriptions
+That's the equivalent task as run from the downloads page looking through your channel and playlist and add missing videos to the download queue.
+
+## Start download
+Start downloading all videos currently in the download queue.
+
+## Refresh Metadata
+Rescan videos, channels and playlists on youtube and update metadata periodically. This will also deactivate an item and exclude it from future refreshes if the link on YouTube is no longer available. This task is meant to be run once per day, set your schedule accordingly. 
+
+The field **Refresh older than x days** takes a number where TubeArchivist will consider an item as *outdated*. This value is used to calculate how many items need to be refreshed today based on the total indexed. This will spread out the requests to YouTube. Sensible value here is **90** days. 
+
+## Thumbnail check
+This will check if all expected thumbnails are there and will delete any artwork without matching video.
+
+## Index backup
+Create a zip file of the metadata and select **Max auto backups to keep** to automatically delete old backups created from this task.
+
 
 # Actions
 Additional database functionality.
