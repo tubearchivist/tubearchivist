@@ -1,5 +1,5 @@
 /**
- * Handle progress bar on /download
+ * Handle multi channel notifications
  * 
  */
 
@@ -10,7 +10,8 @@ const messageTypes = {
     "download": ["message:download", "message:add", "message:rescan"],
     "channel": ["message:subchannel"],
     "channel_id": ["message:playlistscan"],
-    "playlist": ["message:subplaylist"]
+    "playlist": ["message:subplaylist"],
+    "setting": ["message:setting"]
 }
 
 // start to look for messages

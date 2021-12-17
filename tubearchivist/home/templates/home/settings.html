@@ -1,6 +1,8 @@
 {% extends "home/base.html" %}
+{% load static %}
 {% block content %}
 <div class="boxed-content">
+    <div id="notifications" data="setting"></div>
     <div class="title-bar">
         <h1>User Configurations</h1>
     </div>
@@ -163,8 +165,8 @@
                 {{ scheduler_form.check_reindex }}
             </div>
             <div class="settings-item">
-                <p>Current refresh for metadata older than, in days: <span class="settings-current">{{ config.scheduler.check_reindex_days }}</span></p>
-                <p>Refresh videos older than, in days:</p>
+                <p>Current refresh for metadata older than x days: <span class="settings-current">{{ config.scheduler.check_reindex_days }}</span></p>
+                <p>Refresh older than x days, recommended 90:</p>
                 {{ scheduler_form.check_reindex_days }}
             </div>
         </div>
@@ -273,4 +275,5 @@
         </div>
     {% endif %}
 </div>
+<script type="text/javascript" src="{% static 'progress.js' %}"></script>
 {% endblock content %}

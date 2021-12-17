@@ -162,6 +162,7 @@ class RedisArchivist:
         "subchannel",
         "subplaylist",
         "playlistscan",
+        "setting",
     ]
 
     def __init__(self):

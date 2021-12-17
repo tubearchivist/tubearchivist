@@ -175,11 +175,30 @@ class ScheduleBuilder:
         for key, value in form_post.items():
             to_check = value[0]
             if key in self.SCHEDULES and to_check:
-                to_write = self.value_builder(key, to_check)
+                try:
+                    to_write = self.value_builder(key, to_check)
+                except ValueError:
+                    print(f"failed: {key} {to_check}")
+                    mess_dict = {
+                        "status": "message:setting",
+                        "level": "error",
+                        "title": "Scheduler update failed.",
+                        "message": "Invalid schedule input",
+                    }
+                    RedisArchivist().set_message("message:setting", mess_dict)
+                    return
+
                 redis_config["scheduler"][key] = to_write
             if key in self.CONFIG and to_check:
                 redis_config["scheduler"][key] = int(to_check)
         RedisArchivist().set_message("config", redis_config, expire=False)
+        mess_dict = {
+            "status": "message:setting",
+            "level": "info",
+            "title": "Scheduler changed.",
+            "message": "Please restart container for changes to take effect",
+        }
+        RedisArchivist().set_message("message:setting", mess_dict)
 
     def value_builder(self, key, to_check):
         """validate single cron form entry and return cron dict"""
@@ -196,7 +215,8 @@ class ScheduleBuilder:
             values = to_check.split()
 
         if len(keys) != len(values):
-            raise ValueError(f"failed to parse {to_check} for {key}")
+            print(f"failed to parse {to_check} for {key}")
+            raise ValueError("invalid input")
 
         to_write = dict(zip(keys, values))
         if "*" in to_write["minute"]:

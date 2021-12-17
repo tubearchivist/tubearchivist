@@ -948,6 +948,7 @@ class SettingsView(View):
                 print(form_post)
                 ScheduleBuilder().update_schedule_conf(form_post)
 
+        sleep(1)
         return redirect("settings", permanent=True)
 
 
