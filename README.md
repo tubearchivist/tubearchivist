@@ -140,6 +140,9 @@ This should be considered as a **minimal viable product**, there is an extensive
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
 - [ ] Implement [Apprise](https://github.com/caronc/apprise) for notifications
 - [ ] Subtitle download & indexing
+- [ ] User created playlists
+- [ ] Auto play or play next link
+- [ ] SSO / LDAP support
 - [X] Auto rescan and auto download on a schedule [2021-12-17]
 - [X] Optional automatic deletion of watched items after a specified time [2021-12-17]
 - [X] Create playlists [2021-11-27]
