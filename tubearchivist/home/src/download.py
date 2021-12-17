@@ -75,7 +75,7 @@ class PendingList:
 
         return missing_videos
 
-    def add_to_pending(self, missing_videos):
+    def add_to_pending(self, missing_videos, ignore=False):
         """build the bulk json data from pending"""
         # check if channel is indexed
         channel_handler = ChannelSubscription()
@@ -84,7 +84,7 @@ class PendingList:
         # check if already there
         self.all_downloaded = self.get_all_downloaded()
 
-        bulk_list, all_videos_added = self.build_bulk(missing_videos)
+        bulk_list, all_videos_added = self.build_bulk(missing_videos, ignore)
         # add last newline
         bulk_list.append("\n")
         query_str = "\n".join(bulk_list)
@@ -99,7 +99,7 @@ class PendingList:
 
         return all_videos_added
 
-    def build_bulk(self, missing_videos):
+    def build_bulk(self, missing_videos, ignore=False):
         """build the bulk lists"""
         bulk_list = []
         all_videos_added = []
@@ -116,7 +116,10 @@ class PendingList:
 
             channel_indexed = video["channel_id"] in self.all_channel_ids
             video["channel_indexed"] = channel_indexed
-            video["status"] = "pending"
+            if ignore:
+                video["status"] = "ignore"
+            else:
+                video["status"] = "pending"
             action = {"create": {"_id": youtube_id, "_index": "ta_download"}}
             bulk_list.append(json.dumps(action))
             bulk_list.append(json.dumps(video))
@@ -790,8 +793,12 @@ class VideoDownloader:
             "sort": [{"player.watched_date": {"order": "asc"}}],
         }
         all_to_delete = IndexPaginate("ta_video", data).get_results()
+        all_youtube_ids = [i["youtube_id"] for i in all_to_delete]
 
-        for to_delete in all_to_delete:
-            youtube_id = to_delete["youtube_id"]
+        for youtube_id in all_youtube_ids:
             print(f"autodelete {youtube_id}")
             YoutubeVideo(youtube_id).delete_media_file()
+
+        print("add deleted to ignore list")
+        pending_handler = PendingList()
+        pending_handler.add_to_pending(all_youtube_ids, ignore=True)
