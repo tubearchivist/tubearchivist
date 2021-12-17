@@ -43,7 +43,9 @@
 Once your YouTube video collection grows, it becomes hard to search and find a specific video. That's where Tube Archivist comes in: By indexing your video collection with metadata from YouTube, you can organize, search and enjoy your archived YouTube videos without hassle offline through a convenient web interface.
 
 ## Installing and updating
-Take a look at the example `docker-compose.yml` file provided. Tube Archivist depends on three main components split up into separate docker containers:  
+Take a look at the example `docker-compose.yml` file provided. Use the *latest* or the named semantic version tag. The *unstable* tag is for intermediate testing and as the name implies, is **unstable** and not be used on your main installation but in a [testing environment](CONTRIBUTING.md).  
+
+Tube Archivist depends on three main components split up into separate docker containers:  
 
 ### Tube Archivist
 The main Python application that displays and serves your video collection, built with Django.
@@ -54,6 +56,7 @@ The main Python application that displays and serves your video collection, buil
   - The environment variables `HOST_UID` and `HOST_GID` allows Tube Archivist to `chown` the video files to the main host system user instead of the container user. Those two variables are optional, not setting them will disable that functionality. That might be needed if the underlying filesystem doesn't support `chown` like *NFS*. 
   - Change the environment variables `TA_USERNAME` and `TA_PASSWORD` to create the initial credentials. 
   - `ELASTIC_PASSWORD` is for the password for Elasticsearch. The environment variable `ELASTIC_USER` is optional, should you want to change the username from the default *elastic*.
+  - For the scheduler to know what time it is, set your timezone with the `TZ` environment variable, defaults to *UTC*.
 
 ### Port collisions
 If you have a collision on port `8000`, best solution is to use dockers *HOST_PORT* and *CONTAINER_PORT* distinction: To for example change the interface to port 9000 use `9000:8000` in your docker-compose file.  
@@ -132,12 +135,13 @@ bestvideo[VCODEC=avc1]+bestaudio[ACODEC=mp4a]/mp4
 This should be considered as a **minimal viable product**, there is an extensive list of future functions and improvements planned.
 
 ### Functionality
-- [ ] Auto rescan and auto download on a schedule
 - [ ] User roles
 - [ ] Podcast mode to serve channel as mp3
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
-- [ ] Optional automatic deletion of watched items after a specified time
+- [ ] Implement [Apprise](https://github.com/caronc/apprise) for notifications
 - [ ] Subtitle download & indexing
+- [X] Auto rescan and auto download on a schedule [2021-12-17]
+- [X] Optional automatic deletion of watched items after a specified time [2021-12-17]
 - [X] Create playlists [2021-11-27]
 - [X] Access control [2021-11-01]
 - [X] Delete videos and channel [2021-10-16]
@@ -157,7 +161,7 @@ This should be considered as a **minimal viable product**, there is an extensive
 
 
 ## Known limitations
-- Video files created by Tube Archivist need to be **mp4** video files for best browser compatibility.
+- Video files created by Tube Archivist need to be playable in your browser of choice. Not every codec is compatible with every browser and might require some testing with format selection. 
 - Every limitation of **yt-dlp** will also be present in Tube Archivist. If **yt-dlp** can't download or extract a video for any reason, Tube Archivist won't be able to either.
 - For now this is meant to be run in a trusted network environment. Not everything is properly authenticated.
 - There is currently no flexibility in naming of the media files.
