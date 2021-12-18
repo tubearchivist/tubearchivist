@@ -729,7 +729,8 @@ button:hover {
     align-content: center;
 }
 
-.playlist-desc.list > * {
+.playlist-desc.list > a,
+.playlist-desc.list > p {
     width: 100%;
 }
 

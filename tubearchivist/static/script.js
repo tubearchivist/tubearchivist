@@ -46,17 +46,19 @@ function isUnwatched(youtube_id) {
 }
 
 function unsubscribe(id_unsub) {
-    console.log(payload);
     var payload = JSON.stringify({'unsubscribe': id_unsub});
     sendPost(payload);
-    document.getElementById(id_unsub).replaceWith("You are unsubscribed.");
+    var message = document.createElement('span');
+    message.innerText = "You are unsubscribed.";
+    document.getElementById(id_unsub).replaceWith(message);
 }
 
 function subscribe(id_sub) {
     var payload = JSON.stringify({'subscribe': id_sub});
-    console.log(payload);
     sendPost(payload);
-    document.getElementById(id_sub).replaceWith("You are subscribed.");
+    var message = document.createElement('span');
+    message.innerText = "You are subscribed.";
+    document.getElementById(id_sub).replaceWith(message);
 }
 
 function changeView(image) {

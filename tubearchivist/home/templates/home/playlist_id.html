@@ -25,13 +25,12 @@
         <div class="info-box-item">
             <div>
                 <p>Last refreshed: {{ playlist_info.playlist_last_refresh }}</p>
-                <p>Playlist: 
-                    {% if playlist_info.playlist_subscribed %}
-                        <button class="unsubscribe" type="button" id="{{ playlist_info.playlist_id }}" onclick="unsubscribe(this.id)" title="Unsubscribe from {{ playlist_info.playlist_name }}">Unsubscribe</button>
-                    {% else %}
-                        <button type="button" id="{{ playlist_info.playlist_id }}" onclick="subscribe(this.id)" title="Subscribe to {{ playlist_info.playlist_name }}">Subscribe</button>
-                    {% endif %}
-                </p>
+                <p>Playlist:</p>
+                {% if playlist_info.playlist_subscribed %}
+                    <button class="unsubscribe" type="button" id="{{ playlist_info.playlist_id }}" onclick="unsubscribe(this.id)" title="Unsubscribe from {{ playlist_info.playlist_name }}">Unsubscribe</button>
+                {% else %}
+                    <button type="button" id="{{ playlist_info.playlist_id }}" onclick="subscribe(this.id)" title="Subscribe to {{ playlist_info.playlist_name }}">Subscribe</button>
+                {% endif %}
                 {% if playlist_info.playlist_active %}
                     <p>Youtube: <a href="https://www.youtube.com/playlist?list={{ playlist_info.playlist_id }}" target="_blank">Active</a></p>
                 {% else %}
