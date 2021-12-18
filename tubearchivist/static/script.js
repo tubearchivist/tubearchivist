@@ -349,7 +349,10 @@ function removePlayer() {
     if (playerElement.hasChildNodes()) {
         var youtubeId = playerElement.childNodes[0].getAttribute("data-id");
         var playedStatus = document.createDocumentFragment();
-        playedStatus.appendChild(document.getElementById(youtubeId));
+        var playedBox = document.getElementById(youtubeId);
+        if (playedBox) {
+            playedStatus.appendChild(playedBox);
+        };
         playerElement.innerHTML = '';
         // append played status
         var videoInfo = document.getElementById('video-info-' + youtubeId);
