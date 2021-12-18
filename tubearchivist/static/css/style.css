@@ -200,14 +200,16 @@ button:hover {
 }
 
 .toggleBox > .onbtn {
-    bottom: 15px;
-    left: 15px;
+    right: 35%;
+    top: 45%;
+    transform: translate(50%,-50%);
     font-family: Sen-Regular, sans-serif;
 }
 
 .toggleBox > .ofbtn {
-    bottom: 15px;
-    right: 15px;
+    left: 0;
+    top: 45%;
+    transform: translate(50%,-50%);
     font-family: Sen-Regular, sans-serif;
     color: var(--main-font);
 }
