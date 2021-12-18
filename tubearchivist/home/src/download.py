@@ -794,6 +794,8 @@ class VideoDownloader:
         }
         all_to_delete = IndexPaginate("ta_video", data).get_results()
         all_youtube_ids = [i["youtube_id"] for i in all_to_delete]
+        if not all_youtube_ids:
+            return
 
         for youtube_id in all_youtube_ids:
             print(f"autodelete {youtube_id}")
