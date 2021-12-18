@@ -147,6 +147,7 @@ function sync_docker {
     sudo docker buildx build \
         --platform linux/amd64,linux/arm64 \
         -t bbilly1/tubearchivist:latest \
+        -t bbilly1/tubearchivist:unstable \
         -t bbilly1/tubearchivist:"$VERSION" --push .
 
     # create release tag
