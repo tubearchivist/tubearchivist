@@ -525,6 +525,10 @@ button:hover {
     margin-bottom: 10px;
 }
 
+.sort span {
+    width: 100%;
+}
+
 /* login */
 .login-page {
     display: flex;
