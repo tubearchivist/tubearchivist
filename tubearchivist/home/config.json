@@ -7,7 +7,8 @@
     "default_view": {
         "home": "grid",
         "channel": "list",
-        "downloads": "list"
+        "downloads": "list",
+        "playlist": "grid"
     },
     "subscriptions": {
         "auto_search": false,
