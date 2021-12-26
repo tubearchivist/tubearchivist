@@ -36,124 +36,175 @@ from home.src.searching import Pagination, SearchHandler
 from home.tasks import extrac_dl, subscribe_to
 
 
-class HomeView(View):
-    """resolves to /
-    handle home page and video search post functionality
-    """
+class ArchivistViewConfig(View):
+    """base view class to generate initial config context"""
 
-    CONFIG = AppConfig().config
-    ES_URL = CONFIG["application"]["es_url"]
+    def __init__(self, view_origin):
+        super().__init__()
+        self.view_origin = view_origin
+        self.user_id = False
+        self.user_conf = False
+        self.default_conf = False
+        self.context = False
 
-    def get(self, request):
-        """return home search results"""
-        user_id = request.user.id
-        view_config = self.read_config(user_id)
-        # handle search
-        search_get = request.GET.get("search", False)
+    def _get_sort_by(self):
+        """return sort_by config var"""
+        messag_key = f"{self.user_id}:sort_by"
+        sort_by = self.user_conf.get_message(messag_key)["status"]
+        if not sort_by:
+            sort_by = self.default_conf["archive"]["sort_by"]
+
+        return sort_by
+
+    def _get_sort_order(self):
+        """return sort_order config var"""
+        sort_order_key = f"{self.user_id}:sort_order"
+        sort_order = self.user_conf.get_message(sort_order_key)["status"]
+        if not sort_order:
+            sort_order = self.default_conf["archive"]["sort_order"]
+
+        return sort_order
+
+    def _get_view_style(self):
+        """return view_style config var"""
+        view_key = f"{self.user_id}:view:{self.view_origin}"
+        view_style = self.user_conf.get_message(view_key)["status"]
+        if not view_style:
+            view_style = self.default_conf["default_view"][self.view_origin]
+
+        return view_style
+
+    def _get_hide_watched(self):
+        hide_watched_key = f"{self.user_id}:hide_watched"
+        hide_watched = self.user_conf.get_message(hide_watched_key)["status"]
+
+        return hide_watched
+
+    def config_builder(self, user_id):
+        """build default context for every view"""
+        self.user_id = user_id
+        self.user_conf = RedisArchivist()
+        self.default_conf = AppConfig().config
+
+        context = {}
+        context["colors"] = self.default_conf["application"]["colors"]
+        context["sort_by"] = self._get_sort_by()
+        context["sort_order"] = self._get_sort_order()
+        context["view_style"] = self._get_view_style()
+        context["hide_watched"] = self._get_hide_watched()
+
+        self.context = context
+
+
+class ArchivistResultsView(ArchivistViewConfig):
+    """View class to inherit from when searching data in es"""
+
+    view_origin = False
+    es_search = False
+
+    def __init__(self):
+        super().__init__(self.view_origin)
+        self.pagination_handler = False
+        self.search_get = False
+        self.data = False
+        self.sort_by = False
+
+    def _sort_by_overwrite(self):
+        """overwrite sort by key to match with es keys"""
+        sort_by_map = {
+            "views": "stats.view_count",
+            "likes": "stats.like_count",
+            "downloaded": "date_downloaded",
+            "published": "published",
+        }
+        sort_by = sort_by_map[self.context["sort_by"]]
+
+        return sort_by
+
+    @staticmethod
+    def _url_encode(search_get):
+        """url encode search form request"""
         if search_get:
             search_encoded = urllib.parse.quote(search_get)
         else:
             search_encoded = False
-        # define page size
-        page_get = int(request.GET.get("page", 0))
-        pagination_handler = Pagination(
-            page_get, user_id, search_get=search_encoded
-        )
 
-        url = self.ES_URL + "/ta_video/_search"
-        data = self.build_data(
-            pagination_handler,
-            view_config["sort_by"],
-            view_config["sort_order"],
-            search_get,
-            view_config["hide_watched"],
-        )
+        return search_encoded
 
-        search = SearchHandler(url, data)
-        videos_hits = search.get_data()
-        max_hits = search.max_hits
-        pagination_handler.validate(max_hits)
-
-        search_form = VideoSearchForm()
-        context = {
-            "search_form": search_form,
-            "videos": videos_hits,
-            "pagination": pagination_handler.pagination,
-            "sort_by": view_config["sort_by"],
-            "sort_order": view_config["sort_order"],
-            "hide_watched": view_config["hide_watched"],
-            "colors": view_config["colors"],
-            "view_style": view_config["view_style"],
-        }
-        return render(request, "home/home.html", context)
-
-    @staticmethod
-    def build_data(
-        pagination_handler, sort_by, sort_order, search_get, hide_watched
-    ):
-        """build the data dict for the search query"""
-        page_size = pagination_handler.pagination["page_size"]
-        page_from = pagination_handler.pagination["page_from"]
-
-        # overwrite sort_by to match key
-        if sort_by == "views":
-            sort_by = "stats.view_count"
-        elif sort_by == "likes":
-            sort_by = "stats.like_count"
-        elif sort_by == "downloaded":
-            sort_by = "date_downloaded"
-
+    def _initial_data(self):
+        """add initial data dict"""
+        sort_order = self.context["sort_order"]
         data = {
-            "size": page_size,
-            "from": page_from,
+            "size": self.pagination_handler.pagination["page_size"],
+            "from": self.pagination_handler.pagination["page_from"],
             "query": {"match_all": {}},
-            "sort": [{sort_by: {"order": sort_order}}],
+            "sort": [{self.sort_by: {"order": sort_order}}],
         }
-        if hide_watched:
-            data["query"] = {"term": {"player.watched": {"value": False}}}
-        if search_get:
-            del data["sort"]
+        self.data = data
+
+    def initiate_vars(self, page_get, search_get=False):
+        """search in es for vidoe hits"""
+        self.config_builder(self.user_id)
+        self.search_get = search_get
+        self.pagination_handler = Pagination(
+            page_get, self.user_id, search_get=self._url_encode(search_get)
+        )
+        self.sort_by = self._sort_by_overwrite()
+        self._initial_data()
+
+    def find_video_hits(self):
+        """return videos list"""
+        url = self.default_conf["application"]["es_url"] + self.es_search
+        search = SearchHandler(url, self.data)
+        videos_hits = search.get_data()
+        self.pagination_handler.validate(search.max_hits)
+
+        return videos_hits
+
+
+class HomeView(ArchivistResultsView):
+    """resolves to /
+    handle home page and video search post functionality
+    """
+
+    view_origin = "home"
+    es_search = "/ta_video/_search"
+
+    def get(self, request):
+        """handle get requests"""
+        user_id = request.user.id
+        page_get = int(request.GET.get("page", 0))
+        search_get = request.GET.get("search", False)
+
+        self.config_builder(user_id)
+        self.initiate_vars(page_get, search_get)
+        self._update_view_data()
+
+        self.context.update(
+            {
+                "search_form": VideoSearchForm(),
+                "videos": self.find_video_hits(),
+                "pagination": self.pagination_handler.pagination,
+            }
+        )
+
+        return render(request, "home/home.html", self.context)
+
+    def _update_view_data(self):
+        """update view specific data dict"""
+        if self.context["hide_watched"]:
+            self.data["query"] = {"term": {"player.watched": {"value": False}}}
+        if self.search_get:
+            del self.data["sort"]
             query = {
                 "multi_match": {
-                    "query": search_get,
+                    "query": self.search_get,
                     "fields": ["title", "channel.channel_name", "tags"],
                     "type": "cross_fields",
                     "operator": "and",
                 }
             }
-            data["query"] = query
-
-        return data
-
-    @staticmethod
-    def read_config(user_id):
-        """read needed values from redis"""
-        config_handler = AppConfig(user_id)
-
-        view_key = f"{user_id}:view:home"
-        view_style = RedisArchivist().get_message(view_key)["status"]
-        if not view_style:
-            view_style = config_handler.config["default_view"]["home"]
-
-        sort_by = RedisArchivist().get_message(f"{user_id}:sort_by")["status"]
-        if not sort_by:
-            sort_by = config_handler.config["archive"]["sort_by"]
-
-        sort_order_key = f"{user_id}:sort_order"
-        sort_order = RedisArchivist().get_message(sort_order_key)["status"]
-        if not sort_order:
-            sort_order = config_handler.config["archive"]["sort_order"]
-
-        hide_watched_key = f"{user_id}:hide_watched"
-        hide_watched = RedisArchivist().get_message(hide_watched_key)["status"]
-        view_config = {
-            "colors": config_handler.colors,
-            "view_style": view_style,
-            "sort_by": sort_by,
-            "sort_order": sort_order,
-            "hide_watched": hide_watched,
-        }
-        return view_config
+            self.data["query"] = query
 
     @staticmethod
     def post(request):
