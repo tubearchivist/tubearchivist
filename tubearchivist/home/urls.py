@@ -37,7 +37,7 @@ urlpatterns = [
     path("progress/", login_required(progress), name="progress"),
     path("channel/", login_required(ChannelView.as_view()), name="channel"),
     path(
-        "channel/<slug:channel_id_detail>/",
+        "channel/<slug:channel_id>/",
         login_required(ChannelIdView.as_view()),
         name="channel_id",
     ),

@@ -86,21 +86,27 @@ class ArchivistViewConfig(View):
 
         return show_ignored_only
 
+    def _get_show_subed_only(self):
+        sub_only_key = f"{self.user_id}:show_subed_only"
+        show_subed_only = self.user_conf.get_message(sub_only_key)["status"]
+
+        return show_subed_only
+
     def config_builder(self, user_id):
         """build default context for every view"""
         self.user_id = user_id
         self.user_conf = RedisArchivist()
         self.default_conf = AppConfig().config
 
-        context = {}
-        context["colors"] = self.default_conf["application"]["colors"]
-        context["sort_by"] = self._get_sort_by()
-        context["sort_order"] = self._get_sort_order()
-        context["view_style"] = self._get_view_style()
-        context["hide_watched"] = self._get_hide_watched()
-        context["show_ignored_only"] = self._get_show_ignore_only()
-
-        self.context = context
+        self.context = {
+            "colors": self.default_conf["application"]["colors"],
+            "sort_by": self._get_sort_by(),
+            "sort_order": self._get_sort_order(),
+            "view_style": self._get_view_style(),
+            "hide_watched": self._get_hide_watched(),
+            "show_ignored_only": self._get_show_ignore_only(),
+            "show_subed_only": self._get_show_subed_only(),
+        }
 
 
 class ArchivistResultsView(ArchivistViewConfig):
@@ -335,200 +341,97 @@ class DownloadView(ArchivistResultsView):
         return redirect("downloads", permanent=True)
 
 
-class ChannelIdView(View):
+class ChannelIdView(ArchivistResultsView):
     """resolves to /channel/<channel-id>/
     display single channel page from channel_id
     """
 
-    def get(self, request, channel_id_detail):
-        """get method"""
-        # es_url, colors, view_style = self.read_config()
-        view_config = self.read_config(user_id=request.user.id)
-        context = self.get_channel_videos(
-            request, channel_id_detail, view_config
-        )
-        context.update(view_config)
-        return render(request, "home/channel_id.html", context)
+    view_origin = "home"
+    es_search = "/ta_video/_search"
 
-    @staticmethod
-    def read_config(user_id):
-        """read config file"""
-        config_handler = AppConfig(user_id)
-        config = config_handler.config
-
-        view_key = f"{user_id}:view:home"
-        view_style = RedisArchivist().get_message(view_key)["status"]
-        if not view_style:
-            view_style = config_handler.config["default_view"]["home"]
-
-        sort_by = RedisArchivist().get_message(f"{user_id}:sort_by")["status"]
-        if not sort_by:
-            sort_by = config["archive"]["sort_by"]
-
-        sort_order_key = f"{user_id}:sort_order"
-        sort_order = RedisArchivist().get_message(sort_order_key)["status"]
-        if not sort_order:
-            sort_order = config["archive"]["sort_order"]
-
-        hide_watched_key = f"{user_id}:hide_watched"
-        hide_watched = RedisArchivist().get_message(hide_watched_key)["status"]
-
-        view_config = {
-            "colors": config_handler.colors,
-            "es_url": config["application"]["es_url"],
-            "view_style": view_style,
-            "sort_by": sort_by,
-            "sort_order": sort_order,
-            "hide_watched": hide_watched,
-        }
-        return view_config
-
-    def get_channel_videos(self, request, channel_id_detail, view_config):
-        """get channel from video index"""
+    def get(self, request, channel_id):
+        """get request"""
+        user_id = request.user.id
         page_get = int(request.GET.get("page", 0))
-        pagination_handler = Pagination(page_get, request.user.id)
-        # get data
-        url = view_config["es_url"] + "/ta_video/_search"
-        data = self.build_data(
-            pagination_handler, channel_id_detail, view_config
-        )
-        search = SearchHandler(url, data)
-        videos_hits = search.get_data()
-        max_hits = search.max_hits
-        if max_hits:
-            channel_info = videos_hits[0]["source"]["channel"]
+        self.initiate_vars(page_get, user_id)
+        self._update_view_data(channel_id)
+        self.find_results()
+
+        if self.context["results"]:
+            channel_info = self.context["results"][0]["source"]["channel"]
             channel_name = channel_info["channel_name"]
-            pagination_handler.validate(max_hits)
-            pagination = pagination_handler.pagination
         else:
-            # get details from channel index when when no hits
-            channel_info, channel_name = self.get_channel_info(
-                channel_id_detail, view_config["es_url"]
-            )
-            videos_hits = False
-            pagination = False
+            channel_info, channel_name = self.get_channel_info(channel_id)
 
-        context = {
-            "channel_info": channel_info,
-            "videos": videos_hits,
-            "max_hits": max_hits,
-            "pagination": pagination,
-            "title": "Channel: " + channel_name,
+        self.context.update(
+            {
+                "title": "Channel: " + channel_name,
+                "channel_info": channel_info,
+            }
+        )
+
+        return render(request, "home/channel_id.html", self.context)
+
+    def _update_view_data(self, channel_id):
+        """update view specific data dict"""
+        query = {
+            "bool": {
+                "must": [
+                    {"term": {"channel.channel_id": {"value": channel_id}}}
+                ]
+            }
         }
+        self.data["query"] = query
 
-        return context
-
-    @staticmethod
-    def build_data(pagination_handler, channel_id_detail, view_config):
-        """build data dict for search"""
-        sort_by = view_config["sort_by"]
-        sort_order = view_config["sort_order"]
-
-        # overwrite sort_by to match key
-        if sort_by == "views":
-            sort_by = "stats.view_count"
-        elif sort_by == "likes":
-            sort_by = "stats.like_count"
-        elif sort_by == "downloaded":
-            sort_by = "date_downloaded"
-
-        data = {
-            "size": pagination_handler.pagination["page_size"],
-            "from": pagination_handler.pagination["page_from"],
-            "query": {
-                "bool": {
-                    "must": [
-                        {
-                            "term": {
-                                "channel.channel_id": {
-                                    "value": channel_id_detail
-                                }
-                            }
-                        }
-                    ]
-                }
-            },
-            "sort": [{sort_by: {"order": sort_order}}],
-        }
-        if view_config["hide_watched"]:
+        if self.context["hide_watched"]:
             to_append = {"term": {"player.watched": {"value": False}}}
-            data["query"]["bool"]["must"].append(to_append)
+            self.data["query"]["bool"]["must"].append(to_append)
 
-        return data
-
-    @staticmethod
-    def get_channel_info(channel_id_detail, es_url):
-        """get channel info from channel index if no videos"""
-        url = f"{es_url}/ta_channel/_doc/{channel_id_detail}"
-        data = False
-        search = SearchHandler(url, data)
+    def get_channel_info(self, channel_id):
+        """fallback channel info if no videos found"""
+        es_url = self.default_conf["application"]["es_url"]
+        url = f"{es_url}/ta_channel/_doc/{channel_id}"
+        search = SearchHandler(url, data=False)
         channel_data = search.get_data()
         channel_info = channel_data[0]["source"]
         channel_name = channel_info["channel_name"]
         return channel_info, channel_name
 
 
-class ChannelView(View):
+class ChannelView(ArchivistResultsView):
     """resolves to /channel/
     handle functionality for channel overview page, subscribe to channel,
     search as you type for channel name
     """
 
+    view_origin = "channel"
+    es_search = "/ta_channel/_search"
+
     def get(self, request):
-        """handle http get requests"""
+        """handle get request"""
         user_id = request.user.id
-        view_config = self.read_config(user_id=user_id)
         page_get = int(request.GET.get("page", 0))
-        pagination_handler = Pagination(page_get, user_id)
 
-        # get
-        url = view_config["es_url"] + "/ta_channel/_search"
-        data = {
-            "size": pagination_handler.pagination["page_size"],
-            "from": pagination_handler.pagination["page_from"],
-            "query": {"match_all": {}},
-            "sort": [{"channel_name.keyword": {"order": "asc"}}],
-        }
-        if view_config["show_subed_only"]:
-            data["query"] = {"term": {"channel_subscribed": {"value": True}}}
-        search = SearchHandler(url, data)
-        channel_hits = search.get_data()
-        pagination_handler.validate(search.max_hits)
-        search_form = ChannelSearchForm()
-        subscribe_form = SubscribeToChannelForm()
-        context = {
-            "search_form": search_form,
-            "subscribe_form": subscribe_form,
-            "channels": channel_hits,
-            "max_hits": search.max_hits,
-            "pagination": pagination_handler.pagination,
-            "show_subed_only": view_config["show_subed_only"],
-            "title": "Channels",
-            "colors": view_config["colors"],
-            "view_style": view_config["view_style"],
-        }
-        return render(request, "home/channel.html", context)
+        self.initiate_vars(page_get, user_id)
+        self._update_view_data()
+        self.find_results()
+        self.context.update(
+            {
+                "title": "Channels",
+                "search_form": ChannelSearchForm(),
+                "subscribe_form": SubscribeToChannelForm(),
+            }
+        )
 
-    @staticmethod
-    def read_config(user_id):
-        """read config file"""
-        config_handler = AppConfig(user_id)
-        view_key = f"{user_id}:view:channel"
-        view_style = RedisArchivist().get_message(view_key)["status"]
-        if not view_style:
-            view_style = config_handler.config["default_view"]["channel"]
+        return render(request, "home/channel.html", self.context)
 
-        sub_only_key = f"{user_id}:show_subed_only"
-        show_subed_only = RedisArchivist().get_message(sub_only_key)["status"]
-
-        view_config = {
-            "es_url": config_handler.config["application"]["es_url"],
-            "view_style": view_style,
-            "show_subed_only": show_subed_only,
-            "colors": config_handler.colors,
-        }
-
-        return view_config
+    def _update_view_data(self):
+        """update view data dict"""
+        self.data["sort"] = [{"channel_name.keyword": {"order": "asc"}}]
+        if self.context["show_subed_only"]:
+            self.data["query"] = {
+                "term": {"channel_subscribed": {"value": True}}
+            }
 
     @staticmethod
     def post(request):

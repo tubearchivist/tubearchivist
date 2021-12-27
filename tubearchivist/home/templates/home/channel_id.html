@@ -110,8 +110,8 @@
         </div>
     </div>
     <div class="video-list {{ view_style }}">
-        {% if videos %}
-            {% for video in videos %}
+        {% if results %}
+            {% for video in results %}
                 <div class="video-item {{ view_style }}">
                     <a href="#player" data-src="/media/{{ video.source.media_url }}" data-thumb="/cache/{{ video.source.vid_thumb_url }}" data-title="{{ video.source.title }}" data-channel="{{ video.source.channel.channel_name }}" data-channel-id="{{ video.source.channel.channel_id }}" data-id="{{ video.source.youtube_id }}" onclick="createPlayer(this)">
                         <div class="video-thumb-wrap {{ view_style }}">

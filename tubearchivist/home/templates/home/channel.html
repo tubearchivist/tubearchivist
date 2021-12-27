@@ -51,8 +51,8 @@
     </div>
     <h2>Total matching channels: {{ max_hits }}</h2>
     <div class="channel-list {{ view_style }}">
-        {% if channels %}
-            {% for channel in channels %}
+        {% if results %}
+            {% for channel in results %}
             <div class="channel-item {{ view_style }}">
                 <div class="channel-banner {{ view_style }}">
                     <a href="{% url 'channel_id' channel.source.channel_id %}">
