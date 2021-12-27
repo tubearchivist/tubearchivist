@@ -149,8 +149,9 @@ class ArchivistResultsView(ArchivistViewConfig):
         }
         self.data = data
 
-    def initiate_vars(self, page_get, search_get=False):
+    def initiate_vars(self, page_get, user_id, search_get=False):
         """search in es for vidoe hits"""
+        self.user_id = user_id
         self.config_builder(self.user_id)
         self.search_get = search_get
         self.pagination_handler = Pagination(
@@ -159,15 +160,14 @@ class ArchivistResultsView(ArchivistViewConfig):
         self.sort_by = self._sort_by_overwrite()
         self._initial_data()
 
-    def find_video_hits(self):
-        """return videos list"""
+    def find_results(self):
+        """add results and pagination to context"""
         url = self.default_conf["application"]["es_url"] + self.es_search
         search = SearchHandler(url, self.data)
-        videos_hits = search.get_data()
+        self.context["results"] = search.get_data()
         self.pagination_handler.validate(search.max_hits)
         self.context["max_hits"] = search.max_hits
-
-        return videos_hits
+        self.context["pagination"] = self.pagination_handler.pagination
 
 
 class HomeView(ArchivistResultsView):
@@ -184,17 +184,11 @@ class HomeView(ArchivistResultsView):
         page_get = int(request.GET.get("page", 0))
         search_get = request.GET.get("search", False)
 
-        self.config_builder(user_id)
-        self.initiate_vars(page_get, search_get)
+        self.initiate_vars(page_get, user_id, search_get)
         self._update_view_data()
+        self.find_results()
 
-        self.context.update(
-            {
-                "search_form": VideoSearchForm(),
-                "videos": self.find_video_hits(),
-                "pagination": self.pagination_handler.pagination,
-            }
-        )
+        self.context.update({"search_form": VideoSearchForm()})
 
         return render(request, "home/home.html", self.context)
 
@@ -288,16 +282,14 @@ class DownloadView(ArchivistResultsView):
         user_id = request.user.id
         page_get = int(request.GET.get("page", 0))
 
-        self.config_builder(user_id)
-        self.initiate_vars(page_get)
+        self.initiate_vars(page_get, user_id)
         self._update_view_data()
+        self.find_results()
 
         self.context.update(
             {
                 "title": "Downloads",
                 "add_form": AddToQueueForm(),
-                "all_video_hits": self.find_video_hits(),
-                "pagination": self.pagination_handler.pagination,
             }
         )
         return render(request, "home/downloads.html", self.context)

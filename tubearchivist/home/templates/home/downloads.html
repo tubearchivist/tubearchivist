@@ -56,8 +56,8 @@
     </div>
     <h3>Total videos: {{ max_hits }}</h3>
     <div class="dl-list {{ view_style }}">
-        {% if all_video_hits %}
-            {% for video in all_video_hits %}
+        {% if results %}
+            {% for video in results %}
                 <div class="dl-item {{ view_style }}" id="dl-{{ video.source.youtube_id }}">
                     <div class="dl-thumb {{ view_style }}">
                         <img src="/cache/{{ video.source.vid_thumb_url }}" alt="video_thumb">
