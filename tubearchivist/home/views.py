@@ -80,6 +80,12 @@ class ArchivistViewConfig(View):
 
         return hide_watched
 
+    def _get_show_ignore_only(self):
+        ignored_key = f"{self.user_id}:show_ignored_only"
+        show_ignored_only = self.user_conf.get_message(ignored_key)["status"]
+
+        return show_ignored_only
+
     def config_builder(self, user_id):
         """build default context for every view"""
         self.user_id = user_id
@@ -92,6 +98,7 @@ class ArchivistViewConfig(View):
         context["sort_order"] = self._get_sort_order()
         context["view_style"] = self._get_view_style()
         context["hide_watched"] = self._get_hide_watched()
+        context["show_ignored_only"] = self._get_show_ignore_only()
 
         self.context = context
 
@@ -158,6 +165,7 @@ class ArchivistResultsView(ArchivistViewConfig):
         search = SearchHandler(url, self.data)
         videos_hits = search.get_data()
         self.pagination_handler.validate(search.max_hits)
+        self.context["max_hits"] = search.max_hits
 
         return videos_hits
 
@@ -267,88 +275,45 @@ class AboutView(View):
         return render(request, "home/about.html", context)
 
 
-class DownloadView(View):
+class DownloadView(ArchivistResultsView):
     """resolves to /download/
     takes POST for downloading youtube links
     """
 
+    view_origin = "downloads"
+    es_search = "/ta_download/_search"
+
     def get(self, request):
-        """handle get requests"""
+        """handle get request"""
         user_id = request.user.id
-        view_config = self.read_config(user_id)
-
         page_get = int(request.GET.get("page", 0))
-        pagination_handler = Pagination(page_get, user_id)
 
-        url = view_config["es_url"] + "/ta_download/_search"
-        data = self.build_data(
-            pagination_handler, view_config["show_ignored_only"]
+        self.config_builder(user_id)
+        self.initiate_vars(page_get)
+        self._update_view_data()
+
+        self.context.update(
+            {
+                "title": "Downloads",
+                "add_form": AddToQueueForm(),
+                "all_video_hits": self.find_video_hits(),
+                "pagination": self.pagination_handler.pagination,
+            }
         )
-        search = SearchHandler(url, data)
+        return render(request, "home/downloads.html", self.context)
 
-        videos_hits = search.get_data()
-        max_hits = search.max_hits
-
-        if videos_hits:
-            all_video_hits = [i["source"] for i in videos_hits]
-            pagination_handler.validate(max_hits)
-            pagination = pagination_handler.pagination
-        else:
-            all_video_hits = False
-            pagination = False
-
-        add_form = AddToQueueForm()
-        context = {
-            "add_form": add_form,
-            "all_video_hits": all_video_hits,
-            "max_hits": max_hits,
-            "pagination": pagination,
-            "title": "Downloads",
-            "colors": view_config["colors"],
-            "show_ignored_only": view_config["show_ignored_only"],
-            "view_style": view_config["view_style"],
-        }
-        return render(request, "home/downloads.html", context)
-
-    @staticmethod
-    def read_config(user_id):
-        """read config vars"""
-        config_handler = AppConfig(user_id)
-        view_key = f"{user_id}:view:downloads"
-        view_style = RedisArchivist().get_message(view_key)["status"]
-        if not view_style:
-            view_style = config_handler.config["default_view"]["downloads"]
-
-        ignored = RedisArchivist().get_message(f"{user_id}:show_ignored_only")
-        show_ignored_only = ignored["status"]
-
-        es_url = config_handler.config["application"]["es_url"]
-
-        view_config = {
-            "es_url": es_url,
-            "colors": config_handler.colors,
-            "view_style": view_style,
-            "show_ignored_only": show_ignored_only,
-        }
-        return view_config
-
-    @staticmethod
-    def build_data(pagination_handler, show_ignored_only):
-        """build data dict for search"""
-        page_size = pagination_handler.pagination["page_size"]
-        page_from = pagination_handler.pagination["page_from"]
-        if show_ignored_only:
+    def _update_view_data(self):
+        """update downloads view specific data dict"""
+        if self.context["show_ignored_only"]:
             filter_view = "ignore"
         else:
             filter_view = "pending"
-
-        data = {
-            "size": page_size,
-            "from": page_from,
-            "query": {"term": {"status": {"value": filter_view}}},
-            "sort": [{"timestamp": {"order": "asc"}}],
-        }
-        return data
+        self.data.update(
+            {
+                "query": {"term": {"status": {"value": filter_view}}},
+                "sort": [{"timestamp": {"order": "asc"}}],
+            }
+        )
 
     @staticmethod
     def post(request):

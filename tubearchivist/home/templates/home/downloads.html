@@ -58,9 +58,9 @@
     <div class="dl-list {{ view_style }}">
         {% if all_video_hits %}
             {% for video in all_video_hits %}
-                <div class="dl-item {{ view_style }}" id="dl-{{ video.youtube_id }}">
+                <div class="dl-item {{ view_style }}" id="dl-{{ video.source.youtube_id }}">
                     <div class="dl-thumb {{ view_style }}">
-                        <img src="/cache/{{ video.vid_thumb_url }}" alt="video_thumb">
+                        <img src="/cache/{{ video.source.vid_thumb_url }}" alt="video_thumb">
                         {% if show_ignored_only %}
                             <span>ignored</span>
                         {% else %}
@@ -68,19 +68,19 @@
                         {% endif %}
                     </div>
                     <div class="dl-desc {{ view_style }}">
-                        <h3>{{ video.title }}</h3>
-                        {% if video.channel_indexed %}
-                            <a href="{% url 'channel_id' video.channel_id %}">{{ video.channel_name }}</a>
+                        <h3>{{ video.source.title }}</h3>
+                        {% if video.source.channel_indexed %}
+                            <a href="{% url 'channel_id' video.source.channel_id %}">{{ video.source.channel_name }}</a>
                         {% else %}
-                            <span>{{ video.channel_name }}</span>
+                            <span>{{ video.source.channel_name }}</span>
                         {% endif %}
-                        <p>Published: {{ video.published }} | Duration: {{ video.duration }} | {{ video.youtube_id }}</p>
+                        <p>Published: {{ video.source.published }} | Duration: {{ video.source.duration }} | {{ video.source.youtube_id }}</p>
                         {% if show_ignored_only %}
-                            <button data-id="{{ video.youtube_id }}" onclick="forgetIgnore(this)">Forget</button>
-                            <button data-id="{{ video.youtube_id }}" onclick="addSingle(this)">Add to queue</button>
+                            <button data-id="{{ video.source.youtube_id }}" onclick="forgetIgnore(this)">Forget</button>
+                            <button data-id="{{ video.source.youtube_id }}" onclick="addSingle(this)">Add to queue</button>
                         {% else %}
-                            <button data-id="{{ video.youtube_id }}" onclick="toIgnore(this)">Ignore</button>
-                            <button id="{{ video.youtube_id }}" data-id="{{ video.youtube_id }}" onclick="downloadNow(this)">Download now</button>
+                            <button data-id="{{ video.source.youtube_id }}" onclick="toIgnore(this)">Ignore</button>
+                            <button id="{{ video.source.youtube_id }}" data-id="{{ video.source.youtube_id }}" onclick="downloadNow(this)">Download now</button>
                         {% endif %}
                     </div>
                 </div>
