@@ -48,7 +48,7 @@ urlpatterns = [
     ),
     path("playlist/", login_required(PlaylistView.as_view()), name="playlist"),
     path(
-        "playlist/<slug:playlist_id_detail>/",
+        "playlist/<slug:playlist_id>/",
         login_required(PlaylistIdView.as_view()),
         name="playlist_id",
     ),

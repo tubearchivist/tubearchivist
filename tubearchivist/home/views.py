@@ -155,6 +155,13 @@ class ArchivistResultsView(ArchivistViewConfig):
         }
         self.data = data
 
+    def single_lookup(self, es_path):
+        """retrieve a single item from url"""
+        es_url = self.default_conf["application"]["es_url"]
+        search = SearchHandler(f"{es_url}/{es_path}", data=False)
+        result = search.get_data()[0]["source"]
+        return result
+
     def initiate_vars(self, page_get, user_id, search_get=False):
         """search in es for vidoe hits"""
         self.user_id = user_id
@@ -361,7 +368,11 @@ class ChannelIdView(ArchivistResultsView):
             channel_info = self.context["results"][0]["source"]["channel"]
             channel_name = channel_info["channel_name"]
         else:
-            channel_info, channel_name = self.get_channel_info(channel_id)
+            # fall back channel lookup if no videos found
+            es_path = f"ta_channel/_doc/{channel_id}"
+            channel_result = self.single_lookup(es_path)
+            channel_info = channel_result[0]["source"]
+            channel_name = channel_info["channel_name"]
 
         self.context.update(
             {
@@ -386,16 +397,6 @@ class ChannelIdView(ArchivistResultsView):
         if self.context["hide_watched"]:
             to_append = {"term": {"player.watched": {"value": False}}}
             self.data["query"]["bool"]["must"].append(to_append)
-
-    def get_channel_info(self, channel_id):
-        """fallback channel info if no videos found"""
-        es_url = self.default_conf["application"]["es_url"]
-        url = f"{es_url}/ta_channel/_doc/{channel_id}"
-        search = SearchHandler(url, data=False)
-        channel_data = search.get_data()
-        channel_info = channel_data[0]["source"]
-        channel_name = channel_info["channel_name"]
-        return channel_info, channel_name
 
 
 class ChannelView(ArchivistResultsView):
@@ -453,225 +454,127 @@ class ChannelView(ArchivistResultsView):
         return redirect("channel", permanent=True)
 
 
-class PlaylistIdView(View):
+class PlaylistIdView(ArchivistResultsView):
     """resolves to /playlist/<playlist_id>
     show all videos in a playlist
     """
 
-    def get(self, request, playlist_id_detail):
+    view_origin = "home"
+    es_search = "/ta_video/_search"
+
+    def get(self, request, playlist_id):
         """handle get request"""
-        view_config = self.read_config(user_id=request.user.id)
-        context = self.get_playlist_videos(
-            request, playlist_id_detail, view_config
-        )
-        context.update(view_config)
-        return render(request, "home/playlist_id.html", context)
-
-    @staticmethod
-    def read_config(user_id):
-        """build config dict"""
-        config_handler = AppConfig(user_id)
-        config = config_handler.config
-
-        view_key = f"{user_id}:view:home"
-        view_style = RedisArchivist().get_message(view_key)["status"]
-        if not view_style:
-            view_style = config_handler.config["default_view"]["home"]
-
-        sort_by = RedisArchivist().get_message(f"{user_id}:sort_by")["status"]
-        if not sort_by:
-            sort_by = config["archive"]["sort_by"]
-
-        sort_order_key = f"{user_id}:sort_order"
-        sort_order = RedisArchivist().get_message(sort_order_key)["status"]
-        if not sort_order:
-            sort_order = config["archive"]["sort_order"]
-
-        hide_watched_key = f"{user_id}:hide_watched"
-        hide_watched = RedisArchivist().get_message(hide_watched_key)["status"]
-
-        view_config = {
-            "colors": config_handler.colors,
-            "es_url": config["application"]["es_url"],
-            "view_style": view_style,
-            "sort_by": sort_by,
-            "sort_order": sort_order,
-            "hide_watched": hide_watched,
-        }
-        return view_config
-
-    def get_playlist_videos(self, request, playlist_id_detail, view_config):
-        """get matching videos for playlist"""
+        user_id = request.user.id
         page_get = int(request.GET.get("page", 0))
-        pagination_handler = Pagination(page_get, request.user.id)
-        # get data
-        playlist_info = self.get_playlist_info(
-            playlist_id_detail, view_config["es_url"]
+        self.initiate_vars(page_get, user_id)
+
+        playlist_info, channel_info = self._get_info(playlist_id)
+        playlist_name = playlist_info["playlist_name"]
+
+        self._update_view_data(playlist_id, playlist_info)
+        self.find_results()
+        self.context.update(
+            {
+                "title": "Playlist: " + playlist_name,
+                "playlist_info": playlist_info,
+                "playlist_name": playlist_name,
+                "channel_info": channel_info,
+            }
         )
+        return render(request, "home/playlist_id.html", self.context)
+
+    def _get_info(self, playlist_id):
+        """return additional metadata"""
+        # playlist details
+        es_path = f"ta_playlist/_doc/{playlist_id}"
+        playlist_info = self.single_lookup(es_path)
+
+        # channel details
+        channel_id = playlist_info["playlist_channel_id"]
+        es_path = f"ta_channel/_doc/{channel_id}"
+        channel_info = self.single_lookup(es_path)
+
+        return playlist_info, channel_info
+
+    def _update_view_data(self, playlist_id, playlist_info):
+        """update view specific data dict"""
         sort = {
             i["youtube_id"]: i["idx"]
             for i in playlist_info["playlist_entries"]
         }
-        playlist_name = playlist_info["playlist_name"]
-        data = self.build_data(
-            pagination_handler, playlist_id_detail, view_config, sort
-        )
-        search = SearchHandler(
-            view_config["es_url"] + "/ta_video/_search", data
-        )
-        videos_hits = search.get_data()
-        channel_info = self.get_channel_info(
-            playlist_info["playlist_channel_id"], view_config["es_url"]
-        )
-
-        if search.max_hits:
-            pagination_handler.validate(search.max_hits)
-            pagination = pagination_handler.pagination
-        else:
-            videos_hits = False
-            pagination = False
-
-        context = {
-            "playlist_info": playlist_info,
-            "playlist_name": playlist_name,
-            "channel_info": channel_info,
-            "videos": videos_hits,
-            "max_hits": search.max_hits,
-            "pagination": pagination,
-            "title": "Playlist: " + playlist_name,
-        }
-
-        return context
-
-    @staticmethod
-    def build_data(pagination_handler, playlist_id_detail, view_config, sort):
-        """build data query for es"""
-        sort_by = view_config["sort_by"]
-
-        # overwrite sort_by to match key
-        if sort_by == "views":
-            sort_by = "stats.view_count"
-        elif sort_by == "likes":
-            sort_by = "stats.like_count"
-        elif sort_by == "downloaded":
-            sort_by = "date_downloaded"
-
         script = (
             "if(params.scores.containsKey(doc['youtube_id'].value)) "
             + "{return params.scores[doc['youtube_id'].value];} "
             + "return 100000;"
         )
-
-        data = {
-            "size": pagination_handler.pagination["page_size"],
-            "from": pagination_handler.pagination["page_from"],
-            "query": {
-                "bool": {
-                    "must": [
-                        {"match": {"playlist.keyword": playlist_id_detail}}
-                    ]
-                }
-            },
-            "sort": [
-                {
-                    "_script": {
-                        "type": "number",
-                        "script": {
-                            "lang": "painless",
-                            "source": script,
-                            "params": {"scores": sort},
-                        },
-                        "order": "asc",
+        self.data.update(
+            {
+                "query": {
+                    "bool": {
+                        "must": [{"match": {"playlist.keyword": playlist_id}}]
                     }
-                }
-            ],
-        }
-        if view_config["hide_watched"]:
+                },
+                "sort": [
+                    {
+                        "_script": {
+                            "type": "number",
+                            "script": {
+                                "lang": "painless",
+                                "source": script,
+                                "params": {"scores": sort},
+                            },
+                            "order": "asc",
+                        }
+                    }
+                ],
+            }
+        )
+        if self.context["hide_watched"]:
             to_append = {"term": {"player.watched": {"value": False}}}
-            data["query"]["bool"]["must"].append(to_append)
-
-        return data
-
-    @staticmethod
-    def get_channel_info(channel_id_detail, es_url):
-        """get channel info from channel index if no videos"""
-        url = f"{es_url}/ta_channel/_doc/{channel_id_detail}"
-        search = SearchHandler(url, data=False)
-        channel_data = search.get_data()
-        channel_info = channel_data[0]["source"]
-        return channel_info
-
-    @staticmethod
-    def get_playlist_info(playlist_id_detail, es_url):
-        """get playlist info header to no fail if playlist is empty"""
-        url = f"{es_url}/ta_playlist/_doc/{playlist_id_detail}"
-        search = SearchHandler(url, data=False)
-        playlist_data = search.get_data()
-        playlist_info = playlist_data[0]["source"]
-        return playlist_info
+            self.data["query"]["bool"]["must"].append(to_append)
 
 
-class PlaylistView(View):
+class PlaylistView(ArchivistResultsView):
     """resolves to /playlist/
     show all playlists indexed
     """
 
-    def get(self, request):
-        """handle http get requests"""
-        user_id = request.user.id
-        view_config = self.read_config(user_id=user_id)
+    view_origin = "home"
+    es_search = "/ta_playlist/_search"
 
-        # handle search
-        search_get = request.GET.get("search", False)
-        if search_get:
-            search_encoded = urllib.parse.quote(search_get)
-        else:
-            search_encoded = False
-        # define page size
+    def get(self, request):
+        """handle get request"""
+        user_id = request.user.id
         page_get = int(request.GET.get("page", 0))
-        pagination_handler = Pagination(
-            page_get, user_id, search_get=search_encoded
+        search_get = request.GET.get("search", False)
+
+        self.initiate_vars(page_get, user_id, search_get)
+        self._update_view_data()
+        self.find_results()
+        self.context.update(
+            {
+                "title": "Playlists",
+                "subscribe_form": SubscribeToChannelForm(),
+                "search_form": PlaylistSearchForm(),
+            }
         )
 
-        url = view_config["es_url"] + "/ta_playlist/_search"
-        data = self.build_data(pagination_handler, search_get, view_config)
-        search = SearchHandler(url, data)
-        playlist_hits = search.get_data()
-        pagination_handler.validate(search.max_hits)
-        search_form = PlaylistSearchForm()
-        subscribe_form = SubscribeToChannelForm()
+        return render(request, "home/playlist.html", self.context)
 
-        context = {
-            "subscribe_form": subscribe_form,
-            "search_form": search_form,
-            "title": "Playlists",
-            "colors": view_config["colors"],
-            "show_subed_only": view_config["show_subed_only"],
-            "pagination": pagination_handler.pagination,
-            "playlists": playlist_hits,
-            "view_style": view_config["view_style"],
-            "running": view_config["running"],
-        }
-        return render(request, "home/playlist.html", context)
-
-    @staticmethod
-    def build_data(pagination_handler, search_get, view_config):
-        """build data object for query"""
-        data = {
-            "size": pagination_handler.pagination["page_size"],
-            "from": pagination_handler.pagination["page_from"],
-            "query": {"match_all": {}},
-            "sort": [{"playlist_name.keyword": {"order": "asc"}}],
-        }
-        if view_config["show_subed_only"]:
-            data["query"] = {"term": {"playlist_subscribed": {"value": True}}}
-        if search_get:
-            data["query"] = {
+    def _update_view_data(self):
+        """update view specific data dict"""
+        self.data["sort"] = [{"playlist_name.keyword": {"order": "asc"}}]
+        if self.context["show_subed_only"]:
+            self.data["query"] = {
+                "term": {"playlist_subscribed": {"value": True}}
+            }
+        if self.search_get:
+            self.data["query"] = {
                 "bool": {
                     "should": [
                         {
                             "multi_match": {
-                                "query": search_get,
+                                "query": self.search_get,
                                 "fields": [
                                     "playlist_channel_id",
                                     "playlist_channel",
@@ -683,29 +586,6 @@ class PlaylistView(View):
                     "minimum_should_match": 1,
                 }
             }
-        return data
-
-    @staticmethod
-    def read_config(user_id):
-        """read config file"""
-        config_handler = AppConfig(user_id)
-        view_key = f"{user_id}:view:playlist"
-        view_style = RedisArchivist().get_message(view_key)["status"]
-        if not view_style:
-            view_style = config_handler.config["default_view"]["channel"]
-
-        sub_only_key = f"{user_id}:show_subed_only"
-        show_subed_only = RedisArchivist().get_message(sub_only_key)["status"]
-        running = RedisArchivist().get_message("progress:subscribe")["status"]
-
-        view_config = {
-            "es_url": config_handler.config["application"]["es_url"],
-            "colors": config_handler.colors,
-            "view_style": view_style,
-            "show_subed_only": show_subed_only,
-            "running": running,
-        }
-        return view_config
 
     @staticmethod
     def post(request):
