@@ -176,11 +176,53 @@ class SearchForm:
         search_results = look_up.get_data()
         return {"results": search_results}
 
+    def multi_search(self, search_query):
+        """searching through index"""
+        url = self.ES_URL + "/ta_video,ta_channel,ta_playlist/_search"
+        data = {
+            "size": 30,
+            "query": {
+                "multi_match": {
+                    "query": search_query,
+                    "fields": [
+                        "title",
+                        "tags",
+                        "category",
+                        "channel_name",
+                        "channel_description",
+                        "playlist_name",
+                        "playlist_description",
+                    ],
+                }
+            },
+        }
+        look_up = SearchHandler(url, data)
+        search_results = look_up.get_data()
+        all_results = self.build_results(search_results)
+
+        return {"results": all_results}
+
     @staticmethod
-    def search_videos():
-        """searching for videos"""
-        # TBD palceholder for now
-        return False
+    def build_results(search_results):
+        """build the all_results dict"""
+        video_results = []
+        channel_results = []
+        playlist_results = []
+        for result in search_results:
+            if result["_index"] == "ta_video":
+                video_results.append(result)
+            elif result["_index"] == "ta_channel":
+                channel_results.append(result)
+            elif result["_index"] == "ta_playlist":
+                playlist_results.append(result)
+
+        all_results = {
+            "video_results": video_results,
+            "channel_results": channel_results,
+            "playlist_results": playlist_results,
+        }
+
+        return all_results
 
 
 class Pagination:
