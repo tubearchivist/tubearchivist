@@ -360,6 +360,178 @@ function removePlayer() {
     };
 }
 
+
+// multi search form
+function searchMulti(query) {
+    if (query.length > 1) {
+        var payload = JSON.stringify({'multi_search': query})
+        var http = new XMLHttpRequest();
+        http.onreadystatechange = function() {
+            if (http.readyState === 4) {
+                allResults = JSON.parse(http.response)['results'];
+                populateMultiSearchResults(allResults);
+            };
+        };
+        http.open("POST", "/process/", true);
+        http.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
+        http.setRequestHeader("Content-type", "application/json");
+        http.send(payload);
+    };
+}
+
+
+function populateMultiSearchResults(allResults) {
+    // videos
+    var allVideos = allResults["video_results"];
+    var videoBox = document.getElementById("video-results");
+    videoBox.innerHTML = "";
+    for (let index = 0; index < allVideos.length; index++) {
+        const video = allVideos[index]["source"];
+        const videoDiv = createVideo(video, "grid");
+        videoBox.appendChild(videoDiv);
+    };
+    // channels
+    var allChannels = allResults["channel_results"];
+    var channelBox = document.getElementById("channel-results");
+    channelBox.innerHTML = "";
+    for (let index = 0; index < allChannels.length; index++) {
+        const channel = allChannels[index]["source"];
+        const channelDiv = createChannel(channel, "list");
+        channelBox.appendChild(channelDiv);
+    };
+    // playlists
+    var allPlaylists = allResults["playlist_results"];
+    var playlistBox = document.getElementById("playlist-results");
+    playlistBox.innerHTML = "";
+    for (let index = 0; index < allPlaylists.length; index++) {
+        const playlist = allPlaylists[index]["source"];
+        const playlistDiv = createPlaylist(playlist, "grid");
+        playlistBox.appendChild(playlistDiv);
+    };
+}
+
+
+function createVideo(video, viewStyle) {
+    // create video item div from template
+    const videoId = video["youtube_id"];
+    const mediaUrl = video["media_url"];
+    const thumbUrl = "/cache/" + video["vid_thumb_url"];
+    const videoTitle = video["title"];
+    const videoPublished = video["published"];
+    const videoDuration = video["player"]["duration_str"];
+    if (video["player"]["watched"]) {
+        var playerState = "seen";
+    } else {
+        var playerState = "unseen";
+    };
+    const channelId = video["channel"]["channel_id"];
+    const channelName = video["channel"]["channel_name"];
+    // build markup
+    const markup = `
+    <a href="#player" data-src="/media/${mediaUrl}" data-thumb="${thumbUrl}" data-title="${videoTitle}" data-channel="${channelName}" data-channel-id="${channelId}" data-id="${videoId}" onclick="createPlayer(this)">
+        <div class="video-thumb-wrap ${viewStyle}">
+            <div class="video-thumb">
+                <img src="${thumbUrl}" alt="video-thumb">
+            </div>
+            <div class="video-play">
+                <img src="/static/img/icon-play.svg" alt="play-icon">
+            </div>
+        </div>
+    </a>
+    <div class="video-desc ${viewStyle}">
+        <div class="video-desc-player" id="video-info-${videoId}">
+                <img src="/static/img/icon-${playerState}.svg" alt="${playerState}-icon" id="${videoId}" onclick="isWatched(this.id)" class="${playerState}-icon">
+            <span>${videoPublished} | ${videoDuration}</span>
+        </div>
+        <div>
+            <a href="/channel/${channelId}/"><h3>${channelName}</h3></a>
+            <a class="video-more" href="/video/${videoId}/"><h2>${videoTitle}</h2></a>
+        </div>
+    </div>
+    `
+    const videoDiv = document.createElement("div");
+    videoDiv.setAttribute("class", "video-item " + viewStyle);
+    videoDiv.innerHTML = markup
+    return videoDiv
+}
+
+
+function createChannel(channel, viewStyle) {
+    // create channel item div from template
+    const channelId = channel["channel_id"];
+    const channelName = channel["channel_name"];
+    const channelSubs = channel["channel_subs"];
+    const channelLastRefresh = channel["channel_last_refresh"];
+    if (channel["channel_subscribed"]) {
+        var button = `<button class="unsubscribe" type="button" id="${channelId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${channelName}">Unsubscribe</button>`
+    } else {
+        var button = `<button type="button" id="${channelId}" onclick="subscribe(this.id)" title="Subscribe to ${channelName}">Subscribe</button>`
+    };
+    // build markup
+    const markup = `
+    <div class="channel-banner list">
+        <a href="/channel/${channelId}/">
+            <img src="/cache/channels/${channelId}_banner.jpg" alt="${channelId}-banner">
+        </a>
+    </div>
+    <div class="info-box info-box-2 list">
+        <div class="info-box-item">
+            <div class="round-img">
+                <a href="/channel/${channelId}/">
+                    <img src="/cache/channels/${channelId}_thumb.jpg" alt="channel-thumb">
+                </a>
+            </div>
+            <div>
+                <h3><a href="/channel/${channelId}/">${channelName}</a></h3>
+                <p>Subscribers: ${channelSubs}</p>
+            </div>
+        </div>
+        <div class="info-box-item">
+            <div>
+                <p>Last refreshed: ${channelLastRefresh}</p>
+                ${button}
+            </div>
+        </div>
+    </div>
+    `
+    const channelDiv = document.createElement("div");
+    channelDiv.setAttribute("class", "channel-item " + viewStyle);
+    channelDiv.innerHTML = markup;
+    return channelDiv
+}
+
+function createPlaylist(playlist, viewStyle) {
+    // create playlist item div from template
+    const playlistId = playlist["playlist_id"];
+    const playlistName = playlist["playlist_name"];
+    const playlistChannelId = playlist["playlist_channel_id"];
+    const playlistChannel = playlist["playlist_channel"];
+    const playlistLastRefresh = playlist["playlist_last_refresh"];
+    if (playlist["playlist_subscribed"]) {
+        var button = `<button class="unsubscribe" type="button" id="${playlistId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${playlistName}">Unsubscribe</button>`
+    } else {
+        var button = `<button type="button" id="${playlistId}" onclick="subscribe(this.id)" title="Subscribe to ${playlistName}">Subscribe</button>`
+    };
+    const markup = `
+    <div class="playlist-thumbnail">
+        <a href="/playlist/${playlistId}/">
+            <img src="/cache/playlists/${playlistId}.jpg" alt="${playlistId}-thumbnail">
+        </a>
+    </div>
+    <div class="playlist-desc ${viewStyle}">
+        <a href="/channel/${playlistChannelId}/"><h3>${playlistChannel}</h3></a>
+        <a href="/playlist/${playlistId}/"><h2>${playlistName}</h2></a>
+        <p>Last refreshed: ${playlistLastRefresh}</p>
+        ${button}
+    </div>
+    `
+    const playlistDiv = document.createElement("div");
+    playlistDiv.setAttribute("class", "playlist-item " + viewStyle);
+    playlistDiv.innerHTML = markup;
+    return playlistDiv
+}
+
+
 // searching channels
 function searchChannels(query) {
     var searchResultBox = document.getElementById('resultBox');

@@ -1,5 +1,6 @@
 {% extends "home/base.html" %}
 {% block content %}
+<div id="player" class="player-wrapper"></div>
 <div class="boxed-content">
     <div class="title-bar">
         <h1>Search</h1>
@@ -7,21 +8,21 @@
     <div class="multi-search-box">
         {{ search_form }}
     </div>
-    <div>
+    <div class="multi-search-result">
         <h2>Video Results</h2>
         <div id="video-results" class="video-list grid">
             <p>No videos found.</p>
         </div>
     </div>
-    <div>
+    <div class="multi-search-result">
         <h2>Channel Results</h2>
-        <div id="channel-results">
+        <div id="channel-results" class="channel-list list">
             <p>No channels found.</p>
         </div>
     </div>
-    <div>
+    <div class="multi-search-result">
         <h2>Playlist Results</h2>
-        <div id="playlist-results">
+        <div id="playlist-results" class="playlist-list grid">
             <p>No playlists found.</p>
         </div>
     </div>

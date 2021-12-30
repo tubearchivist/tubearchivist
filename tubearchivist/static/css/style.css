@@ -662,6 +662,10 @@ button:hover {
     width: 100%;
 }
 
+.multi-search-result {
+    padding: 1rem 0;
+}
+
 /* channel overview page */
 .channel-list.list {
     display: block;
