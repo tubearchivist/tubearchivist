@@ -25,6 +25,7 @@ INDEX_CONFIG = [
             },
             "channel_name": {
                 "type": "text",
+                "analyzer": "english",
                 "fields": {
                     "keyword": {
                         "type": "keyword",
@@ -64,6 +65,7 @@ INDEX_CONFIG = [
                     },
                     "channel_name": {
                         "type": "text",
+                        "analyzer": "english",
                         "fields": {
                             "keyword": {
                                 "type": "keyword",
@@ -88,8 +90,16 @@ INDEX_CONFIG = [
             },
             "description": {"type": "text"},
             "media_url": {"type": "keyword", "index": False},
+            "tags": {
+                "type": "text",
+                "analyzer": "english",
+                "fields": {
+                    "keyword": {"type": "keyword", "ignore_above": 256}
+                },
+            },
             "title": {
                 "type": "text",
+                "analyzer": "english",
                 "fields": {
                     "keyword": {
                         "type": "keyword",
@@ -171,12 +181,18 @@ INDEX_CONFIG = [
             "playlist_description": {"type": "text"},
             "playlist_name": {
                 "type": "text",
+                "analyzer": "english",
                 "fields": {
                     "keyword": {
                         "type": "keyword",
                         "ignore_above": 256,
                         "normalizer": "to_lower",
-                    }
+                    },
+                    "search_as_you_type": {
+                        "type": "search_as_you_type",
+                        "doc_values": False,
+                        "max_shingle_size": 3,
+                    },
                 },
             },
             "playlist_channel": {
