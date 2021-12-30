@@ -13,6 +13,7 @@ from home.views import (
     LoginView,
     PlaylistIdView,
     PlaylistView,
+    SearchView,
     SettingsView,
     VideoView,
     process,
@@ -52,4 +53,5 @@ urlpatterns = [
         login_required(PlaylistIdView.as_view()),
         name="playlist_id",
     ),
+    path("search/", SearchView.as_view(), name="search"),
 ]

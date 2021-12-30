@@ -116,6 +116,21 @@ class PlaylistSearchForm(forms.Form):
     )
 
 
+class MultiSearchForm(forms.Form):
+    """multi search form for /search/"""
+
+    searchInput = forms.CharField(
+        label="",
+        widget=forms.TextInput(
+            attrs={
+                "autocomplete": "off",
+                "oninput": "searchMulti(this.value)",
+                "autofocus": True,
+            }
+        ),
+    )
+
+
 class AddToQueueForm(forms.Form):
     """text area form to add to downloads"""
 

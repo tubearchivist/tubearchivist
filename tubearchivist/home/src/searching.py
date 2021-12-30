@@ -184,14 +184,23 @@ class SearchForm:
             "query": {
                 "multi_match": {
                     "query": search_query,
+                    "type": "bool_prefix",
+                    "operator": "and",
+                    "fuzziness": "auto",
                     "fields": [
-                        "title",
-                        "tags",
                         "category",
-                        "channel_name",
                         "channel_description",
-                        "playlist_name",
+                        "channel_name._2gram",
+                        "channel_name._3gram",
+                        "channel_name.search_as_you_type",
                         "playlist_description",
+                        "playlist_name._2gram",
+                        "playlist_name._3gram",
+                        "playlist_name.search_as_you_type",
+                        "tags",
+                        "title._2gram",
+                        "title._3gram",
+                        "title.search_as_you_type",
                     ],
                 }
             },
@@ -208,13 +217,14 @@ class SearchForm:
         video_results = []
         channel_results = []
         playlist_results = []
-        for result in search_results:
-            if result["_index"] == "ta_video":
-                video_results.append(result)
-            elif result["_index"] == "ta_channel":
-                channel_results.append(result)
-            elif result["_index"] == "ta_playlist":
-                playlist_results.append(result)
+        if search_results:
+            for result in search_results:
+                if result["_index"] == "ta_video":
+                    video_results.append(result)
+                elif result["_index"] == "ta_channel":
+                    channel_results.append(result)
+                elif result["_index"] == "ta_playlist":
+                    playlist_results.append(result)
 
         all_results = {
             "video_results": video_results,

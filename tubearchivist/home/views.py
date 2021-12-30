@@ -20,6 +20,7 @@ from home.forms import (
     ApplicationSettingsForm,
     ChannelSearchForm,
     CustomAuthForm,
+    MultiSearchForm,
     PlaylistSearchForm,
     SchedulerSettingsForm,
     SubscribeToChannelForm,
@@ -667,6 +668,22 @@ class VideoView(View):
                 stars.append("empty")
             rating = rating - 1
         return stars
+
+
+class SearchView(ArchivistResultsView):
+    """resolves to /search/
+    handle cross index search interface
+    """
+
+    view_origin = "home"
+    es_search = False
+
+    def get(self, request):
+        """handle get request"""
+        self.initiate_vars(request)
+        self.context.update({"search_form": MultiSearchForm()})
+
+        return render(request, "home/search.html", self.context)
 
 
 class SettingsView(View):
