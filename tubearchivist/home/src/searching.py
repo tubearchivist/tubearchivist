@@ -155,27 +155,6 @@ class SearchForm:
     CONFIG = AppConfig().config
     ES_URL = CONFIG["application"]["es_url"]
 
-    def search_channels(self, search_query):
-        """fancy searching channels as you type"""
-        url = self.ES_URL + "/ta_channel/_search"
-        data = {
-            "size": 10,
-            "query": {
-                "multi_match": {
-                    "query": search_query,
-                    "type": "bool_prefix",
-                    "fields": [
-                        "channel_name.search_as_you_type",
-                        "channel_name._2gram",
-                        "channel_name._3gram",
-                    ],
-                }
-            },
-        }
-        look_up = SearchHandler(url, data)
-        search_results = look_up.get_data()
-        return {"results": search_results}
-
     def multi_search(self, search_query):
         """searching through index"""
         url = self.ES_URL + "/ta_video,ta_channel,ta_playlist/_search"

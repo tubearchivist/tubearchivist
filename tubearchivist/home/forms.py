@@ -83,39 +83,6 @@ class SchedulerSettingsForm(forms.Form):
     run_backup_rotate = forms.IntegerField(required=False)
 
 
-class VideoSearchForm(forms.Form):
-    """search videos form"""
-
-    searchInput = forms.CharField(
-        label="Search your videos",
-        widget=forms.TextInput(attrs={"autocomplete": "off"}),
-    )
-
-
-class ChannelSearchForm(forms.Form):
-    """search for channels"""
-
-    searchInput = forms.CharField(
-        label="",
-        widget=forms.TextInput(
-            attrs={
-                "oninput": "searchChannels(this.value)",
-                "autocomplete": "off",
-                "list": "resultBox",
-            }
-        ),
-    )
-
-
-class PlaylistSearchForm(forms.Form):
-    """search for playlists"""
-
-    searchInput = forms.CharField(
-        label="",
-        widget=forms.TextInput(attrs={"autocomplete": "off"}),
-    )
-
-
 class MultiSearchForm(forms.Form):
     """multi search form for /search/"""
 

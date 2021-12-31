@@ -290,20 +290,6 @@ button:hover {
     width: 50%;
 }
 
-.search-form input {
-    width: 90%;
-}
-
-.search-icon {
-    flex: 0 0 40px;
-}
-
-.search-icon img {
-    width: 100%;
-    cursor: pointer;
-    filter: var(--img-filter);
-}
-
 .view-controls {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -322,12 +308,6 @@ button:hover {
     margin: 5px 10px;
     cursor: pointer;
     filter: var(--img-filter);
-}
-
-#search-box {
-    display: none;
-    flex: auto;
-    padding: 10px;
 }
 
 #hidden-form {

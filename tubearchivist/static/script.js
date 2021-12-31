@@ -532,57 +532,6 @@ function createPlaylist(playlist, viewStyle) {
 }
 
 
-// searching channels
-function searchChannels(query) {
-    var searchResultBox = document.getElementById('resultBox');
-    searchResultBox.innerHTML = '';
-    if (query.length > 1) {
-        var payload = JSON.stringify({'channel-search': query})
-        sendSearchAsYouType(payload);
-    };
-}
-
-
-function populateChannelResults(allResults) {
-    var searchResultBox = document.getElementById('resultBox');
-    for (let i = 0; i < allResults.length; i++) {
-        var singleResult = allResults[i];
-        var source = singleResult['source'];
-        var channelName = source['channel_name'];
-        var channelId = source['channel_id'];
-        var optionElement = document.createElement('option');
-        optionElement.value = channelName;
-        optionElement.setAttribute('data', channelId);
-        searchResultBox.appendChild(optionElement);
-    };
-}
-
-function channelRedirect(){
-    var response = document.getElementById('resultBox');
-    var firstChild = response.firstChild
-    if (firstChild) {
-        var redirectId = firstChild.getAttribute('data');
-        location = '/channel/' + redirectId;
-    };
-    return false;
-}
-
-
-function sendSearchAsYouType(payload) {
-    var http = new XMLHttpRequest();
-    http.onreadystatechange = function() {
-        if (http.readyState === 4) {
-            allResults = JSON.parse(http.response)['results'];
-            populateChannelResults(allResults);
-        };
-    };
-    http.open("POST", "/process/", true);
-    http.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
-    http.setRequestHeader("Content-type", "application/json");
-    http.send(payload);
-}
-
-
 // generic
 function sendPost(payload) {
     var http = new XMLHttpRequest();
@@ -619,18 +568,6 @@ function textReveal() {
         textBox.style.height = 'unset';
         button.innerText = 'Hide';
     };
-}
-
-function showSearch() {
-    var searchBox = document.getElementById('search-box');
-    var displayStyle = searchBox.style.display
-    if (displayStyle === "") {
-        searchBox.style.display = 'block';
-    } else {
-        searchBox.style.display = "";
-    }
-    var inputBox = document.getElementById('id_searchInput');
-    inputBox.focus();
 }
 
 function showForm() {

@@ -13,20 +13,16 @@ from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.utils.http import urlencode
 from django.views import View
 from home.forms import (
     AddToQueueForm,
     ApplicationSettingsForm,
-    ChannelSearchForm,
     CustomAuthForm,
     MultiSearchForm,
-    PlaylistSearchForm,
     SchedulerSettingsForm,
     SubscribeToChannelForm,
     SubscribeToPlaylistForm,
     UserSettingsForm,
-    VideoSearchForm,
 )
 from home.src.config import AppConfig, ScheduleBuilder
 from home.src.frontend import PostData
@@ -199,7 +195,6 @@ class HomeView(ArchivistResultsView):
         self.initiate_vars(request)
         self._update_view_data()
         self.find_results()
-        self.context.update({"search_form": VideoSearchForm()})
 
         return render(request, "home/home.html", self.context)
 
@@ -218,18 +213,6 @@ class HomeView(ArchivistResultsView):
                 }
             }
             self.data["query"] = query
-
-    @staticmethod
-    def post(request):
-        """handle post from search form"""
-        search_form = VideoSearchForm(data=request.POST)
-        if search_form.is_valid():
-            search_query = request.POST.get("searchInput")
-            print(search_query)
-            search_url = "/?" + urlencode({"search": search_query})
-            return redirect(search_url, permanent=True)
-
-        return redirect("home")
 
 
 class LoginView(View):
@@ -408,7 +391,6 @@ class ChannelView(ArchivistResultsView):
         self.context.update(
             {
                 "title": "Channels",
-                "search_form": ChannelSearchForm(),
                 "subscribe_form": SubscribeToChannelForm(),
             }
         )
@@ -536,7 +518,6 @@ class PlaylistView(ArchivistResultsView):
             {
                 "title": "Playlists",
                 "subscribe_form": SubscribeToChannelForm(),
-                "search_form": PlaylistSearchForm(),
             }
         )
 
@@ -571,13 +552,6 @@ class PlaylistView(ArchivistResultsView):
     @staticmethod
     def post(request):
         """handle post from search form"""
-        search_form = PlaylistSearchForm(data=request.POST)
-        if search_form.is_valid():
-            search_query = request.POST.get("searchInput")
-            print(search_query)
-            search_url = "/playlist/?" + urlencode({"search": search_query})
-            return redirect(search_url, permanent=True)
-
         subscribe_form = SubscribeToPlaylistForm(data=request.POST)
         if subscribe_form.is_valid():
             url_str = request.POST.get("subscribe")

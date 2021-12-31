@@ -75,7 +75,6 @@ class PostData:
             "db-backup": self._db_backup,
             "db-restore": self._db_restore,
             "fs-rescan": self._fs_rescan,
-            "channel-search": self._channel_search,
             "multi_search": self._multi_search,
             "delete-video": self._delete_video,
             "delete-channel": self._delete_channel,
@@ -282,13 +281,6 @@ class PostData:
         print("start filesystem scan")
         rescan_filesystem.delay()
         return {"success": True}
-
-    def _channel_search(self):
-        """search for channel name as_you_type"""
-        search_query = self.exec_val
-        print("searching for: " + search_query)
-        search_results = SearchForm().search_channels(search_query)
-        return search_results
 
     def _multi_search(self):
         """search through all indexes"""

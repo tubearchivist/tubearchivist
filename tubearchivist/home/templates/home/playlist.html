@@ -18,16 +18,6 @@
                 </form>
             </div>
         </div>
-        <div class="search-form icon-text">
-            <div class="search-icon">
-                <img src="{% static 'img/icon-search.svg' %}" alt="search-icon" onclick="showSearch()">
-                <p>Search your Playlists</p>
-            </div>
-            <form action="/playlist/" method="POST" id="search-box">
-                {% csrf_token %}
-                {{ search_form }}
-            </form>
-        </div>
     </div>
     <div class="view-controls">
         <div class="toggle">
