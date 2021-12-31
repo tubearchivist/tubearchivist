@@ -58,8 +58,8 @@
                     </a>
                 </div>
                 <div class="nav-icons">
-                    <a href="{% url 'about' %}">
-                        <img src="{% static 'img/icon-help.svg' %}" alt="help-icon" title="About">
+                    <a href="{% url 'search' %}">
+                        <img src="{% static 'img/icon-search.svg' %}" alt="search-icon" title="Search">
                     </a>
                     <a href="{% url 'settings' %}">
                         <img src="{% static 'img/icon-gear.svg' %}" alt="gear-icon" title="Settings">
@@ -116,7 +116,7 @@
     </div>
     <div class="footer">
         <div class="boxed-content">
-            <span>© 2021 - <script type="text/javascript">document.write(new Date().getFullYear());</script> The Tube Archivist v0.0.9 | <a href="https://github.com/bbilly1/tubearchivist" target="_blank">Github</a> | <a href="https://hub.docker.com/r/bbilly1/tubearchivist" target="_blank">Docker Hub</a></span>
+            <span>© 2021 - <script type="text/javascript">document.write(new Date().getFullYear());</script> TubeArchivist v0.0.9 </span><span><a href="{% url 'about' %}">About</a> | <a href="https://github.com/bbilly1/tubearchivist" target="_blank">GitHub</a> | <a href="https://hub.docker.com/r/bbilly1/tubearchivist" target="_blank">Docker Hub</a></span>
         </div>
     </div>
 </body>

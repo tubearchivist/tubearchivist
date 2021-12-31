@@ -1042,6 +1042,10 @@ button:hover {
     .footer {
         text-align: center;
     }
+    .footer .boxed-content span {
+        width: 100%;
+        display: block;
+    }
     .toggle {
         flex-wrap: wrap;
     }
