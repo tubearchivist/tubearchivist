@@ -53,5 +53,5 @@ urlpatterns = [
         login_required(PlaylistIdView.as_view()),
         name="playlist_id",
     ),
-    path("search/", SearchView.as_view(), name="search"),
+    path("search/", login_required(SearchView.as_view()), name="search"),
 ]
