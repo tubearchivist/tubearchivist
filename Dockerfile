@@ -25,9 +25,6 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ] ; then \
         apt-get -y update && apt-get -y install --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/* \
     ; fi
 
-# copy config files
-COPY nginx.conf /etc/nginx/conf.d/
-
 # make folders
 RUN mkdir /cache
 RUN mkdir /youtube
@@ -36,6 +33,9 @@ RUN mkdir /app
 # install python dependencies
 COPY ./tubearchivist/requirements.txt /requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt --src /usr/local/src
+
+# copy config files
+COPY nginx.conf /etc/nginx/conf.d/
 
 # copy application into container
 COPY ./tubearchivist /app
