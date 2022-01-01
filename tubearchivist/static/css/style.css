@@ -275,7 +275,7 @@ button:hover {
 .sort {
     display: flex;
     flex-wrap: wrap;
-    align-content: center;
+    align-items: center;
 }
 
 .padding-box {
@@ -467,6 +467,23 @@ button:hover {
 
 
 /* info box */
+.title-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.title-split img {
+    width: 40px;
+    filter: var(--img-filter);
+    cursor: pointer;
+    margin: 0 10px;
+}
+
+.title-split-form {
+    padding-top: 30px;
+    display: flex;
+}
+
 .info-box {
     display: grid;
     grid-gap: 1rem;
@@ -503,10 +520,6 @@ button:hover {
 
 .description-text br {
     margin-bottom: 10px;
-}
-
-.sort span {
-    width: 100%;
 }
 
 /* login */

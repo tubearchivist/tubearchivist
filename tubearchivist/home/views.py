@@ -517,7 +517,7 @@ class PlaylistView(ArchivistResultsView):
         self.context.update(
             {
                 "title": "Playlists",
-                "subscribe_form": SubscribeToChannelForm(),
+                "subscribe_form": SubscribeToPlaylistForm(),
             }
         )
 

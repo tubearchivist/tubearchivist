@@ -3,14 +3,12 @@
 {% load humanize %}
 {% block content %}
 <div class="boxed-content">
-    <div class="title-bar">
-        <h1>Channels</h1>
-    </div>
-    <div id="notifications" data="channel"></div>
-    <div class="info-box info-box-2">
-        <div class="icon-text">
-            <img id="add-icon" onclick="showForm()" src="{% static 'img/icon-add.svg' %}" alt="add-icon">
-            <p>Subscribe to Channels</p>
+    <div class="title-split">
+        <div class="title-bar">
+            <h1>Channels</h1>
+        </div>
+        <div class="title-split-form">
+            <img id="add-icon" onclick="showForm()" src="{% static 'img/icon-add.svg' %}" alt="add-icon" title="Subscribe to Channels">
             <div class="show-form">
                 <form id="hidden-form" action="/channel/" method="post">
                     {% csrf_token %}
@@ -20,9 +18,10 @@
             </div>
         </div>
     </div>
+    <div id="notifications" data="channel"></div>
     <div class="view-controls">
         <div class="toggle">
-            <span>Show only subscribed channels:</span>
+            <span>Show subscribed only:</span>
             <div class="toggleBox">
                 <input id="show_subed_only" onclick="toggleCheckbox(this)" type="checkbox" {% if show_subed_only %}checked{% endif %}>
                 {% if show_subed_only %}

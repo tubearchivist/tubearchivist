@@ -116,7 +116,7 @@ class SubscribeToChannelForm(forms.Form):
     """text area form to subscribe to multiple channels"""
 
     subscribe = forms.CharField(
-        label=False,
+        label="Subscribe to channels",
         widget=forms.Textarea(
             attrs={
                 "rows": 3,
@@ -130,11 +130,11 @@ class SubscribeToPlaylistForm(forms.Form):
     """text area form to subscribe to multiple playlists"""
 
     subscribe = forms.CharField(
-        label=False,
+        label="Subscribe to playlists",
         widget=forms.Textarea(
             attrs={
                 "rows": 3,
-                "placeholder": "Input playlist IDs",
+                "placeholder": "Input playlist IDs or URLs",
             }
         ),
     )
