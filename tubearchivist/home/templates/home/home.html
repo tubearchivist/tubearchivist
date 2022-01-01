@@ -5,33 +5,9 @@
     <div class="title-bar">
         <h1>Recent Videos</h1>
     </div>
-    <div class="info-box info-box-2">
-        <div class="sort">
-            <span>Sort by <span class="settings-current">{{ sort_by }}</span></span>
-            <select name="sort" id="sort" onchange="sortChange(this.value)">
-                <option value="" disabled selected> -- change sort by -- </option>
-                <option value="published">date published</option>
-                <option value="downloaded">date downloaded</option>
-                <option value="views">views</option>
-                <option value="likes">likes</option>
-            </select>
-            <select name="sord-order" id="sort-order" onchange="sortChange(this.value)">
-                {% if sort_order == "asc" %}
-                    <option value="asc" selected>asc</option>
-                {% else %}
-                    <option value="asc">asc</option>
-                {% endif %}
-                {% if sort_order == "desc" %}
-                    <option value="desc" selected>desc</option>
-                {% else %}
-                    <option value="desc">desc</option>
-                {% endif %}
-            </select>
-        </div>
-    </div>
     <div class="view-controls">
         <div class="toggle">
-            <span>Hide watched videos:</span>
+            <span>Hide watched:</span>
             <div class="toggleBox">
                 <input id="hide_watched" onclick="toggleCheckbox(this)" type="checkbox" {% if hide_watched %}checked{% endif %}>
                 {% if hide_watched %}
@@ -42,6 +18,22 @@
             </div>
         </div>
         <div class="view-icons">
+            <div class="sort">
+                <div id="hidden-form">
+                    <span>Sort by:</span>
+                    <select name="sort" id="sort" onchange="sortChange(this.value)">
+                        <option value="published" {% if sort_by == "published" %}selected{% endif %}>date published</option>
+                        <option value="downloaded" {% if sort_by == "published" %}selected{% endif %}>date downloaded</option>
+                        <option value="views" {% if sort_by == "published" %}selected{% endif %}>views</option>
+                        <option value="likes" {% if sort_by == "published" %}selected{% endif %}>likes</option>
+                    </select>
+                    <select name="sord-order" id="sort-order" onchange="sortChange(this.value)">
+                        <option value="asc" {% if sort_order == "asc" %}selected{% endif %}>asc</option>
+                        <option value="desc" {% if sort_order == "desc" %}selected{% endif %}>desc</option>
+                    </select>
+                </div>
+            </div>
+            <img src="{% static 'img/icon-sort.svg' %}" alt="sort-icon" onclick="showForm()">
             <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="grid" alt="grid view">
             <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="list" alt="list view">
         </div>
