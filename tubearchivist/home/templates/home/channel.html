@@ -8,7 +8,7 @@
             <h1>Channels</h1>
         </div>
         <div class="title-split-form">
-            <img id="add-icon" onclick="showForm()" src="{% static 'img/icon-add.svg' %}" alt="add-icon" title="Subscribe to Channels">
+            <img id="animate-icon" onclick="showForm()" src="{% static 'img/icon-add.svg' %}" alt="add-icon" title="Subscribe to Channels">
             <div class="show-form">
                 <form id="hidden-form" action="/channel/" method="post">
                     {% csrf_token %}

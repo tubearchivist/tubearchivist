@@ -575,15 +575,17 @@ function showForm() {
     var displayStyle = formElement.style.display
     if (displayStyle === "") {
         formElement.style.display = 'block';
-        animate('add-icon', 'pulse-img');
     } else {
         formElement.style.display = "";
-    }
+    };
+    animate('animate-icon', 'pulse-img');
 }
 
 function animate(elementId, animationClass) {
     var toAnimate = document.getElementById(elementId);
     if (toAnimate.className !== animationClass) {
         toAnimate.className = animationClass;
-    }
+    } else {
+        toAnimate.classList.remove(animationClass);
+    };
 }
