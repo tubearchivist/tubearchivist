@@ -13,7 +13,7 @@ from datetime import datetime
 from time import sleep
 
 import requests
-import yt_dlp as youtube_dl
+import yt_dlp
 from home.src.config import AppConfig
 from home.src.helper import (
     DurationConverter,
@@ -155,8 +155,8 @@ class PendingList:
             "simulate": True,
         }
         try:
-            vid = youtube_dl.YoutubeDL(obs).extract_info(youtube_id)
-        except youtube_dl.utils.DownloadError:
+            vid = yt_dlp.YoutubeDL(obs).extract_info(youtube_id)
+        except yt_dlp.utils.DownloadError:
             print("failed to extract info for: " + youtube_id)
             return False
         # stop if video is streaming live now
@@ -309,7 +309,7 @@ class ChannelSubscription:
         }
         if limit:
             obs["playlistend"] = self.channel_size
-        chan = youtube_dl.YoutubeDL(obs).extract_info(url, download=False)
+        chan = yt_dlp.YoutubeDL(obs).extract_info(url, download=False)
         last_videos = [(i["id"], i["title"]) for i in chan["entries"]]
         return last_videos
 
@@ -551,7 +551,7 @@ class VideoDownloader:
 
             try:
                 self.dl_single_vid(youtube_id)
-            except youtube_dl.utils.DownloadError:
+            except yt_dlp.utils.DownloadError:
                 print("failed to download " + youtube_id)
                 continue
             vid_dict = index_new_video(youtube_id)
@@ -593,7 +593,7 @@ class VideoDownloader:
 
     @staticmethod
     def progress_hook(response):
-        """process the progress_hooks from youtube_dl"""
+        """process the progress_hooks from yt_dlp"""
         # title
         path = os.path.split(response["filename"])[-1][12:]
         filename = os.path.splitext(os.path.splitext(path)[0])[0]
@@ -683,10 +683,10 @@ class VideoDownloader:
         for file_name in all_cached:
             if youtube_id in file_name:
                 obs["outtmpl"] = os.path.join(dl_cache, file_name)
-        with youtube_dl.YoutubeDL(obs) as ydl:
+        with yt_dlp.YoutubeDL(obs) as ydl:
             try:
                 ydl.download([youtube_id])
-            except youtube_dl.utils.DownloadError:
+            except yt_dlp.utils.DownloadError:
                 print("retry failed download: " + youtube_id)
                 sleep(10)
                 ydl.download([youtube_id])

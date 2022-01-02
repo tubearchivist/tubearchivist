@@ -12,7 +12,7 @@ from datetime import datetime
 from time import sleep
 
 import requests
-import yt_dlp as youtube_dl
+import yt_dlp
 from bs4 import BeautifulSoup
 from home.src.config import AppConfig
 from home.src.helper import DurationConverter, UrlListParser, clean_string
@@ -257,7 +257,7 @@ class YoutubeChannel:
             "skip_download": True,
             "extract_flat": True,
         }
-        playlists = youtube_dl.YoutubeDL(obs).extract_info(url)
+        playlists = yt_dlp.YoutubeDL(obs).extract_info(url)
         all_entries = [(i["id"], i["title"]) for i in playlists["entries"]]
 
         return all_entries
@@ -289,7 +289,7 @@ class YoutubeVideo:
         self.vid_dict = None
 
     def get_vid_dict(self):
-        """wrapper to loop around youtube_dl to retry on failure"""
+        """wrapper to loop around yt_dlp to retry on failure"""
         print(f"get video data for {self.youtube_id}")
         vid_dict = False
         for i in range(3):
@@ -315,10 +315,10 @@ class YoutubeVideo:
             "noplaylist": True,
         }
         try:
-            vid = youtube_dl.YoutubeDL(obs).extract_info(youtube_id)
+            vid = yt_dlp.YoutubeDL(obs).extract_info(youtube_id)
         except (
-            youtube_dl.utils.ExtractorError,
-            youtube_dl.utils.DownloadError,
+            yt_dlp.utils.ExtractorError,
+            yt_dlp.utils.DownloadError,
         ):
             print("failed to get info for " + youtube_id)
             return False
@@ -489,12 +489,10 @@ class YoutubePlaylist:
             "playlistend": 0,
         }
         try:
-            playlist = youtube_dl.YoutubeDL(obs).extract_info(
-                url, download=False
-            )
+            playlist = yt_dlp.YoutubeDL(obs).extract_info(url, download=False)
         except (
-            youtube_dl.utils.ExtractorError,
-            youtube_dl.utils.DownloadError,
+            yt_dlp.utils.ExtractorError,
+            yt_dlp.utils.DownloadError,
         ):
             print("failed to get info for " + self.playlist_id)
             return False
@@ -535,12 +533,10 @@ class YoutubePlaylist:
             obs["playlistend"] = playlistend
 
         try:
-            playlist = youtube_dl.YoutubeDL(obs).extract_info(
-                url, download=False
-            )
+            playlist = yt_dlp.YoutubeDL(obs).extract_info(url, download=False)
         except (
-            youtube_dl.utils.ExtractorError,
-            youtube_dl.utils.DownloadError,
+            yt_dlp.utils.ExtractorError,
+            yt_dlp.utils.DownloadError,
         ):
             print("failed to get plealist entries for " + self.playlist_id)
             return False

@@ -13,7 +13,7 @@ from urllib.parse import parse_qs, urlparse
 
 import redis
 import requests
-import yt_dlp as youtube_dl
+import yt_dlp
 
 
 def get_total_hits(index, es_url, es_auth, match_field):
@@ -139,7 +139,7 @@ class UrlListParser:
             "extract_flat": True,
             "playlistend": 0,
         }
-        url_info = youtube_dl.YoutubeDL(obs).extract_info(url, download=False)
+        url_info = yt_dlp.YoutubeDL(obs).extract_info(url, download=False)
         try:
             channel_id = url_info["channel_id"]
         except KeyError as error:
