@@ -106,6 +106,13 @@ def download_single(youtube_id):
     try:
         have_lock = my_lock.acquire(blocking=False)
         if have_lock:
+            mess_dict = {
+                "status": "message:download",
+                "level": "info",
+                "title": "Download single video",
+                "message": "processing",
+            }
+            RedisArchivist().set_message("message:download", mess_dict)
             VideoDownloader().run_queue()
         else:
             print("Download queue already running.")
