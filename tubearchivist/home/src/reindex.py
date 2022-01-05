@@ -97,11 +97,12 @@ class Reindex:
         """get all videos without rating if ryd integration is enabled"""
         headers = {"Content-type": "application/json"}
         data = {
+            "size": 200,
             "query": {
                 "bool": {
                     "must_not": [{"exists": {"field": "stats.average_rating"}}]
                 }
-            }
+            },
         }
         query_str = json.dumps(data)
         url = self.es_url + "/ta_video/_search"
