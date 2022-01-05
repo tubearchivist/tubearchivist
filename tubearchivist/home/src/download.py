@@ -645,10 +645,6 @@ class VideoDownloader:
         if throttle:
             obs["throttledratelimit"] = throttle * 1024
 
-        external = False
-        if external:
-            obs["external_downloader"] = "aria2c"
-
         postprocessors = []
 
         if self.config["downloads"]["add_metadata"]:
