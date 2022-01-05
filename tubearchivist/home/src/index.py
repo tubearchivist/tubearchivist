@@ -14,10 +14,10 @@ from time import sleep
 import requests
 import yt_dlp
 from bs4 import BeautifulSoup
-from ryd_client import ryd_client
 from home.src.config import AppConfig
 from home.src.helper import DurationConverter, UrlListParser, clean_string
 from home.src.thumbnails import ThumbManager
+from ryd_client import ryd_client
 
 
 class YoutubeChannel:
