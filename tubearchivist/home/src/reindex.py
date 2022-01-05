@@ -590,14 +590,10 @@ def scan_filesystem():
 
 def reindex_old_documents():
     """daily refresh of old documents"""
-    # check needed last run
-    now = int(datetime.now().strftime("%s"))
-    last_reindex = RedisArchivist().get_message("last_reindex")
-    if isinstance(last_reindex, int) and now - last_reindex < 60 * 60 * 24:
-        return
     # continue if needed
     reindex_handler = Reindex()
     reindex_handler.check_outdated()
     reindex_handler.reindex()
     # set timestamp
+    now = int(datetime.now().strftime("%s"))
     RedisArchivist().set_message("last_reindex", now, expire=False)
