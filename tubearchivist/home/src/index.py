@@ -224,6 +224,13 @@ class YoutubeChannel:
         if not response.ok:
             print(response.text)
 
+    def delete_playlists(self):
+        """delete all indexed playlist from es"""
+        all_playlists = self.get_indexed_playlists()
+        for playlist in all_playlists:
+            playlist_id = playlist["playlist_id"]
+            YoutubePlaylist(playlist_id).delete_metadata()
+
     def delete_channel(self):
         """delete channel and all videos"""
         print(f"deleting {self.channel_id} and all matching media files")
@@ -239,7 +246,8 @@ class YoutubeChannel:
             print(f"no videos found for {folder_path}")
 
         ThumbManager().delete_chan_thumb(self.channel_id)
-
+        print("delete indexed playlists")
+        self.delete_playlists()
         print("delete indexed videos")
         self.delete_es_videos()
         url = self.ES_URL + "/ta_channel/_doc/" + self.channel_id
