@@ -42,6 +42,7 @@ class Reindex:
         self.es_url = config["application"]["es_url"]
         self.es_auth = config["application"]["es_auth"]
         self.refresh_interval = config["scheduler"]["check_reindex_days"]
+        self.integrate_ryd = config["downloads"]["integrate_ryd"]
         # scan
         self.all_youtube_ids = False
         self.all_channel_ids = False
@@ -91,6 +92,27 @@ class Reindex:
         response_dict = json.loads(response.text)
         all_youtube_ids = [i["_id"] for i in response_dict["hits"]["hits"]]
         return all_youtube_ids
+
+    def get_unrated_vids(self):
+        """get all videos without rating if ryd integration is enabled"""
+        headers = {"Content-type": "application/json"}
+        data = {
+            "query": {
+                "bool": {
+                    "must_not": [{"exists": {"field": "stats.average_rating"}}]
+                }
+            }
+        }
+        query_str = json.dumps(data)
+        url = self.es_url + "/ta_video/_search"
+        response = requests.get(
+            url, data=query_str, headers=headers, auth=self.es_auth
+        )
+        if not response.ok:
+            print(response.text)
+        response_dict = json.loads(response.text)
+        missing_rating = [i["_id"] for i in response_dict["hits"]["hits"]]
+        self.all_youtube_ids = self.all_youtube_ids + missing_rating
 
     def get_outdated_channels(self, size):
         """get daily channels to refresh"""
@@ -156,6 +178,8 @@ class Reindex:
         self.all_youtube_ids = self.get_outdated_vids(video_daily)
         self.all_channel_ids = self.get_outdated_channels(channel_daily)
         self.all_playlist_ids = self.get_outdated_playlists(playlist_daily)
+        if self.integrate_ryd:
+            self.get_unrated_vids()
 
     def rescrape_all_channels(self):
         """sync new data from channel to all matching videos"""
