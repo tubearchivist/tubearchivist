@@ -56,11 +56,18 @@ class ApplicationSettingsForm(forms.Form):
         ("1", "embed thumbnail"),
     ]
 
+    RYD_CHOICES = [
+        ("", "-- change ryd integrations"),
+        ("0", "disable ryd integration"),
+        ("1", "enable ryd integration"),
+    ]
+
     subscriptions_channel_size = forms.IntegerField(required=False)
     downloads_limit_count = forms.IntegerField(required=False)
     downloads_limit_speed = forms.IntegerField(required=False)
     downloads_throttledratelimit = forms.IntegerField(required=False)
     downloads_sleep_interval = forms.IntegerField(required=False)
+    downloads_autodelete_days = forms.IntegerField(required=False)
     downloads_format = forms.CharField(required=False)
     downloads_add_metadata = forms.ChoiceField(
         widget=forms.Select, choices=METADATA_CHOICES, required=False
@@ -68,7 +75,9 @@ class ApplicationSettingsForm(forms.Form):
     downloads_add_thumbnail = forms.ChoiceField(
         widget=forms.Select, choices=THUMBNAIL_CHOICES, required=False
     )
-    downloads_autodelete_days = forms.IntegerField(required=False)
+    downloads_integrate_ryd = forms.ChoiceField(
+        widget=forms.Select, choices=RYD_CHOICES, required=False
+    )
 
 
 class SchedulerSettingsForm(forms.Form):

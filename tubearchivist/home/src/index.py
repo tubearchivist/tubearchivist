@@ -14,6 +14,7 @@ from time import sleep
 import requests
 import yt_dlp
 from bs4 import BeautifulSoup
+from ryd_client import ryd_client
 from home.src.config import AppConfig
 from home.src.helper import DurationConverter, UrlListParser, clean_string
 from home.src.thumbnails import ThumbManager
@@ -282,6 +283,7 @@ class YoutubeVideo:
     ES_AUTH = CONFIG["application"]["es_auth"]
     CACHE_DIR = CONFIG["application"]["cache_dir"]
     VIDEOS = CONFIG["application"]["videos"]
+    RYD = CONFIG["downloads"]["integrate_ryd"]
 
     def __init__(self, youtube_id):
         self.youtube_id = youtube_id
@@ -303,6 +305,8 @@ class YoutubeVideo:
                 break
 
         self.vid_dict = vid_dict
+        if self.RYD:
+            self.get_ryd_stats()
 
     def get_youtubedl_vid_data(self):
         """parse youtubedl extract info"""
@@ -445,6 +449,23 @@ class YoutubeVideo:
             print(response.text)
         # delete thumbs from cache
         ThumbManager().delete_vid_thumb(self.youtube_id)
+
+    def get_ryd_stats(self):
+        """get optional stats from returnyoutubedislikeapi.com"""
+        try:
+            print(f"get ryd stats for: {self.youtube_id}")
+            result = ryd_client.get(self.youtube_id)
+        except requests.exceptions.ConnectionError:
+            print(f"failed to query ryd api, skipping {self.youtube_id}")
+            return False
+
+        dislikes = {
+            "dislike_count": result["dislikes"],
+            "average_rating": result["rating"],
+        }
+        self.vid_dict["stats"].update(dislikes)
+
+        return True
 
 
 class YoutubePlaylist:

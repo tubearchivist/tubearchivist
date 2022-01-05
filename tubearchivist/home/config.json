@@ -23,7 +23,8 @@
         "format": false,
         "add_metadata": false,
         "add_thumbnail": false,
-        "throttledratelimit": false
+        "throttledratelimit": false,
+        "integrate_ryd": false
     },
     "application": {
         "app_root": "/app",
