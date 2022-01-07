@@ -379,33 +379,40 @@ function searchMulti(query) {
     };
 }
 
+function getViewDefaults(view) {
+    var defaultView = document.getElementById("id_" + view).value;
+    return defaultView
+}
 
 function populateMultiSearchResults(allResults) {
     // videos
+    var defaultVideo = getViewDefaults("home");
     var allVideos = allResults["video_results"];
     var videoBox = document.getElementById("video-results");
     videoBox.innerHTML = "";
     for (let index = 0; index < allVideos.length; index++) {
         const video = allVideos[index]["source"];
-        const videoDiv = createVideo(video, "grid");
+        const videoDiv = createVideo(video, defaultVideo);
         videoBox.appendChild(videoDiv);
     };
     // channels
+    var defaultChannel = getViewDefaults("channel");
     var allChannels = allResults["channel_results"];
     var channelBox = document.getElementById("channel-results");
     channelBox.innerHTML = "";
     for (let index = 0; index < allChannels.length; index++) {
         const channel = allChannels[index]["source"];
-        const channelDiv = createChannel(channel, "list");
+        const channelDiv = createChannel(channel, defaultChannel);
         channelBox.appendChild(channelDiv);
     };
     // playlists
+    var defaultPlaylist = getViewDefaults("playlist");
     var allPlaylists = allResults["playlist_results"];
     var playlistBox = document.getElementById("playlist-results");
     playlistBox.innerHTML = "";
     for (let index = 0; index < allPlaylists.length; index++) {
         const playlist = allPlaylists[index]["source"];
-        const playlistDiv = createPlaylist(playlist, "grid");
+        const playlistDiv = createPlaylist(playlist, defaultPlaylist);
         playlistBox.appendChild(playlistDiv);
     };
 }
@@ -469,12 +476,12 @@ function createChannel(channel, viewStyle) {
     };
     // build markup
     const markup = `
-    <div class="channel-banner list">
+    <div class="channel-banner ${viewStyle}">
         <a href="/channel/${channelId}/">
             <img src="/cache/channels/${channelId}_banner.jpg" alt="${channelId}-banner">
         </a>
     </div>
-    <div class="info-box info-box-2 list">
+    <div class="info-box info-box-2 ${viewStyle}">
         <div class="info-box-item">
             <div class="round-img">
                 <a href="/channel/${channelId}/">

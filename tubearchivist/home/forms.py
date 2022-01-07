@@ -105,6 +105,9 @@ class MultiSearchForm(forms.Form):
             }
         ),
     )
+    home = forms.CharField(widget=forms.HiddenInput())
+    channel = forms.CharField(widget=forms.HiddenInput())
+    playlist = forms.CharField(widget=forms.HiddenInput())
 
 
 class AddToQueueForm(forms.Form):

@@ -71,6 +71,19 @@ class ArchivistViewConfig(View):
 
         return view_style
 
+    def get_all_view_styles(self):
+        """get dict of all view stiles for search form"""
+        all_keys = ["channel", "playlist", "home"]
+        all_styles = {}
+        for view_origin in all_keys:
+            view_key = f"{self.user_id}:view:{view_origin}"
+            view_style = self.user_conf.get_message(view_key)["status"]
+            if not view_style:
+                view_style = self.default_conf["default_view"][view_origin]
+            all_styles[view_origin] = view_style
+
+        return all_styles
+
     def _get_hide_watched(self):
         hide_watched_key = f"{self.user_id}:hide_watched"
         hide_watched = self.user_conf.get_message(hide_watched_key)["status"]
@@ -655,7 +668,11 @@ class SearchView(ArchivistResultsView):
     def get(self, request):
         """handle get request"""
         self.initiate_vars(request)
-        self.context.update({"search_form": MultiSearchForm()})
+        all_styles = self.get_all_view_styles()
+        self.context.update({"all_styles": all_styles})
+        self.context.update(
+            {"search_form": MultiSearchForm(initial=all_styles)}
+        )
 
         return render(request, "home/search.html", self.context)
 
