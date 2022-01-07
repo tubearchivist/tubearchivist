@@ -519,7 +519,7 @@ class PlaylistView(ArchivistResultsView):
     show all playlists indexed
     """
 
-    view_origin = "home"
+    view_origin = "playlist"
     es_search = "/ta_playlist/_search"
 
     def get(self, request):
