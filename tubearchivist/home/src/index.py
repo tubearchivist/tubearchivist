@@ -291,7 +291,6 @@ class YoutubeVideo:
     ES_AUTH = CONFIG["application"]["es_auth"]
     CACHE_DIR = CONFIG["application"]["cache_dir"]
     VIDEOS = CONFIG["application"]["videos"]
-    RYD = CONFIG["downloads"]["integrate_ryd"]
 
     def __init__(self, youtube_id):
         self.youtube_id = youtube_id
@@ -313,7 +312,7 @@ class YoutubeVideo:
                 break
 
         self.vid_dict = vid_dict
-        if self.RYD:
+        if self.CONFIG["downloads"]["integrate_ryd"]:
             self.get_ryd_stats()
 
     def get_youtubedl_vid_data(self):
