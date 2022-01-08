@@ -358,8 +358,7 @@ class ChannelIdView(ArchivistResultsView):
         else:
             # fall back channel lookup if no videos found
             es_path = f"ta_channel/_doc/{channel_id}"
-            channel_result = self.single_lookup(es_path)
-            channel_info = channel_result[0]["source"]
+            channel_info = self.single_lookup(es_path)
             channel_name = channel_info["channel_name"]
 
         self.context.update(
