@@ -7,6 +7,7 @@
 * [Core functionality](#core-functionality)
 * [Screenshots](#screenshots)
 * [Problem Tube Archivist tries to solve](#problem-tube-archivist-tries-to-solve)
+* [Connect](#connect)
 * [Installing and updating](#installing-and-updating)
 * [Getting Started](#getting-started)
 * [Potential pitfalls](#potential-pitfalls)
@@ -41,6 +42,10 @@
   
 ## Problem Tube Archivist tries to solve
 Once your YouTube video collection grows, it becomes hard to search and find a specific video. That's where Tube Archivist comes in: By indexing your video collection with metadata from YouTube, you can organize, search and enjoy your archived YouTube videos without hassle offline through a convenient web interface.
+
+## Connect
+- [Discord](https://discord.gg/AFwz8nE7BK): Connect with us on our brand new Discord server.
+- [r/TubeArchivist](https://www.reddit.com/r/TubeArchivist/): Join our brand new Subreddit.
 
 ## Installing and updating
 Take a look at the example `docker-compose.yml` file provided. Use the *latest* or the named semantic version tag. The *unstable* tag is for intermediate testing and as the name implies, is **unstable** and not be used on your main installation but in a [testing environment](CONTRIBUTING.md).  
