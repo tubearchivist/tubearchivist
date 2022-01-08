@@ -27,6 +27,10 @@ Additional settings passed to yt-dlp.
 - **Embed Metadata**: This saves the available tags directly into the media file by passing `--embed-metadata` to yt-dlp.
 - **Embed Thumbnail**: This will save the thumbnail into the media file by passing `--embed-thumbnail` to yt-dlp.
 
+## Integrations
+All third party integrations of TubeArchivist will **always** be *opt in*.
+- **returnyoutubedislike.com**: This will get dislikes and average ratings for each video back by integarting with the API from [returnyoutubedislike.com](https://www.returnyoutubedislike.com/).
+
 # Scheduler Setup
 Schedule settings expect a cron like format, where the first value is minute, second is hour and third is day of the week. Day 0 is Sunday, day 1 is Monday etc.
 
@@ -40,6 +44,7 @@ Examples:
 
 NOTE:
 - Changes in the scheduler settings require a container restart to take effect.
+- Cron format as *number*/*number* are none standard cron and are not supported by the scheduler, for example **0 0/12 \*** is invalid, use **0 \*/12 \*** instead.
 - Avoid an unnecessary frequent schedule to not get blocked by YouTube. For that reason * or wildcards for minutes are not supported.
 
 ## Rescan Subscriptions

@@ -5,7 +5,7 @@ Accessible at `/downloads/` of your Tube Archivist, this page handles all the do
 ## Rescan Subscriptions
 The **Rescan Subscriptions** icon <img src="assets/icon-rescan.png?raw=true" alt="rescan icon" width="20px" style="margin:0 5px;"> will start a background task to look for new videos from the channels and playlists you are subscribed to. You can define the channel and playlist page size on the [settings page](Settings#subscriptions). With the default page size, expect this process to take around 2-3 seconds for each channel or playlist you are subscribed to. A status message will show the progress.
 
-Then for every video found, **Tube Archivist** will skip the video if it has already been downloaded or if you added it to the *ignored* list before. All the other videos will get added to the download queue. Expect this to take around 1 second for each video as **Tube Archivist** needs to grab some additional metadata. New videos will get added at the bottom of the download queue.
+Then for every video found, **Tube Archivist** will skip the video if it has already been downloaded or if you added it to the *ignored* list before. All the other videos will get added to the download queue. Expect this to take around 2 seconds for each video as **Tube Archivist** needs to grab some additional metadata. New videos will get added at the bottom of the download queue.
 
 ## Download Queue
 The **Start Download** icon <img src="assets/icon-download.png?raw=true" alt="download icon" width="20px" style="margin:0 5px;"> will start the download process starting from the top of the queue. Take a look at the relevant settings on the [Settings Page](Settings#downloads). Once the process started, a progress message will show with additional details and controls: 
