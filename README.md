@@ -25,19 +25,19 @@
 * Keep track of viewed and unviewed videos
 
 ## Screenshots
-![home screenshot](assets/tube-archivist-screenshot-home-v0.1.0.png?raw=true "Tube Archivist Home")  
+![home screenshot](assets/tube-archivist-screenshot-home.png?raw=true "Tube Archivist Home")  
 *Home Page*
 
-![channels screenshot](assets/tube-archivist-screenshot-channels-v0.1.0.png?raw=true "Tube Archivist Channels")  
+![channels screenshot](assets/tube-archivist-screenshot-channels.png?raw=true "Tube Archivist Channels")  
 *All Channels*
 
-![single channel screenshot](assets/tube-archivist-screenshot-single-channel-v0.1.0.png?raw=true "Tube Archivist Single Channel")  
+![single channel screenshot](assets/tube-archivist-screenshot-single-channel.png?raw=true "Tube Archivist Single Channel")  
 *Single Channel*
 
-![video page screenshot](assets/tube-archivist-screenshot-video-v0.1.0.png?raw=true "Tube Archivist Video Page")  
+![video page screenshot](assets/tube-archivist-screenshot-video.png?raw=true "Tube Archivist Video Page")  
 *Video Page*
 
-![video page screenshot](assets/tube-archivist-screenshot-download-v0.1.0.png?raw=true "Tube Archivist Video Page")  
+![video page screenshot](assets/tube-archivist-screenshot-download.png?raw=true "Tube Archivist Video Page")  
 *Downloads Page*
   
 ## Problem Tube Archivist tries to solve
