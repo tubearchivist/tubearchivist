@@ -7,6 +7,7 @@ Functionality:
 
 import json
 import os
+import re
 
 from celery.schedules import crontab
 from home.src.helper import RedisArchivist
@@ -206,6 +207,10 @@ class ScheduleBuilder:
         if to_check == "0":
             # deactivate this schedule
             return False
+        if re.search(r"[\d]{1,2}\/[\d]{1,2}", to_check):
+            # number/number cron format will fail in celery
+            print("number/number schedule formatting not supported")
+            raise ValueError
 
         keys = ["minute", "hour", "day_of_week"]
         if to_check == "auto":
@@ -219,8 +224,11 @@ class ScheduleBuilder:
             raise ValueError("invalid input")
 
         to_write = dict(zip(keys, values))
-        if "*" in to_write["minute"]:
-            raise ValueError("too frequent: wildcard in minutes not supported")
+        try:
+            int(to_write["minute"])
+        except ValueError as error:
+            print("too frequent: only number in minutes are supported")
+            raise ValueError("invalid input") from error
 
         return to_write
 
