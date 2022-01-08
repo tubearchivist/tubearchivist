@@ -1,6 +1,6 @@
 ![Tube Archivist](assets/tube-archivist-banner.jpg?raw=true "Tube Archivist Banner")  
 
-<center><h1>Your self hosted YouTube media server</h1></center>
+<center><h1>Your self hosted YouTube media server!</h1></center>
 
 ## Table of contents:
 * [Wiki](https://github.com/bbilly1/tubearchivist/wiki) for a detailed documentation
