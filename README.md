@@ -183,4 +183,4 @@ The best donation to **Tube Archivist** is your time, take a look at the [contri
 Second best way to support the development is to provide for caffeinated beverages:
 * [Paypal.me](https://paypal.me/bbilly1) for a one time coffee
 * [Paypal Subscription](https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-03770005GR991451KMFGVPMQ) for a monthly coffee
-* [co-fi.com](https://ko-fi.com/bbilly1) for an alternative platform
+* [ko-fi.com](https://ko-fi.com/bbilly1) for an alternative platform
