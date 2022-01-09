@@ -8,8 +8,8 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - ./volumes/tubearchivist/media:/youtube
-      - ./volumes/tubearchivist/cache:/cache
+      - media:/youtube
+      - cache:/cache
     environment:
       - ES_URL=http://archivist-es:9200
       - REDIS_HOST=archivist-redis
@@ -29,7 +29,7 @@ services:
     expose:
       - "6379"
     volumes:
-      - ./volumes/tubearchivist/redis:/data
+      - redis:/data
     depends_on:
       - archivist-es
   archivist-es:
@@ -46,6 +46,12 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - ./volumes/tubearchivist/es:/usr/share/elasticsearch/data
+      - es:/usr/share/elasticsearch/data
     expose:
       - "9200"
+
+volumes:
+  media:
+  cache:
+  redis:
+  es:
