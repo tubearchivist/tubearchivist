@@ -103,7 +103,7 @@ function validate {
 
 
 # publish unstable tag to docker
-function sync_unsable {
+function sync_unstable {
 
     if [[ $(systemctl is-active docker) != 'active' ]]; then
         echo "starting docker"
@@ -147,7 +147,6 @@ function sync_docker {
     sudo docker buildx build \
         --platform linux/amd64,linux/arm64 \
         -t bbilly1/tubearchivist:latest \
-        -t bbilly1/tubearchivist:unstable \
         -t bbilly1/tubearchivist:"$VERSION" --push .
 
     # create release tag
@@ -171,8 +170,9 @@ elif [[ $1 == "validate" ]]; then
     validate "$2"
 elif [[ $1 == "docker" ]]; then
     sync_docker
+    sync_unstable
 elif [[ $1 == "unstable" ]]; then
-    sync_unsable
+    sync_unstable
 else
     echo "valid options are: blackhole | test | validate | docker | unstable"
 fi
