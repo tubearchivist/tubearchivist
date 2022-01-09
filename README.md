@@ -145,6 +145,8 @@ This should be considered as a **minimal viable product**, there is an extensive
 - [ ] Podcast mode to serve channel as mp3
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
 - [ ] Implement [Apprise](https://github.com/caronc/apprise) for notifications
+- [ ] Add [SponsorBlock](https://sponsor.ajay.app/) integration
+- [ ] Implement per channel settings
 - [ ] Subtitle download & indexing
 - [ ] User created playlists
 - [ ] Auto play or play next link
@@ -161,10 +163,10 @@ This should be considered as a **minimal viable product**, there is an extensive
 - [X] Scan your file system to index already downloaded videos [2021-09-14]
 
 ### UI
-- [ ] Fancy advanced unified search interface
 - [ ] Show similar videos on video page
 - [ ] Multi language support
 - [ ] Show total video downloaded vs total videos available in channel
+- [X] Fancy advanced unified search interface [2022-01-08]
 - [X] Grid and list view for both channel and video list pages [2021-10-03]
 - [X] Create a github wiki for user documentation [2021-10-03]
 
