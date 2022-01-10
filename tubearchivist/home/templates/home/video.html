@@ -45,6 +45,7 @@
                 {% else %}
                     <p>Youtube: Deactivated</p>
                 {% endif %}
+                <button id="download-item"><a download href="/media/{{ video.media_url }}">Download Video</a></button>
                 <button onclick="deleteConfirm()" id="delete-item">Delete Video</button>
                 <div class="delete-confirm" id="delete-button">
                     <span>Are you sure? </span><button class="danger-button" onclick="deleteVideo(this)" data-id="{{ video.youtube_id }}" data-redirect = "{{ video.channel.channel_id }}">Delete</button> <button onclick="cancelDelete()">Cancel</button>
