@@ -34,7 +34,7 @@ function onInitError() {
         console.log("Initialization failed");
 }
 
-function launchApp() {
+function startCast() {
         console.log("Launching the Chromecast App...");
         chrome.cast.requestSession(onRequestSessionSuccess, onLaunchError);
 }
@@ -78,7 +78,7 @@ function onLoadError() {
         console.log('Failed to load video.');
 }
 
-function stopApp() {
+function stopCast() {
         session.stop(onStopAppSuccess, onStopAppError);
 }
 
