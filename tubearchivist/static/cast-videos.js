@@ -35,7 +35,7 @@ function onInitError() {
 }
 
 function startCast() {
-        console.log("Launching the Chromecast App...");
+        console.log("Starting cast...");
         chrome.cast.requestSession(onRequestSessionSuccess, onLaunchError);
 }
 
