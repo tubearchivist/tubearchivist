@@ -79,13 +79,13 @@ function onLoadError() {
 }
 
 function stopCast() {
-        session.stop(onStopAppSuccess, onStopAppError);
+        session.stop(onStopCastSuccess, onStopCastError);
 }
 
-function onStopAppSuccess() {
-        console.log('Successfully stopped app.');
+function onStopCastSuccess() {
+        console.log('Successfully stopped casting.');
 }
 
-function onStopAppError() {
-        console.log('Error stopping app.');
+function onStopCastError() {
+        console.log('Error stopping cast.');
 }
