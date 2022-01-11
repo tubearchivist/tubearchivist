@@ -1,6 +1,7 @@
 beautifulsoup4==4.10.0
 celery==5.2.3
 Django==4.0.1
+djangorestframework==3.13.1
 Pillow==9.0.0
 redis==4.1.0
 requests==2.27.1

@@ -31,6 +31,7 @@ from home.src.index import YoutubePlaylist
 from home.src.index_management import get_available_backups
 from home.src.searching import Pagination, SearchHandler
 from home.tasks import extrac_dl, subscribe_to
+from rest_framework.authtoken.models import Token
 
 
 class ArchivistViewConfig(View):
@@ -683,8 +684,7 @@ class SettingsView(View):
     take post request from the form to update settings
     """
 
-    @staticmethod
-    def get(request):
+    def get(self, request):
         """read and display current settings"""
         config_handler = AppConfig(request.user.id)
         colors = config_handler.colors
@@ -693,10 +693,12 @@ class SettingsView(View):
         user_form = UserSettingsForm()
         app_form = ApplicationSettingsForm()
         scheduler_form = SchedulerSettingsForm()
+        token = self.get_token(request)
 
         context = {
             "title": "Settings",
             "config": config_handler.config,
+            "api_token": token,
             "colors": colors,
             "available_backups": available_backups,
             "user_form": user_form,
@@ -705,6 +707,14 @@ class SettingsView(View):
         }
 
         return render(request, "home/settings.html", context)
+
+    @staticmethod
+    def get_token(request):
+        """get existing or create new token of user"""
+        # pylint: disable=no-member
+        token = Token.objects.get_or_create(user=request.user)[0]
+        print(token)
+        return token
 
     @staticmethod
     def post(request):
