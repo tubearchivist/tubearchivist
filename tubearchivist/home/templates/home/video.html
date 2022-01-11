@@ -12,8 +12,10 @@
 <div class="boxed-content">
     <div class="title-bar">
         <h1>{{ video.title }}</h1>
-        <button onclick="startCast()">Start Cast</button>
-        <button onclick="stopCast()">Stop Cast</button>
+        {% if cast %}
+            <button onclick="startCast()">Start Cast</button>
+            <button onclick="stopCast()">Stop Cast</button>
+        {% endif %}
     </div>
     <div class="info-box info-box-3">
         <div class="info-box-item">
