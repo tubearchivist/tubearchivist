@@ -1,9 +1,9 @@
 # TubeArchivist API
 Documentation of available API endpoints.  
-**Note: This will change!**
+**Note: This is very early alpha and will change!**
 
 ## Authentication
-API token will get automatically created, accessible on the settings page. Token needs to be passed as an authorization header with every request. Additionally session based authentication is enabled too: When you are logged in to your TubeArchivist instance, you'll have access to the api in the browser for testing.
+API token will get automatically created, accessible on the settings page. Token needs to be passed as an authorization header with every request. Additionally session based authentication is enabled too: When you are logged into your TubeArchivist instance, you'll have access to the api in the browser for testing.
 
 Curl example:
 ```shell
@@ -20,14 +20,14 @@ headers = {"Authorization": "Token xxxxxxxxxx"}
 response = requests.get(url, headers=headers)
 ```
 
-## Videos
+## Video Item View
 /api/video/\<video_id>/
 
 ## Channel List View
 /api/channel/
 
 ### Subscribe to a list of channels
-POST /api/channel
+POST /api/channel/
 ```json
 {
     "data": [
@@ -39,14 +39,13 @@ POST /api/channel
 ## Channel Item View
 /api/channel/\<channel_id>/
 
-## Playlists
+## Playlists Item View
 /api/playlist/\<playlist_id>/
 
 ## Download Queue List View
 /api/download/
 
 ### Add list of videos to download queue
-
 POST /api/download/
 ```json
 {
