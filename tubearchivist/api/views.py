@@ -2,6 +2,11 @@
 
 import requests
 from home.src.config import AppConfig
+from rest_framework.authentication import (
+    SessionAuthentication,
+    TokenAuthentication,
+)
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -9,6 +14,8 @@ from rest_framework.views import APIView
 class ApiBaseView(APIView):
     """base view to inherit from"""
 
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     search_base = False
 
     def __init__(self):
