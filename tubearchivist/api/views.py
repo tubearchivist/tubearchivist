@@ -40,7 +40,11 @@ class ApiBaseView(APIView):
         url = f"{es_url}{self.search_base}{document_id}"
         print(url)
         response = requests.get(url, auth=self.context["es_auth"])
-        self.response["data"] = response.json()["_source"]
+        try:
+            self.response["data"] = response.json()["_source"]
+        except KeyError:
+            print(f"item not found: {document_id}")
+            self.response["data"] = False
         self.status_code = response.status_code
 
     def get_paginate(self):
@@ -70,7 +74,7 @@ class VideoApiView(ApiBaseView):
         """get request"""
         self.config_builder()
         self.get_document(video_id)
-        return Response(self.response)
+        return Response(self.response, status=self.status_code)
 
 
 class ChannelApiView(ApiBaseView):
@@ -85,7 +89,7 @@ class ChannelApiView(ApiBaseView):
         """get request"""
         self.config_builder()
         self.get_document(channel_id)
-        return Response(self.response)
+        return Response(self.response, status=self.status_code)
 
 
 class PlaylistApiView(ApiBaseView):
@@ -100,7 +104,7 @@ class PlaylistApiView(ApiBaseView):
         """get request"""
         self.config_builder()
         self.get_document(playlist_id)
-        return Response(self.response)
+        return Response(self.response, status=self.status_code)
 
 
 class DownloadApiView(ApiBaseView):
@@ -115,7 +119,7 @@ class DownloadApiView(ApiBaseView):
         """get request"""
         self.config_builder()
         self.get_document(video_id)
-        return Response(self.response)
+        return Response(self.response, status=self.status_code)
 
 
 class DownloadApiListView(ApiBaseView):
