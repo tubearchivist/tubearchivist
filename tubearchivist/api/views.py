@@ -2,6 +2,8 @@
 
 import requests
 from home.src.config import AppConfig
+from home.src.helper import UrlListParser
+from home.tasks import extrac_dl
 from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
@@ -20,7 +22,7 @@ class ApiBaseView(APIView):
 
     def __init__(self):
         super().__init__()
-        self.response = False
+        self.response = {"data": False}
         self.status_code = False
         self.context = False
 
@@ -38,7 +40,21 @@ class ApiBaseView(APIView):
         url = f"{es_url}{self.search_base}{document_id}"
         print(url)
         response = requests.get(url, auth=self.context["es_auth"])
-        self.response = response.json()["_source"]
+        self.response["data"] = response.json()["_source"]
+        self.status_code = response.status_code
+
+    def get_paginate(self):
+        """add pagination detail to response"""
+        self.response["paginate"] = False
+
+    def get_document_list(self, data):
+        """get a list of results"""
+        es_url = self.context["es_url"]
+        url = f"{es_url}{self.search_base}"
+        print(url)
+        response = requests.get(url, json=data, auth=self.context["es_auth"])
+        all_hits = response.json()["hits"]["hits"]
+        self.response["data"] = [i["_source"] for i in all_hits]
         self.status_code = response.status_code
 
 
@@ -100,3 +116,45 @@ class DownloadApiView(ApiBaseView):
         self.config_builder()
         self.get_document(video_id)
         return Response(self.response)
+
+
+class DownloadApiListView(ApiBaseView):
+    """resolves to /api/download/
+    GET: returns latest videos in the download queue
+    POST: add a list of videos to download queue
+    """
+
+    search_base = "/ta_download/_search/"
+
+    def get(self, request):
+        # pylint: disable=unused-argument
+        """get request"""
+        data = {"query": {"match_all": {}}}
+        self.config_builder()
+        self.get_document_list(data)
+        self.get_paginate()
+        return Response(self.response)
+
+    @staticmethod
+    def post(request):
+        """add list of videos to download queue"""
+        data = request.data
+        try:
+            to_add = data["data"]
+        except KeyError:
+            message = "missing expected data key"
+            print(message)
+            return Response({"message": message}, status=400)
+
+        pending = [i["youtube_id"] for i in to_add if i["status"] == "pending"]
+        url_str = " ".join(pending)
+        try:
+            youtube_ids = UrlListParser(url_str).process_list()
+        except ValueError:
+            message = f"failed to parse: {url_str}"
+            print(message)
+            return Response({"message": message}, status=400)
+
+        extrac_dl.delay(youtube_ids)
+
+        return Response(data)
