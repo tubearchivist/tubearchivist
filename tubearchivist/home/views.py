@@ -590,10 +590,9 @@ class VideoView(View):
 
     def get(self, request, video_id):
         """get single video"""
-        es_url, colors = self.read_config(user_id=request.user.id)
+        es_url, colors, cast = self.read_config(user_id=request.user.id)
         url = f"{es_url}/ta_video/_doc/{video_id}"
-        data = None
-        look_up = SearchHandler(url, data)
+        look_up = SearchHandler(url, None)
         video_hit = look_up.get_data()
         video_data = video_hit[0]["source"]
         try:
@@ -614,6 +613,7 @@ class VideoView(View):
             "playlist_nav": playlist_nav,
             "title": video_title,
             "colors": colors,
+            "cast": cast,
         }
         return render(request, "home/video.html", context)
 
@@ -635,8 +635,9 @@ class VideoView(View):
         """read config file"""
         config_handler = AppConfig(user_id)
         es_url = config_handler.config["application"]["es_url"]
+        cast = config_handler.config["application"]["enable_cast"]
         colors = config_handler.colors
-        return es_url, colors
+        return es_url, colors, cast
 
     @staticmethod
     def star_creator(rating):

@@ -62,6 +62,12 @@ class ApplicationSettingsForm(forms.Form):
         ("1", "enable ryd integration"),
     ]
 
+    CAST_CHOICES = [
+        ("", "-- change Cast integration --"),
+        ("0", "disable Cast"),
+        ("1", "enable Cast"),
+    ]
+
     subscriptions_channel_size = forms.IntegerField(required=False)
     downloads_limit_count = forms.IntegerField(required=False)
     downloads_limit_speed = forms.IntegerField(required=False)
@@ -77,6 +83,9 @@ class ApplicationSettingsForm(forms.Form):
     )
     downloads_integrate_ryd = forms.ChoiceField(
         widget=forms.Select, choices=RYD_CHOICES, required=False
+    )
+    application_enable_cast = forms.ChoiceField(
+        widget=forms.Select, choices=CAST_CHOICES, required=False
     )
 
 
