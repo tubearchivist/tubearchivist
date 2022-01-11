@@ -466,6 +466,9 @@ class YoutubeVideo:
             print(f"failed to query ryd api, skipping {self.youtube_id}")
             return False
 
+        if result["status"] == 404:
+            return False
+
         dislikes = {
             "dislike_count": result["dislikes"],
             "average_rating": result["rating"],
