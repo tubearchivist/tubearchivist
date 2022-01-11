@@ -1,6 +1,7 @@
 """all api urls"""
 
 from api.views import (
+    ChannelApiListView,
     ChannelApiView,
     DownloadApiListView,
     DownloadApiView,
@@ -14,6 +15,11 @@ urlpatterns = [
         "video/<slug:video_id>/",
         VideoApiView.as_view(),
         name="api-video",
+    ),
+    path(
+        "channel/",
+        ChannelApiListView.as_view(),
+        name="api-channel-list",
     ),
     path(
         "channel/<slug:channel_id>/",

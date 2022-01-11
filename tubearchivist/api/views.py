@@ -3,7 +3,7 @@
 import requests
 from home.src.config import AppConfig
 from home.src.helper import UrlListParser
-from home.tasks import extrac_dl
+from home.tasks import extrac_dl, subscribe_to
 from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
@@ -90,6 +90,42 @@ class ChannelApiView(ApiBaseView):
         self.config_builder()
         self.get_document(channel_id)
         return Response(self.response, status=self.status_code)
+
+
+class ChannelApiListView(ApiBaseView):
+    """resolves to /api/channel/
+    GET: returns list of channels
+    POST: edit a list of channels
+    """
+
+    search_base = "/ta_channel/_search/"
+
+    def get(self, request):
+        # pylint: disable=unused-argument
+        """get request"""
+        data = {"query": {"match_all": {}}}
+        self.config_builder()
+        self.get_document_list(data)
+        self.get_paginate()
+
+        return Response(self.response)
+
+    @staticmethod
+    def post(request):
+        """subscribe to list of channels"""
+        data = request.data
+        try:
+            to_add = data["data"]
+        except KeyError:
+            message = "missing expected data key"
+            print(message)
+            return Response({"message": message}, status=400)
+
+        pending = [i["channel_id"] for i in to_add if i["channel_subscribed"]]
+        url_str = " ".join(pending)
+        subscribe_to.delay(url_str)
+
+        return Response(data)
 
 
 class PlaylistApiView(ApiBaseView):
