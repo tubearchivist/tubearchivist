@@ -6,12 +6,16 @@
     <video 
         src="/media/{{ video.media_url }}" 
         poster="/cache/{{ video.vid_thumb_url }}" controls preload="false" 
-        type='video/mp4' width="100%" playsinline>
+        type='video/mp4' width="100%" playsinline id="video-item">
     </video>
 </div>
 <div class="boxed-content">
     <div class="title-bar">
         <h1>{{ video.title }}</h1>
+        {% if cast %}
+            <button onclick="startCast()">Start Cast</button>
+            <button onclick="stopCast()">Stop Cast</button>
+        {% endif %}
     </div>
     <div class="info-box info-box-3">
         <div class="info-box-item">
