@@ -1,91 +1,47 @@
-var session = null;
+initializeCastApi = function() {
+    cast.framework.CastContext.getInstance().setOptions({
+        receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+        autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+    });
 
-function initializeCastApi() {
-        var applicationID = chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID;
-        var sessionRequest = new chrome.cast.SessionRequest(applicationID);
-        var apiConfig = new chrome.cast.ApiConfig(sessionRequest,
-                sessionListener,
-                receiverListener);
-        chrome.cast.initialize(apiConfig, onInitSuccess, onInitError);
+    var player = new cast.framework.RemotePlayer();
+    var playerController = new cast.framework.RemotePlayerController(player);
+
+    playerController.addEventListener(
+        cast.framework.RemotePlayerEventType.IS_CONNECTED_CHANGED,
+        function (e) {
+            startCast(e.value);
+        }.bind(this)
+    );
 };
 
-function sessionListener(e) {
-        session = e;
-        console.log('New session');
-        if (session.media.length != 0) {
-                console.log('Found ' + session.media.length + ' sessions.');
-        }
-}
- 
-function receiverListener(e) {
-        if( e === 'available' ) {
-                console.log("Chromecast was found on the network.");
-        }
-        else {
-                console.log("There are no Chromecasts available.");
-        }
-}
+startCast = function(value) {
+    if (value) {
 
-function onInitSuccess() {
-        console.log("Initialization succeeded");
-}
+        var castSession = cast.framework.CastContext.getInstance().getCurrentSession();
 
-function onInitError() {
-        console.log("Initialization failed");
-}
+        contentId = document.getElementById("video-item").src;
+        contentTitle = document.getElementById('video-title').innerHTML;
+        contentImage = document.getElementById("video-item").poster;
+        contentType = 'video/mp4';
 
-function startCast() {
-        console.log("Starting cast...");
-        chrome.cast.requestSession(onRequestSessionSuccess, onLaunchError);
-}
+        mediaInfo = new chrome.cast.media.MediaInfo(contentId, contentType);
+        mediaInfo.streamType = chrome.cast.media.StreamType.BUFFERED;
+        mediaInfo.metadata = new chrome.cast.media.TvShowMediaMetadata();
+        mediaInfo.metadata.title = contentTitle
+        mediaInfo.metadata.images = [{
+            'url': contentImage
+        }];
 
-function onRequestSessionSuccess(e) {
-        console.log("Successfully created session: " + e.sessionId);
-        session = e;
-}
-
-function onLaunchError() {
-        console.log("Error connecting to the Chromecast.");
-}
-
-function onRequestSessionSuccess(e) {
-        console.log("Successfully created session: " + e.sessionId);
-        session = e;
-        loadMedia();
-}
-
-function loadMedia() {
-        if (!session) {
-                console.log("No session.");
-                return;
-        }
-        
-        var videoSrc = document.getElementById("video-item").src;
-        var mediaInfo = new chrome.cast.media.MediaInfo(videoSrc);
-        mediaInfo.contentType = 'video/mp4';
-  
         var request = new chrome.cast.media.LoadRequest(mediaInfo);
-        request.autoplay = true;
-
-        session.loadMedia(request, onLoadSuccess, onLoadError);
+        castSession.loadMedia(request).then(
+            function() { console.log('Load succeed'); },
+            function(errorCode) { console.log('Error code: ' + errorCode); });
+    }
 }
 
-function onLoadSuccess() {
-        console.log('Successfully loaded video.');
-}
-
-function onLoadError() {
-        console.log('Failed to load video.');
-}
-
-function stopCast() {
-        session.stop(onStopCastSuccess, onStopCastError);
-}
-
-function onStopCastSuccess() {
-        console.log('Successfully stopped casting.');
-}
-
-function onStopCastError() {
-        console.log('Error stopping cast.');
-}
+window['__onGCastApiAvailable'] = function(isAvailable) {
+    if (isAvailable) {
+        initializeCastApi();
+    }
+};
