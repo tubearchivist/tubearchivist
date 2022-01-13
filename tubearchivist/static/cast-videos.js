@@ -16,7 +16,8 @@ function initializeCastApi() {
 };
 
 function castConnectionChange(player) {
-    if (player.isConnected) { // If cast connection is intitialized start cast
+    // If cast connection is intitialized start cast
+    if (player.isConnected) {
         // console.log("Cast Connected.");
         castStart();
     } else if (!player.isConnected) {
@@ -27,8 +28,8 @@ function castConnectionChange(player) {
 function castStart() {
     var castSession = cast.framework.CastContext.getInstance().getCurrentSession();
     
-    
-    if (!castSession.getMediaSession()) { // Check if there is already media playing on the cast target to prevent recasting on page reload or switching to another video page
+    // Check if there is already media playing on the cast target to prevent recasting on page reload or switching to another video page
+    if (!castSession.getMediaSession()) { 
         contentId = document.getElementById("video-item").src; // Get URL from the video item
         contentTitle = document.getElementById('video-title').innerHTML; // Get Video title
         contentImage = document.getElementById("video-item").poster; // Get video thumbnail URL
@@ -60,7 +61,7 @@ function castSuccessful() {
 }
 
 function castFailed(errorCode) {
-    // console.log('Error code: ' + errorCode);
+    console.log('Error code: ' + errorCode);
 }
 
 window['__onGCastApiAvailable'] = function(isAvailable) {
