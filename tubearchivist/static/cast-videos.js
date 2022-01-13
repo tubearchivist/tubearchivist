@@ -17,10 +17,10 @@ function initializeCastApi() {
 
 function castConnectionChange(player) {
     if (player.isConnected) { // If cast connection is intitialized start cast
-        console.log("Cast Connected.");
+        // console.log("Cast Connected.");
         castStart();
     } else if (!player.isConnected) {
-        console.log("Cast Disconnected.");
+        // console.log("Cast Disconnected.");
     }
 }
 
@@ -55,12 +55,12 @@ function castStart() {
 }
 
 function castSuccessful() {
-    console.log('Cast Successful.');
+    // console.log('Cast Successful.');
     document.getElementById("video-item").pause(); // Pause browser video on successful cast
 }
 
 function castFailed(errorCode) {
-    console.log('Error code: ' + errorCode);
+    // console.log('Error code: ' + errorCode);
 }
 
 window['__onGCastApiAvailable'] = function(isAvailable) {
