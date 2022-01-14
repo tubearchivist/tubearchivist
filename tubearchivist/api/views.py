@@ -178,6 +178,7 @@ class DownloadApiListView(ApiBaseView):
     @staticmethod
     def post(request):
         """add list of videos to download queue"""
+        print(f"request meta data: {request.META}")
         data = request.data
         try:
             to_add = data["data"]

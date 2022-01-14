@@ -14,6 +14,7 @@ import hashlib
 from os import environ, path
 from pathlib import Path
 
+from corsheaders.defaults import default_headers
 from home.src.config import AppConfig
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "corsheaders",
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
@@ -52,6 +54,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -140,3 +143,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "/login/"
 LOGOUT_REDIRECT_URL = "/login/"
+
+# Cors needed for browser extension
+# background.js makes the request so HTTP_ORIGIN will be from extension
+CORS_ALLOWED_ORIGIN_REGEXES = [r"moz-extension://*"]
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "mode",
+]
