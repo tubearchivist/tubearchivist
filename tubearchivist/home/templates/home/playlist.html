@@ -23,7 +23,7 @@
             <span>Show subscribed only:</span>
             <div class="toggleBox">
                 <input id="show_subed_only" onclick="toggleCheckbox(this)" type="checkbox" {% if show_subed_only %}checked{% endif %}>
-                {% if show_subed_only %}
+                {% if not show_subed_only %}
                     <label for="" class="ofbtn">Off</label>
                 {% else %}
                     <label for="" class="onbtn">On</label>

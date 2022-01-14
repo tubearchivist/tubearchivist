@@ -71,7 +71,7 @@
             <span>Hide watched videos:</span>
             <div class="toggleBox">
                 <input id="hide_watched" onclick="toggleCheckbox(this)" type="checkbox" {% if hide_watched %}checked{% endif %}>
-                {% if hide_watched %}
+                {% if not hide_watched %}
                     <label for="" class="ofbtn">Off</label>
                 {% else %}
                     <label for="" class="onbtn">On</label>
