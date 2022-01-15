@@ -146,7 +146,7 @@ LOGOUT_REDIRECT_URL = "/login/"
 
 # Cors needed for browser extension
 # background.js makes the request so HTTP_ORIGIN will be from extension
-CORS_ALLOWED_ORIGIN_REGEXES = [r"moz-extension://*"]
+CORS_ALLOWED_ORIGIN_REGEXES = [r"moz-extension://*", r"chrome-extension://*"]
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "mode",
