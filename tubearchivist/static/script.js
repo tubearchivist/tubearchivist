@@ -286,12 +286,17 @@ function cancelDelete() {
 
 // player
 function createPlayer(button) {
-    var mediaUrl = button.getAttribute('data-src');
-    var mediaThumb = button.getAttribute('data-thumb');
-    var mediaTitle = button.getAttribute('data-title');
-    var mediaChannel = button.getAttribute('data-channel');
-    var mediaChannelId = button.getAttribute('data-channel-id');
-    var dataId = button.getAttribute('data-id');
+    var videoId = button.getAttribute('data-id'); // Get video ID the same way as before
+    var videoPlayerData = getVideoPlayerData(videoId); // Get video player data for video ID
+
+    // Set old vars with acquired video player data
+    var dataId = videoPlayerData.youtube_id;
+    var mediaUrl = videoPlayerData.media_url;
+    var mediaThumb = videoPlayerData.vid_thumb_url;
+    var mediaTitle = videoPlayerData.title;
+    var mediaChannel = videoPlayerData.channel_name;
+    var mediaChannelId = videoPlayerData.channel_id;
+
     // get watched status
     var playedStatus = document.createDocumentFragment();
     playedStatus.appendChild(document.getElementById(dataId));
@@ -350,6 +355,30 @@ function createPlayer(button) {
     playerElement.appendChild(titleBar);
     // add whole
     document.getElementById("player").appendChild(playerElement);
+}
+
+// Gets video player data in JSON format when passed video ID
+function getVideoPlayerData(videoId) {
+    var apiEndpoint = "/api/video/" + videoId + "/player/"; // Set API Endpoint
+    videoPlayerData = apiRequest(apiEndpoint, "GET")
+    return videoPlayerData;
+}
+
+// Gets video data in JSON format when passed video ID, not used right now but is another example of using apiRequest()
+function getVideoData(videoId) {
+    var apiEndpoint = "/api/video/" + videoId + "/"; // Set API Endpoint
+    videoData = apiRequest(apiEndpoint, "GET")
+    return videoData;
+}
+
+// Makes api requests when passed an endpoint and method ("GET" or "POST")
+function apiRequest(apiEndpoint, method) {
+    const xhttp = new XMLHttpRequest();
+    var sessionToken = getCookie("sessionid"); // Get session token from cookie
+    xhttp.open(method, apiEndpoint, false);
+    xhttp.setRequestHeader("Authorization", "Token " + sessionToken);
+    xhttp.send();
+    return JSON.parse(xhttp.responseText); // Format response as JSON and return
 }
 
 function removePlayer() {
@@ -604,3 +633,4 @@ function animate(elementId, animationClass) {
         toAnimate.classList.remove(animationClass);
     };
 }
+
