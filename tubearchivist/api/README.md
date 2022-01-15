@@ -23,6 +23,10 @@ response = requests.get(url, headers=headers)
 ## Video Item View
 /api/video/\<video_id>/
 
+## Video Player View
+returns all relevant information to create video player
+/api/video/\<video_id>/player
+
 ## Channel List View
 /api/channel/
 
