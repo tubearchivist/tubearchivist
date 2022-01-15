@@ -33,7 +33,7 @@
             <span>Show only ignored videos:</span>
             <div class="toggleBox">
                 <input id="show_ignored_only" onclick="toggleCheckbox(this)" type="checkbox" {% if show_ignored_only %}checked{% endif %}>
-                {% if show_ignored_only %}
+                {% if not show_ignored_only %}
                     <label for="" class="ofbtn">Off</label>
                 {% else %}
                     <label for="" class="onbtn">On</label>

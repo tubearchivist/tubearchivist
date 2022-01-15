@@ -155,8 +155,8 @@ button:hover {
     position: relative;
     width: 70px;
     height: 30px;
-    background-color: var(--accent-font-dark);
-    border-color: var(--accent-font-dark);
+    background-color: var(--accent-font-light);
+    border-color: var(--accent-font-light);
     appearance: none;
     border-radius: 15px;
     transition: 0.4s;
@@ -165,8 +165,8 @@ button:hover {
 }
 
 .toggleBox > input:checked[type="checkbox"] {
-    background-color: var(--accent-font-light);
-    border-color: var(--accent-font-light);
+    background-color: var(--accent-font-dark);
+    border-color: var(--accent-font-dark);
 }
 
 .toggleBox > input[type="checkbox"]::before {
@@ -200,14 +200,15 @@ button:hover {
 }
 
 .toggleBox > .onbtn {
-    right: 35%;
+    right: 70%;
     top: 45%;
     transform: translate(50%,-50%);
     font-family: Sen-Regular, sans-serif;
+
 }
 
 .toggleBox > .ofbtn {
-    left: 0;
+    left: 37%;
     top: 45%;
     transform: translate(50%,-50%);
     font-family: Sen-Regular, sans-serif;
