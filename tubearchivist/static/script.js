@@ -287,7 +287,7 @@ function cancelDelete() {
 // player
 function createPlayer(button) {
     var videoId = button.getAttribute('data-id'); // Get video ID the same way as before
-    var videoPlayerData = getVideoPlayerData(videoId); // Get video player data for video ID
+    var videoPlayerData = getVideoPlayerData(videoId); // Get video player data from video ID
 
     // Set old vars with acquired video player data
     var dataId = videoPlayerData.youtube_id;
