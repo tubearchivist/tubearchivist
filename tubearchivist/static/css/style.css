@@ -271,8 +271,8 @@ button:hover {
     float: right;
     width: 40px;
     padding: 0 5px;
-    --disconnected-color: #259485;
-    --connected-color: #97d4c8;
+    --disconnected-color: var(--accent-font-dark);
+    --connected-color: var(--accent-font-light);
 }
 
 /* top of page */
