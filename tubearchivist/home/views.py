@@ -111,6 +111,7 @@ class ArchivistViewConfig(View):
 
         self.context = {
             "colors": self.default_conf["application"]["colors"],
+            "cast": self.default_conf["application"]["enable_cast"],
             "sort_by": self._get_sort_by(),
             "sort_order": self._get_sort_order(),
             "view_style": self._get_view_style(),

@@ -309,6 +309,7 @@ function createPlayer(button) {
     videoPlayer.setAttribute('width', '100%');
     videoPlayer.setAttribute('playsinline', true);
     videoPlayer.setAttribute('poster', mediaThumb);
+    videoPlayer.setAttribute('id', 'video-item'); // Set ID to get URL for casting
     playerElement.appendChild(videoPlayer);
     // title bar
     var titleBar = document.createElement('div');
@@ -335,7 +336,14 @@ function createPlayer(button) {
     var videoTitleLink = document.createElement('a');
     videoTitleLink.setAttribute('href', '/video/' + dataId + '/');
     var videoTitle = document.createElement('h2');
+    videoTitle.setAttribute('id', "video-title"); // Set ID to get title for casting
     videoTitle.innerText = mediaTitle;
+    var castScript = document.getElementById('cast-script'); // Get cast-script
+    if(typeof(castScript) != 'undefined' && castScript != null) { // Check if cast integration is enabled
+        var castButton = document.createElement("google-cast-launcher"); // Create cast button
+        castButton.setAttribute('id', "castbutton"); // Set ID to apply theme
+        titleBar.appendChild(castButton); // Add cast button to title
+    }
     videoTitleLink.appendChild(videoTitle);
     titleBar.appendChild(videoTitleLink);
     // add titlebar

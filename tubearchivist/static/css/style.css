@@ -267,6 +267,14 @@ button:hover {
     filter: var(--img-filter);
 }
 
+#castbutton {
+    float: right;
+    width: 40px;
+    padding: 0 5px;
+    --disconnected-color: var(--accent-font-dark);
+    --connected-color: var(--accent-font-light);
+}
+
 /* top of page */
 .title-bar {
     padding-top: 30px;
