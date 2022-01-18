@@ -65,7 +65,7 @@ class YoutubeChannel:
         channel_id = self.channel_id
         url = f"https://www.youtube.com/channel/{channel_id}/about?hl=en"
         cookies = {"CONSENT": "YES+xxxxxxxxxxxxxxxxxxxxxxxxxxx"}
-        response = requests.get(url, cookies=cookies, auth=self.ES_AUTH)
+        response = requests.get(url, cookies=cookies)
         if response.ok:
             channel_page = response.text
         else:
