@@ -169,8 +169,7 @@ class ArchivistResultsView(ArchivistViewConfig):
 
     def single_lookup(self, es_path):
         """retrieve a single item from url"""
-        es_url = self.default_conf["application"]["es_url"]
-        search = SearchHandler(f"{es_url}/{es_path}", data=False)
+        search = SearchHandler(es_path, config=self.default_conf)
         result = search.get_data()[0]["source"]
         return result
 
@@ -189,8 +188,9 @@ class ArchivistResultsView(ArchivistViewConfig):
 
     def find_results(self):
         """add results and pagination to context"""
-        url = self.default_conf["application"]["es_url"] + self.es_search
-        search = SearchHandler(url, self.data)
+        search = SearchHandler(
+            self.es_search, config=self.default_conf, data=self.data
+        )
         self.context["results"] = search.get_data()
         self.pagination_handler.validate(search.max_hits)
         self.context["max_hits"] = search.max_hits
@@ -203,7 +203,7 @@ class HomeView(ArchivistResultsView):
     """
 
     view_origin = "home"
-    es_search = "/ta_video/_search"
+    es_search = "ta_video/_search"
 
     def get(self, request):
         """handle get requests"""
@@ -284,7 +284,7 @@ class DownloadView(ArchivistResultsView):
     """
 
     view_origin = "downloads"
-    es_search = "/ta_download/_search"
+    es_search = "ta_download/_search"
 
     def get(self, request):
         """handle get request"""
@@ -346,7 +346,7 @@ class ChannelIdView(ArchivistResultsView):
     """
 
     view_origin = "home"
-    es_search = "/ta_video/_search"
+    es_search = "ta_video/_search"
 
     def get(self, request, channel_id):
         """get request"""
@@ -395,7 +395,7 @@ class ChannelView(ArchivistResultsView):
     """
 
     view_origin = "channel"
-    es_search = "/ta_channel/_search"
+    es_search = "ta_channel/_search"
 
     def get(self, request):
         """handle get request"""
@@ -445,7 +445,7 @@ class PlaylistIdView(ArchivistResultsView):
     """
 
     view_origin = "home"
-    es_search = "/ta_video/_search"
+    es_search = "ta_video/_search"
 
     def get(self, request, playlist_id):
         """handle get request"""
@@ -521,7 +521,7 @@ class PlaylistView(ArchivistResultsView):
     """
 
     view_origin = "playlist"
-    es_search = "/ta_playlist/_search"
+    es_search = "ta_playlist/_search"
 
     def get(self, request):
         """handle get request"""
@@ -592,9 +592,9 @@ class VideoView(View):
 
     def get(self, request, video_id):
         """get single video"""
-        es_url, colors, cast = self.read_config(user_id=request.user.id)
-        url = f"{es_url}/ta_video/_doc/{video_id}"
-        look_up = SearchHandler(url, None)
+        colors, cast = self.read_config(user_id=request.user.id)
+        path = f"ta_video/_doc/{video_id}"
+        look_up = SearchHandler(path, config=False)
         video_hit = look_up.get_data()
         video_data = video_hit[0]["source"]
         try:
@@ -636,10 +636,9 @@ class VideoView(View):
     def read_config(user_id):
         """read config file"""
         config_handler = AppConfig(user_id)
-        es_url = config_handler.config["application"]["es_url"]
         cast = config_handler.config["application"]["enable_cast"]
         colors = config_handler.colors
-        return es_url, colors, cast
+        return colors, cast
 
     @staticmethod
     def star_creator(rating):

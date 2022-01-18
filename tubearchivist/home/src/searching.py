@@ -10,8 +10,8 @@ import math
 import urllib.parse
 from datetime import datetime
 
-import requests
 from home.src.config import AppConfig
+from home.src.es import ElasticWrap
 from home.src.helper import RedisArchivist
 from home.src.thumbnails import ThumbManager
 
@@ -19,23 +19,15 @@ from home.src.thumbnails import ThumbManager
 class SearchHandler:
     """search elastic search"""
 
-    CONFIG = AppConfig().config
-    CACHE_DIR = CONFIG["application"]["cache_dir"]
-    ES_AUTH = CONFIG["application"]["es_auth"]
-
-    def __init__(self, url, data):
+    def __init__(self, path, config, data=False):
         self.max_hits = None
-        self.url = url
+        self.path = path
+        self.config = config
         self.data = data
 
     def get_data(self):
         """get the data"""
-        if self.data:
-            response = requests.get(
-                self.url, json=self.data, auth=self.ES_AUTH
-            ).json()
-        else:
-            response = requests.get(self.url, auth=self.ES_AUTH).json()
+        response, _ = ElasticWrap(self.path, config=self.config).get(self.data)
 
         if "hits" in response.keys():
             self.max_hits = response["hits"]["total"]["value"]
@@ -153,11 +145,10 @@ class SearchForm:
     """build query from search form data"""
 
     CONFIG = AppConfig().config
-    ES_URL = CONFIG["application"]["es_url"]
 
     def multi_search(self, search_query):
         """searching through index"""
-        url = self.ES_URL + "/ta_video,ta_channel,ta_playlist/_search"
+        path = "ta_video,ta_channel,ta_playlist/_search"
         data = {
             "size": 30,
             "query": {
@@ -184,7 +175,7 @@ class SearchForm:
                 }
             },
         }
-        look_up = SearchHandler(url, data)
+        look_up = SearchHandler(path, config=self.CONFIG, data=data)
         search_results = look_up.get_data()
         all_results = self.build_results(search_results)
 
