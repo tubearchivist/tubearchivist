@@ -312,8 +312,11 @@ function createPlayer(button) {
     // Watched indicator
     if (videoIsWatched) {
         var playerState = "seen";
+        var watchedFunction = "Unwatched";
     } else {
         var playerState = "unseen";
+        var watchedFunction = "Watched";
+        
     };
     
     const markup = `
@@ -321,7 +324,7 @@ function createPlayer(button) {
         <video src="${videoUrl}" controls autoplay width="100%" playsinline poster="${videoThumbUrl}" id="video-item"></video>
         <div class="player-title boxed-content">
             <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
-            <img src="/static/img/icon-${playerState}.svg" alt="${playerState}-icon" id="${videoId}" onclick="isWatched(this.id)" class="${playerState}-icon">
+            <img src="/static/img/icon-${playerState}.svg" alt="${playerState}-icon" id="${videoId}" onclick="is${watchedFunction}(this.id)" class="${playerState}-icon" title="Mark as ${watchedFunction}">
             <a href="/channel/${channelId}/">
                 <h3>${channelName}</h3>
             </a>
