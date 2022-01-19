@@ -286,105 +286,98 @@ function cancelDelete() {
 
 // player
 function createPlayer(button) {
-    var videoId = button.getAttribute('data-id'); // Get video ID the same way as before
-    var videoPlayerData = getVideoPlayerData(videoId); // Get video player data from video ID
+    var videoId = button.getAttribute('data-id');
+    var videoPlayerData = getVideoPlayerData(videoId);
 
-    // Set old vars with acquired video player data
-    var dataId = videoPlayerData.youtube_id;
-    var mediaUrl = videoPlayerData.media_url;
-    var mediaThumb = videoPlayerData.vid_thumb_url;
-    var mediaTitle = videoPlayerData.title;
-    var mediaChannel = videoPlayerData.channel_name;
-    var mediaChannelId = videoPlayerData.channel_id;
+    // Set vars with acquired video player data
+    var videoUrl = videoPlayerData.media_url;
+    var videoThumbUrl = videoPlayerData.vid_thumb_url;
+    var videoName = videoPlayerData.title;
+    var channelName = videoPlayerData.channel_name;
+    var channelId = videoPlayerData.channel_id;
+    var videoIsWatched = videoPlayerData.is_watched;
 
-    // get watched status
-    var playedStatus = document.createDocumentFragment();
-    playedStatus.appendChild(document.getElementById(dataId));
-    // create player
+    
+    // Remove old player
     removePlayer();
-    var playerElement = document.createElement('div');
-    playerElement.classList.add("video-player");
-    // var playerElement = document.getElementById('player');
-    playerElement.setAttribute('data-id', dataId);
-    // playerElement.innerHTML = '';
-    var videoPlayer = document.createElement('video');
-    videoPlayer.setAttribute('src', mediaUrl);
-    videoPlayer.setAttribute('controls', true);
-    videoPlayer.setAttribute('autoplay', true);
-    videoPlayer.setAttribute('width', '100%');
-    videoPlayer.setAttribute('playsinline', true);
-    videoPlayer.setAttribute('poster', mediaThumb);
-    videoPlayer.setAttribute('id', 'video-item'); // Set ID to get URL for casting
-    playerElement.appendChild(videoPlayer);
-    // title bar
-    var titleBar = document.createElement('div');
-    titleBar.classList.add('player-title', 'boxed-content');
-    // close
-    var closeButton = document.createElement('img');
-    closeButton.className = 'close-button';
-    closeButton.setAttribute('src', "/static/img/icon-close.svg");
-    closeButton.setAttribute('alt', 'close-icon');
-    closeButton.setAttribute('data', dataId);
-    closeButton.setAttribute('onclick', "removePlayer()");
-    closeButton.setAttribute('title', 'Close player');
-    titleBar.appendChild(closeButton);
-    // played
-    titleBar.appendChild(playedStatus);
-    // channel title
-    var channelTitleLink = document.createElement('a');
-    channelTitleLink.setAttribute('href', '/channel/' + mediaChannelId + '/');
-    var channelTitle = document.createElement('h3');
-    channelTitle.innerText = mediaChannel;
-    channelTitleLink.appendChild(channelTitle);
-    titleBar.appendChild(channelTitleLink);
-    // video title
-    var videoTitleLink = document.createElement('a');
-    videoTitleLink.setAttribute('href', '/video/' + dataId + '/');
-    var videoTitle = document.createElement('h2');
-    videoTitle.setAttribute('id', "video-title"); // Set ID to get title for casting
-    videoTitle.innerText = mediaTitle;
-    var castScript = document.getElementById('cast-script'); // Get cast-script
-    if(typeof(castScript) != 'undefined' && castScript != null) { // Check if cast integration is enabled
-        var castButton = document.createElement("google-cast-launcher"); // Create cast button
-        castButton.setAttribute('id', "castbutton"); // Set ID to apply theme
-        titleBar.appendChild(castButton); // Add cast button to title
-    }
-    videoTitleLink.appendChild(videoTitle);
-    titleBar.appendChild(videoTitleLink);
-    // add titlebar
-    playerElement.appendChild(titleBar);
-    // add whole
-    document.getElementById("player").appendChild(playerElement);
+    
+    // If cast integration is enabled create cast button
+    var castScript = document.getElementById('cast-script');
+    if (typeof(castScript) != 'undefined' && castScript != null) {
+        var castButton = `<google-cast-launcher id="castbutton" style="display: block;"></google-cast-launcher>`;
+    } else {
+        var castButton = ``;
+    };
+
+    // Watched indicator button
+    if (videoIsWatched) {
+        var isWatchedButton = `<img src="/static/img/icon-seen.svg" alt="seen-icon" id="${videoId}" onclick="isUnwatched(this.id)" class="seen-icon" title="Mark as unwatched">`;
+    } else {
+        var isWatchedButton = `<img src="/static/img/icon-unseen.svg" alt="unseen-icon" id="${videoId}" title="Mark as watched" onclick="isWatched(this.id)" class="unseen-icon">`;
+    };
+
+    const markup = `
+    <div class="video-player" data-id="${videoId}">
+        <video src="${videoUrl}" controls autoplay width="100%" playsinline poster="${videoThumbUrl}" id="video-item"></video>
+        <div class="player-title boxed-content">
+            <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
+            ${isWatchedButton}
+            <a href="/channel/${channelId}/">
+                <h3>${channelName}</h3>
+            </a>
+            <a href="/video/${videoId}/">
+                <h2 id="video-title">${videoName}</h2>
+            </a>
+            ${castButton}
+        </div>
+    </div>
+    `
+    const divPlayer =  document.getElementById("player");
+    divPlayer.innerHTML = markup;
 }
 
 // Gets video player data in JSON format when passed video ID
 function getVideoPlayerData(videoId) {
-    var apiEndpoint = "/api/video/" + videoId + "/player/"; // Set API Endpoint
+    var apiEndpoint = "/api/video/" + videoId + "/player/";
     videoPlayerData = apiRequest(apiEndpoint, "GET")
     return videoPlayerData;
 }
 
-// Gets video data in JSON format when passed video ID, not used right now but is another example of using apiRequest()
+// Gets video data in JSON format when passed video ID
 function getVideoData(videoId) {
-    var apiEndpoint = "/api/video/" + videoId + "/"; // Set API Endpoint
+    var apiEndpoint = "/api/video/" + videoId + "/";
     videoData = apiRequest(apiEndpoint, "GET")
-    return videoData;
+    return videoData.data;
+}
+
+// Gets channel data in JSON format when passed channel ID
+function getChannelData(channelId) {
+    var apiEndpoint = "/api/channel/" + channelId + "/";
+    channelData = apiRequest(apiEndpoint, "GET")
+    return channelData.data;
+}
+
+// Gets playlist data in JSON format when passed playlist ID
+function getPlaylistData(playlistId) {
+    var apiEndpoint = "/api/playlist/" + playlistId + "/";
+    playlistData = apiRequest(apiEndpoint, "GET")
+    return playlistData.data;
 }
 
 // Makes api requests when passed an endpoint and method ("GET" or "POST")
 function apiRequest(apiEndpoint, method) {
     const xhttp = new XMLHttpRequest();
-    var sessionToken = getCookie("sessionid"); // Get session token from cookie
+    var sessionToken = getCookie("sessionid");
     xhttp.open(method, apiEndpoint, false);
     xhttp.setRequestHeader("Authorization", "Token " + sessionToken);
     xhttp.send();
-    return JSON.parse(xhttp.responseText); // Format response as JSON and return
+    return JSON.parse(xhttp.responseText);
 }
 
 function removePlayer() {
     var playerElement = document.getElementById('player');
     if (playerElement.hasChildNodes()) {
-        var youtubeId = playerElement.childNodes[0].getAttribute("data-id");
+        var youtubeId = playerElement.childNodes[1].getAttribute("data-id");
         var playedStatus = document.createDocumentFragment();
         var playedBox = document.getElementById(youtubeId);
         if (playedBox) {
@@ -458,21 +451,24 @@ function populateMultiSearchResults(allResults) {
 function createVideo(video, viewStyle) {
     // create video item div from template
     const videoId = video["youtube_id"];
-    const mediaUrl = video["media_url"];
-    const thumbUrl = "/cache/" + video["vid_thumb_url"];
-    const videoTitle = video["title"];
+    const videoData = getVideoData(videoId);
+    const videoPlayerData = getVideoPlayerData(videoId);
+    // const mediaUrl = videoData.media_url;
+    const thumbUrl = videoPlayerData.vid_thumb_url;
+    const videoTitle = videoPlayerData.title;
     const videoPublished = video["published"];
-    const videoDuration = video["player"]["duration_str"];
-    if (video["player"]["watched"]) {
+    // const videoPublished = videoPlayerData.published; // API date format is "2022-01-09" and couldn't quite get the format right with Date()
+    const videoDuration = videoData.player.duration_str;
+    if (videoPlayerData.is_watched) {
         var playerState = "seen";
     } else {
         var playerState = "unseen";
     };
-    const channelId = video["channel"]["channel_id"];
-    const channelName = video["channel"]["channel_name"];
+    const channelId = videoPlayerData.channel_id;
+    const channelName = videoPlayerData.channel_name;
     // build markup
     const markup = `
-    <a href="#player" data-src="/media/${mediaUrl}" data-thumb="${thumbUrl}" data-title="${videoTitle}" data-channel="${channelName}" data-channel-id="${channelId}" data-id="${videoId}" onclick="createPlayer(this)">
+    <a href="#player" data-id="${videoId}" onclick="createPlayer(this)">
         <div class="video-thumb-wrap ${viewStyle}">
             <div class="video-thumb">
                 <img src="${thumbUrl}" alt="video-thumb">
@@ -495,18 +491,20 @@ function createVideo(video, viewStyle) {
     `
     const videoDiv = document.createElement("div");
     videoDiv.setAttribute("class", "video-item " + viewStyle);
-    videoDiv.innerHTML = markup
-    return videoDiv
+    videoDiv.innerHTML = markup;
+    return videoDiv;
 }
 
 
 function createChannel(channel, viewStyle) {
     // create channel item div from template
     const channelId = channel["channel_id"];
-    const channelName = channel["channel_name"];
-    const channelSubs = channel["channel_subs"];
-    const channelLastRefresh = channel["channel_last_refresh"];
-    if (channel["channel_subscribed"]) {
+    const channelData = getChannelData(channelId);
+    const channelName = channelData.channel_name;
+    const channelSubs = channelData.channel_subs;
+    const channelLastRefresh = channel["channel_last_refresh"]; 
+    // const channelLastRefresh = channelData.channel_last_refresh; // Last refresh date format unknown, milliseconds resulted in wrong date
+    if (channelData.channel_subscribed) {
         var button = `<button class="unsubscribe" type="button" id="${channelId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${channelName}">Unsubscribe</button>`
     } else {
         var button = `<button type="button" id="${channelId}" onclick="subscribe(this.id)" title="Subscribe to ${channelName}">Subscribe</button>`
@@ -541,17 +539,19 @@ function createChannel(channel, viewStyle) {
     const channelDiv = document.createElement("div");
     channelDiv.setAttribute("class", "channel-item " + viewStyle);
     channelDiv.innerHTML = markup;
-    return channelDiv
+    return channelDiv;
 }
 
 function createPlaylist(playlist, viewStyle) {
     // create playlist item div from template
     const playlistId = playlist["playlist_id"];
-    const playlistName = playlist["playlist_name"];
-    const playlistChannelId = playlist["playlist_channel_id"];
-    const playlistChannel = playlist["playlist_channel"];
+    const playlistData = getPlaylistData(playlistId);
+    const playlistName = playlistData.playlist_name;
+    const playlistChannelId = playlistData.playlist_channel_id;
+    const playlistChannel = playlistData.playlist_channel;
     const playlistLastRefresh = playlist["playlist_last_refresh"];
-    if (playlist["playlist_subscribed"]) {
+    // const playlistLastRefresh = playlistData.playlist_last_refresh; // Last refresh date format unknown
+    if (playlistData.playlist_subscribed) {
         var button = `<button class="unsubscribe" type="button" id="${playlistId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${playlistName}">Unsubscribe</button>`
     } else {
         var button = `<button type="button" id="${playlistId}" onclick="subscribe(this.id)" title="Subscribe to ${playlistName}">Subscribe</button>`
@@ -572,7 +572,7 @@ function createPlaylist(playlist, viewStyle) {
     const playlistDiv = document.createElement("div");
     playlistDiv.setAttribute("class", "playlist-item " + viewStyle);
     playlistDiv.innerHTML = markup;
-    return playlistDiv
+    return playlistDiv;
 }
 
 
