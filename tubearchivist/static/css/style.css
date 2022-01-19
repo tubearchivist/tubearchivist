@@ -286,27 +286,6 @@ button:hover {
     --connected-color: var(--accent-font-light);
 }
 
-/* Scrollbar width */
-::-webkit-scrollbar {
-  width: 7px;
-}
-
-/* Track (Scrollbar Background) */
-/* ::-webkit-scrollbar-track {
-  background: var(--highlight-bg);
-} */
-
-/* Handle (The thing you grab)*/
-::-webkit-scrollbar-thumb {
-  background: var(--accent-font-dark);
-  border-radius: 10px;
-}
-
-/* Handle on hover */
-/* ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-font-light);
-} */
-
 /* top of page */
 .title-bar {
     padding-top: 30px;
