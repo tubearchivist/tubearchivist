@@ -288,21 +288,14 @@ function cancelDelete() {
 function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
     var videoPlayerData = getVideoPlayerData(videoId);
-
-    // Set vars with acquired video player data
     var videoUrl = videoPlayerData.media_url;
     var videoThumbUrl = videoPlayerData.vid_thumb_url;
     var videoName = videoPlayerData.title;
     var channelName = videoPlayerData.channel_name;
     var channelId = videoPlayerData.channel_id;
     var videoIsWatched = videoPlayerData.is_watched;
-
-    
-    // Remove old player
     removePlayer();
-
-    // Remove watch indicator from video info
-    document.getElementById(videoId).outerHTML = '';
+    document.getElementById(videoId).outerHTML = ''; // Remove watch indicator from video info
 
     // If cast integration is enabled create cast button
     var castScript = document.getElementById('cast-script');
@@ -311,7 +304,6 @@ function createPlayer(button) {
     } else {
         var castButton = ``
     };
-
     // Watched indicator
     if (videoIsWatched) {
         var playerState = "seen";
@@ -321,7 +313,6 @@ function createPlayer(button) {
         var watchedFunction = "Watched";
         
     };
-    
     const markup = `
     <div class="video-player" data-id="${videoId}">
         <video src="${videoUrl}" controls autoplay width="100%" playsinline poster="${videoThumbUrl}" id="video-item"></video>
@@ -459,7 +450,6 @@ function createVideo(video, viewStyle) {
     const videoId = video["youtube_id"];
     const videoData = getVideoData(videoId);
     const videoPlayerData = getVideoPlayerData(videoId);
-    // const mediaUrl = videoData.media_url;
     const thumbUrl = videoPlayerData.vid_thumb_url;
     const videoTitle = videoPlayerData.title;
     const videoPublished = video["published"];
