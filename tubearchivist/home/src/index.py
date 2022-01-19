@@ -15,9 +15,194 @@ import requests
 import yt_dlp
 from bs4 import BeautifulSoup
 from home.src.config import AppConfig
+from home.src.es import ElasticWrap
 from home.src.helper import DurationConverter, UrlListParser, clean_string
 from home.src.thumbnails import ThumbManager
 from ryd_client import ryd_client
+
+
+class YouTubeItem:
+    """base class for youtube"""
+
+    es_path = False
+    index_name = False
+
+    def __init__(self, youtube_id):
+        self.app_conf = self._get_conf()
+        self.youtube_id = youtube_id
+        self.youtube_meta = False
+        self.json_data = False
+
+    @staticmethod
+    def _get_conf():
+        """read user conf"""
+        config = AppConfig().config
+        return config["application"]
+
+    def get_from_youtube(self):
+        """use yt-dlp to get meta data from youtube"""
+        print("getting from youtube")
+        obs = {
+            "quiet": True,
+            "default_search": "ytsearch",
+            "skip_download": True,
+            "check_formats": "selected",
+            "noplaylist": True,
+        }
+
+        try:
+            response = yt_dlp.YoutubeDL(obs).extract_info(self.youtube_id)
+        except (
+            yt_dlp.utils.ExtractorError,
+            yt_dlp.utils.DownloadError,
+        ):
+            print("failed to get info for " + self.youtube_id)
+            self.youtube_meta = False
+
+        self.youtube_meta = response
+
+    def get_from_es(self):
+        """get indexed data from elastic search"""
+        print("get from es")
+        response, _ = ElasticWrap(self.es_path).get()
+        self.json_data = response
+
+    def upload_to_es(self):
+        """add json_data to elastic"""
+        _, _ = ElasticWrap(self.es_path).put(self.json_data)
+
+    def deactivate(self):
+        """deactivate document in es"""
+        key_match = {
+            "video": "active",
+            "channel": "channel_active",
+            "playlist": "playlist_active",
+        }
+        update_path = f"ta_{self.index_name}/_update/{self.youtube_id}"
+        data = {
+            "script": f"ctx._source.{key_match.get(self.index_name)} = false"
+        }
+        _, _ = ElasticWrap(update_path).post(data)
+
+    def del_in_es(self):
+        """delete item from elastic search"""
+        print("delete from es")
+        _, _ = ElasticWrap(self.es_path).delete()
+
+
+class YoutubeVideoNew(YouTubeItem):
+    """represents a single youtube video"""
+
+    es_path = False
+    index_name = "video"
+
+    def __init__(self, youtube_id):
+        super().__init__(youtube_id)
+        self.channel_id = False
+        self.es_path = f"ta_video/_doc/{youtube_id}"
+
+    def build_json(self):
+        """build json dict of video"""
+        self.get_from_youtube()
+        self.process_youtube_meta()
+        self.add_stats()
+
+    def process_youtube_meta(self):
+        """extract relevant fields from youtube"""
+        # extract
+        self.channel_id = self.youtube_meta["channel_id"]
+        upload_date = self.youtube_meta["upload_date"]
+        upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
+        published = upload_date_time.strftime("%Y-%m-%d")
+        last_refresh = int(datetime.now().strftime("%s"))
+        # build json_data basics
+        self.json_data = {
+            "title": self.youtube_meta["title"],
+            "description": self.youtube_meta["description"],
+            "category": self.youtube_meta["categories"],
+            "vid_thumb_url": self.youtube_meta["thumbnail"],
+            "tags": self.youtube_meta["tags"],
+            "published": published,
+            "vid_last_refresh": last_refresh,
+            "date_downloaded": last_refresh,
+            "youtube_id": self.youtube_id,
+            "active": True,
+        }
+
+    def add_stats(self):
+        """add stats dicst to json_data"""
+        # likes
+        like_count = self.youtube_meta.get("like_count", 0)
+        dislike_count = self.youtube_meta.get("dislike_count", 0)
+        self.json_data.update(
+            {
+                "stats": {
+                    "view_count": self.youtube_meta["view_count"],
+                    "like_count": like_count,
+                    "dislike_count": dislike_count,
+                    "average_rating": self.youtube_meta["average_rating"],
+                }
+            }
+        )
+
+    def add_player(self, vid_path):
+        """add player information for new videos"""
+        duration_handler = DurationConverter()
+        duration = duration_handler.get_sec(vid_path)
+        duration_str = duration_handler.get_str(duration)
+        self.json_data.update(
+            {
+                "player": {
+                    "watched": False,
+                    "duration": duration,
+                    "duration_str": duration_str,
+                }
+            }
+        )
+
+    def add_file_path(self):
+        """build media_url for where file will be located"""
+        channel_name = self.json_data["channel"]["channel_name"]
+        clean_channel_name = clean_string(channel_name)
+        timestamp = self.json_data["published"].replace("-", "")
+        youtube_id = self.json_data["youtube_id"]
+        title = self.json_data["title"]
+        clean_title = clean_string(title)
+        filename = f"{timestamp}_{youtube_id}_{clean_title}.mp4"
+        media_url = os.path.join(clean_channel_name, filename)
+        self.json_data["media_url"] = media_url
+
+    def delete_media_file(self):
+        """delete video file, meta data, thumbnails"""
+        # delete media file
+        video_base = self.app_conf["videos"]
+        media_url = self.json_data["media_url"]
+        print(f"delete {media_url} from file system")
+        to_delete = os.path.join(video_base, media_url)
+        os.remove(to_delete)
+        # delete from index
+        self.del_in_es()
+
+    def get_ryd_stats(self):
+        """get optional stats from returnyoutubedislikeapi.com"""
+        try:
+            print(f"get ryd stats for: {self.youtube_id}")
+            result = ryd_client.get(self.youtube_id)
+        except requests.exceptions.ConnectionError:
+            print(f"failed to query ryd api, skipping {self.youtube_id}")
+            return False
+
+        if result["status"] == 404:
+            return False
+
+        dislikes = {
+            "dislike_count": result["dislikes"],
+            "average_rating": result["rating"],
+        }
+        self.json_data["stats"].update(dislikes)
+
+        return True
+
 
 
 class YoutubeChannel:

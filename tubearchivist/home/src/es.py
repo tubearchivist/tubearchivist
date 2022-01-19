@@ -59,10 +59,13 @@ class ElasticWrap:
 
     def put(self, data):
         """put data to es"""
-
-        response = requests.put(self.url, json=data, auth=self.auth)
+        response = requests.put(
+            f"{self.url}/?refresh=true", json=data, auth=self.auth
+        )
         if not response.ok:
             print(response.text)
+            print(data)
+            raise ValueError("failed to add item to index")
 
         return response.json(), response.status_code
 
