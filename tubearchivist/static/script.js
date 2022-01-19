@@ -304,24 +304,24 @@ function createPlayer(button) {
     // If cast integration is enabled create cast button
     var castScript = document.getElementById('cast-script');
     if (typeof(castScript) != 'undefined' && castScript != null) {
-        var castButton = `<google-cast-launcher id="castbutton" style="display: block;"></google-cast-launcher>`;
+        var castButton = `<google-cast-launcher id="castbutton" style="display: block;"></google-cast-launcher>`
     } else {
-        var castButton = ``;
+        var castButton = ``
     };
 
-    // Watched indicator button
+    // Watched indicator
     if (videoIsWatched) {
-        var isWatchedButton = `<img src="/static/img/icon-seen.svg" alt="seen-icon" id="${videoId}" onclick="isUnwatched(this.id)" class="seen-icon" title="Mark as unwatched">`;
+        var playerState = "seen";
     } else {
-        var isWatchedButton = `<img src="/static/img/icon-unseen.svg" alt="unseen-icon" id="${videoId}" title="Mark as watched" onclick="isWatched(this.id)" class="unseen-icon">`;
+        var playerState = "unseen";
     };
-
+    
     const markup = `
     <div class="video-player" data-id="${videoId}">
         <video src="${videoUrl}" controls autoplay width="100%" playsinline poster="${videoThumbUrl}" id="video-item"></video>
         <div class="player-title boxed-content">
             <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
-            ${isWatchedButton}
+            <img src="/static/img/icon-${playerState}.svg" alt="${playerState}-icon" id="${videoId}" onclick="isWatched(this.id)" class="${playerState}-icon">
             <a href="/channel/${channelId}/">
                 <h3>${channelName}</h3>
             </a>
