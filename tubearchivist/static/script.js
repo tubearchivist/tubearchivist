@@ -300,7 +300,10 @@ function createPlayer(button) {
     
     // Remove old player
     removePlayer();
-    
+
+    // Remove watch indicator from video info
+    document.getElementById(videoId).outerHTML = '';
+
     // If cast integration is enabled create cast button
     var castScript = document.getElementById('cast-script');
     if (typeof(castScript) != 'undefined' && castScript != null) {
