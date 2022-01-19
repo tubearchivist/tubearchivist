@@ -17,6 +17,16 @@ font-family: 'Sen-Regular';
 
 html {
     height: 100%;
+    scrollbar-color: var(--accent-font-dark) #0000;
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-font-dark);
+    border-radius: 10px;
 }
 
 body {
