@@ -289,33 +289,35 @@ function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
     var videoPlayerData = getVideoPlayerData(videoId);
     var videoData = getVideoData(videoId);
-    var channelId = videoPlayerData.channel_id;
-    var channelData = getChannelData(channelId);
+    var channelData = getChannelData(videoPlayerData.channel_id);
+
     var videoUrl = videoPlayerData.media_url;
     var videoThumbUrl = videoPlayerData.vid_thumb_url;
     var videoName = videoPlayerData.title;
+    var videoDescription = getFormattedDescription(videoData.description);
+
     var videoViews = formatNumbers(videoData.stats.view_count);
     var videoLikeCount = formatNumbers(videoData.stats.like_count);
     var videoDislikeCount = formatNumbers(videoData.stats.dislike_count);
     var videoRating = videoData.stats.average_rating.toFixed(1);
     var videoStarRating = getStarRating(videoData.stats.average_rating);
-    var videoDescription = getFormattedDescription(videoData.description);
+
+    var channelId = videoPlayerData.channel_id;
     var channelName = videoPlayerData.channel_name;
-    var videoIsWatched = videoPlayerData.is_watched;
     var channelSubs = formatNumbers(channelData.channel_subs);
-    var channelIsActive = channelData.channel_active;
+
     removePlayer();
     document.getElementById(videoId).outerHTML = ''; // Remove watch indicator from video info
 
     // If cast integration is enabled create cast button
     var castScript = document.getElementById('cast-script');
     if (typeof(castScript) != 'undefined' && castScript != null) {
-        var castButton = `<google-cast-launcher id="castbutton" style="display: block;"></google-cast-launcher>`
+        var castButton = `<google-cast-launcher id="castbutton"></google-cast-launcher>`
     } else {
         var castButton = ``
     };
     // Watched indicator
-    if (videoIsWatched) {
+    if (videoPlayerData.is_watched) {
         var playerState = "seen";
         var watchedFunction = "Unwatched";
     } else {
@@ -323,10 +325,10 @@ function createPlayer(button) {
         var watchedFunction = "Watched";  
     };
     // Channel Active
-    if (channelIsActive) {
-        var channelActive = `<p>Youtube: <a href="https://www.youtube.com/watch?v=${videoId}" target="_blank">Active</a></p>`
+    if (channelData.channel_active) {
+        var channelActive = `<a href="https://www.youtube.com/watch?v=${videoId}" target="_blank">Active</a>`
     } else {
-        var channelActive = `<p>Youtube: Deactivated</p>` 
+        var channelActive = `Deactivated` 
     };
     const markup = `
     <div data-id="${videoId}">
@@ -358,7 +360,7 @@ function createPlayer(button) {
                     <div>
                         <p>Published: N/A</p>
                         <p>Last refreshed: N/A</p>
-                        ${channelActive}
+                        <p>Youtube: ${channelActive}</p>
                         <a download href="${videoUrl}"><button id="download-item">Download File</button></a>
                         <button onclick="deleteConfirm()" id="delete-item">Delete Video</button>
                         <div class="delete-confirm" id="delete-button">
@@ -375,12 +377,12 @@ function createPlayer(button) {
                     </div>
                 </div>
             </div>
-            <div class="info-box-item description-box">
+            <!--<div class="info-box-item description-box">
                 <p>Description: <button onclick="textReveal()" id="text-reveal-button">Show</button></p>
                 <div id="text-reveal" class="description-text">
                     <p>${videoDescription}</p>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
     `
