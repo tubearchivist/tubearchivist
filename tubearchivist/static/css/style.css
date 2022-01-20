@@ -341,7 +341,7 @@ button:hover {
 
 /* video player */
 .player-wrapper {
-    background-color: var(--highlight-bg);
+    /* background-color: var(--highlight-bg); */
     margin: 20px 0;
 }
 
