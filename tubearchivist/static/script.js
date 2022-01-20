@@ -288,12 +288,22 @@ function cancelDelete() {
 function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
     var videoPlayerData = getVideoPlayerData(videoId);
+    var videoData = getVideoData(videoId);
+    var channelId = videoPlayerData.channel_id;
+    var channelData = getChannelData(channelId);
     var videoUrl = videoPlayerData.media_url;
     var videoThumbUrl = videoPlayerData.vid_thumb_url;
     var videoName = videoPlayerData.title;
+    var videoViews = formatNumbers(videoData.stats.view_count);
+    var videoLikeCount = formatNumbers(videoData.stats.like_count);
+    var videoDislikeCount = formatNumbers(videoData.stats.dislike_count);
+    var videoRating = videoData.stats.average_rating.toFixed(1);
+    var videoStarRating = getStarRating(videoData.stats.average_rating);
+    var videoDescription = getFormattedDescription(videoData.description);
     var channelName = videoPlayerData.channel_name;
-    var channelId = videoPlayerData.channel_id;
     var videoIsWatched = videoPlayerData.is_watched;
+    var channelSubs = formatNumbers(channelData.channel_subs);
+    var channelIsActive = channelData.channel_active;
     removePlayer();
     document.getElementById(videoId).outerHTML = ''; // Remove watch indicator from video info
 
@@ -310,27 +320,101 @@ function createPlayer(button) {
         var watchedFunction = "Unwatched";
     } else {
         var playerState = "unseen";
-        var watchedFunction = "Watched";
-        
+        var watchedFunction = "Watched";  
+    };
+    // Channel Active
+    if (channelIsActive) {
+        var channelActive = `<p>Youtube: <a href="https://www.youtube.com/watch?v=${videoId}" target="_blank">Active</a></p>`
+    } else {
+        var channelActive = `<p>Youtube: Deactivated</p>` 
     };
     const markup = `
-    <div class="video-player" data-id="${videoId}">
-        <video src="${videoUrl}" controls autoplay width="100%" playsinline poster="${videoThumbUrl}" id="video-item"></video>
+    <div data-id="${videoId}">
+        <div class="video-main">
+            <video src="${videoUrl}" poster="${videoThumbUrl}" controls autoplay type='video/mp4' width="100%" playsinline id="video-item"></video>
+        </div>
         <div class="player-title boxed-content">
             <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
             <img src="/static/img/icon-${playerState}.svg" alt="${playerState}-icon" id="${videoId}" onclick="is${watchedFunction}(this.id)" class="${playerState}-icon" title="Mark as ${watchedFunction}">
-            <a href="/channel/${channelId}/">
-                <h3>${channelName}</h3>
-            </a>
-            <a href="/video/${videoId}/">
-                <h2 id="video-title">${videoName}</h2>
-            </a>
-            ${castButton}
+        </div>
+        <div class="boxed-content">
+            <div class="title-bar">
+                ${castButton}
+                <a href="/video/${videoId}/"><h1 id="video-title">${videoName}</h1></a>
+            </div>
+            <div class="info-box info-box-3">
+                <div class="info-box-item">
+                    <div class="round-img">
+                        <a href="/channel/${channelId}/">
+                            <img src="/cache/channels/${channelId}_thumb.jpg" alt="channel-thumb">
+                        </a>
+                    </div>
+                    <div>
+                        <h3><a href="/channel/${channelId}/">${channelName}</a></h3>
+                        <p>Subscribers: ${channelSubs}</p> 
+                    </div>
+                </div>
+                <div class="info-box-item">
+                    <div>
+                        <p>Published: N/A</p>
+                        <p>Last refreshed: N/A</p>
+                        ${channelActive}
+                        <a download href="${videoUrl}"><button id="download-item">Download File</button></a>
+                        <button onclick="deleteConfirm()" id="delete-item">Delete Video</button>
+                        <div class="delete-confirm" id="delete-button">
+                            <span>Are you sure? </span><button class="danger-button" onclick="deleteVideo(this)" data-id="${videoId}" data-redirect = "${channelId}">Delete</button> <button onclick="cancelDelete()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="info-box-item">
+                    <div>
+                        <p>Views: ${videoViews}</p>
+                        <p class="thumb-icon like"><img src="/static/img/icon-thumb.svg" alt="thumbs-up">: ${videoLikeCount}</p>
+                        <p class="thumb-icon dislike"><img src="/static/img/icon-thumb.svg" alt="thumbs-down">: ${videoDislikeCount}</p>
+                        <p class="rating-stars">Rating: ${videoStarRating} (${videoRating})</p>
+                    </div>
+                </div>
+            </div>
+            <div class="info-box-item description-box">
+                <p>Description: <button onclick="textReveal()" id="text-reveal-button">Show</button></p>
+                <div id="text-reveal" class="description-text">
+                    <p>${videoDescription}</p>
+                </div>
+            </div>
         </div>
     </div>
     `
     const divPlayer =  document.getElementById("player");
     divPlayer.innerHTML = markup;
+}
+
+// Returns HTML formatted description
+function getFormattedDescription(description) {
+    return description.split('\n\n').join('</p><p>').split('\n').join('<br>');
+}
+
+// Returns HTML stars when given a rating
+function getStarRating(rating) {
+    var stars = '';
+    for (let i = 1; i <= parseFloat(rating).toFixed(0); i++) {
+        stars = stars + '<img src="/static/img/icon-star-full.svg" alt="full">';
+    }
+    return stars;
+}
+
+// Format numbers for frontend
+function formatNumbers(number) {
+    var numberUnformatted = parseFloat(number);
+    if (numberUnformatted > 999999999) {
+        var numberFormatted = (numberUnformatted / 1000000000).toFixed(1).toString() + " billion";
+    } else if (numberUnformatted > 999999) {
+        var numberFormatted = (numberUnformatted / 1000000).toFixed(1).toString() + " million";
+    } else if (numberUnformatted > 999) {
+        var numberFormatted = numberUnformatted.toLocaleString("en-US");
+    } else {
+        var numberFormatted = numberUnformatted;
+    }
+    return numberFormatted;
 }
 
 // Gets video player data in JSON format when passed video ID
