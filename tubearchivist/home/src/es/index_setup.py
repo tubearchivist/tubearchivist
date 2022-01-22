@@ -1,10 +1,4 @@
-"""
-Functionality:
-- initial elastic search setup
-- index configuration is represented in INDEX_CONFIG
-- index mapping and settings validation
-- backup and restore
-"""
+"""setup and verify needed elastic indexes"""
 
 import json
 import os
@@ -12,213 +6,8 @@ import zipfile
 from datetime import datetime
 
 import requests
-from home.src.config import AppConfig
-from home.src.helper import ignore_filelist
-
-# expected mapping and settings
-INDEX_CONFIG = [
-    {
-        "index_name": "channel",
-        "expected_map": {
-            "channel_id": {
-                "type": "keyword",
-            },
-            "channel_name": {
-                "type": "text",
-                "analyzer": "english",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256,
-                        "normalizer": "to_lower",
-                    },
-                    "search_as_you_type": {
-                        "type": "search_as_you_type",
-                        "doc_values": False,
-                        "max_shingle_size": 3,
-                    },
-                },
-            },
-            "channel_banner_url": {"type": "keyword", "index": False},
-            "channel_thumb_url": {"type": "keyword", "index": False},
-            "channel_description": {"type": "text"},
-            "channel_last_refresh": {"type": "date", "format": "epoch_second"},
-        },
-        "expected_set": {
-            "analysis": {
-                "normalizer": {
-                    "to_lower": {"type": "custom", "filter": ["lowercase"]}
-                }
-            },
-            "number_of_replicas": "0",
-        },
-    },
-    {
-        "index_name": "video",
-        "expected_map": {
-            "vid_thumb_url": {"type": "text", "index": False},
-            "date_downloaded": {"type": "date"},
-            "channel": {
-                "properties": {
-                    "channel_id": {
-                        "type": "keyword",
-                    },
-                    "channel_name": {
-                        "type": "text",
-                        "analyzer": "english",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256,
-                                "normalizer": "to_lower",
-                            },
-                            "search_as_you_type": {
-                                "type": "search_as_you_type",
-                                "doc_values": False,
-                                "max_shingle_size": 3,
-                            },
-                        },
-                    },
-                    "channel_banner_url": {"type": "keyword", "index": False},
-                    "channel_thumb_url": {"type": "keyword", "index": False},
-                    "channel_description": {"type": "text"},
-                    "channel_last_refresh": {
-                        "type": "date",
-                        "format": "epoch_second",
-                    },
-                }
-            },
-            "description": {"type": "text"},
-            "media_url": {"type": "keyword", "index": False},
-            "tags": {
-                "type": "text",
-                "analyzer": "english",
-                "fields": {
-                    "keyword": {"type": "keyword", "ignore_above": 256}
-                },
-            },
-            "title": {
-                "type": "text",
-                "analyzer": "english",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256,
-                        "normalizer": "to_lower",
-                    },
-                    "search_as_you_type": {
-                        "type": "search_as_you_type",
-                        "doc_values": False,
-                        "max_shingle_size": 3,
-                    },
-                },
-            },
-            "vid_last_refresh": {"type": "date"},
-            "youtube_id": {"type": "keyword"},
-            "published": {"type": "date"},
-            "playlist": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256,
-                        "normalizer": "to_lower",
-                    }
-                },
-            },
-        },
-        "expected_set": {
-            "analysis": {
-                "normalizer": {
-                    "to_lower": {"type": "custom", "filter": ["lowercase"]}
-                }
-            },
-            "number_of_replicas": "0",
-        },
-    },
-    {
-        "index_name": "download",
-        "expected_map": {
-            "timestamp": {"type": "date"},
-            "channel_id": {"type": "keyword"},
-            "channel_name": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256,
-                        "normalizer": "to_lower",
-                    }
-                },
-            },
-            "status": {"type": "keyword"},
-            "title": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256,
-                        "normalizer": "to_lower",
-                    }
-                },
-            },
-            "vid_thumb_url": {"type": "keyword"},
-            "youtube_id": {"type": "keyword"},
-        },
-        "expected_set": {
-            "analysis": {
-                "normalizer": {
-                    "to_lower": {"type": "custom", "filter": ["lowercase"]}
-                }
-            },
-            "number_of_replicas": "0",
-        },
-    },
-    {
-        "index_name": "playlist",
-        "expected_map": {
-            "playlist_id": {"type": "keyword"},
-            "playlist_description": {"type": "text"},
-            "playlist_name": {
-                "type": "text",
-                "analyzer": "english",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256,
-                        "normalizer": "to_lower",
-                    },
-                    "search_as_you_type": {
-                        "type": "search_as_you_type",
-                        "doc_values": False,
-                        "max_shingle_size": 3,
-                    },
-                },
-            },
-            "playlist_channel": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256,
-                        "normalizer": "to_lower",
-                    }
-                },
-            },
-            "playlist_channel_id": {"type": "keyword"},
-            "playlist_thumbnail": {"type": "keyword"},
-            "playlist_last_refresh": {"type": "date"},
-        },
-        "expected_set": {
-            "analysis": {
-                "normalizer": {
-                    "to_lower": {"type": "custom", "filter": ["lowercase"]}
-                }
-            },
-            "number_of_replicas": "0",
-        },
-    },
-]
+from home.src.ta.config import AppConfig
+from home.src.ta.helper import ignore_filelist
 
 
 class ElasticIndex:
@@ -602,48 +391,22 @@ class ElasticBackup:
             os.remove(file_path)
 
 
-def get_available_backups():
-    """return dict of available backups for settings view"""
-    backup_handler = ElasticBackup(INDEX_CONFIG, reason=False)
-    all_backup_files = backup_handler.get_all_backup_files()
-    return all_backup_files
+def get_mapping():
+    """read index_mapping.json and get expected mapping and settings"""
+    with open("home/src/es/index_mapping.json", "r", encoding="utf-8") as f:
+        config_str = f.read()
+        index_config = json.loads(config_str).get("index_config")
 
-
-def backup_all_indexes(reason):
-    """backup all es indexes to disk"""
-    backup_handler = ElasticBackup(INDEX_CONFIG, reason)
-
-    for index in backup_handler.index_config:
-        index_name = index["index_name"]
-        if not backup_handler.index_exists(index_name):
-            continue
-        all_results = backup_handler.get_all_documents(index_name)
-        file_content = backup_handler.build_bulk(all_results)
-        backup_handler.write_es_json(file_content, index_name)
-        backup_handler.write_ta_json(all_results, index_name)
-
-    backup_handler.zip_it()
-
-    if reason == "auto":
-        backup_handler.rotate_backup()
-
-
-def restore_from_backup(filename):
-    """restore indexes from backup file"""
-    # delete
-    index_check(force_restore=True)
-    # recreate
-    backup_handler = ElasticBackup(INDEX_CONFIG, reason=False)
-    zip_content = backup_handler.unpack_zip_backup(filename)
-    backup_handler.restore_json_files(zip_content)
+    return index_config
 
 
 def index_check(force_restore=False):
     """check if all indexes are created and have correct mapping"""
 
     backed_up = False
+    index_config = get_mapping()
 
-    for index in INDEX_CONFIG:
+    for index in index_config:
         index_name = index["index_name"]
         expected_map = index["expected_map"]
         expected_set = index["expected_set"]
@@ -675,3 +438,42 @@ def index_check(force_restore=False):
 
         # else all good
         print(f"ta_{index_name} index is created and up to date...")
+
+
+def get_available_backups():
+    """return dict of available backups for settings view"""
+    index_config = get_mapping()
+    backup_handler = ElasticBackup(index_config, reason=False)
+    all_backup_files = backup_handler.get_all_backup_files()
+    return all_backup_files
+
+
+def backup_all_indexes(reason):
+    """backup all es indexes to disk"""
+    index_config = get_mapping()
+    backup_handler = ElasticBackup(index_config, reason)
+
+    for index in backup_handler.index_config:
+        index_name = index["index_name"]
+        if not backup_handler.index_exists(index_name):
+            continue
+        all_results = backup_handler.get_all_documents(index_name)
+        file_content = backup_handler.build_bulk(all_results)
+        backup_handler.write_es_json(file_content, index_name)
+        backup_handler.write_ta_json(all_results, index_name)
+
+    backup_handler.zip_it()
+
+    if reason == "auto":
+        backup_handler.rotate_backup()
+
+
+def restore_from_backup(filename):
+    """restore indexes from backup file"""
+    # delete
+    index_check(force_restore=True)
+    # recreate
+    index_config = get_mapping()
+    backup_handler = ElasticBackup(index_config, reason=False)
+    zip_content = backup_handler.unpack_zip_backup(filename)
+    backup_handler.restore_json_files(zip_content)

@@ -10,22 +10,24 @@ import os
 
 import home.apps as startup_apps
 from celery import Celery, shared_task
-from home.src.config import AppConfig, ScheduleBuilder
-from home.src.download import (
+from home.src.download.queue import PendingList
+from home.src.download.subscriptions import (
     ChannelSubscription,
-    PendingList,
     PlaylistSubscription,
-    VideoDownloader,
 )
-from home.src.helper import RedisArchivist, RedisQueue, UrlListParser
-from home.src.index import YoutubeChannel, YoutubePlaylist
-from home.src.index_management import backup_all_indexes, restore_from_backup
-from home.src.reindex import (
+from home.src.download.thumbnails import ThumbManager, validate_thumbnails
+from home.src.download.yt_dlp_handler import VideoDownloader
+from home.src.es.index_setup import backup_all_indexes, restore_from_backup
+from home.src.index.channel import YoutubeChannel
+from home.src.index.filesystem import (
     ManualImport,
     reindex_old_documents,
     scan_filesystem,
 )
-from home.src.thumbnails import ThumbManager, validate_thumbnails
+from home.src.index.playlist import YoutubePlaylist
+from home.src.ta.config import AppConfig, ScheduleBuilder
+from home.src.ta.helper import UrlListParser
+from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 
 CONFIG = AppConfig().config
 REDIS_HOST = os.environ.get("REDIS_HOST")

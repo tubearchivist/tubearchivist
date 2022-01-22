@@ -14,7 +14,9 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views import View
-from home.forms import (
+from home.src.es.index_setup import get_available_backups
+from home.src.frontend.api_calls import PostData
+from home.src.frontend.forms import (
     AddToQueueForm,
     ApplicationSettingsForm,
     CustomAuthForm,
@@ -24,12 +26,12 @@ from home.forms import (
     SubscribeToPlaylistForm,
     UserSettingsForm,
 )
-from home.src.config import AppConfig, ScheduleBuilder
-from home.src.frontend import PostData
-from home.src.helper import RedisArchivist, UrlListParser
-from home.src.index import YoutubePlaylist
-from home.src.index_management import get_available_backups
-from home.src.searching import Pagination, SearchHandler
+from home.src.frontend.searching import SearchHandler
+from home.src.index.generic import Pagination
+from home.src.index.playlist import YoutubePlaylist
+from home.src.ta.config import AppConfig, ScheduleBuilder
+from home.src.ta.helper import UrlListParser
+from home.src.ta.ta_redis import RedisArchivist
 from home.tasks import extrac_dl, subscribe_to
 from rest_framework.authtoken.models import Token
 

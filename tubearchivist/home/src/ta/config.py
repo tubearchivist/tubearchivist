@@ -10,7 +10,7 @@ import os
 import re
 
 from celery.schedules import crontab
-from home.src.helper import RedisArchivist
+from home.src.ta.ta_redis import RedisArchivist
 
 
 class AppConfig:

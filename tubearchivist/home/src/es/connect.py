@@ -3,7 +3,7 @@
 import json
 
 import requests
-from home.src.config import AppConfig
+from home.src.ta.config import AppConfig
 
 
 class ElasticWrap:

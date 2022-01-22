@@ -4,19 +4,18 @@ Functionality:
 - called via user input
 """
 
-from home.src.download import (
+from home.src.download.queue import PendingList
+from home.src.download.subscriptions import (
     ChannelSubscription,
-    PendingList,
     PlaylistSubscription,
 )
-from home.src.helper import RedisArchivist, RedisQueue, UrlListParser
-from home.src.index import (
-    WatchState,
-    YoutubeChannel,
-    YoutubePlaylist,
-    YoutubeVideo,
-)
-from home.src.searching import SearchForm
+from home.src.frontend.searching import SearchForm
+from home.src.frontend.watched import WatchState
+from home.src.index.channel import YoutubeChannel
+from home.src.index.playlist import YoutubePlaylist
+from home.src.index.video import YoutubeVideo
+from home.src.ta.helper import UrlListParser
+from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 from home.tasks import (
     download_pending,
     download_single,

@@ -1,9 +1,9 @@
 """all API views"""
 
 import requests
-from home.src.config import AppConfig
-from home.src.helper import UrlListParser
-from home.src.thumbnails import ThumbManager
+from home.src.ta.config import AppConfig
+from home.src.ta.helper import UrlListParser
+from home.src.download.thumbnails import ThumbManager
 from home.tasks import extrac_dl, subscribe_to
 from rest_framework.authentication import (
     SessionAuthentication,
