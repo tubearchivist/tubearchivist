@@ -6,7 +6,7 @@
     <video 
         src="/media/{{ video.media_url }}" 
         poster="/cache/{{ video.vid_thumb_url }}" controls preload="false" 
-        type='video/mp4' width="100%" playsinline id="video-item">
+        type='video/mp4' width="100%" playsinline id="video-item" ontimeupdate="onVideoProgress('{{ video.youtube_id }}')" onloadedmetadata="setVideoProgress(0)">
     </video>
 </div>
 <div class="boxed-content">
