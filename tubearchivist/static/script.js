@@ -296,6 +296,7 @@ function createPlayer(button) {
     var videoName = videoPlayerData.title;
     var videoDescription = getFormattedDescription(videoData.description);
 
+    var videoProgress = 0; // videoData.progress; // Groundwork for saving video position, change once progress variable is added to API
     var videoViews = formatNumbers(videoData.stats.view_count);
     var videoLikeCount = formatNumbers(videoData.stats.like_count);
     var videoDislikeCount = formatNumbers(videoData.stats.dislike_count);
@@ -333,7 +334,7 @@ function createPlayer(button) {
     const markup = `
     <div data-id="${videoId}">
         <div class="video-main">
-            <video src="${videoUrl}" poster="${videoThumbUrl}" controls autoplay type='video/mp4' width="100%" playsinline id="video-item"></video>
+            <video src="${videoUrl}" poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" onloadedmetadata="setVideoProgress(${videoProgress})" controls autoplay type='video/mp4' width="100%" playsinline id="video-item"></video>
         </div>
         <div class="player-title boxed-content">
             <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
@@ -390,6 +391,35 @@ function createPlayer(button) {
     divPlayer.innerHTML = markup;
 }
 
+// Set video progress in seconds
+function setVideoProgress(videoProgress) {
+    var videoElement = document.getElementById("video-item");
+    videoElement.currentTime = videoProgress;
+}
+
+// Runs on video playback, marks video as watched if video gets to 90% or higher
+function onVideoProgress(videoId) {
+    var videoElement = document.getElementById("video-item");
+    if ((videoElement.currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
+        // sendVideoProgress(videoId, videoElement.currentTime); // Groundwork for saving video position
+        if ((videoElement.currentTime / videoElement.duration) > 0.89) {
+            isWatched(videoId);
+        }
+    }
+
+}
+
+// Groundwork for saving video position
+function sendVideoProgress(videoId, videoProgress) {
+    var apiEndpoint = "/api/video/" + videoId + "/";
+    progress = { 
+        player: {
+            prograss: videoProgress 
+        }
+    };
+    videoData = apiRequest(apiEndpoint, "POST", progress);
+}
+
 // Returns HTML formatted description
 function getFormattedDescription(description) {
     return description.split('\n\n').join('</p><p>').split('\n').join('<br>');
@@ -422,38 +452,39 @@ function formatNumbers(number) {
 // Gets video player data in JSON format when passed video ID
 function getVideoPlayerData(videoId) {
     var apiEndpoint = "/api/video/" + videoId + "/player/";
-    videoPlayerData = apiRequest(apiEndpoint, "GET")
+    videoPlayerData = apiRequest(apiEndpoint, "GET");
     return videoPlayerData;
 }
 
 // Gets video data in JSON format when passed video ID
 function getVideoData(videoId) {
     var apiEndpoint = "/api/video/" + videoId + "/";
-    videoData = apiRequest(apiEndpoint, "GET")
+    videoData = apiRequest(apiEndpoint, "GET");
     return videoData.data;
 }
 
 // Gets channel data in JSON format when passed channel ID
 function getChannelData(channelId) {
     var apiEndpoint = "/api/channel/" + channelId + "/";
-    channelData = apiRequest(apiEndpoint, "GET")
+    channelData = apiRequest(apiEndpoint, "GET");
     return channelData.data;
 }
 
 // Gets playlist data in JSON format when passed playlist ID
 function getPlaylistData(playlistId) {
     var apiEndpoint = "/api/playlist/" + playlistId + "/";
-    playlistData = apiRequest(apiEndpoint, "GET")
+    playlistData = apiRequest(apiEndpoint, "GET");
     return playlistData.data;
 }
 
 // Makes api requests when passed an endpoint and method ("GET" or "POST")
-function apiRequest(apiEndpoint, method) {
+function apiRequest(apiEndpoint, method, data) {
     const xhttp = new XMLHttpRequest();
     var sessionToken = getCookie("sessionid");
     xhttp.open(method, apiEndpoint, false);
     xhttp.setRequestHeader("Authorization", "Token " + sessionToken);
-    xhttp.send();
+    xhttp.setRequestHeader("Content-Type", "application/json");
+    xhttp.send(JSON.stringify(data));
     return JSON.parse(xhttp.responseText);
 }
 
