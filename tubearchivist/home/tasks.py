@@ -266,17 +266,16 @@ def subscribe_to(url_str):
 @shared_task
 def index_channel_playlists(channel_id):
     """add all playlists of channel to index"""
-    channel_handler = YoutubeChannel(channel_id)
-    channel_name = channel_handler.channel_dict["channel_name"]
+    channel = YoutubeChannel(channel_id)
     # notify
     mess_dict = {
         "status": "message:playlistscan",
         "level": "info",
         "title": "Looking for playlists",
-        "message": f'Scanning channel "{channel_name}" in progress',
+        "message": f'Scanning channel "{channel.youtube_id}" in progress',
     }
     RedisArchivist().set_message("message:playlistscan", mess_dict)
-    all_playlists = channel_handler.get_all_playlists()
+    all_playlists = channel.get_all_playlists()
 
     if not all_playlists:
         print(f"no playlists found for channel {channel_id}")
@@ -295,28 +294,29 @@ def index_channel_playlists(channel_id):
         }
         RedisArchivist().set_message("message:playlistscan", mess_dict)
         print("add playlist: " + playlist_title)
-        playlist_handler = YoutubePlaylist(
-            playlist_id, all_youtube_ids=all_youtube_ids
-        )
-        playlist_handler.get_playlist_dict()
-        if not playlist_handler.playlist_dict:
+
+        playlist = YoutubePlaylist(playlist_id)
+        playlist.all_youtube_ids = all_youtube_ids
+        playlist.build_json()
+
+        if not playlist.json_data:
             # skip if not available
             continue
+
         # don't add if no videos downloaded
         downloaded = [
             i
-            for i in playlist_handler.playlist_dict["playlist_entries"]
+            for i in playlist.json_data["playlist_entries"]
             if i["downloaded"]
         ]
         if not downloaded:
             continue
-        playlist_handler.upload_to_es()
-        playlist_handler.add_vids_to_playlist()
+
+        playlist.upload_to_es()
+        playlist.add_vids_to_playlist()
 
     if all_playlists:
-        handler = ThumbManager()
-        missing_playlists = handler.get_missing_playlists()
-        handler.download_playlist(missing_playlists)
+        playlist.get_playlist_art()
 
     return
 

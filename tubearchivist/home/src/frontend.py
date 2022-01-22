@@ -306,7 +306,7 @@ class PostData:
         playlist_dict = self.exec_val
         playlist_id = playlist_dict["playlist-id"]
         playlist_action = playlist_dict["playlist-action"]
-        print(f"delete {playlist_action} from playlist {playlist_id}")
+        print(f"{playlist_id}: delete playlist {playlist_action}")
         if playlist_action == "metadata":
             YoutubePlaylist(playlist_id).delete_metadata()
         elif playlist_action == "all":

@@ -15,6 +15,7 @@ from time import sleep
 import requests
 import yt_dlp
 from home.src.config import AppConfig
+from home.src.es import IndexPaginate
 from home.src.helper import (
     DurationConverter,
     RedisArchivist,
@@ -23,7 +24,6 @@ from home.src.helper import (
     ignore_filelist,
 )
 from home.src.index import (
-    IndexPaginate,
     YoutubeChannel,
     YoutubePlaylist,
     YoutubeVideo,
@@ -69,7 +69,9 @@ class PendingList:
                 missing_videos = missing_videos + youtube_ids
             elif url_type == "playlist":
                 self.missing_from_playlists.append(entry)
-                video_results = YoutubePlaylist(url).get_entries()
+                playlist = YoutubePlaylist(url)
+                playlist.build_json()
+                video_results = playlist.json_data.get("playlist_entries")
                 youtube_ids = [i["youtube_id"] for i in video_results]
                 missing_videos = missing_videos + youtube_ids
 
@@ -346,34 +348,14 @@ class ChannelSubscription:
 
         return missing_videos
 
-    def change_subscribe(self, channel_id, channel_subscribed):
+    @staticmethod
+    def change_subscribe(channel_id, channel_subscribed):
         """subscribe or unsubscribe from channel and update"""
-        if not isinstance(channel_subscribed, bool):
-            print("invalid status, should be bool")
-            return
-        headers = {"Content-type": "application/json"}
-        channel_handler = YoutubeChannel(channel_id)
-        channel_dict = channel_handler.channel_dict
-        channel_dict["channel_subscribed"] = channel_subscribed
-        if channel_subscribed:
-            # handle subscribe
-            url = self.es_url + "/ta_channel/_doc/" + channel_id
-            payload = json.dumps(channel_dict)
-            print(channel_dict)
-        else:
-            url = self.es_url + "/ta_channel/_update/" + channel_id
-            payload = json.dumps({"doc": channel_dict})
-        # update channel
-        request = requests.post(
-            url, data=payload, headers=headers, auth=self.es_auth
-        )
-        if not request.ok:
-            print(request.text)
-            raise ValueError("failed change subscribe status")
-        # sync to videos
-        channel_handler.sync_to_videos()
-        if channel_handler.source == "scraped":
-            channel_handler.get_channel_art()
+        channel = YoutubeChannel(channel_id)
+        channel.build_json()
+        channel.json_data["channel_subscribed"] = channel_subscribed
+        channel.upload_to_es()
+        channel.sync_to_videos()
 
 
 class PlaylistSubscription:
@@ -413,20 +395,15 @@ class PlaylistSubscription:
                 print(f"{playlist_id} not a playlist, skipping...")
                 continue
 
-            playlist_h = YoutubePlaylist(
-                playlist_id, all_youtube_ids=all_youtube_ids
-            )
-            if not playlist_h.get_es_playlist():
-                playlist_h.get_playlist_dict()
-                playlist_h.playlist_dict["playlist_subscribed"] = subscribed
-                playlist_h.upload_to_es()
-                playlist_h.add_vids_to_playlist()
-                thumb = playlist_h.playlist_dict["playlist_thumbnail"]
-                new_thumbs.append((playlist_id, thumb))
-                self.channel_validate(playlist_h)
-            else:
-                self.change_subscribe(playlist_id, subscribe_status=True)
-
+            playlist_h = YoutubePlaylist(playlist_id)
+            playlist_h.all_youtube_ids = all_youtube_ids
+            playlist_h.build_json()
+            playlist_h.json_data["playlist_subscribed"] = subscribed
+            playlist_h.upload_to_es()
+            playlist_h.add_vids_to_playlist()
+            self.channel_validate(playlist_h.json_data["playlist_channel_id"])
+            thumb = playlist_h.json_data["playlist_thumbnail"]
+            new_thumbs.append((playlist_id, thumb))
             # notify
             message = {
                 "status": "message:subplaylist",
@@ -441,41 +418,18 @@ class PlaylistSubscription:
         return new_thumbs
 
     @staticmethod
-    def channel_validate(playlist_handler):
+    def channel_validate(channel_id):
         """make sure channel of playlist is there"""
-        channel_id = playlist_handler.playlist_dict["playlist_channel_id"]
-        channel_handler = YoutubeChannel(channel_id)
-        if channel_handler.source == "scraped":
-            channel_handler.channel_dict["channel_subscribed"] = False
-            channel_handler.upload_to_es()
-            channel_handler.get_channel_art()
+        channel = YoutubeChannel(channel_id)
+        channel.build_json()
 
-    def change_subscribe(self, playlist_id, subscribe_status):
+    @staticmethod
+    def change_subscribe(playlist_id, subscribe_status):
         """change the subscribe status of a playlist"""
-        es_url = self.config["application"]["es_url"]
-        es_auth = self.config["application"]["es_auth"]
-        playlist_handler = YoutubePlaylist(playlist_id)
-        playlist_handler.get_playlist_dict()
-        subed_now = playlist_handler.playlist_dict["playlist_subscribed"]
-
-        if subed_now == subscribe_status:
-            # status already as expected, do nothing
-            return False
-
-        # update subscribed status
-        headers = {"Content-type": "application/json"}
-        url = f"{es_url}/ta_playlist/_update/{playlist_id}"
-        payload = json.dumps(
-            {"doc": {"playlist_subscribed": subscribe_status}}
-        )
-        response = requests.post(
-            url, data=payload, headers=headers, auth=es_auth
-        )
-        if not response.ok:
-            print(response.text)
-            raise ValueError("failed to change subscribe status")
-
-        return True
+        playlist = YoutubePlaylist(playlist_id)
+        playlist.build_json()
+        playlist.json_data["playlist_subscribed"] = subscribe_status
+        playlist.upload_to_es()
 
     @staticmethod
     def get_to_ignore():
@@ -493,26 +447,25 @@ class PlaylistSubscription:
         to_ignore = self.get_to_ignore()
 
         missing_videos = []
-        counter = 1
-        for playlist_id in all_playlists:
+        for idx, playlist_id in enumerate(all_playlists):
             size_limit = self.config["subscriptions"]["channel_size"]
-            playlist_handler = YoutubePlaylist(playlist_id)
-            playlist = playlist_handler.update_playlist()
+            playlist = YoutubePlaylist(playlist_id)
+            playlist.update_playlist()
             if not playlist:
-                playlist_handler.deactivate()
+                playlist.deactivate()
                 continue
 
+            playlist_entries = playlist.json_data["playlist_entries"]
             if size_limit:
-                playlist_entries = playlist["playlist_entries"][:size_limit]
-            else:
-                playlist_entries = playlist["playlist_entries"]
+                del playlist_entries[size_limit:]
+
             all_missing = [i for i in playlist_entries if not i["downloaded"]]
 
             message = {
                 "status": "message:rescan",
                 "level": "info",
                 "title": "Scanning playlists: Looking for new videos.",
-                "message": f"Progress: {counter}/{len(all_playlists)}",
+                "message": f"Progress: {idx + 1}/{len(all_playlists)}",
             }
             RedisArchivist().set_message("message:rescan", message=message)
 
@@ -520,7 +473,6 @@ class PlaylistSubscription:
                 youtube_id = video["youtube_id"]
                 if youtube_id not in to_ignore:
                     missing_videos.append(youtube_id)
-            counter = counter + 1
 
         return missing_videos
 
@@ -751,15 +703,15 @@ class VideoDownloader:
             playlists = YoutubeChannel(channel_id).get_indexed_playlists()
             all_playlist_ids = [i["playlist_id"] for i in playlists]
             for id_p, playlist_id in enumerate(all_playlist_ids):
-                playlist_handler = YoutubePlaylist(
-                    playlist_id, all_youtube_ids=all_youtube_ids
-                )
-                playlist_dict = playlist_handler.update_playlist()
-                if not playlist_dict:
-                    playlist_handler.deactivate()
-                    continue
+                playlist = YoutubePlaylist(playlist_id)
+                playlist.all_youtube_ids = all_youtube_ids
+                playlist.build_json(scrape=True)
+                if not playlist.json_data:
+                    playlist.deactivate()
 
-                playlist_handler.add_vids_to_playlist()
+                playlist.add_vids_to_playlist()
+                playlist.upload_to_es()
+
                 # notify
                 title = (
                     "Processing playlists for channels: "

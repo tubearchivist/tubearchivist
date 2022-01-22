@@ -189,87 +189,73 @@ class Reindex:
         all_channels = channel_sub_handler.get_channels(subscribed_only=False)
         all_channel_ids = [i["channel_id"] for i in all_channels]
 
-        counter = 1
         for channel_id in all_channel_ids:
-            channel_index = YoutubeChannel(channel_id)
-            subscribed = channel_index.channel_dict["channel_subscribed"]
-            channel_index.channel_dict = channel_index.build_channel_dict(
-                scrape=True
-            )
-            channel_index.channel_dict["channel_subscribed"] = subscribed
-            channel_index.upload_to_es()
-            channel_index.sync_to_videos()
-            counter = counter + 1
+            channel = YoutubeChannel(channel_id)
+            subscribed = channel.json_data["channel_subscribed"]
+            channel.get_from_youtube()
+            channel.json_data["channel_subscribed"] = subscribed
+            channel.upload_to_es()
+            channel.sync_to_videos()
+
             if sleep_interval:
                 sleep(sleep_interval)
 
     @staticmethod
     def reindex_single_video(youtube_id):
         """refresh data for single video"""
-        vid_handler = YoutubeVideo(youtube_id)
-        vid_handler.get_vid_dict()
-        if not vid_handler.vid_dict:
-            # stop if deactivated
-            vid_handler.deactivate()
-            return
+        video = YoutubeVideo(youtube_id)
 
-        es_vid_dict = vid_handler.get_es_data()
-        player = es_vid_dict["_source"]["player"]
-        date_downloaded = es_vid_dict["_source"]["date_downloaded"]
-        channel_dict = es_vid_dict["_source"]["channel"]
-        channel_name = channel_dict["channel_name"]
-        try:
-            playlist = es_vid_dict["_source"]["playlist"]
-        except KeyError:
-            playlist = False
+        # read current state
+        video.get_from_es()
+        player = video.json_data["player"]
+        date_downloaded = video.json_data["date_downloaded"]
+        channel_dict = video.json_data["channel"]
+        playlist = video.json_data.get("playlist")
 
-        vid_handler.build_file_path(channel_name)
-        # add to vid_dict
-        vid_handler.vid_dict["player"] = player
-        vid_handler.vid_dict["date_downloaded"] = date_downloaded
-        vid_handler.vid_dict["channel"] = channel_dict
+        # get new
+        video.build_json()
+        if not video.json_data:
+            video.deactivate()
+
+        # add back
+        video.json_data["player"] = player
+        video.json_data["date_downloaded"] = date_downloaded
+        video.json_data["channel"] = channel_dict
         if playlist:
-            vid_handler.vid_dict["playlist"] = playlist
-        # update
-        vid_handler.upload_to_es()
+            video.json_data["playlist"] = playlist
+
+        video.upload_to_es()
+
         thumb_handler = ThumbManager()
         thumb_handler.delete_vid_thumb(youtube_id)
-        to_download = (youtube_id, vid_handler.vid_dict["vid_thumb_url"])
+        to_download = (youtube_id, video.json_data["vid_thumb_url"])
         thumb_handler.download_vid([to_download], notify=False)
 
     @staticmethod
     def reindex_single_channel(channel_id):
         """refresh channel data and sync to videos"""
-        channel_handler = YoutubeChannel(channel_id)
-        subscribed = channel_handler.channel_dict["channel_subscribed"]
-        channel_handler.channel_dict = channel_handler.build_channel_dict(
-            scrape=True
-        )
-        channel_handler.channel_dict["channel_subscribed"] = subscribed
-        # update
-        channel_handler.upload_to_es()
-        channel_handler.sync_to_videos()
-        thumb_handler = ThumbManager()
-        thumb_handler.delete_chan_thumb(channel_id)
-        channel_thumb = channel_handler.channel_dict["channel_thumb_url"]
-        channel_banner = channel_handler.channel_dict["channel_banner_url"]
-        to_download = (channel_id, channel_thumb, channel_banner)
-        thumb_handler.download_chan([to_download])
+        channel = YoutubeChannel(channel_id)
+        channel.get_from_es()
+        subscribed = channel.json_data["channel_subscribed"]
+        channel.get_from_youtube()
+        channel.json_data["channel_subscribed"] = subscribed
+        channel.upload_to_es()
+        channel.sync_to_videos()
 
     @staticmethod
     def reindex_single_playlist(playlist_id, all_indexed_ids):
         """refresh playlist data"""
-        playlist_handler = YoutubePlaylist(
-            playlist_id, all_youtube_ids=all_indexed_ids
-        )
-        playlist = playlist_handler.update_playlist()
-        if not playlist:
-            playlist_handler.deactivate()
+        playlist = YoutubePlaylist(playlist_id)
+        playlist.get_from_es()
+        subscribed = playlist.json_data["playlist_subscribed"]
+        playlist.all_youtube_ids = all_indexed_ids
+        playlist.build_json(scrape=True)
+        if not playlist.json_data:
+            playlist.deactivate()
             return
 
-        playlist_thumbnail = (playlist_id, playlist["playlist_thumbnail"])
-        thumb_handler = ThumbManager()
-        thumb_handler.download_playlist([playlist_thumbnail])
+        playlist.json_data["playlist_subscribed"] = subscribed
+        playlist.upload_to_es()
         return
 
     def reindex(self):
@@ -586,7 +572,7 @@ def scan_filesystem():
         print("index new videos")
         for missing_vid in filesystem_handler.to_index:
             youtube_id = missing_vid[2]
-            index_new_video(youtube_id, missing_vid=missing_vid)
+            index_new_video(youtube_id)
 
 
 def reindex_old_documents():

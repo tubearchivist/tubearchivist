@@ -624,11 +624,11 @@ class VideoView(View):
         """build playlist nav if available"""
         all_navs = []
         for playlist_id in playlists:
-            handler = YoutubePlaylist(playlist_id)
-            handler.get_playlist_dict()
-            nav = handler.build_nav(video_id)
-            if nav:
-                all_navs.append(nav)
+            playlist = YoutubePlaylist(playlist_id)
+            playlist.get_from_es()
+            playlist.build_nav(video_id)
+            if playlist.nav:
+                all_navs.append(playlist.nav)
 
         return all_navs
 
