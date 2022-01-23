@@ -1,7 +1,11 @@
-"""handle subscriptions"""
+"""
+Functionality:
+- handle channel subscriptions
+- handle playlist subscriptions
+"""
 
 import yt_dlp
-from home.src.download import queue   # partial import
+from home.src.download import queue  # partial import
 from home.src.es.connect import IndexPaginate
 from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist

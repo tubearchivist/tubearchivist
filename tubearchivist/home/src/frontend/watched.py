@@ -1,4 +1,7 @@
-"""handle watch state"""
+"""
+functionality:
+- handle watched state for videos, channels and playlists
+"""
 
 import json
 from datetime import datetime

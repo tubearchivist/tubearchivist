@@ -1,6 +1,7 @@
 """
 functionality:
 - handle download and caching for thumbnails
+- check for missing thumbnails
 """
 
 import os

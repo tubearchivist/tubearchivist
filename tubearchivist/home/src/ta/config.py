@@ -2,7 +2,6 @@
 Functionality:
 - read and write config
 - load config variables into redis
-- needs to be a separate module to avoid circular import
 """
 
 import json

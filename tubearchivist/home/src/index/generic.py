@@ -1,4 +1,7 @@
-"""generic base class for indexing documents"""
+"""
+functionality:
+- generic base class to inherit from for video, channel and playlist
+"""
 
 import math
 

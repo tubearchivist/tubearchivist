@@ -1,4 +1,8 @@
-"""handle playlist"""
+"""
+functionality:
+- get metadata from youtube for a playlist
+- index and update in es
+"""
 
 import json
 from datetime import datetime

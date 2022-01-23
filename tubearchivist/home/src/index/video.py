@@ -1,4 +1,8 @@
-"""handle single video index"""
+"""
+functionality:
+- get metadata from youtube for a video
+- index and update in es
+"""
 
 import os
 from datetime import datetime

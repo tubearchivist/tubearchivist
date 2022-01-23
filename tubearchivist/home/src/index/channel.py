@@ -1,4 +1,8 @@
-"""handle single channel in index"""
+"""
+functionality:
+- get metadata from youtube for a channel
+- index and update in es
+"""
 
 import json
 import os

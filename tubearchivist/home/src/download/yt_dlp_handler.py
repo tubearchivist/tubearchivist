@@ -1,4 +1,10 @@
-"""handle yt_dlp downloads"""
+"""
+functionality:
+- handle yt_dlp
+- build options and post processor
+- download video files
+- move to archive
+"""
 
 import os
 import shutil

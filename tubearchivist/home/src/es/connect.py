@@ -1,4 +1,8 @@
-"""holds es connection manager"""
+"""
+functionality:
+- wrapper around requests to call elastic search
+- reusable search_after to extract total index
+"""
 
 import json
 

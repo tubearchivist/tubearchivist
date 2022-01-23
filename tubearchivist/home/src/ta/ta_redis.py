@@ -1,4 +1,8 @@
-"""interact with redis"""
+"""
+functionality:
+- interact with redis
+- hold temporary download queue in redis
+"""
 
 import json
 import os

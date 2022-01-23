@@ -1,4 +1,8 @@
-"""periodically refresh documents"""
+"""
+functionality:
+- periodically refresh documents
+- index and update in es
+"""
 
 import json
 from datetime import datetime

@@ -1,4 +1,9 @@
-"""setup and verify needed elastic indexes"""
+"""
+functionality:
+- setup elastic index at first start
+- verify and update index mapping and settings if needed
+- backup and restore metadata
+"""
 
 import json
 import os

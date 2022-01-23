@@ -1,7 +1,7 @@
 """
 Functionality:
 - all views for home app
-- process post data received from frontend via ajax
+- holds base classes to inherit from
 """
 
 import json

@@ -1,4 +1,8 @@
-"""handle download queue"""
+"""
+Functionality:
+- handle download queue
+- linked with ta_dowload index
+"""
 
 import json
 import os
