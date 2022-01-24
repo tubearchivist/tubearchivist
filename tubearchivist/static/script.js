@@ -397,7 +397,7 @@ function setVideoProgress(videoProgress) {
     videoElement.currentTime = videoProgress;
 }
 
-// Runs on video playback, marks video as watched if video gets to 90% or higher
+// Runs on video playback, marks video as watched if video gets to 90% or higher, WIP sends position to api
 function onVideoProgress(videoId) {
     var videoElement = document.getElementById("video-item");
     if ((videoElement.currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
@@ -428,8 +428,16 @@ function getFormattedDescription(description) {
 // Returns HTML stars when given a rating
 function getStarRating(rating) {
     var stars = '';
-    for (let i = 1; i <= parseFloat(rating).toFixed(0); i++) {
+    for (let i = 1; i <= parseFloat(rating); i++) {
         stars = stars + '<img src="/static/img/icon-star-full.svg" alt="full">';
+    }
+    if ((parseFloat(rating) % 1) >= 0.5) {
+        stars = stars + '<img src="/static/img/icon-star-full.svg" alt="full">';
+    } else if ((parseFloat(rating) % 1) > 0) {
+        stars = stars + '<img src="/static/img/icon-star-half.svg" alt="half">';
+    }
+    for (let i = 1; i <= (5 - parseFloat(rating)); i++) {
+        stars = stars + '<img src="/static/img/icon-star-empty.svg" alt="empty">';
     }
     return stars;
 }
