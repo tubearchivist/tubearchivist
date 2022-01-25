@@ -299,6 +299,8 @@ function createPlayer(button) {
     var videoDescription = getFormattedDescription(videoData.description);
 
     var videoProgress = videoData.player.progress; // Groundwork for saving video position, change once progress variable is added to API
+    var videoLastRefresh = new Date(videoData.vid_last_refresh * 1000).toLocaleString('en-US', { dateStyle: "medium" });
+    var videoPublished = new Date(videoData.published + "T00:00:00").toLocaleString('en-US', { dateStyle: "medium" });
     var videoViews = formatNumbers(videoData.stats.view_count);
     var videoLikeCount = formatNumbers(videoData.stats.like_count);
     var videoDislikeCount = formatNumbers(videoData.stats.dislike_count);
@@ -361,8 +363,8 @@ function createPlayer(button) {
                 </div>
                 <div class="info-box-item">
                     <div>
-                        <p>Published: N/A</p>
-                        <p>Last refreshed: N/A</p>
+                        <p>Published: ${videoPublished}</p>
+                        <p>Last refreshed: ${videoLastRefresh}</p>
                         <p>Youtube: ${channelActive}</p>
                         <a download href="${videoUrl}"><button id="download-item">Download File</button></a>
                         <button onclick="deleteConfirm()" id="delete-item">Delete Video</button>
