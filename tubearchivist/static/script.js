@@ -587,8 +587,7 @@ function createVideo(video, viewStyle) {
     const videoPlayerData = getVideoPlayerData(videoId);
     const thumbUrl = videoPlayerData.vid_thumb_url;
     const videoTitle = videoPlayerData.title;
-    const videoPublished = video["published"];
-    // const videoPublished = videoPlayerData.published; // API date format is "2022-01-09" and couldn't quite get the format right with Date()
+    const videoPublished = new Date(videoData.published + "T00:00:00").toLocaleString('en-US', { dateStyle: "medium" });
     const videoDuration = videoData.player.duration_str;
     if (videoPlayerData.is_watched) {
         var playerState = "seen";
@@ -632,9 +631,8 @@ function createChannel(channel, viewStyle) {
     const channelId = channel["channel_id"];
     const channelData = getChannelData(channelId);
     const channelName = channelData.channel_name;
-    const channelSubs = channelData.channel_subs;
-    const channelLastRefresh = channel["channel_last_refresh"]; 
-    // const channelLastRefresh = channelData.channel_last_refresh; // Last refresh date format unknown, milliseconds resulted in wrong date
+    const channelSubs = formatNumbers(channelData.channel_subs);
+    const channelLastRefresh = new Date(channelData.channel_last_refresh * 1000).toLocaleString('en-US', { dateStyle: "medium" });
     if (channelData.channel_subscribed) {
         var button = `<button class="unsubscribe" type="button" id="${channelId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${channelName}">Unsubscribe</button>`
     } else {
@@ -680,8 +678,7 @@ function createPlaylist(playlist, viewStyle) {
     const playlistName = playlistData.playlist_name;
     const playlistChannelId = playlistData.playlist_channel_id;
     const playlistChannel = playlistData.playlist_channel;
-    const playlistLastRefresh = playlist["playlist_last_refresh"];
-    // const playlistLastRefresh = playlistData.playlist_last_refresh; // Last refresh date format unknown
+    const playlistLastRefresh = new Date(playlistData.playlist_last_refresh * 1000).toLocaleString('en-US', { dateStyle: "medium" });
     if (playlistData.playlist_subscribed) {
         var button = `<button class="unsubscribe" type="button" id="${playlistId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${playlistName}">Unsubscribe</button>`
     } else {
