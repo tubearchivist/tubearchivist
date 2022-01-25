@@ -9,6 +9,7 @@ function sortChange(sortValue) {
 }
 
 function isWatched(youtube_id) {
+    // sendVideoProgress(youtube_id, 0); // Reset video progress on watched;
     var payload = JSON.stringify({'watched': youtube_id});
     sendPost(payload);
     var seenIcon = document.createElement('img');
@@ -33,6 +34,7 @@ function isWatchedButton(button) {
 }
 
 function isUnwatched(youtube_id) {
+    // sendVideoProgress(youtube_id, 0); // Reset video progress on unwatched;
     var payload = JSON.stringify({'un_watched': youtube_id});
     sendPost(payload);
     var unseenIcon = document.createElement('img');
@@ -296,7 +298,7 @@ function createPlayer(button) {
     var videoName = videoPlayerData.title;
     var videoDescription = getFormattedDescription(videoData.description);
 
-    var videoProgress = 0; // videoData.progress; // Groundwork for saving video position, change once progress variable is added to API
+    var videoProgress = videoData.player.progress; // Groundwork for saving video position, change once progress variable is added to API
     var videoViews = formatNumbers(videoData.stats.view_count);
     var videoLikeCount = formatNumbers(videoData.stats.like_count);
     var videoDislikeCount = formatNumbers(videoData.stats.dislike_count);
@@ -393,6 +395,9 @@ function createPlayer(button) {
 
 // Set video progress in seconds
 function setVideoProgress(videoProgress) {
+    if (isNaN(videoProgress)) {
+        videoProgress = 0;
+    }
     var videoElement = document.getElementById("video-item");
     videoElement.currentTime = videoProgress;
 }
@@ -402,7 +407,7 @@ function onVideoProgress(videoId) {
     var videoElement = document.getElementById("video-item");
     if ((videoElement.currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
         // sendVideoProgress(videoId, videoElement.currentTime); // Groundwork for saving video position
-        if ((videoElement.currentTime / videoElement.duration) > 0.89) {
+        if ((videoElement.currentTime / videoElement.duration) >= 0.90) {
             isWatched(videoId);
         }
     }
@@ -412,9 +417,12 @@ function onVideoProgress(videoId) {
 // Groundwork for saving video position
 function sendVideoProgress(videoId, videoProgress) {
     var apiEndpoint = "/api/video/" + videoId + "/";
+    if (isNaN(videoProgress)) {
+        videoProgress = 0;
+    }
     progress = { 
         player: {
-            prograss: videoProgress 
+            progress: videoProgress 
         }
     };
     videoData = apiRequest(apiEndpoint, "POST", progress);
