@@ -1,5 +1,0 @@
-{
-    "python.linting.pylintEnabled": true,
-    "python.linting.pycodestyleEnabled": false,
-    "python.linting.enabled": true
-}
