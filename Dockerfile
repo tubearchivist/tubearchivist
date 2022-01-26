@@ -35,12 +35,12 @@ COPY ./tubearchivist/requirements.txt /requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt --src /usr/local/src
 
 # copy config files
-COPY nginx.conf /etc/nginx/conf.d/
+COPY docker_assets/nginx.conf /etc/nginx/conf.d/
 
 # copy application into container
 COPY ./tubearchivist /app
-COPY ./run.sh /app
-COPY ./uwsgi.ini /app
+COPY ./docker_assets/run.sh /app
+COPY ./docker_assets/uwsgi.ini /app
 
 # volumes
 VOLUME /cache
