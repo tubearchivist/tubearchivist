@@ -456,7 +456,6 @@ function getStarRating(rating) {
 function formatDates(dateUnformatted) {
     // var dateFormatted = dateUnformatted.toLocaleString('en-US', { dateStyle: "medium" }); // en-US is simular but has the day and month switched and en-GB has correct order but no comma, so none of the huilt in formats worked directly 
     var dateFormatted = dateUnformatted.toLocaleString("en-US", { day: "2-digit" }) + " " +  dateUnformatted.toLocaleString("en-US", { month: "short" }) + ", " + dateUnformatted.toLocaleString("en-US", { year: "numeric" });
-    console.log(dateFormatted);
     return dateFormatted;
 }
 
