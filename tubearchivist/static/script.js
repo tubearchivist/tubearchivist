@@ -303,9 +303,20 @@ function createPlayer(button) {
     var videoPublished = formatDates(new Date(videoData.published + "T00:00:00")); // Time needed or else the date is always one day behind, UTC to local or something
     var videoViews = formatNumbers(videoData.stats.view_count);
     var videoLikeCount = formatNumbers(videoData.stats.like_count);
-    var videoDislikeCount = formatNumbers(videoData.stats.dislike_count);
-    var videoRating = videoData.stats.average_rating.toFixed(1);
-    var videoStarRating = getStarRating(videoData.stats.average_rating);
+    if (videoData.stats.dislike_count != null && videoData.stats.dislike_count != 'undefined' && videoData.stats.dislike_count != 0) { // Can replace with API check later
+        var videoDislikeCount = formatNumbers(videoData.stats.dislike_count);
+        var videoDislikes = `<p class="thumb-icon dislike"><img src="/static/img/icon-thumb.svg" alt="thumbs-down">: ${videoDislikeCount}</p>`
+    } else {
+        var videoDislikes = ``
+    }
+    if (videoData.stats.average_rating != null && videoData.stats.average_rating != 'undefiend') { // Can replace with API check later
+        var videoRating = videoData.stats.average_rating.toFixed(1);
+        var videoStarRating = getStarRating(videoData.stats.average_rating);
+        var videoStars = `<p class="rating-stars">Rating: ${videoStarRating} (${videoRating})</p>`
+    } else {
+        var videoStars = ``
+    }
+    
 
     var channelId = videoPlayerData.channel_id;
     var channelName = videoPlayerData.channel_name;
@@ -377,8 +388,8 @@ function createPlayer(button) {
                     <div>
                         <p>Views: ${videoViews}</p>
                         <p class="thumb-icon like"><img src="/static/img/icon-thumb.svg" alt="thumbs-up">: ${videoLikeCount}</p>
-                        <p class="thumb-icon dislike"><img src="/static/img/icon-thumb.svg" alt="thumbs-down">: ${videoDislikeCount}</p>
-                        <p class="rating-stars">Rating: ${videoStarRating} (${videoRating})</p>
+                        ${videoDislikes}
+                        ${videoStars}
                     </div>
                 </div>
             </div>
