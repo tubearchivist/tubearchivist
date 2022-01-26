@@ -299,8 +299,8 @@ function createPlayer(button) {
     var videoDescription = getFormattedDescription(videoData.description);
 
     var videoProgress = videoData.player.progress; // Groundwork for saving video position, change once progress variable is added to API
-    var videoLastRefresh = new Date(videoData.vid_last_refresh * 1000).toLocaleString('en-US', { dateStyle: "medium" });
-    var videoPublished = new Date(videoData.published + "T00:00:00").toLocaleString('en-US', { dateStyle: "medium" });
+    var videoLastRefresh = formatDates(new Date(videoData.vid_last_refresh * 1000)); // Convert s to ms
+    var videoPublished = formatDates(new Date(videoData.published + "T00:00:00")); // Time needed or else the date is always one day behind, UTC to local or something
     var videoViews = formatNumbers(videoData.stats.view_count);
     var videoLikeCount = formatNumbers(videoData.stats.like_count);
     var videoDislikeCount = formatNumbers(videoData.stats.dislike_count);
@@ -452,6 +452,14 @@ function getStarRating(rating) {
     return stars;
 }
 
+// Format dates to match format in other locations
+function formatDates(dateUnformatted) {
+    // var dateFormatted = dateUnformatted.toLocaleString('en-US', { dateStyle: "medium" }); // en-US is simular but has the day and month switched and en-GB has correct order but no comma, so none of the huilt in formats worked directly 
+    var dateFormatted = dateUnformatted.toLocaleString("en-US", { day: "2-digit" }) + " " +  dateUnformatted.toLocaleString("en-US", { month: "short" }) + ", " + dateUnformatted.toLocaleString("en-US", { year: "numeric" });
+    console.log(dateFormatted);
+    return dateFormatted;
+}
+
 // Format numbers for frontend
 function formatNumbers(number) {
     var numberUnformatted = parseFloat(number);
@@ -587,7 +595,7 @@ function createVideo(video, viewStyle) {
     const videoPlayerData = getVideoPlayerData(videoId);
     const thumbUrl = videoPlayerData.vid_thumb_url;
     const videoTitle = videoPlayerData.title;
-    const videoPublished = new Date(videoData.published + "T00:00:00").toLocaleString('en-US', { dateStyle: "medium" });
+    const videoPublished = formatDates(new Date(videoData.published + "T00:00:00"));
     const videoDuration = videoData.player.duration_str;
     if (videoPlayerData.is_watched) {
         var playerState = "seen";
@@ -632,7 +640,7 @@ function createChannel(channel, viewStyle) {
     const channelData = getChannelData(channelId);
     const channelName = channelData.channel_name;
     const channelSubs = formatNumbers(channelData.channel_subs);
-    const channelLastRefresh = new Date(channelData.channel_last_refresh * 1000).toLocaleString('en-US', { dateStyle: "medium" });
+    const channelLastRefresh = formatDates(new Date(channelData.channel_last_refresh * 1000));
     if (channelData.channel_subscribed) {
         var button = `<button class="unsubscribe" type="button" id="${channelId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${channelName}">Unsubscribe</button>`
     } else {
@@ -678,7 +686,7 @@ function createPlaylist(playlist, viewStyle) {
     const playlistName = playlistData.playlist_name;
     const playlistChannelId = playlistData.playlist_channel_id;
     const playlistChannel = playlistData.playlist_channel;
-    const playlistLastRefresh = new Date(playlistData.playlist_last_refresh * 1000).toLocaleString('en-US', { dateStyle: "medium" });
+    const playlistLastRefresh = formatDates(new Date(playlistData.playlist_last_refresh * 1000));
     if (playlistData.playlist_subscribed) {
         var button = `<button class="unsubscribe" type="button" id="${playlistId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${playlistName}">Unsubscribe</button>`
     } else {
