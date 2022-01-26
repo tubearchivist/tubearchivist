@@ -31,8 +31,10 @@ class VideoDownloader:
     """
 
     def __init__(self, youtube_id_list=False):
+        self.obs = False
         self.youtube_id_list = youtube_id_list
         self.config = AppConfig().config
+        self._build_obs()
         self.channels = set()
 
     def run_queue(self):
@@ -49,14 +51,14 @@ class VideoDownloader:
                 break
 
             try:
-                self.dl_single_vid(youtube_id)
+                self._dl_single_vid(youtube_id)
             except yt_dlp.utils.DownloadError:
                 print("failed to download " + youtube_id)
                 continue
             vid_dict = index_new_video(youtube_id)
             self.channels.add(vid_dict["channel"]["channel_id"])
             self.move_to_archive(vid_dict)
-            self.delete_from_pending(youtube_id)
+            self._delete_from_pending(youtube_id)
 
         autodelete_days = self.config["downloads"]["autodelete_days"]
         if autodelete_days:
@@ -91,7 +93,7 @@ class VideoDownloader:
         queue.add_list(to_add)
 
     @staticmethod
-    def progress_hook(response):
+    def _progress_hook(response):
         """process the progress_hooks from yt_dlp"""
         # title
         path = os.path.split(response["filename"])[-1][12:]
@@ -115,9 +117,15 @@ class VideoDownloader:
         }
         RedisArchivist().set_message("message:download", mess_dict)
 
-    def build_obs(self):
-        """build obs dictionary for yt-dlp"""
-        obs = {
+    def _build_obs(self):
+        """collection to build all obs passed to yt-dlp"""
+        self._build_obs_basic()
+        self._build_obs_user()
+        self._build_obs_postprocessors()
+
+    def _build_obs_basic(self):
+        """initial obs"""
+        self.obs = {
             "default_search": "ytsearch",
             "merge_output_format": "mp4",
             "restrictfilenames": True,
@@ -126,7 +134,7 @@ class VideoDownloader:
                 + "/download/"
                 + self.config["application"]["file_template"]
             ),
-            "progress_hooks": [self.progress_hook],
+            "progress_hooks": [self._progress_hook],
             "noprogress": True,
             "quiet": True,
             "continuedl": True,
@@ -135,15 +143,22 @@ class VideoDownloader:
             "noplaylist": True,
             "check_formats": "selected",
         }
+
+    def _build_obs_user(self):
+        """build user customized options"""
         if self.config["downloads"]["format"]:
-            obs["format"] = self.config["downloads"]["format"]
+            self.obs["format"] = self.config["downloads"]["format"]
         if self.config["downloads"]["limit_speed"]:
-            obs["ratelimit"] = self.config["downloads"]["limit_speed"] * 1024
+            self.obs["ratelimit"] = (
+                self.config["downloads"]["limit_speed"] * 1024
+            )
 
         throttle = self.config["downloads"]["throttledratelimit"]
         if throttle:
-            obs["throttledratelimit"] = throttle * 1024
+            self.obs["throttledratelimit"] = throttle * 1024
 
+    def _build_obs_postprocessors(self):
+        """add postprocessor to obs"""
         postprocessors = []
 
         if self.config["downloads"]["add_metadata"]:
@@ -162,23 +177,20 @@ class VideoDownloader:
                     "already_have_thumbnail": True,
                 }
             )
-            obs["writethumbnail"] = True
+            self.obs["writethumbnail"] = True
 
-        obs["postprocessors"] = postprocessors
+        self.obs["postprocessors"] = postprocessors
 
-        return obs
-
-    def dl_single_vid(self, youtube_id):
+    def _dl_single_vid(self, youtube_id):
         """download single video"""
         dl_cache = self.config["application"]["cache_dir"] + "/download/"
-        obs = self.build_obs()
 
         # check if already in cache to continue from there
         all_cached = ignore_filelist(os.listdir(dl_cache))
         for file_name in all_cached:
             if youtube_id in file_name:
-                obs["outtmpl"] = os.path.join(dl_cache, file_name)
-        with yt_dlp.YoutubeDL(obs) as ydl:
+                self.obs["outtmpl"] = os.path.join(dl_cache, file_name)
+        with yt_dlp.YoutubeDL(self.obs) as ydl:
             try:
                 ydl.download([youtube_id])
             except yt_dlp.utils.DownloadError:
@@ -186,7 +198,7 @@ class VideoDownloader:
                 sleep(10)
                 ydl.download([youtube_id])
 
-        if obs["writethumbnail"]:
+        if self.obs["writethumbnail"]:
             # webp files don't get cleaned up automatically
             all_cached = ignore_filelist(os.listdir(dl_cache))
             to_clean = [i for i in all_cached if not i.endswith(".mp4")]
@@ -219,7 +231,7 @@ class VideoDownloader:
         if host_uid and host_gid:
             os.chown(new_file_path, host_uid, host_gid)
 
-    def delete_from_pending(self, youtube_id):
+    def _delete_from_pending(self, youtube_id):
         """delete downloaded video from pending index if its there"""
         es_url = self.config["application"]["es_url"]
         es_auth = self.config["application"]["es_auth"]
@@ -228,7 +240,7 @@ class VideoDownloader:
         if not response.ok and not response.status_code == 404:
             print(response.text)
 
-    def add_subscribed_channels(self):
+    def _add_subscribed_channels(self):
         """add all channels subscribed to refresh"""
         all_subscribed = PlaylistSubscription().get_playlists()
         if not all_subscribed:
@@ -243,7 +255,7 @@ class VideoDownloader:
     def validate_playlists(self):
         """look for playlist needing to update"""
         print("sync playlists")
-        self.add_subscribed_channels()
+        self._add_subscribed_channels()
         all_indexed = PendingList().get_all_indexed()
         all_youtube_ids = [i["youtube_id"] for i in all_indexed]
         for id_c, channel_id in enumerate(self.channels):
