@@ -407,13 +407,14 @@ function setVideoProgress(videoProgress) {
 // Runs on video playback, marks video as watched if video gets to 90% or higher, WIP sends position to api
 function onVideoProgress(videoId) {
     var videoElement = document.getElementById("video-item");
-    if ((videoElement.currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
-        // sendVideoProgress(videoId, videoElement.currentTime); // Groundwork for saving video position
-        if ((videoElement.currentTime / videoElement.duration) >= 0.90) {
-            isWatched(videoId);
+    if (videoElement != null) {
+        if ((videoElement.currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
+            // sendVideoProgress(videoId, videoElement.currentTime); // Groundwork for saving video position
+            if ((videoElement.currentTime / videoElement.duration) >= 0.90) {
+                isWatched(videoId);
+            }
         }
     }
-
 }
 
 // Groundwork for saving video position
