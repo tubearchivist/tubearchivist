@@ -109,9 +109,21 @@
                     {% endif %}
                     {% if pagination.last_page > 0 %}
                         {% if pagination.search_get %}
-                        <a class="pagination-item" href="?page={{ pagination.last_page }}&search={{ pagination.search_get }}">Last ({{ pagination.last_page }})</a>
+                        <a class="pagination-item" href="?page={{ pagination.last_page }}&search={{ pagination.search_get }}">
+                            {% if pagination.max_hits %}
+                                Max ({{ pagination.last_page }})
+                            {% else %}
+                                Last ({{ pagination.last_page }})
+                            {% endif %}
+                        </a>
                         {% else %}
-                        <a class="pagination-item" href="?page={{ pagination.last_page }}">Last ({{ pagination.last_page }})</a>
+                        <a class="pagination-item" href="?page={{ pagination.last_page }}">
+                            {% if pagination.max_hits %}
+                                Max ({{ pagination.last_page }})
+                            {% else %}
+                                Last ({{ pagination.last_page }})
+                            {% endif %}
+                        </a>
                         {% endif %}
                     {% endif %}
                 {% endif %}

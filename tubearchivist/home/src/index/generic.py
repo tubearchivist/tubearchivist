@@ -122,6 +122,7 @@ class Pagination:
             "page_from": page_from,
             "prev_pages": prev_pages,
             "current_page": page_get,
+            "max_hits": False,
         }
         if self.search_get:
             pagination.update({"search_get": self.search_get})
@@ -131,6 +132,11 @@ class Pagination:
         """validate pagination with total_hits after making api call"""
         page_get = self.page_get
         max_pages = math.ceil(total_hits / self.page_size)
+        if total_hits > 10000:
+            # es returns maximal 10000 results
+            self.pagination["max_hits"] = True
+            max_pages = max_pages - 1
+
         if page_get < max_pages and max_pages > 1:
             self.pagination["last_page"] = max_pages
         else:
