@@ -286,6 +286,10 @@ button:hover {
     --connected-color: var(--accent-font-light);
 }
 
+.alert-hover:hover {
+    filter: var(--img-filter-error);
+}
+
 /* top of page */
 .title-bar {
     padding-top: 30px;
