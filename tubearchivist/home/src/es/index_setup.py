@@ -399,8 +399,7 @@ class ElasticBackup:
 def get_mapping():
     """read index_mapping.json and get expected mapping and settings"""
     with open("home/src/es/index_mapping.json", "r", encoding="utf-8") as f:
-        config_str = f.read()
-        index_config = json.loads(config_str).get("index_config")
+        index_config = json.load(f).get("index_config")
 
     return index_config
 

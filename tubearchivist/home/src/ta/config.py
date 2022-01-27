@@ -38,8 +38,7 @@ class AppConfig:
     def get_config_file(self):
         """read the defaults from config.json"""
         with open("home/config.json", "r", encoding="utf-8") as f:
-            config_str = f.read()
-            config_file = json.loads(config_str)
+            config_file = json.load(f)
 
         config_file["application"].update(self.get_config_env())
 
