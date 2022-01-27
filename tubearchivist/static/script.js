@@ -359,7 +359,7 @@ function createPlayer(button) {
     //     var channelActive = `Deactivated` 
     // };
     const markup = `
-    <div class="video-player data-id="${videoId}">
+    <div class="video-player" data-id="${videoId}">
         <video src="${videoUrl}" poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" onloadedmetadata="setVideoProgress(${videoProgress})" controls autoplay type='video/mp4' width="100%" playsinline id="video-item"></video>
         <div class="player-title boxed-content">
             <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
