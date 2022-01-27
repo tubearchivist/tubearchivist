@@ -1,6 +1,6 @@
 # build the tube archivist image from default python slim image
 
-FROM python:3.10.1-slim-bullseye
+FROM python:3.10.2-slim-bullseye
 ARG TARGETPLATFORM
 
 ENV PYTHONUNBUFFERED 1
