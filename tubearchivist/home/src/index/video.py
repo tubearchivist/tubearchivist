@@ -125,6 +125,10 @@ class YoutubeVideo(YouTubeItem):
         """build media_url for where file will be located"""
         channel_name = self.json_data["channel"]["channel_name"]
         clean_channel_name = clean_string(channel_name)
+        if len(clean_channel_name) <= 3:
+            # fall back to channel id
+            clean_channel_name = self.json_data["channel"]["channel_id"]
+
         timestamp = self.json_data["published"].replace("-", "")
         youtube_id = self.json_data["youtube_id"]
         title = self.json_data["title"]
