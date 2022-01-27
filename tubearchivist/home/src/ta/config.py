@@ -2,7 +2,6 @@
 Functionality:
 - read and write config
 - load config variables into redis
-- needs to be a separate module to avoid circular import
 """
 
 import json
@@ -10,7 +9,7 @@ import os
 import re
 
 from celery.schedules import crontab
-from home.src.helper import RedisArchivist
+from home.src.ta.ta_redis import RedisArchivist
 
 
 class AppConfig:
@@ -39,8 +38,7 @@ class AppConfig:
     def get_config_file(self):
         """read the defaults from config.json"""
         with open("home/config.json", "r", encoding="utf-8") as f:
-            config_str = f.read()
-            config_file = json.loads(config_str)
+            config_file = json.load(f)
 
         config_file["application"].update(self.get_config_env())
 

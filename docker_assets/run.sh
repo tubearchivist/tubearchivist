@@ -1,11 +1,6 @@
 #!/bin/bash
 # startup script inside the container for tubearchivist
 
-# check environment
-if [[ -z "$DJANGO_DEBUG" ]]; then
-    export DJANGO_DEBUG=False
-fi
-
 if [[ -z "$ELASTIC_USER" ]]; then
     export ELASTIC_USER=elastic
 fi

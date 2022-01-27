@@ -9,7 +9,6 @@ jobs:
       - run: pip install --upgrade pip wheel
       - run: pip install bandit black codespell flake8 flake8-bugbear
                          flake8-comprehensions isort
-      - run: bandit --recursive  --skip B105,B108,B404,B603,B607 .
       - run: black --check --diff --line-length 79 .
       - run: codespell
       - run: flake8 . --count --max-complexity=12 --max-line-length=79

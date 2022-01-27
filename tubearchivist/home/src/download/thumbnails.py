@@ -1,16 +1,19 @@
 """
 functionality:
 - handle download and caching for thumbnails
+- check for missing thumbnails
 """
 
 import os
 from collections import Counter
 from time import sleep
 
-import home.src.download as download
 import requests
-from home.src.config import AppConfig
-from home.src.helper import RedisArchivist, ignore_filelist
+from home.src.download import queue  # partial import
+from home.src.download import subscriptions  # partial import
+from home.src.ta.config import AppConfig
+from home.src.ta.helper import ignore_filelist
+from home.src.ta.ta_redis import RedisArchivist
 from mutagen.mp4 import MP4, MP4Cover
 from PIL import Image
 
@@ -55,8 +58,8 @@ class ThumbManager:
     def get_needed_thumbs(self, missing_only=False):
         """get a list of all missing thumbnails"""
         all_thumbs = self.get_all_thumbs()
-        all_indexed = download.PendingList().get_all_indexed()
-        all_in_queue, all_ignored = download.PendingList().get_all_pending()
+        all_indexed = queue.PendingList().get_all_indexed()
+        all_in_queue, all_ignored = queue.PendingList().get_all_pending()
 
         needed_thumbs = []
         for video in all_indexed:
@@ -84,9 +87,8 @@ class ThumbManager:
         all_channel_art = os.listdir(self.CHANNEL_DIR)
         files = [i[0:24] for i in all_channel_art]
         cached_channel_ids = [k for (k, v) in Counter(files).items() if v > 1]
-        channels = download.ChannelSubscription().get_channels(
-            subscribed_only=False
-        )
+        channel_sub = subscriptions.ChannelSubscription()
+        channels = channel_sub.get_channels(subscribed_only=False)
 
         missing_channels = []
         for channel in channels:
@@ -104,10 +106,8 @@ class ThumbManager:
         """get all missing playlist artwork"""
         all_downloaded = ignore_filelist(os.listdir(self.PLAYLIST_DIR))
         all_ids_downloaded = [i.replace(".jpg", "") for i in all_downloaded]
-
-        playlists = download.PlaylistSubscription().get_playlists(
-            subscribed_only=False
-        )
+        playlist_sub = subscriptions.PlaylistSubscription()
+        playlists = playlist_sub.get_playlists(subscribed_only=False)
 
         missing_playlists = []
         for playlist in playlists:
@@ -276,7 +276,7 @@ class ThumbManager:
 
     def get_thumb_list(self):
         """get list of mediafiles and matching thumbnails"""
-        all_indexed = download.PendingList().get_all_indexed()
+        all_indexed = queue.PendingList().get_all_indexed()
         video_list = []
         for video in all_indexed:
             youtube_id = video["youtube_id"]

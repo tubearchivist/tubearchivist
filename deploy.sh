@@ -85,9 +85,7 @@ function validate {
     fi
 
     echo "run validate on $check_path"
-    
-    echo "running bandit"
-    bandit --recursive --skip B105,B108,B404,B603,B607 "$check_path"
+
     echo "running black"
     black --diff --color --check -l 79 "$check_path"
     echo "running codespell"

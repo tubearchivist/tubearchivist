@@ -3,9 +3,9 @@
 import os
 
 from django.apps import AppConfig
-from home.src.config import AppConfig as ArchivistConfig
-from home.src.helper import RedisArchivist
-from home.src.index_management import index_check
+from home.src.es.index_setup import index_check
+from home.src.ta.config import AppConfig as ArchivistConfig
+from home.src.ta.ta_redis import RedisArchivist
 
 
 def sync_redis_state():

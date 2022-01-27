@@ -1,0 +1,274 @@
+{
+    "index_config": [{
+            "index_name": "channel",
+            "expected_map": {
+                "channel_id": {
+                    "type": "keyword"
+                },
+                "channel_name": {
+                    "type": "text",
+                    "analyzer": "english",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256,
+                            "normalizer": "to_lower"
+                        },
+                        "search_as_you_type": {
+                            "type": "search_as_you_type",
+                            "doc_values": false,
+                            "max_shingle_size": 3
+                        }
+                    }
+                },
+                "channel_banner_url": {
+                    "type": "keyword",
+                    "index": false
+                },
+                "channel_thumb_url": {
+                    "type": "keyword",
+                    "index": false
+                },
+                "channel_description": {
+                    "type": "text"
+                },
+                "channel_last_refresh": {
+                    "type": "date",
+                    "format": "epoch_second"
+                }
+            },
+            "expected_set": {
+                "analysis": {
+                    "normalizer": {
+                        "to_lower": {
+                            "type": "custom",
+                            "filter": ["lowercase"]
+                        }
+                    }
+                },
+                "number_of_replicas": "0"
+            }
+        },
+        {
+            "index_name": "video",
+            "expected_map": {
+                "vid_thumb_url": {
+                    "type": "text",
+                    "index": false
+                },
+                "date_downloaded": {
+                    "type": "date"
+                },
+                "channel": {
+                    "properties": {
+                        "channel_id": {
+                            "type": "keyword"
+                        },
+                        "channel_name": {
+                            "type": "text",
+                            "analyzer": "english",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256,
+                                    "normalizer": "to_lower"
+                                },
+                                "search_as_you_type": {
+                                    "type": "search_as_you_type",
+                                    "doc_values": false,
+                                    "max_shingle_size": 3
+                                }
+                            }
+                        },
+                        "channel_banner_url": {
+                            "type": "keyword",
+                            "index": false
+                        },
+                        "channel_thumb_url": {
+                            "type": "keyword",
+                            "index": false
+                        },
+                        "channel_description": {
+                            "type": "text"
+                        },
+                        "channel_last_refresh": {
+                            "type": "date",
+                            "format": "epoch_second"
+                        }
+                    }
+                },
+                "description": {
+                    "type": "text"
+                },
+                "media_url": {
+                    "type": "keyword",
+                    "index": false
+                },
+                "tags": {
+                    "type": "text",
+                    "analyzer": "english",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "title": {
+                    "type": "text",
+                    "analyzer": "english",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256,
+                            "normalizer": "to_lower"
+                        },
+                        "search_as_you_type": {
+                            "type": "search_as_you_type",
+                            "doc_values": false,
+                            "max_shingle_size": 3
+                        }
+                    }
+                },
+                "vid_last_refresh": {
+                    "type": "date"
+                },
+                "youtube_id": {
+                    "type": "keyword"
+                },
+                "published": {
+                    "type": "date"
+                },
+                "playlist": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256,
+                            "normalizer": "to_lower"
+                        }
+                    }
+                }
+            },
+            "expected_set": {
+                "analysis": {
+                    "normalizer": {
+                        "to_lower": {
+                            "type": "custom",
+                            "filter": ["lowercase"]
+                        }
+                    }
+                },
+                "number_of_replicas": "0"
+            }
+        },
+        {
+            "index_name": "download",
+            "expected_map": {
+                "timestamp": {
+                    "type": "date"
+                },
+                "channel_id": {
+                    "type": "keyword"
+                },
+                "channel_name": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256,
+                            "normalizer": "to_lower"
+                        }
+                    }
+                },
+                "status": {
+                    "type": "keyword"
+                },
+                "title": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256,
+                            "normalizer": "to_lower"
+                        }
+                    }
+                },
+                "vid_thumb_url": {
+                    "type": "keyword"
+                },
+                "youtube_id": {
+                    "type": "keyword"
+                }
+            },
+            "expected_set": {
+                "analysis": {
+                    "normalizer": {
+                        "to_lower": {
+                            "type": "custom",
+                            "filter": ["lowercase"]
+                        }
+                    }
+                },
+                "number_of_replicas": "0"
+            }
+        },
+        {
+            "index_name": "playlist",
+            "expected_map": {
+                "playlist_id": {
+                    "type": "keyword"
+                },
+                "playlist_description": {
+                    "type": "text"
+                },
+                "playlist_name": {
+                    "type": "text",
+                    "analyzer": "english",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256,
+                            "normalizer": "to_lower"
+                        },
+                        "search_as_you_type": {
+                            "type": "search_as_you_type",
+                            "doc_values": false,
+                            "max_shingle_size": 3
+                        }
+                    }
+                },
+                "playlist_channel": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256,
+                            "normalizer": "to_lower"
+                        }
+                    }
+                },
+                "playlist_channel_id": {
+                    "type": "keyword"
+                },
+                "playlist_thumbnail": {
+                    "type": "keyword"
+                },
+                "playlist_last_refresh": {
+                    "type": "date"
+                }
+            },
+            "expected_set": {
+                "analysis": {
+                    "normalizer": {
+                        "to_lower": {
+                            "type": "custom",
+                            "filter": ["lowercase"]
+                        }
+                    }
+                },
+                "number_of_replicas": "0"
+            }
+        }
+    ]
+}

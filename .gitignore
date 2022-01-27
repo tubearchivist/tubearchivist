@@ -3,3 +3,6 @@ __pycache__
 
 # django testing db
 db.sqlite3
+
+# vscode custom conf
+.vscode
