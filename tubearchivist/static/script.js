@@ -298,6 +298,18 @@ function createPlayer(button) {
     var videoName = videoPlayerData.title;
     var videoDescription = getFormattedDescription(videoData.description);
 
+    var videoPlaylists = videoData.playlist; // Array of playlists the video is in
+    var subbedPlaylists = getSubbedPlaylists(videoPlaylists); // Array of playlist the video is in that are subscribed
+    if (subbedPlaylists.length != 0) {
+        var playlistData = getPlaylistData(subbedPlaylists[0]); // Playlist data for first subscribed playlist
+        var playlistId = playlistData.playlist_id;
+        var playlistName = playlistData.playlist_name;
+        var playlist = `<h5><a href="/playlist/${playlistId}/"> - ${playlistName}</a></h5>`
+    } else {
+        var playlist = ''
+    }
+    
+
     var videoProgress = videoData.player.progress; // Groundwork for saving video position, change once progress variable is added to API
     var videoLastRefresh = formatDates(new Date(videoData.vid_last_refresh * 1000)); // Convert s to ms
     var videoPublished = formatDates(new Date(videoData.published + "T00:00:00")); // Time needed or else the date is always one day behind, UTC to local or something
@@ -353,7 +365,10 @@ function createPlayer(button) {
             <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
             <img src="/static/img/icon-${playerState}.svg" alt="${playerState}-icon" id="${videoId}" onclick="is${watchedFunction}(this.id)" class="${playerState}-icon" title="Mark as ${watchedFunction}">
             ${castButton}
-            <h3><a href="/channel/${channelId}/">${channelName}</a></h3>
+            <div class="player-channel-playlist">
+                <h3><a href="/channel/${channelId}/">${channelName}</a></h3>
+                ${playlist}
+            </div>
             <a href="/video/${videoId}/"><h2 id="video-title">${videoName}</h2></a>
             <div class="player-stats">
                 <p>Views  ${videoViews}</p>
@@ -474,6 +489,17 @@ function getPlaylistData(playlistId) {
     var apiEndpoint = "/api/playlist/" + playlistId + "/";
     playlistData = apiRequest(apiEndpoint, "GET");
     return playlistData.data;
+}
+
+// Given an array of playlist ids it returns an array of subbed playlists from that list
+function getSubbedPlaylists(videoPlaylists) {
+    var subbedPlaylists = [];
+    for (var i = 0; i < videoPlaylists.length; i++) {
+        if(getPlaylistData(videoPlaylists[i]).playlist_subscribed) {
+            subbedPlaylists.push(videoPlaylists[i]);
+        }
+    }
+    return subbedPlaylists;
 }
 
 // Makes api requests when passed an endpoint and method ("GET" or "POST")
