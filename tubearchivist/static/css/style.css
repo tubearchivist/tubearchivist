@@ -341,7 +341,7 @@ button:hover {
 
 /* video player */
 .player-wrapper {
-    /* background-color: var(--highlight-bg); */
+    background-color: var(--highlight-bg);
     margin: 20px 0;
 }
 
@@ -450,6 +450,19 @@ button:hover {
 .player-title h3 {
     font-size: 0.9em;
     text-transform: uppercase;
+}
+
+.player-title h2 {
+    display: inline;
+}
+
+.player-title p {
+    display: inline;
+    margin: 5px;
+}
+
+.player-stats {
+    float: right;
 }
 
 .video-desc-player {
