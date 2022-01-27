@@ -305,14 +305,14 @@ function createPlayer(button) {
     var videoLikeCount = formatNumbers(videoData.stats.like_count);
     if (videoData.stats.dislike_count != 0) { // Can replace with API check later
         var videoDislikeCount = formatNumbers(videoData.stats.dislike_count);
-        var videoDislikes = `<p class="thumb-icon dislike"><img src="/static/img/icon-thumb.svg" alt="thumbs-down">: ${videoDislikeCount}</p>`
+        var videoDislikes = `<p>|</p><p class="thumb-icon dislike"><img src="/static/img/icon-thumb.svg" alt="thumbs-down"> ${videoDislikeCount}</p>`
     } else {
         var videoDislikes = ``
     }
     if (videoData.stats.average_rating != null) { // Can replace with API check later
         var videoRating = videoData.stats.average_rating.toFixed(1);
         var videoStarRating = getStarRating(videoData.stats.average_rating);
-        var videoStars = `<p class="rating-stars">Rating: ${videoStarRating} (${videoRating})</p>`
+        var videoStars = `<p class="rating-stars">${videoStarRating} (${videoRating})</p>`
     } else {
         var videoStars = ``
     }
@@ -347,58 +347,20 @@ function createPlayer(button) {
         var channelActive = `Deactivated` 
     };
     const markup = `
-    <div data-id="${videoId}">
-        <div class="video-main">
-            <video src="${videoUrl}" poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" onloadedmetadata="setVideoProgress(${videoProgress})" controls autoplay type='video/mp4' width="100%" playsinline id="video-item"></video>
-        </div>
+    <div class="video-player data-id="${videoId}">
+        <video src="${videoUrl}" poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" onloadedmetadata="setVideoProgress(${videoProgress})" controls autoplay type='video/mp4' width="100%" playsinline id="video-item"></video>
         <div class="player-title boxed-content">
             <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
             <img src="/static/img/icon-${playerState}.svg" alt="${playerState}-icon" id="${videoId}" onclick="is${watchedFunction}(this.id)" class="${playerState}-icon" title="Mark as ${watchedFunction}">
-        </div>
-        <div class="boxed-content">
-            <div class="title-bar">
-                ${castButton}
-                <a href="/video/${videoId}/"><h1 id="video-title">${videoName}</h1></a>
+            ${castButton}
+            <h3><a href="/channel/${channelId}/">${channelName}</a></h3>
+            <a href="/video/${videoId}/"><h2 id="video-title">${videoName}</h2></a>
+            <div class="player-stats">
+                <p>Views  ${videoViews}</p>
+                <p>|</p>
+                <p class="thumb-icon like"><img src="/static/img/icon-thumb.svg" alt="thumbs-up"> ${videoLikeCount}</p>
+                ${videoDislikes}
             </div>
-            <div class="info-box info-box-3">
-                <div class="info-box-item">
-                    <div class="round-img">
-                        <a href="/channel/${channelId}/">
-                            <img src="/cache/channels/${channelId}_thumb.jpg" alt="channel-thumb">
-                        </a>
-                    </div>
-                    <div>
-                        <h3><a href="/channel/${channelId}/">${channelName}</a></h3>
-                        <p>Subscribers: ${channelSubs}</p> 
-                    </div>
-                </div>
-                <div class="info-box-item">
-                    <div>
-                        <p>Published: ${videoPublished}</p>
-                        <p>Last refreshed: ${videoLastRefresh}</p>
-                        <p>Youtube: ${channelActive}</p>
-                        <a download href="${videoUrl}"><button id="download-item">Download File</button></a>
-                        <button onclick="deleteConfirm()" id="delete-item">Delete Video</button>
-                        <div class="delete-confirm" id="delete-button">
-                            <span>Are you sure? </span><button class="danger-button" onclick="deleteVideo(this)" data-id="${videoId}" data-redirect = "${channelId}">Delete</button> <button onclick="cancelDelete()">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="info-box-item">
-                    <div>
-                        <p>Views: ${videoViews}</p>
-                        <p class="thumb-icon like"><img src="/static/img/icon-thumb.svg" alt="thumbs-up">: ${videoLikeCount}</p>
-                        ${videoDislikes}
-                        ${videoStars}
-                    </div>
-                </div>
-            </div>
-            <!--<div class="info-box-item description-box">
-                <p>Description: <button onclick="textReveal()" id="text-reveal-button">Show</button></p>
-                <div id="text-reveal" class="description-text">
-                    <p>${videoDescription}</p>
-                </div>
-            </div> -->
         </div>
     </div>
     `
