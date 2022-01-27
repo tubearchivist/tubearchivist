@@ -298,28 +298,27 @@ function createPlayer(button) {
     var videoName = videoPlayerData.title;
     // var videoDescription = getFormattedDescription(videoData.description);
 
+    var playlist = ''
     var videoPlaylists = videoData.playlist; // Array of playlists the video is in
-    var subbedPlaylists = getSubbedPlaylists(videoPlaylists); // Array of playlist the video is in that are subscribed
-    if (subbedPlaylists.length != 0) {
-        var playlistData = getPlaylistData(subbedPlaylists[0]); // Playlist data for first subscribed playlist
-        var playlistId = playlistData.playlist_id;
-        var playlistName = playlistData.playlist_name;
-        var playlist = `<h5><a href="/playlist/${playlistId}/"> - ${playlistName}</a></h5>`
-    } else {
-        var playlist = ''
+    if (typeof(videoPlaylists) != 'undefined') {
+        var subbedPlaylists = getSubbedPlaylists(videoPlaylists); // Array of playlist the video is in that are subscribed
+        if (subbedPlaylists.length != 0) {
+            var playlistData = getPlaylistData(subbedPlaylists[0]); // Playlist data for first subscribed playlist
+            var playlistId = playlistData.playlist_id;
+            var playlistName = playlistData.playlist_name;
+            var playlist = `<h5><a href="/playlist/${playlistId}/"> - ${playlistName}</a></h5>`
+        }
     }
-    
 
     var videoProgress = videoData.player.progress; // Groundwork for saving video position, change once progress variable is added to API
     // var videoLastRefresh = formatDates(new Date(videoData.vid_last_refresh * 1000)); // Convert s to ms
     // var videoPublished = formatDates(new Date(videoData.published + "T00:00:00")); // Time needed or else the date is always one day behind, UTC to local or something
     var videoViews = formatNumbers(videoData.stats.view_count);
     var videoLikeCount = formatNumbers(videoData.stats.like_count);
+    var videoDislikes = ``
     if (videoData.stats.dislike_count != 0) { // Can replace with API check later
         var videoDislikeCount = formatNumbers(videoData.stats.dislike_count);
         var videoDislikes = `<p>|</p><p class="thumb-icon dislike"><img src="/static/img/icon-thumb.svg" alt="thumbs-down"> ${videoDislikeCount}</p>`
-    } else {
-        var videoDislikes = ``
     }
     // if (videoData.stats.average_rating != null) { // Can replace with API check later
     //     var videoRating = videoData.stats.average_rating.toFixed(1);
@@ -338,12 +337,12 @@ function createPlayer(button) {
     document.getElementById(videoId).outerHTML = ''; // Remove watch indicator from video info
 
     // If cast integration is enabled create cast button
+    var castButton = ``
     var castScript = document.getElementById('cast-script');
     if (typeof(castScript) != 'undefined' && castScript != null) {
         var castButton = `<google-cast-launcher id="castbutton"></google-cast-launcher>`
-    } else {
-        var castButton = ``
-    };
+    }
+
     // Watched indicator
     if (videoPlayerData.is_watched) {
         var playerState = "seen";
