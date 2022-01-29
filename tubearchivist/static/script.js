@@ -355,11 +355,11 @@ function createPlayer(button) {
     // if (channelData.channel_active) {
     //     var channelActive = `<a href="https://www.youtube.com/watch?v=${videoId}" target="_blank">Active</a>`
     // } else {
-    //     var channelActive = `Deactivated` 
+    //     var channelActive = `Deactivated`
     // };
     const markup = `
     <div class="video-player" data-id="${videoId}">
-        <video src="${videoUrl}" poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" onloadedmetadata="setVideoProgress(${videoProgress})" controls autoplay type='video/mp4' width="100%" playsinline id="video-item"></video>
+        <video src="${videoUrl}#t=${videoProgress}" poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" controls autoplay type='video/mp4' width="100%" playsinline id="video-item"></video>
         <div class="player-title boxed-content">
             <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
             <img src="/static/img/icon-${playerState}.svg" alt="${playerState}-icon" id="${videoId}" onclick="is${watchedFunction}(this.id)" class="${playerState}-icon" title="Mark as ${watchedFunction}">
