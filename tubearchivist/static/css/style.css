@@ -446,28 +446,21 @@ button:hover {
     text-align: left;
 }
 
-.player-channel-playlist h3, 
-.player-channel-playlist h5 {
-    display: inline;
-}
-
 .video-desc h3,
 .player-title h3 {
     font-size: 0.9em;
     text-transform: uppercase;
 }
 
-.player-title h2 {
-    display: inline;
-}
-
-.player-title p {
-    display: inline;
-    margin: 5px;
-}
-
 .player-stats {
     float: right;
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.player-stats span {
+    margin: 0 5px;
 }
 
 .video-desc-player {
@@ -653,7 +646,7 @@ button:hover {
     filter: var(--img-filter);
 }
 
-.thumb-icon.dislike img {
+.dislike {
     transform: rotate(180deg);
 }
 

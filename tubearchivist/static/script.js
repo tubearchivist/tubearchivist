@@ -357,24 +357,31 @@ function createPlayer(button) {
     // } else {
     //     var channelActive = `Deactivated`
     // };
+
+    var playerStats = `<div class="thumb-icon player-stats"><img src="/static/img/icon-eye.svg" alt="views icon"><span>${videoViews}</span>`;
+    if (videoData.stats.like_count) {
+        var likes = formatNumbers(videoData.stats.like_count);
+        playerStats += `<span>|</span><img src="/static/img/icon-thumb.svg" alt="thumbs-up"><span>${likes}</span>`;
+    };
+    if (videoData.stats.dislike_count) {
+        var dislikes = formatNumbers(videoData.stats.dislike_count);
+        playerStats += `<span>|</span><img class="dislike" src="/static/img/icon-thumb.svg" alt="thumbs-down"><span>${dislikes}</span>`;
+    };
+    playerStats += "</div>";
+
     const markup = `
     <div class="video-player" data-id="${videoId}">
         <video src="${videoUrl}#t=${videoProgress}" poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" controls autoplay type='video/mp4' width="100%" playsinline id="video-item"></video>
         <div class="player-title boxed-content">
             <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
             <img src="/static/img/icon-${playerState}.svg" alt="${playerState}-icon" id="${videoId}" onclick="is${watchedFunction}(this.id)" class="${playerState}-icon" title="Mark as ${watchedFunction}">
+            ${playerStats}
             ${castButton}
             <div class="player-channel-playlist">
                 <h3><a href="/channel/${channelId}/">${channelName}</a></h3>
                 ${playlist}
             </div>
             <a href="/video/${videoId}/"><h2 id="video-title">${videoName}</h2></a>
-            <div class="player-stats">
-                <p>Views  ${videoViews}</p>
-                <p>|</p>
-                <p class="thumb-icon like"><img src="/static/img/icon-thumb.svg" alt="thumbs-up"> ${videoLikeCount}</p>
-                ${videoDislikes}
-            </div>
         </div>
     </div>
     `
