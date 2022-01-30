@@ -14,6 +14,75 @@ from home.src.ta.helper import DurationConverter, clean_string
 from ryd_client import ryd_client
 
 
+class YoutubeSubtitle(YouTubeItem):
+    """handle video subtitle functionality"""
+
+    def __init__(self, youtube_meta, config):
+        self.youtube_meta = youtube_meta
+        self.youtube_id = youtube_meta["id"]
+        self.config = config
+        self.languages = self.get_lang_list()
+        self.source = self.config["downloads"]["subtitle_source"]
+
+    def get_lang_list(self):
+        """return desired languages list"""
+        languages_raw = self.config["downloads"]["subtitle"]
+        languages = [i.strip() for i in languages_raw.split(",")]
+        return languages
+
+    def get_subtitles(self):
+        """check what to do"""
+        if not self.languages:
+            # no subtitles
+            return False
+
+        relevant_subtitles = self.get_user_subtitles()
+        if relevant_subtitles:
+            return relevant_subtitles
+
+        if self.source == "auto":
+            relevant_auto = self.get_auto_caption()
+            return relevant_auto
+
+    def get_auto_caption(self):
+        """get auto_caption subtitles"""
+        print(f"{self.youtube_id}: get auto generated subtitles")
+        all_subtitles = self.youtube_meta.get("automatic_captions")
+
+        if not all_subtitles:
+            return False
+
+        relevant_subtitles = []
+
+        for language in self.languages:
+            all_formats = all_subtitles.get(language)
+            subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
+            subtitle.update({"lang": language, "source": "auto"})
+            relevant_subtitles.append(subtitle)
+            break
+
+        return relevant_subtitles
+
+    def get_user_subtitles(self):
+        """get subtitles uploaded from channel owner"""
+        print(f"{self.youtube_id}: get user uploaded subtitles")
+        all_subtitles = self.youtube_meta.get("subtitles")
+
+        if not all_subtitles:
+            return False
+
+        relevant_subtitles = []
+
+        for language in self.languages:
+            all_formats = all_subtitles.get(language)
+            subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
+            subtitle.update({"lang": language, "source": "user"})
+            relevant_subtitles.append(subtitle)
+            break
+
+        return relevant_subtitles
+
+
 class YoutubeVideo(YouTubeItem):
     """represents a single youtube video"""
 
@@ -37,6 +106,7 @@ class YoutubeVideo(YouTubeItem):
         self._add_stats()
         self.add_file_path()
         self.add_player()
+        self._check_subtitles()
         if self.config["downloads"]["integrate_ryd"]:
             self._get_ryd_stats()
 
@@ -166,6 +236,13 @@ class YoutubeVideo(YouTubeItem):
         self.json_data["stats"].update(dislikes)
 
         return True
+
+    def _check_subtitles(self):
+        """optionally add subtitles"""
+        handler = YoutubeSubtitle(self.youtube_meta, self.config)
+        subtitles = handler.get_subtitles()
+        if subtitles:
+            self.json_data["subtitles"] = subtitles
 
 
 def index_new_video(youtube_id):
