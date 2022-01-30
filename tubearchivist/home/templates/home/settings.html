@@ -94,6 +94,17 @@
                 <i>Embed thumbnail into the mediafile.</i><br>
                 {{ app_form.downloads_add_thumbnail }}
             </div>
+            <div class="settings-item">
+                <p>Subtitles download setting: <span class="settings-current">{{ config.downloads.subtitle }}</span><br>
+                <i>Choose which subtitles to download, add comma separated two letter language ISO code,<br>
+                    e.g. <span class="settings-current">en, de</span></i><br>
+                {{ app_form.downloads_subtitle }}</p>
+            </div>
+            <div class="settings-item">
+                <p>Subtitle source settings: <span class="settings-current">{{ config.downloads.subtitle_source }}</span></p>
+                <i>Download only user generated, or also less accurate auto generated subtitles.</i><br>
+                {{ app_form.downloads_subtitle_source }}
+            </div>
         </div>
         <div class="settings-group">
             <h2 id="integrations">Integrations</h2>

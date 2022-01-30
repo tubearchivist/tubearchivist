@@ -23,6 +23,8 @@
         "format": false,
         "add_metadata": false,
         "add_thumbnail": false,
+        "subtitle": false,
+        "subtitle_source": false,
         "throttledratelimit": false,
         "integrate_ryd": false
     },
