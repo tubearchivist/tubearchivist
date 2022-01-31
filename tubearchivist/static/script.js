@@ -306,7 +306,7 @@ function createPlayer(button) {
             var playlistData = getPlaylistData(subbedPlaylists[0]); // Playlist data for first subscribed playlist
             var playlistId = playlistData.playlist_id;
             var playlistName = playlistData.playlist_name;
-            var playlist = `<h5><a href="/playlist/${playlistId}/"> - ${playlistName}</a></h5>`
+            var playlist = `<h5><a href="/playlist/${playlistId}/">${playlistName}</a></h5>`
         }
     }
 
@@ -375,8 +375,8 @@ function createPlayer(button) {
         <div class="player-title boxed-content">
             <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
             <img src="/static/img/icon-${playerState}.svg" alt="${playerState}-icon" id="${videoId}" onclick="is${watchedFunction}(this.id)" class="${playerState}-icon" title="Mark as ${watchedFunction}">
-            ${playerStats}
             ${castButton}
+            ${playerStats}
             <div class="player-channel-playlist">
                 <h3><a href="/channel/${channelId}/">${channelName}</a></h3>
                 ${playlist}
