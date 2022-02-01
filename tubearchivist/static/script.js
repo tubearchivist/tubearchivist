@@ -388,16 +388,19 @@ function onVideoProgress(videoId) {
 
 // Groundwork for saving video position
 function sendVideoProgress(videoId, videoProgress) {
-    var apiEndpoint = "/api/video/" + videoId + "/";
+    var apiEndpoint = "/api/video/";
     if (isNaN(videoProgress)) {
         videoProgress = 0;
     }
-    progress = { 
-        player: {
-            progress: videoProgress 
-        }
+    var data = {
+        "data": [{
+            "youtube_id": videoId,
+            "player": {
+                "progress": videoProgress 
+            }
+        }]
     };
-    videoData = apiRequest(apiEndpoint, "POST", progress);
+    videoData = apiRequest(apiEndpoint, "POST", data);
 }
 
 // Returns HTML formatted description
