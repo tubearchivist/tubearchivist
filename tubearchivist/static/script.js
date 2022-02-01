@@ -291,12 +291,10 @@ function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
     var videoPlayerData = getVideoPlayerData(videoId);
     var videoData = getVideoData(videoId);
-    // var channelData = getChannelData(videoPlayerData.channel_id);
 
     var videoUrl = videoPlayerData.media_url;
     var videoThumbUrl = videoPlayerData.vid_thumb_url;
     var videoName = videoPlayerData.title;
-    // var videoDescription = getFormattedDescription(videoData.description);
 
     var playlist = ''
     var videoPlaylists = videoData.playlist; // Array of playlists the video is in
@@ -311,27 +309,10 @@ function createPlayer(button) {
     }
 
     var videoProgress = videoData.player.progress; // Groundwork for saving video position, change once progress variable is added to API
-    // var videoLastRefresh = formatDates(new Date(videoData.vid_last_refresh * 1000)); // Convert s to ms
-    // var videoPublished = formatDates(new Date(videoData.published + "T00:00:00")); // Time needed or else the date is always one day behind, UTC to local or something
     var videoViews = formatNumbers(videoData.stats.view_count);
-    var videoLikeCount = formatNumbers(videoData.stats.like_count);
-    var videoDislikes = ``
-    if (videoData.stats.dislike_count != 0) { // Can replace with API check later
-        var videoDislikeCount = formatNumbers(videoData.stats.dislike_count);
-        var videoDislikes = `<p>|</p><p class="thumb-icon dislike"><img src="/static/img/icon-thumb.svg" alt="thumbs-down"> ${videoDislikeCount}</p>`
-    }
-    // if (videoData.stats.average_rating != null) { // Can replace with API check later
-    //     var videoRating = videoData.stats.average_rating.toFixed(1);
-    //     var videoStarRating = getStarRating(videoData.stats.average_rating);
-    //     var videoStars = `<p class="rating-stars">${videoStarRating} (${videoRating})</p>`
-    // } else {
-    //     var videoStars = ``
-    // }
-    
 
     var channelId = videoPlayerData.channel_id;
     var channelName = videoPlayerData.channel_name;
-    // var channelSubs = formatNumbers(channelData.channel_subs);
 
     removePlayer();
     document.getElementById(videoId).outerHTML = ''; // Remove watch indicator from video info
@@ -351,12 +332,6 @@ function createPlayer(button) {
         var playerState = "unseen";
         var watchedFunction = "Watched";  
     };
-    // Channel Active
-    // if (channelData.channel_active) {
-    //     var channelActive = `<a href="https://www.youtube.com/watch?v=${videoId}" target="_blank">Active</a>`
-    // } else {
-    //     var channelActive = `Deactivated`
-    // };
 
     var playerStats = `<div class="thumb-icon player-stats"><img src="/static/img/icon-eye.svg" alt="views icon"><span>${videoViews}</span>`;
     if (videoData.stats.like_count) {
@@ -497,7 +472,7 @@ function getPlaylistData(playlistId) {
     return playlistData.data;
 }
 
-// Given an array of playlist ids it returns an array of subbed playlists from that list
+// Given an array of playlist ids it returns an array of subbed playlist ids from that list
 function getSubbedPlaylists(videoPlaylists) {
     var subbedPlaylists = [];
     for (var i = 0; i < videoPlaylists.length; i++) {
