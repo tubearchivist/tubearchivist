@@ -14,24 +14,24 @@ from home.src.ta.helper import DurationConverter, clean_string
 from ryd_client import ryd_client
 
 
-class YoutubeSubtitle(YouTubeItem):
+class YoutubeSubtitle:
     """handle video subtitle functionality"""
 
-    def __init__(self, youtube_meta, config):
-        self.youtube_meta = youtube_meta
-        self.youtube_id = youtube_meta["id"]
+    def __init__(self, config, youtube_meta, media_url, youtube_id):
         self.config = config
-        self.languages = self.get_lang_list()
-        self.source = self.config["downloads"]["subtitle_source"]
+        self.youtube_meta = youtube_meta
+        self.media_url = media_url
+        self.youtube_id = youtube_id
+        self.languages = False
 
-    def get_lang_list(self):
-        """return desired languages list"""
+    def sub_conf_parse(self):
+        """add additional conf values to self"""
         languages_raw = self.config["downloads"]["subtitle"]
-        languages = [i.strip() for i in languages_raw.split(",")]
-        return languages
+        self.languages = [i.strip() for i in languages_raw.split(",")]
 
     def get_subtitles(self):
         """check what to do"""
+        self.sub_conf_parse()
         if not self.languages:
             # no subtitles
             return False
@@ -40,9 +40,11 @@ class YoutubeSubtitle(YouTubeItem):
         if relevant_subtitles:
             return relevant_subtitles
 
-        if self.source == "auto":
+        if self.config["downloads"]["subtitle_source"] == "auto":
             relevant_auto = self.get_auto_caption()
             return relevant_auto
+
+        return False
 
     def get_auto_caption(self):
         """get auto_caption subtitles"""
@@ -54,10 +56,13 @@ class YoutubeSubtitle(YouTubeItem):
 
         relevant_subtitles = []
 
-        for language in self.languages:
-            all_formats = all_subtitles.get(language)
+        for lang in self.languages:
+            media_url = self.media_url.replace(".mp4", f"-{lang}.vtt")
+            all_formats = all_subtitles.get(lang)
             subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
-            subtitle.update({"lang": language, "source": "auto"})
+            subtitle.update(
+                {"lang": lang, "source": "auto", "media_url": media_url}
+            )
             relevant_subtitles.append(subtitle)
             break
 
@@ -73,17 +78,20 @@ class YoutubeSubtitle(YouTubeItem):
 
         relevant_subtitles = []
 
-        for language in self.languages:
-            all_formats = all_subtitles.get(language)
+        for lang in self.languages:
+            media_url = self.media_url.replace(".mp4", f"-{lang}.vtt")
+            all_formats = all_subtitles.get(lang)
             subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
-            subtitle.update({"lang": language, "source": "user"})
+            subtitle.update(
+                {"lang": lang, "source": "user", "media_url": media_url}
+            )
             relevant_subtitles.append(subtitle)
             break
 
         return relevant_subtitles
 
 
-class YoutubeVideo(YouTubeItem):
+class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     """represents a single youtube video"""
 
     es_path = False
@@ -239,7 +247,12 @@ class YoutubeVideo(YouTubeItem):
 
     def _check_subtitles(self):
         """optionally add subtitles"""
-        handler = YoutubeSubtitle(self.youtube_meta, self.config)
+        handler = YoutubeSubtitle(
+            self.config,
+            self.youtube_meta,
+            media_url=self.json_data["media_url"],
+            youtube_id=self.youtube_id,
+        )
         subtitles = handler.get_subtitles()
         if subtitles:
             self.json_data["subtitles"] = subtitles
