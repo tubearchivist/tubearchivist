@@ -190,7 +190,7 @@ function reEmbed() {
 
 function dbBackup() {
     var payload = JSON.stringify({'db-backup': true});
-    sendPost(payload)
+    sendPost(payload);
     // clear button
     var message = document.createElement('p');
     message.innerText = 'backing up archive';
@@ -302,7 +302,7 @@ function createPlayer(button) {
             var playlistData = getPlaylistData(subbedPlaylists[0]); // Playlist data for first subscribed playlist
             var playlistId = playlistData.playlist_id;
             var playlistName = playlistData.playlist_name;
-            var playlist = `<h5><a href="/playlist/${playlistId}/">${playlistName}</a></h5>`
+            var playlist = `<h5><a href="/playlist/${playlistId}/">${playlistName}</a></h5>`;
         }
     }
 
@@ -316,10 +316,10 @@ function createPlayer(button) {
     document.getElementById(videoId).outerHTML = ''; // Remove watch indicator from video info
 
     // If cast integration is enabled create cast button
-    var castButton = ``
+    var castButton = ``;
     var castScript = document.getElementById('cast-script');
     if (typeof(castScript) != 'undefined' && castScript != null) {
-        var castButton = `<google-cast-launcher id="castbutton"></google-cast-launcher>`
+        var castButton = `<google-cast-launcher id="castbutton"></google-cast-launcher>`;
     }
 
     // Watched indicator
@@ -329,17 +329,17 @@ function createPlayer(button) {
     } else {
         var playerState = "unseen";
         var watchedFunction = "Watched";  
-    };
+    }
 
     var playerStats = `<div class="thumb-icon player-stats"><img src="/static/img/icon-eye.svg" alt="views icon"><span>${videoViews}</span>`;
     if (videoData.stats.like_count) {
         var likes = formatNumbers(videoData.stats.like_count);
         playerStats += `<span>|</span><img src="/static/img/icon-thumb.svg" alt="thumbs-up"><span>${likes}</span>`;
-    };
+    }
     if (videoData.stats.dislike_count) {
         var dislikes = formatNumbers(videoData.stats.dislike_count);
         playerStats += `<span>|</span><img class="dislike" src="/static/img/icon-thumb.svg" alt="thumbs-down"><span>${dislikes}</span>`;
-    };
+    }
     playerStats += "</div>";
 
     const markup = `
@@ -357,7 +357,7 @@ function createPlayer(button) {
             <a href="/video/${videoId}/"><h2 id="video-title">${videoName}</h2></a>
         </div>
     </div>
-    `
+    `;
     const divPlayer =  document.getElementById("player");
     divPlayer.innerHTML = markup;
 }
@@ -467,87 +467,87 @@ function removePlayer() {
         var playedBox = document.getElementById(youtubeId);
         if (playedBox) {
             playedStatus.appendChild(playedBox);
-        };
+        }
         playerElement.innerHTML = '';
         // append played status
         var videoInfo = document.getElementById('video-info-' + youtubeId);
         videoInfo.insertBefore(playedStatus, videoInfo.firstChild);
-    };
+    }
 }
 
 
 // multi search form
 function searchMulti(query) {
     if (query.length > 1) {
-        var payload = JSON.stringify({'multi_search': query})
+        var payload = JSON.stringify({'multi_search': query});
         var http = new XMLHttpRequest();
         http.onreadystatechange = function() {
             if (http.readyState === 4) {
-                allResults = JSON.parse(http.response)['results'];
+                allResults = JSON.parse(http.response).results;
                 populateMultiSearchResults(allResults);
-            };
+            }
         };
         http.open("POST", "/process/", true);
         http.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
         http.setRequestHeader("Content-type", "application/json");
         http.send(payload);
-    };
+    }
 }
 
 function getViewDefaults(view) {
     var defaultView = document.getElementById("id_" + view).value;
-    return defaultView
+    return defaultView;
 }
 
 function populateMultiSearchResults(allResults) {
     // videos
     var defaultVideo = getViewDefaults("home");
-    var allVideos = allResults["video_results"];
+    var allVideos = allResults.video_results;
     var videoBox = document.getElementById("video-results");
     videoBox.innerHTML = "";
     for (let index = 0; index < allVideos.length; index++) {
-        const video = allVideos[index]["source"];
+        const video = allVideos[index].source;
         const videoDiv = createVideo(video, defaultVideo);
         videoBox.appendChild(videoDiv);
-    };
+    }
     // channels
     var defaultChannel = getViewDefaults("channel");
-    var allChannels = allResults["channel_results"];
+    var allChannels = allResults.channel_results;
     var channelBox = document.getElementById("channel-results");
     channelBox.innerHTML = "";
     for (let index = 0; index < allChannels.length; index++) {
-        const channel = allChannels[index]["source"];
+        const channel = allChannels[index].source;
         const channelDiv = createChannel(channel, defaultChannel);
         channelBox.appendChild(channelDiv);
-    };
+    }
     // playlists
     var defaultPlaylist = getViewDefaults("playlist");
-    var allPlaylists = allResults["playlist_results"];
+    var allPlaylists = allResults.playlist_results;
     var playlistBox = document.getElementById("playlist-results");
     playlistBox.innerHTML = "";
     for (let index = 0; index < allPlaylists.length; index++) {
-        const playlist = allPlaylists[index]["source"];
+        const playlist = allPlaylists[index].source;
         const playlistDiv = createPlaylist(playlist, defaultPlaylist);
         playlistBox.appendChild(playlistDiv);
-    };
+    }
 }
 
 
 function createVideo(video, viewStyle) {
     // create video item div from template
-    const videoId = video["youtube_id"];
-    const mediaUrl = video["media_url"];
-    const thumbUrl = "/cache/" + video["vid_thumb_url"];
-    const videoTitle = video["title"];
-    const videoPublished = video["published"];
-    const videoDuration = video["player"]["duration_str"];
-    if (video["player"]["watched"]) {
+    const videoId = video.youtube_id;
+    const mediaUrl = video.media_url;
+    const thumbUrl = "/cache/" + video.vid_thumb_url;
+    const videoTitle = video.title;
+    const videoPublished = video.published;
+    const videoDuration = video.player.duration_str;
+    if (video.player.watched) {
         var playerState = "seen";
     } else {
         var playerState = "unseen";
     };
-    const channelId = video["channel"]["channel_id"];
-    const channelName = video["channel"]["channel_name"];
+    const channelId = video.channel.channel_id;
+    const channelName = video.channel.channel_name;
     // build markup
     const markup = `
     <a href="#player" data-src="/media/${mediaUrl}" data-thumb="${thumbUrl}" data-title="${videoTitle}" data-channel="${channelName}" data-channel-id="${channelId}" data-id="${videoId}" onclick="createPlayer(this)">
@@ -570,25 +570,25 @@ function createVideo(video, viewStyle) {
             <a class="video-more" href="/video/${videoId}/"><h2>${videoTitle}</h2></a>
         </div>
     </div>
-    `
+    `;
     const videoDiv = document.createElement("div");
     videoDiv.setAttribute("class", "video-item " + viewStyle);
-    videoDiv.innerHTML = markup
-    return videoDiv
+    videoDiv.innerHTML = markup;
+    return videoDiv;
 }
 
 
 function createChannel(channel, viewStyle) {
     // create channel item div from template
-    const channelId = channel["channel_id"];
-    const channelName = channel["channel_name"];
-    const channelSubs = channel["channel_subs"];
-    const channelLastRefresh = channel["channel_last_refresh"];
-    if (channel["channel_subscribed"]) {
-        var button = `<button class="unsubscribe" type="button" id="${channelId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${channelName}">Unsubscribe</button>`
+    const channelId = channel.channel_id;
+    const channelName = channel.channel_name;
+    const channelSubs = channel.channel_subs;
+    const channelLastRefresh = channel.channel_last_refresh;
+    if (channel.channel_subscribed) {
+        var button = `<button class="unsubscribe" type="button" id="${channelId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${channelName}">Unsubscribe</button>`;
     } else {
-        var button = `<button type="button" id="${channelId}" onclick="subscribe(this.id)" title="Subscribe to ${channelName}">Subscribe</button>`
-    };
+        var button = `<button type="button" id="${channelId}" onclick="subscribe(this.id)" title="Subscribe to ${channelName}">Subscribe</button>`;
+    }
     // build markup
     const markup = `
     <div class="channel-banner ${viewStyle}">
@@ -615,25 +615,25 @@ function createChannel(channel, viewStyle) {
             </div>
         </div>
     </div>
-    `
+    `;
     const channelDiv = document.createElement("div");
     channelDiv.setAttribute("class", "channel-item " + viewStyle);
     channelDiv.innerHTML = markup;
-    return channelDiv
+    return channelDiv;
 }
 
 function createPlaylist(playlist, viewStyle) {
     // create playlist item div from template
-    const playlistId = playlist["playlist_id"];
-    const playlistName = playlist["playlist_name"];
-    const playlistChannelId = playlist["playlist_channel_id"];
-    const playlistChannel = playlist["playlist_channel"];
-    const playlistLastRefresh = playlist["playlist_last_refresh"];
-    if (playlist["playlist_subscribed"]) {
-        var button = `<button class="unsubscribe" type="button" id="${playlistId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${playlistName}">Unsubscribe</button>`
+    const playlistId = playlist.playlist_id;
+    const playlistName = playlist.playlist_name;
+    const playlistChannelId = playlist.playlist_channel_id;
+    const playlistChannel = playlist.playlist_channel;
+    const playlistLastRefresh = playlist.playlist_last_refresh;
+    if (playlist.playlist_subscribed) {
+        var button = `<button class="unsubscribe" type="button" id="${playlistId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${playlistName}">Unsubscribe</button>`;
     } else {
-        var button = `<button type="button" id="${playlistId}" onclick="subscribe(this.id)" title="Subscribe to ${playlistName}">Subscribe</button>`
-    };
+        var button = `<button type="button" id="${playlistId}" onclick="subscribe(this.id)" title="Subscribe to ${playlistName}">Subscribe</button>`;
+    }
     const markup = `
     <div class="playlist-thumbnail">
         <a href="/playlist/${playlistId}/">
@@ -646,11 +646,11 @@ function createPlaylist(playlist, viewStyle) {
         <p>Last refreshed: ${playlistLastRefresh}</p>
         ${button}
     </div>
-    `
+    `;
     const playlistDiv = document.createElement("div");
     playlistDiv.setAttribute("class", "playlist-item " + viewStyle);
     playlistDiv.innerHTML = markup;
-    return playlistDiv
+    return playlistDiv;
 }
 
 
@@ -672,8 +672,8 @@ function getCookie(c_name) {
             c_end = document.cookie.indexOf(";", c_start);
             if (c_end == -1) c_end = document.cookie.length;
             return unescape(document.cookie.substring(c_start,c_end));
-        };
-    };
+        }
+    }
     return "";
 }
 
@@ -689,17 +689,17 @@ function textReveal() {
     } else {
         textBox.style.height = 'unset';
         button.innerText = 'Hide';
-    };
+    }
 }
 
 function showForm() {
     var formElement = document.getElementById('hidden-form');
-    var displayStyle = formElement.style.display
+    var displayStyle = formElement.style.display;
     if (displayStyle === "") {
         formElement.style.display = 'block';
     } else {
         formElement.style.display = "";
-    };
+    }
     animate('animate-icon', 'pulse-img');
 }
 
@@ -709,6 +709,5 @@ function animate(elementId, animationClass) {
         toAnimate.className = animationClass;
     } else {
         toAnimate.classList.remove(animationClass);
-    };
+    }
 }
-
