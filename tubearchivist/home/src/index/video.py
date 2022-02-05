@@ -174,7 +174,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
                 vid_path = os.path.join(cache_path, file_cached)
                 return vid_path
 
-        return False
+        raise FileNotFoundError
 
     def add_player(self):
         """add player information for new videos"""
