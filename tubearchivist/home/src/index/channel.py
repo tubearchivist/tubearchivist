@@ -198,6 +198,9 @@ class YoutubeChannel(YouTubeItem):
         """get folder where media files get stored"""
         channel_name = self.json_data["channel_name"]
         folder_name = clean_string(channel_name)
+        if len(folder_name) <= 3:
+            # fall back to channel id
+            folder_name = self.json_data["channel_id"]
         folder_path = os.path.join(self.app_conf["videos"], folder_name)
         return folder_path
 

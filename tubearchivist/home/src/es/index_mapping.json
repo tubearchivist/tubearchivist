@@ -25,6 +25,10 @@
                     "type": "keyword",
                     "index": false
                 },
+                "channel_tvart_url": {
+                    "type": "keyword",
+                    "index": false
+                },
                 "channel_thumb_url": {
                     "type": "keyword",
                     "index": false
@@ -81,6 +85,10 @@
                             }
                         },
                         "channel_banner_url": {
+                            "type": "keyword",
+                            "index": false
+                        },
+                        "channel_tvart_url": {
                             "type": "keyword",
                             "index": false
                         },

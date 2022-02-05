@@ -212,6 +212,9 @@ class VideoDownloader:
         host_uid = self.config["application"]["HOST_UID"]
         host_gid = self.config["application"]["HOST_GID"]
         channel_name = clean_string(vid_dict["channel"]["channel_name"])
+        if len(channel_name) <= 3:
+            # fall back to channel id
+            channel_name = vid_dict["channel"]["channel_id"]
         # make archive folder with correct permissions
         new_folder = os.path.join(videos, channel_name)
         if not os.path.exists(new_folder):

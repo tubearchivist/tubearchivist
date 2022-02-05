@@ -68,6 +68,12 @@ class ApplicationSettingsForm(forms.Form):
         ("1", "enable Cast"),
     ]
 
+    SUBTITLE_SOURCE_CHOICES = [
+        ("", "-- change subtitle source settings"),
+        ("auto", "also download auto generated"),
+        ("user", "only download uploader"),
+    ]
+
     subscriptions_channel_size = forms.IntegerField(required=False)
     downloads_limit_count = forms.IntegerField(required=False)
     downloads_limit_speed = forms.IntegerField(required=False)
@@ -80,6 +86,10 @@ class ApplicationSettingsForm(forms.Form):
     )
     downloads_add_thumbnail = forms.ChoiceField(
         widget=forms.Select, choices=THUMBNAIL_CHOICES, required=False
+    )
+    downloads_subtitle = forms.CharField(required=False)
+    downloads_subtitle_source = forms.ChoiceField(
+        widget=forms.Select, choices=SUBTITLE_SOURCE_CHOICES, required=False
     )
     downloads_integrate_ryd = forms.ChoiceField(
         widget=forms.Select, choices=RYD_CHOICES, required=False

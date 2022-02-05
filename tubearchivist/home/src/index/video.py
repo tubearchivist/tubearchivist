@@ -14,7 +14,107 @@ from home.src.ta.helper import DurationConverter, clean_string
 from ryd_client import ryd_client
 
 
-class YoutubeVideo(YouTubeItem):
+class YoutubeSubtitle:
+    """handle video subtitle functionality"""
+
+    def __init__(self, config, youtube_meta, media_url, youtube_id):
+        self.config = config
+        self.youtube_meta = youtube_meta
+        self.media_url = media_url
+        self.youtube_id = youtube_id
+        self.languages = False
+
+    def sub_conf_parse(self):
+        """add additional conf values to self"""
+        languages_raw = self.config["downloads"]["subtitle"]
+        self.languages = [i.strip() for i in languages_raw.split(",")]
+
+    def get_subtitles(self):
+        """check what to do"""
+        self.sub_conf_parse()
+        if not self.languages:
+            # no subtitles
+            return False
+
+        relevant_subtitles = self.get_user_subtitles()
+        if relevant_subtitles:
+            return relevant_subtitles
+
+        if self.config["downloads"]["subtitle_source"] == "auto":
+            relevant_auto = self.get_auto_caption()
+            return relevant_auto
+
+        return False
+
+    def get_auto_caption(self):
+        """get auto_caption subtitles"""
+        print(f"{self.youtube_id}: get auto generated subtitles")
+        all_subtitles = self.youtube_meta.get("automatic_captions")
+
+        if not all_subtitles:
+            return False
+
+        relevant_subtitles = []
+
+        for lang in self.languages:
+            media_url = self.media_url.replace(".mp4", f"-{lang}.vtt")
+            all_formats = all_subtitles.get(lang)
+            subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
+            subtitle.update(
+                {"lang": lang, "source": "auto", "media_url": media_url}
+            )
+            relevant_subtitles.append(subtitle)
+            break
+
+        return relevant_subtitles
+
+    def _normalize_lang(self):
+        """normalize country specific language keys"""
+        all_subtitles = self.youtube_meta.get("subtitles")
+        all_keys = list(all_subtitles.keys())
+        for key in all_keys:
+            lang = key.split("-")[0]
+            old = all_subtitles.pop(key)
+            all_subtitles[lang] = old
+
+        return all_subtitles
+
+    def get_user_subtitles(self):
+        """get subtitles uploaded from channel owner"""
+        print(f"{self.youtube_id}: get user uploaded subtitles")
+        all_subtitles = self._normalize_lang()
+        if not all_subtitles:
+            return False
+
+        relevant_subtitles = []
+
+        for lang in self.languages:
+            media_url = self.media_url.replace(".mp4", f"-{lang}.vtt")
+            all_formats = all_subtitles.get(lang)
+            subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
+            subtitle.update(
+                {"lang": lang, "source": "user", "media_url": media_url}
+            )
+            relevant_subtitles.append(subtitle)
+            break
+
+        return relevant_subtitles
+
+    def download_subtitles(self, relevant_subtitles):
+        """download subtitle files to archive"""
+        for subtitle in relevant_subtitles:
+            dest_path = os.path.join(
+                self.config["application"]["videos"], subtitle["media_url"]
+            )
+            response = requests.get(subtitle["url"])
+            if response.ok:
+                with open(dest_path, "w", encoding="utf-8") as subfile:
+                    subfile.write(response.text)
+            else:
+                print(f"{self.youtube_id}: failed to download subtitle")
+
+
+class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     """represents a single youtube video"""
 
     es_path = False
@@ -37,6 +137,7 @@ class YoutubeVideo(YouTubeItem):
         self._add_stats()
         self.add_file_path()
         self.add_player()
+        self._check_subtitles()
         if self.config["downloads"]["integrate_ryd"]:
             self._get_ryd_stats()
 
@@ -96,7 +197,7 @@ class YoutubeVideo(YouTubeItem):
                 vid_path = os.path.join(cache_path, file_cached)
                 return vid_path
 
-        return False
+        raise FileNotFoundError
 
     def add_player(self):
         """add player information for new videos"""
@@ -125,6 +226,10 @@ class YoutubeVideo(YouTubeItem):
         """build media_url for where file will be located"""
         channel_name = self.json_data["channel"]["channel_name"]
         clean_channel_name = clean_string(channel_name)
+        if len(clean_channel_name) <= 3:
+            # fall back to channel id
+            clean_channel_name = self.json_data["channel"]["channel_id"]
+
         timestamp = self.json_data["published"].replace("-", "")
         youtube_id = self.json_data["youtube_id"]
         title = self.json_data["title"]
@@ -162,6 +267,19 @@ class YoutubeVideo(YouTubeItem):
         self.json_data["stats"].update(dislikes)
 
         return True
+
+    def _check_subtitles(self):
+        """optionally add subtitles"""
+        handler = YoutubeSubtitle(
+            self.config,
+            self.youtube_meta,
+            media_url=self.json_data["media_url"],
+            youtube_id=self.youtube_id,
+        )
+        subtitles = handler.get_subtitles()
+        if subtitles:
+            self.json_data["subtitles"] = subtitles
+            handler.download_subtitles(relevant_subtitles=subtitles)
 
 
 def index_new_video(youtube_id):
