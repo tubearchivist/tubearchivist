@@ -68,11 +68,21 @@ class YoutubeSubtitle:
 
         return relevant_subtitles
 
+    def _normalize_lang(self):
+        """normalize country specific language keys"""
+        all_subtitles = self.youtube_meta.get("subtitles")
+        all_keys = list(all_subtitles.keys())
+        for key in all_keys:
+            lang = key.split("-")[0]
+            old = all_subtitles.pop(key)
+            all_subtitles[lang] = old
+
+        return all_subtitles
+
     def get_user_subtitles(self):
         """get subtitles uploaded from channel owner"""
         print(f"{self.youtube_id}: get user uploaded subtitles")
-        all_subtitles = self.youtube_meta.get("subtitles")
-
+        all_subtitles = self._normalize_lang()
         if not all_subtitles:
             return False
 
@@ -89,6 +99,19 @@ class YoutubeSubtitle:
             break
 
         return relevant_subtitles
+
+    def download_subtitles(self, relevant_subtitles):
+        """download subtitle files to archive"""
+        for subtitle in relevant_subtitles:
+            dest_path = os.path.join(
+                self.config["application"]["videos"], subtitle["media_url"]
+            )
+            response = requests.get(subtitle["url"])
+            if response.ok:
+                with open(dest_path, "w", encoding="utf-8") as subfile:
+                    subfile.write(response.text)
+            else:
+                print(f"{self.youtube_id}: failed to download subtitle")
 
 
 class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
@@ -256,6 +279,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         subtitles = handler.get_subtitles()
         if subtitles:
             self.json_data["subtitles"] = subtitles
+            handler.download_subtitles(relevant_subtitles=subtitles)
 
 
 def index_new_video(youtube_id):
