@@ -405,11 +405,11 @@ function sendVideoProgress(videoId, videoProgress) {
 function formatNumbers(number) {
     var numberUnformatted = parseFloat(number);
     if (numberUnformatted > 999999999) {
-        var numberFormatted = (numberUnformatted / 1000000000).toFixed(1).toString() + " billion";
+        var numberFormatted = (numberUnformatted / 1000000000).toFixed(1).toString() + "B";
     } else if (numberUnformatted > 999999) {
-        var numberFormatted = (numberUnformatted / 1000000).toFixed(1).toString() + " million";
+        var numberFormatted = (numberUnformatted / 1000000).toFixed(1).toString() + "M";
     } else if (numberUnformatted > 999) {
-        var numberFormatted = numberUnformatted.toLocaleString("en-US");
+        var numberFormatted = (numberUnformatted / 1000).toFixed(1).toString() + "K";
     } else {
         var numberFormatted = numberUnformatted;
     }
