@@ -289,14 +289,12 @@ function cancelDelete() {
 // player
 function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
-    var videoPlayerData = getVideoPlayerData(videoId);
     var videoData = getVideoData(videoId);
+    var videoUrl = videoData.media_url;
+    var videoThumbUrl = videoData.vid_thumb_url;
+    var videoName = videoData.title;
 
-    var videoUrl = videoPlayerData.media_url;
-    var videoThumbUrl = videoPlayerData.vid_thumb_url;
-    var videoName = videoPlayerData.title;
-
-    var playlist = ''
+    var playlist = '';
     var videoPlaylists = videoData.playlist; // Array of playlists the video is in
     if (typeof(videoPlaylists) != 'undefined') {
         var subbedPlaylists = getSubbedPlaylists(videoPlaylists); // Array of playlist the video is in that are subscribed
@@ -311,8 +309,8 @@ function createPlayer(button) {
     var videoProgress = videoData.player.progress; // Groundwork for saving video position, change once progress variable is added to API
     var videoViews = formatNumbers(videoData.stats.view_count);
 
-    var channelId = videoPlayerData.channel_id;
-    var channelName = videoPlayerData.channel_name;
+    var channelId = videoData.channel.channel_id;
+    var channelName = videoData.channel.channel_name;
 
     removePlayer();
     document.getElementById(videoId).outerHTML = ''; // Remove watch indicator from video info
@@ -325,7 +323,7 @@ function createPlayer(button) {
     }
 
     // Watched indicator
-    if (videoPlayerData.is_watched) {
+    if (videoData.player.is_watched) {
         var playerState = "seen";
         var watchedFunction = "Unwatched";
     } else {
@@ -445,13 +443,6 @@ function formatNumbers(number) {
         var numberFormatted = numberUnformatted;
     }
     return numberFormatted;
-}
-
-// Gets video player data in JSON format when passed video ID
-function getVideoPlayerData(videoId) {
-    var apiEndpoint = "/api/video/" + videoId + "/player/";
-    videoPlayerData = apiRequest(apiEndpoint, "GET");
-    return videoPlayerData;
 }
 
 // Gets video data in JSON format when passed video ID
@@ -575,18 +566,17 @@ function createVideo(video, viewStyle) {
     // create video item div from template
     const videoId = video["youtube_id"];
     const videoData = getVideoData(videoId);
-    const videoPlayerData = getVideoPlayerData(videoId);
-    const thumbUrl = videoPlayerData.vid_thumb_url;
-    const videoTitle = videoPlayerData.title;
+    const thumbUrl = videoData.vid_thumb_url;
+    const videoTitle = videoData.title;
     const videoPublished = formatDates(new Date(videoData.published + "T00:00:00"));
     const videoDuration = videoData.player.duration_str;
-    if (videoPlayerData.is_watched) {
+    if (videoData.player.is_watched) {
         var playerState = "seen";
     } else {
         var playerState = "unseen";
     };
-    const channelId = videoPlayerData.channel_id;
-    const channelName = videoPlayerData.channel_name;
+    const channelId = videoData.channel.channel_id;
+    const channelName = videoData.channel.channel_name;
     // build markup
     const markup = `
     <a href="#player" data-id="${videoId}" onclick="createPlayer(this)">
