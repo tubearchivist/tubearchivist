@@ -57,10 +57,10 @@
         </div>
         <div class="info-box-item">
             <div>
-                <p>Views: {{ video.stats.view_count|intcomma }}</p>
+                <p class="thumb-icon"><img src="{% static 'img/icon-eye.svg' %}" alt="views">: {{ video.stats.view_count|intcomma }}</p>
                 <p class="thumb-icon like"><img src="{% static 'img/icon-thumb.svg' %}" alt="thumbs-up">: {{ video.stats.like_count|intcomma }}</p>
                 {% if video.stats.dislike_count %}
-                    <p class="thumb-icon dislike"><img src="{% static 'img/icon-thumb.svg' %}" alt="thumbs-down">: {{ video.stats.dislike_count|intcomma }}</p>
+                    <p class="thumb-icon"><img class="dislike" src="{% static 'img/icon-thumb.svg' %}" alt="thumbs-down">: {{ video.stats.dislike_count|intcomma }}</p>
                 {% endif %}
                 {% if video.stats.average_rating %}
                     <p class="rating-stars">Rating: 
