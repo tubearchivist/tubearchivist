@@ -456,6 +456,17 @@ button:hover {
     text-transform: uppercase;
 }
 
+.player-stats {
+    float: right;
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.player-stats span {
+    margin: 0 5px;
+}
+
 .video-desc-player {
     margin-bottom: 8px;
     display: flex;
@@ -639,7 +650,7 @@ button:hover {
     filter: var(--img-filter);
 }
 
-.thumb-icon.dislike img {
+.dislike {
     transform: rotate(180deg);
 }
 
