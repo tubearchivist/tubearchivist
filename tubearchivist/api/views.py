@@ -26,13 +26,13 @@ class ApiBaseView(APIView):
         self.response = {"data": False}
         self.status_code = False
         self.context = False
+        self.default_conf = AppConfig().config
 
     def config_builder(self):
         """build confic context"""
-        default_conf = AppConfig().config
         self.context = {
-            "es_url": default_conf["application"]["es_url"],
-            "es_auth": default_conf["application"]["es_auth"],
+            "es_url": self.default_conf["application"]["es_url"],
+            "es_auth": self.default_conf["application"]["es_auth"],
         }
 
     def get_document(self, document_id):
@@ -47,6 +47,19 @@ class ApiBaseView(APIView):
             print(f"item not found: {document_id}")
             self.response["data"] = False
         self.status_code = response.status_code
+
+    def process_keys(self):
+        """process keys for frontend"""
+        all_keys = self.response["data"].keys()
+        if "media_url" in all_keys:
+            media_url = self.response["data"]["media_url"]
+            self.response["data"]["media_url"] = f"/media/{media_url}"
+        if "vid_thumb_url" in all_keys:
+            youtube_id = self.response["data"]["youtube_id"]
+            vid_thumb_url = ThumbManager().vid_thumb_path(youtube_id)
+            cache_dir = self.default_conf["application"]["cache_dir"]
+            new_thumb = f"{cache_dir}/{vid_thumb_url}"
+            self.response["data"]["vid_thumb_url"] = new_thumb
 
     def get_paginate(self):
         """add pagination detail to response"""
@@ -75,6 +88,7 @@ class VideoApiView(ApiBaseView):
         """get request"""
         self.config_builder()
         self.get_document(video_id)
+        self.process_keys()
         return Response(self.response, status=self.status_code)
 
 
