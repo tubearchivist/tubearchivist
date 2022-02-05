@@ -113,6 +113,8 @@ class YoutubeSubtitle:
             )
             response = requests.get(subtitle["url"])
             if response.ok:
+                # create folder here for first video of channel
+                os.makedirs(os.path.split(dest_path)[0], exist_ok=True)
                 with open(dest_path, "w", encoding="utf-8") as subfile:
                     subfile.write(response.text)
             else:
