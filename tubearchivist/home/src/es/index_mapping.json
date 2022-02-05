@@ -156,6 +156,32 @@
                             "normalizer": "to_lower"
                         }
                     }
+                },
+                "subtitles": {
+                    "properties": {
+                        "ext": {
+                            "type": "keyword",
+                            "index": false
+                        },
+                        "lang": {
+                            "type": "keyword",
+                            "index": false
+                        },
+                        "media_url": {
+                            "type": "keyword",
+                            "index": false
+                        },
+                        "name": {
+                            "type": "keyword"
+                        },
+                        "source": {
+                            "type": "keyword"
+                        },
+                        "url": {
+                            "type": "keyword",
+                            "index": false
+                        }
+                    }
                 }
             },
             "expected_set": {
