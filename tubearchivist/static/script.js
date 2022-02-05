@@ -401,35 +401,6 @@ function sendVideoProgress(videoId, videoProgress) {
     videoData = apiRequest(apiEndpoint, "POST", data);
 }
 
-// Returns HTML formatted description
-function getFormattedDescription(description) {
-    return description.split('\n\n').join('</p><p>').split('\n').join('<br>');
-}
-
-// Returns HTML stars when given a rating
-function getStarRating(rating) {
-    var stars = '';
-    for (let i = 1; i <= parseFloat(rating); i++) {
-        stars = stars + '<img src="/static/img/icon-star-full.svg" alt="full">';
-    }
-    if ((parseFloat(rating) % 1) >= 0.5) {
-        stars = stars + '<img src="/static/img/icon-star-full.svg" alt="full">';
-    } else if ((parseFloat(rating) % 1) > 0) {
-        stars = stars + '<img src="/static/img/icon-star-half.svg" alt="half">';
-    }
-    for (let i = 1; i <= (5 - parseFloat(rating)); i++) {
-        stars = stars + '<img src="/static/img/icon-star-empty.svg" alt="empty">';
-    }
-    return stars;
-}
-
-// Format dates to match format in other locations
-function formatDates(dateUnformatted) {
-    // var dateFormatted = dateUnformatted.toLocaleString('en-US', { dateStyle: "medium" }); // en-US is simular but has the day and month switched and en-GB has correct order but no comma, so none of the huilt in formats worked directly 
-    var dateFormatted = dateUnformatted.toLocaleString("en-US", { day: "2-digit" }) + " " +  dateUnformatted.toLocaleString("en-US", { month: "short" }) + ", " + dateUnformatted.toLocaleString("en-US", { year: "numeric" });
-    return dateFormatted;
-}
-
 // Format numbers for frontend
 function formatNumbers(number) {
     var numberUnformatted = parseFloat(number);
@@ -565,21 +536,21 @@ function populateMultiSearchResults(allResults) {
 function createVideo(video, viewStyle) {
     // create video item div from template
     const videoId = video["youtube_id"];
-    const videoData = getVideoData(videoId);
-    const thumbUrl = videoData.vid_thumb_url;
-    const videoTitle = videoData.title;
-    const videoPublished = formatDates(new Date(videoData.published + "T00:00:00"));
-    const videoDuration = videoData.player.duration_str;
-    if (videoData.player.is_watched) {
+    const mediaUrl = video["media_url"];
+    const thumbUrl = "/cache/" + video["vid_thumb_url"];
+    const videoTitle = video["title"];
+    const videoPublished = video["published"];
+    const videoDuration = video["player"]["duration_str"];
+    if (video["player"]["watched"]) {
         var playerState = "seen";
     } else {
         var playerState = "unseen";
     };
-    const channelId = videoData.channel.channel_id;
-    const channelName = videoData.channel.channel_name;
+    const channelId = video["channel"]["channel_id"];
+    const channelName = video["channel"]["channel_name"];
     // build markup
     const markup = `
-    <a href="#player" data-id="${videoId}" onclick="createPlayer(this)">
+    <a href="#player" data-src="/media/${mediaUrl}" data-thumb="${thumbUrl}" data-title="${videoTitle}" data-channel="${channelName}" data-channel-id="${channelId}" data-id="${videoId}" onclick="createPlayer(this)">
         <div class="video-thumb-wrap ${viewStyle}">
             <div class="video-thumb">
                 <img src="${thumbUrl}" alt="video-thumb">
@@ -602,19 +573,18 @@ function createVideo(video, viewStyle) {
     `
     const videoDiv = document.createElement("div");
     videoDiv.setAttribute("class", "video-item " + viewStyle);
-    videoDiv.innerHTML = markup;
-    return videoDiv;
+    videoDiv.innerHTML = markup
+    return videoDiv
 }
 
 
 function createChannel(channel, viewStyle) {
     // create channel item div from template
     const channelId = channel["channel_id"];
-    const channelData = getChannelData(channelId);
-    const channelName = channelData.channel_name;
-    const channelSubs = formatNumbers(channelData.channel_subs);
-    const channelLastRefresh = formatDates(new Date(channelData.channel_last_refresh * 1000));
-    if (channelData.channel_subscribed) {
+    const channelName = channel["channel_name"];
+    const channelSubs = channel["channel_subs"];
+    const channelLastRefresh = channel["channel_last_refresh"];
+    if (channel["channel_subscribed"]) {
         var button = `<button class="unsubscribe" type="button" id="${channelId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${channelName}">Unsubscribe</button>`
     } else {
         var button = `<button type="button" id="${channelId}" onclick="subscribe(this.id)" title="Subscribe to ${channelName}">Subscribe</button>`
@@ -649,18 +619,17 @@ function createChannel(channel, viewStyle) {
     const channelDiv = document.createElement("div");
     channelDiv.setAttribute("class", "channel-item " + viewStyle);
     channelDiv.innerHTML = markup;
-    return channelDiv;
+    return channelDiv
 }
 
 function createPlaylist(playlist, viewStyle) {
     // create playlist item div from template
     const playlistId = playlist["playlist_id"];
-    const playlistData = getPlaylistData(playlistId);
-    const playlistName = playlistData.playlist_name;
-    const playlistChannelId = playlistData.playlist_channel_id;
-    const playlistChannel = playlistData.playlist_channel;
-    const playlistLastRefresh = formatDates(new Date(playlistData.playlist_last_refresh * 1000));
-    if (playlistData.playlist_subscribed) {
+    const playlistName = playlist["playlist_name"];
+    const playlistChannelId = playlist["playlist_channel_id"];
+    const playlistChannel = playlist["playlist_channel"];
+    const playlistLastRefresh = playlist["playlist_last_refresh"];
+    if (playlist["playlist_subscribed"]) {
         var button = `<button class="unsubscribe" type="button" id="${playlistId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${playlistName}">Unsubscribe</button>`
     } else {
         var button = `<button type="button" id="${playlistId}" onclick="subscribe(this.id)" title="Subscribe to ${playlistName}">Subscribe</button>`
@@ -681,7 +650,7 @@ function createPlaylist(playlist, viewStyle) {
     const playlistDiv = document.createElement("div");
     playlistDiv.setAttribute("class", "playlist-item " + viewStyle);
     playlistDiv.innerHTML = markup;
-    return playlistDiv;
+    return playlistDiv
 }
 
 
