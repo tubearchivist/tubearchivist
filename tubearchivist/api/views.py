@@ -92,38 +92,6 @@ class VideoApiView(ApiBaseView):
         return Response(self.response, status=self.status_code)
 
 
-class VideoApiPlayerView(ApiBaseView):
-    """resolves to /api/video/<video_id>/player
-    GET: returns dict of video to build player
-    """
-
-    search_base = "/ta_video/_doc/"
-
-    def get(self, request, video_id):
-        # pylint: disable=unused-argument
-        """get request"""
-        self.config_builder()
-        self.get_document(video_id)
-        player = self.process_response()
-        return Response(player, status=self.status_code)
-
-    def process_response(self):
-        """build all needed vars for player"""
-        vid_data = self.response["data"]
-        youtube_id = vid_data["youtube_id"]
-        vid_thumb_url = ThumbManager().vid_thumb_path(youtube_id)
-        player = {
-            "youtube_id": youtube_id,
-            "media_url": "/media/" + vid_data["media_url"],
-            "vid_thumb_url": "/cache/" + vid_thumb_url,
-            "title": vid_data["title"],
-            "channel_name": vid_data["channel"]["channel_name"],
-            "channel_id": vid_data["channel"]["channel_id"],
-            "is_watched": vid_data["player"]["watched"],
-        }
-        return player
-
-
 class ChannelApiView(ApiBaseView):
     """resolves to /api/channel/<channel_id>/
     GET: returns metadata dict of channel
