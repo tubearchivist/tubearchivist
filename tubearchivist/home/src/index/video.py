@@ -71,10 +71,15 @@ class YoutubeSubtitle:
     def _normalize_lang(self):
         """normalize country specific language keys"""
         all_subtitles = self.youtube_meta.get("subtitles")
+        if not all_subtitles:
+            return False
+
         all_keys = list(all_subtitles.keys())
         for key in all_keys:
             lang = key.split("-")[0]
             old = all_subtitles.pop(key)
+            if lang == "live_chat":
+                continue
             all_subtitles[lang] = old
 
         return all_subtitles
