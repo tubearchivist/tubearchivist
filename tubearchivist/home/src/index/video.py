@@ -18,16 +18,13 @@ from ryd_client import ryd_client
 class YoutubeSubtitle:
     """handle video subtitle functionality"""
 
-    def __init__(self, config, youtube_meta, media_url, youtube_id):
-        self.config = config
-        self.youtube_meta = youtube_meta
-        self.media_url = media_url
-        self.youtube_id = youtube_id
+    def __init__(self, video):
+        self.video = video
         self.languages = False
 
     def sub_conf_parse(self):
         """add additional conf values to self"""
-        languages_raw = self.config["downloads"]["subtitle"]
+        languages_raw = self.video.config["downloads"]["subtitle"]
         self.languages = [i.strip() for i in languages_raw.split(",")]
 
     def get_subtitles(self):
@@ -41,7 +38,7 @@ class YoutubeSubtitle:
         if relevant_subtitles:
             return relevant_subtitles
 
-        if self.config["downloads"]["subtitle_source"] == "auto":
+        if self.video.config["downloads"]["subtitle_source"] == "auto":
             relevant_auto = self.get_auto_caption()
             return relevant_auto
 
@@ -49,8 +46,8 @@ class YoutubeSubtitle:
 
     def get_auto_caption(self):
         """get auto_caption subtitles"""
-        print(f"{self.youtube_id}: get auto generated subtitles")
-        all_subtitles = self.youtube_meta.get("automatic_captions")
+        print(f"{self.video.youtube_id}: get auto generated subtitles")
+        all_subtitles = self.video.youtube_meta.get("automatic_captions")
 
         if not all_subtitles:
             return False
@@ -58,7 +55,8 @@ class YoutubeSubtitle:
         relevant_subtitles = []
 
         for lang in self.languages:
-            media_url = self.media_url.replace(".mp4", f"-{lang}.vtt")
+            video_media_url = self.video.json_data["media_url"]
+            media_url = video_media_url.replace(".mp4", f"-{lang}.vtt")
             all_formats = all_subtitles.get(lang)
             subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
             subtitle.update(
@@ -71,7 +69,7 @@ class YoutubeSubtitle:
 
     def _normalize_lang(self):
         """normalize country specific language keys"""
-        all_subtitles = self.youtube_meta.get("subtitles")
+        all_subtitles = self.video.youtube_meta.get("subtitles")
         if not all_subtitles:
             return False
 
@@ -87,7 +85,7 @@ class YoutubeSubtitle:
 
     def get_user_subtitles(self):
         """get subtitles uploaded from channel owner"""
-        print(f"{self.youtube_id}: get user uploaded subtitles")
+        print(f"{self.video.youtube_id}: get user uploaded subtitles")
         all_subtitles = self._normalize_lang()
         if not all_subtitles:
             return False
@@ -95,7 +93,8 @@ class YoutubeSubtitle:
         relevant_subtitles = []
 
         for lang in self.languages:
-            media_url = self.media_url.replace(".mp4", f"-{lang}.vtt")
+            video_media_url = self.video.json_data["media_url"]
+            media_url = video_media_url.replace(".mp4", f"-{lang}.vtt")
             all_formats = all_subtitles.get(lang)
             subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
             subtitle.update(
@@ -108,10 +107,9 @@ class YoutubeSubtitle:
 
     def download_subtitles(self, relevant_subtitles):
         """download subtitle files to archive"""
+        videos_base = self.video.config["application"]["videos"]
         for subtitle in relevant_subtitles:
-            dest_path = os.path.join(
-                self.config["application"]["videos"], subtitle["media_url"]
-            )
+            dest_path = os.path.join(videos_base, subtitle["media_url"])
             response = requests.get(subtitle["url"])
             if subtitle["source"] == "auto":
                 parser = SubtitleParser(response.text)
@@ -125,7 +123,7 @@ class YoutubeSubtitle:
                 with open(dest_path, "w", encoding="utf-8") as subfile:
                     subfile.write(subtitle_str_clean)
             else:
-                print(f"{self.youtube_id}: failed to download subtitle")
+                print(f"{self.video.youtube_id}: failed to download subtitle")
 
 
 class SubtitleParser:
@@ -375,12 +373,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def _check_subtitles(self):
         """optionally add subtitles"""
-        handler = YoutubeSubtitle(
-            self.config,
-            self.youtube_meta,
-            media_url=self.json_data["media_url"],
-            youtube_id=self.youtube_id,
-        )
+        handler = YoutubeSubtitle(self)
         subtitles = handler.get_subtitles()
         if subtitles:
             self.json_data["subtitles"] = subtitles
