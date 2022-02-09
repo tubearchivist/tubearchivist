@@ -113,11 +113,17 @@ class YoutubeSubtitle:
                 self.config["application"]["videos"], subtitle["media_url"]
             )
             response = requests.get(subtitle["url"])
+            if subtitle["source"] == "auto":
+                parser = SubtitleParser(response.text)
+                parser.process()
+                subtitle_str_clean = parser.get_subtitle_str()
+            else:
+                subtitle_str_clean = response.text
             if response.ok:
                 # create folder here for first video of channel
                 os.makedirs(os.path.split(dest_path)[0], exist_ok=True)
                 with open(dest_path, "w", encoding="utf-8") as subfile:
-                    subfile.write(response.text)
+                    subfile.write(subtitle_str_clean)
             else:
                 print(f"{self.youtube_id}: failed to download subtitle")
 
