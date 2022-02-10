@@ -112,7 +112,7 @@ class YoutubeSubtitle:
         videos_base = self.video.config["application"]["videos"]
         for subtitle in relevant_subtitles:
             dest_path = os.path.join(videos_base, subtitle["media_url"])
-            source = subtitle["media_url"]
+            source = subtitle["source"]
             response = requests.get(subtitle["url"])
             if not response.ok:
                 print(f"{self.video.youtube_id}: failed to download subtitle")
