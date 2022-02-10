@@ -294,6 +294,14 @@ function createPlayer(button) {
     var videoThumbUrl = videoData.vid_thumb_url;
     var videoName = videoData.title;
 
+    var subtitles = '';
+    var videoSubtitles = videoData.subtitles; // Array of subtitles
+    if (typeof(videoSubtitles) != 'undefined') {
+        for (var i = 0; i < videoSubtitles.length; i++) {
+            subtitles += `<track label="${videoSubtitles[i].name}" kind="subtitles" srclang="${videoSubtitles[i].lang}" src="${videoSubtitles[i].media_url}">`;
+        }
+    }
+
     var playlist = '';
     var videoPlaylists = videoData.playlist; // Array of playlists the video is in
     if (typeof(videoPlaylists) != 'undefined') {
@@ -344,7 +352,10 @@ function createPlayer(button) {
 
     const markup = `
     <div class="video-player" data-id="${videoId}">
-        <video src="${videoUrl}#t=${videoProgress}" poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" controls autoplay type='video/mp4' width="100%" playsinline id="video-item"></video>
+        <video poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" controls autoplay width="100%" playsinline id="video-item">
+            <source src="${videoUrl}#t=${videoProgress}" type="video/mp4">
+            ${subtitles}
+        </video>
         <div class="player-title boxed-content">
             <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
             <img src="/static/img/icon-${playerState}.svg" alt="${playerState}-icon" id="${videoId}" onclick="is${watchedFunction}(this.id)" class="${playerState}-icon" title="Mark as ${watchedFunction}">
