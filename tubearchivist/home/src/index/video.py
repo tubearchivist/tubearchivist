@@ -36,38 +36,37 @@ class YoutubeSubtitle:
             # no subtitles
             return False
 
-        relevant_subtitles = self.get_user_subtitles()
-        if relevant_subtitles:
-            return relevant_subtitles
+        relevant_subtitles = []
+        for lang in self.languages:
+            user_sub = self.get_user_subtitles(lang)
+            if user_sub:
+                relevant_subtitles.append(user_sub)
+                continue
 
-        if self.video.config["downloads"]["subtitle_source"] == "auto":
-            relevant_auto = self.get_auto_caption()
-            return relevant_auto
+            if self.video.config["downloads"]["subtitle_source"] == "auto":
+                auto_cap = self.get_auto_caption(lang)
+                if auto_cap:
+                    relevant_subtitles.append(auto_cap)
 
-        return False
+        return relevant_subtitles
 
-    def get_auto_caption(self):
+    def get_auto_caption(self, lang):
         """get auto_caption subtitles"""
-        print(f"{self.video.youtube_id}: get auto generated subtitles")
+        print(f"{self.video.youtube_id}-{lang}: get auto generated subtitles")
         all_subtitles = self.video.youtube_meta.get("automatic_captions")
 
         if not all_subtitles:
             return False
 
-        relevant_subtitles = []
+        video_media_url = self.video.json_data["media_url"]
+        media_url = video_media_url.replace(".mp4", f"-{lang}.vtt")
+        all_formats = all_subtitles.get(lang)
+        subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
+        subtitle.update(
+            {"lang": lang, "source": "auto", "media_url": media_url}
+        )
 
-        for lang in self.languages:
-            video_media_url = self.video.json_data["media_url"]
-            media_url = video_media_url.replace(".mp4", f"-{lang}.vtt")
-            all_formats = all_subtitles.get(lang)
-            subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
-            subtitle.update(
-                {"lang": lang, "source": "auto", "media_url": media_url}
-            )
-            relevant_subtitles.append(subtitle)
-            break
-
-        return relevant_subtitles
+        return subtitle
 
     def _normalize_lang(self):
         """normalize country specific language keys"""
@@ -85,27 +84,26 @@ class YoutubeSubtitle:
 
         return all_subtitles
 
-    def get_user_subtitles(self):
+    def get_user_subtitles(self, lang):
         """get subtitles uploaded from channel owner"""
-        print(f"{self.video.youtube_id}: get user uploaded subtitles")
+        print(f"{self.video.youtube_id}-{lang}: get user uploaded subtitles")
         all_subtitles = self._normalize_lang()
         if not all_subtitles:
             return False
 
-        relevant_subtitles = []
+        video_media_url = self.video.json_data["media_url"]
+        media_url = video_media_url.replace(".mp4", f"-{lang}.vtt")
+        all_formats = all_subtitles.get(lang)
+        if not all_formats:
+            # no user subtitles found
+            return False
 
-        for lang in self.languages:
-            video_media_url = self.video.json_data["media_url"]
-            media_url = video_media_url.replace(".mp4", f"-{lang}.vtt")
-            all_formats = all_subtitles.get(lang)
-            subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
-            subtitle.update(
-                {"lang": lang, "source": "user", "media_url": media_url}
-            )
-            relevant_subtitles.append(subtitle)
-            break
+        subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
+        subtitle.update(
+            {"lang": lang, "source": "user", "media_url": media_url}
+        )
 
-        return relevant_subtitles
+        return subtitle
 
     def download_subtitles(self, relevant_subtitles):
         """download subtitle files to archive"""
@@ -173,7 +171,7 @@ class SubtitleParser:
         cue_dict = {"lines": []}
 
         for line in all_lines:
-            if re.match(r"^([0-9]{2}:?){3}", line):
+            if re.match(self.time_reg, line):
                 clean = re.search(self.time_reg, line).group()
                 start, end = clean.split(" --> ")
                 cue_dict.update({"start": start, "end": end})
