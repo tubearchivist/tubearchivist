@@ -46,8 +46,9 @@ class FilesystemScanner:
         all_downloaded = []
         for channel_name in all_channels:
             channel_path = os.path.join(self.VIDEOS, channel_name)
-            videos = os.listdir(channel_path)
-            all_videos = ignore_filelist(videos)
+            channel_files = os.listdir(channel_path)
+            channel_files_clean = ignore_filelist(channel_files)
+            all_videos = [i for i in channel_files_clean if i.endswith(".mp4")]
             for video in all_videos:
                 youtube_id = video[9:20]
                 all_downloaded.append((channel_name, video, youtube_id))
