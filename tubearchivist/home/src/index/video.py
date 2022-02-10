@@ -4,10 +4,13 @@ functionality:
 - index and update in es
 """
 
+import json
 import os
+import re
 from datetime import datetime
 
 import requests
+from home.src.es.connect import ElasticWrap
 from home.src.index import channel as ta_channel
 from home.src.index.generic import YouTubeItem
 from home.src.ta.helper import DurationConverter, clean_string
@@ -17,16 +20,13 @@ from ryd_client import ryd_client
 class YoutubeSubtitle:
     """handle video subtitle functionality"""
 
-    def __init__(self, config, youtube_meta, media_url, youtube_id):
-        self.config = config
-        self.youtube_meta = youtube_meta
-        self.media_url = media_url
-        self.youtube_id = youtube_id
+    def __init__(self, video):
+        self.video = video
         self.languages = False
 
     def sub_conf_parse(self):
         """add additional conf values to self"""
-        languages_raw = self.config["downloads"]["subtitle"]
+        languages_raw = self.video.config["downloads"]["subtitle"]
         self.languages = [i.strip() for i in languages_raw.split(",")]
 
     def get_subtitles(self):
@@ -36,82 +36,226 @@ class YoutubeSubtitle:
             # no subtitles
             return False
 
-        relevant_subtitles = self.get_user_subtitles()
-        if relevant_subtitles:
-            return relevant_subtitles
+        relevant_subtitles = []
+        for lang in self.languages:
+            user_sub = self.get_user_subtitles(lang)
+            if user_sub:
+                relevant_subtitles.append(user_sub)
+                continue
 
-        if self.config["downloads"]["subtitle_source"] == "auto":
-            relevant_auto = self.get_auto_caption()
-            return relevant_auto
+            if self.video.config["downloads"]["subtitle_source"] == "auto":
+                auto_cap = self.get_auto_caption(lang)
+                if auto_cap:
+                    relevant_subtitles.append(auto_cap)
 
-        return False
+        return relevant_subtitles
 
-    def get_auto_caption(self):
+    def get_auto_caption(self, lang):
         """get auto_caption subtitles"""
-        print(f"{self.youtube_id}: get auto generated subtitles")
-        all_subtitles = self.youtube_meta.get("automatic_captions")
+        print(f"{self.video.youtube_id}-{lang}: get auto generated subtitles")
+        all_subtitles = self.video.youtube_meta.get("automatic_captions")
 
         if not all_subtitles:
             return False
 
-        relevant_subtitles = []
+        video_media_url = self.video.json_data["media_url"]
+        media_url = video_media_url.replace(".mp4", f"-{lang}.vtt")
+        all_formats = all_subtitles.get(lang)
+        subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
+        subtitle.update(
+            {"lang": lang, "source": "auto", "media_url": media_url}
+        )
 
-        for lang in self.languages:
-            media_url = self.media_url.replace(".mp4", f"-{lang}.vtt")
-            all_formats = all_subtitles.get(lang)
-            subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
-            subtitle.update(
-                {"lang": lang, "source": "auto", "media_url": media_url}
-            )
-            relevant_subtitles.append(subtitle)
-            break
-
-        return relevant_subtitles
+        return subtitle
 
     def _normalize_lang(self):
         """normalize country specific language keys"""
-        all_subtitles = self.youtube_meta.get("subtitles")
+        all_subtitles = self.video.youtube_meta.get("subtitles")
+        if not all_subtitles:
+            return False
+
         all_keys = list(all_subtitles.keys())
         for key in all_keys:
             lang = key.split("-")[0]
             old = all_subtitles.pop(key)
+            if lang == "live_chat":
+                continue
             all_subtitles[lang] = old
 
         return all_subtitles
 
-    def get_user_subtitles(self):
+    def get_user_subtitles(self, lang):
         """get subtitles uploaded from channel owner"""
-        print(f"{self.youtube_id}: get user uploaded subtitles")
+        print(f"{self.video.youtube_id}-{lang}: get user uploaded subtitles")
         all_subtitles = self._normalize_lang()
         if not all_subtitles:
             return False
 
-        relevant_subtitles = []
+        video_media_url = self.video.json_data["media_url"]
+        media_url = video_media_url.replace(".mp4", f"-{lang}.vtt")
+        all_formats = all_subtitles.get(lang)
+        if not all_formats:
+            # no user subtitles found
+            return False
 
-        for lang in self.languages:
-            media_url = self.media_url.replace(".mp4", f"-{lang}.vtt")
-            all_formats = all_subtitles.get(lang)
-            subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
-            subtitle.update(
-                {"lang": lang, "source": "user", "media_url": media_url}
-            )
-            relevant_subtitles.append(subtitle)
-            break
+        subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
+        subtitle.update(
+            {"lang": lang, "source": "user", "media_url": media_url}
+        )
 
-        return relevant_subtitles
+        return subtitle
 
     def download_subtitles(self, relevant_subtitles):
         """download subtitle files to archive"""
+        videos_base = self.video.config["application"]["videos"]
         for subtitle in relevant_subtitles:
-            dest_path = os.path.join(
-                self.config["application"]["videos"], subtitle["media_url"]
-            )
+            dest_path = os.path.join(videos_base, subtitle["media_url"])
+            source = subtitle["source"]
             response = requests.get(subtitle["url"])
-            if response.ok:
-                with open(dest_path, "w", encoding="utf-8") as subfile:
-                    subfile.write(response.text)
+            if not response.ok:
+                print(f"{self.video.youtube_id}: failed to download subtitle")
+                continue
+
+            parser = SubtitleParser(response.text, subtitle.get("lang"))
+            parser.process()
+            subtitle_str = parser.get_subtitle_str()
+            self._write_subtitle_file(dest_path, subtitle_str)
+            query_str = parser.create_bulk_import(self.video, source)
+            self._index_subtitle(query_str)
+
+    @staticmethod
+    def _write_subtitle_file(dest_path, subtitle_str):
+        """write subtitle file to disk"""
+        # create folder here for first video of channel
+        os.makedirs(os.path.split(dest_path)[0], exist_ok=True)
+        with open(dest_path, "w", encoding="utf-8") as subfile:
+            subfile.write(subtitle_str)
+
+    @staticmethod
+    def _index_subtitle(query_str):
+        """send subtitle to es for indexing"""
+        _, _ = ElasticWrap("_bulk").post(data=query_str, ndjson=True)
+
+
+class SubtitleParser:
+    """parse subtitle str from youtube"""
+
+    time_reg = r"^([0-9]{2}:?){3}\.[0-9]{3} --> ([0-9]{2}:?){3}\.[0-9]{3}"
+    stamp_reg = r"<([0-9]{2}:?){3}\.[0-9]{3}>"
+    tag_reg = r"</?c>"
+
+    def __init__(self, subtitle_str, lang):
+        self.subtitle_str = subtitle_str
+        self.lang = lang
+        self.header = False
+        self.parsed_cue_list = False
+        self.all_text_lines = False
+        self.matched = False
+
+    def process(self):
+        """collection to process subtitle string"""
+        self._parse_cues()
+        self._match_text_lines()
+        self._add_id()
+
+    def _parse_cues(self):
+        """split into cues"""
+        all_cues = self.subtitle_str.replace("\n \n", "\n").split("\n\n")
+        self.header = all_cues[0]
+        self.all_text_lines = []
+        self.parsed_cue_list = [self._cue_cleaner(i) for i in all_cues[1:]]
+
+    def _cue_cleaner(self, cue):
+        """parse single cue"""
+        all_lines = cue.split("\n")
+        cue_dict = {"lines": []}
+
+        for line in all_lines:
+            if re.match(self.time_reg, line):
+                clean = re.search(self.time_reg, line).group()
+                start, end = clean.split(" --> ")
+                cue_dict.update({"start": start, "end": end})
             else:
-                print(f"{self.youtube_id}: failed to download subtitle")
+                clean = re.sub(self.stamp_reg, "", line)
+                clean = re.sub(self.tag_reg, "", clean)
+                cue_dict["lines"].append(clean)
+                if clean and clean not in self.all_text_lines:
+                    self.all_text_lines.append(clean)
+
+        return cue_dict
+
+    def _match_text_lines(self):
+        """match unique text lines with timestamps"""
+
+        self.matched = []
+
+        while self.all_text_lines:
+            check = self.all_text_lines[0]
+            matches = [i for i in self.parsed_cue_list if check in i["lines"]]
+            new_cue = matches[-1]
+            new_cue["start"] = matches[0]["start"]
+
+            for line in new_cue["lines"]:
+                try:
+                    self.all_text_lines.remove(line)
+                except ValueError:
+                    print("failed to process:")
+                    print(line)
+
+            self.matched.append(new_cue)
+
+    def _add_id(self):
+        """add id to matched cues"""
+        for idx, _ in enumerate(self.matched):
+            self.matched[idx]["id"] = idx + 1
+
+    def get_subtitle_str(self):
+        """stitch cues and return processed new string"""
+        new_subtitle_str = self.header + "\n\n"
+
+        for cue in self.matched:
+            timestamp = f"{cue.get('start')} --> {cue.get('end')}"
+            lines = "\n".join(cue.get("lines"))
+            cue_text = f"{cue.get('id')}\n{timestamp}\n{lines}\n\n"
+            new_subtitle_str = new_subtitle_str + cue_text
+
+        return new_subtitle_str
+
+    def create_bulk_import(self, video, source):
+        """process matched for es import"""
+        bulk_list = []
+        channel = video.json_data.get("channel")
+
+        document = {
+            "youtube_id": video.youtube_id,
+            "title": video.json_data.get("title"),
+            "subtitle_channel": channel.get("channel_name"),
+            "subtitle_channel_id": channel.get("channel_id"),
+            "subtitle_last_refresh": int(datetime.now().strftime("%s")),
+            "subtitle_lang": self.lang,
+            "subtitle_source": source,
+        }
+
+        for match in self.matched:
+            match_id = match.get("id")
+            document_id = f"{video.youtube_id}-{self.lang}-{match_id}"
+            action = {"index": {"_index": "ta_subtitle", "_id": document_id}}
+            document.update(
+                {
+                    "subtitle_fragment_id": document_id,
+                    "subtitle_start": match.get("start"),
+                    "subtitle_end": match.get("end"),
+                    "subtitle_index": match_id,
+                    "subtitle_line": " ".join(match.get("lines")),
+                }
+            )
+            bulk_list.append(json.dumps(action))
+            bulk_list.append(json.dumps(document))
+
+        bulk_list.append("\n")
+        query_str = "\n".join(bulk_list)
+
+        return query_str
 
 
 class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
@@ -204,10 +348,17 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         try:
             # when indexing from download task
             vid_path = self.build_dl_cache_path()
-        except FileNotFoundError:
-            # when reindexing
-            base = self.app_conf["videos"]
-            vid_path = os.path.join(base, self.json_data["media_url"])
+        except FileNotFoundError as err:
+            # when reindexing needs to handle title rename
+            channel = os.path.split(self.json_data["media_url"])[0]
+            channel_dir = os.path.join(self.app_conf["videos"], channel)
+            all_files = os.listdir(channel_dir)
+            for file in all_files:
+                if self.youtube_id in file:
+                    vid_path = os.path.join(channel_dir, file)
+                    break
+            else:
+                raise FileNotFoundError("could not find video file") from err
 
         duration_handler = DurationConverter()
         duration = duration_handler.get_sec(vid_path)
@@ -242,11 +393,18 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         """delete video file, meta data"""
         self.get_from_es()
         video_base = self.app_conf["videos"]
-        media_url = self.json_data["media_url"]
-        print(f"{self.youtube_id}: delete {media_url} from file system")
-        to_delete = os.path.join(video_base, media_url)
-        os.remove(to_delete)
+        to_del = [self.json_data.get("media_url")]
+
+        all_subtitles = self.json_data.get("subtitles")
+        if all_subtitles:
+            to_del = to_del + [i.get("media_url") for i in all_subtitles]
+
+        for media_url in to_del:
+            file_path = os.path.join(video_base, media_url)
+            os.remove(file_path)
+
         self.del_in_es()
+        self._delete_subtitles()
 
     def _get_ryd_stats(self):
         """get optional stats from returnyoutubedislikeapi.com"""
@@ -270,16 +428,16 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def _check_subtitles(self):
         """optionally add subtitles"""
-        handler = YoutubeSubtitle(
-            self.config,
-            self.youtube_meta,
-            media_url=self.json_data["media_url"],
-            youtube_id=self.youtube_id,
-        )
+        handler = YoutubeSubtitle(self)
         subtitles = handler.get_subtitles()
         if subtitles:
             self.json_data["subtitles"] = subtitles
             handler.download_subtitles(relevant_subtitles=subtitles)
+
+    def _delete_subtitles(self):
+        """delete indexed subtitles"""
+        data = {"query": {"term": {"youtube_id": {"value": self.youtube_id}}}}
+        _, _ = ElasticWrap("ta_subtitle/_delete_by_query").post(data=data)
 
 
 def index_new_video(youtube_id):

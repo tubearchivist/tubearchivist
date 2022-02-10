@@ -169,7 +169,11 @@ class DurationConverter:
             capture_output=True,
             check=True,
         )
-        duration_sec = int(float(duration.stdout.decode().strip()))
+        duration_raw = duration.stdout.decode().strip()
+        if duration_raw == "N/A":
+            return 0
+
+        duration_sec = int(float(duration_raw))
         return duration_sec
 
     @staticmethod

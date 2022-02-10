@@ -3,10 +3,14 @@
 {% load static %}
 {% load humanize %}
 <div class="video-main">
-    <video 
-        src="/media/{{ video.media_url }}" 
-        poster="/cache/{{ video.vid_thumb_url }}" controls preload="false" 
-        type='video/mp4' width="100%" playsinline id="video-item" ontimeupdate="onVideoProgress('{{ video.youtube_id }}')" onloadedmetadata="setVideoProgress(0)">
+    <video poster="/cache/{{ video.vid_thumb_url }}" controls preload="false" width="100%" playsinline 
+    id="video-item" ontimeupdate="onVideoProgress('{{ video.youtube_id }}')" onloadedmetadata="setVideoProgress(0)">
+        <source src="/media/{{ video.media_url }}" type="video/mp4">
+        {% if video.subtitles %}
+            {% for subtitle in video.subtitles %}
+                <track label="{{subtitle.name}}" kind="subtitles" srclang="{{subtitle.lang}}" src="/media/{{subtitle.media_url}}">
+            {% endfor %}
+        {% endif %}
     </video>
 </div>
 <div class="boxed-content">
@@ -57,10 +61,10 @@
         </div>
         <div class="info-box-item">
             <div>
-                <p>Views: {{ video.stats.view_count|intcomma }}</p>
+                <p class="thumb-icon"><img src="{% static 'img/icon-eye.svg' %}" alt="views">: {{ video.stats.view_count|intcomma }}</p>
                 <p class="thumb-icon like"><img src="{% static 'img/icon-thumb.svg' %}" alt="thumbs-up">: {{ video.stats.like_count|intcomma }}</p>
                 {% if video.stats.dislike_count %}
-                    <p class="thumb-icon dislike"><img src="{% static 'img/icon-thumb.svg' %}" alt="thumbs-down">: {{ video.stats.dislike_count|intcomma }}</p>
+                    <p class="thumb-icon"><img class="dislike" src="{% static 'img/icon-thumb.svg' %}" alt="thumbs-down">: {{ video.stats.dislike_count|intcomma }}</p>
                 {% endif %}
                 {% if video.stats.average_rating %}
                     <p class="rating-stars">Rating: 
