@@ -303,6 +303,73 @@
                 },
                 "number_of_replicas": "0"
             }
+        },
+        {
+            "index_name": "subtitle",
+            "expected_map": {
+                "youtube_id": {
+                    "type": "keyword"
+                },
+                "title": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256,
+                            "normalizer": "to_lower"
+                        }
+                    }
+                },
+                "subtitle_fragment_id": {
+                    "type": "keyword"
+                },
+                "subtitle_channel": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256,
+                            "normalizer": "to_lower"
+                        }
+                    }
+                },
+                "subtitle_channel_id": {
+                    "type": "keyword"
+                },
+                "subtitle_start": {
+                    "type": "text"
+                },
+                "subtitle_end": {
+                    "type": "text"
+                },
+                "subtitle_last_refresh": {
+                    "type": "date"
+                },
+                "subtitle_index": {
+                    "type" : "long"
+                },
+                "subtitle_lang": {
+                    "type": "keyword"
+                },
+                "subtitle_source": {
+                    "type": "keyword"
+                },
+                "subtitle_line": {
+                    "type" : "text",
+                    "analyzer": "english"
+                }
+            },
+            "expected_set": {
+                "analysis": {
+                    "normalizer": {
+                        "to_lower": {
+                            "type": "custom",
+                            "filter": ["lowercase"]
+                        }
+                    }
+                },
+                "number_of_replicas": "0"
+            }
         }
     ]
 }
