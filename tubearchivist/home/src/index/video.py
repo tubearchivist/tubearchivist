@@ -350,7 +350,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         try:
             # when indexing from download task
             vid_path = self.build_dl_cache_path()
-        except FileNotFoundError:
+        except FileNotFoundError as err:
             # when reindexing needs to handle title rename
             channel = os.path.split(self.json_data["media_url"])[0]
             channel_dir = os.path.join(self.app_conf["videos"], channel)
@@ -360,7 +360,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
                     vid_path = os.path.join(channel_dir, file)
                     break
             else:
-                raise FileNotFoundError
+                raise FileNotFoundError("could not find video file") from err
 
         duration_handler = DurationConverter()
         duration = duration_handler.get_sec(vid_path)
