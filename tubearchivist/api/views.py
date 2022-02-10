@@ -60,6 +60,12 @@ class ApiBaseView(APIView):
             cache_dir = self.default_conf["application"]["cache_dir"]
             new_thumb = f"{cache_dir}/{vid_thumb_url}"
             self.response["data"]["vid_thumb_url"] = new_thumb
+        if "subtitles" in all_keys:
+            all_subtitles = self.response["data"]["subtitles"]
+            for idx, _ in enumerate(all_subtitles):
+                url = self.response["data"]["subtitles"][idx]["media_url"]
+                new_url = f"/media/{url}"
+                self.response["data"]["subtitles"][idx]["media_url"] = new_url
 
     def get_paginate(self):
         """add pagination detail to response"""
