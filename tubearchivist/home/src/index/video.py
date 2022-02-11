@@ -27,7 +27,8 @@ class YoutubeSubtitle:
     def sub_conf_parse(self):
         """add additional conf values to self"""
         languages_raw = self.video.config["downloads"]["subtitle"]
-        self.languages = [i.strip() for i in languages_raw.split(",")]
+        if languages_raw:
+            self.languages = [i.strip() for i in languages_raw.split(",")]
 
     def get_subtitles(self):
         """check what to do"""
