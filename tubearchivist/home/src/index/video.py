@@ -201,8 +201,7 @@ class SubtitleParser:
                 try:
                     self.all_text_lines.remove(line)
                 except ValueError:
-                    print("failed to process:")
-                    print(line)
+                    continue
 
             self.matched.append(new_cue)
 
