@@ -235,6 +235,14 @@ function findPlaylists(button) {
     }, 500);
 }
 
+function resetToken() {
+    var payload = JSON.stringify({'reset-token': true});
+    sendPost(payload);
+    var message = document.createElement("p");
+    message.innerText = "Token revoked";
+    document.getElementById("text-reveal").replaceWith(message);
+}
+
 // delete from file system
 function deleteConfirm() {
     to_show = document.getElementById("delete-button");
