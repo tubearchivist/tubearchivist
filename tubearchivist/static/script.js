@@ -352,8 +352,8 @@ function createPlayer(button) {
 
     const markup = `
     <div class="video-player" data-id="${videoId}">
-        <video poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" controls autoplay width="100%" playsinline>
-            <source src="${videoUrl}#t=${videoProgress}" type="video/mp4" id="video-item">
+        <video poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" controls autoplay width="100%" playsinline id="video-item">
+            <source src="${videoUrl}#t=${videoProgress}" type="video/mp4" id="video-source">
             ${subtitles}
         </video>
         <div class="player-title boxed-content">

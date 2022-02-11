@@ -31,7 +31,7 @@ function castStart() {
     
     // Check if there is already media playing on the cast target to prevent recasting on page reload or switching to another video page
     if (!castSession.getMediaSession()) { 
-        contentId = document.getElementById("video-item").src; // Get video URL
+        contentId = document.getElementById("video-source").src; // Get video URL
         contentTitle = document.getElementById('video-title').innerHTML; // Get video title
         contentImage = document.getElementById("video-item").poster; // Get video thumbnail URL
         contentType = 'video/mp4'; // Set content type, only videos right now so it is hard coded
