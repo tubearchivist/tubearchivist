@@ -69,7 +69,7 @@ Create a zip file of the metadata and select **Max auto backups to keep** to aut
 Additional database functionality.
 
 ## Manual Media Files Import
-So far this depends on the video you are trying to import to be still available on YouTube to get the metadata. Add the files you like to import to the */cache/import* folder. Then start the process from the settings page *Manual Media Files Import*. Make sure to follow one of the two methods below.
+So far this depends on the video you are trying to import to be still available on YouTube to get the metadata. Add the files you'd like to import to the */cache/import* folder. Then start the process from the settings page *Manual Media Files Import*. Make sure to follow one of the two methods below.
 
 ### Method 1:
 Add a matching *.json* file with the media file. Both files need to have the same base name, for example:
@@ -86,6 +86,7 @@ Detect the YouTube ID from filename, this accepts the default yt-dlp naming conv
 
 ### Some notes:
 - This will **consume** the files you put into the import folder: Files will get converted to mp4 if needed (this might take a long time...) and moved to the archive, *.json* files will get deleted upon completion to avoid having duplicates on the next run.
+- There should be no subdirectories added to */cache/import*, only video files. If your existing video library has video files inside subdirectories, you can get all the files into one directory by running `find ./ -mindepth 2 -type f -exec mv '{}' . \;` from the top-level directory of your existing video library. You can also delete any remaining empty subdirectories with `find ./ -mindepth 1 -type d -delete`.
 - Maybe start with a subset of your files to import to make sure everything goes well...
 - Follow the logs to monitor progress and errors: `docker-compose logs -f tubearchivist`.
 
