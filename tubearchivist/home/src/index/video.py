@@ -121,8 +121,9 @@ class YoutubeSubtitle:
             parser.process()
             subtitle_str = parser.get_subtitle_str()
             self._write_subtitle_file(dest_path, subtitle_str)
-            query_str = parser.create_bulk_import(self.video, source)
-            self._index_subtitle(query_str)
+            if self.video.config["downloads"]["subtitle_index"]:
+                query_str = parser.create_bulk_import(self.video, source)
+                self._index_subtitle(query_str)
 
     @staticmethod
     def _write_subtitle_file(dest_path, subtitle_str):

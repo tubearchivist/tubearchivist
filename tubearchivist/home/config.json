@@ -25,6 +25,7 @@
         "add_thumbnail": false,
         "subtitle": false,
         "subtitle_source": false,
+        "subtitle_index": false,
         "throttledratelimit": false,
         "integrate_ryd": false
     },
