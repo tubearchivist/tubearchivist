@@ -2,6 +2,7 @@
 
 Enabling the cast integration in the settings page will load an additional JS library from **Google**. 
 
+
 ### Requirements
 #### HTTPS
 To use the cast integration HTTPS needs to be enabled, which can be done using a reverse proxy. This is a requirement by Google as communication to the cast device is required to be encrypted, but the content itself is not.
