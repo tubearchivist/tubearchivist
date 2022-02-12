@@ -3,7 +3,7 @@
 <center><h1>Your self hosted YouTube media server</h1></center>
 
 ## Table of contents:
-* [Wiki](https://github.com/bbilly1/tubearchivist/wiki) for a detailed documentation
+* [Wiki](https://github.com/bbilly1/tubearchivist/wiki) for a detailed documentation, with [FAQ](https://github.com/bbilly1/tubearchivist/wiki/FAQ)
 * [Core functionality](#core-functionality)
 * [Screenshots](#screenshots)
 * [Problem Tube Archivist tries to solve](#problem-tube-archivist-tries-to-solve)
@@ -138,38 +138,38 @@ bestvideo[VCODEC=avc1]+bestaudio[ACODEC=mp4a]/mp4
 5. Enjoy your archived collection!
   
 ## Roadmap
-This should be considered as a **minimal viable product**, there is an extensive list of future functions and improvements planned.
+We have come far, nonetheless we are not short of ideas on how to improve and extend this project:
 
-### Functionality
 - [ ] User roles
 - [ ] Podcast mode to serve channel as mp3
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
 - [ ] Implement [Apprise](https://github.com/caronc/apprise) for notifications
 - [ ] Add [SponsorBlock](https://sponsor.ajay.app/) integration
 - [ ] Implement per channel settings
-- [ ] Subtitle download & indexing
 - [ ] User created playlists
 - [ ] Auto play or play next link
 - [ ] SSO / LDAP support
+- [ ] Show similar videos on video page
+- [ ] Multi language support
+- [ ] Show total video downloaded vs total videos available in channel
+- [ ] Make items in grid row configurable
+- [ ] Add statistics of index
+
+Implemented:
+- [X] Subtitle download & indexing [2022-02-13]
+- [X] Fancy advanced unified search interface [2022-01-08]
 - [X] Auto rescan and auto download on a schedule [2021-12-17]
 - [X] Optional automatic deletion of watched items after a specified time [2021-12-17]
 - [X] Create playlists [2021-11-27]
 - [X] Access control [2021-11-01]
 - [X] Delete videos and channel [2021-10-16]
 - [X] Add thumbnail embed option [2021-10-16]
+- [X] Create a github wiki for user documentation [2021-10-03]
+- [X] Grid and list view for both channel and video list pages [2021-10-03]
 - [X] Un-ignore videos [2021-10-03]
 - [X] Dynamic download queue [2021-09-26]
 - [X] Backup and restore [2021-09-22]
 - [X] Scan your file system to index already downloaded videos [2021-09-14]
-
-### UI
-- [ ] Show similar videos on video page
-- [ ] Multi language support
-- [ ] Show total video downloaded vs total videos available in channel
-- [X] Fancy advanced unified search interface [2022-01-08]
-- [X] Grid and list view for both channel and video list pages [2021-10-03]
-- [X] Create a github wiki for user documentation [2021-10-03]
-
 
 ## Known limitations
 - Video files created by Tube Archivist need to be playable in your browser of choice. Not every codec is compatible with every browser and might require some testing with format selection. 
