@@ -62,6 +62,9 @@ class YoutubeSubtitle:
         video_media_url = self.video.json_data["media_url"]
         media_url = video_media_url.replace(".mp4", f"-{lang}.vtt")
         all_formats = all_subtitles.get(lang)
+        if not all_formats:
+            return False
+
         subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
         subtitle.update(
             {"lang": lang, "source": "auto", "media_url": media_url}
