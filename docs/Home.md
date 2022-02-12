@@ -2,6 +2,7 @@
 Welcome to the official Tube Archivist Wiki. This is an up-to-date documentation of user functionality.
 
 Table of contents:
+* [FAQ](FAQ): Frequently asked questions what this project is and tries to do
 * [Channels](Channels): Browse your channels, handle channel subscriptions
 * [Playlists](Playlists): Browse your indexed playlists, handle playlist subscriptions
 * [Downloads](Downloads): Scanning subscriptions, handle download queue
