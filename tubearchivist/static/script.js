@@ -331,7 +331,7 @@ function createPlayer(button) {
     }
 
     // Watched indicator
-    if (videoData.player.is_watched) {
+    if (videoData.player.watched) {
         var playerState = "seen";
         var watchedFunction = "Unwatched";
     } else {
@@ -388,7 +388,8 @@ function onVideoProgress(videoId) {
     if (videoElement != null) {
         if ((videoElement.currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
             // sendVideoProgress(videoId, videoElement.currentTime); // Groundwork for saving video position
-            if ((videoElement.currentTime / videoElement.duration) >= 0.90) {
+            var videoData = getVideoData(videoId);
+            if (((videoElement.currentTime / videoElement.duration) >= 0.90) && !videoData.player.watched) {
                 isWatched(videoId);
             }
         }
