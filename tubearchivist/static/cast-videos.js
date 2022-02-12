@@ -60,7 +60,7 @@ function castStart() {
         mediaInfo = new chrome.cast.media.MediaInfo(contentId, contentType); // Create MediaInfo var that contains url and content type
         // mediaInfo.streamType = chrome.cast.media.StreamType.BUFFERED; // Set type of stream, BUFFERED, LIVE, OTHER
         mediaInfo.metadata = new chrome.cast.media.GenericMediaMetadata(); // Create metadata var and add it to MediaInfo
-        mediaInfo.metadata.title = contentTitle; // Set the video title
+        mediaInfo.metadata.title = contentTitle.replace("&amp;", "&"); // Set the video title
         mediaInfo.metadata.images = [new chrome.cast.Image(contentImage)]; // Set the video thumbnail
         // mediaInfo.textTrackStyle = new chrome.cast.media.TextTrackStyle();
         mediaInfo.tracks = contentSubtitles;
