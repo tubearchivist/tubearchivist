@@ -388,8 +388,7 @@ function onVideoProgress(videoId) {
     if (videoElement != null) {
         if ((videoElement.currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
             // sendVideoProgress(videoId, videoElement.currentTime); // Groundwork for saving video position
-            var videoData = getVideoData(videoId);
-            if (((videoElement.currentTime / videoElement.duration) >= 0.90) && !videoData.player.watched) {
+            if (((videoElement.currentTime / videoElement.duration) >= 0.90) && document.getElementById(videoId).className == "unseen-icon") {
                 isWatched(videoId);
             }
         }
