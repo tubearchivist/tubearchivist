@@ -70,8 +70,8 @@ class ApplicationSettingsForm(forms.Form):
 
     SUBTITLE_SOURCE_CHOICES = [
         ("", "-- change subtitle source settings"),
+        ("user", "only download user created"),
         ("auto", "also download auto generated"),
-        ("user", "only download uploader"),
     ]
 
     SUBTITLE_INDEX_CHOICES = [
