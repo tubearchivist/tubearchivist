@@ -422,7 +422,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             os.remove(file_path)
 
         self.del_in_es()
-        self._delete_subtitles()
+        self.delete_subtitles()
 
     def _get_ryd_stats(self):
         """get optional stats from returnyoutubedislikeapi.com"""
@@ -452,7 +452,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             self.json_data["subtitles"] = subtitles
             handler.download_subtitles(relevant_subtitles=subtitles)
 
-    def _delete_subtitles(self):
+    def delete_subtitles(self):
         """delete indexed subtitles"""
         data = {"query": {"term": {"youtube_id": {"value": self.youtube_id}}}}
         _, _ = ElasticWrap("ta_subtitle/_delete_by_query").post(data=data)
