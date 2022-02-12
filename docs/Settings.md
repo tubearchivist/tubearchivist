@@ -27,9 +27,16 @@ Additional settings passed to yt-dlp.
 - **Embed Metadata**: This saves the available tags directly into the media file by passing `--embed-metadata` to yt-dlp.
 - **Embed Thumbnail**: This will save the thumbnail into the media file by passing `--embed-thumbnail` to yt-dlp.
 
+## Subtitles
+- **Download Setting**: Select the subtitle language you like to download. Add a comma separated list for multiple languages.
+- **Source Settings**: User created subtitles are provided from the uploader and are usually the video script. Auto generated is from YouTube, quality varies, particularly for auto translated tracks.
+- **Index Settings**: Enabling subtitle indexing will add the lines to Elasticsearch and will make subtitles searchable. This will increase the index size and is not recommended on low-end hardware.
+
 ## Integrations
 All third party integrations of TubeArchivist will **always** be *opt in*.
-- **returnyoutubedislike.com**: This will get dislikes and average ratings for each video back by integarting with the API from [returnyoutubedislike.com](https://www.returnyoutubedislike.com/).
+- **API**: Your access token for the Tube Archivist API. 
+- **returnyoutubedislike.com**: This will get return dislikes and average ratings for each video by integrating with the API from [returnyoutubedislike.com](https://www.returnyoutubedislike.com/).
+- **Cast**: Enable Google Cast for videos. Requires a valid SSL certificate and works only in Google Chrome.
 
 # Scheduler Setup
 Schedule settings expect a cron like format, where the first value is minute, second is hour and third is day of the week. Day 0 is Sunday, day 1 is Monday etc.
