@@ -9,6 +9,7 @@ ENV PYTHONUNBUFFERED 1
 RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recommends \
     build-essential \
     nginx \
+    atomicparsley \
     curl && rm -rf /var/lib/apt/lists/*
 
 # get newest patched ffmpeg and ffprobe builds for amd64 fall back to repo ffmpeg for arm64

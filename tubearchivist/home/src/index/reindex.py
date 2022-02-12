@@ -204,7 +204,9 @@ class Reindex:
         video.build_json()
         if not video.json_data:
             video.deactivate()
+            return
 
+        video.delete_subtitles()
         # add back
         video.json_data["player"] = player
         video.json_data["date_downloaded"] = date_downloaded
@@ -218,6 +220,7 @@ class Reindex:
         thumb_handler.delete_vid_thumb(youtube_id)
         to_download = (youtube_id, video.json_data["vid_thumb_url"])
         thumb_handler.download_vid([to_download], notify=False)
+        return
 
     @staticmethod
     def reindex_single_channel(channel_id):

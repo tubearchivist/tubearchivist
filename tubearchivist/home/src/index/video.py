@@ -27,7 +27,8 @@ class YoutubeSubtitle:
     def sub_conf_parse(self):
         """add additional conf values to self"""
         languages_raw = self.video.config["downloads"]["subtitle"]
-        self.languages = [i.strip() for i in languages_raw.split(",")]
+        if languages_raw:
+            self.languages = [i.strip() for i in languages_raw.split(",")]
 
     def get_subtitles(self):
         """check what to do"""
@@ -61,6 +62,9 @@ class YoutubeSubtitle:
         video_media_url = self.video.json_data["media_url"]
         media_url = video_media_url.replace(".mp4", f"-{lang}.vtt")
         all_formats = all_subtitles.get(lang)
+        if not all_formats:
+            return False
+
         subtitle = [i for i in all_formats if i["ext"] == "vtt"][0]
         subtitle.update(
             {"lang": lang, "source": "auto", "media_url": media_url}
@@ -120,8 +124,9 @@ class YoutubeSubtitle:
             parser.process()
             subtitle_str = parser.get_subtitle_str()
             self._write_subtitle_file(dest_path, subtitle_str)
-            query_str = parser.create_bulk_import(self.video, source)
-            self._index_subtitle(query_str)
+            if self.video.config["downloads"]["subtitle_index"]:
+                query_str = parser.create_bulk_import(self.video, source)
+                self._index_subtitle(query_str)
 
     @staticmethod
     def _write_subtitle_file(dest_path, subtitle_str):
@@ -157,6 +162,7 @@ class SubtitleParser:
         self._parse_cues()
         self._match_text_lines()
         self._add_id()
+        self._timestamp_check()
 
     def _parse_cues(self):
         """split into cues"""
@@ -179,7 +185,8 @@ class SubtitleParser:
                 clean = re.sub(self.stamp_reg, "", line)
                 clean = re.sub(self.tag_reg, "", clean)
                 cue_dict["lines"].append(clean)
-                if clean and clean not in self.all_text_lines:
+                if clean.strip() and clean not in self.all_text_lines[-4:]:
+                    # remove immediate duplicates
                     self.all_text_lines.append(clean)
 
         return cue_dict
@@ -199,10 +206,24 @@ class SubtitleParser:
                 try:
                     self.all_text_lines.remove(line)
                 except ValueError:
-                    print("failed to process:")
-                    print(line)
+                    continue
 
             self.matched.append(new_cue)
+
+    def _timestamp_check(self):
+        """check if end timestamp is bigger than start timestamp"""
+        for idx, cue in enumerate(self.matched):
+            # this
+            end = int(re.sub("[^0-9]", "", cue.get("end")))
+            # next
+            try:
+                next_cue = self.matched[idx + 1]
+            except IndexError:
+                continue
+
+            start_next = int(re.sub("[^0-9]", "", next_cue.get("start")))
+            if end > start_next:
+                self.matched[idx]["end"] = next_cue.get("start")
 
     def _add_id(self):
         """add id to matched cues"""
@@ -404,7 +425,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             os.remove(file_path)
 
         self.del_in_es()
-        self._delete_subtitles()
+        self.delete_subtitles()
 
     def _get_ryd_stats(self):
         """get optional stats from returnyoutubedislikeapi.com"""
@@ -434,7 +455,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             self.json_data["subtitles"] = subtitles
             handler.download_subtitles(relevant_subtitles=subtitles)
 
-    def _delete_subtitles(self):
+    def delete_subtitles(self):
         """delete indexed subtitles"""
         data = {"query": {"term": {"youtube_id": {"value": self.youtube_id}}}}
         _, _ = ElasticWrap("ta_subtitle/_delete_by_query").post(data=data)

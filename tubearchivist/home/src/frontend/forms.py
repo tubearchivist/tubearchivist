@@ -70,8 +70,14 @@ class ApplicationSettingsForm(forms.Form):
 
     SUBTITLE_SOURCE_CHOICES = [
         ("", "-- change subtitle source settings"),
+        ("user", "only download user created"),
         ("auto", "also download auto generated"),
-        ("user", "only download uploader"),
+    ]
+
+    SUBTITLE_INDEX_CHOICES = [
+        ("", "-- change subtitle index settings --"),
+        ("0", "disable subtitle index"),
+        ("1", "enable subtitle index"),
     ]
 
     subscriptions_channel_size = forms.IntegerField(required=False)
@@ -90,6 +96,9 @@ class ApplicationSettingsForm(forms.Form):
     downloads_subtitle = forms.CharField(required=False)
     downloads_subtitle_source = forms.ChoiceField(
         widget=forms.Select, choices=SUBTITLE_SOURCE_CHOICES, required=False
+    )
+    downloads_subtitle_index = forms.ChoiceField(
+        widget=forms.Select, choices=SUBTITLE_INDEX_CHOICES, required=False
     )
     downloads_integrate_ryd = forms.ChoiceField(
         widget=forms.Select, choices=RYD_CHOICES, required=False

@@ -94,6 +94,9 @@
                 <i>Embed thumbnail into the mediafile.</i><br>
                 {{ app_form.downloads_add_thumbnail }}
             </div>
+        </div>
+        <div class="settings-group">
+            <h2 id="format">Subtitles</h2>
             <div class="settings-item">
                 <p>Subtitles download setting: <span class="settings-current">{{ config.downloads.subtitle }}</span><br>
                 <i>Choose which subtitles to download, add comma separated two letter language ISO code,<br>
@@ -105,12 +108,20 @@
                 <i>Download only user generated, or also less accurate auto generated subtitles.</i><br>
                 {{ app_form.downloads_subtitle_source }}
             </div>
+            <div class="settings-item">
+                <p>Index and make subtitles searchable: <span class="settings-current">{{ config.downloads.subtitle_index }}</span></p>
+                <i>Store subtitle lines in Elasticsearch. Not recommended for low-end hardware.</i><br>
+                {{ app_form.downloads_subtitle_index }}
+            </div>
         </div>
         <div class="settings-group">
             <h2 id="integrations">Integrations</h2>
             <div class="settings-item">
-                <p>API token:</p>
-                <p>{{ api_token }}</p>
+                <p>API token: <button type="button" onclick="textReveal()" id="text-reveal-button">Show</button></p>
+                <div id="text-reveal" class="description-text">
+                    <p>{{ api_token }}</p>
+                    <button class="danger-button" type="button" onclick="resetToken()">Revoke</button>
+                </div>
             </div>
             <div class="settings-item">
                 <p>Integrate with <a href="https://returnyoutubedislike.com/">returnyoutubedislike.com</a> to get dislikes and average ratings back: <span class="settings-current">{{ config.downloads.integrate_ryd }}</span></p>
