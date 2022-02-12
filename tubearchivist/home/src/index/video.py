@@ -159,6 +159,7 @@ class SubtitleParser:
         self._parse_cues()
         self._match_text_lines()
         self._add_id()
+        self._timestamp_check()
 
     def _parse_cues(self):
         """split into cues"""
@@ -181,7 +182,8 @@ class SubtitleParser:
                 clean = re.sub(self.stamp_reg, "", line)
                 clean = re.sub(self.tag_reg, "", clean)
                 cue_dict["lines"].append(clean)
-                if clean and clean not in self.all_text_lines:
+                if clean.strip() and clean not in self.all_text_lines[-4:]:
+                    # remove immediate duplicates
                     self.all_text_lines.append(clean)
 
         return cue_dict
@@ -204,6 +206,21 @@ class SubtitleParser:
                     continue
 
             self.matched.append(new_cue)
+
+    def _timestamp_check(self):
+        """check if end timestamp is bigger than start timestamp"""
+        for idx, cue in enumerate(self.matched):
+            # this
+            end = int(re.sub("[^0-9]", "", cue.get("end")))
+            # next
+            try:
+                next_cue = self.matched[idx + 1]
+            except IndexError:
+                continue
+
+            start_next = int(re.sub("[^0-9]", "", next_cue.get("start")))
+            if end > start_next:
+                self.matched[idx]["end"] = next_cue.get("start")
 
     def _add_id(self):
         """add id to matched cues"""
