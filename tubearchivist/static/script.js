@@ -331,7 +331,7 @@ function createPlayer(button) {
     }
 
     // Watched indicator
-    if (videoData.player.is_watched) {
+    if (videoData.player.watched) {
         var playerState = "seen";
         var watchedFunction = "Unwatched";
     } else {
@@ -353,7 +353,7 @@ function createPlayer(button) {
     const markup = `
     <div class="video-player" data-id="${videoId}">
         <video poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" controls autoplay width="100%" playsinline id="video-item">
-            <source src="${videoUrl}#t=${videoProgress}" type="video/mp4">
+            <source src="${videoUrl}#t=${videoProgress}" type="video/mp4" id="video-source">
             ${subtitles}
         </video>
         <div class="player-title boxed-content">
@@ -388,7 +388,7 @@ function onVideoProgress(videoId) {
     if (videoElement != null) {
         if ((videoElement.currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
             // sendVideoProgress(videoId, videoElement.currentTime); // Groundwork for saving video position
-            if ((videoElement.currentTime / videoElement.duration) >= 0.90) {
+            if (((videoElement.currentTime / videoElement.duration) >= 0.90) && document.getElementById(videoId).className == "unseen-icon") {
                 isWatched(videoId);
             }
         }

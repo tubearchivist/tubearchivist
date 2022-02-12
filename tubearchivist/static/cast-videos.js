@@ -31,21 +31,44 @@ function castStart() {
     
     // Check if there is already media playing on the cast target to prevent recasting on page reload or switching to another video page
     if (!castSession.getMediaSession()) { 
-        contentId = document.getElementById("video-item").src; // Get video URL
+        contentId = document.getElementById("video-source").src; // Get video URL
         contentTitle = document.getElementById('video-title').innerHTML; // Get video title
         contentImage = document.getElementById("video-item").poster; // Get video thumbnail URL
         contentType = 'video/mp4'; // Set content type, only videos right now so it is hard coded
         contentCurrentTime = document.getElementById("video-item").currentTime; // Get video's current position
+        contentActiveSubtitle = [];
+        // Check if a subtitle is turned on.
+        for (var i = 0; i < document.getElementById("video-item").textTracks.length; i++) {
+            if (document.getElementById("video-item").textTracks[i].mode == "showing") {
+                contentActiveSubtitle =[i + 1];
+            }
+        }
+        contentSubtitles = [];
+        for (var i = 0; i < document.getElementById("video-item").children.length; i++) {
+            if (document.getElementById("video-item").children[i].tagName == "TRACK") {
+                subtitle = new chrome.cast.media.Track(i, chrome.cast.media.TrackType.TEXT);
+                subtitle.trackContentId = document.getElementById("video-item").children[i].src;
+                subtitle.trackContentType = 'text/vtt';
+                subtitle.subtype = chrome.cast.media.TextTrackType.SUBTITLES;
+                subtitle.name = document.getElementById("video-item").children[i].label;
+                subtitle.language = document.getElementById("video-item").children[i].srclang;
+                subtitle.customData = null;
+                contentSubtitles.push(subtitle);
+            }
+        }
 
         mediaInfo = new chrome.cast.media.MediaInfo(contentId, contentType); // Create MediaInfo var that contains url and content type
         // mediaInfo.streamType = chrome.cast.media.StreamType.BUFFERED; // Set type of stream, BUFFERED, LIVE, OTHER
         mediaInfo.metadata = new chrome.cast.media.GenericMediaMetadata(); // Create metadata var and add it to MediaInfo
-        mediaInfo.metadata.title = contentTitle; // Set the video title
+        mediaInfo.metadata.title = contentTitle.replace("&amp;", "&"); // Set the video title
         mediaInfo.metadata.images = [new chrome.cast.Image(contentImage)]; // Set the video thumbnail
+        // mediaInfo.textTrackStyle = new chrome.cast.media.TextTrackStyle();
+        mediaInfo.tracks = contentSubtitles;
 
         var request = new chrome.cast.media.LoadRequest(mediaInfo); // Create request with the previously set MediaInfo. 
         // request.queueData = new chrome.cast.media.QueueData(); // See https://developers.google.com/cast/docs/reference/web_sender/chrome.cast.media.QueueData for playlist support.
         request.currentTime = shiftCurrentTime(contentCurrentTime); // Set video start position based on the browser video position
+        request.activeTrackIds = contentActiveSubtitle; // Set active subtitle based on video player
         // request.autoplay = false; // Set content to auto play, true by default
         castSession.loadMedia(request).then(
             function() { 

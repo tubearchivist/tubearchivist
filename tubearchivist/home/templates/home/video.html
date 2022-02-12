@@ -4,8 +4,8 @@
 {% load humanize %}
 <div class="video-main">
     <video poster="/cache/{{ video.vid_thumb_url }}" controls preload="false" width="100%" playsinline 
-    id="video-item" ontimeupdate="onVideoProgress('{{ video.youtube_id }}')" onloadedmetadata="setVideoProgress(0)">
-        <source src="/media/{{ video.media_url }}" type="video/mp4">
+    ontimeupdate="onVideoProgress('{{ video.youtube_id }}')" onloadedmetadata="setVideoProgress(0)" id="video-item">
+        <source src="/media/{{ video.media_url }}" type="video/mp4" id="video-source">
         {% if video.subtitles %}
             {% for subtitle in video.subtitles %}
                 <track label="{{subtitle.name}}" kind="subtitles" srclang="{{subtitle.lang}}" src="/media/{{subtitle.media_url}}">
