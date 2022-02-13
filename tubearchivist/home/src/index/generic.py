@@ -49,7 +49,7 @@ class YouTubeItem:
             yt_dlp.utils.DownloadError,
         ):
             print(f"{self.youtube_id}: failed to get info from youtube")
-            self.youtube_meta = False
+            response = False
 
         self.youtube_meta = response
 
@@ -66,10 +66,11 @@ class YouTubeItem:
 
     def deactivate(self):
         """deactivate document in es"""
+        print(f"{self.youtube_id}: deactivate document")
         key_match = {
-            "video": "active",
-            "channel": "channel_active",
-            "playlist": "playlist_active",
+            "ta_video": "active",
+            "ta_channel": "channel_active",
+            "ta_playlist": "playlist_active",
         }
         update_path = f"{self.index_name}/_update/{self.youtube_id}"
         data = {
