@@ -44,8 +44,8 @@ All third party integrations of TubeArchivist will **always** be *opt in*.
             * A supported browser is required for this integration such as Google Chrome. Other browsers, especially Chromium-based browsers, may support casting by enabling it in the settings.
         - Subtitles
             * Subtitles are supported however they do not work out of the box and require additional configuration. Due to requirements by Google, to use subtitles you need additional headers which will need to be configured in your reverse proxy. See this [page](https://developers.google.com/cast/docs/web_sender/advanced#cors_requirements) for the specific requirements.
-            > You need the following headers: Content-Type, Accept-Encoding, and Range. Note that the last two headers, Accept-Encoding and Range, are additional headers that you may not have needed previously.
-            > Wildcards "*" cannot be used for the Access-Control-Allow-Origin header. If the page has protected media content, it must use a domain instead of a wildcard.
+               > You need the following headers: Content-Type, Accept-Encoding, and Range. Note that the last two headers, Accept-Encoding and Range, are additional headers that you may not have needed previously.
+               > Wildcards "*" cannot be used for the Access-Control-Allow-Origin header. If the page has protected media content, it must use a domain instead of a wildcard.
 
 
 # Scheduler Setup
