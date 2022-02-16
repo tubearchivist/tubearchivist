@@ -54,7 +54,7 @@
             <button onclick="deleteQueue(this)" data-id="pending" title="Delete all pending videos from the queue">Delete all queued</button>
         {% endif %}
     </div>
-    <h3>Total videos: {{ max_hits }}</h3>
+    <h3>Total videos: {{ max_hits }}{% if max_hits == 10000 %}+{% endif %}</h3>
     <div class="dl-list {{ view_style }}">
         {% if results %}
             {% for video in results %}

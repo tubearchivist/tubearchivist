@@ -202,7 +202,7 @@ class Reindex:
 
         # get new
         video.build_json()
-        if not video.json_data:
+        if not video.youtube_meta:
             video.deactivate()
             return
 

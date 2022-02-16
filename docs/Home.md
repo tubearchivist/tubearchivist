@@ -22,6 +22,7 @@ Table of contents:
 * Clicking on a video title brings you to the dedicated video page and shows additional details.
 * Clicking on a video thumbnail opens the video player and starts streaming the selected video.
 * Clicking on the search icon <img src="assets/icon-search.png?raw=true" alt="gridview icon" width="20px" style="margin:0 5px;"> will open a dedicated search page to search over your complete index.
+* The pagination - if available - builds links for up to 10'000 results, use the search, sort or filter functionality to find what you are looking for.
 
 
 An empty checkbox icon <img src="assets/icon-unseen.png?raw=true" alt="unseen icon" width="20px" style="margin:0 5px;"> will show for videos you haven't marked as watched. Click on it and the icon will change to a filled checkbox <img src="assets/icon-seen.png?raw=true" alt="seen icon" width="20px" style="margin:0 5px;"> indicating it as watched - click again to revert.
