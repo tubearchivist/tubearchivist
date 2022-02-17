@@ -4,6 +4,7 @@ import requests
 from home.src.download.thumbnails import ThumbManager
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import UrlListParser
+from home.src.ta.ta_redis import RedisArchivist
 from home.tasks import extrac_dl, subscribe_to
 from rest_framework.authentication import (
     SessionAuthentication,
@@ -97,6 +98,45 @@ class VideoApiView(ApiBaseView):
         self.get_document(video_id)
         self.process_keys()
         return Response(self.response, status=self.status_code)
+
+
+class VideoProgressView(APIView):
+    """resolves to /api/video/<video_id>/
+    handle progress status for video
+    """
+
+    @staticmethod
+    def get(request, video_id):
+        """get progress for a single video"""
+        user_id = request.user.id
+        key = f"{user_id}:progress:{video_id}"
+        video_progress = RedisArchivist().get_message(key)
+        position = video_progress.get("position", 0)
+
+        progress = {
+            "youtube_id": video_id,
+            "user_id": user_id,
+            "position": position,
+        }
+        return Response(progress)
+
+    @staticmethod
+    def post(request, video_id):
+        """set progress position in redis"""
+        position = request.data.get("position", 0)
+        key = f"{request.user.id}:progress:{video_id}"
+        message = {"position": position}
+        RedisArchivist().set_message(key, message, expire=False)
+
+        return Response(request.data)
+
+    @staticmethod
+    def delete(request, video_id):
+        """delete progress position"""
+        key = f"{request.user.id}:progress:{video_id}"
+        RedisArchivist().del_message(key)
+
+        return Response({"progress-reset": video_id})
 
 
 class ChannelApiView(ApiBaseView):

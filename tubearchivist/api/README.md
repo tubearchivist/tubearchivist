@@ -23,6 +23,32 @@ response = requests.get(url, headers=headers)
 ## Video Item View
 /api/video/\<video_id>/
 
+## Video Progress View
+/api/video/\<video_id>/progress  
+
+Progress is stored for each user.
+
+### Get last player position of a video
+GET /api/video/\<video_id>/progress
+```json
+{
+    "youtube_id": "<video_id>",
+    "user_id": 1,
+    "position": 100
+}
+```
+
+### Post player position of video
+POST /api/video/\<video_id>/progress
+```json
+{
+    "position": 100
+}
+```
+
+### Delete player position of video
+DELETE /api/video/\<video_id>/progress  
+
 ## Channel List View
 /api/channel/
 
