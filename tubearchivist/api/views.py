@@ -34,6 +34,7 @@ class ApiBaseView(APIView):
             "es_url": self.default_conf["application"]["es_url"],
             "es_auth": self.default_conf["application"]["es_auth"],
         }
+        self.response["config"] = self.default_conf
 
     def get_document(self, document_id):
         """get single document from es"""
