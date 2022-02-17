@@ -9,7 +9,7 @@ function sortChange(sortValue) {
 }
 
 function isWatched(youtube_id) {
-    // sendVideoProgress(youtube_id, 0); // Reset video progress on watched;
+    postVideoProgress(youtube_id, 0); // Reset video progress on watched;
     var payload = JSON.stringify({'watched': youtube_id});
     sendPost(payload);
     var seenIcon = document.createElement('img');
@@ -34,7 +34,7 @@ function isWatchedButton(button) {
 }
 
 function isUnwatched(youtube_id) {
-    // sendVideoProgress(youtube_id, 0); // Reset video progress on unwatched;
+    postVideoProgress(youtube_id, 0); // Reset video progress on unwatched;
     var payload = JSON.stringify({'un_watched': youtube_id});
     sendPost(payload);
     var unseenIcon = document.createElement('img');
@@ -298,12 +298,12 @@ function cancelDelete() {
 function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
     var videoData = getVideoData(videoId);
-    var videoUrl = videoData.media_url;
-    var videoThumbUrl = videoData.vid_thumb_url;
-    var videoName = videoData.title;
+    var videoUrl = videoData.data.media_url;
+    var videoThumbUrl = videoData.data.vid_thumb_url;
+    var videoName = videoData.data.title;
 
     var subtitles = '';
-    var videoSubtitles = videoData.subtitles; // Array of subtitles
+    var videoSubtitles = videoData.data.subtitles; // Array of subtitles
     if (typeof(videoSubtitles) != 'undefined') {
         for (var i = 0; i < videoSubtitles.length; i++) {
             subtitles += `<track label="${videoSubtitles[i].name}" kind="subtitles" srclang="${videoSubtitles[i].lang}" src="${videoSubtitles[i].media_url}">`;
@@ -311,7 +311,7 @@ function createPlayer(button) {
     }
 
     var playlist = '';
-    var videoPlaylists = videoData.playlist; // Array of playlists the video is in
+    var videoPlaylists = videoData.data.playlist; // Array of playlists the video is in
     if (typeof(videoPlaylists) != 'undefined') {
         var subbedPlaylists = getSubbedPlaylists(videoPlaylists); // Array of playlist the video is in that are subscribed
         if (subbedPlaylists.length != 0) {
@@ -322,24 +322,23 @@ function createPlayer(button) {
         }
     }
 
-    var videoProgress = videoData.player.progress; // Groundwork for saving video position, change once progress variable is added to API
-    var videoViews = formatNumbers(videoData.stats.view_count);
+    var videoProgress = videoData.data.player.progress; // Groundwork for saving video position, change once progress variable is added to API
+    var videoViews = formatNumbers(videoData.data.stats.view_count);
 
-    var channelId = videoData.channel.channel_id;
-    var channelName = videoData.channel.channel_name;
+    var channelId = videoData.data.channel.channel_id;
+    var channelName = videoData.data.channel.channel_name;
 
     removePlayer();
     document.getElementById(videoId).outerHTML = ''; // Remove watch indicator from video info
 
     // If cast integration is enabled create cast button
     var castButton = ``;
-    var castScript = document.getElementById('cast-script');
-    if (typeof(castScript) != 'undefined' && castScript != null) {
+    if (videoData.config.application.enable_cast) {
         var castButton = `<google-cast-launcher id="castbutton"></google-cast-launcher>`;
     }
 
     // Watched indicator
-    if (videoData.player.watched) {
+    if (videoData.data.player.watched) {
         var playerState = "seen";
         var watchedFunction = "Unwatched";
     } else {
@@ -348,12 +347,12 @@ function createPlayer(button) {
     }
 
     var playerStats = `<div class="thumb-icon player-stats"><img src="/static/img/icon-eye.svg" alt="views icon"><span>${videoViews}</span>`;
-    if (videoData.stats.like_count) {
-        var likes = formatNumbers(videoData.stats.like_count);
+    if (videoData.data.stats.like_count) {
+        var likes = formatNumbers(videoData.data.stats.like_count);
         playerStats += `<span>|</span><img src="/static/img/icon-thumb.svg" alt="thumbs-up"><span>${likes}</span>`;
     }
-    if (videoData.stats.dislike_count) {
-        var dislikes = formatNumbers(videoData.stats.dislike_count);
+    if (videoData.data.stats.dislike_count && videoData.config.downloads.integrate_ryd) {
+        var dislikes = formatNumbers(videoData.data.stats.dislike_count);
         playerStats += `<span>|</span><img class="dislike" src="/static/img/icon-thumb.svg" alt="thumbs-down"><span>${dislikes}</span>`;
     }
     playerStats += "</div>";
@@ -382,42 +381,25 @@ function createPlayer(button) {
 }
 
 // Set video progress in seconds
-function setVideoProgress(videoProgress) {
-    if (isNaN(videoProgress)) {
-        videoProgress = 0;
-    }
-    var videoElement = document.getElementById("video-item");
-    videoElement.currentTime = videoProgress;
-}
+// function setVideoProgress(videoProgress) {
+//     if (isNaN(videoProgress)) {
+//         videoProgress = 0;
+//     }
+//     var videoElement = document.getElementById("video-item");
+//     videoElement.currentTime = videoProgress;
+// }
 
 // Runs on video playback, marks video as watched if video gets to 90% or higher, WIP sends position to api
 function onVideoProgress(videoId) {
     var videoElement = document.getElementById("video-item");
     if (videoElement != null) {
         if ((videoElement.currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
-            // sendVideoProgress(videoId, videoElement.currentTime); // Groundwork for saving video position
+            postVideoProgress(videoId, videoElement.currentTime); // Groundwork for saving video position
             if (((videoElement.currentTime / videoElement.duration) >= 0.90) && document.getElementById(videoId).className == "unseen-icon") {
                 isWatched(videoId);
             }
         }
     }
-}
-
-// Groundwork for saving video position
-function sendVideoProgress(videoId, videoProgress) {
-    var apiEndpoint = "/api/video/";
-    if (isNaN(videoProgress)) {
-        videoProgress = 0;
-    }
-    var data = {
-        "data": [{
-            "youtube_id": videoId,
-            "player": {
-                "progress": videoProgress 
-            }
-        }]
-    };
-    videoData = apiRequest(apiEndpoint, "POST", data);
 }
 
 // Format numbers for frontend
@@ -439,7 +421,7 @@ function formatNumbers(number) {
 function getVideoData(videoId) {
     var apiEndpoint = "/api/video/" + videoId + "/";
     videoData = apiRequest(apiEndpoint, "GET");
-    return videoData.data;
+    return videoData;
 }
 
 // Gets channel data in JSON format when passed channel ID
@@ -456,6 +438,13 @@ function getPlaylistData(playlistId) {
     return playlistData.data;
 }
 
+// Get video progress data in JSON format when passed video ID
+// function getVideoProgress(videoId) {
+//     var apiEndpoint = "/api/video/" + videoId + "/progress/";
+//     videoProgress = apiRequest(apiEndpoint, "GET");
+//     return videoProgress.data;
+// }
+
 // Given an array of playlist ids it returns an array of subbed playlist ids from that list
 function getSubbedPlaylists(videoPlaylists) {
     var subbedPlaylists = [];
@@ -465,6 +454,20 @@ function getSubbedPlaylists(videoPlaylists) {
         }
     }
     return subbedPlaylists;
+}
+
+// Send video position when given video id and progress in seconds
+function postVideoProgress(videoId, videoProgress) {
+    var apiEndpoint = "/api/video/" + videoId + "/progress/";
+    if (isNaN(videoProgress)) {
+        videoProgress = 0;
+    }
+    var data = {
+        "data": [{
+            "progress": videoProgress 
+        }]
+    };
+    videoData = apiRequest(apiEndpoint, "POST", data);
 }
 
 // Makes api requests when passed an endpoint and method ("GET" or "POST")
