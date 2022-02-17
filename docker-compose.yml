@@ -23,7 +23,7 @@ services:
       - archivist-es
       - archivist-redis
   archivist-redis:
-    image: redislabs/rejson:latest
+    image: bbilly1/rejson:latest
     container_name: archivist-redis
     restart: always
     expose:
