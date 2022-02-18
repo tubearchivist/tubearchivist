@@ -305,7 +305,7 @@ function createPlayer(button) {
 
     var subtitles = '';
     var videoSubtitles = videoData.data.subtitles; // Array of subtitles
-    if (typeof(videoSubtitles) != 'undefined') {
+    if (typeof(videoSubtitles) != 'undefined' && videoData.config.downloads.subtitle) {
         for (var i = 0; i < videoSubtitles.length; i++) {
             subtitles += `<track label="${videoSubtitles[i].name}" kind="subtitles" srclang="${videoSubtitles[i].lang}" src="${videoSubtitles[i].media_url}">`;
         }
