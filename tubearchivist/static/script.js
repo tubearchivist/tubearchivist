@@ -298,6 +298,7 @@ function cancelDelete() {
 function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
     var videoData = getVideoData(videoId);
+    var videoProgress = getVideoProgress(videoId).position; // videoData.data.player.progress; // Groundwork for saving video position, change once progress variable is added to API
     var videoUrl = videoData.data.media_url;
     var videoThumbUrl = videoData.data.vid_thumb_url;
     var videoName = videoData.data.title;
@@ -322,7 +323,6 @@ function createPlayer(button) {
         }
     }
 
-    var videoProgress = videoData.data.player.progress; // Groundwork for saving video position, change once progress variable is added to API
     var videoViews = formatNumbers(videoData.data.stats.view_count);
 
     var channelId = videoData.data.channel.channel_id;
@@ -359,7 +359,7 @@ function createPlayer(button) {
 
     const markup = `
     <div class="video-player" data-id="${videoId}">
-        <video poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" controls autoplay width="100%" playsinline id="video-item">
+        <video poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" onpause="onVideoPause('${videoId}')" controls autoplay width="100%" playsinline id="video-item">
             <source src="${videoUrl}#t=${videoProgress}" type="video/mp4" id="video-source">
             ${subtitles}
         </video>
@@ -402,6 +402,14 @@ function onVideoProgress(videoId) {
     }
 }
 
+// Runs on video pause. Sends current position.
+function onVideoPause(videoId) {
+    var videoElement = document.getElementById("video-item");
+    if (videoElement != null) {
+        postVideoProgress(videoId, videoElement.currentTime);
+    }
+}
+
 // Format numbers for frontend
 function formatNumbers(number) {
     var numberUnformatted = parseFloat(number);
@@ -439,11 +447,11 @@ function getPlaylistData(playlistId) {
 }
 
 // Get video progress data in JSON format when passed video ID
-// function getVideoProgress(videoId) {
-//     var apiEndpoint = "/api/video/" + videoId + "/progress/";
-//     videoProgress = apiRequest(apiEndpoint, "GET");
-//     return videoProgress.data;
-// }
+function getVideoProgress(videoId) {
+    var apiEndpoint = "/api/video/" + videoId + "/progress/";
+    videoProgress = apiRequest(apiEndpoint, "GET");
+    return videoProgress;
+}
 
 // Given an array of playlist ids it returns an array of subbed playlist ids from that list
 function getSubbedPlaylists(videoPlaylists) {
@@ -463,10 +471,9 @@ function postVideoProgress(videoId, videoProgress) {
         videoProgress = 0;
     }
     var data = {
-        "data": [{
-            "progress": videoProgress 
-        }]
+        "position": videoProgress
     };
+    console.log("Sent Video Progress: " + videoProgress);
     videoData = apiRequest(apiEndpoint, "POST", data);
 }
 
@@ -475,7 +482,11 @@ function apiRequest(apiEndpoint, method, data) {
     const xhttp = new XMLHttpRequest();
     var sessionToken = getCookie("sessionid");
     xhttp.open(method, apiEndpoint, false);
-    xhttp.setRequestHeader("Authorization", "Token " + sessionToken);
+    if (apiEndpoint.includes("progress")) { // Temp solution
+        xhttp.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
+    } else {
+        xhttp.setRequestHeader("Authorization", "Token " + sessionToken);
+    }
     xhttp.setRequestHeader("Content-Type", "application/json");
     xhttp.send(JSON.stringify(data));
     return JSON.parse(xhttp.responseText);
