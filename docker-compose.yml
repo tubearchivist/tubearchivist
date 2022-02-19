@@ -23,7 +23,7 @@ services:
       - archivist-es
       - archivist-redis
   archivist-redis:
-    image: bbilly1/rejson:latest
+    image: redislabs/rejson:latest      # For arm64 just update this line with bbilly1/rejson:latest
     container_name: archivist-redis
     restart: always
     expose:
