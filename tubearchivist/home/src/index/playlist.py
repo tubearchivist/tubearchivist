@@ -35,8 +35,11 @@ class YoutubePlaylist(YouTubeItem):
 
     def build_json(self, scrape=False):
         """collection to create json_data"""
-        if not scrape:
-            self.get_from_es()
+        self.get_from_es()
+        if self.json_data:
+            subscribed = self.json_data.get("playlist_subscribed")
+        else:
+            subscribed = False
 
         if scrape or not self.json_data:
             self.get_from_youtube()
@@ -44,13 +47,13 @@ class YoutubePlaylist(YouTubeItem):
             self.get_entries()
             self.json_data["playlist_entries"] = self.all_members
             self.get_playlist_art()
+            self.json_data["playlist_subscribed"] = subscribed
 
     def process_youtube_meta(self):
         """extract relevant fields from youtube"""
         self.json_data = {
             "playlist_id": self.youtube_id,
             "playlist_active": True,
-            "playlist_subscribed": False,
             "playlist_name": self.youtube_meta["title"],
             "playlist_channel": self.youtube_meta["channel"],
             "playlist_channel_id": self.youtube_meta["channel_id"],
