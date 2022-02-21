@@ -466,6 +466,7 @@ function getSubbedPlaylists(videoPlaylists) {
 
 // Send video position when given video id and progress in seconds
 function postVideoProgress(videoId, videoProgress) {
+    method = "POST";
     var apiEndpoint = "/api/video/" + videoId + "/progress/";
     if (isNaN(videoProgress)) {
         videoProgress = 0;
@@ -473,8 +474,10 @@ function postVideoProgress(videoId, videoProgress) {
     var data = {
         "position": videoProgress
     };
-    console.log("Sent Video Progress: " + videoProgress);
-    videoData = apiRequest(apiEndpoint, "POST", data);
+    if (videoProgress == 0) {
+        method = "DELETE"; 
+    }
+    apiRequest(apiEndpoint, method, data);
 }
 
 // Makes api requests when passed an endpoint and method ("GET" or "POST")
@@ -482,11 +485,8 @@ function apiRequest(apiEndpoint, method, data) {
     const xhttp = new XMLHttpRequest();
     var sessionToken = getCookie("sessionid");
     xhttp.open(method, apiEndpoint, false);
-    if (apiEndpoint.includes("progress")) { // Temp solution
-        xhttp.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
-    } else {
-        xhttp.setRequestHeader("Authorization", "Token " + sessionToken);
-    }
+    xhttp.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
+    xhttp.setRequestHeader("Authorization", "Token " + sessionToken);
     xhttp.setRequestHeader("Content-Type", "application/json");
     xhttp.send(JSON.stringify(data));
     return JSON.parse(xhttp.responseText);
