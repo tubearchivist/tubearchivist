@@ -298,18 +298,12 @@ function cancelDelete() {
 function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
     var videoData = getVideoData(videoId);
-    var videoProgress = getVideoProgress(videoId).position; // videoData.data.player.progress; // Groundwork for saving video position, change once progress variable is added to API
-    var videoUrl = videoData.data.media_url;
-    var videoThumbUrl = videoData.data.vid_thumb_url;
+    // var videoProgress = getVideoProgress(videoId).position; // videoData.data.player.progress; // Groundwork for saving video position, change once progress variable is added to API
+    // var videoUrl = videoData.data.media_url;
+    // var videoThumbUrl = videoData.data.vid_thumb_url;
     var videoName = videoData.data.title;
 
-    var subtitles = '';
-    var videoSubtitles = videoData.data.subtitles; // Array of subtitles
-    if (typeof(videoSubtitles) != 'undefined' && videoData.config.downloads.subtitle) {
-        for (var i = 0; i < videoSubtitles.length; i++) {
-            subtitles += `<track label="${videoSubtitles[i].name}" kind="subtitles" srclang="${videoSubtitles[i].lang}" src="${videoSubtitles[i].media_url}">`;
-        }
-    }
+    videoTag = createVideoTag(videoId);
 
     var playlist = '';
     var videoPlaylists = videoData.data.playlist; // Array of playlists the video is in
@@ -359,10 +353,7 @@ function createPlayer(button) {
 
     const markup = `
     <div class="video-player" data-id="${videoId}">
-        <video poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" onpause="onVideoPause('${videoId}')" controls autoplay width="100%" playsinline id="video-item">
-            <source src="${videoUrl}#t=${videoProgress}" type="video/mp4" id="video-source">
-            ${subtitles}
-        </video>
+        ${videoTag}
         <div class="player-title boxed-content">
             <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
             <img src="/static/img/icon-${playerState}.svg" alt="${playerState}-icon" id="${videoId}" onclick="is${watchedFunction}(this.id)" class="${playerState}-icon" title="Mark as ${watchedFunction}">
@@ -378,6 +369,30 @@ function createPlayer(button) {
     `;
     const divPlayer =  document.getElementById("player");
     divPlayer.innerHTML = markup;
+}
+
+// Generates a video tag with subtitles when passed a video id.
+function createVideoTag(videoId) {
+    var videoData = getVideoData(videoId);
+    var videoProgress = getVideoProgress(videoId).position;
+    var videoUrl = videoData.data.media_url;
+    var videoThumbUrl = videoData.data.vid_thumb_url;
+    
+    var subtitles = '';
+    var videoSubtitles = videoData.data.subtitles; // Array of subtitles
+    if (typeof(videoSubtitles) != 'undefined' && videoData.config.downloads.subtitle) {
+        for (var i = 0; i < videoSubtitles.length; i++) {
+            subtitles += `<track label="${videoSubtitles[i].name}" kind="subtitles" srclang="${videoSubtitles[i].lang}" src="${videoSubtitles[i].media_url}">`;
+        }
+    }
+
+    var videoTag = `
+    <video poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" onpause="onVideoPause('${videoId}')" controls autoplay width="100%" playsinline id="video-item">
+        <source src="${videoUrl}#t=${videoProgress}" type="video/mp4" id="video-source" videoid="${videoId}">
+        ${subtitles}
+    </video>
+    `;
+    return videoTag;
 }
 
 // Set video progress in seconds
