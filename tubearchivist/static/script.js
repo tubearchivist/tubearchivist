@@ -399,25 +399,45 @@ function createVideoTag(videoId) {
     return videoTag;
 }
 
-// Runs on video playback, marks video as watched if video gets to 90% or higher, WIP sends position to api
-function onVideoProgress(videoId) {
+function getVideoPlayer() {
     var videoElement = document.getElementById("video-item");
+    return videoElement;
+}
+
+function getVideoPlayerCurrentTime() {
+    var videoElement = getVideoPlayer();
     if (videoElement != null) {
-        if ((videoElement.currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
-            postVideoProgress(videoId, videoElement.currentTime); // Groundwork for saving video position
-            if (((videoElement.currentTime / videoElement.duration) >= 0.90) && document.getElementById(videoId).className == "unseen-icon") {
-                isWatched(videoId);
-            }
+        return videoElement.currentTime;
+    } else {
+        return 0;
+    }
+}
+
+function getVideoPlayerDuration() {
+    var videoElement = getVideoPlayer();
+    if (videoElement != null) {
+        return videoElement.duration;
+    } else {
+        return 0;
+    }
+}
+
+// Runs on video playback, marks video as watched if video gets to 90% or higher, sends position to api
+function onVideoProgress(videoId) {
+    var currentTime = getVideoPlayerCurrentTime();
+    var duration = getVideoPlayerDuration();
+    if ((currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
+        postVideoProgress(videoId, currentTime);
+        if (((currentTime / duration) >= 0.90) && document.getElementById(videoId).className == "unseen-icon") {
+            isWatched(videoId);
         }
     }
 }
 
 // Runs on video pause. Sends current position.
 function onVideoPause(videoId) {
-    var videoElement = document.getElementById("video-item");
-    if (videoElement != null) {
-        postVideoProgress(videoId, videoElement.currentTime);
-    }
+    var currentTime = getVideoPlayerCurrentTime();
+    postVideoProgress(videoId, currentTime);
 }
 
 // Format numbers for frontend
