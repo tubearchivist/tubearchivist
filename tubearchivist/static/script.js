@@ -488,7 +488,6 @@ function getSubbedPlaylists(videoPlaylists) {
 
 // Send video position when given video id and progress in seconds
 function postVideoProgress(videoId, videoProgress) {
-    method = "POST";
     var apiEndpoint = "/api/video/" + videoId + "/progress/";
     if (isNaN(videoProgress)) {
         videoProgress = 0;
@@ -497,9 +496,10 @@ function postVideoProgress(videoId, videoProgress) {
         "position": videoProgress
     };
     if (videoProgress == 0) {
-        method = "DELETE"; 
+        apiRequest(apiEndpoint, "DELETE");
+    } else {
+        apiRequest(apiEndpoint, "POST", data);
     }
-    apiRequest(apiEndpoint, method, data);
 }
 
 // Makes api requests when passed an endpoint and method ("GET" or "POST")
