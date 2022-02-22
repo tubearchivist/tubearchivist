@@ -367,8 +367,15 @@ function createPlayer(button) {
         </div>
     </div>
     `;
-    const divPlayer =  document.getElementById("player");
+    const divPlayer = document.getElementById("player");
     divPlayer.innerHTML = markup;
+}
+
+// Added video tag to video page
+function insertVideoTag(videoId) {
+    var videoTag = createVideoTag(videoId);
+    var videoMain = document.getElementsByClassName("video-main");
+    videoMain[0].innerHTML = videoTag;
 }
 
 // Generates a video tag with subtitles when passed a video id.
