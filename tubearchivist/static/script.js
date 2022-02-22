@@ -298,9 +298,6 @@ function cancelDelete() {
 function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
     var videoData = getVideoData(videoId);
-    // var videoProgress = getVideoProgress(videoId).position; // videoData.data.player.progress; // Groundwork for saving video position, change once progress variable is added to API
-    // var videoUrl = videoData.data.media_url;
-    // var videoThumbUrl = videoData.data.vid_thumb_url;
     var videoName = videoData.data.title;
 
     videoTag = createVideoTag(videoId);
@@ -401,15 +398,6 @@ function createVideoTag(videoId) {
     `;
     return videoTag;
 }
-
-// Set video progress in seconds
-// function setVideoProgress(videoProgress) {
-//     if (isNaN(videoProgress)) {
-//         videoProgress = 0;
-//     }
-//     var videoElement = document.getElementById("video-item");
-//     videoElement.currentTime = videoProgress;
-// }
 
 // Runs on video playback, marks video as watched if video gets to 90% or higher, WIP sends position to api
 function onVideoProgress(videoId) {
