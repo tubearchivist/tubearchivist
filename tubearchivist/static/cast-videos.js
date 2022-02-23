@@ -38,12 +38,14 @@ function castConnectionChange(player) {
 
 function castVideoProgress(player) {
     var videoId = getVideoPlayerVideoId();
-    var currentTime = player.currentTime;
-    var duration = player.duration;
-    if ((currentTime % 10) <= 1.0 && currentTime != 0 && duration != 0) { // Check progress every 10 seconds or else progress is checked a few times a second
-        postVideoProgress(videoId, currentTime);
-        if (((currentTime / duration) >= 0.90) && !getVideoPlayerWatchStatus()) {
-            isWatched(videoId);
+    if (player.mediaInfo.contentId.includes(videoId)) {
+        var currentTime = player.currentTime;
+        var duration = player.duration;
+        if ((currentTime % 10) <= 1.0 && currentTime != 0 && duration != 0) { // Check progress every 10 seconds or else progress is checked a few times a second
+            postVideoProgress(videoId, currentTime);
+            if (((currentTime / duration) >= 0.90) && !getVideoPlayerWatchStatus()) {
+                isWatched(videoId);
+            }
         }
     }
 }
@@ -51,7 +53,14 @@ function castVideoProgress(player) {
 function castVideoPaused(player) {
     var videoId = getVideoPlayerVideoId();
     var currentTime = player.currentTime;
-    postVideoProgress(videoId, currentTime);
+    var duration = player.duration;
+    if (player.mediaInfo != null) {
+        if (player.mediaInfo.contentId.includes(videoId)) {
+            if (currentTime != 0 && duration != 0) {
+                postVideoProgress(videoId, currentTime);
+            }
+        }
+    }
 }
 
 function castStart() {
