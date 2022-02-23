@@ -435,13 +435,22 @@ function getVideoPlayerDuration() {
     }
 }
 
+function getVideoPlayerWatchStatus() {
+    var videoId = getVideoPlayerVideoId();
+    var watched = false;
+    if(document.getElementById(videoId).className != "unseen-icon") {
+        watched = true;
+    }
+    return watched;
+}
+
 // Runs on video playback, marks video as watched if video gets to 90% or higher, sends position to api
 function onVideoProgress(videoId) {
     var currentTime = getVideoPlayerCurrentTime();
     var duration = getVideoPlayerDuration();
     if ((currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
         postVideoProgress(videoId, currentTime);
-        if (((currentTime / duration) >= 0.90) && document.getElementById(videoId).className == "unseen-icon") {
+        if (((currentTime / duration) >= 0.90) && !getVideoPlayerWatchStatus()) {
             isWatched(videoId);
         }
     }
@@ -511,14 +520,15 @@ function getSubbedPlaylists(videoPlaylists) {
 function postVideoProgress(videoId, videoProgress) {
     var apiEndpoint = "/api/video/" + videoId + "/progress/";
     if (!isNaN(videoProgress)) {
-        console.log("Saving Video Progress for Video ID: " + videoId + ", Progress: " + videoProgress);
         var data = {
             "position": videoProgress
         };
         if (videoProgress == 0) {
             apiRequest(apiEndpoint, "DELETE");
-        } else {
+            console.log("Saving Video Progress for Video ID: " + videoId + ", Progress: " + videoProgress);
+        } else if (!getVideoPlayerWatchStatus()) {
             apiRequest(apiEndpoint, "POST", data);
+            console.log("Saving Video Progress for Video ID: " + videoId + ", Progress: " + videoProgress);
         }
     }
 }
