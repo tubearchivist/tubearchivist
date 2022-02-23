@@ -548,6 +548,10 @@ function apiRequest(apiEndpoint, method, data) {
     return JSON.parse(xhttp.responseText);
 }
 
+function getURL() {
+    return window.location.href.replace(window.location.pathname, "");
+}
+
 function removePlayer() {
     var currentTime = getVideoPlayerCurrentTime();
     var videoId = getVideoPlayerVideoId();
