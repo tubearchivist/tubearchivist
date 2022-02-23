@@ -300,7 +300,7 @@ function createPlayer(button) {
     var videoData = getVideoData(videoId);
     var videoName = videoData.data.title;
 
-    videoTag = createVideoTag(videoId);
+    var videoTag = createVideoTag(videoId);
 
     var playlist = '';
     var videoPlaylists = videoData.data.playlist; // Array of playlists the video is in
@@ -323,7 +323,7 @@ function createPlayer(button) {
     document.getElementById(videoId).outerHTML = ''; // Remove watch indicator from video info
 
     // If cast integration is enabled create cast button
-    var castButton = ``;
+    var castButton = '';
     if (videoData.config.application.enable_cast) {
         var castButton = `<google-cast-launcher id="castbutton"></google-cast-launcher>`;
     }
@@ -368,7 +368,7 @@ function createPlayer(button) {
     divPlayer.innerHTML = markup;
 }
 
-// Added video tag to video page
+// Add video tag to video page when passed a video id, function loaded on page load `video.html (115-117)`
 function insertVideoTag(videoId) {
     var videoTag = createVideoTag(videoId);
     var videoMain = document.getElementsByClassName("video-main");
@@ -399,11 +399,19 @@ function createVideoTag(videoId) {
     return videoTag;
 }
 
+// Gets video tag
 function getVideoPlayer() {
     var videoElement = document.getElementById("video-item");
     return videoElement;
 }
 
+// Gets the video source tag
+function getVideoPlayerVideoSource() {
+    var videoPlayerVideoSource = document.getElementById("video-source");
+    return videoPlayerVideoSource;
+}
+
+// Gets the current progress of the video currently in the player
 function getVideoPlayerCurrentTime() {
     var videoElement = getVideoPlayer();
     if (videoElement != null) {
@@ -413,6 +421,17 @@ function getVideoPlayerCurrentTime() {
     }
 }
 
+// Gets the video id of the video currently in the player
+function getVideoPlayerVideoId() {
+    var videoPlayerVideoSource = getVideoPlayerVideoSource()
+    if (videoPlayerVideoSource != null) {
+        return videoPlayerVideoSource.videoid;
+    } else {
+        return 0;
+    }
+}
+
+// Gets the duration of the video currently in the player
 function getVideoPlayerDuration() {
     var videoElement = getVideoPlayer();
     if (videoElement != null) {
@@ -455,31 +474,31 @@ function formatNumbers(number) {
     return numberFormatted;
 }
 
-// Gets video data in JSON format when passed video ID
+// Gets video data when passed video ID
 function getVideoData(videoId) {
     var apiEndpoint = "/api/video/" + videoId + "/";
-    videoData = apiRequest(apiEndpoint, "GET");
+    var videoData = apiRequest(apiEndpoint, "GET");
     return videoData;
 }
 
-// Gets channel data in JSON format when passed channel ID
+// Gets channel data when passed channel ID
 function getChannelData(channelId) {
     var apiEndpoint = "/api/channel/" + channelId + "/";
-    channelData = apiRequest(apiEndpoint, "GET");
+    var channelData = apiRequest(apiEndpoint, "GET");
     return channelData.data;
 }
 
-// Gets playlist data in JSON format when passed playlist ID
+// Gets playlist data when passed playlist ID
 function getPlaylistData(playlistId) {
     var apiEndpoint = "/api/playlist/" + playlistId + "/";
-    playlistData = apiRequest(apiEndpoint, "GET");
+    var playlistData = apiRequest(apiEndpoint, "GET");
     return playlistData.data;
 }
 
-// Get video progress data in JSON format when passed video ID
+// Get video progress data when passed video ID
 function getVideoProgress(videoId) {
     var apiEndpoint = "/api/video/" + videoId + "/progress/";
-    videoProgress = apiRequest(apiEndpoint, "GET");
+    var videoProgress = apiRequest(apiEndpoint, "GET");
     return videoProgress;
 }
 
@@ -510,12 +529,12 @@ function postVideoProgress(videoId, videoProgress) {
     }
 }
 
-// Makes api requests when passed an endpoint and method ("GET" or "POST")
+// Makes api requests when passed an endpoint and method ("GET", "POST", "DELETE")
 function apiRequest(apiEndpoint, method, data) {
     const xhttp = new XMLHttpRequest();
     var sessionToken = getCookie("sessionid");
     xhttp.open(method, apiEndpoint, false);
-    xhttp.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
+    xhttp.setRequestHeader("X-CSRFToken", getCookie("csrftoken")); // Used for video progress POST requests
     xhttp.setRequestHeader("Authorization", "Token " + sessionToken);
     xhttp.setRequestHeader("Content-Type", "application/json");
     xhttp.send(JSON.stringify(data));
