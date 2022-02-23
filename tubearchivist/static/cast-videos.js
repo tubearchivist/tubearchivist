@@ -13,6 +13,16 @@ function initializeCastApi() {
             castConnectionChange(player) 
         }
     );
+    playerController.addEventListener(
+        cast.framework.RemotePlayerEventType.CURRENT_TIME_CHANGED, function() { 
+            castVideoProgress(player) 
+        }
+    );
+    playerController.addEventListener(
+        cast.framework.RemotePlayerEventType.IS_PAUSED_CHANGED, function() { 
+            castVideoPaused(player) 
+        }
+    );
 }
 
 
@@ -26,32 +36,53 @@ function castConnectionChange(player) {
     }
 }
 
+function castVideoProgress(player) {
+    var videoId = getVideoPlayerVideoId();
+    var currentTime = player.currentTime;
+    var duration = player.duration;
+    if ((currentTime % 10) <= 1.0 && currentTime != 0 && duration != 0) { // Check progress every 10 seconds or else progress is checked a few times a second
+        postVideoProgress(videoId, currentTime);
+        if (((currentTime / duration) >= 0.90) && !getVideoPlayerWatchStatus()) {
+            isWatched(videoId);
+        }
+    }
+}
+
+function castVideoPaused(player) {
+    var videoId = getVideoPlayerVideoId();
+    var currentTime = player.currentTime;
+    postVideoProgress(videoId, currentTime);
+}
+
 function castStart() {
     var castSession = cast.framework.CastContext.getInstance().getCurrentSession();
-    
     // Check if there is already media playing on the cast target to prevent recasting on page reload or switching to another video page
     if (!castSession.getMediaSession()) { 
-        contentId = document.getElementById("video-source").src; // Get video URL
-        contentTitle = document.getElementById('video-title').innerHTML; // Get video title
-        contentImage = document.getElementById("video-item").poster; // Get video thumbnail URL
+        var videoId = getVideoPlayerVideoId();
+        var videoData = getVideoData(videoId);
+        var contentId = getURL() + videoData.data.media_url;
+        var contentTitle = videoData.data.title;
+        var contentImage = getURL() + videoData.data.vid_thumb_url;
+
         contentType = 'video/mp4'; // Set content type, only videos right now so it is hard coded
-        contentCurrentTime = document.getElementById("video-item").currentTime; // Get video's current position
+        contentCurrentTime = getVideoPlayerCurrentTime(); // Get video's current position
         contentActiveSubtitle = [];
         // Check if a subtitle is turned on.
-        for (var i = 0; i < document.getElementById("video-item").textTracks.length; i++) {
-            if (document.getElementById("video-item").textTracks[i].mode == "showing") {
+        for (var i = 0; i < getVideoPlayer().textTracks.length; i++) {
+            if (getVideoPlayer().textTracks[i].mode == "showing") {
                 contentActiveSubtitle =[i + 1];
             }
         }
         contentSubtitles = [];
-        for (var i = 0; i < document.getElementById("video-item").children.length; i++) {
-            if (document.getElementById("video-item").children[i].tagName == "TRACK") {
+        var videoSubtitles = videoData.data.subtitles; // Array of subtitles
+        if (typeof(videoSubtitles) != 'undefined' && videoData.config.downloads.subtitle) {
+            for (var i = 0; i < videoSubtitles.length; i++) {
                 subtitle = new chrome.cast.media.Track(i, chrome.cast.media.TrackType.TEXT);
-                subtitle.trackContentId = document.getElementById("video-item").children[i].src;
+                subtitle.trackContentId = videoSubtitles[i].media_url;
                 subtitle.trackContentType = 'text/vtt';
                 subtitle.subtype = chrome.cast.media.TextTrackType.SUBTITLES;
-                subtitle.name = document.getElementById("video-item").children[i].label;
-                subtitle.language = document.getElementById("video-item").children[i].srclang;
+                subtitle.name = videoSubtitles[i].name;
+                subtitle.language = videoSubtitles[i].lang;
                 subtitle.customData = null;
                 contentSubtitles.push(subtitle);
             }
@@ -91,7 +122,7 @@ function shiftCurrentTime(contentCurrentTime) { // Shift media back 3 seconds to
 
 function castSuccessful() {
     // console.log('Cast Successful.');
-    document.getElementById("video-item").pause(); // Pause browser video on successful cast
+    getVideoPlayer().pause(); // Pause browser video on successful cast
 }
 
 function castFailed(errorCode) {
