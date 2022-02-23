@@ -423,7 +423,7 @@ function getVideoPlayerCurrentTime() {
 function getVideoPlayerVideoId() {
     var videoPlayerVideoSource = getVideoPlayerVideoSource();
     if (videoPlayerVideoSource != null) {
-        return videoPlayerVideoSource.videoid;
+        return videoPlayerVideoSource.getAttribute("videoid");
     }
 }
 
@@ -511,6 +511,7 @@ function getSubbedPlaylists(videoPlaylists) {
 function postVideoProgress(videoId, videoProgress) {
     var apiEndpoint = "/api/video/" + videoId + "/progress/";
     if (!isNaN(videoProgress)) {
+        console.log("Saving Video Progress for Video ID: " + videoId + ", Progress: " + videoProgress);
         var data = {
             "position": videoProgress
         };
