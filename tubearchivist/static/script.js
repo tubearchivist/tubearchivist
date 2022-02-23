@@ -416,18 +416,14 @@ function getVideoPlayerCurrentTime() {
     var videoElement = getVideoPlayer();
     if (videoElement != null) {
         return videoElement.currentTime;
-    } else {
-        return 0;
     }
 }
 
 // Gets the video id of the video currently in the player
 function getVideoPlayerVideoId() {
-    var videoPlayerVideoSource = getVideoPlayerVideoSource()
+    var videoPlayerVideoSource = getVideoPlayerVideoSource();
     if (videoPlayerVideoSource != null) {
         return videoPlayerVideoSource.videoid;
-    } else {
-        return 0;
     }
 }
 
@@ -436,8 +432,6 @@ function getVideoPlayerDuration() {
     var videoElement = getVideoPlayer();
     if (videoElement != null) {
         return videoElement.duration;
-    } else {
-        return 0;
     }
 }
 
@@ -516,16 +510,15 @@ function getSubbedPlaylists(videoPlaylists) {
 // Send video position when given video id and progress in seconds
 function postVideoProgress(videoId, videoProgress) {
     var apiEndpoint = "/api/video/" + videoId + "/progress/";
-    if (isNaN(videoProgress)) {
-        videoProgress = 0;
-    }
-    var data = {
-        "position": videoProgress
-    };
-    if (videoProgress == 0) {
-        apiRequest(apiEndpoint, "DELETE");
-    } else {
-        apiRequest(apiEndpoint, "POST", data);
+    if (!isNaN(videoProgress)) {
+        var data = {
+            "position": videoProgress
+        };
+        if (videoProgress == 0) {
+            apiRequest(apiEndpoint, "DELETE");
+        } else {
+            apiRequest(apiEndpoint, "POST", data);
+        }
     }
 }
 
@@ -542,6 +535,9 @@ function apiRequest(apiEndpoint, method, data) {
 }
 
 function removePlayer() {
+    var currentTime = getVideoPlayerCurrentTime();
+    var videoId = getVideoPlayerVideoId();
+    postVideoProgress(videoId, currentTime);
     var playerElement = document.getElementById('player');
     if (playerElement.hasChildNodes()) {
         var youtubeId = playerElement.childNodes[1].getAttribute("data-id");
