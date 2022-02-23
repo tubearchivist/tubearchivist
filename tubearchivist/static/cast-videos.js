@@ -43,8 +43,16 @@ function castVideoProgress(player) {
         var duration = player.duration;
         if ((currentTime % 10) <= 1.0 && currentTime != 0 && duration != 0) { // Check progress every 10 seconds or else progress is checked a few times a second
             postVideoProgress(videoId, currentTime);
-            if (((currentTime / duration) >= 0.90) && !getVideoPlayerWatchStatus()) {
-                isWatched(videoId);
+            if (!getVideoPlayerWatchStatus()) { // Check if video is already marked as watched
+                if (duration <= 1800){ // If video is less than 30 min
+                    if ((currentTime / duration) >= 0.90) { // Mark as watched at 90%
+                        isWatched(videoId);
+                    }
+                } else {
+                    if (currentTime >= (duration - 120)) {
+                        isWatched(videoId);
+                    }
+                }
             }
         }
     }
