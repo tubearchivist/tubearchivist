@@ -391,7 +391,7 @@ function createVideoTag(videoId) {
     }
 
     var videoTag = `
-    <video poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" onpause="onVideoPause('${videoId}')" controls autoplay width="100%" playsinline id="video-item">
+    <video poster="${videoThumbUrl}" ontimeupdate="onVideoProgress()" onpause="onVideoPause()" controls autoplay width="100%" playsinline id="video-item">
         <source src="${videoUrl}#t=${videoProgress}" type="video/mp4" id="video-source" videoid="${videoId}">
         ${subtitles}
     </video>
@@ -435,6 +435,7 @@ function getVideoPlayerDuration() {
     }
 }
 
+// Gets current watch status of video based on watch button
 function getVideoPlayerWatchStatus() {
     var videoId = getVideoPlayerVideoId();
     var watched = false;
@@ -445,7 +446,8 @@ function getVideoPlayerWatchStatus() {
 }
 
 // Runs on video playback, marks video as watched if video gets to 90% or higher, sends position to api
-function onVideoProgress(videoId) {
+function onVideoProgress() {
+    var videoId = getVideoPlayerVideoId();
     var currentTime = getVideoPlayerCurrentTime();
     var duration = getVideoPlayerDuration();
     if ((currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
@@ -457,7 +459,8 @@ function onVideoProgress(videoId) {
 }
 
 // Runs on video pause. Sends current position.
-function onVideoPause(videoId) {
+function onVideoPause() {
+    var videoId = getVideoPlayerVideoId();
     var currentTime = getVideoPlayerCurrentTime();
     postVideoProgress(videoId, currentTime);
 }
@@ -525,7 +528,7 @@ function postVideoProgress(videoId, videoProgress) {
         };
         if (videoProgress == 0) {
             apiRequest(apiEndpoint, "DELETE");
-            console.log("Saving Video Progress for Video ID: " + videoId + ", Progress: " + videoProgress);
+            console.log("Deleting Video Progress for Video ID: " + videoId + ", Progress: " + videoProgress);
         } else if (!getVideoPlayerWatchStatus()) {
             apiRequest(apiEndpoint, "POST", data);
             console.log("Saving Video Progress for Video ID: " + videoId + ", Progress: " + videoProgress);
