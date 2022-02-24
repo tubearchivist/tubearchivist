@@ -396,7 +396,7 @@ function createVideoTag(videoData, videoProgress) {
     }
 
     var videoTag = `
-    <video poster="${videoThumbUrl}" ontimeupdate="onVideoProgress()" onpause="onVideoPause()" controls autoplay width="100%" playsinline id="video-item">
+    <video poster="${videoThumbUrl}" ontimeupdate="onVideoProgress()" onpause="onVideoPause()" onended="onVideoEnded()" controls autoplay width="100%" playsinline id="video-item">
         <source src="${videoUrl}#t=${videoProgress}" type="video/mp4" id="video-source" videoid="${videoId}">
         ${subtitles}
     </video>
@@ -462,6 +462,14 @@ function onVideoProgress() {
                 isWatched(videoId);
             }
         }
+    }
+}
+
+// Runs on video end, marks video as watched
+function onVideoEnded() {
+    var videoId = getVideoPlayerVideoId();
+    if (!getVideoPlayerWatchStatus()) { // Check if video is already marked as watched
+        isWatched(videoId);
     }
 }
 
