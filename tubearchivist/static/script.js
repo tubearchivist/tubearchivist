@@ -23,6 +23,7 @@ function isWatched(youtube_id) {
     document.getElementById(youtube_id).replaceWith(seenIcon);
 }
 
+// Removes the progress bar when passed a video id
 function removeProgressBar(videoId) {
     setProgressBar(videoId, 0, 1);
 }
@@ -549,10 +550,10 @@ function postVideoProgress(videoId, videoProgress) {
         };
         if (videoProgress == 0) {
             apiRequest(apiEndpoint, "DELETE");
-            console.log("Deleting Video Progress for Video ID: " + videoId + ", Progress: " + videoProgress);
+            // console.log("Deleting Video Progress for Video ID: " + videoId + ", Progress: " + videoProgress);
         } else if (!getVideoPlayerWatchStatus()) {
             apiRequest(apiEndpoint, "POST", data);
-            console.log("Saving Video Progress for Video ID: " + videoId + ", Progress: " + videoProgress);
+            // console.log("Saving Video Progress for Video ID: " + videoId + ", Progress: " + videoProgress);
         }
     }
 }
@@ -569,6 +570,7 @@ function apiRequest(apiEndpoint, method, data) {
     return JSON.parse(xhttp.responseText);
 }
 
+// Gets origin URL
 function getURL() {
     return window.location.origin;
 }
@@ -594,6 +596,7 @@ function removePlayer() {
     }
 }
 
+// Sets the progress bar when passed a video id, video progress and video duration
 function setProgressBar(videoId, currentTime, duration) {
     progressBar = document.getElementById("progress-" + videoId);
     progressBarWidth = (currentTime / duration) * 100 + "%";
