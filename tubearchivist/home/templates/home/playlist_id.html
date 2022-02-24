@@ -93,6 +93,8 @@
                                 <img src="/cache/{{ video.source.vid_thumb_url }}" alt="video-thumb">
                                 {% if video.source.player.progress %}
                                 <div class="video-progress-bar" id="progress-{{ video.source.youtube_id }}" style="width: {{video.source.player.progress}}%;"></div>
+                                {% else %}
+                                <div class="video-progress-bar" id="progress-{{ video.source.youtube_id }}" style="width: 0%;"></div>
                                 {% endif %}
                             </div>
                             <div class="video-play">
