@@ -564,7 +564,7 @@ function apiRequest(apiEndpoint, method, data) {
 }
 
 function getURL() {
-    return window.location.href.replace(window.location.pathname, "");
+    return window.location.origin;
 }
 
 function removePlayer() {
