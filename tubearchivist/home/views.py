@@ -367,6 +367,7 @@ class ChannelIdView(ArchivistResultsView):
         self.initiate_vars(request)
         self._update_view_data(channel_id)
         self.find_results()
+        self.match_progress()
 
         if self.context["results"]:
             channel_info = self.context["results"][0]["source"]["channel"]
@@ -468,6 +469,7 @@ class PlaylistIdView(ArchivistResultsView):
         playlist_name = playlist_info["playlist_name"]
         self._update_view_data(playlist_id, playlist_info)
         self.find_results()
+        self.match_progress()
         self.context.update(
             {
                 "title": "Playlist: " + playlist_name,
