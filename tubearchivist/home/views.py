@@ -169,6 +169,17 @@ class ArchivistResultsView(ArchivistViewConfig):
         }
         self.data = data
 
+    def match_progress(self):
+        """add video progress to result context"""
+        results = RedisArchivist().list_items(f"{self.user_id}:progress:")
+        progress = {i["youtube_id"]: i["position"] for i in results}
+        for hit in self.context["results"]:
+            video = hit["source"]
+            if video["youtube_id"] in progress:
+                played_sec = progress.get(video["youtube_id"])
+                total = video["player"]["duration"]
+                video["player"]["progress"] = 100 * (played_sec / total)
+
     def single_lookup(self, es_path):
         """retrieve a single item from url"""
         search = SearchHandler(es_path, config=self.default_conf)
@@ -212,6 +223,7 @@ class HomeView(ArchivistResultsView):
         self.initiate_vars(request)
         self._update_view_data()
         self.find_results()
+        self.match_progress()
 
         return render(request, "home/home.html", self.context)
 
