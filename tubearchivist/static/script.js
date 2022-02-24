@@ -601,7 +601,6 @@ function setProgressBar(videoId, currentTime, duration) {
     progressBar = document.getElementById("progress-" + videoId);
     progressBarWidth = (currentTime / duration) * 100 + "%";
     if (progressBar) {
-        console.log(progressBarWidth);
         progressBar.style.width = progressBarWidth;
     }
 }
