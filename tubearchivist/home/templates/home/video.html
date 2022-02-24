@@ -113,6 +113,8 @@
     {% endif %}
 </div>
 <script>
-    window.onload = insertVideoTag('{{ video.youtube_id }}');
+    var videoData = getVideoData('{{ video.youtube_id }}');
+    var videoProgress = getVideoProgress(videoId).position;
+    window.onload = insertVideoTag(videoData, videoProgress);
 </script>
 {% endblock content %}

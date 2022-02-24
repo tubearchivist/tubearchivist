@@ -298,9 +298,10 @@ function cancelDelete() {
 function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
     var videoData = getVideoData(videoId);
+    var videoProgress = getVideoProgress(videoId).position;
     var videoName = videoData.data.title;
 
-    var videoTag = createVideoTag(videoId);
+    var videoTag = createVideoTag(videoData, videoProgress);
 
     var playlist = '';
     var videoPlaylists = videoData.data.playlist; // Array of playlists the video is in
@@ -369,19 +370,16 @@ function createPlayer(button) {
 }
 
 // Add video tag to video page when passed a video id, function loaded on page load `video.html (115-117)`
-function insertVideoTag(videoId) {
-    var videoTag = createVideoTag(videoId);
+function insertVideoTag(videoData, videoProgress) {
+    var videoTag = createVideoTag(videoData, videoProgress);
     var videoMain = document.getElementsByClassName("video-main");
     videoMain[0].innerHTML = videoTag;
 }
 
 // Generates a video tag with subtitles when passed a video id.
-function createVideoTag(videoId) {
-    var videoData = getVideoData(videoId);
-    var videoProgress = getVideoProgress(videoId).position;
+function createVideoTag(videoData, videoProgress) {
     var videoUrl = videoData.data.media_url;
     var videoThumbUrl = videoData.data.vid_thumb_url;
-    
     var subtitles = '';
     var videoSubtitles = videoData.data.subtitles; // Array of subtitles
     if (typeof(videoSubtitles) != 'undefined' && videoData.config.downloads.subtitle) {
