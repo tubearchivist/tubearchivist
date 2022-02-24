@@ -59,6 +59,19 @@ class RedisArchivist:
 
         return json_str
 
+    def list_items(self, query):
+        """list all matches"""
+        reply = self.redis_connection.execute_command(
+            "KEYS", self.NAME_SPACE + query + "*"
+        )
+        all_matches = [i.decode().lstrip(self.NAME_SPACE) for i in reply]
+        all_results = []
+        for match in all_matches:
+            json_str = self.get_message(match)
+            all_results.append(json_str)
+
+        return all_results
+
     def del_message(self, key):
         """delete key from redis"""
         response = self.redis_connection.execute_command(

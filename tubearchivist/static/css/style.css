@@ -391,8 +391,17 @@ button:hover {
     grid-template-columns: 25% auto;
 }
 
+.video-progress-bar {
+    position: absolute;
+    background-color: var(--accent-font-light);
+    height: 7px;
+    left: 0;
+    bottom: 3px;
+}
+
 .video-thumb img {
     width: 100%;
+    position: relative;
 }
 
 .video-play img {
