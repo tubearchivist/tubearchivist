@@ -9,7 +9,7 @@ function sortChange(sortValue) {
 }
 
 function isWatched(youtube_id) {
-    // sendVideoProgress(youtube_id, 0); // Reset video progress on watched;
+    postVideoProgress(youtube_id, 0); // Reset video progress on watched;
     var payload = JSON.stringify({'watched': youtube_id});
     sendPost(payload);
     var seenIcon = document.createElement('img');
@@ -34,7 +34,7 @@ function isWatchedButton(button) {
 }
 
 function isUnwatched(youtube_id) {
-    // sendVideoProgress(youtube_id, 0); // Reset video progress on unwatched;
+    postVideoProgress(youtube_id, 0); // Reset video progress on unwatched;
     var payload = JSON.stringify({'un_watched': youtube_id});
     sendPost(payload);
     var unseenIcon = document.createElement('img');
@@ -298,20 +298,12 @@ function cancelDelete() {
 function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
     var videoData = getVideoData(videoId);
-    var videoUrl = videoData.media_url;
-    var videoThumbUrl = videoData.vid_thumb_url;
-    var videoName = videoData.title;
+    var videoName = videoData.data.title;
 
-    var subtitles = '';
-    var videoSubtitles = videoData.subtitles; // Array of subtitles
-    if (typeof(videoSubtitles) != 'undefined') {
-        for (var i = 0; i < videoSubtitles.length; i++) {
-            subtitles += `<track label="${videoSubtitles[i].name}" kind="subtitles" srclang="${videoSubtitles[i].lang}" src="${videoSubtitles[i].media_url}">`;
-        }
-    }
+    var videoTag = createVideoTag(videoId);
 
     var playlist = '';
-    var videoPlaylists = videoData.playlist; // Array of playlists the video is in
+    var videoPlaylists = videoData.data.playlist; // Array of playlists the video is in
     if (typeof(videoPlaylists) != 'undefined') {
         var subbedPlaylists = getSubbedPlaylists(videoPlaylists); // Array of playlist the video is in that are subscribed
         if (subbedPlaylists.length != 0) {
@@ -322,24 +314,22 @@ function createPlayer(button) {
         }
     }
 
-    var videoProgress = videoData.player.progress; // Groundwork for saving video position, change once progress variable is added to API
-    var videoViews = formatNumbers(videoData.stats.view_count);
+    var videoViews = formatNumbers(videoData.data.stats.view_count);
 
-    var channelId = videoData.channel.channel_id;
-    var channelName = videoData.channel.channel_name;
+    var channelId = videoData.data.channel.channel_id;
+    var channelName = videoData.data.channel.channel_name;
 
     removePlayer();
     document.getElementById(videoId).outerHTML = ''; // Remove watch indicator from video info
 
     // If cast integration is enabled create cast button
-    var castButton = ``;
-    var castScript = document.getElementById('cast-script');
-    if (typeof(castScript) != 'undefined' && castScript != null) {
+    var castButton = '';
+    if (videoData.config.application.enable_cast) {
         var castButton = `<google-cast-launcher id="castbutton"></google-cast-launcher>`;
     }
 
     // Watched indicator
-    if (videoData.player.watched) {
+    if (videoData.data.player.watched) {
         var playerState = "seen";
         var watchedFunction = "Unwatched";
     } else {
@@ -348,22 +338,19 @@ function createPlayer(button) {
     }
 
     var playerStats = `<div class="thumb-icon player-stats"><img src="/static/img/icon-eye.svg" alt="views icon"><span>${videoViews}</span>`;
-    if (videoData.stats.like_count) {
-        var likes = formatNumbers(videoData.stats.like_count);
+    if (videoData.data.stats.like_count) {
+        var likes = formatNumbers(videoData.data.stats.like_count);
         playerStats += `<span>|</span><img src="/static/img/icon-thumb.svg" alt="thumbs-up"><span>${likes}</span>`;
     }
-    if (videoData.stats.dislike_count) {
-        var dislikes = formatNumbers(videoData.stats.dislike_count);
+    if (videoData.data.stats.dislike_count && videoData.config.downloads.integrate_ryd) {
+        var dislikes = formatNumbers(videoData.data.stats.dislike_count);
         playerStats += `<span>|</span><img class="dislike" src="/static/img/icon-thumb.svg" alt="thumbs-down"><span>${dislikes}</span>`;
     }
     playerStats += "</div>";
 
     const markup = `
     <div class="video-player" data-id="${videoId}">
-        <video poster="${videoThumbUrl}" ontimeupdate="onVideoProgress('${videoId}')" controls autoplay width="100%" playsinline id="video-item">
-            <source src="${videoUrl}#t=${videoProgress}" type="video/mp4" id="video-source">
-            ${subtitles}
-        </video>
+        ${videoTag}
         <div class="player-title boxed-content">
             <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
             <img src="/static/img/icon-${playerState}.svg" alt="${playerState}-icon" id="${videoId}" onclick="is${watchedFunction}(this.id)" class="${playerState}-icon" title="Mark as ${watchedFunction}">
@@ -377,47 +364,121 @@ function createPlayer(button) {
         </div>
     </div>
     `;
-    const divPlayer =  document.getElementById("player");
+    const divPlayer = document.getElementById("player");
     divPlayer.innerHTML = markup;
 }
 
-// Set video progress in seconds
-function setVideoProgress(videoProgress) {
-    if (isNaN(videoProgress)) {
-        videoProgress = 0;
-    }
-    var videoElement = document.getElementById("video-item");
-    videoElement.currentTime = videoProgress;
+// Add video tag to video page when passed a video id, function loaded on page load `video.html (115-117)`
+function insertVideoTag(videoId) {
+    var videoTag = createVideoTag(videoId);
+    var videoMain = document.getElementsByClassName("video-main");
+    videoMain[0].innerHTML = videoTag;
 }
 
-// Runs on video playback, marks video as watched if video gets to 90% or higher, WIP sends position to api
-function onVideoProgress(videoId) {
+// Generates a video tag with subtitles when passed a video id.
+function createVideoTag(videoId) {
+    var videoData = getVideoData(videoId);
+    var videoProgress = getVideoProgress(videoId).position;
+    var videoUrl = videoData.data.media_url;
+    var videoThumbUrl = videoData.data.vid_thumb_url;
+    
+    var subtitles = '';
+    var videoSubtitles = videoData.data.subtitles; // Array of subtitles
+    if (typeof(videoSubtitles) != 'undefined' && videoData.config.downloads.subtitle) {
+        for (var i = 0; i < videoSubtitles.length; i++) {
+            subtitles += `<track label="${videoSubtitles[i].name}" kind="subtitles" srclang="${videoSubtitles[i].lang}" src="${videoSubtitles[i].media_url}">`;
+        }
+    }
+
+    var videoTag = `
+    <video poster="${videoThumbUrl}" ontimeupdate="onVideoProgress()" onpause="onVideoPause()" controls autoplay width="100%" playsinline id="video-item">
+        <source src="${videoUrl}#t=${videoProgress}" type="video/mp4" id="video-source" videoid="${videoId}">
+        ${subtitles}
+    </video>
+    `;
+    return videoTag;
+}
+
+// Gets video tag
+function getVideoPlayer() {
     var videoElement = document.getElementById("video-item");
+    return videoElement;
+}
+
+// Gets the video source tag
+function getVideoPlayerVideoSource() {
+    var videoPlayerVideoSource = document.getElementById("video-source");
+    return videoPlayerVideoSource;
+}
+
+// Gets the current progress of the video currently in the player
+function getVideoPlayerCurrentTime() {
+    var videoElement = getVideoPlayer();
     if (videoElement != null) {
-        if ((videoElement.currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
-            // sendVideoProgress(videoId, videoElement.currentTime); // Groundwork for saving video position
-            if (((videoElement.currentTime / videoElement.duration) >= 0.90) && document.getElementById(videoId).className == "unseen-icon") {
+        return videoElement.currentTime;
+    }
+}
+
+// Gets the video id of the video currently in the player
+function getVideoPlayerVideoId() {
+    var videoPlayerVideoSource = getVideoPlayerVideoSource();
+    if (videoPlayerVideoSource != null) {
+        return videoPlayerVideoSource.getAttribute("videoid");
+    }
+}
+
+// Gets the duration of the video currently in the player
+function getVideoPlayerDuration() {
+    var videoElement = getVideoPlayer();
+    if (videoElement != null) {
+        return videoElement.duration;
+    }
+}
+
+// Gets current watch status of video based on watch button
+function getVideoPlayerWatchStatus() {
+    var videoId = getVideoPlayerVideoId();
+    var watched = false;
+    if(document.getElementById(videoId).className != "unseen-icon") {
+        watched = true;
+    }
+    return watched;
+}
+
+// Runs on video playback, marks video as watched if video gets to 90% or higher, sends position to api
+function onVideoProgress() {
+    var videoId = getVideoPlayerVideoId();
+    var currentTime = getVideoPlayerCurrentTime();
+    var duration = getVideoPlayerDuration();
+    if ((currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
+        postVideoProgress(videoId, currentTime);
+        if (!getVideoPlayerWatchStatus()) { // Check if video is already marked as watched
+            if (watchedThreshold(currentTime, duration)) {
                 isWatched(videoId);
             }
         }
     }
 }
 
-// Groundwork for saving video position
-function sendVideoProgress(videoId, videoProgress) {
-    var apiEndpoint = "/api/video/";
-    if (isNaN(videoProgress)) {
-        videoProgress = 0;
+function watchedThreshold(currentTime, duration) {
+    var watched = false;
+    if (duration <= 1800){ // If video is less than 30 min
+        if ((currentTime / duration) >= 0.90) { // Mark as watched at 90%
+            var watched = true;
+        }
+    } else { // If video is more than 30 min
+        if (currentTime >= (duration - 120)) { // Mark as watched if there is two minutes left
+            var watched = true;
+        }
     }
-    var data = {
-        "data": [{
-            "youtube_id": videoId,
-            "player": {
-                "progress": videoProgress 
-            }
-        }]
-    };
-    videoData = apiRequest(apiEndpoint, "POST", data);
+    return watched;
+}
+
+// Runs on video pause. Sends current position.
+function onVideoPause() {
+    var videoId = getVideoPlayerVideoId();
+    var currentTime = getVideoPlayerCurrentTime();
+    postVideoProgress(videoId, currentTime);
 }
 
 // Format numbers for frontend
@@ -435,25 +496,32 @@ function formatNumbers(number) {
     return numberFormatted;
 }
 
-// Gets video data in JSON format when passed video ID
+// Gets video data when passed video ID
 function getVideoData(videoId) {
     var apiEndpoint = "/api/video/" + videoId + "/";
-    videoData = apiRequest(apiEndpoint, "GET");
-    return videoData.data;
+    var videoData = apiRequest(apiEndpoint, "GET");
+    return videoData;
 }
 
-// Gets channel data in JSON format when passed channel ID
+// Gets channel data when passed channel ID
 function getChannelData(channelId) {
     var apiEndpoint = "/api/channel/" + channelId + "/";
-    channelData = apiRequest(apiEndpoint, "GET");
+    var channelData = apiRequest(apiEndpoint, "GET");
     return channelData.data;
 }
 
-// Gets playlist data in JSON format when passed playlist ID
+// Gets playlist data when passed playlist ID
 function getPlaylistData(playlistId) {
     var apiEndpoint = "/api/playlist/" + playlistId + "/";
-    playlistData = apiRequest(apiEndpoint, "GET");
+    var playlistData = apiRequest(apiEndpoint, "GET");
     return playlistData.data;
+}
+
+// Get video progress data when passed video ID
+function getVideoProgress(videoId) {
+    var apiEndpoint = "/api/video/" + videoId + "/progress/";
+    var videoProgress = apiRequest(apiEndpoint, "GET");
+    return videoProgress;
 }
 
 // Given an array of playlist ids it returns an array of subbed playlist ids from that list
@@ -467,18 +535,43 @@ function getSubbedPlaylists(videoPlaylists) {
     return subbedPlaylists;
 }
 
-// Makes api requests when passed an endpoint and method ("GET" or "POST")
+// Send video position when given video id and progress in seconds
+function postVideoProgress(videoId, videoProgress) {
+    var apiEndpoint = "/api/video/" + videoId + "/progress/";
+    if (!isNaN(videoProgress)) {
+        var data = {
+            "position": videoProgress
+        };
+        if (videoProgress == 0) {
+            apiRequest(apiEndpoint, "DELETE");
+            console.log("Deleting Video Progress for Video ID: " + videoId + ", Progress: " + videoProgress);
+        } else if (!getVideoPlayerWatchStatus()) {
+            apiRequest(apiEndpoint, "POST", data);
+            console.log("Saving Video Progress for Video ID: " + videoId + ", Progress: " + videoProgress);
+        }
+    }
+}
+
+// Makes api requests when passed an endpoint and method ("GET", "POST", "DELETE")
 function apiRequest(apiEndpoint, method, data) {
     const xhttp = new XMLHttpRequest();
     var sessionToken = getCookie("sessionid");
     xhttp.open(method, apiEndpoint, false);
+    xhttp.setRequestHeader("X-CSRFToken", getCookie("csrftoken")); // Used for video progress POST requests
     xhttp.setRequestHeader("Authorization", "Token " + sessionToken);
     xhttp.setRequestHeader("Content-Type", "application/json");
     xhttp.send(JSON.stringify(data));
     return JSON.parse(xhttp.responseText);
 }
 
+function getURL() {
+    return window.location.href.replace(window.location.pathname, "");
+}
+
 function removePlayer() {
+    var currentTime = getVideoPlayerCurrentTime();
+    var videoId = getVideoPlayerVideoId();
+    postVideoProgress(videoId, currentTime);
     var playerElement = document.getElementById('player');
     if (playerElement.hasChildNodes()) {
         var youtubeId = playerElement.childNodes[1].getAttribute("data-id");
