@@ -378,6 +378,7 @@ function insertVideoTag(videoData, videoProgress) {
 
 // Generates a video tag with subtitles when passed a video id.
 function createVideoTag(videoData, videoProgress) {
+    var videoId = videoData.data.youtube_id;
     var videoUrl = videoData.data.media_url;
     var videoThumbUrl = videoData.data.vid_thumb_url;
     var subtitles = '';
