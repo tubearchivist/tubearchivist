@@ -172,6 +172,9 @@ class ArchivistResultsView(ArchivistViewConfig):
     def match_progress(self):
         """add video progress to result context"""
         results = RedisArchivist().list_items(f"{self.user_id}:progress:")
+        if not results:
+            return
+
         progress = {i["youtube_id"]: i["position"] for i in results}
         for hit in self.context["results"]:
             video = hit["source"]
