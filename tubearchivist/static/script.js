@@ -537,7 +537,8 @@ function getSubbedPlaylists(videoPlaylists) {
 // Send video position when given video id and progress in seconds
 function postVideoProgress(videoId, videoProgress) {
     var apiEndpoint = "/api/video/" + videoId + "/progress/";
-    if (!isNaN(videoProgress)) {
+    var duartion = getVideoPlayerDuration();
+    if (!isNaN(videoProgress) && duartion != 'undefined') {
         var data = {
             "position": videoProgress
         };
