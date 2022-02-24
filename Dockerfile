@@ -16,7 +16,7 @@ RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recomm
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ] ; then \
     curl -s https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest \
         | grep browser_download_url \
-        | grep linux64-gpl-4.4.tar.xz \
+        | grep ".*master.*linux64.*tar.xz" \
         | cut -d '"' -f 4 \
         | xargs curl -L --output ffmpeg.tar.xz && \
         tar -xf ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ "ffmpeg" && \
