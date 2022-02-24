@@ -453,17 +453,25 @@ function onVideoProgress() {
     if ((currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
         postVideoProgress(videoId, currentTime);
         if (!getVideoPlayerWatchStatus()) { // Check if video is already marked as watched
-            if (duration <= 1800){ // If video is less than 30 min
-                if ((currentTime / duration) >= 0.90) { // Mark as watched at 90%
-                    isWatched(videoId);
-                }
-            } else {
-                if (currentTime >= (duration - 120)) {
-                    isWatched(videoId);
-                }
+            if (watchedThreshold(currentTime, duration)) {
+                isWatched(videoId);
             }
         }
     }
+}
+
+function watchedThreshold(currentTime, duration) {
+    var watched = false;
+    if (duration <= 1800){ // If video is less than 30 min
+        if ((currentTime / duration) >= 0.90) { // Mark as watched at 90%
+            var watched = true;
+        }
+    } else { // If video is more than 30 min
+        if (currentTime >= (duration - 120)) { // Mark as watched if there is two minutes left
+            var watched = true;
+        }
+    }
+    return watched;
 }
 
 // Runs on video pause. Sends current position.
