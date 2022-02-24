@@ -10,6 +10,7 @@ function sortChange(sortValue) {
 
 function isWatched(youtube_id) {
     postVideoProgress(youtube_id, 0); // Reset video progress on watched;
+    removeProgressBar(youtube_id);
     var payload = JSON.stringify({'watched': youtube_id});
     sendPost(payload);
     var seenIcon = document.createElement('img');
@@ -20,6 +21,10 @@ function isWatched(youtube_id) {
     seenIcon.setAttribute('onclick', "isUnwatched(this.id)");
     seenIcon.classList = 'seen-icon';
     document.getElementById(youtube_id).replaceWith(seenIcon);
+}
+
+function removeProgressBar(videoId) {
+    setProgressBar(videoId, 0, 1);
 }
 
 function isWatchedButton(button) {
@@ -570,8 +575,10 @@ function getURL() {
 
 function removePlayer() {
     var currentTime = getVideoPlayerCurrentTime();
+    var duration = getVideoPlayerDuration();
     var videoId = getVideoPlayerVideoId();
     postVideoProgress(videoId, currentTime);
+    setProgressBar(videoId, currentTime, duration);
     var playerElement = document.getElementById('player');
     if (playerElement.hasChildNodes()) {
         var youtubeId = playerElement.childNodes[1].getAttribute("data-id");
@@ -587,6 +594,14 @@ function removePlayer() {
     }
 }
 
+function setProgressBar(videoId, currentTime, duration) {
+    progressBar = document.getElementById("progress-" + videoId);
+    progressBarWidth = (currentTime / duration) * 100 + "%";
+    if (progressBar) {
+        console.log(progressBarWidth);
+        progressBar.style.width = progressBarWidth;
+    }
+}
 
 // multi search form
 function searchMulti(query) {
