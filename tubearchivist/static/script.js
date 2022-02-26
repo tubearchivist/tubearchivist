@@ -444,7 +444,7 @@ function getVideoPlayerDuration() {
 function getVideoPlayerWatchStatus() {
     var videoId = getVideoPlayerVideoId();
     var watched = false;
-    if(document.getElementById(videoId).className != "unseen-icon") {
+    if(document.getElementById(videoId) != null && document.getElementById(videoId).className != "unseen-icon") {
         watched = true;
     }
     return watched;
@@ -608,8 +608,10 @@ function removePlayer() {
 function setProgressBar(videoId, currentTime, duration) {
     progressBar = document.getElementById("progress-" + videoId);
     progressBarWidth = (currentTime / duration) * 100 + "%";
-    if (progressBar) {
+    if (progressBar && !getVideoPlayerWatchStatus()) {
         progressBar.style.width = progressBarWidth;
+    } else if (progressBar) {
+        progressBar.style.width = "0%";
     }
 }
 
