@@ -48,7 +48,13 @@ class ChannelSubscription:
         }
         if limit:
             obs["playlistend"] = self.channel_size
-        chan = yt_dlp.YoutubeDL(obs).extract_info(url, download=False)
+
+        try:
+            chan = yt_dlp.YoutubeDL(obs).extract_info(url, download=False)
+        except yt_dlp.utils.DownloadError:
+            print(f"{channel_id}: failed to extract videos, skipping.")
+            return False
+
         last_videos = [(i["id"], i["title"]) for i in chan["entries"]]
         return last_videos
 
@@ -66,9 +72,11 @@ class ChannelSubscription:
         for idx, channel in enumerate(all_channels):
             channel_id = channel["channel_id"]
             last_videos = self.get_last_youtube_videos(channel_id)
-            for video in last_videos:
-                if video[0] not in to_ignore:
-                    missing_videos.append(video[0])
+
+            if last_videos:
+                for video in last_videos:
+                    if video[0] not in to_ignore:
+                        missing_videos.append(video[0])
             # notify
             message = {
                 "status": "message:rescan",
