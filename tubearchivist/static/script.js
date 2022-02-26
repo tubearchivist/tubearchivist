@@ -10,6 +10,7 @@ function sortChange(sortValue) {
 
 function isWatched(youtube_id) {
     postVideoProgress(youtube_id, 0); // Reset video progress on watched;
+    removeProgressBar(youtube_id);
     var payload = JSON.stringify({'watched': youtube_id});
     sendPost(payload);
     var seenIcon = document.createElement('img');
@@ -20,6 +21,11 @@ function isWatched(youtube_id) {
     seenIcon.setAttribute('onclick', "isUnwatched(this.id)");
     seenIcon.classList = 'seen-icon';
     document.getElementById(youtube_id).replaceWith(seenIcon);
+}
+
+// Removes the progress bar when passed a video id
+function removeProgressBar(videoId) {
+    setProgressBar(videoId, 0, 1);
 }
 
 function isWatchedButton(button) {
@@ -298,9 +304,10 @@ function cancelDelete() {
 function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
     var videoData = getVideoData(videoId);
+    var videoProgress = getVideoProgress(videoId).position;
     var videoName = videoData.data.title;
 
-    var videoTag = createVideoTag(videoId);
+    var videoTag = createVideoTag(videoData, videoProgress);
 
     var playlist = '';
     var videoPlaylists = videoData.data.playlist; // Array of playlists the video is in
@@ -369,19 +376,17 @@ function createPlayer(button) {
 }
 
 // Add video tag to video page when passed a video id, function loaded on page load `video.html (115-117)`
-function insertVideoTag(videoId) {
-    var videoTag = createVideoTag(videoId);
+function insertVideoTag(videoData, videoProgress) {
+    var videoTag = createVideoTag(videoData, videoProgress);
     var videoMain = document.getElementsByClassName("video-main");
     videoMain[0].innerHTML = videoTag;
 }
 
-// Generates a video tag with subtitles when passed a video id.
-function createVideoTag(videoId) {
-    var videoData = getVideoData(videoId);
-    var videoProgress = getVideoProgress(videoId).position;
+// Generates a video tag with subtitles when passed videoData and videoProgress.
+function createVideoTag(videoData, videoProgress) {
+    var videoId = videoData.data.youtube_id;
     var videoUrl = videoData.data.media_url;
     var videoThumbUrl = videoData.data.vid_thumb_url;
-    
     var subtitles = '';
     var videoSubtitles = videoData.data.subtitles; // Array of subtitles
     if (typeof(videoSubtitles) != 'undefined' && videoData.config.downloads.subtitle) {
@@ -391,7 +396,7 @@ function createVideoTag(videoId) {
     }
 
     var videoTag = `
-    <video poster="${videoThumbUrl}" ontimeupdate="onVideoProgress()" onpause="onVideoPause()" controls autoplay width="100%" playsinline id="video-item">
+    <video poster="${videoThumbUrl}" ontimeupdate="onVideoProgress()" onpause="onVideoPause()" onended="onVideoEnded()" controls autoplay width="100%" playsinline id="video-item">
         <source src="${videoUrl}#t=${videoProgress}" type="video/mp4" id="video-source" videoid="${videoId}">
         ${subtitles}
     </video>
@@ -457,6 +462,14 @@ function onVideoProgress() {
                 isWatched(videoId);
             }
         }
+    }
+}
+
+// Runs on video end, marks video as watched
+function onVideoEnded() {
+    var videoId = getVideoPlayerVideoId();
+    if (!getVideoPlayerWatchStatus()) { // Check if video is already marked as watched
+        isWatched(videoId);
     }
 }
 
@@ -538,16 +551,17 @@ function getSubbedPlaylists(videoPlaylists) {
 // Send video position when given video id and progress in seconds
 function postVideoProgress(videoId, videoProgress) {
     var apiEndpoint = "/api/video/" + videoId + "/progress/";
-    if (!isNaN(videoProgress)) {
+    var duartion = getVideoPlayerDuration();
+    if (!isNaN(videoProgress) && duartion != 'undefined') {
         var data = {
             "position": videoProgress
         };
         if (videoProgress == 0) {
             apiRequest(apiEndpoint, "DELETE");
-            console.log("Deleting Video Progress for Video ID: " + videoId + ", Progress: " + videoProgress);
+            // console.log("Deleting Video Progress for Video ID: " + videoId + ", Progress: " + videoProgress);
         } else if (!getVideoPlayerWatchStatus()) {
             apiRequest(apiEndpoint, "POST", data);
-            console.log("Saving Video Progress for Video ID: " + videoId + ", Progress: " + videoProgress);
+            // console.log("Saving Video Progress for Video ID: " + videoId + ", Progress: " + videoProgress);
         }
     }
 }
@@ -564,14 +578,17 @@ function apiRequest(apiEndpoint, method, data) {
     return JSON.parse(xhttp.responseText);
 }
 
+// Gets origin URL
 function getURL() {
-    return window.location.href.replace(window.location.pathname, "");
+    return window.location.origin;
 }
 
 function removePlayer() {
     var currentTime = getVideoPlayerCurrentTime();
+    var duration = getVideoPlayerDuration();
     var videoId = getVideoPlayerVideoId();
     postVideoProgress(videoId, currentTime);
+    setProgressBar(videoId, currentTime, duration);
     var playerElement = document.getElementById('player');
     if (playerElement.hasChildNodes()) {
         var youtubeId = playerElement.childNodes[1].getAttribute("data-id");
@@ -587,6 +604,14 @@ function removePlayer() {
     }
 }
 
+// Sets the progress bar when passed a video id, video progress and video duration
+function setProgressBar(videoId, currentTime, duration) {
+    progressBar = document.getElementById("progress-" + videoId);
+    progressBarWidth = (currentTime / duration) * 100 + "%";
+    if (progressBar) {
+        progressBar.style.width = progressBarWidth;
+    }
+}
 
 // multi search form
 function searchMulti(query) {

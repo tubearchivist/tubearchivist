@@ -123,7 +123,7 @@ class VideoProgressView(ApiBaseView):
         """set progress position in redis"""
         position = request.data.get("position", 0)
         key = f"{request.user.id}:progress:{video_id}"
-        message = {"position": position}
+        message = {"position": position, "youtube_id": video_id}
         RedisArchivist().set_message(key, message, expire=False)
         self.response = request.data
 

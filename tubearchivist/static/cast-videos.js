@@ -43,6 +43,7 @@ function castVideoProgress(player) {
         var duration = player.duration;
         if ((currentTime % 10) <= 1.0 && currentTime != 0 && duration != 0) { // Check progress every 10 seconds or else progress is checked a few times a second
             postVideoProgress(videoId, currentTime);
+            setProgressBar(videoId, currentTime, duration);
             if (!getVideoPlayerWatchStatus()) { // Check if video is already marked as watched
                 if (watchedThreshold(currentTime, duration)) {
                     isWatched(videoId);
