@@ -175,6 +175,7 @@ class ArchivistResultsView(ArchivistViewConfig):
         if not results or not self.context["results"]:
             return
 
+        self.context["continue_vids"] = []
         progress = {i["youtube_id"]: i["position"] for i in results}
         for hit in self.context["results"]:
             video = hit["source"]
@@ -182,6 +183,7 @@ class ArchivistResultsView(ArchivistViewConfig):
                 played_sec = progress.get(video["youtube_id"])
                 total = video["player"]["duration"]
                 video["player"]["progress"] = 100 * (played_sec / total)
+                self.context["continue_vids"].append(video)
 
     def single_lookup(self, es_path):
         """retrieve a single item from url"""

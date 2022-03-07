@@ -370,16 +370,18 @@ button:hover {
 }
 
 /* video list */
-.video-list.grid {
+.video-list {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
     grid-gap: 1rem;
+    margin-top: 1rem;
+}
+
+.video-list.grid {
+    grid-template-columns: 1fr 1fr 1fr;
 }
 
 .video-list.list {
-    display: grid;
     grid-template-columns: unset;
-    grid-gap: 1rem;
 }
 
 .video-item {
