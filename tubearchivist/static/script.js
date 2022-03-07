@@ -8,20 +8,54 @@ function sortChange(sortValue) {
     }, 500);
 }
 
-function isWatched(youtube_id) {
-    postVideoProgress(youtube_id, 0); // Reset video progress on watched;
-    removeProgressBar(youtube_id);
-    var payload = JSON.stringify({'watched': youtube_id});
-    sendPost(payload);
-    var seenIcon = document.createElement('img');
-    seenIcon.setAttribute('src', "/static/img/icon-seen.svg");
-    seenIcon.setAttribute('alt', 'seen-icon');
-    seenIcon.setAttribute('id', youtube_id);
-    seenIcon.setAttribute('title', "Mark as unwatched");
-    seenIcon.setAttribute('onclick', "isUnwatched(this.id)");
-    seenIcon.classList = 'seen-icon';
-    document.getElementById(youtube_id).replaceWith(seenIcon);
+// Updates video watch status when passed a video id and it's current state (ex if the video was unwatched but you want to mark it as watched you will pass "unwatched")
+function updateVideoWatchStatus(videoId, videoCurrentWatchStatus) {
+    postVideoProgress(videoId, 0); // Reset video progress on watched/unwatched;
+    removeProgressBar(videoId);
+
+    if (videoCurrentWatchStatus == "watched") {
+        var watchStatusIndicator = createWatchStatusIndicator(videoId, "unwatched");
+        var payload = JSON.stringify({'un_watched': videoId});
+        sendPost(payload);
+    } else if (videoCurrentWatchStatus == "unwatched") {
+        var watchStatusIndicator = createWatchStatusIndicator(videoId, "watched");
+        var payload = JSON.stringify({'watched': videoId});
+        sendPost(payload);
+    }
+
+    var watchButtons = document.getElementsByClassName("watch-button");
+    for (let i = 0; i < watchButtons.length; i++) {
+        if (watchButtons[i].getAttribute("data-id") == videoId) {
+            watchButtons[i].outerHTML = watchStatusIndicator;
+        }
+    }
 }
+
+// Creates a watch status indicator when passed a video id and the videos watch status
+function createWatchStatusIndicator(videoId, videoWatchStatus) {
+    if (videoWatchStatus == "watched") {
+        var seen = "seen";
+        var title = "Mark as unwatched";
+    } else if (videoWatchStatus == "unwatched") {
+        var seen = "unseen";
+        var title = "Mark as watched";
+    }
+    var watchStatusIndicator = `<img src="/static/img/icon-${seen}.svg" alt="${seen}-icon" data-id="${videoId}" data-status="${videoWatchStatus}" onclick="updateVideoWatchStatus(this.getAttribute('data-id'), this.getAttribute('data-status'))" class="watch-button" title="${title}">`;
+    return watchStatusIndicator;
+}
+
+// function isWatched(youtube_id) {
+//     var payload = JSON.stringify({'watched': youtube_id});
+//     sendPost(payload);
+//     var seenIcon = document.createElement('img');
+//     seenIcon.setAttribute('src', "/static/img/icon-seen.svg");
+//     seenIcon.setAttribute('alt', 'seen-icon');
+//     seenIcon.setAttribute('id', youtube_id);
+//     seenIcon.setAttribute('title', "Mark as unwatched");
+//     seenIcon.setAttribute('onclick', "isUnwatched(this.id)");
+//     seenIcon.classList = 'seen-icon';
+//     document.getElementById(youtube_id).replaceWith(seenIcon);
+// }
 
 // Removes the progress bar when passed a video id
 function removeProgressBar(videoId) {
@@ -39,19 +73,19 @@ function isWatchedButton(button) {
     }, 1000);
 }
 
-function isUnwatched(youtube_id) {
-    postVideoProgress(youtube_id, 0); // Reset video progress on unwatched;
-    var payload = JSON.stringify({'un_watched': youtube_id});
-    sendPost(payload);
-    var unseenIcon = document.createElement('img');
-    unseenIcon.setAttribute('src', "/static/img/icon-unseen.svg");
-    unseenIcon.setAttribute('alt', 'unseen-icon');
-    unseenIcon.setAttribute('id', youtube_id);
-    unseenIcon.setAttribute('title', "Mark as watched");
-    unseenIcon.setAttribute('onclick', "isWatched(this.id)");
-    unseenIcon.classList = 'unseen-icon';
-    document.getElementById(youtube_id).replaceWith(unseenIcon);
-}
+// function isUnwatched(youtube_id) {
+//     postVideoProgress(youtube_id, 0); // Reset video progress on unwatched;
+//     var payload = JSON.stringify({'un_watched': youtube_id});
+//     sendPost(payload);
+//     var unseenIcon = document.createElement('img');
+//     unseenIcon.setAttribute('src', "/static/img/icon-unseen.svg");
+//     unseenIcon.setAttribute('alt', 'unseen-icon');
+//     unseenIcon.setAttribute('id', youtube_id);
+//     unseenIcon.setAttribute('title', "Mark as watched");
+//     unseenIcon.setAttribute('onclick', "isWatched(this.id)");
+//     unseenIcon.classList = 'unseen-icon';
+//     document.getElementById(youtube_id).replaceWith(unseenIcon);
+// }
 
 function unsubscribe(id_unsub) {
     var payload = JSON.stringify({'unsubscribe': id_unsub});
@@ -327,7 +361,7 @@ function createPlayer(button) {
     var channelName = videoData.data.channel.channel_name;
 
     removePlayer();
-    document.getElementById(videoId).outerHTML = ''; // Remove watch indicator from video info
+    // document.getElementById(videoId).outerHTML = ''; // Remove watch indicator from video info
 
     // If cast integration is enabled create cast button
     var castButton = '';
@@ -337,12 +371,11 @@ function createPlayer(button) {
 
     // Watched indicator
     if (videoData.data.player.watched) {
-        var playerState = "seen";
-        var watchedFunction = "Unwatched";
+        var watchStatusIndicator = createWatchStatusIndicator(videoId, "watched");
     } else {
-        var playerState = "unseen";
-        var watchedFunction = "Watched";  
+        var watchStatusIndicator = createWatchStatusIndicator(videoId, "unwatched");
     }
+    
 
     var playerStats = `<div class="thumb-icon player-stats"><img src="/static/img/icon-eye.svg" alt="views icon"><span>${videoViews}</span>`;
     if (videoData.data.stats.like_count) {
@@ -360,7 +393,7 @@ function createPlayer(button) {
         ${videoTag}
         <div class="player-title boxed-content">
             <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
-            <img src="/static/img/icon-${playerState}.svg" alt="${playerState}-icon" id="${videoId}" onclick="is${watchedFunction}(this.id)" class="${playerState}-icon" title="Mark as ${watchedFunction}">
+            ${watchStatusIndicator}
             ${castButton}
             ${playerStats}
             <div class="player-channel-playlist">
@@ -444,8 +477,12 @@ function getVideoPlayerDuration() {
 function getVideoPlayerWatchStatus() {
     var videoId = getVideoPlayerVideoId();
     var watched = false;
-    if(document.getElementById(videoId) != null && document.getElementById(videoId).className != "unseen-icon") {
-        watched = true;
+
+    var watchButtons = document.getElementsByClassName("watch-button");
+    for (let i = 0; i < watchButtons.length; i++) {
+        if (watchButtons[i].getAttribute("data-id") == videoId && watchButtons[i].getAttribute("data-status") == "watched") {
+            watched = true;
+        }
     }
     return watched;
 }
@@ -459,7 +496,7 @@ function onVideoProgress() {
         postVideoProgress(videoId, currentTime);
         if (!getVideoPlayerWatchStatus()) { // Check if video is already marked as watched
             if (watchedThreshold(currentTime, duration)) {
-                isWatched(videoId);
+                updateVideoWatchStatus(videoId, "unwatched");
             }
         }
     }
@@ -469,7 +506,7 @@ function onVideoProgress() {
 function onVideoEnded() {
     var videoId = getVideoPlayerVideoId();
     if (!getVideoPlayerWatchStatus()) { // Check if video is already marked as watched
-        isWatched(videoId);
+        updateVideoWatchStatus(videoId, "unwatched");
     }
 }
 
@@ -606,13 +643,21 @@ function removePlayer() {
 
 // Sets the progress bar when passed a video id, video progress and video duration
 function setProgressBar(videoId, currentTime, duration) {
-    progressBar = document.getElementById("progress-" + videoId);
-    progressBarWidth = (currentTime / duration) * 100 + "%";
-    if (progressBar && !getVideoPlayerWatchStatus()) {
-        progressBar.style.width = progressBarWidth;
-    } else if (progressBar) {
-        progressBar.style.width = "0%";
+    var progressBarWidth = (currentTime / duration) * 100 + "%";
+    var progressBars = document.getElementsByClassName("video-progress-bar");
+    for (let i = 0; i < progressBars.length; i++) {
+        if (progressBars[i].id == "progress-" + videoId) {
+            if (!getVideoPlayerWatchStatus()) {
+                progressBars[i].style.width = progressBarWidth;
+            } else {
+                progressBars[i].style.width = "0%";
+            }
+        }
     }
+
+    // progressBar = document.getElementById("progress-" + videoId);
+    
+    
 }
 
 // multi search form
@@ -681,9 +726,9 @@ function createVideo(video, viewStyle) {
     const videoPublished = video.published;
     const videoDuration = video.player.duration_str;
     if (video.player.watched) {
-        var playerState = "seen";
+        var watchStatusIndicator = createWatchStatusIndicator(videoId, "watched");
     } else {
-        var playerState = "unseen";
+        var watchStatusIndicator = createWatchStatusIndicator(videoId, "unwatched");
     };
     const channelId = video.channel.channel_id;
     const channelName = video.channel.channel_name;
@@ -701,7 +746,7 @@ function createVideo(video, viewStyle) {
     </a>
     <div class="video-desc ${viewStyle}">
         <div class="video-desc-player" id="video-info-${videoId}">
-                <img src="/static/img/icon-${playerState}.svg" alt="${playerState}-icon" id="${videoId}" onclick="isWatched(this.id)" class="${playerState}-icon">
+                ${watchStatusIndicator}
             <span>${videoPublished} | ${videoDuration}</span>
         </div>
         <div>
