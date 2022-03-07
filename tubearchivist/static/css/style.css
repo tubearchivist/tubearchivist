@@ -484,8 +484,7 @@ button:hover {
     align-items: center;
 }
 
-.unseen-icon,
-.seen-icon,
+.watch-button,
 .close-button {
     cursor: pointer;
     filter: var(--img-filter);
