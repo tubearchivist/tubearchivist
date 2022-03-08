@@ -27,9 +27,9 @@
                     <div class="video-desc {{ view_style }}">
                         <div class="video-desc-player" id="video-info-{{ video.youtube_id }}">
                             {% if video.player.watched %}
-                                <img src="{% static 'img/icon-seen.svg' %}" alt="seen-icon" data-id="{{ video.youtube_id }}" data-status="watched" onclick="updateVideoWatchStatus(this.getAttribute('data-id'), this.getAttribute('data-status'))" class="watch-button" title="Mark as unwatched">
+                                <img src="{% static 'img/icon-seen.svg' %}" alt="seen-icon" data-id="{{ video.youtube_id }}" data-status="watched" onclick="updateVideoWatchStatus(this)" class="watch-button" title="Mark as unwatched">
                             {% else %}
-                                <img src="{% static 'img/icon-unseen.svg' %}" alt="unseen-icon" data-id="{{ video.youtube_id }}" data-status="unwatched" onclick="updateVideoWatchStatus(this.getAttribute('data-id'), this.getAttribute('data-status'))" class="watch-button" title="Mark as watched">
+                                <img src="{% static 'img/icon-unseen.svg' %}" alt="unseen-icon" data-id="{{ video.youtube_id }}" data-status="unwatched" onclick="updateVideoWatchStatus(this)" class="watch-button" title="Mark as watched">
                             {% endif %}
                             <span>{{ video.published }} | {{ video.player.duration_str }}</span>
                         </div>
@@ -103,9 +103,9 @@
                     <div class="video-desc {{ view_style }}">
                         <div class="video-desc-player" id="video-info-{{ video.source.youtube_id }}">
                             {% if video.source.player.watched %}
-                                <img src="{% static 'img/icon-seen.svg' %}" alt="seen-icon" data-id="{{ video.source.youtube_id }}" data-status="watched" onclick="updateVideoWatchStatus(this.getAttribute('data-id'), this.getAttribute('data-status'))" class="watch-button" title="Mark as unwatched">
+                                <img src="{% static 'img/icon-seen.svg' %}" alt="seen-icon" data-id="{{ video.source.youtube_id }}" data-status="watched" onclick="updateVideoWatchStatus(this)" class="watch-button" title="Mark as unwatched">
                             {% else %}
-                                <img src="{% static 'img/icon-unseen.svg' %}" alt="unseen-icon" data-id="{{ video.source.youtube_id }}" data-status="unwatched" onclick="updateVideoWatchStatus(this.getAttribute('data-id'), this.getAttribute('data-status'))" class="watch-button" title="Mark as watched">
+                                <img src="{% static 'img/icon-unseen.svg' %}" alt="unseen-icon" data-id="{{ video.source.youtube_id }}" data-status="unwatched" onclick="updateVideoWatchStatus(this)" class="watch-button" title="Mark as watched">
                             {% endif %}
                             <span>{{ video.source.published }} | {{ video.source.player.duration_str }}</span>
                         </div>
