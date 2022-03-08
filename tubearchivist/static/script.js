@@ -9,7 +9,14 @@ function sortChange(sortValue) {
 }
 
 // Updates video watch status when passed a video id and it's current state (ex if the video was unwatched but you want to mark it as watched you will pass "unwatched")
-function updateVideoWatchStatus(videoId, videoCurrentWatchStatus) {
+function updateVideoWatchStatus(input1, videoCurrentWatchStatus) {
+    if (videoCurrentWatchStatus) {
+        videoId = input1;
+    } else if (input1.getAttribute("data-id")) {
+        videoId = input1.getAttribute("data-id");
+        videoCurrentWatchStatus = input1.getAttribute("data-status");
+    }
+
     postVideoProgress(videoId, 0); // Reset video progress on watched/unwatched;
     removeProgressBar(videoId);
 
@@ -40,7 +47,7 @@ function createWatchStatusIndicator(videoId, videoWatchStatus) {
         var seen = "unseen";
         var title = "Mark as watched";
     }
-    var watchStatusIndicator = `<img src="/static/img/icon-${seen}.svg" alt="${seen}-icon" data-id="${videoId}" data-status="${videoWatchStatus}" onclick="updateVideoWatchStatus(this.getAttribute('data-id'), this.getAttribute('data-status'))" class="watch-button" title="${title}">`;
+    var watchStatusIndicator = `<img src="/static/img/icon-${seen}.svg" alt="${seen}-icon" data-id="${videoId}" data-status="${videoWatchStatus}" onclick="updateVideoWatchStatus(this)" class="watch-button" title="${title}">`;
     return watchStatusIndicator;
 }
 
