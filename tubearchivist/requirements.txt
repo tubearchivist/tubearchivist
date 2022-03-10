@@ -9,4 +9,4 @@ requests==2.27.1
 ryd-client==0.0.3
 uWSGI==2.0.20
 whitenoise==6.0.0
-yt_dlp==2022.2.4
+yt_dlp==2022.3.8.2
