@@ -114,12 +114,13 @@ class YoutubeSubtitle:
         for subtitle in relevant_subtitles:
             dest_path = os.path.join(videos_base, subtitle["media_url"])
             source = subtitle["source"]
+            lang = subtitle.get("lang")
             response = requests.get(subtitle["url"])
             if not response.ok:
                 print(f"{self.video.youtube_id}: failed to download subtitle")
                 continue
 
-            parser = SubtitleParser(response.text, subtitle.get("lang"))
+            parser = SubtitleParser(response.text, lang, source)
             parser.process()
             subtitle_str = parser.get_subtitle_str()
             self._write_subtitle_file(dest_path, subtitle_str)
@@ -144,15 +145,20 @@ class YoutubeSubtitle:
 class SubtitleParser:
     """parse subtitle str from youtube"""
 
-    def __init__(self, subtitle_str, lang):
+    def __init__(self, subtitle_str, lang, source):
         self.subtitle_raw = json.loads(subtitle_str)
         self.lang = lang
+        self.source = source
         self.all_cues = False
 
     def process(self):
         """extract relevant que data"""
+        all_events = self.subtitle_raw.get("events")
+        if self.source == "auto":
+            all_events = self._flat_auto_caption(all_events)
+
         self.all_cues = []
-        for idx, event in enumerate(self.subtitle_raw.get("events")):
+        for idx, event in enumerate(all_events):
             cue = {
                 "start": self.ms_conv(event["tStartMs"]),
                 "end": self.ms_conv(event["tStartMs"] + event["dDurationMs"]),
@@ -160,6 +166,22 @@ class SubtitleParser:
                 "idx": idx + 1,
             }
             self.all_cues.append(cue)
+
+    @staticmethod
+    def _flat_auto_caption(all_events):
+        """flatten autocaption segments"""
+        flatten = []
+        for event in all_events:
+            if "segs" not in event.keys():
+                continue
+            text = "".join([i.get("utf8") for i in event.get("segs")])
+            if not text.strip():
+                continue
+
+            event.update({"segs": [{"utf8": text}]})
+            flatten.append(event)
+
+        return flatten
 
     @staticmethod
     def ms_conv(ms):
