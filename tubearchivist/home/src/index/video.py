@@ -23,7 +23,7 @@ class YoutubeSubtitle:
         self.video = video
         self.languages = False
 
-    def sub_conf_parse(self):
+    def _sub_conf_parse(self):
         """add additional conf values to self"""
         languages_raw = self.video.config["downloads"]["subtitle"]
         if languages_raw:
@@ -31,26 +31,26 @@ class YoutubeSubtitle:
 
     def get_subtitles(self):
         """check what to do"""
-        self.sub_conf_parse()
+        self._sub_conf_parse()
         if not self.languages:
             # no subtitles
             return False
 
         relevant_subtitles = []
         for lang in self.languages:
-            user_sub = self.get_user_subtitles(lang)
+            user_sub = self._get_user_subtitles(lang)
             if user_sub:
                 relevant_subtitles.append(user_sub)
                 continue
 
             if self.video.config["downloads"]["subtitle_source"] == "auto":
-                auto_cap = self.get_auto_caption(lang)
+                auto_cap = self._get_auto_caption(lang)
                 if auto_cap:
                     relevant_subtitles.append(auto_cap)
 
         return relevant_subtitles
 
-    def get_auto_caption(self, lang):
+    def _get_auto_caption(self, lang):
         """get auto_caption subtitles"""
         print(f"{self.video.youtube_id}-{lang}: get auto generated subtitles")
         all_subtitles = self.video.youtube_meta.get("automatic_captions")
@@ -87,7 +87,7 @@ class YoutubeSubtitle:
 
         return all_subtitles
 
-    def get_user_subtitles(self, lang):
+    def _get_user_subtitles(self, lang):
         """get subtitles uploaded from channel owner"""
         print(f"{self.video.youtube_id}-{lang}: get user uploaded subtitles")
         all_subtitles = self._normalize_lang()
@@ -160,8 +160,8 @@ class SubtitleParser:
         self.all_cues = []
         for idx, event in enumerate(all_events):
             cue = {
-                "start": self.ms_conv(event["tStartMs"]),
-                "end": self.ms_conv(event["tStartMs"] + event["dDurationMs"]),
+                "start": self._ms_conv(event["tStartMs"]),
+                "end": self._ms_conv(event["tStartMs"] + event["dDurationMs"]),
                 "text": "".join([i.get("utf8") for i in event["segs"]]),
                 "idx": idx + 1,
             }
@@ -184,7 +184,7 @@ class SubtitleParser:
         return flatten
 
     @staticmethod
-    def ms_conv(ms):
+    def _ms_conv(ms):
         """convert ms to timestamp"""
         hours = str((ms // (1000 * 60 * 60)) % 24).zfill(2)
         minutes = str((ms // (1000 * 60)) % 60).zfill(2)
@@ -206,7 +206,7 @@ class SubtitleParser:
 
     def create_bulk_import(self, video, source):
         """subtitle lines for es import"""
-        documents = self.create_documents(video, source)
+        documents = self._create_documents(video, source)
         bulk_list = []
 
         for document in documents:
@@ -220,9 +220,9 @@ class SubtitleParser:
 
         return query_str
 
-    def create_documents(self, video, source):
+    def _create_documents(self, video, source):
         """process documents"""
-        documents = self.chunk_list(video.youtube_id)
+        documents = self._chunk_list(video.youtube_id)
         channel = video.json_data.get("channel")
         meta_dict = {
             "youtube_id": video.youtube_id,
@@ -238,7 +238,7 @@ class SubtitleParser:
 
         return documents
 
-    def chunk_list(self, youtube_id):
+    def _chunk_list(self, youtube_id):
         """join cues for bulk import"""
         chunk_list = []
 
