@@ -178,6 +178,14 @@ class SubtitleParser:
             if not text.strip():
                 continue
 
+            if flatten:
+                # fix overlapping retiming issue
+                last_end = flatten[-1]["tStartMs"] + flatten[-1]["dDurationMs"]
+                if event["tStartMs"] < last_end:
+                    joined = flatten[-1]["segs"][0]["utf8"] + "\n" + text
+                    flatten[-1]["segs"][0]["utf8"] = joined
+                    continue
+
             event.update({"segs": [{"utf8": text}]})
             flatten.append(event)
 
