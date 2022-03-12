@@ -39,6 +39,16 @@
                 "channel_last_refresh": {
                     "type": "date",
                     "format": "epoch_second"
+                },
+                "channel_overwrites": {
+                    "properties": {
+                        "format": {
+                            "type": "text"
+                        },
+                        "autodelete_days": {
+                            "type": "long"
+                        }
+                    }
                 }
             },
             "expected_set": {
@@ -102,6 +112,16 @@
                         "channel_last_refresh": {
                             "type": "date",
                             "format": "epoch_second"
+                        },
+                        "channel_overwrites": {
+                            "properties": {
+                                "format": {
+                                    "type": "text"
+                                },
+                                "autodelete_days": {
+                                    "type": "long"
+                                }
+                            }
                         }
                     }
                 },

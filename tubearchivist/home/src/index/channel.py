@@ -267,3 +267,19 @@ class YoutubeChannel(YouTubeItem):
         }
         all_playlists = IndexPaginate("ta_playlist", data).get_results()
         return all_playlists
+
+    def get_overwrites(self):
+        """get all per channel overwrites"""
+        return self.json_data.get("channel_overwrites", False)
+
+    def set_overwrites(self, overwrites):
+        """set per channel overwrites"""
+        valid_keys = ["format", "autodelete_days"]
+        for key in overwrites:
+            if key not in valid_keys:
+                raise ValueError(f"invalid overwrite key: {key}")
+
+        if "channel_overwrites" in self.json_data.keys():
+            self.json_data["channel_overwrites"].update(overwrites)
+        else:
+            self.json_data["channel_overwrites"] = overwrites
