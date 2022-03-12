@@ -183,6 +183,8 @@ class ArchivistResultsView(ArchivistViewConfig):
             if video["youtube_id"] in in_progress:
                 played_sec = in_progress.get(video["youtube_id"])
                 total = video["player"]["duration"]
+                if not total:
+                    total = played_sec * 2
                 video["player"]["progress"] = 100 * (played_sec / total)
 
     def get_in_progress(self, results):
@@ -202,6 +204,8 @@ class ArchivistResultsView(ArchivistViewConfig):
             matched = [i for i in results if i["youtube_id"] == youtube_id]
             played_sec = matched[0]["position"]
             total = video["source"]["player"]["duration"]
+            if not total:
+                total = matched[0].get("position") * 2
             video["source"]["player"]["progress"] = 100 * (played_sec / total)
 
         return videos
