@@ -191,6 +191,7 @@ class ArchivistResultsView(ArchivistViewConfig):
         data = {
             "size": self.default_conf["archive"]["page_size"],
             "query": {"bool": {"should": ids}},
+            "sort": [{"published": {"order": "desc"}}],
         }
         search = SearchHandler(
             "ta_video/_search", self.default_conf, data=data
