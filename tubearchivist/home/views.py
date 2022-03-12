@@ -175,15 +175,35 @@ class ArchivistResultsView(ArchivistViewConfig):
         if not results or not self.context["results"]:
             return
 
-        self.context["continue_vids"] = []
-        progress = {i["youtube_id"]: i["position"] for i in results}
+        self.context["continue_vids"] = self.get_in_progress(results)
+
+        in_progress = {i["youtube_id"]: i["position"] for i in results}
         for hit in self.context["results"]:
             video = hit["source"]
-            if video["youtube_id"] in progress:
-                played_sec = progress.get(video["youtube_id"])
+            if video["youtube_id"] in in_progress:
+                played_sec = in_progress.get(video["youtube_id"])
                 total = video["player"]["duration"]
                 video["player"]["progress"] = 100 * (played_sec / total)
-                self.context["continue_vids"].append(video)
+
+    def get_in_progress(self, results):
+        """get all videos in progress"""
+        ids = [{"match": {"youtube_id": i.get("youtube_id")}} for i in results]
+        data = {
+            "size": self.default_conf["archive"]["page_size"],
+            "query": {"bool": {"should": ids}},
+        }
+        search = SearchHandler(
+            "ta_video/_search", self.default_conf, data=data
+        )
+        videos = search.get_data()
+        for video in videos:
+            youtube_id = video["source"]["youtube_id"]
+            matched = [i for i in results if i["youtube_id"] == youtube_id]
+            played_sec = matched[0]["position"]
+            total = video["source"]["player"]["duration"]
+            video["source"]["player"]["progress"] = 100 * (played_sec / total)
+
+        return videos
 
     def single_lookup(self, es_path):
         """retrieve a single item from url"""
