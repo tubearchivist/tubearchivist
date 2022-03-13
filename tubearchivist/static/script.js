@@ -431,7 +431,12 @@ function createVideoTag(videoData, videoProgress) {
     var videoSubtitles = videoData.data.subtitles; // Array of subtitles
     if (typeof(videoSubtitles) != 'undefined' && videoData.config.downloads.subtitle) {
         for (var i = 0; i < videoSubtitles.length; i++) {
-            subtitles += `<track label="${videoSubtitles[i].name}" kind="subtitles" srclang="${videoSubtitles[i].lang}" src="${videoSubtitles[i].media_url}">`;
+            console.log(videoSubtitles[i]);
+            let label = videoSubtitles[i].name;
+            if (videoSubtitles[i].source == "auto") {
+                label += " - auto";
+            }
+            subtitles += `<track label="${label}" kind="subtitles" srclang="${videoSubtitles[i].lang}" src="${videoSubtitles[i].media_url}">`;
         }
     }
 
