@@ -61,9 +61,19 @@
         <div class="info-box-item">
             <form action="/channel/{{ channel_info.channel_id }}/" method="POST">
                 {% csrf_token %}
-                <p>Download format</p>
+                <p>Download format: <span class="settings-current">
+                    {% if channel_info.channel_overwrites.download_format %}
+                        {{ channel_info.channel_overwrites.download_format }}
+                    {% else %}
+                        False
+                    {% endif %}</span></p>
                 {{ channel_overwrite_form.download_format }}<br>
-                <p>Auto delete videos after x days</p>
+                <p>Auto delete videos after x days: <span class="settings-current">
+                    {% if channel_info.channel_overwrites.autodelete_days %}
+                        {{ channel_info.channel_overwrites.autodelete_days }}
+                    {% else %}
+                        False
+                    {% endif %}</span></p>
                 {{ channel_overwrite_form.autodelete_days }}<br>
                 <button type="submit">Save</button>
             </form>
