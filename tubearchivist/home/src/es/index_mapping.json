@@ -42,7 +42,7 @@
                 },
                 "channel_overwrites": {
                     "properties": {
-                        "format": {
+                        "download_format": {
                             "type": "text"
                         },
                         "autodelete_days": {
@@ -115,7 +115,7 @@
                         },
                         "channel_overwrites": {
                             "properties": {
-                                "format": {
+                                "download_format": {
                                     "type": "text"
                                 },
                                 "autodelete_days": {
