@@ -57,6 +57,18 @@
             </div>
         </div>
     </div>
+    <div class="info-box">
+        <div class="info-box-item">
+            <form action="/channel/{{ channel_info.channel_id }}/" method="POST">
+                {% csrf_token %}
+                <p>Download format</p>
+                {{ channel_overwrite_form.download_format }}<br>
+                <p>Auto delete videos after x days</p>
+                {{ channel_overwrite_form.autodelete_days }}<br>
+                <button type="submit">Save</button>
+            </form>
+        </div>
+    </div>
     {% if channel_info.channel_description %}
         <div class="info-box-item description-box">
             <p>Description: <button onclick="textReveal()" id="text-reveal-button">Show</button></p>

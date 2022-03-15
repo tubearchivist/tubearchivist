@@ -19,6 +19,7 @@ from home.src.frontend.api_calls import PostData
 from home.src.frontend.forms import (
     AddToQueueForm,
     ApplicationSettingsForm,
+    ChannelOverwriteForm,
     CustomAuthForm,
     MultiSearchForm,
     SchedulerSettingsForm,
@@ -27,6 +28,7 @@ from home.src.frontend.forms import (
     UserSettingsForm,
 )
 from home.src.frontend.searching import SearchHandler
+from home.src.index.channel import channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.config import AppConfig, ScheduleBuilder
@@ -412,6 +414,7 @@ class ChannelIdView(ArchivistResultsView):
             {
                 "title": "Channel: " + channel_name,
                 "channel_info": channel_info,
+                "channel_overwrite_form": ChannelOverwriteForm,
             }
         )
 
@@ -431,6 +434,19 @@ class ChannelIdView(ArchivistResultsView):
         if self.context["hide_watched"]:
             to_append = {"term": {"player.watched": {"value": False}}}
             self.data["query"]["bool"]["must"].append(to_append)
+
+    @staticmethod
+    def post(request, channel_id):
+        """handle post request"""
+        print(f"handle post from {channel_id}")
+        channel_overwrite_form = ChannelOverwriteForm(request.POST)
+        if channel_overwrite_form.is_valid():
+            overwrites = channel_overwrite_form.cleaned_data
+            print(f"{channel_id}: set overwrites {overwrites}")
+            channel_overwrites(channel_id, overwrites=overwrites)
+
+        sleep(1)
+        return redirect("channel_id", channel_id, permanent=True)
 
 
 class ChannelView(ArchivistResultsView):

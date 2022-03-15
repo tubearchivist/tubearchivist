@@ -178,3 +178,10 @@ class SubscribeToPlaylistForm(forms.Form):
             }
         ),
     )
+
+
+class ChannelOverwriteForm(forms.Form):
+    """custom overwrites for channel settings"""
+
+    download_format = forms.CharField(label=False, required=False)
+    autodelete_days = forms.IntegerField(label=False, required=False)

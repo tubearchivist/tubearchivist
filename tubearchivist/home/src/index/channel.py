@@ -274,7 +274,7 @@ class YoutubeChannel(YouTubeItem):
 
     def set_overwrites(self, overwrites):
         """set per channel overwrites"""
-        valid_keys = ["format", "autodelete_days"]
+        valid_keys = ["download_format", "autodelete_days"]
         for key in overwrites:
             if key not in valid_keys:
                 raise ValueError(f"invalid overwrite key: {key}")
@@ -283,3 +283,12 @@ class YoutubeChannel(YouTubeItem):
             self.json_data["channel_overwrites"].update(overwrites)
         else:
             self.json_data["channel_overwrites"] = overwrites
+
+
+def channel_overwrites(channel_id, overwrites):
+    """collection to overwrite settings per channel"""
+    channel = YoutubeChannel(channel_id)
+    channel.build_json()
+    channel.set_overwrites(overwrites)
+    channel.upload_to_es()
+    channel.sync_to_videos()
