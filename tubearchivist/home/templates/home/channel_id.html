@@ -75,6 +75,13 @@
                         False
                     {% endif %}</span></p>
                 {{ channel_overwrite_form.autodelete_days }}<br>
+                <p>Index playlists: <span class="settings-current">
+                    {% if channel_info.channel_overwrites.index_playlists %}
+                        {{ channel_info.channel_overwrites.index_playlists }}
+                    {% else %}
+                        False
+                    {% endif %}</span></p>
+                {{ channel_overwrite_form.index_playlists }}<br>
                 <button type="submit">Save</button>
             </form>
         </div>

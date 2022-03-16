@@ -47,6 +47,9 @@
                         },
                         "autodelete_days": {
                             "type": "long"
+                        },
+                        "index_playlists": {
+                            "type": "boolean"
                         }
                     }
                 }
@@ -120,6 +123,9 @@
                                 },
                                 "autodelete_days": {
                                     "type": "long"
+                                },
+                                "index_playlists": {
+                                    "type": "boolean"
                                 }
                             }
                         }
