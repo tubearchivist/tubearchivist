@@ -283,6 +283,9 @@ class YoutubeChannel(YouTubeItem):
             if value in [0, "0"]:
                 del to_write[key]
                 continue
+            if value == "1":
+                to_write[key] = True
+                continue
             if value:
                 to_write.update({key: value})
 
