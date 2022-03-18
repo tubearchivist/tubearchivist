@@ -32,6 +32,7 @@ class VideoDownloader:
 
     def __init__(self, youtube_id_list=False):
         self.obs = False
+        self.video_overwrites = False
         self.youtube_id_list = youtube_id_list
         self.config = AppConfig().config
         self._build_obs()
@@ -39,6 +40,11 @@ class VideoDownloader:
 
     def run_queue(self):
         """setup download queue in redis loop until no more items"""
+        pending = PendingList()
+        pending.get_download()
+        pending.get_channels()
+        self.video_overwrites = pending.video_overwrites
+
         queue = RedisQueue("dl_queue")
 
         limit_queue = self.config["downloads"]["limit_count"]
@@ -182,16 +188,31 @@ class VideoDownloader:
 
         self.obs["postprocessors"] = postprocessors
 
+    def get_format_overwrites(self, youtube_id):
+        """get overwrites from single video"""
+        overwrites = self.video_overwrites.get(youtube_id, False)
+        if overwrites:
+            return overwrites.get("download_format", False)
+
+        return False
+
     def _dl_single_vid(self, youtube_id):
         """download single video"""
+        obs = self.obs.copy()
+        format_overwrite = self.get_format_overwrites(youtube_id)
+        if format_overwrite:
+            obs["format"] = format_overwrite
+
         dl_cache = self.config["application"]["cache_dir"] + "/download/"
 
         # check if already in cache to continue from there
         all_cached = ignore_filelist(os.listdir(dl_cache))
         for file_name in all_cached:
             if youtube_id in file_name:
-                self.obs["outtmpl"] = os.path.join(dl_cache, file_name)
-        with yt_dlp.YoutubeDL(self.obs) as ydl:
+                obs["outtmpl"] = os.path.join(dl_cache, file_name)
+
+        print(obs)
+        with yt_dlp.YoutubeDL(obs) as ydl:
             try:
                 ydl.download([youtube_id])
             except yt_dlp.utils.DownloadError:
@@ -261,6 +282,7 @@ class VideoDownloader:
         print("sync playlists")
         self._add_subscribed_channels()
         pending = PendingList()
+        pending.get_download()
         pending.get_indexed()
         all_youtube_ids = [i["youtube_id"] for i in pending.all_videos]
         for id_c, channel_id in enumerate(self.channels):
