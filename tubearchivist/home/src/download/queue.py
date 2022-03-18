@@ -28,6 +28,7 @@ class PendingIndex:
         self.all_videos = False
         self.all_channels = False
         self.all_overwrites = False
+        self.video_overwrites = False
         self.to_skip = False
 
     def get_download(self):
@@ -76,6 +77,18 @@ class PendingIndex:
                 self.all_overwrites.update(
                     {channel_id: channel.get("channel_overwrites")}
                 )
+
+        self._map_overwrites()
+
+    def _map_overwrites(self):
+        """map video ids to channel ids overwrites"""
+        self.video_overwrites = {}
+        for video in self.all_pending:
+            video_id = video["youtube_id"]
+            channel_id = video["channel_id"]
+            overwrites = self.all_overwrites.get(channel_id, False)
+            if overwrites:
+                self.video_overwrites.update({video_id: overwrites})
 
 
 class PendingInteract:
