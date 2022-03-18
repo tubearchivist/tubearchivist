@@ -266,8 +266,9 @@ class Reindex:
         # playlist
         print(f"reindexing {len(self.all_playlist_ids)} playlists")
         if self.all_playlist_ids:
-            all_indexed = PendingList().get_all_indexed()
-            all_indexed_ids = [i["youtube_id"] for i in all_indexed]
+            handler = PendingList()
+            handler.get_indexed()
+            all_indexed_ids = [i["youtube_id"] for i in handler.all_videos]
             for playlist_id in self.all_playlist_ids:
                 self.reindex_single_playlist(playlist_id, all_indexed_ids)
                 if self.sleep_interval:

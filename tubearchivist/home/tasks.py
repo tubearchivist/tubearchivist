@@ -63,9 +63,13 @@ def update_subscribed():
             missing_from_playlists = playlist_handler.find_missing()
             missing = missing_from_channels + missing_from_playlists
             if missing:
-                pending_handler = PendingList()
-                all_videos_added = pending_handler.add_to_pending(missing)
-                ThumbManager().download_vid(all_videos_added)
+                youtube_ids = [
+                    {"type": "video", "url": i["youtube_id"]} for i in missing
+                ]
+                pending_handler = PendingList(youtube_ids=youtube_ids)
+                pending_handler.parse_url_list()
+                pending_handler.add_to_pending()
+
         else:
             print("Did not acquire rescan lock.")
 
@@ -128,19 +132,9 @@ def download_single(youtube_id):
 @shared_task
 def extrac_dl(youtube_ids):
     """parse list passed and add to pending"""
-    pending_handler = PendingList()
-    missing_videos = pending_handler.parse_url_list(youtube_ids)
-    all_videos_added = pending_handler.add_to_pending(missing_videos)
-    missing_playlists = pending_handler.missing_from_playlists
-
-    thumb_handler = ThumbManager()
-    if missing_playlists:
-        new_thumbs = PlaylistSubscription().process_url_str(
-            missing_playlists, subscribed=False
-        )
-        thumb_handler.download_playlist(new_thumbs)
-
-    thumb_handler.download_vid(all_videos_added)
+    pending_handler = PendingList(youtube_ids=youtube_ids)
+    pending_handler.parse_url_list()
+    pending_handler.add_to_pending()
 
 
 @shared_task(name="check_reindex")
@@ -283,8 +277,9 @@ def index_channel_playlists(channel_id):
         print(f"no playlists found for channel {channel_id}")
         return
 
-    all_indexed = PendingList().get_all_indexed()
-    all_youtube_ids = [i["youtube_id"] for i in all_indexed]
+    handler = PendingList()
+    handler.get_indexed()
+    all_youtube_ids = [i["youtube_id"] for i in handler.all_videos]
 
     for idx, (playlist_id, playlist_title) in enumerate(all_playlists):
         # notify

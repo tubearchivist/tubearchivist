@@ -75,8 +75,9 @@ class VideoDownloader:
             "message": "Scanning your download queue.",
         }
         RedisArchivist().set_message("message:download", mess_dict)
-        all_pending, _ = PendingList().get_all_pending()
-        to_add = [i["youtube_id"] for i in all_pending]
+        pending = PendingList()
+        pending.get_download()
+        to_add = [i["youtube_id"] for i in pending.all_pending]
         if not to_add:
             # there is nothing pending
             print("download queue is empty")
@@ -259,8 +260,9 @@ class VideoDownloader:
         """look for playlist needing to update"""
         print("sync playlists")
         self._add_subscribed_channels()
-        all_indexed = PendingList().get_all_indexed()
-        all_youtube_ids = [i["youtube_id"] for i in all_indexed]
+        pending = PendingList()
+        pending.get_indexed()
+        all_youtube_ids = [i["youtube_id"] for i in pending.all_videos]
         for id_c, channel_id in enumerate(self.channels):
             playlists = YoutubeChannel(channel_id).get_indexed_playlists()
             all_playlist_ids = [i["playlist_id"] for i in playlists]
@@ -302,15 +304,17 @@ class VideoDownloader:
             "query": {"range": {"player.watched_date": {"lte": now_lte}}},
             "sort": [{"player.watched_date": {"order": "asc"}}],
         }
-        all_to_delete = IndexPaginate("ta_video", data).get_results()
-        all_youtube_ids = [i["youtube_id"] for i in all_to_delete]
-        if not all_youtube_ids:
+        to_delete = IndexPaginate("ta_video", data).get_results()
+        if not to_delete:
             return
 
-        for youtube_id in all_youtube_ids:
+        for video in to_delete:
+            youtube_id = video["youtube_id"]
             print(f"autodelete {youtube_id}")
             YoutubeVideo(youtube_id).delete_media_file()
 
         print("add deleted to ignore list")
-        pending_handler = PendingList()
-        pending_handler.add_to_pending(all_youtube_ids, ignore=True)
+        vids = [{"type": "video", "url": i["youtube_id"]} for i in to_delete]
+        pending = PendingList(youtube_ids=vids)
+        pending.parse_url_list()
+        pending.add_to_pending(status="ignore")

@@ -58,11 +58,12 @@ class ThumbManager:
     def get_needed_thumbs(self, missing_only=False):
         """get a list of all missing thumbnails"""
         all_thumbs = self.get_all_thumbs()
-        all_indexed = queue.PendingList().get_all_indexed()
-        all_in_queue, all_ignored = queue.PendingList().get_all_pending()
+
+        pending = queue.PendingList()
+        pending.get_indexed()
 
         needed_thumbs = []
-        for video in all_indexed:
+        for video in pending.all_videos:
             youtube_id = video["youtube_id"]
             thumb_url = video["vid_thumb_url"]
             if missing_only:
@@ -71,7 +72,9 @@ class ThumbManager:
             else:
                 needed_thumbs.append((youtube_id, thumb_url))
 
-        for video in all_in_queue + all_ignored:
+        pending.get_download()
+
+        for video in pending.all_pending + pending.all_ignored:
             youtube_id = video["youtube_id"]
             thumb_url = video["vid_thumb_url"]
             if missing_only:
@@ -276,9 +279,11 @@ class ThumbManager:
 
     def get_thumb_list(self):
         """get list of mediafiles and matching thumbnails"""
-        all_indexed = queue.PendingList().get_all_indexed()
+        pending = queue.PendingList()
+        pending.get_indexed()
+
         video_list = []
-        for video in all_indexed:
+        for video in pending.all_videos:
             youtube_id = video["youtube_id"]
             media_url = os.path.join(self.MEDIA_DIR, video["media_url"])
             thumb_path = os.path.join(

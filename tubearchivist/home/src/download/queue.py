@@ -106,7 +106,7 @@ class PendingInteract:
 class PendingList(PendingIndex):
     """manage the pending videos list"""
 
-    def __init__(self, youtube_ids):
+    def __init__(self, youtube_ids=False):
         super().__init__()
         self.youtube_ids = youtube_ids
         self.to_skip = False
@@ -173,7 +173,7 @@ class PendingList(PendingIndex):
 
         thumb_handler = ThumbManager()
         for idx, youtube_id in enumerate(self.missing_videos):
-            video_details = self._get_youtube_details(youtube_id)
+            video_details = self.get_youtube_details(youtube_id)
             if not video_details:
                 continue
 
@@ -208,7 +208,7 @@ class PendingList(PendingIndex):
         if idx + 1 % 25 == 0:
             print("adding to queue progress: " + progress)
 
-    def _get_youtube_details(self, youtube_id):
+    def get_youtube_details(self, youtube_id):
         """get details from youtubedl for single pending video"""
         obs = {
             "default_search": "ytsearch",
