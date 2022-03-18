@@ -63,9 +63,7 @@ def update_subscribed():
             missing_from_playlists = playlist_handler.find_missing()
             missing = missing_from_channels + missing_from_playlists
             if missing:
-                youtube_ids = [
-                    {"type": "video", "url": i["youtube_id"]} for i in missing
-                ]
+                youtube_ids = [{"type": "video", "url": i} for i in missing]
                 pending_handler = PendingList(youtube_ids=youtube_ids)
                 pending_handler.parse_url_list()
                 pending_handler.add_to_pending()
