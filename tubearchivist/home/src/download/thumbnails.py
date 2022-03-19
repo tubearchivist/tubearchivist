@@ -60,6 +60,7 @@ class ThumbManager:
         all_thumbs = self.get_all_thumbs()
 
         pending = queue.PendingList()
+        pending.get_download()
         pending.get_indexed()
 
         needed_thumbs = []
@@ -71,8 +72,6 @@ class ThumbManager:
                     needed_thumbs.append((youtube_id, thumb_url))
             else:
                 needed_thumbs.append((youtube_id, thumb_url))
-
-        pending.get_download()
 
         for video in pending.all_pending + pending.all_ignored:
             youtube_id = video["youtube_id"]
