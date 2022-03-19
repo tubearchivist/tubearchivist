@@ -11,7 +11,6 @@ from time import sleep
 
 import requests
 from home.src.download.queue import PendingList
-from home.src.download.subscriptions import ChannelSubscription
 from home.src.download.thumbnails import ThumbManager
 from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
@@ -170,24 +169,6 @@ class Reindex:
         if self.integrate_ryd:
             self.get_unrated_vids()
 
-    def rescrape_all_channels(self):
-        """sync new data from channel to all matching videos"""
-        sleep_interval = self.sleep_interval
-        channel_sub_handler = ChannelSubscription()
-        all_channels = channel_sub_handler.get_channels(subscribed_only=False)
-        all_channel_ids = [i["channel_id"] for i in all_channels]
-
-        for channel_id in all_channel_ids:
-            channel = YoutubeChannel(channel_id)
-            subscribed = channel.json_data["channel_subscribed"]
-            channel.get_from_youtube()
-            channel.json_data["channel_subscribed"] = subscribed
-            channel.upload_to_es()
-            channel.sync_to_videos()
-
-            if sleep_interval:
-                sleep(sleep_interval)
-
     @staticmethod
     def reindex_single_video(youtube_id):
         """refresh data for single video"""
@@ -228,8 +209,10 @@ class Reindex:
         channel = YoutubeChannel(channel_id)
         channel.get_from_es()
         subscribed = channel.json_data["channel_subscribed"]
+        overwrites = channel.json_data["channel_overwrites"]
         channel.get_from_youtube()
         channel.json_data["channel_subscribed"] = subscribed
+        channel.json_data["channel_overwrites"] = overwrites
         channel.upload_to_es()
         channel.sync_to_videos()
 
