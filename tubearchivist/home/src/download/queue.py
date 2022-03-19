@@ -27,7 +27,7 @@ class PendingIndex:
         self.all_ignored = False
         self.all_videos = False
         self.all_channels = False
-        self.all_overwrites = False
+        self.channel_overwrites = False
         self.video_overwrites = False
         self.to_skip = False
 
@@ -63,7 +63,7 @@ class PendingIndex:
     def get_channels(self):
         """get a list of all channels indexed"""
         self.all_channels = []
-        self.all_overwrites = {}
+        self.channel_overwrites = {}
         data = {
             "query": {"match_all": {}},
             "sort": [{"channel_id": {"order": "asc"}}],
@@ -74,7 +74,7 @@ class PendingIndex:
             channel_id = channel["channel_id"]
             self.all_channels.append(channel_id)
             if channel.get("channel_overwrites"):
-                self.all_overwrites.update(
+                self.channel_overwrites.update(
                     {channel_id: channel.get("channel_overwrites")}
                 )
 
@@ -86,7 +86,7 @@ class PendingIndex:
         for video in self.all_pending:
             video_id = video["youtube_id"]
             channel_id = video["channel_id"]
-            overwrites = self.all_overwrites.get(channel_id, False)
+            overwrites = self.channel_overwrites.get(channel_id, False)
             if overwrites:
                 self.video_overwrites.update({video_id: overwrites})
 
