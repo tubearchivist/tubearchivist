@@ -52,7 +52,6 @@ class PendingIndex:
 
     def get_indexed(self):
         """get a list of all videos indexed"""
-        self.all_videos = []
         data = {
             "query": {"match_all": {}},
             "sort": [{"published": {"order": "desc"}}],
