@@ -88,7 +88,6 @@ def download_pending():
             downloader = VideoDownloader()
             downloader.add_pending()
             downloader.run_queue()
-            downloader.validate_playlists()
         else:
             print("Did not acquire download lock.")
 
@@ -276,8 +275,8 @@ def index_channel_playlists(channel_id):
         return
 
     handler = PendingList()
-    handler.get_indexed()
     handler.get_download()
+    handler.get_indexed()
     all_youtube_ids = [i["youtube_id"] for i in handler.all_videos]
 
     for idx, (playlist_id, playlist_title) in enumerate(all_playlists):

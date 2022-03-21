@@ -30,11 +30,17 @@ class DownloadPostProcess:
     def __init__(self, download):
         self.download = download
         self.now = int(datetime.now().strftime("%s"))
+        self.pending = False
 
     def run(self):
         """run all functions"""
+        self.pending = PendingList()
+        self.pending.get_download()
+        self.pending.get_channels()
+        self.pending.get_indexed()
         self.auto_delete_all()
         self.auto_delete_overwrites()
+        self.validate_playlists()
 
     def auto_delete_all(self):
         """handle auto delete"""
@@ -52,10 +58,7 @@ class DownloadPostProcess:
 
     def auto_delete_overwrites(self):
         """handle per channel auto delete from overwrites"""
-        pending = PendingList()
-        pending.get_download()
-        pending.get_channels()
-        for channel_id, value in pending.channel_overwrites.items():
+        for channel_id, value in self.pending.channel_overwrites.items():
             if "autodelete_days" in value:
                 autodelete_days = value.get("autodelete_days")
                 print(f"{channel_id}: delete older than {autodelete_days}d")
@@ -87,6 +90,47 @@ class DownloadPostProcess:
         pending = PendingList(youtube_ids=vids)
         pending.parse_url_list()
         pending.add_to_pending(status="ignore")
+
+    def validate_playlists(self):
+        """look for playlist needing to update"""
+        for id_c, channel_id in enumerate(self.download.channels):
+            playlists = YoutubeChannel(channel_id).get_indexed_playlists()
+            all_channel_playlist = [i["playlist_id"] for i in playlists]
+            self._validate_channel_playlist(all_channel_playlist, id_c)
+
+    def _validate_channel_playlist(self, all_channel_playlist, id_c):
+        """scan channel for playlist needing update"""
+        all_youtube_ids = [i["youtube_id"] for i in self.pending.all_videos]
+        for id_p, playlist_id in enumerate(all_channel_playlist):
+            playlist = YoutubePlaylist(playlist_id)
+            playlist.all_youtube_ids = all_youtube_ids
+            playlist.build_json(scrape=True)
+            if not playlist.json_data:
+                playlist.deactivate()
+
+            playlist.add_vids_to_playlist()
+            playlist.upload_to_es()
+            self._notify_playlist_progress(all_channel_playlist, id_c, id_p)
+
+    def _notify_playlist_progress(self, all_channel_playlist, id_c, id_p):
+        """notify to UI"""
+        title = (
+            "Processing playlists for channels: "
+            + f"{id_c + 1}/{len(self.download.channels)}"
+        )
+        message = f"Progress: {id_p + 1}/{len(all_channel_playlist)}"
+        mess_dict = {
+            "status": "message:download",
+            "level": "info",
+            "title": title,
+            "message": message,
+        }
+        if id_p + 1 == len(all_channel_playlist):
+            RedisArchivist().set_message(
+                "message:download", mess_dict, expire=4
+            )
+        else:
+            RedisArchivist().set_message("message:download", mess_dict)
 
 
 class VideoDownloader:
@@ -132,6 +176,7 @@ class VideoDownloader:
             self._delete_from_pending(youtube_id)
 
         # post processing
+        self._add_subscribed_channels()
         DownloadPostProcess(self).run()
 
     @staticmethod
@@ -338,43 +383,3 @@ class VideoDownloader:
             self.channels.add(channel_id)
 
         return
-
-    def validate_playlists(self):
-        """look for playlist needing to update"""
-        print("sync playlists")
-        self._add_subscribed_channels()
-        pending = PendingList()
-        pending.get_download()
-        pending.get_indexed()
-        all_youtube_ids = [i["youtube_id"] for i in pending.all_videos]
-        for id_c, channel_id in enumerate(self.channels):
-            playlists = YoutubeChannel(channel_id).get_indexed_playlists()
-            all_playlist_ids = [i["playlist_id"] for i in playlists]
-            for id_p, playlist_id in enumerate(all_playlist_ids):
-                playlist = YoutubePlaylist(playlist_id)
-                playlist.all_youtube_ids = all_youtube_ids
-                playlist.build_json(scrape=True)
-                if not playlist.json_data:
-                    playlist.deactivate()
-
-                playlist.add_vids_to_playlist()
-                playlist.upload_to_es()
-
-                # notify
-                title = (
-                    "Processing playlists for channels: "
-                    + f"{id_c + 1}/{len(self.channels)}"
-                )
-                message = f"Progress: {id_p + 1}/{len(all_playlist_ids)}"
-                mess_dict = {
-                    "status": "message:download",
-                    "level": "info",
-                    "title": title,
-                    "message": message,
-                }
-                if id_p + 1 == len(all_playlist_ids):
-                    RedisArchivist().set_message(
-                        "message:download", mess_dict, expire=4
-                    )
-                else:
-                    RedisArchivist().set_message("message:download", mess_dict)
