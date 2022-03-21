@@ -277,6 +277,7 @@ def index_channel_playlists(channel_id):
 
     handler = PendingList()
     handler.get_indexed()
+    handler.get_download()
     all_youtube_ids = [i["youtube_id"] for i in handler.all_videos]
 
     for idx, (playlist_id, playlist_title) in enumerate(all_playlists):
