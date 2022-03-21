@@ -34,7 +34,7 @@ from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.config import AppConfig, ScheduleBuilder
 from home.src.ta.helper import UrlListParser
 from home.src.ta.ta_redis import RedisArchivist
-from home.tasks import extrac_dl, subscribe_to
+from home.tasks import extrac_dl, index_channel_playlists, subscribe_to
 from rest_framework.authtoken.models import Token
 
 
@@ -444,6 +444,8 @@ class ChannelIdView(ArchivistResultsView):
             overwrites = channel_overwrite_form.cleaned_data
             print(f"{channel_id}: set overwrites {overwrites}")
             channel_overwrites(channel_id, overwrites=overwrites)
+            if overwrites.get("index_playlists") == "1":
+                index_channel_playlists.delay(channel_id)
 
         sleep(1)
         return redirect("channel_id", channel_id, permanent=True)
