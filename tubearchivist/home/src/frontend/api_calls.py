@@ -112,7 +112,7 @@ class PostData:
         """ignore from download queue"""
         video_id = self.exec_val
         print(f"ignore video {video_id}")
-        PendingInteract(video_id=video_id, status="ignore")
+        PendingInteract(video_id=video_id, status="ignore").update_status()
         # also clear from redis queue
         RedisQueue("dl_queue").clear_item(video_id)
         return {"success": True}
