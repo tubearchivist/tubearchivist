@@ -6,6 +6,7 @@
     <div class="channel-banner">
         <a href="/channel/{{ channel_info.channel_id }}/"><img src="/cache/channels/{{ channel_info.channel_id }}_banner.jpg" alt="channel_banner"></a>
     </div>
+    <div id="notifications" data="channel_id"></div>
     <div class="info-box info-box-3">
         <div class="info-box-item">
             <div class="round-img">
@@ -52,7 +53,6 @@
                     <p>Total Videos archived: {{ max_hits }}</p>
                     <p>Watched: <button title="Mark all videos from {{ channel_info.channel_name }} as watched" type="button" id="watched-button" data-id="{{ channel_info.channel_id }}" onclick="isWatchedButton(this)">Mark as watched</button></p>
                 {% endif %}
-                <button title="Search for playlists on YouTube for {{ channel_info.channel_name }}" type="button" id="find-playlists-button" data-id="{{ channel_info.channel_id }}" onclick="findPlaylists(this)">Find Playlists</button>
                 <a href="/playlist/?search={{ channel_info.channel_id }}" title="Show all playlists belonging to {{ channel_info.channel_name }}"><button>Show Playlists</button></a>
             </div>
         </div>
@@ -94,7 +94,6 @@
             </div>
         </div>
     {% endif %}
-    <div id="notifications" data="channel_id"></div>
     <div class="view-controls">
         <div class="toggle">
             <span>Hide watched videos:</span>

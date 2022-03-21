@@ -269,19 +269,6 @@ function fsRescan() {
     toReplace.appendChild(message);
 }
 
-function findPlaylists(button) {
-    var channel_id = button.getAttribute("data-id");
-    var payload = JSON.stringify({'find-playlists': channel_id});
-    sendPost(payload);
-    // clear button
-    var message = document.createElement('p');
-    message.innerText = 'Scraping for playlists in progress';
-    document.getElementById("find-playlists-button").replaceWith(message);
-    setTimeout(function(){
-        checkMessages();
-    }, 500);
-}
-
 function resetToken() {
     var payload = JSON.stringify({'reset-token': true});
     sendPost(payload);
