@@ -12,11 +12,13 @@ from datetime import datetime
 import requests
 import yt_dlp
 from bs4 import BeautifulSoup
+from home.src.download import queue  # partial import
 from home.src.download.thumbnails import ThumbManager
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.generic import YouTubeItem
 from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.helper import clean_string
+from home.src.ta.ta_redis import RedisArchivist
 
 
 class ChannelScraper:
@@ -153,6 +155,7 @@ class YoutubeChannel(YouTubeItem):
     def __init__(self, youtube_id):
         super().__init__(youtube_id)
         self.es_path = f"{self.index_name}/_doc/{youtube_id}"
+        self.all_playlists = False
 
     def build_json(self, upload=False):
         """get from es or from youtube"""
@@ -241,6 +244,64 @@ class YoutubeChannel(YouTubeItem):
         self.delete_es_videos()
         self.del_in_es()
 
+    def index_channel_playlists(self):
+        """add all playlists of channel to index"""
+        mess_dict = {
+            "status": "message:playlistscan",
+            "level": "info",
+            "title": "Looking for playlists",
+            "message": f'Scanning channel "{self.youtube_id}" in progress',
+        }
+        RedisArchivist().set_message("message:playlistscan", mess_dict)
+        self.get_all_playlists()
+        if not self.all_playlists:
+            print(f"{self.youtube_id}: no playlists found.")
+            return
+
+        all_youtube_ids = self.get_all_video_ids()
+        for idx, playlist in enumerate(self.all_playlists):
+            self.notify_single_playlist(idx, playlist)
+            self.index_single_playlist(playlist, all_youtube_ids)
+
+    def notify_single_playlist(self, idx, playlist):
+        """send notification"""
+        mess_dict = {
+            "status": "message:playlistscan",
+            "level": "info",
+            "title": "Scanning channel for playlists",
+            "message": f"Progress: {idx + 1}/{len(self.all_playlists)}",
+        }
+        RedisArchivist().set_message("message:playlistscan", mess_dict)
+        print("add playlist: " + playlist[1])
+
+    @staticmethod
+    def index_single_playlist(playlist, all_youtube_ids):
+        """add single playlist if needed"""
+        playlist = YoutubePlaylist(playlist[0])
+        playlist.all_youtube_ids = all_youtube_ids
+        playlist.build_json()
+        if not playlist.json_data:
+            return
+
+        entries = playlist.json_data["playlist_entries"]
+        downloaded = [i for i in entries if i["downloaded"]]
+        if not downloaded:
+            return
+
+        playlist.upload_to_es()
+        playlist.add_vids_to_playlist()
+        playlist.get_playlist_art()
+
+    @staticmethod
+    def get_all_video_ids():
+        """match all playlists with videos"""
+        handler = queue.PendingList()
+        handler.get_download()
+        handler.get_indexed()
+        all_youtube_ids = [i["youtube_id"] for i in handler.all_videos]
+
+        return all_youtube_ids
+
     def get_all_playlists(self):
         """get all playlists owned by this channel"""
         url = (
@@ -254,8 +315,7 @@ class YoutubeChannel(YouTubeItem):
         }
         playlists = yt_dlp.YoutubeDL(obs).extract_info(url)
         all_entries = [(i["id"], i["title"]) for i in playlists["entries"]]
-
-        return all_entries
+        self.all_playlists = all_entries
 
     def get_indexed_playlists(self):
         """get all indexed playlists from channel"""
