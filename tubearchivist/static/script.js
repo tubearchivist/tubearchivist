@@ -192,7 +192,6 @@ function addSingle(button) {
 function deleteQueue(button) {
     var to_delete = button.getAttribute('data-id');
     var payload = JSON.stringify({'deleteQueue': to_delete});
-    console.log(payload);
     sendPost(payload);
     setTimeout(function(){
         location.reload();
@@ -315,7 +314,6 @@ function deletePlaylist(button) {
             "playlist-action": playlist_action
         }
     });
-    console.log(payload);
     sendPost(payload);
     setTimeout(function(){
         window.location.replace("/playlist/");
@@ -418,7 +416,6 @@ function createVideoTag(videoData, videoProgress) {
     var videoSubtitles = videoData.data.subtitles; // Array of subtitles
     if (typeof(videoSubtitles) != 'undefined' && videoData.config.downloads.subtitle) {
         for (var i = 0; i < videoSubtitles.length; i++) {
-            console.log(videoSubtitles[i]);
             let label = videoSubtitles[i].name;
             if (videoSubtitles[i].source == "auto") {
                 label += " - auto";
