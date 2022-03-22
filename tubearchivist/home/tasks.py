@@ -8,8 +8,8 @@ Functionality:
 
 import os
 
-import home.apps as startup_apps
 from celery import Celery, shared_task
+from home.apps import StartupCheck
 from home.src.download.queue import PendingList
 from home.src.download.subscriptions import (
     ChannelSubscription,
@@ -98,7 +98,7 @@ def download_pending():
 @shared_task
 def download_single(youtube_id):
     """start download single video now"""
-    queue = RedisQueue("dl_queue")
+    queue = RedisQueue()
     queue.add_priority(youtube_id)
     print("Added to queue with priority: " + youtube_id)
     # start queue if needed
@@ -181,7 +181,7 @@ def kill_dl(task_id):
         app.control.revoke(task_id, terminate=True)
 
     _ = RedisArchivist().del_message("dl_queue_id")
-    RedisQueue("dl_queue").clear()
+    RedisQueue().clear()
 
     # clear cache
     cache_dir = os.path.join(CONFIG["application"]["cache_dir"], "download")
@@ -274,5 +274,5 @@ try:
     app.conf.beat_schedule = ScheduleBuilder().build_schedule()
 except KeyError:
     # update path from v0.0.8 to v0.0.9 to load new defaults
-    startup_apps.sync_redis_state()
+    StartupCheck().sync_redis_state()
     app.conf.beat_schedule = ScheduleBuilder().build_schedule()

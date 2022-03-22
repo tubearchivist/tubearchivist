@@ -162,7 +162,7 @@ class VideoDownloader:
         pending.get_channels()
         self.video_overwrites = pending.video_overwrites
 
-        queue = RedisQueue("dl_queue")
+        queue = RedisQueue()
 
         limit_queue = self.config["downloads"]["limit_count"]
         if limit_queue:
@@ -212,8 +212,7 @@ class VideoDownloader:
             RedisArchivist().set_message("message:download", mess_dict)
             return
 
-        queue = RedisQueue("dl_queue")
-        queue.add_list(to_add)
+        RedisQueue().add_list(to_add)
 
     @staticmethod
     def _progress_hook(response):
