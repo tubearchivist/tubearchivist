@@ -201,6 +201,9 @@ class ArchivistResultsView(ArchivistViewConfig):
             "ta_video/_search", self.default_conf, data=data
         )
         videos = search.get_data()
+        if not videos:
+            return False
+
         for video in videos:
             youtube_id = video["source"]["youtube_id"]
             matched = [i for i in results if i["youtube_id"] == youtube_id]
