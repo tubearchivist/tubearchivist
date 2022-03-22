@@ -247,11 +247,13 @@ class YoutubeChannel(YouTubeItem):
     def index_channel_playlists(self):
         """add all playlists of channel to index"""
         print(f"{self.youtube_id}: index all playlists")
+        self.get_from_es()
+        channel_name = self.json_data["channel_name"]
         mess_dict = {
             "status": "message:playlistscan",
             "level": "info",
             "title": "Looking for playlists",
-            "message": f'Scanning channel "{self.youtube_id}" in progress',
+            "message": f"{channel_name}: Scanning channel in progress",
         }
         RedisArchivist().set_message("message:playlistscan", mess_dict)
         self.get_all_playlists()
@@ -261,22 +263,23 @@ class YoutubeChannel(YouTubeItem):
 
         all_youtube_ids = self.get_all_video_ids()
         for idx, playlist in enumerate(self.all_playlists):
-            self.notify_single_playlist(idx, playlist)
-            self.index_single_playlist(playlist, all_youtube_ids)
+            self._notify_single_playlist(idx, playlist)
+            self._index_single_playlist(playlist, all_youtube_ids)
 
-    def notify_single_playlist(self, idx, playlist):
+    def _notify_single_playlist(self, idx, playlist):
         """send notification"""
+        channel_name = self.json_data["channel_name"]
         mess_dict = {
             "status": "message:playlistscan",
             "level": "info",
-            "title": "Scanning channel for playlists",
+            "title": f"{channel_name}: Scanning channel for playlists",
             "message": f"Progress: {idx + 1}/{len(self.all_playlists)}",
         }
         RedisArchivist().set_message("message:playlistscan", mess_dict)
         print("add playlist: " + playlist[1])
 
     @staticmethod
-    def index_single_playlist(playlist, all_youtube_ids):
+    def _index_single_playlist(playlist, all_youtube_ids):
         """add single playlist if needed"""
         playlist = YoutubePlaylist(playlist[0])
         playlist.all_youtube_ids = all_youtube_ids
