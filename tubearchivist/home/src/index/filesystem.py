@@ -59,9 +59,11 @@ class FilesystemScanner:
     def get_all_indexed():
         """get a list of all indexed videos"""
         index_handler = PendingList()
-        all_indexed_raw = index_handler.get_all_indexed()
+        index_handler.get_download()
+        index_handler.get_indexed()
+
         all_indexed = []
-        for video in all_indexed_raw:
+        for video in index_handler.all_videos:
             youtube_id = video["youtube_id"]
             media_url = video["media_url"]
             published = video["published"]

@@ -178,3 +178,19 @@ class SubscribeToPlaylistForm(forms.Form):
             }
         ),
     )
+
+
+class ChannelOverwriteForm(forms.Form):
+    """custom overwrites for channel settings"""
+
+    PLAYLIST_INDEX = [
+        ("", "-- change playlist index --"),
+        ("0", "Disable playlist index"),
+        ("1", "Enable playlist index"),
+    ]
+
+    download_format = forms.CharField(label=False, required=False)
+    autodelete_days = forms.IntegerField(label=False, required=False)
+    index_playlists = forms.ChoiceField(
+        widget=forms.Select, choices=PLAYLIST_INDEX, required=False
+    )

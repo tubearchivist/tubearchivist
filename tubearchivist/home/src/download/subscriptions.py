@@ -61,11 +61,9 @@ class ChannelSubscription:
     def find_missing(self):
         """add missing videos from subscribed channels to pending"""
         all_channels = self.get_channels()
-        pending_handler = queue.PendingList()
-        all_pending, all_ignore = pending_handler.get_all_pending()
-        all_ids = [i["youtube_id"] for i in all_ignore + all_pending]
-        all_downloaded = pending_handler.get_all_downloaded()
-        to_ignore = all_ids + all_downloaded
+        pending = queue.PendingList()
+        pending.get_download()
+        pending.get_indexed()
 
         missing_videos = []
 
@@ -75,7 +73,7 @@ class ChannelSubscription:
 
             if last_videos:
                 for video in last_videos:
-                    if video[0] not in to_ignore:
+                    if video[0] not in pending.to_skip:
                         missing_videos.append(video[0])
             # notify
             message = {
@@ -129,7 +127,11 @@ class PlaylistSubscription:
 
     def process_url_str(self, new_playlists, subscribed=True):
         """process playlist subscribe form url_str"""
-        all_indexed = queue.PendingList().get_all_indexed()
+        data = {
+            "query": {"match_all": {}},
+            "sort": [{"published": {"order": "desc"}}],
+        }
+        all_indexed = IndexPaginate("ta_video", data).get_results()
         all_youtube_ids = [i["youtube_id"] for i in all_indexed]
 
         new_thumbs = []
@@ -179,12 +181,11 @@ class PlaylistSubscription:
     @staticmethod
     def get_to_ignore():
         """get all youtube_ids already downloaded or ignored"""
-        pending_handler = queue.PendingList()
-        all_pending, all_ignore = pending_handler.get_all_pending()
-        all_ids = [i["youtube_id"] for i in all_ignore + all_pending]
-        all_downloaded = pending_handler.get_all_downloaded()
-        to_ignore = all_ids + all_downloaded
-        return to_ignore
+        pending = queue.PendingList()
+        pending.get_download()
+        pending.get_indexed()
+
+        return pending.to_skip
 
     def find_missing(self):
         """find videos in subscribed playlists not downloaded yet"""

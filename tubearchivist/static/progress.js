@@ -7,7 +7,7 @@ checkMessages()
 
 // page map to notification status
 const messageTypes = {
-    "download": ["message:download", "message:add", "message:rescan"],
+    "download": ["message:download", "message:add", "message:rescan", "message:playlistscan"],
     "channel": ["message:subchannel"],
     "channel_id": ["message:playlistscan"],
     "playlist": ["message:subplaylist"],

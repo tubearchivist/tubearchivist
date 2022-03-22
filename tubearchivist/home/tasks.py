@@ -24,7 +24,6 @@ from home.src.index.filesystem import (
     reindex_old_documents,
     scan_filesystem,
 )
-from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.config import AppConfig, ScheduleBuilder
 from home.src.ta.helper import UrlListParser
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
@@ -63,9 +62,11 @@ def update_subscribed():
             missing_from_playlists = playlist_handler.find_missing()
             missing = missing_from_channels + missing_from_playlists
             if missing:
-                pending_handler = PendingList()
-                all_videos_added = pending_handler.add_to_pending(missing)
-                ThumbManager().download_vid(all_videos_added)
+                youtube_ids = [{"type": "video", "url": i} for i in missing]
+                pending_handler = PendingList(youtube_ids=youtube_ids)
+                pending_handler.parse_url_list()
+                pending_handler.add_to_pending()
+
         else:
             print("Did not acquire rescan lock.")
 
@@ -86,7 +87,6 @@ def download_pending():
             downloader = VideoDownloader()
             downloader.add_pending()
             downloader.run_queue()
-            downloader.validate_playlists()
         else:
             print("Did not acquire download lock.")
 
@@ -128,19 +128,9 @@ def download_single(youtube_id):
 @shared_task
 def extrac_dl(youtube_ids):
     """parse list passed and add to pending"""
-    pending_handler = PendingList()
-    missing_videos = pending_handler.parse_url_list(youtube_ids)
-    all_videos_added = pending_handler.add_to_pending(missing_videos)
-    missing_playlists = pending_handler.missing_from_playlists
-
-    thumb_handler = ThumbManager()
-    if missing_playlists:
-        new_thumbs = PlaylistSubscription().process_url_str(
-            missing_playlists, subscribed=False
-        )
-        thumb_handler.download_playlist(new_thumbs)
-
-    thumb_handler.download_vid(all_videos_added)
+    pending_handler = PendingList(youtube_ids=youtube_ids)
+    pending_handler.parse_url_list()
+    pending_handler.add_to_pending()
 
 
 @shared_task(name="check_reindex")
@@ -277,50 +267,7 @@ def index_channel_playlists(channel_id):
         "message": f'Scanning channel "{channel.youtube_id}" in progress',
     }
     RedisArchivist().set_message("message:playlistscan", mess_dict)
-    all_playlists = channel.get_all_playlists()
-
-    if not all_playlists:
-        print(f"no playlists found for channel {channel_id}")
-        return
-
-    all_indexed = PendingList().get_all_indexed()
-    all_youtube_ids = [i["youtube_id"] for i in all_indexed]
-
-    for idx, (playlist_id, playlist_title) in enumerate(all_playlists):
-        # notify
-        mess_dict = {
-            "status": "message:playlistscan",
-            "level": "info",
-            "title": "Scanning channel for playlists",
-            "message": f"Progress: {idx + 1}/{len(all_playlists)}",
-        }
-        RedisArchivist().set_message("message:playlistscan", mess_dict)
-        print("add playlist: " + playlist_title)
-
-        playlist = YoutubePlaylist(playlist_id)
-        playlist.all_youtube_ids = all_youtube_ids
-        playlist.build_json()
-
-        if not playlist.json_data:
-            # skip if not available
-            continue
-
-        # don't add if no videos downloaded
-        downloaded = [
-            i
-            for i in playlist.json_data["playlist_entries"]
-            if i["downloaded"]
-        ]
-        if not downloaded:
-            continue
-
-        playlist.upload_to_es()
-        playlist.add_vids_to_playlist()
-
-    if all_playlists:
-        playlist.get_playlist_art()
-
-    return
+    channel.index_channel_playlists()
 
 
 try:

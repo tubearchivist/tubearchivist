@@ -269,19 +269,6 @@ function fsRescan() {
     toReplace.appendChild(message);
 }
 
-function findPlaylists(button) {
-    var channel_id = button.getAttribute("data-id");
-    var payload = JSON.stringify({'find-playlists': channel_id});
-    sendPost(payload);
-    // clear button
-    var message = document.createElement('p');
-    message.innerText = 'Scraping for playlists in progress';
-    document.getElementById("find-playlists-button").replaceWith(message);
-    setTimeout(function(){
-        checkMessages();
-    }, 500);
-}
-
 function resetToken() {
     var payload = JSON.stringify({'reset-token': true});
     sendPost(payload);
@@ -431,7 +418,12 @@ function createVideoTag(videoData, videoProgress) {
     var videoSubtitles = videoData.data.subtitles; // Array of subtitles
     if (typeof(videoSubtitles) != 'undefined' && videoData.config.downloads.subtitle) {
         for (var i = 0; i < videoSubtitles.length; i++) {
-            subtitles += `<track label="${videoSubtitles[i].name}" kind="subtitles" srclang="${videoSubtitles[i].lang}" src="${videoSubtitles[i].media_url}">`;
+            console.log(videoSubtitles[i]);
+            let label = videoSubtitles[i].name;
+            if (videoSubtitles[i].source == "auto") {
+                label += " - auto";
+            }
+            subtitles += `<track label="${label}" kind="subtitles" srclang="${videoSubtitles[i].lang}" src="${videoSubtitles[i].media_url}">`;
         }
     }
 

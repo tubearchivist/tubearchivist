@@ -19,6 +19,7 @@ from home.src.frontend.api_calls import PostData
 from home.src.frontend.forms import (
     AddToQueueForm,
     ApplicationSettingsForm,
+    ChannelOverwriteForm,
     CustomAuthForm,
     MultiSearchForm,
     SchedulerSettingsForm,
@@ -27,12 +28,13 @@ from home.src.frontend.forms import (
     UserSettingsForm,
 )
 from home.src.frontend.searching import SearchHandler
+from home.src.index.channel import channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.config import AppConfig, ScheduleBuilder
 from home.src.ta.helper import UrlListParser
 from home.src.ta.ta_redis import RedisArchivist
-from home.tasks import extrac_dl, subscribe_to
+from home.tasks import extrac_dl, index_channel_playlists, subscribe_to
 from rest_framework.authtoken.models import Token
 
 
@@ -183,6 +185,8 @@ class ArchivistResultsView(ArchivistViewConfig):
             if video["youtube_id"] in in_progress:
                 played_sec = in_progress.get(video["youtube_id"])
                 total = video["player"]["duration"]
+                if not total:
+                    total = played_sec * 2
                 video["player"]["progress"] = 100 * (played_sec / total)
 
     def get_in_progress(self, results):
@@ -202,6 +206,8 @@ class ArchivistResultsView(ArchivistViewConfig):
             matched = [i for i in results if i["youtube_id"] == youtube_id]
             played_sec = matched[0]["position"]
             total = video["source"]["player"]["duration"]
+            if not total:
+                total = matched[0].get("position") * 2
             video["source"]["player"]["progress"] = 100 * (played_sec / total)
 
         return videos
@@ -408,6 +414,7 @@ class ChannelIdView(ArchivistResultsView):
             {
                 "title": "Channel: " + channel_name,
                 "channel_info": channel_info,
+                "channel_overwrite_form": ChannelOverwriteForm,
             }
         )
 
@@ -427,6 +434,21 @@ class ChannelIdView(ArchivistResultsView):
         if self.context["hide_watched"]:
             to_append = {"term": {"player.watched": {"value": False}}}
             self.data["query"]["bool"]["must"].append(to_append)
+
+    @staticmethod
+    def post(request, channel_id):
+        """handle post request"""
+        print(f"handle post from {channel_id}")
+        channel_overwrite_form = ChannelOverwriteForm(request.POST)
+        if channel_overwrite_form.is_valid():
+            overwrites = channel_overwrite_form.cleaned_data
+            print(f"{channel_id}: set overwrites {overwrites}")
+            channel_overwrites(channel_id, overwrites=overwrites)
+            if overwrites.get("index_playlists") == "1":
+                index_channel_playlists.delay(channel_id)
+
+        sleep(1)
+        return redirect("channel_id", channel_id, permanent=True)
 
 
 class ChannelView(ArchivistResultsView):

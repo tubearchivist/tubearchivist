@@ -39,6 +39,19 @@
                 "channel_last_refresh": {
                     "type": "date",
                     "format": "epoch_second"
+                },
+                "channel_overwrites": {
+                    "properties": {
+                        "download_format": {
+                            "type": "text"
+                        },
+                        "autodelete_days": {
+                            "type": "long"
+                        },
+                        "index_playlists": {
+                            "type": "boolean"
+                        }
+                    }
                 }
             },
             "expected_set": {
@@ -102,6 +115,19 @@
                         "channel_last_refresh": {
                             "type": "date",
                             "format": "epoch_second"
+                        },
+                        "channel_overwrites": {
+                            "properties": {
+                                "download_format": {
+                                    "type": "text"
+                                },
+                                "autodelete_days": {
+                                    "type": "long"
+                                },
+                                "index_playlists": {
+                                    "type": "boolean"
+                                }
+                            }
                         }
                     }
                 },

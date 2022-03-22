@@ -12,11 +12,13 @@ from datetime import datetime
 import requests
 import yt_dlp
 from bs4 import BeautifulSoup
+from home.src.download import queue  # partial import
 from home.src.download.thumbnails import ThumbManager
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.generic import YouTubeItem
 from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.helper import clean_string
+from home.src.ta.ta_redis import RedisArchivist
 
 
 class ChannelScraper:
@@ -153,6 +155,7 @@ class YoutubeChannel(YouTubeItem):
     def __init__(self, youtube_id):
         super().__init__(youtube_id)
         self.es_path = f"{self.index_name}/_doc/{youtube_id}"
+        self.all_playlists = False
 
     def build_json(self, upload=False):
         """get from es or from youtube"""
@@ -241,6 +244,68 @@ class YoutubeChannel(YouTubeItem):
         self.delete_es_videos()
         self.del_in_es()
 
+    def index_channel_playlists(self):
+        """add all playlists of channel to index"""
+        print(f"{self.youtube_id}: index all playlists")
+        self.get_from_es()
+        channel_name = self.json_data["channel_name"]
+        mess_dict = {
+            "status": "message:playlistscan",
+            "level": "info",
+            "title": "Looking for playlists",
+            "message": f"{channel_name}: Scanning channel in progress",
+        }
+        RedisArchivist().set_message("message:playlistscan", mess_dict)
+        self.get_all_playlists()
+        if not self.all_playlists:
+            print(f"{self.youtube_id}: no playlists found.")
+            return
+
+        all_youtube_ids = self.get_all_video_ids()
+        for idx, playlist in enumerate(self.all_playlists):
+            self._notify_single_playlist(idx, playlist)
+            self._index_single_playlist(playlist, all_youtube_ids)
+
+    def _notify_single_playlist(self, idx, playlist):
+        """send notification"""
+        channel_name = self.json_data["channel_name"]
+        mess_dict = {
+            "status": "message:playlistscan",
+            "level": "info",
+            "title": f"{channel_name}: Scanning channel for playlists",
+            "message": f"Progress: {idx + 1}/{len(self.all_playlists)}",
+        }
+        RedisArchivist().set_message("message:playlistscan", mess_dict)
+        print("add playlist: " + playlist[1])
+
+    @staticmethod
+    def _index_single_playlist(playlist, all_youtube_ids):
+        """add single playlist if needed"""
+        playlist = YoutubePlaylist(playlist[0])
+        playlist.all_youtube_ids = all_youtube_ids
+        playlist.build_json()
+        if not playlist.json_data:
+            return
+
+        entries = playlist.json_data["playlist_entries"]
+        downloaded = [i for i in entries if i["downloaded"]]
+        if not downloaded:
+            return
+
+        playlist.upload_to_es()
+        playlist.add_vids_to_playlist()
+        playlist.get_playlist_art()
+
+    @staticmethod
+    def get_all_video_ids():
+        """match all playlists with videos"""
+        handler = queue.PendingList()
+        handler.get_download()
+        handler.get_indexed()
+        all_youtube_ids = [i["youtube_id"] for i in handler.all_videos]
+
+        return all_youtube_ids
+
     def get_all_playlists(self):
         """get all playlists owned by this channel"""
         url = (
@@ -254,8 +319,7 @@ class YoutubeChannel(YouTubeItem):
         }
         playlists = yt_dlp.YoutubeDL(obs).extract_info(url)
         all_entries = [(i["id"], i["title"]) for i in playlists["entries"]]
-
-        return all_entries
+        self.all_playlists = all_entries
 
     def get_indexed_playlists(self):
         """get all indexed playlists from channel"""
@@ -267,3 +331,35 @@ class YoutubeChannel(YouTubeItem):
         }
         all_playlists = IndexPaginate("ta_playlist", data).get_results()
         return all_playlists
+
+    def get_overwrites(self):
+        """get all per channel overwrites"""
+        return self.json_data.get("channel_overwrites", False)
+
+    def set_overwrites(self, overwrites):
+        """set per channel overwrites"""
+        valid_keys = ["download_format", "autodelete_days", "index_playlists"]
+
+        to_write = self.json_data.get("channel_overwrites", {})
+        for key, value in overwrites.items():
+            if key not in valid_keys:
+                raise ValueError(f"invalid overwrite key: {key}")
+            if value in [0, "0"]:
+                del to_write[key]
+                continue
+            if value == "1":
+                to_write[key] = True
+                continue
+            if value:
+                to_write.update({key: value})
+
+        self.json_data["channel_overwrites"] = to_write
+
+
+def channel_overwrites(channel_id, overwrites):
+    """collection to overwrite settings per channel"""
+    channel = YoutubeChannel(channel_id)
+    channel.build_json()
+    channel.set_overwrites(overwrites)
+    channel.upload_to_es()
+    channel.sync_to_videos()

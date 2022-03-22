@@ -24,6 +24,123 @@ from home.src.ta.helper import clean_string, ignore_filelist
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 
 
+class DownloadPostProcess:
+    """handle task to run after download queue finishes"""
+
+    def __init__(self, download):
+        self.download = download
+        self.now = int(datetime.now().strftime("%s"))
+        self.pending = False
+
+    def run(self):
+        """run all functions"""
+        self.pending = PendingList()
+        self.pending.get_download()
+        self.pending.get_channels()
+        self.pending.get_indexed()
+        self.auto_delete_all()
+        self.auto_delete_overwrites()
+        self.validate_playlists()
+
+    def auto_delete_all(self):
+        """handle auto delete"""
+        autodelete_days = self.download.config["downloads"]["autodelete_days"]
+        if not autodelete_days:
+            return
+
+        print(f"auto delete older than {autodelete_days} days")
+        now_lte = self.now - autodelete_days * 24 * 60 * 60
+        data = {
+            "query": {"range": {"player.watched_date": {"lte": now_lte}}},
+            "sort": [{"player.watched_date": {"order": "asc"}}],
+        }
+        self._auto_delete_watched(data)
+
+    def auto_delete_overwrites(self):
+        """handle per channel auto delete from overwrites"""
+        for channel_id, value in self.pending.channel_overwrites.items():
+            if "autodelete_days" in value:
+                autodelete_days = value.get("autodelete_days")
+                print(f"{channel_id}: delete older than {autodelete_days}d")
+                now_lte = self.now - autodelete_days * 24 * 60 * 60
+                must_list = [
+                    {"range": {"player.watched_date": {"lte": now_lte}}},
+                    {"term": {"channel.channel_id": {"value": channel_id}}},
+                ]
+                data = {
+                    "query": {"bool": {"must": must_list}},
+                    "sort": [{"player.watched_date": {"order": "desc"}}],
+                }
+                self._auto_delete_watched(data)
+
+    @staticmethod
+    def _auto_delete_watched(data):
+        """delete watched videos after x days"""
+        to_delete = IndexPaginate("ta_video", data).get_results()
+        if not to_delete:
+            return
+
+        for video in to_delete:
+            youtube_id = video["youtube_id"]
+            print(f"{youtube_id}: auto delete video")
+            YoutubeVideo(youtube_id).delete_media_file()
+
+        print("add deleted to ignore list")
+        vids = [{"type": "video", "url": i["youtube_id"]} for i in to_delete]
+        pending = PendingList(youtube_ids=vids)
+        pending.parse_url_list()
+        pending.add_to_pending(status="ignore")
+
+    def validate_playlists(self):
+        """look for playlist needing to update"""
+        for id_c, channel_id in enumerate(self.download.channels):
+            channel = YoutubeChannel(channel_id)
+            overwrites = self.pending.channel_overwrites.get(channel_id, False)
+            if overwrites and overwrites.get("index_playlists"):
+                # validate from remote
+                channel.index_channel_playlists()
+                continue
+
+            # validate from local
+            playlists = channel.get_indexed_playlists()
+            all_channel_playlist = [i["playlist_id"] for i in playlists]
+            self._validate_channel_playlist(all_channel_playlist, id_c)
+
+    def _validate_channel_playlist(self, all_channel_playlist, id_c):
+        """scan channel for playlist needing update"""
+        all_youtube_ids = [i["youtube_id"] for i in self.pending.all_videos]
+        for id_p, playlist_id in enumerate(all_channel_playlist):
+            playlist = YoutubePlaylist(playlist_id)
+            playlist.all_youtube_ids = all_youtube_ids
+            playlist.build_json(scrape=True)
+            if not playlist.json_data:
+                playlist.deactivate()
+
+            playlist.add_vids_to_playlist()
+            playlist.upload_to_es()
+            self._notify_playlist_progress(all_channel_playlist, id_c, id_p)
+
+    def _notify_playlist_progress(self, all_channel_playlist, id_c, id_p):
+        """notify to UI"""
+        title = (
+            "Processing playlists for channels: "
+            + f"{id_c + 1}/{len(self.download.channels)}"
+        )
+        message = f"Progress: {id_p + 1}/{len(all_channel_playlist)}"
+        mess_dict = {
+            "status": "message:download",
+            "level": "info",
+            "title": title,
+            "message": message,
+        }
+        if id_p + 1 == len(all_channel_playlist):
+            RedisArchivist().set_message(
+                "message:download", mess_dict, expire=4
+            )
+        else:
+            RedisArchivist().set_message("message:download", mess_dict)
+
+
 class VideoDownloader:
     """
     handle the video download functionality
@@ -32,6 +149,7 @@ class VideoDownloader:
 
     def __init__(self, youtube_id_list=False):
         self.obs = False
+        self.video_overwrites = False
         self.youtube_id_list = youtube_id_list
         self.config = AppConfig().config
         self._build_obs()
@@ -39,6 +157,11 @@ class VideoDownloader:
 
     def run_queue(self):
         """setup download queue in redis loop until no more items"""
+        pending = PendingList()
+        pending.get_download()
+        pending.get_channels()
+        self.video_overwrites = pending.video_overwrites
+
         queue = RedisQueue("dl_queue")
 
         limit_queue = self.config["downloads"]["limit_count"]
@@ -60,10 +183,9 @@ class VideoDownloader:
             self.move_to_archive(vid_dict)
             self._delete_from_pending(youtube_id)
 
-        autodelete_days = self.config["downloads"]["autodelete_days"]
-        if autodelete_days:
-            print(f"auto delete older than {autodelete_days} days")
-            self.auto_delete_watched(autodelete_days)
+        # post processing
+        self._add_subscribed_channels()
+        DownloadPostProcess(self).run()
 
     @staticmethod
     def add_pending():
@@ -75,8 +197,9 @@ class VideoDownloader:
             "message": "Scanning your download queue.",
         }
         RedisArchivist().set_message("message:download", mess_dict)
-        all_pending, _ = PendingList().get_all_pending()
-        to_add = [i["youtube_id"] for i in all_pending]
+        pending = PendingList()
+        pending.get_download()
+        to_add = [i["youtube_id"] for i in pending.all_pending]
         if not to_add:
             # there is nothing pending
             print("download queue is empty")
@@ -181,16 +304,30 @@ class VideoDownloader:
 
         self.obs["postprocessors"] = postprocessors
 
+    def get_format_overwrites(self, youtube_id):
+        """get overwrites from single video"""
+        overwrites = self.video_overwrites.get(youtube_id, False)
+        if overwrites:
+            return overwrites.get("download_format", False)
+
+        return False
+
     def _dl_single_vid(self, youtube_id):
         """download single video"""
+        obs = self.obs.copy()
+        format_overwrite = self.get_format_overwrites(youtube_id)
+        if format_overwrite:
+            obs["format"] = format_overwrite
+
         dl_cache = self.config["application"]["cache_dir"] + "/download/"
 
         # check if already in cache to continue from there
         all_cached = ignore_filelist(os.listdir(dl_cache))
         for file_name in all_cached:
             if youtube_id in file_name:
-                self.obs["outtmpl"] = os.path.join(dl_cache, file_name)
-        with yt_dlp.YoutubeDL(self.obs) as ydl:
+                obs["outtmpl"] = os.path.join(dl_cache, file_name)
+
+        with yt_dlp.YoutubeDL(obs) as ydl:
             try:
                 ydl.download([youtube_id])
             except yt_dlp.utils.DownloadError:
@@ -254,63 +391,3 @@ class VideoDownloader:
             self.channels.add(channel_id)
 
         return
-
-    def validate_playlists(self):
-        """look for playlist needing to update"""
-        print("sync playlists")
-        self._add_subscribed_channels()
-        all_indexed = PendingList().get_all_indexed()
-        all_youtube_ids = [i["youtube_id"] for i in all_indexed]
-        for id_c, channel_id in enumerate(self.channels):
-            playlists = YoutubeChannel(channel_id).get_indexed_playlists()
-            all_playlist_ids = [i["playlist_id"] for i in playlists]
-            for id_p, playlist_id in enumerate(all_playlist_ids):
-                playlist = YoutubePlaylist(playlist_id)
-                playlist.all_youtube_ids = all_youtube_ids
-                playlist.build_json(scrape=True)
-                if not playlist.json_data:
-                    playlist.deactivate()
-
-                playlist.add_vids_to_playlist()
-                playlist.upload_to_es()
-
-                # notify
-                title = (
-                    "Processing playlists for channels: "
-                    + f"{id_c + 1}/{len(self.channels)}"
-                )
-                message = f"Progress: {id_p + 1}/{len(all_playlist_ids)}"
-                mess_dict = {
-                    "status": "message:download",
-                    "level": "info",
-                    "title": title,
-                    "message": message,
-                }
-                if id_p + 1 == len(all_playlist_ids):
-                    RedisArchivist().set_message(
-                        "message:download", mess_dict, expire=4
-                    )
-                else:
-                    RedisArchivist().set_message("message:download", mess_dict)
-
-    @staticmethod
-    def auto_delete_watched(autodelete_days):
-        """delete watched videos after x days"""
-        now = int(datetime.now().strftime("%s"))
-        now_lte = now - autodelete_days * 24 * 60 * 60
-        data = {
-            "query": {"range": {"player.watched_date": {"lte": now_lte}}},
-            "sort": [{"player.watched_date": {"order": "asc"}}],
-        }
-        all_to_delete = IndexPaginate("ta_video", data).get_results()
-        all_youtube_ids = [i["youtube_id"] for i in all_to_delete]
-        if not all_youtube_ids:
-            return
-
-        for youtube_id in all_youtube_ids:
-            print(f"autodelete {youtube_id}")
-            YoutubeVideo(youtube_id).delete_media_file()
-
-        print("add deleted to ignore list")
-        pending_handler = PendingList()
-        pending_handler.add_to_pending(all_youtube_ids, ignore=True)

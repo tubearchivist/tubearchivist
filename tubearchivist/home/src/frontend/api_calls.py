@@ -4,7 +4,7 @@ Functionality:
 - called via user input
 """
 
-from home.src.download.queue import PendingList
+from home.src.download.queue import PendingInteract
 from home.src.download.subscriptions import (
     ChannelSubscription,
     PlaylistSubscription,
@@ -110,12 +110,11 @@ class PostData:
 
     def _ignore(self):
         """ignore from download queue"""
-        id_to_ignore = self.exec_val
-        print("ignore video " + id_to_ignore)
-        handler = PendingList()
-        handler.ignore_from_pending([id_to_ignore])
+        video_id = self.exec_val
+        print(f"ignore video {video_id}")
+        PendingInteract(video_id=video_id, status="ignore").update_status()
         # also clear from redis queue
-        RedisQueue("dl_queue").clear_item(id_to_ignore)
+        RedisQueue("dl_queue").clear_item(video_id)
         return {"success": True}
 
     @staticmethod
@@ -222,28 +221,25 @@ class PostData:
 
     def _forget_ignore(self):
         """delete from ta_download index"""
-        youtube_id = self.exec_val
-        print("forgetting from download index: " + youtube_id)
-        PendingList().delete_from_pending(youtube_id)
+        video_id = self.exec_val
+        print(f"forgetting from download index: {video_id}")
+        PendingInteract(video_id=video_id).delete_item()
         return {"success": True}
 
     def _add_single(self):
         """add single youtube_id to download queue"""
-        youtube_id = self.exec_val
-        print("add vid to dl queue: " + youtube_id)
-        PendingList().delete_from_pending(youtube_id)
-        youtube_ids = UrlListParser(youtube_id).process_list()
-        extrac_dl.delay(youtube_ids)
+        video_id = self.exec_val
+        print(f"add vid to dl queue: {video_id}")
+        PendingInteract(video_id=video_id).delete_item()
+        video_ids = UrlListParser(video_id).process_list()
+        extrac_dl.delay(video_ids)
         return {"success": True}
 
     def _delete_queue(self):
         """delete download queue"""
         status = self.exec_val
         print("deleting from download queue: " + status)
-        if status == "pending":
-            PendingList().delete_pending("pending")
-        elif status == "ignore":
-            PendingList().delete_pending("ignore")
+        PendingInteract(status=status).delete_by_status()
         return {"success": True}
 
     @staticmethod
