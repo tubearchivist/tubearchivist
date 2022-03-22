@@ -246,6 +246,7 @@ class YoutubeChannel(YouTubeItem):
 
     def index_channel_playlists(self):
         """add all playlists of channel to index"""
+        print(f"{self.youtube_id}: index all playlists")
         mess_dict = {
             "status": "message:playlistscan",
             "level": "info",

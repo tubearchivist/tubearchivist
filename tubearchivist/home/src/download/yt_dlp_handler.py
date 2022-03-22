@@ -94,7 +94,15 @@ class DownloadPostProcess:
     def validate_playlists(self):
         """look for playlist needing to update"""
         for id_c, channel_id in enumerate(self.download.channels):
-            playlists = YoutubeChannel(channel_id).get_indexed_playlists()
+            channel = YoutubeChannel(channel_id)
+            overwrites = self.pending.channel_overwrites.get(channel_id, False)
+            if overwrites and overwrites.get("index_playlists"):
+                # validate from remote
+                channel.index_channel_playlists()
+                continue
+
+            # validate from local
+            playlists = channel.get_indexed_playlists()
             all_channel_playlist = [i["playlist_id"] for i in playlists]
             self._validate_channel_playlist(all_channel_playlist, id_c)
 
