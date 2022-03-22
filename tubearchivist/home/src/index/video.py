@@ -369,7 +369,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             channel_dir = os.path.join(self.app_conf["videos"], channel)
             all_files = os.listdir(channel_dir)
             for file in all_files:
-                if self.youtube_id in file:
+                if self.youtube_id in file and file.endswith(".mp4"):
                     vid_path = os.path.join(channel_dir, file)
                     break
             else:
