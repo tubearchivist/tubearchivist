@@ -296,7 +296,6 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         self._add_stats()
         self.add_file_path()
         self.add_player()
-        self._check_subtitles()
         if self.config["downloads"]["integrate_ryd"]:
             self._get_ryd_stats()
 
@@ -441,7 +440,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
         return True
 
-    def _check_subtitles(self):
+    def check_subtitles(self):
         """optionally add subtitles"""
         handler = YoutubeSubtitle(self)
         subtitles = handler.get_subtitles()
@@ -451,8 +450,9 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def delete_subtitles(self):
         """delete indexed subtitles"""
+        path = "ta_subtitle/_delete_by_query?refresh=true"
         data = {"query": {"term": {"youtube_id": {"value": self.youtube_id}}}}
-        _, _ = ElasticWrap("ta_subtitle/_delete_by_query").post(data=data)
+        _, _ = ElasticWrap(path).post(data=data)
 
 
 def index_new_video(youtube_id):
@@ -462,5 +462,6 @@ def index_new_video(youtube_id):
     if not video.json_data:
         raise ValueError("failed to get metadata for " + youtube_id)
 
+    video.check_subtitles()
     video.upload_to_es()
     return video.json_data

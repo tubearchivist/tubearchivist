@@ -155,6 +155,8 @@ class Reindex:
             return
 
         video.delete_subtitles()
+        video.check_subtitles()
+
         # add back
         video.json_data["player"] = player
         video.json_data["date_downloaded"] = date_downloaded
