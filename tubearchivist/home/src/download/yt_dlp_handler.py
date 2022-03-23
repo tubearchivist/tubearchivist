@@ -11,11 +11,10 @@ import shutil
 from datetime import datetime
 from time import sleep
 
-import requests
 import yt_dlp
 from home.src.download.queue import PendingList
 from home.src.download.subscriptions import PlaylistSubscription
-from home.src.es.connect import IndexPaginate
+from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video import YoutubeVideo, index_new_video
@@ -370,14 +369,11 @@ class VideoDownloader:
         if host_uid and host_gid:
             os.chown(new_file_path, host_uid, host_gid)
 
-    def _delete_from_pending(self, youtube_id):
+    @staticmethod
+    def _delete_from_pending(youtube_id):
         """delete downloaded video from pending index if its there"""
-        es_url = self.config["application"]["es_url"]
-        es_auth = self.config["application"]["es_auth"]
-        url = f"{es_url}/ta_download/_doc/{youtube_id}"
-        response = requests.delete(url, auth=es_auth)
-        if not response.ok and not response.status_code == 404:
-            print(response.text)
+        path = f"ta_download/_doc/{youtube_id}"
+        _, _ = ElasticWrap(path).delete()
 
     def _add_subscribed_channels(self):
         """add all channels subscribed to refresh"""
