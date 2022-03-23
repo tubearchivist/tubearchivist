@@ -11,9 +11,9 @@ import re
 import shutil
 import subprocess
 
-import requests
 from home.src.download.queue import PendingList
 from home.src.download.yt_dlp_handler import VideoDownloader
+from home.src.es.connect import ElasticWrap
 from home.src.index.reindex import Reindex
 from home.src.index.video import index_new_video
 from home.src.ta.config import AppConfig
@@ -25,8 +25,6 @@ class FilesystemScanner:
     """handle scanning and fixing from filesystem"""
 
     CONFIG = AppConfig().config
-    ES_URL = CONFIG["application"]["es_url"]
-    ES_AUTH = CONFIG["application"]["es_auth"]
     VIDEOS = CONFIG["application"]["videos"]
 
     def __init__(self):
@@ -147,25 +145,16 @@ class FilesystemScanner:
             bulk_list.append(json.dumps(source))
         # add last newline
         bulk_list.append("\n")
-        query_str = "\n".join(bulk_list)
-        # make the call
-        headers = {"Content-type": "application/x-ndjson"}
-        url = self.ES_URL + "/_bulk"
-        request = requests.post(
-            url, data=query_str, headers=headers, auth=self.ES_AUTH
-        )
-        if not request.ok:
-            print(request.text)
+        data = "\n".join(bulk_list)
+        _, _ = ElasticWrap("_bulk").post(data=data, ndjson=True)
 
     def delete_from_index(self):
         """find indexed but deleted mediafile"""
         for indexed in self.to_delete:
             youtube_id = indexed[0]
             print(f"deleting {youtube_id} from index")
-            url = self.ES_URL + "/ta_video/_doc/" + youtube_id
-            request = requests.delete(url, auth=self.ES_AUTH)
-            if not request.ok:
-                print(request.text)
+            path = f"ta_video/_doc/{youtube_id}"
+            _, _ = ElasticWrap(path).delete()
 
 
 class ManualImport:
