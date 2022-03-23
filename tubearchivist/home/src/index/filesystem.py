@@ -10,7 +10,6 @@ import os
 import re
 import shutil
 import subprocess
-from datetime import datetime
 
 import requests
 from home.src.download.queue import PendingList
@@ -319,10 +318,7 @@ def scan_filesystem():
 
 def reindex_old_documents():
     """daily refresh of old documents"""
-    # continue if needed
-    reindex_handler = Reindex()
-    reindex_handler.check_outdated()
-    reindex_handler.reindex()
-    # set timestamp
-    now = int(datetime.now().strftime("%s"))
-    RedisArchivist().set_message("last_reindex", now, expire=False)
+    handler = Reindex()
+    handler.check_outdated()
+    handler.reindex()
+    RedisArchivist().set_message("last_reindex", handler.now, expire=False)
