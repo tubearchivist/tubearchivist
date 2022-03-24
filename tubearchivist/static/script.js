@@ -883,6 +883,15 @@ function showForm() {
     animate('animate-icon', 'pulse-img');
 }
 
+function showOverwrite() {
+    var overwriteDiv = document.getElementById("overwrite-form");
+    if (overwriteDiv.classList.contains("hidden-overwrite")) {
+        overwriteDiv.classList.remove("hidden-overwrite");
+    } else {
+        overwriteDiv.classList.add("hidden-overwrite")
+    }
+}
+
 function animate(elementId, animationClass) {
     var toAnimate = document.getElementById(elementId);
     if (toAnimate.className !== animationClass) {
