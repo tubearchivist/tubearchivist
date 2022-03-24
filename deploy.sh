@@ -43,7 +43,10 @@ function sync_test {
     # pass argument to build for specific platform
 
     host="tubearchivist.local"
+    # make base folder
+    ssh "$host" "mkdir -p docker"
 
+    # copy project files to build image
     rsync -a --progress --delete-after \
         --exclude ".git" \
         --exclude ".gitignore" \
@@ -52,8 +55,8 @@ function sync_test {
         --exclude "db.sqlite3" \
         . -e ssh "$host":tubearchivist
 
-    # uncomment or copy your own docker-compose file
-    # rsync -r --progress --delete docker-compose.yml -e ssh "$host":docker
+    # copy default docker-compose file if not exist
+    rsync --progress --ignore-existing docker-compose.yml -e ssh "$host":docker
 
     if [[ $1 = "amd64" ]]; then
         platform="linux/amd64"
@@ -65,11 +68,8 @@ function sync_test {
         platform="linux/amd64"
     fi
 
-    ssh "$host" "docker buildx build --platform $platform -t bbilly1/tubearchivist:latest tubearchivist --load"
+    ssh "$host" "docker buildx build --build-arg INSTALL_DEBUG=1 --platform $platform -t bbilly1/tubearchivist:latest tubearchivist --load"
     ssh "$host" 'docker-compose -f docker/docker-compose.yml up -d'
-
-    ssh "$host" 'docker cp tubearchivist/tubearchivist/testing.sh tubearchivist:/app/testing.sh'
-    ssh "$host" 'docker exec tubearchivist chmod +x /app/testing.sh'
 
 }
 
