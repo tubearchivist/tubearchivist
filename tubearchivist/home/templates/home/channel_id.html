@@ -53,8 +53,8 @@
                     <p>Total Videos archived: {{ max_hits }}</p>
                     <p>Watched: <button title="Mark all videos from {{ channel_info.channel_name }} as watched" type="button" id="watched-button" data-id="{{ channel_info.channel_id }}" onclick="isWatchedButton(this)">Mark as watched</button></p>
                 {% endif %}
+                <button {% if channel_info.channel_overwrites %} class="danger-button"{% endif %} onclick="showOverwrite()" title="Overwrite settings for channel {{ channel_info.channel_name }}">Configure</button>
                 <a href="/playlist/?search={{ channel_info.channel_id }}" title="Show all playlists belonging to {{ channel_info.channel_name }}"><button>Show Playlists</button></a>
-                <button {% if channel_info.channel_overwrites %} class="danger-button"{% endif %} onclick="showOverwrite()">Overwrites Settings</button>
             </div>
         </div>
     </div>
@@ -72,7 +72,7 @@
                     {{ channel_overwrite_form.download_format }}<br>
                 </div>
                 <div class="overwrite-form-item">
-                    <p>Auto delete videos after x days: <span class="settings-current">
+                    <p>Auto delete watched videos after x days: <span class="settings-current">
                         {% if channel_info.channel_overwrites.autodelete_days %}
                             {{ channel_info.channel_overwrites.autodelete_days }}
                         {% else %}
