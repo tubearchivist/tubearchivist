@@ -1,8 +1,10 @@
 """handle custom startup functions"""
 
 import os
+import sys
 
 from django.apps import AppConfig
+from home.src.es.connect import ElasticWrap
 from home.src.es.index_setup import index_check
 from home.src.ta.config import AppConfig as ArchivistConfig
 from home.src.ta.ta_redis import RedisArchivist
@@ -10,6 +12,9 @@ from home.src.ta.ta_redis import RedisArchivist
 
 class StartupCheck:
     """checks to run at application startup"""
+
+    MIN_MAJOR, MAX_MAJOR = 7, 7
+    MIN_MINOR = 17
 
     def __init__(self):
         self.config_handler = ArchivistConfig()
@@ -19,6 +24,7 @@ class StartupCheck:
     def run(self):
         """run all startup checks"""
         print("run startup checks")
+        self.es_version_check()
         self.release_lock()
         index_check()
         self.sync_redis_state()
@@ -71,6 +77,33 @@ class StartupCheck:
             response = self.redis_con.del_message(lock)
             if response:
                 print("deleted leftover key from redis: " + lock)
+
+    def is_invalid(self, version):
+        """return true if es version is invalid, false if ok"""
+        major, minor = [int(i) for i in version.split(".")[:2]]
+        if not self.MIN_MAJOR <= major <= self.MAX_MAJOR:
+            return True
+
+        if minor >= self.MIN_MINOR:
+            return False
+
+        return True
+
+    def es_version_check(self):
+        """check for minimal elasticsearch version"""
+        response, _ = ElasticWrap("/").get()
+        version = response["version"]["number"]
+        invalid = self.is_invalid(version)
+
+        if invalid:
+            print(
+                "minial required elasticsearch version: "
+                + f"{self.MIN_MAJOR}.{self.MIN_MINOR}, "
+                + "please update to recommended version."
+            )
+            sys.exit(1)
+
+        print("elasticsearch version check passed")
 
 
 class HomeConfig(AppConfig):

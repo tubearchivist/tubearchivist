@@ -1,7 +1,7 @@
 """all API views"""
 
-import requests
 from home.src.download.thumbnails import ThumbManager
+from home.src.es.connect import ElasticWrap
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import UrlListParser
 from home.src.ta.ta_redis import RedisArchivist
@@ -24,31 +24,21 @@ class ApiBaseView(APIView):
 
     def __init__(self):
         super().__init__()
-        self.response = {"data": False}
+        self.response = {"data": False, "config": AppConfig().config}
         self.status_code = False
         self.context = False
-        self.default_conf = AppConfig().config
-
-    def config_builder(self):
-        """build confic context"""
-        self.context = {
-            "es_url": self.default_conf["application"]["es_url"],
-            "es_auth": self.default_conf["application"]["es_auth"],
-        }
-        self.response["config"] = self.default_conf
 
     def get_document(self, document_id):
         """get single document from es"""
-        es_url = self.context["es_url"]
-        url = f"{es_url}{self.search_base}{document_id}"
-        print(url)
-        response = requests.get(url, auth=self.context["es_auth"])
+        path = f"{self.search_base}{document_id}"
+        print(path)
+        response, status_code = ElasticWrap(path).get()
         try:
-            self.response["data"] = response.json()["_source"]
+            self.response["data"] = response["_source"]
         except KeyError:
             print(f"item not found: {document_id}")
             self.response["data"] = False
-        self.status_code = response.status_code
+        self.status_code = status_code
 
     def process_keys(self):
         """process keys for frontend"""
@@ -59,7 +49,7 @@ class ApiBaseView(APIView):
         if "vid_thumb_url" in all_keys:
             youtube_id = self.response["data"]["youtube_id"]
             vid_thumb_url = ThumbManager().vid_thumb_path(youtube_id)
-            cache_dir = self.default_conf["application"]["cache_dir"]
+            cache_dir = self.response["config"]["application"]["cache_dir"]
             new_thumb = f"{cache_dir}/{vid_thumb_url}"
             self.response["data"]["vid_thumb_url"] = new_thumb
         if "subtitles" in all_keys:
@@ -75,13 +65,11 @@ class ApiBaseView(APIView):
 
     def get_document_list(self, data):
         """get a list of results"""
-        es_url = self.context["es_url"]
-        url = f"{es_url}{self.search_base}"
-        print(url)
-        response = requests.get(url, json=data, auth=self.context["es_auth"])
-        all_hits = response.json()["hits"]["hits"]
+        print(self.search_base)
+        response, status_code = ElasticWrap(self.search_base).get(data=data)
+        all_hits = response["hits"]["hits"]
         self.response["data"] = [i["_source"] for i in all_hits]
-        self.status_code = response.status_code
+        self.status_code = status_code
 
 
 class VideoApiView(ApiBaseView):
@@ -89,12 +77,11 @@ class VideoApiView(ApiBaseView):
     GET: returns metadata dict of video
     """
 
-    search_base = "/ta_video/_doc/"
+    search_base = "ta_video/_doc/"
 
     def get(self, request, video_id):
         # pylint: disable=unused-argument
         """get request"""
-        self.config_builder()
         self.get_document(video_id)
         self.process_keys()
         return Response(self.response, status=self.status_code)
@@ -143,12 +130,11 @@ class ChannelApiView(ApiBaseView):
     GET: returns metadata dict of channel
     """
 
-    search_base = "/ta_channel/_doc/"
+    search_base = "ta_channel/_doc/"
 
     def get(self, request, channel_id):
         # pylint: disable=unused-argument
         """get request"""
-        self.config_builder()
         self.get_document(channel_id)
         return Response(self.response, status=self.status_code)
 
@@ -159,13 +145,12 @@ class ChannelApiListView(ApiBaseView):
     POST: edit a list of channels
     """
 
-    search_base = "/ta_channel/_search/"
+    search_base = "ta_channel/_search/"
 
     def get(self, request):
         # pylint: disable=unused-argument
         """get request"""
         data = {"query": {"match_all": {}}}
-        self.config_builder()
         self.get_document_list(data)
         self.get_paginate()
 
@@ -194,12 +179,11 @@ class PlaylistApiView(ApiBaseView):
     GET: returns metadata dict of playlist
     """
 
-    search_base = "/ta_playlist/_doc/"
+    search_base = "ta_playlist/_doc/"
 
     def get(self, request, playlist_id):
         # pylint: disable=unused-argument
         """get request"""
-        self.config_builder()
         self.get_document(playlist_id)
         return Response(self.response, status=self.status_code)
 
@@ -209,12 +193,11 @@ class DownloadApiView(ApiBaseView):
     GET: returns metadata dict of an item in the download queue
     """
 
-    search_base = "/ta_download/_doc/"
+    search_base = "ta_download/_doc/"
 
     def get(self, request, video_id):
         # pylint: disable=unused-argument
         """get request"""
-        self.config_builder()
         self.get_document(video_id)
         return Response(self.response, status=self.status_code)
 
@@ -225,13 +208,12 @@ class DownloadApiListView(ApiBaseView):
     POST: add a list of videos to download queue
     """
 
-    search_base = "/ta_download/_search/"
+    search_base = "ta_download/_search/"
 
     def get(self, request):
         # pylint: disable=unused-argument
         """get request"""
         data = {"query": {"match_all": {}}}
-        self.config_builder()
         self.get_document_list(data)
         self.get_paginate()
         return Response(self.response)

@@ -3,29 +3,13 @@ Loose collection of helper functions
 - don't import AppConfig class here to avoid circular imports
 """
 
-import json
 import re
 import string
 import subprocess
 import unicodedata
 from urllib.parse import parse_qs, urlparse
 
-import requests
 import yt_dlp
-
-
-def get_total_hits(index, es_url, es_auth, match_field):
-    """get total hits from index"""
-    headers = {"Content-type": "application/json"}
-    data = {"query": {"match": {match_field: True}}}
-    payload = json.dumps(data)
-    url = f"{es_url}/{index}/_search?filter_path=hits.total"
-    request = requests.post(url, data=payload, headers=headers, auth=es_auth)
-    if not request.ok:
-        print(request.text)
-    total_json = json.loads(request.text)
-    total_hits = total_json["hits"]["total"]["value"]
-    return total_hits
 
 
 def clean_string(file_name):

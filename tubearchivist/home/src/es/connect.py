@@ -93,11 +93,12 @@ class IndexPaginate:
 
     DEFAULT_SIZE = 500
 
-    def __init__(self, index_name, data, size=False):
+    def __init__(self, index_name, data, size=False, keep_source=False):
         self.index_name = index_name
         self.data = data
         self.pit_id = False
         self.size = size
+        self.keep_source = keep_source
 
     def get_results(self):
         """get all results"""
@@ -132,7 +133,10 @@ class IndexPaginate:
             all_hits = response["hits"]["hits"]
             if all_hits:
                 for hit in all_hits:
-                    source = hit["_source"]
+                    if self.keep_source:
+                        source = hit
+                    else:
+                        source = hit["_source"]
                     search_after = hit["sort"]
                     all_results.append(source)
                 # update search_after with last hit data

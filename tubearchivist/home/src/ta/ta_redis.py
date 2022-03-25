@@ -11,12 +11,20 @@ import redis
 from home.src.ta.helper import ignore_filelist
 
 
-class RedisArchivist:
-    """collection of methods to interact with redis"""
+class RedisBase:
+    """connection base for redis"""
 
     REDIS_HOST = os.environ.get("REDIS_HOST")
     REDIS_PORT = os.environ.get("REDIS_PORT") or 6379
     NAME_SPACE = "ta:"
+
+    def __init__(self):
+        self.conn = redis.Redis(host=self.REDIS_HOST, port=self.REDIS_PORT)
+
+
+class RedisArchivist(RedisBase):
+    """collection of methods to interact with redis"""
+
     CHANNELS = [
         "download",
         "add",
@@ -27,14 +35,9 @@ class RedisArchivist:
         "setting",
     ]
 
-    def __init__(self):
-        self.redis_connection = redis.Redis(
-            host=self.REDIS_HOST, port=self.REDIS_PORT
-        )
-
     def set_message(self, key, message, expire=True):
         """write new message to redis"""
-        self.redis_connection.execute_command(
+        self.conn.execute_command(
             "JSON.SET", self.NAME_SPACE + key, ".", json.dumps(message)
         )
 
@@ -43,15 +46,11 @@ class RedisArchivist:
                 secs = 20
             else:
                 secs = expire
-            self.redis_connection.execute_command(
-                "EXPIRE", self.NAME_SPACE + key, secs
-            )
+            self.conn.execute_command("EXPIRE", self.NAME_SPACE + key, secs)
 
     def get_message(self, key):
         """get message dict from redis"""
-        reply = self.redis_connection.execute_command(
-            "JSON.GET", self.NAME_SPACE + key
-        )
+        reply = self.conn.execute_command("JSON.GET", self.NAME_SPACE + key)
         if reply:
             json_str = json.loads(reply)
         else:
@@ -61,7 +60,7 @@ class RedisArchivist:
 
     def list_items(self, query):
         """list all matches"""
-        reply = self.redis_connection.execute_command(
+        reply = self.conn.execute_command(
             "KEYS", self.NAME_SPACE + query + "*"
         )
         all_matches = [i.decode().lstrip(self.NAME_SPACE) for i in reply]
@@ -74,14 +73,12 @@ class RedisArchivist:
 
     def del_message(self, key):
         """delete key from redis"""
-        response = self.redis_connection.execute_command(
-            "DEL", self.NAME_SPACE + key
-        )
+        response = self.conn.execute_command("DEL", self.NAME_SPACE + key)
         return response
 
     def get_lock(self, lock_key):
         """handle lock for task management"""
-        redis_lock = self.redis_connection.lock(self.NAME_SPACE + lock_key)
+        redis_lock = self.conn.lock(self.NAME_SPACE + lock_key)
         return redis_lock
 
     def get_progress(self):
@@ -89,7 +86,7 @@ class RedisArchivist:
         all_messages = []
         for channel in self.CHANNELS:
             key = "message:" + channel
-            reply = self.redis_connection.execute_command(
+            reply = self.conn.execute_command(
                 "JSON.GET", self.NAME_SPACE + key
             )
             if reply:
@@ -120,19 +117,12 @@ class RedisArchivist:
         return mess_dict
 
 
-class RedisQueue:
+class RedisQueue(RedisBase):
     """dynamically interact with the download queue in redis"""
 
-    REDIS_HOST = os.environ.get("REDIS_HOST")
-    REDIS_PORT = os.environ.get("REDIS_PORT")
-    NAME_SPACE = "ta:"
-
-    if not REDIS_PORT:
-        REDIS_PORT = 6379
-
-    def __init__(self, key):
-        self.key = self.NAME_SPACE + key
-        self.conn = redis.Redis(host=self.REDIS_HOST, port=self.REDIS_PORT)
+    def __init__(self):
+        super().__init__()
+        self.key = self.NAME_SPACE + "dl_queue"
 
     def get_all(self):
         """return all elements in list"""

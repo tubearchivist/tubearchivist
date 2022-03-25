@@ -3,21 +3,14 @@ functionality:
 - handle watched state for videos, channels and playlists
 """
 
-import json
 from datetime import datetime
 
-import requests
-from home.src.ta.config import AppConfig
+from home.src.es.connect import ElasticWrap
 from home.src.ta.helper import UrlListParser
 
 
 class WatchState:
     """handle watched checkbox for videos and channels"""
-
-    CONFIG = AppConfig().config
-    ES_URL = CONFIG["application"]["es_url"]
-    ES_AUTH = CONFIG["application"]["es_auth"]
-    HEADERS = {"Content-type": "application/json"}
 
     def __init__(self, youtube_id):
         self.youtube_id = youtube_id
@@ -33,7 +26,7 @@ class WatchState:
         elif url_type == "playlist":
             self.mark_playlist_watched()
 
-        print(f"marked {self.youtube_id} as watched")
+        print(f"{self.youtube_id}: marked as watched")
 
     def mark_as_unwatched(self):
         """revert watched state to false"""
@@ -41,7 +34,7 @@ class WatchState:
         if url_type == "video":
             self.mark_vid_watched(revert=True)
 
-        print(f"revert {self.youtube_id} as unwatched")
+        print(f"{self.youtube_id}: revert as unwatched")
 
     def dedect_type(self):
         """find youtube id type"""
@@ -52,77 +45,54 @@ class WatchState:
 
     def mark_vid_watched(self, revert=False):
         """change watched status of single video"""
-        url = self.ES_URL + "/ta_video/_update/" + self.youtube_id
+        path = f"ta_video/_update/{self.youtube_id}"
         data = {
             "doc": {"player": {"watched": True, "watched_date": self.stamp}}
         }
         if revert:
             data["doc"]["player"]["watched"] = False
 
-        payload = json.dumps(data)
-        request = requests.post(
-            url, data=payload, headers=self.HEADERS, auth=self.ES_AUTH
-        )
-        if not request.ok:
-            print(request.text)
+        response, status_code = ElasticWrap(path).post(data=data)
+        if status_code != 200:
+            print(response)
             raise ValueError("failed to mark video as watched")
 
     def mark_channel_watched(self):
         """change watched status of every video in channel"""
+        path = "ta_video/_update_by_query"
+        must_list = [
+            {"term": {"channel.channel_id": {"value": self.youtube_id}}},
+            {"term": {"player.watched": {"value": False}}},
+        ]
         data = {
-            "query": {
-                "bool": {
-                    "must": [
-                        {
-                            "term": {
-                                "channel.channel_id": {
-                                    "value": self.youtube_id
-                                }
-                            }
-                        },
-                        {"term": {"player.watched": {"value": False}}},
-                    ]
-                }
-            },
+            "query": {"bool": {"must": must_list}},
             "script": {
                 "source": "ctx._source.player['watched'] = true",
                 "lang": "painless",
             },
         }
-        payload = json.dumps(data)
-        url = f"{self.ES_URL}/ta_video/_update_by_query"
-        request = requests.post(
-            url, data=payload, headers=self.HEADERS, auth=self.ES_AUTH
-        )
-        if not request.ok:
-            print(request.text)
+
+        response, status_code = ElasticWrap(path).post(data=data)
+        if status_code != 200:
+            print(response)
             raise ValueError("failed mark channel as watched")
 
     def mark_playlist_watched(self):
         """change watched state of all videos in playlist"""
+        path = "ta_video/_update_by_query"
+        must_list = [
+            {"term": {"playlist.keyword": {"value": self.youtube_id}}},
+            {"term": {"player.watched": {"value": False}}},
+        ]
         data = {
-            "query": {
-                "bool": {
-                    "must": [
-                        {
-                            "term": {
-                                "playlist.keyword": {"value": self.youtube_id}
-                            }
-                        },
-                        {"term": {"player.watched": {"value": False}}},
-                    ]
-                }
-            },
+            "query": {"bool": {"must": must_list}},
             "script": {
                 "source": "ctx._source.player['watched'] = true",
                 "lang": "painless",
             },
         }
-        payload = json.dumps(data)
-        url = f"{self.ES_URL}/ta_video/_update_by_query"
-        request = requests.post(
-            url, data=payload, headers=self.HEADERS, auth=self.ES_AUTH
-        )
-        if not request.ok:
-            print(request.text)
+
+        response, status_code = ElasticWrap(path).post(data=data)
+        if status_code != 200:
+            print(response)
             raise ValueError("failed mark playlist as watched")

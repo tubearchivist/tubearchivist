@@ -566,6 +566,28 @@ button:hover {
     margin-bottom: 10px;
 }
 
+.overwrite-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+}
+
+.overwrite-form button {
+    width: 200px;
+}
+
+.overwrite-form-item {
+    margin-bottom: 1rem;
+}
+
+.overwrite-form-item input {
+    width: 90%;
+}
+
+.hidden-overwrite {
+    display: none;
+}
+
 /* login */
 .login-page {
     display: flex;
@@ -1062,7 +1084,10 @@ button:hover {
     .channel-list.grid,
     .video-item.list,
     .playlist-list.list,
-    .playlist-list.grid {
+    .playlist-list.grid,
+    .info-box-2,
+    .info-box-3,
+    .overwrite-form {
         grid-template-columns: 1fr;
     }
     .playlist-item.list {
@@ -1100,10 +1125,6 @@ button:hover {
     }
     .sort select {
         margin: unset;
-    }
-    .info-box-2,
-    .info-box-3 {
-        grid-template-columns: 1fr;
     }
     .description-box {
         display: block;

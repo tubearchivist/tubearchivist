@@ -1,7 +1,8 @@
 # build the tube archivist image from default python slim image
 
-FROM python:3.10.2-slim-bullseye
+FROM python:3.10.3-slim-bullseye
 ARG TARGETPLATFORM
+ARG INSTALL_DEBUG
 
 ENV PYTHONUNBUFFERED 1
 
@@ -24,6 +25,13 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ] ; then \
         rm ffmpeg.tar.xz \
     ; elif [ "$TARGETPLATFORM" = "linux/arm64" ] ; then \
         apt-get -y update && apt-get -y install --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/* \
+    ; fi
+
+# install debug tools for testing environment
+RUN if [ "$INSTALL_DEBUG" ] ; then \
+        apt-get -y update && apt-get -y install --no-install-recommends \
+        vim htop bmon net-tools iputils-ping procps \
+        && pip install --no-cache-dir ipython --src /usr/local/src \
     ; fi
 
 # make folders
