@@ -264,6 +264,13 @@ class HomeView(ArchivistResultsView):
 
     def _update_view_data(self):
         """update view specific data dict"""
+        self.data["sort"].extend(
+            [
+                {"channel.channel_name.keyword": {"order": "asc"}},
+                {"title.keyword": {"order": "asc"}},
+            ]
+        )
+
         if self.context["hide_watched"]:
             self.data["query"] = {"term": {"player.watched": {"value": False}}}
         if self.search_get:
@@ -425,14 +432,14 @@ class ChannelIdView(ArchivistResultsView):
 
     def _update_view_data(self, channel_id):
         """update view specific data dict"""
-        query = {
+        self.data["query"] = {
             "bool": {
                 "must": [
                     {"term": {"channel.channel_id": {"value": channel_id}}}
                 ]
             }
         }
-        self.data["query"] = query
+        self.data["sort"].append({"title.keyword": {"order": "asc"}})
 
         if self.context["hide_watched"]:
             to_append = {"term": {"player.watched": {"value": False}}}
