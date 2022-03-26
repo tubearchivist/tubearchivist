@@ -11,7 +11,7 @@ jobs:
                          flake8-comprehensions isort
       - run: black --check --diff --line-length 79 .
       - run: codespell
-      - run: flake8 . --count --max-complexity=12 --max-line-length=79
+      - run: flake8 . --count --max-complexity=10 --max-line-length=79
                       --show-source --statistics
       - run: isort --check-only --line-length 79 --profile black .
       # - run: pip install -r tubearchivist/requirements.txt

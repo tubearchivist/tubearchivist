@@ -91,7 +91,7 @@ function validate {
     echo "running codespell"
     codespell --skip="./.git" "$check_path"
     echo "running flake8"
-    flake8 "$check_path" --count --max-complexity=12 --max-line-length=79 \
+    flake8 "$check_path" --count --max-complexity=10 --max-line-length=79 \
         --show-source --statistics
     echo "running isort"
     isort --check-only --diff --profile black -l 79 "$check_path"
