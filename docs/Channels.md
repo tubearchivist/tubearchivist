@@ -22,5 +22,10 @@ Each channel will get a dedicated channel detail page accessible at `/channel/<c
 - You can *Show* the channel description, that matches with the *About* tab on YouTube.
 - The **Mark as Watched** button will mark all videos of this channel as watched.
 - The button **Delete Channel** will delete the channel plus all videos of this channel, both media files and metadata additionally this will also delete playlists metadata belonging to that channel.
-- The button **Find Playlists** will go out to youtube and look for playlists belonging to this channel and index all with at least one video downloaded. Only do this for channels where you care about playlists as this will slow down indexing new videos for having to check which playlist this belongs to.
 - The button **Show Playlists** will go to the [playlists](Playlists) page and filter the list to only show playlists from this channel.
+
+### Channel Customize
+Clicking on the *Configure* button will open a form with options to configure settings on a per channel basis. Any configurations here will overwrite your settings from the [settings](Settings) page.
+- **Download Format**: Overwrite the download qualities for videos from this channel.
+- **Auto Delete**: Automatically delete watched videos from this channel after selected days.
+- **Index Playlists**: Automatically add all Playlists with at least a video downloaded to your index. Only do this for channels where you care about playlists as this will slow down indexing new videos for having to check which playlist this belongs to.
