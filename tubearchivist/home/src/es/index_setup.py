@@ -54,14 +54,15 @@ class ElasticIndex:
 
     def validate_mappings(self):
         """check if all mappings are as expected"""
-
-        expected_map = self.expected_map
         now_map = self.details["mappings"]["properties"]
 
-        for key, value in expected_map.items():
+        for key, value in self.expected_map.items():
             # nested
             if list(value.keys()) == ["properties"]:
                 for key_n, value_n in value["properties"].items():
+                    if key not in now_map:
+                        print(key_n, value_n)
+                        return True
                     if key_n not in now_map[key]["properties"].keys():
                         print(key_n, value_n)
                         return True
