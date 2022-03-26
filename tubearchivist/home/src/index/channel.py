@@ -17,7 +17,7 @@ from home.src.download.thumbnails import ThumbManager
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.generic import YouTubeItem
 from home.src.index.playlist import YoutubePlaylist
-from home.src.ta.helper import clean_string
+from home.src.ta.helper import clean_string, requests_headers
 from home.src.ta.ta_redis import RedisArchivist
 
 
@@ -46,7 +46,9 @@ class ChannelScraper:
         print(f"{self.channel_id}: scrape channel data from youtube")
         url = f"https://www.youtube.com/channel/{self.channel_id}/about?hl=en"
         cookies = {"CONSENT": "YES+xxxxxxxxxxxxxxxxxxxxxxxxxxx"}
-        response = requests.get(url, cookies=cookies)
+        response = requests.get(
+            url, cookies=cookies, headers=requests_headers()
+        )
         if response.ok:
             channel_page = response.text
         else:

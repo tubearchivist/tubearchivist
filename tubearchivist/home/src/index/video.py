@@ -12,7 +12,11 @@ import requests
 from home.src.es.connect import ElasticWrap
 from home.src.index import channel as ta_channel
 from home.src.index.generic import YouTubeItem
-from home.src.ta.helper import DurationConverter, clean_string
+from home.src.ta.helper import (
+    DurationConverter,
+    clean_string,
+    requests_headers,
+)
 from ryd_client import ryd_client
 
 
@@ -115,9 +119,12 @@ class YoutubeSubtitle:
             dest_path = os.path.join(videos_base, subtitle["media_url"])
             source = subtitle["source"]
             lang = subtitle.get("lang")
-            response = requests.get(subtitle["url"])
+            response = requests.get(
+                subtitle["url"], headers=requests_headers()
+            )
             if not response.ok:
                 print(f"{self.video.youtube_id}: failed to download subtitle")
+                print(response.text)
                 continue
 
             parser = SubtitleParser(response.text, lang, source)
