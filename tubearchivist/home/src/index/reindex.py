@@ -221,6 +221,7 @@ class Reindex:
         print(f"reindexing {len(self.all_playlist_ids)} playlists")
         if self.all_playlist_ids:
             handler = PendingList()
+            handler.get_download()
             handler.get_indexed()
             all_indexed_ids = [i["youtube_id"] for i in handler.all_videos]
             for playlist_id in self.all_playlist_ids:
