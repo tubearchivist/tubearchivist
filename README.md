@@ -24,6 +24,9 @@
 * Play videos
 * Keep track of viewed and unviewed videos
 
+## Tube Archivist on YouTube
+[![ibracorp-youtube-video-thumb](assets/tube-archivist-ibracorp-O8H8Z01c0Ys.jpg)](https://www.youtube.com/watch?v=O8H8Z01c0Ys)
+
 ## Screenshots
 ![home screenshot](assets/tube-archivist-screenshot-home.png?raw=true "Tube Archivist Home")  
 *Home Page*
