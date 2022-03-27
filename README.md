@@ -73,6 +73,8 @@ Should that not be an option, the Tube Archivist container takes these two addit
 Changing any of these two environment variables will change the files *nginx.conf* and *uwsgi.ini* at startup using `sed` in your container.
 
 ### Elasticsearch
+**Note**: Newest Tube Archivist depends on Elasticsearch version 7.17 to provide an automatic updatepath. 
+
 Stores video meta data and makes everything searchable. Also keeps track of the download queue.
   - Needs to be accessible over the default port `9200`
   - Needs a volume at **/usr/share/elasticsearch/data** to store data
