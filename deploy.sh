@@ -130,10 +130,7 @@ function sync_docker {
     fi
 
     echo "latest tags:"
-    git tag
-
-    echo "latest docker images:"
-    sudo docker image ls bbilly1/tubearchivist
+    git tag | tail -n 10
 
     printf "\ncreate new version:\n"
     read -r VERSION
