@@ -143,14 +143,13 @@ bestvideo[VCODEC=avc1]+bestaudio[ACODEC=mp4a]/mp4
 5. Enjoy your archived collection!
   
 ## Roadmap
-We have come far, nonetheless we are not short of ideas on how to improve and extend this project:
+We have come far, nonetheless we are not short of ideas on how to improve and extend this project, in no particular order:
 
 - [ ] User roles
 - [ ] Podcast mode to serve channel as mp3
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
 - [ ] Implement [Apprise](https://github.com/caronc/apprise) for notifications
 - [ ] Add [SponsorBlock](https://sponsor.ajay.app/) integration
-- [ ] Implement per channel settings
 - [ ] User created playlists
 - [ ] Auto play or play next link
 - [ ] SSO / LDAP support
@@ -159,8 +158,11 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Show total video downloaded vs total videos available in channel
 - [ ] Make items in grid row configurable
 - [ ] Add statistics of index
+- [ ] Auto ignore videos by keyword
+- [ ] Custom searchable notes to videos, channels, playlists
 
 Implemented:
+- [X] Implement per channel settings [2022-03-26]
 - [X] Subtitle download & indexing [2022-02-13]
 - [X] Fancy advanced unified search interface [2022-01-08]
 - [X] Auto rescan and auto download on a schedule [2021-12-17]

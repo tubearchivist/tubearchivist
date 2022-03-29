@@ -8,6 +8,7 @@ import re
 import string
 import subprocess
 import unicodedata
+from datetime import datetime
 from urllib.parse import parse_qs, urlparse
 
 import yt_dlp
@@ -86,6 +87,16 @@ def requests_headers():
     )
 
     return {"User-Agent": template}
+
+
+def date_praser(timestamp):
+    """return formatted date string"""
+    if isinstance(timestamp, int):
+        date_obj = datetime.fromtimestamp(timestamp)
+    elif isinstance(timestamp, str):
+        date_obj = datetime.strptime(timestamp, "%Y-%m-%d")
+
+    return datetime.strftime(date_obj, "%d %b, %Y")
 
 
 class UrlListParser:

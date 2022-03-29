@@ -1,5 +1,6 @@
 """all API views"""
 
+from api.src.search_processor import SearchProcess
 from home.src.download.thumbnails import ThumbManager
 from home.src.es.connect import ElasticWrap
 from home.src.ta.config import AppConfig
@@ -36,7 +37,7 @@ class ApiBaseView(APIView):
         print(path)
         response, status_code = ElasticWrap(path).get()
         try:
-            self.response["data"] = response["_source"]
+            self.response["data"] = SearchProcess(response).process()
         except KeyError:
             print(f"item not found: {document_id}")
             self.response["data"] = False
@@ -69,8 +70,7 @@ class ApiBaseView(APIView):
         """get a list of results"""
         print(self.search_base)
         response, status_code = ElasticWrap(self.search_base).get(data=data)
-        all_hits = response["hits"]["hits"]
-        self.response["data"] = [i["_source"] for i in all_hits]
+        self.response["data"] = SearchProcess(response).process()
         self.status_code = status_code
 
 
@@ -87,6 +87,23 @@ class VideoApiView(ApiBaseView):
         self.get_document(video_id)
         self.process_keys()
         return Response(self.response, status=self.status_code)
+
+
+class VideoApiListView(ApiBaseView):
+    """resolves to /api/video/
+    GET: returns list of videos
+    """
+
+    search_base = "ta_video/_search/"
+
+    def get(self, request):
+        # pylint: disable=unused-argument
+        """get request"""
+        data = {"query": {"match_all": {}}}
+        self.get_document_list(data)
+        self.get_paginate()
+
+        return Response(self.response)
 
 
 class VideoProgressView(ApiBaseView):
