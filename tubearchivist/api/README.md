@@ -21,7 +21,7 @@ response = requests.get(url, headers=headers)
 ```
 
 ## Login View
-Return token and user ID for username and password:
+Return token and user ID for username and password:  
 POST /api/login
 ```json
 {
