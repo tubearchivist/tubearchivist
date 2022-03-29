@@ -89,6 +89,23 @@ class VideoApiView(ApiBaseView):
         return Response(self.response, status=self.status_code)
 
 
+class VideoApiListView(ApiBaseView):
+    """resolves to /api/video/
+    GET: returns list of videos
+    """
+
+    search_base = "ta_video/_search/"
+
+    def get(self, request):
+        # pylint: disable=unused-argument
+        """get request"""
+        data = {"query": {"match_all": {}}}
+        self.get_document_list(data)
+        self.get_paginate()
+
+        return Response(self.response)
+
+
 class VideoProgressView(ApiBaseView):
     """resolves to /api/video/<video_id>/
     handle progress status for video

@@ -38,6 +38,9 @@ after successful login returns
 }
 ```
 
+## Video List View
+/api/video/
+
 ## Video Item View
 /api/video/\<video_id>/
 
