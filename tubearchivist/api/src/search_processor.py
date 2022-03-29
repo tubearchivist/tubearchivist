@@ -35,15 +35,10 @@ class SearchProcess:
     def _process_result(self, result):
         """dedect which type of data to process"""
         index = result["_index"]
-        document_id = result["_id"]
         processed = False
         if index == "ta_video":
-            # process single video
-            print(f"{document_id}: processing video")
             processed = self._process_video(result["_source"])
         if index == "ta_channel":
-            # process single channel
-            print(f"{document_id}: processing channel")
             processed = self._process_channel(result["_source"])
 
         return processed
