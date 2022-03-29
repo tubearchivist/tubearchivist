@@ -5,6 +5,7 @@ from api.views import (
     ChannelApiView,
     DownloadApiListView,
     DownloadApiView,
+    LoginApiView,
     PlaylistApiView,
     VideoApiView,
     VideoProgressView,
@@ -12,6 +13,7 @@ from api.views import (
 from django.urls import path
 
 urlpatterns = [
+    path("login/", LoginApiView.as_view(), name="api-login"),
     path(
         "video/<slug:video_id>/",
         VideoApiView.as_view(),

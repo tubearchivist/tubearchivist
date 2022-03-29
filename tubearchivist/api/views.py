@@ -10,6 +10,8 @@ from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
 )
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -242,3 +244,23 @@ class DownloadApiListView(ApiBaseView):
         extrac_dl.delay(youtube_ids)
 
         return Response(data)
+
+
+class LoginApiView(ObtainAuthToken):
+    """resolves to /api/login/
+    POST: return token and username after successful login
+    """
+
+    def post(self, request, *args, **kwargs):
+        """post data"""
+        # pylint: disable=no-member
+        serializer = self.serializer_class(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+        token, _ = Token.objects.get_or_create(user=user)
+
+        print(f"returning token for user with id {user.pk}")
+
+        return Response({"token": token.key, "user_id": user.pk})

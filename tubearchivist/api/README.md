@@ -20,6 +20,24 @@ headers = {"Authorization": "Token xxxxxxxxxx"}
 response = requests.get(url, headers=headers)
 ```
 
+## Login View
+Return token and user ID for username and password:
+POST /api/login
+```json
+{
+    "username": "tubearchivist",
+    "password": "verysecret"
+}
+```
+
+after successful login returns 
+```json
+{
+    "token": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "user_id": 1
+}
+```
+
 ## Video Item View
 /api/video/\<video_id>/
 
