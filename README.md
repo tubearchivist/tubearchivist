@@ -143,7 +143,7 @@ bestvideo[VCODEC=avc1]+bestaudio[ACODEC=mp4a]/mp4
 5. Enjoy your archived collection!
   
 ## Roadmap
-We have come far, nonetheless we are not short of ideas on how to improve and extend this project, in no particular order:
+We have come far, nonetheless we are not short of ideas on how to improve and extend this project. Issues waiting for you to be tackled in no particular order:
 
 - [ ] User roles
 - [ ] Podcast mode to serve channel as mp3
@@ -158,6 +158,7 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Show total video downloaded vs total videos available in channel
 - [ ] Make items in grid row configurable to use more of the screen
 - [ ] Add statistics of index
+- [ ] Implement complete offline media file import from json file (#138)
 - [ ] Filter and query in search form, search by url query (#134, #139)
 - [ ] Auto ignore videos by keyword (#163)
 - [ ] Custom searchable notes to videos, channels, playlists (#144)
