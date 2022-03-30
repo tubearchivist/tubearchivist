@@ -148,18 +148,19 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] User roles
 - [ ] Podcast mode to serve channel as mp3
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
-- [ ] Implement [Apprise](https://github.com/caronc/apprise) for notifications
+- [ ] Implement [Apprise](https://github.com/caronc/apprise) for notifications (#97)
 - [ ] Add [SponsorBlock](https://sponsor.ajay.app/) integration
-- [ ] User created playlists
+- [ ] User created playlists (#108)
 - [ ] Auto play or play next link
 - [ ] SSO / LDAP support
 - [ ] Show similar videos on video page
 - [ ] Multi language support
 - [ ] Show total video downloaded vs total videos available in channel
-- [ ] Make items in grid row configurable
+- [ ] Make items in grid row configurable to use more of the screen
 - [ ] Add statistics of index
-- [ ] Auto ignore videos by keyword
-- [ ] Custom searchable notes to videos, channels, playlists
+- [ ] Filter and query in search form, search by url query (#134, #139)
+- [ ] Auto ignore videos by keyword (#163)
+- [ ] Custom searchable notes to videos, channels, playlists (#144)
 
 Implemented:
 - [X] Implement per channel settings [2022-03-26]
