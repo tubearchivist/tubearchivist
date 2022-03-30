@@ -29,3 +29,6 @@ So Docker is the only supported installation method. If you don't have any exper
 
 ## 4. Finetuning Elasticsearch
 A minimal configuration of Elasticsearch (ES) is provided in the example docker-compose.yml file. ES is highly configurable and very interesting to learn more about. Refer to the [documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html) if you want to get into it.
+
+## 5. Advanced Authentication
+If you like to use things like SSO, LDAP or 2FA to login, consider using something like Authelia as a reverse proxy so this project can focus on the core task. Tube Archivist has a *remember me* checkbox at login to extend your sessions lifetime in your browser. 

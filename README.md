@@ -152,7 +152,6 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Add [SponsorBlock](https://sponsor.ajay.app/) integration
 - [ ] User created playlists (#108)
 - [ ] Auto play or play next link
-- [ ] SSO / LDAP support
 - [ ] Show similar videos on video page
 - [ ] Multi language support
 - [ ] Show total video downloaded vs total videos available in channel
