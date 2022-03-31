@@ -11,11 +11,12 @@
         "default_popup": "index.html"
     },
     "permissions": [
-        "storage"
+        "storage",
+        "tabs"
     ],
     "content_scripts": [
         {
-            "matches": ["https://www.youtube.com/results*"],
+            "matches": ["https://www.youtube.com/*"],
             "js": ["script.js"]
         }
     ],

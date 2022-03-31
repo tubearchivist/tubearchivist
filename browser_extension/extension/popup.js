@@ -60,4 +60,34 @@ document.addEventListener("DOMContentLoaded", async () => {
         onGot(result)
     });
 
+    browserType.storage.local.get("youtube", function(result) {
+        downlodButton(result);
+    })
+
 })
+
+function downlodButton(result) {
+    console.log("running build dl button");
+    let download = document.getElementById("download");
+    let title = document.createElement("p");
+    title.innerText = result.youtube.title;
+
+    let button = document.createElement("button");
+    button.innerText = "download";
+    button.id = "downloadButton";
+    button.setAttribute("data-id", result.youtube.url);
+
+    button.addEventListener("click", function () {
+        console.log("send download message");
+        let payload = {
+            "download": {
+                "url": result.youtube.url
+            }
+        };
+        browserType.runtime.sendMessage(payload);
+    });
+
+    download.appendChild(title);
+    download.appendChild(button);
+    download.appendChild(document.createElement("hr"));
+}
