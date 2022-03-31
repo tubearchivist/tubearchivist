@@ -100,6 +100,33 @@ function validate {
 }
 
 
+# update latest tag compatible es for set and forget
+function sync_latest_es {
+
+    printf "\nsync new es version:\n"
+    read -r VERSION
+
+    if [[ $(systemctl is-active docker) != 'active' ]]; then
+        echo "starting docker"
+        sudo systemctl start docker
+    fi
+
+    sudo docker image pull docker.elastic.co/elasticsearch/elasticsearch:"$VERSION"
+
+    sudo docker tag \
+        docker.elastic.co/elasticsearch/elasticsearch:"$VERSION" \
+        bbilly1/tubearchivist-es
+
+    sudo docker tag \
+        docker.elastic.co/elasticsearch/elasticsearch:"$VERSION" \
+        bbilly1/tubearchivist-es:"$VERSION"
+
+    sudo docker push bbilly1/tubearchivist-es
+    sudo docker push bbilly1/tubearchivist-es:"$VERSION"
+
+}
+
+
 # publish unstable tag to docker
 function sync_unstable {
 
@@ -153,23 +180,23 @@ function sync_docker {
 }
 
 
-# check package versions in requirements.txt for updates
-python version_check.py
-
-
 if [[ $1 == "blackhole" ]]; then
     sync_blackhole
 elif [[ $1 == "test" ]]; then
     sync_test "$2"
 elif [[ $1 == "validate" ]]; then
+    # check package versions in requirements.txt for updates
+    python version_check.py
     validate "$2"
 elif [[ $1 == "docker" ]]; then
     sync_docker
     sync_unstable
 elif [[ $1 == "unstable" ]]; then
     sync_unstable
+elif [[ $1 == "es" ]]; then
+    sync_latest_es
 else
-    echo "valid options are: blackhole | test | validate | docker | unstable"
+    echo "valid options are: blackhole | test | validate | docker | unstable | es"
 fi
 
 
