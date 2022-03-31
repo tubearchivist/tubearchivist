@@ -20,6 +20,10 @@
             height: 1px;
             color: white;
             background-color: white;
+            margin: 10px 0;
+        }
+        #download {
+            text-align: center
         }
         .login-form {
             display: grid;
@@ -58,13 +62,14 @@
     <div class="container">
         <img src="/images/logo.svg" alt="ta-logo">
         <hr>
+        <div id="download"></div>
         <form class="login-form">
             <label for="url">Tube Archivist Url:</label>
             <input type="text" id="url" name="url">
             <label for="port">Tube Archivist Port:</label>
             <input type="text" id="port" name="port">
             <label for="api-key">API key:</label>
-            <input type="text" id="api-key" name="api-key">
+            <input type="password" id="api-key" name="api-key">
         </form>
         <div class="submit">
             <button onclick="storeLogin()" id="save-login">Save</button>

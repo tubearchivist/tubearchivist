@@ -8,7 +8,7 @@ let browserType = getBrowser();
 
 setTimeout(function(){
     console.log("running setimeout")
-    linkFinder();
+    sendUrl();
     return false;
 }, 2000);
 
@@ -30,43 +30,18 @@ function getBrowser() {
 }
 
 
-// event handler for download task
-function addToDownload(videoId) {
+function sendUrl() {
+    console.log("run sendUrl from script.js");
 
-    console.log(`downloading ${videoId}`);
     let payload = {
-        "download": {
-            "videoId": videoId
-        }
-    };
-
-    browserType.runtime.sendMessage(payload);
-
-}
-
-
-// find relevant links to add a button to
-function linkFinder() {
-
-    console.log("running link finder");
-
-    var allLinks = document.links;
-    for (let i = 0; i < allLinks.length; i++) {
-        
-        const linkItem = allLinks[i];
-        const linkDest = linkItem.getAttribute("href");
-
-        if (linkDest.startsWith("/watch?v=") && linkItem.id == "video-title") {
-            var dlButton = document.createElement("button");
-            dlButton.innerText = "download";
-            var videoId = linkDest.split("=")[1];
-            dlButton.setAttribute("data-id", videoId);
-            dlButton.setAttribute("id", "ta-dl-" + videoId);
-            dlButton.onclick = function(event) {
-                var videoId = this.getAttribute("data-id");
-                addToDownload(videoId);
-            };
-            linkItem.parentElement.appendChild(dlButton);
+        "youtube": {
+            "url": document.URL,
+            "title": document.title
         }
     }
-}
+    console.log(JSON.stringify(payload));
+    browserType.runtime.sendMessage(payload, function(response) {
+        console.log(response.farewell);
+    });
+
+};

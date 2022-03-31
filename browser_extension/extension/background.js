@@ -72,23 +72,27 @@ function forwardRequest(payload) {
 
 }
 
-
 // listen for messages
 browserType.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         console.log("responding from background.js listener");
         console.log(JSON.stringify(request));
-        if (request.download) {
-            console.log("found new download task");
+
+        if (request.youtube) {
+            browserType.storage.local.set(request, function() {
+                console.log("Stored history: " + JSON.stringify(request));
+            });
+        } else if (request.download) {
             let payload = {
                 "data": [
                     {
-                        "youtube_id": request.download["videoId"],
+                        "youtube_id": request.download["url"],
                         "status": "pending",
                     }
                 ]
             }
+            console.log(payload);
             forwardRequest(payload);
-        };
+        }
     }
 );
