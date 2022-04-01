@@ -104,3 +104,16 @@ POST /api/download/
 
 ## Download Queue Item View
 /api/download/\<video_id>/
+
+
+## Ping View
+Validate your connection with the API  
+GET /api/ping
+
+When valid returns message with user id: 
+```json
+{
+    "response": "pong",
+    "user": 1
+}
+```

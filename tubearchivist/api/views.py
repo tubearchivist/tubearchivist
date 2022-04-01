@@ -271,7 +271,7 @@ class PingView(ApiBaseView):
     @staticmethod
     def get(request):
         """get pong"""
-        data = {"pong": request.user.id}
+        data = {"response": "pong", "user": request.user.id}
         return Response(data)
 
 
