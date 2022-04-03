@@ -15,11 +15,11 @@ done
 
 # ugly nginx and uwsgi port overwrite with env vars
 if [[ -n "$TA_PORT" ]]; then
-    sed -i "s/8000/$TA_PORT/g" /etc/nginx/conf.d/nginx.conf
+    sed -i "s/8000/$TA_PORT/g" /etc/nginx/sites-available/default
 fi
 
 if [[ -n "$TA_UWSGI_PORT" ]]; then
-    sed -i "s/8080/$TA_UWSGI_PORT/g" /etc/nginx/conf.d/nginx.conf
+    sed -i "s/8080/$TA_UWSGI_PORT/g" /etc/nginx/sites-available/default
     sed -i "s/8080/$TA_UWSGI_PORT/g" /app/uwsgi.ini
 fi
 

@@ -44,7 +44,7 @@ COPY ./tubearchivist/requirements.txt /requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt --src /usr/local/src
 
 # copy config files
-COPY docker_assets/nginx.conf /etc/nginx/conf.d/
+COPY docker_assets/nginx.conf /etc/nginx/sites-available/default
 
 # copy application into container
 COPY ./tubearchivist /app

@@ -263,6 +263,18 @@ class DownloadApiListView(ApiBaseView):
         return Response(data)
 
 
+class PingView(ApiBaseView):
+    """resolves to /api/ping/
+    GET: test your connection
+    """
+
+    @staticmethod
+    def get(request):
+        """get pong"""
+        data = {"response": "pong", "user": request.user.id}
+        return Response(data)
+
+
 class LoginApiView(ObtainAuthToken):
     """resolves to /api/login/
     POST: return token and username after successful login

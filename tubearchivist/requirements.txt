@@ -4,7 +4,7 @@ Django==4.0.3
 django-cors-headers==3.11.0
 djangorestframework==3.13.1
 Pillow==9.0.1
-redis==4.2.0
+redis==4.2.1
 requests==2.27.1
 ryd-client==0.0.3
 uWSGI==2.0.20
