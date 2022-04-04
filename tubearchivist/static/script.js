@@ -331,8 +331,14 @@ var sponsorBlock = [];
 function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
     var videoData = getVideoData(videoId);
+
+    var sponsorBlockElements = '';
     if (videoData.config.downloads.integrate_sponsorblock) {
         sponsorBlock = videoData.data.sponsorblock;
+        sponsorBlockElements = `
+        <p id="sponsorBlockTimestamps"></p>
+        <button onclick="sendSponsorBlock()" id="sponsorBlockButton">SB: Start</button>
+        `;
     }
     var videoProgress = getVideoProgress(videoId).position;
     var videoName = videoData.data.title;
@@ -397,11 +403,50 @@ function createPlayer(button) {
                 ${playlist}
             </div>
             <a href="/video/${videoId}/"><h2 id="video-title">${videoName}</h2></a>
+            ${sponsorBlockElements}
         </div>
     </div>
     `;
     const divPlayer = document.getElementById("player");
     divPlayer.innerHTML = markup;
+}
+var sponsorBlockTimestamps = [];
+function sendSponsorBlock() {
+    var videoId = getVideoPlayerVideoId();
+    var duration = getVideoPlayerDuration();
+    var currentTime = getVideoPlayerCurrentTime();
+    if (sponsorBlockTimestamps[1]) {
+        var skipSegments = {
+            videoID: videoId,
+            startTime: sponsorBlockTimestamps[0],
+            endTime: sponsorBlockTimestamps[1],
+            category: "sponsor", // sponsor, selfpromo, interaction, intro, outro, preview, music_offtopic, filler
+            userID: "SomeUUID", // This should be a randomly generated UUID stored locally (not the public one)
+            userAgent: "TubeArchivist/1.0.0", // "Name of Client/Version" or "[BOT] Name of Bot/Version" ex. "Chromium/1.0.0"
+            videoDuration: duration, // Optional, duration of video, will attempt to retrieve from the YouTube API if missing (to be used to determine when a submission is out of date)
+        }; // Send to SB API, just need userID
+        var sponsorBlockTimestampsElement = document.getElementById("sponsorBlockButton");
+        sponsorBlockTimestampsElement.innerText = "SB: Start";
+        var sponsorBlockTimestampsElement = document.getElementById("sponsorBlockTimestamps");
+        sponsorBlockTimestampsElement.innerText = 'Timestamps sent!';
+        setTimeout(function(){
+            sponsorBlockTimestampsElement.innerText = '';
+        }, 3000);
+        sponsorBlockTimestamps = [];
+    } else if (sponsorBlockTimestamps[0]) {
+        sponsorBlockTimestamps.push(currentTime);
+        var sponsorBlockTimestampsElement = document.getElementById("sponsorBlockButton");
+        sponsorBlockTimestampsElement.innerText = "SB: Confirm";
+        var sponsorBlockTimestampsElement = document.getElementById("sponsorBlockTimestamps");
+        sponsorBlockTimestampsElement.innerText = `
+        Start: ${sponsorBlockTimestamps[0]}
+        End: ${sponsorBlockTimestamps[1]}
+        `;
+    } else {
+        sponsorBlockTimestamps.push(currentTime);
+        var sponsorBlockTimestampsElement = document.getElementById("sponsorBlockButton");
+        sponsorBlockTimestampsElement.innerText = "SB: End";
+    }
 }
 
 // Add video tag to video page when passed a video id, function loaded on page load `video.html (115-117)`
