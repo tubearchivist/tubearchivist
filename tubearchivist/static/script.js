@@ -327,9 +327,13 @@ function cancelDelete() {
 }
 
 // player
+var sponsorBlock = [];
 function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
     var videoData = getVideoData(videoId);
+    if (videoData.config.downloads.integrate_sponsorblock) {
+        sponsorBlock = videoData.data.sponsorblock;
+    }
     var videoProgress = getVideoProgress(videoId).position;
     var videoName = videoData.data.title;
 
@@ -488,6 +492,14 @@ function onVideoProgress() {
     var videoId = getVideoPlayerVideoId();
     var currentTime = getVideoPlayerCurrentTime();
     var duration = getVideoPlayerDuration();
+    if (sponsorBlock) {
+        for(let i = 0; i < sponsorBlock.length; i++) {
+            if(sponsorBlock[i].segment[0] <= currentTime + 0.1 && sponsorBlock[i].segment[0] >= currentTime - 0.1) {
+                var videoElement = getVideoPlayer();
+                videoElement.currentTime = sponsorBlock[i].segment[1];
+            }
+        }
+    }
     if ((currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
         postVideoProgress(videoId, currentTime);
         if (!getVideoPlayerWatchStatus()) { // Check if video is already marked as watched

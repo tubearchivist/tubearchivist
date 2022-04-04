@@ -114,6 +114,7 @@
 </div>
 <script>
     var videoData = getVideoData('{{ video.youtube_id }}');
+    sponsorBlock = videoData.data.sponsorblock;
     var videoProgress = getVideoProgress('{{ video.youtube_id }}').position;
     window.onload = insertVideoTag(videoData, videoProgress);
 </script>
