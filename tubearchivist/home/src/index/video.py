@@ -457,7 +457,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         print(f"{self.youtube_id}: get sponsorblock timestamps")
         response = requests.get(url)
         if not response.ok:
-            print(f"{self.youtube_id}: failed to get sponsorblock data")
+            print(f"{self.youtube_id}: sponsorblock failed: {response.text}")
             return
 
         self.json_data["sponsorblock"] = response.json()
