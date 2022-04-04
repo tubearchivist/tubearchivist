@@ -129,6 +129,11 @@
                 {{ app_form.downloads_integrate_ryd }}
             </div>
             <div class="settings-item">
+                <p>Integrate with <a href="https://sponsor.ajay.app/">SponsorBlock</a> to get sponsored timestamps: <span class="settings-current">{{ config.downloads.integrate_sponsorblock }}</span></p>
+                <i>Before activating that, make sure you have a scraping sleep interval of at least 3 secs set to avoid ratelimiting issues.</i><br>
+                {{ app_form.downloads_integrate_sponsorblock }}
+            </div>
+            <div class="settings-item">
                 <p>Current Cast integration: <span class="settings-current">{{ config.application.enable_cast }}</span></p>
                 <i>Enabling Cast will load an additional JS library from Google. HTTPS and a supported browser are required for this integration.</i><br>
                 {{ app_form.application_enable_cast }}

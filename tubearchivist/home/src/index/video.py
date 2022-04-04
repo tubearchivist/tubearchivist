@@ -306,6 +306,9 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         if self.config["downloads"]["integrate_ryd"]:
             self._get_ryd_stats()
 
+        if self.config["downloads"]["integrate_sponsorblock"]:
+            self._get_sponsorblock()
+
         return
 
     def _process_youtube_meta(self):
@@ -446,6 +449,18 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         self.json_data["stats"].update(dislikes)
 
         return True
+
+    def _get_sponsorblock(self):
+        """get optional sponsorblock timestamps from sponsor.ajay.app"""
+        api = "https://sponsor.ajay.app/api"
+        url = f"{api}/skipSegments?videoID={self.youtube_id}"
+        print(f"{self.youtube_id}: get sponsorblock timestamps")
+        response = requests.get(url)
+        if not response.ok:
+            print(f"{self.youtube_id}: failed to get sponsorblock data")
+            return
+
+        self.json_data["sponsorblock"] = response.json()
 
     def check_subtitles(self):
         """optionally add subtitles"""

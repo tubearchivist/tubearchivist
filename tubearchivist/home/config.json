@@ -27,7 +27,8 @@
         "subtitle_source": false,
         "subtitle_index": false,
         "throttledratelimit": false,
-        "integrate_ryd": false
+        "integrate_ryd": false,
+        "integrate_sponsorblock": false
     },
     "application": {
         "app_root": "/app",

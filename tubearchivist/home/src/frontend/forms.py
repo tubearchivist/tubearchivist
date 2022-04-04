@@ -62,6 +62,12 @@ class ApplicationSettingsForm(forms.Form):
         ("1", "enable ryd integration"),
     ]
 
+    SP_CHOICES = [
+        ("", "-- change sponsorblock integrations"),
+        ("0", "disable sponsorblock integration"),
+        ("1", "enable sponsorblock integration"),
+    ]
+
     CAST_CHOICES = [
         ("", "-- change Cast integration --"),
         ("0", "disable Cast"),
@@ -102,6 +108,9 @@ class ApplicationSettingsForm(forms.Form):
     )
     downloads_integrate_ryd = forms.ChoiceField(
         widget=forms.Select, choices=RYD_CHOICES, required=False
+    )
+    downloads_integrate_sponsorblock = forms.ChoiceField(
+        widget=forms.Select, choices=SP_CHOICES, required=False
     )
     application_enable_cast = forms.ChoiceField(
         widget=forms.Select, choices=CAST_CHOICES, required=False
