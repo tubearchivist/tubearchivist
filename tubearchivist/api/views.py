@@ -3,6 +3,7 @@
 from api.src.search_processor import SearchProcess
 from home.src.download.thumbnails import ThumbManager
 from home.src.es.connect import ElasticWrap
+from home.src.index.video import SponsorBlock
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import UrlListParser
 from home.src.ta.ta_redis import RedisArchivist
@@ -142,6 +143,55 @@ class VideoProgressView(ApiBaseView):
         self.response = {"progress-reset": video_id}
 
         return Response(self.response)
+
+
+class VideoSponsorView(ApiBaseView):
+    """resolves to /api/video/<video_id>/sponsor/
+    handle sponsor block integration
+    """
+
+    search_base = "ta_video/_doc/"
+
+    def get(self, request, video_id):
+        """get sponsor info"""
+        # pylint: disable=unused-argument
+
+        self.get_document(video_id)
+        sponsorblock = self.response["data"].get("sponsorblock")
+
+        return Response(sponsorblock)
+
+    def post(self, request, video_id):
+        """post verification and timestamps"""
+        if "segment" in request.data:
+            response, status_code = self._create_segment(request, video_id)
+        elif "vote" in request.data:
+            response, status_code = self._vote_on_segment(request)
+
+        return Response(response, status=status_code)
+
+    @staticmethod
+    def _create_segment(request, video_id):
+        """create segment in API"""
+        start_time = request.data["segment"]["startTime"]
+        end_time = request.data["segment"]["endTime"]
+        response, status_code = SponsorBlock(request.user.id).post_timestamps(
+            video_id, start_time, end_time
+        )
+
+        return response, status_code
+
+    @staticmethod
+    def _vote_on_segment(request):
+        """validate on existing segment"""
+        user_id = request.user.id
+        uuid = request.data["vote"]["uuid"]
+        vote = request.data["vote"]["yourVote"]
+        response, status_code = SponsorBlock(user_id).vote_on_segment(
+            uuid, vote
+        )
+
+        return response, status_code
 
 
 class ChannelApiView(ApiBaseView):

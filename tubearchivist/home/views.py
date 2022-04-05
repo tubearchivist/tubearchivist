@@ -9,6 +9,7 @@ import urllib.parse
 from time import sleep
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
@@ -122,6 +123,7 @@ class ArchivistViewConfig(View):
             "hide_watched": self._get_hide_watched(),
             "show_ignored_only": self._get_show_ignore_only(),
             "show_subed_only": self._get_show_subed_only(),
+            "version": settings.TA_VERSION,
         }
 
 
@@ -329,8 +331,11 @@ class AboutView(View):
     @staticmethod
     def get(request):
         """handle http get"""
-        colors = AppConfig(request.user.id).colors
-        context = {"title": "About", "colors": colors}
+        context = {
+            "title": "About",
+            "colors": AppConfig(request.user.id).colors,
+            "version": settings.TA_VERSION,
+        }
         return render(request, "home/about.html", context)
 
 
@@ -690,6 +695,7 @@ class VideoView(View):
             "title": video_title,
             "colors": colors,
             "cast": cast,
+            "version": settings.TA_VERSION,
         }
         return render(request, "home/video.html", context)
 
@@ -746,7 +752,10 @@ class SearchView(ArchivistResultsView):
         all_styles = self.get_all_view_styles()
         self.context.update({"all_styles": all_styles})
         self.context.update(
-            {"search_form": MultiSearchForm(initial=all_styles)}
+            {
+                "search_form": MultiSearchForm(initial=all_styles),
+                "version": settings.TA_VERSION,
+            }
         )
 
         return render(request, "home/search.html", self.context)
@@ -778,6 +787,7 @@ class SettingsView(View):
             "user_form": user_form,
             "app_form": app_form,
             "scheduler_form": scheduler_form,
+            "version": settings.TA_VERSION,
         }
 
         return render(request, "home/settings.html", context)
