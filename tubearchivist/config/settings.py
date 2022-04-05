@@ -151,3 +151,7 @@ CORS_ALLOWED_ORIGIN_REGEXES = [r"moz-extension://*", r"chrome-extension://*"]
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "mode",
 ]
+
+# TA application settings
+TA_UPSTREAM = "https://github.com/bbilly1/tubearchivist"
+TA_VERSION = "v0.1.3"
