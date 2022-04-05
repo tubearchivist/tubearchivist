@@ -150,6 +150,7 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
 - [ ] Implement [Apprise](https://github.com/caronc/apprise) for notifications (#97)
 - [ ] Add [SponsorBlock](https://sponsor.ajay.app/) integration
+- [ ] Add passing browser cookies to yt-dlp (#199)
 - [ ] User created playlists (#108)
 - [ ] Auto play or play next link
 - [ ] Show similar videos on video page
