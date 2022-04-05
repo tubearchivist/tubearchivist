@@ -9,14 +9,17 @@ import os
 from datetime import datetime
 
 import requests
+from django.conf import settings
 from home.src.es.connect import ElasticWrap
 from home.src.index import channel as ta_channel
 from home.src.index.generic import YouTubeItem
 from home.src.ta.helper import (
     DurationConverter,
     clean_string,
+    randomizor,
     requests_headers,
 )
+from home.src.ta.ta_redis import RedisArchivist
 from ryd_client import ryd_client
 
 
@@ -280,6 +283,59 @@ class SubtitleParser:
         return chunk_list
 
 
+class SponsorBlock:
+    """handle sponsor block integration"""
+
+    API = "https://sponsor.ajay.app/api"
+
+    def __init__(self, user_id=False):
+        self.user_id = user_id
+        self.user_agent = f"{settings.TA_UPSTREAM} {settings.TA_VERSION}"
+
+    def get_sb_id(self):
+        """get sponsorblock userid or generate if needed"""
+        if not self.user_id:
+            print("missing request user id")
+            raise ValueError
+
+        key = f"{self.user_id}:id_sponsorblock"
+        sb_id = RedisArchivist().get_message(key)
+        if not sb_id["status"]:
+            sb_id = {"status": randomizor(32)}
+            RedisArchivist().set_message(key, sb_id, expire=False)
+
+        return sb_id
+
+    def get_timestamps(self, youtube_id):
+        """get timestamps from the API"""
+        url = f"{self.API}/skipSegments?videoID={youtube_id}"
+        headers = {"User-Agent": self.user_agent}
+        print(f"{youtube_id}: get sponsorblock timestamps")
+        response = requests.get(url, headers=headers)
+        if not response.ok:
+            print(f"{youtube_id}: sponsorblock failed: {response.text}")
+            return False
+
+        return response.json()
+
+    def post_timestamps(self, youtube_id, start_time, end_time):
+        """post timestamps to api"""
+        user_id = self.get_sb_id().get("status")
+        data = {
+            "videoID": youtube_id,
+            "startTime": start_time,
+            "endTime": end_time,
+            "category": "sponsor",
+            "userID": user_id,
+            "userAgent": self.user_agent,
+        }
+        url = f"{self.API}/skipSegments?videoID={youtube_id}"
+        print(f"post: {data}")
+        print(f"to: {url}")
+
+        return {"success": True}, 200
+
+
 class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     """represents a single youtube video"""
 
@@ -452,15 +508,9 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def _get_sponsorblock(self):
         """get optional sponsorblock timestamps from sponsor.ajay.app"""
-        api = "https://sponsor.ajay.app/api"
-        url = f"{api}/skipSegments?videoID={self.youtube_id}"
-        print(f"{self.youtube_id}: get sponsorblock timestamps")
-        response = requests.get(url)
-        if not response.ok:
-            print(f"{self.youtube_id}: sponsorblock failed: {response.text}")
-            return
-
-        self.json_data["sponsorblock"] = response.json()
+        sponsorblock = SponsorBlock().get_timestamps(self.youtube_id)
+        if sponsorblock:
+            self.json_data["sponsorblock"] = sponsorblock
 
     def check_subtitles(self):
         """optionally add subtitles"""
