@@ -70,6 +70,43 @@ POST /api/video/\<video_id>/progress
 ### Delete player position of video
 DELETE /api/video/\<video_id>/progress  
 
+
+## Sponsor Block View
+/api/video/\<video_id>/sponsor/
+
+Integrate with sponsorblock
+
+### Get list of segments
+GET /api/video/\<video_id>/sponsor/
+
+
+### Vote on existing segment
+**This only simulates the request**  
+POST /api/video/\<video_id>/sponsor/
+```json
+{
+    "vote": {
+        "uuid": "<uuid>",
+        "yourVote": 1
+    }
+}
+```
+yourVote needs to be *int*: 0 for downvote, 1 for upvote, 20 to undo vote
+
+### Create new segment
+**This only simulates the request**  
+POST /api/video/\<video_id>/sponsor/
+```json
+{
+    "segment": {
+        "startTime": 5,
+        "endTime": 10
+    }
+}
+```
+Timestamps either *int* or *float*, end time can't be before start time.
+
+
 ## Channel List View
 /api/channel/
 
