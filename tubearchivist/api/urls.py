@@ -11,6 +11,7 @@ from api.views import (
     VideoApiListView,
     VideoApiView,
     VideoProgressView,
+    VideoSponsorView,
 )
 from django.urls import path
 
@@ -31,6 +32,11 @@ urlpatterns = [
         "video/<slug:video_id>/progress/",
         VideoProgressView.as_view(),
         name="api-video-progress",
+    ),
+    path(
+        "video/<slug:video_id>/sponsor/",
+        VideoSponsorView.as_view(),
+        name="api-video-sponsor",
     ),
     path(
         "channel/",

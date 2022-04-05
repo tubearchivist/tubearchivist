@@ -37,6 +37,12 @@ def ignore_filelist(filelist):
     return cleaned
 
 
+def randomizor(length):
+    """generate random alpha numeric string"""
+    pool = string.digits + string.ascii_letters
+    return "".join(random.choice(pool) for i in range(length))
+
+
 def requests_headers():
     """build header with random user agent for requests outside of yt-dlp"""
 
