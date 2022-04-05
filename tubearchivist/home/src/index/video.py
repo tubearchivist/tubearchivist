@@ -335,6 +335,20 @@ class SponsorBlock:
 
         return {"success": True}, 200
 
+    def vote_on_segment(self, uuid, vote):
+        """send vote on existing segment"""
+        user_id = self.get_sb_id().get("status")
+        data = {
+            "UUID": uuid,
+            "userID": user_id,
+            "type": vote,
+        }
+        url = f"{self.API}/api/voteOnSponsorTime"
+        print(f"post: {data}")
+        print(f"to: {url}")
+
+        return {"success": True}, 200
+
 
 class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     """represents a single youtube video"""
