@@ -335,13 +335,23 @@ function createPlayer(button) {
     var sponsorBlockElements = '';
     if (videoData.config.downloads.integrate_sponsorblock) {
         sponsorBlock = videoData.data.sponsorblock;
-        if (!sponsorBlock) {
-            sponsorBlockElements = `
-            <div class="sponsorblock" id="sponsorblock">
-                <img src="/static/img/PlayerStartIconSponsorBlocker.svg" class="sponsorblockIcon"><button onclick="sendSponsorBlock()">Start</button>
-            </div>
-            `;
-        }
+        // if (!sponsorBlock) {
+        //     sponsorBlockElements = `
+        //     <div class="sponsorblock" id="sponsorblock">
+        //         <img src="/static/img/PlayerStartIconSponsorBlocker.svg" class="sponsorblockIcon"><button onclick="sendSponsorBlockSegment()">Start</button>
+        //     </div>
+        //     `;
+        // } else {
+        //     for(let i in sponsorBlock) {
+        //         if(sponsorBlock[i].locked != 1) {
+        //             sponsorBlockElements = `
+        //             <div class="sponsorblock" id="sponsorblock">
+        //             </div>
+        //             `;
+        //             break;
+        //         }
+        //     }
+        // }
     }
     var videoProgress = getVideoProgress(videoId).position;
     var videoName = videoData.data.title;
@@ -406,68 +416,59 @@ function createPlayer(button) {
                 ${playlist}
             </div>
             <a href="/video/${videoId}/"><h2 id="video-title">${videoName}</h2></a>
-            ${sponsorBlockElements}
         </div>
     </div>
     `;
     const divPlayer = document.getElementById("player");
     divPlayer.innerHTML = markup;
 }
-var sponsorBlockTimestamps = [];
-function sendSponsorBlock() {
-    var videoId = getVideoPlayerVideoId();
-    var duration = getVideoPlayerDuration();
-    var currentTime = getVideoPlayerCurrentTime();
-    if (sponsorBlockTimestamps[1]) {
-        if (sponsorBlockTimestamps[1] > sponsorBlockTimestamps[0]) {
-            var skipSegments = {
-                videoID: videoId,
-                startTime: sponsorBlockTimestamps[0],
-                endTime: sponsorBlockTimestamps[1],
-                category: "sponsor", // sponsor, selfpromo, interaction, intro, outro, preview, music_offtopic, filler
-                userID: "SomeUUID", // This should be a randomly generated UUID stored locally (not the public one)
-                userAgent: "TubeArchivist/1.0.0", // "Name of Client/Version" or "[BOT] Name of Bot/Version" ex. "Chromium/1.0.0"
-                videoDuration: duration, // Optional, duration of video, will attempt to retrieve from the YouTube API if missing (to be used to determine when a submission is out of date)
-            }; 
-            // Send to SB API, just need userID
-            
-            var sponsorBlockElement = document.getElementById("sponsorblock");
-            sponsorBlockElement.innerHTML = `
-            <p>Timestamps sent! (Not really)</p>
-            `;
-            setTimeout(function(){
-                sponsorBlockElement.innerHTML = `
-                <img src="/static/img/PlayerStartIconSponsorBlocker.svg" class="sponsorblockIcon"><button onclick="sendSponsorBlock()">Start</button>
-                `;
-            }, 3000);
-        } else {
-            var sponsorBlockElement = document.getElementById("sponsorblock");
-            sponsorBlockElement.innerHTML = `
-            <span class="danger-zone">Invalid Timestamps!</span>
-            `;
-            setTimeout(function(){
-                sponsorBlockElement.innerHTML = `
-                <img src="/static/img/PlayerStartIconSponsorBlocker.svg" class="sponsorblockIcon"><button onclick="sendSponsorBlock()">Start</button>
-                `;
-            }, 3000);
-        }
-        sponsorBlockTimestamps = [];
-    } else if (sponsorBlockTimestamps[0]) {
-        sponsorBlockTimestamps.push(currentTime);
-        var sponsorBlockElement = document.getElementById("sponsorblock");
-        sponsorBlockElement.innerHTML = `
-        <img src="/static/img/PlayerStartIconSponsorBlocker.svg" class="sponsorblockIcon" onclick="getVideoPlayer().currentTime = '${sponsorBlockTimestamps[0]}'"><p>${sponsorBlockTimestamps[0].toFixed(1)} s</p>
-        <img src="/static/img/PlayerStopIconSponsorBlocker.svg" class="sponsorblockIcon" onclick="getVideoPlayer().currentTime = '${sponsorBlockTimestamps[1]}'"><p>${sponsorBlockTimestamps[1].toFixed(1)} s</p>
-        <img src="/static/img/PlayerUploadIconSponsorBlocker.svg" class="sponsorblockIcon"><button onclick="sendSponsorBlock()">Confirm</button>
-        `;
-    } else {
-        sponsorBlockTimestamps.push(currentTime);
-        var sponsorBlockElement = document.getElementById("sponsorblock");
-        sponsorBlockElement.innerHTML = `
-        <img src="/static/img/PlayerStopIconSponsorBlocker.svg" class="sponsorblockIcon"><button onclick="sendSponsorBlock()">End</button>
-        `;
-    }
-}
+
+// function sendSponsorBlockVote(uuid, vote) {
+//     var videoId = getVideoPlayerVideoId();
+//     postSponsorSegmentVote(videoId, uuid, vote);
+// }
+
+// var sponsorBlockTimestamps = [];
+// function sendSponsorBlockSegment() {
+//     var videoId = getVideoPlayerVideoId();
+//     var currentTime = getVideoPlayerCurrentTime();
+//     var sponsorBlockElement = document.getElementById("sponsorblock");
+//     if (sponsorBlockTimestamps[1]) {
+//         if (sponsorBlockTimestamps[1] > sponsorBlockTimestamps[0]) {
+//             postSponsorSegment(videoId, sponsorBlockTimestamps[0], sponsorBlockTimestamps[1]);
+//             sponsorBlockElement.innerHTML = `
+//             <p>Timestamps sent! (Not really)</p>
+//             `;
+//             setTimeout(function(){
+//                 sponsorBlockElement.innerHTML = `
+//                 <img src="/static/img/PlayerStartIconSponsorBlocker.svg" class="sponsorblockIcon"><button onclick="sendSponsorBlockSegment()">Start</button>
+//                 `;
+//             }, 3000);
+//         } else {
+//             sponsorBlockElement.innerHTML = `
+//             <span class="danger-zone">Invalid Timestamps!</span>
+//             `;
+//             setTimeout(function(){
+//                 sponsorBlockElement.innerHTML = `
+//                 <img src="/static/img/PlayerStartIconSponsorBlocker.svg" class="sponsorblockIcon"><button onclick="sendSponsorBlockSegment()">Start</button>
+//                 `;
+//             }, 3000);
+//         }
+//         sponsorBlockTimestamps = [];
+//     } else if (sponsorBlockTimestamps[0]) {
+//         sponsorBlockTimestamps.push(currentTime);
+//         sponsorBlockElement.innerHTML = `
+//         <img src="/static/img/PlayerStartIconSponsorBlocker.svg" class="sponsorblockIcon" onclick="getVideoPlayer().currentTime = '${sponsorBlockTimestamps[0]}'"><p>${sponsorBlockTimestamps[0].toFixed(1)} s | </p>
+//         <img src="/static/img/PlayerStopIconSponsorBlocker.svg" class="sponsorblockIcon" onclick="getVideoPlayer().currentTime = '${sponsorBlockTimestamps[1]}'"><p>${sponsorBlockTimestamps[1].toFixed(1)} s | </p>
+//         <img src="/static/img/PlayerUploadIconSponsorBlocker.svg" class="sponsorblockIcon"><button onclick="sendSponsorBlockSegment()">Confirm</button>
+//         `;
+//     } else {
+//         sponsorBlockTimestamps.push(currentTime);
+//         sponsorBlockElement.innerHTML = `
+//         <img src="/static/img/PlayerStopIconSponsorBlocker.svg" class="sponsorblockIcon"><button onclick="sendSponsorBlockSegment()">End</button>
+//         `;
+//     }
+// }
 
 // Add video tag to video page when passed a video id, function loaded on page load `video.html (115-117)`
 function insertVideoTag(videoData, videoProgress) {
@@ -557,12 +558,28 @@ function onVideoProgress() {
     var videoId = getVideoPlayerVideoId();
     var currentTime = getVideoPlayerCurrentTime();
     var duration = getVideoPlayerDuration();
+    var videoElement = getVideoPlayer();
+    // var sponsorBlockElement = document.getElementById("sponsorblock");
     if (sponsorBlock) {
-        for(let i = 0; i < sponsorBlock.length; i++) {
-            if(sponsorBlock[i].segment[0] <= currentTime + 0.1 && sponsorBlock[i].segment[0] >= currentTime - 0.1) {
-                var videoElement = getVideoPlayer();
+        for(let i in sponsorBlock) {
+            if(sponsorBlock[i].segment[0] <= currentTime + 0.3 && sponsorBlock[i].segment[0] >= currentTime) {
                 videoElement.currentTime = sponsorBlock[i].segment[1];
             }
+            // if(currentTime >= sponsorBlock[i].segment[1] && currentTime <= sponsorBlock[i].segment[1] + 0.2) {
+            //     if(sponsorBlock[i].locked != 1) {
+            //         sponsorBlockElement.innerHTML += `
+            //         <div id="${sponsorBlock[i].UUID}">
+            //             <button onclick="sendSponsorBlockVote('${sponsorBlock[i].UUID}', 1)">Up Vote</button>
+            //             <button onclick="sendSponsorBlockVote('${sponsorBlock[i].UUID}', -1)">Down Vote</button>
+            //         </div>`;
+            //     }
+            // }
+            // if(currentTime > sponsorBlock[i].segment[1] + 10) {
+            //     var sponsorBlockElementUUID = document.getElementById(sponsorBlock[i].UUID);
+            //     if(sponsorBlockElementUUID) {
+            //         sponsorBlockElementUUID.outerHTML = '';
+            //     }
+            // }
         }
     }
     if ((currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
@@ -675,6 +692,30 @@ function postVideoProgress(videoId, videoProgress) {
         }
     }
 }
+
+// Send sponsor segment when given video id and and timestamps
+// function postSponsorSegment(videoId, startTime, endTime) {
+//     var apiEndpoint = "/api/video/" + videoId + "/sponsor/";
+//     var data = {
+//         "segment": {
+//             "startTime": startTime,
+//             "endTime": endTime
+//         }
+//     };
+//     apiRequest(apiEndpoint, "POST", data);
+// }
+
+// Send sponsor segment when given video id and and timestamps
+// function postSponsorSegmentVote(videoId, uuid, vote) {
+//     var apiEndpoint = "/api/video/" + videoId + "/sponsor/";
+//     var data = {
+//         "vote": {
+//             "uuid": uuid,
+//             "yourVote": vote
+//         }
+//     };
+//     apiRequest(apiEndpoint, "POST", data);
+// }
 
 // Makes api requests when passed an endpoint and method ("GET", "POST", "DELETE")
 function apiRequest(apiEndpoint, method, data) {

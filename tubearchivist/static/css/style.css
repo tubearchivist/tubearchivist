@@ -286,19 +286,6 @@ button:hover {
     --connected-color: var(--accent-font-light);
 }
 
-.sponsorblock {
-    display: flex;
-    align-items: center;
-    margin-top: 10px;
-}
-
-.sponsorblockIcon {
-    height: 25px;
-    margin: 0;
-    padding: 0 0 0 5px;
-    cursor: pointer;
-    filter: var(--img-filter);
-}
 .alert-hover:hover {
     filter: var(--img-filter-error);
 }
