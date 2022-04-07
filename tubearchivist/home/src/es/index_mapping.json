@@ -73,6 +73,10 @@
                     "type": "text",
                     "index": false
                 },
+                "vid_thumb_base64": {
+                    "type": "text",
+                    "index": false
+                },
                 "date_downloaded": {
                     "type": "date"
                 },
