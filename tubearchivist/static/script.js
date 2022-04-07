@@ -332,7 +332,7 @@ function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
     var videoData = getVideoData(videoId);
 
-    var sponsorBlockElements = '';
+    // var sponsorBlockElements = '';
     if (videoData.config.downloads.integrate_sponsorblock) {
         sponsorBlock = videoData.data.sponsorblock;
         // if (!sponsorBlock) {
@@ -406,6 +406,7 @@ function createPlayer(button) {
     const markup = `
     <div class="video-player" data-id="${videoId}">
         ${videoTag}
+        <div class="notifications" id="notifications"></div>
         <div class="player-title boxed-content">
             <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
             ${watchStatusIndicator}
@@ -560,10 +561,12 @@ function onVideoProgress() {
     var duration = getVideoPlayerDuration();
     var videoElement = getVideoPlayer();
     // var sponsorBlockElement = document.getElementById("sponsorblock");
+    var notificationsElement = document.getElementById("notifications");
     if (sponsorBlock) {
         for(let i in sponsorBlock) {
             if(sponsorBlock[i].segment[0] <= currentTime + 0.3 && sponsorBlock[i].segment[0] >= currentTime) {
                 videoElement.currentTime = sponsorBlock[i].segment[1];
+                notificationsElement.innerHTML += `<h3 id="notification-${sponsorBlock[i].UUID}">Skipped sponsor segment from ${formatTime(sponsorBlock[i].segment[0])} to ${formatTime(sponsorBlock[i].segment[1])}.</h3>`;
             }
             // if(currentTime >= sponsorBlock[i].segment[1] && currentTime <= sponsorBlock[i].segment[1] + 0.2) {
             //     if(sponsorBlock[i].locked != 1) {
@@ -574,12 +577,12 @@ function onVideoProgress() {
             //         </div>`;
             //     }
             // }
-            // if(currentTime > sponsorBlock[i].segment[1] + 10) {
-            //     var sponsorBlockElementUUID = document.getElementById(sponsorBlock[i].UUID);
-            //     if(sponsorBlockElementUUID) {
-            //         sponsorBlockElementUUID.outerHTML = '';
-            //     }
-            // }
+            if(currentTime > sponsorBlock[i].segment[1] + 10) {
+                var notificationsElementUUID = document.getElementById("notification-" + sponsorBlock[i].UUID);
+                if(notificationsElementUUID) {
+                    notificationsElementUUID.outerHTML = '';
+                }
+            }
         }
     }
     if ((currentTime % 10).toFixed(1) <= 0.2) { // Check progress every 10 seconds or else progress is checked a few times a second
@@ -634,6 +637,32 @@ function formatNumbers(number) {
         var numberFormatted = numberUnformatted;
     }
     return numberFormatted;
+}
+
+// Formats times in seconds for frontend
+function formatTime(time) {
+    var hoursUnformatted = time / 3600;
+    var minutesUnformatted  = (time % 3600) / 60;
+    var secondsUnformatted  = time % 60;
+
+    var hoursFormatted = Math.trunc(hoursUnformatted);
+    if(minutesUnformatted < 10 && hoursFormatted > 0) {
+        var minutesFormatted  = "0" + Math.trunc(minutesUnformatted);
+    } else {
+        var minutesFormatted = Math.trunc(minutesUnformatted);
+    }
+    if(secondsUnformatted < 10) {
+        var secondsFormatted = "0" + Math.trunc(secondsUnformatted);
+    } else {
+        var secondsFormatted = Math.trunc(secondsUnformatted);
+    }
+
+    var timeUnformatted = '';
+    if(hoursFormatted > 0) {
+        timeUnformatted = hoursFormatted + ":"
+    }
+    var timeFormatted = timeUnformatted.concat(minutesFormatted, ":", secondsFormatted);
+    return timeFormatted;
 }
 
 // Gets video data when passed video ID

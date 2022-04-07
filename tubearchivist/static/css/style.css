@@ -355,6 +355,10 @@ button:hover {
     height: 100vh;
 }
 
+.notifications {
+    text-align: center;
+}
+
 .video-player video,
 .video-main video {
     max-height: 80vh;
