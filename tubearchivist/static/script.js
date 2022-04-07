@@ -332,26 +332,27 @@ function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
     var videoData = getVideoData(videoId);
 
-    // var sponsorBlockElements = '';
+    var sponsorBlockElements = '';
     if (videoData.config.downloads.integrate_sponsorblock) {
         sponsorBlock = videoData.data.sponsorblock;
-        // if (!sponsorBlock) {
-        //     sponsorBlockElements = `
-        //     <div class="sponsorblock" id="sponsorblock">
-        //         <img src="/static/img/PlayerStartIconSponsorBlocker.svg" class="sponsorblockIcon"><button onclick="sendSponsorBlockSegment()">Start</button>
-        //     </div>
-        //     `;
-        // } else {
-        //     for(let i in sponsorBlock) {
-        //         if(sponsorBlock[i].locked != 1) {
-        //             sponsorBlockElements = `
-        //             <div class="sponsorblock" id="sponsorblock">
-        //             </div>
-        //             `;
-        //             break;
-        //         }
-        //     }
-        // }
+        if (!sponsorBlock) {
+            sponsorBlockElements = `
+            <div class="sponsorblock" id="sponsorblock">
+                <h4>This video doesn't have any sponsor segments added. To add a segment go to <u><a href="https://www.youtube.com/watch?v=${videoId}">this video</a></u> and add a segment using the <u><a href="https://sponsor.ajay.app/">SponsorBlock</a></u> extension.</h4>
+            </div>
+            `;
+        } else {
+            for(let i in sponsorBlock) {
+                if(sponsorBlock[i].locked != 1) {
+                    sponsorBlockElements = `
+                    <div class="sponsorblock" id="sponsorblock">
+                        <h4>This video has unlocked sponsor segments. Go to <u><a href="https://www.youtube.com/watch?v=${videoId}">this video</a></u> and add vote on the segments using the <u><a href="https://sponsor.ajay.app/">SponsorBlock</a></u> extension.</h4>
+                    </div>
+                    `;
+                    break;
+                }
+            }
+        }
     }
     var videoProgress = getVideoProgress(videoId).position;
     var videoName = videoData.data.title;
@@ -407,6 +408,7 @@ function createPlayer(button) {
     <div class="video-player" data-id="${videoId}">
         ${videoTag}
         <div class="notifications" id="notifications"></div>
+        ${sponsorBlockElements}
         <div class="player-title boxed-content">
             <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
             ${watchStatusIndicator}
