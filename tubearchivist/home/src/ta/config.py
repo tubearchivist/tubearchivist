@@ -220,6 +220,10 @@ class ScheduleBuilder:
             raise ValueError("invalid input")
 
         to_write = dict(zip(keys, values))
+        all_hours = [int(i) for i in re.split(r"\D+", to_write["hour"])]
+        if max(all_hours) > 23:
+            print("hour can't be greater than 23")
+            raise ValueError("invalid input")
         try:
             int(to_write["minute"])
         except ValueError as error:
