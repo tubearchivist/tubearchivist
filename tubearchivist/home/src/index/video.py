@@ -498,7 +498,10 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
         for media_url in to_del:
             file_path = os.path.join(video_base, media_url)
-            os.remove(file_path)
+            try:
+                os.remove(file_path)
+            except FileNotFoundError:
+                print(f"{self.youtube_id}: failed {media_url}, continue.")
 
         self.del_in_es()
         self.delete_subtitles()
