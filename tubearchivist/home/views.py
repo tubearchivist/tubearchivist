@@ -111,7 +111,7 @@ class ArchivistViewConfig(View):
         """build default context for every view"""
         self.user_id = user_id
         self.user_conf = RedisArchivist()
-        self.default_conf = AppConfig().config
+        self.default_conf = AppConfig(self.user_id).config
 
         self.context = {
             "colors": self.default_conf["application"]["colors"],
