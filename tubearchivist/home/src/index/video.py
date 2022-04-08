@@ -358,9 +358,10 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     index_name = "ta_video"
     yt_base = "https://www.youtube.com/watch?v="
 
-    def __init__(self, youtube_id):
+    def __init__(self, youtube_id, video_overwrites=False):
         super().__init__(youtube_id)
         self.channel_id = False
+        self.video_overwrites = video_overwrites
         self.es_path = f"{self.index_name}/_doc/{youtube_id}"
 
     def build_json(self):
@@ -377,10 +378,23 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         if self.config["downloads"]["integrate_ryd"]:
             self._get_ryd_stats()
 
-        if self.config["downloads"]["integrate_sponsorblock"]:
+        if self._check_get_sb():
             self._get_sponsorblock()
 
         return
+
+    def _check_get_sb(self):
+        """check if need to run sponsor block"""
+        if self.config["downloads"]["integrate_sponsorblock"]:
+            return True
+        try:
+            single_overwrite = self.video_overwrites[self.youtube_id]
+            _ = single_overwrite["integrate_sponsorblock"]
+            return True
+        except KeyError:
+            return False
+
+        return False
 
     def _process_youtube_meta(self):
         """extract relevant fields from youtube"""
@@ -547,9 +561,9 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         _, _ = ElasticWrap(path).post(data=data)
 
 
-def index_new_video(youtube_id):
+def index_new_video(youtube_id, video_overwrites=False):
     """combined classes to create new video in index"""
-    video = YoutubeVideo(youtube_id)
+    video = YoutubeVideo(youtube_id, video_overwrites=video_overwrites)
     video.build_json()
     if not video.json_data:
         raise ValueError("failed to get metadata for " + youtube_id)
