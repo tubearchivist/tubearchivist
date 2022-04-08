@@ -198,8 +198,17 @@ class ChannelOverwriteForm(forms.Form):
         ("1", "Enable playlist index"),
     ]
 
+    SP_CHOICES = [
+        ("", "-- change sponsorblock integrations"),
+        ("0", "disable sponsorblock integration"),
+        ("1", "enable sponsorblock integration"),
+    ]
+
     download_format = forms.CharField(label=False, required=False)
     autodelete_days = forms.IntegerField(label=False, required=False)
     index_playlists = forms.ChoiceField(
         widget=forms.Select, choices=PLAYLIST_INDEX, required=False
+    )
+    integrate_sponsorblock = forms.ChoiceField(
+        widget=forms.Select, choices=SP_CHOICES, required=False
     )

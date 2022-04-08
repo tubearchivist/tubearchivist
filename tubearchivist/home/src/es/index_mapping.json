@@ -50,6 +50,9 @@
                         },
                         "index_playlists": {
                             "type": "boolean"
+                        },
+                        "integrate_sponsorblock": {
+                            "type" : "boolean"
                         }
                     }
                 }
@@ -70,6 +73,10 @@
             "index_name": "video",
             "expected_map": {
                 "vid_thumb_url": {
+                    "type": "text",
+                    "index": false
+                },
+                "vid_thumb_base64": {
                     "type": "text",
                     "index": false
                 },
@@ -126,6 +133,9 @@
                                 },
                                 "index_playlists": {
                                     "type": "boolean"
+                                },
+                                "integrate_sponsorblock": {
+                                    "type" : "boolean"
                                 }
                             }
                         }

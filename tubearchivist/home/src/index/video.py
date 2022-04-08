@@ -10,6 +10,7 @@ from datetime import datetime
 
 import requests
 from django.conf import settings
+from home.src.download.thumbnails import ThumbManager
 from home.src.es.connect import ElasticWrap
 from home.src.index import channel as ta_channel
 from home.src.index.generic import YouTubeItem
@@ -357,9 +358,10 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     index_name = "ta_video"
     yt_base = "https://www.youtube.com/watch?v="
 
-    def __init__(self, youtube_id):
+    def __init__(self, youtube_id, video_overwrites=False):
         super().__init__(youtube_id)
         self.channel_id = False
+        self.video_overwrites = video_overwrites
         self.es_path = f"{self.index_name}/_doc/{youtube_id}"
 
     def build_json(self):
@@ -376,10 +378,23 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         if self.config["downloads"]["integrate_ryd"]:
             self._get_ryd_stats()
 
-        if self.config["downloads"]["integrate_sponsorblock"]:
+        if self._check_get_sb():
             self._get_sponsorblock()
 
         return
+
+    def _check_get_sb(self):
+        """check if need to run sponsor block"""
+        if self.config["downloads"]["integrate_sponsorblock"]:
+            return True
+        try:
+            single_overwrite = self.video_overwrites[self.youtube_id]
+            _ = single_overwrite["integrate_sponsorblock"]
+            return True
+        except KeyError:
+            return False
+
+        return False
 
     def _process_youtube_meta(self):
         """extract relevant fields from youtube"""
@@ -389,12 +404,14 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
         published = upload_date_time.strftime("%Y-%m-%d")
         last_refresh = int(datetime.now().strftime("%s"))
+        base64_blur = ThumbManager().get_base64_blur(self.youtube_id)
         # build json_data basics
         self.json_data = {
             "title": self.youtube_meta["title"],
             "description": self.youtube_meta["description"],
             "category": self.youtube_meta["categories"],
             "vid_thumb_url": self.youtube_meta["thumbnail"],
+            "vid_thumb_base64": base64_blur,
             "tags": self.youtube_meta["tags"],
             "published": published,
             "vid_last_refresh": last_refresh,
@@ -495,7 +512,10 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
         for media_url in to_del:
             file_path = os.path.join(video_base, media_url)
-            os.remove(file_path)
+            try:
+                os.remove(file_path)
+            except FileNotFoundError:
+                print(f"{self.youtube_id}: failed {media_url}, continue.")
 
         self.del_in_es()
         self.delete_subtitles()
@@ -541,9 +561,9 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         _, _ = ElasticWrap(path).post(data=data)
 
 
-def index_new_video(youtube_id):
+def index_new_video(youtube_id, video_overwrites=False):
     """combined classes to create new video in index"""
-    video = YoutubeVideo(youtube_id)
+    video = YoutubeVideo(youtube_id, video_overwrites=video_overwrites)
     video.build_json()
     if not video.json_data:
         raise ValueError("failed to get metadata for " + youtube_id)

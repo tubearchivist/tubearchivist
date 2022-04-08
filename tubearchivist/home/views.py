@@ -8,7 +8,6 @@ import json
 import urllib.parse
 from time import sleep
 
-from django import forms
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
@@ -112,7 +111,7 @@ class ArchivistViewConfig(View):
         """build default context for every view"""
         self.user_id = user_id
         self.user_conf = RedisArchivist()
-        self.default_conf = AppConfig().config
+        self.default_conf = AppConfig(self.user_id).config
 
         self.context = {
             "colors": self.default_conf["application"]["colors"],
@@ -671,7 +670,7 @@ class VideoView(View):
 
     def get(self, request, video_id):
         """get single video"""
-        colors, cast = self.read_config(user_id=request.user.id)
+        config_handler = AppConfig(request.user.id)
         path = f"ta_video/_doc/{video_id}"
         look_up = SearchHandler(path, config=False)
         video_hit = look_up.get_data()
@@ -693,9 +692,10 @@ class VideoView(View):
             "video": video_data,
             "playlist_nav": playlist_nav,
             "title": video_title,
-            "colors": colors,
-            "cast": cast,
+            "colors": config_handler.colors,
+            "cast": config_handler.config["application"]["enable_cast"],
             "version": settings.TA_VERSION,
+            "config": config_handler.config,
         }
         return render(request, "home/video.html", context)
 
@@ -711,14 +711,6 @@ class VideoView(View):
                 all_navs.append(playlist.nav)
 
         return all_navs
-
-    @staticmethod
-    def read_config(user_id):
-        """read config file"""
-        config_handler = AppConfig(user_id)
-        cast = config_handler.config["application"]["enable_cast"]
-        colors = config_handler.colors
-        return colors, cast
 
     @staticmethod
     def star_creator(rating):
@@ -802,23 +794,25 @@ class SettingsView(View):
     @staticmethod
     def post(request):
         """handle form post to update settings"""
+        user_form = UserSettingsForm(request.POST)
+        if user_form.is_valid():
+            user_form_post = user_form.cleaned_data
+            if any(user_form_post.values()):
+                AppConfig().set_user_config(user_form_post, request.user.id)
 
-        form_response = forms.Form(request.POST)
-        if form_response.is_valid():
-            form_post = dict(request.POST)
-            print(form_post)
-            del form_post["csrfmiddlewaretoken"]
-            config_handler = AppConfig()
-            if "application-settings" in form_post:
-                del form_post["application-settings"]
-                config_handler.update_config(form_post)
-            elif "user-settings" in form_post:
-                del form_post["user-settings"]
-                config_handler.set_user_config(form_post, request.user.id)
-            elif "scheduler-settings" in form_post:
-                del form_post["scheduler-settings"]
-                print(form_post)
-                ScheduleBuilder().update_schedule_conf(form_post)
+        app_form = ApplicationSettingsForm(request.POST)
+        if app_form.is_valid():
+            app_form_post = app_form.cleaned_data
+            if app_form_post:
+                print(app_form_post)
+                AppConfig().update_config(app_form_post)
+
+        scheduler_form = SchedulerSettingsForm(request.POST)
+        if scheduler_form.is_valid():
+            scheduler_form_post = scheduler_form.cleaned_data
+            if any(scheduler_form_post.values()):
+                print(scheduler_form_post)
+                ScheduleBuilder().update_schedule_conf(scheduler_form_post)
 
         sleep(1)
         return redirect("settings", permanent=True)

@@ -86,7 +86,8 @@ class VideoApiView(ApiBaseView):
         # pylint: disable=unused-argument
         """get request"""
         self.get_document(video_id)
-        self.process_keys()
+        if self.response.get("data"):
+            self.process_keys()
         return Response(self.response, status=self.status_code)
 
 

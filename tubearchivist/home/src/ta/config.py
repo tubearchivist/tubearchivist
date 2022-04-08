@@ -83,33 +83,32 @@ class AppConfig:
 
     def update_config(self, form_post):
         """update config values from settings form"""
-        config = self.config
         for key, value in form_post.items():
-            to_write = value[0]
-            if len(to_write):
-                if to_write == "0":
-                    to_write = False
-                elif to_write == "1":
-                    to_write = True
-                elif to_write.isdigit():
-                    to_write = int(to_write)
+            if not value and not isinstance(value, int):
+                continue
 
-                config_dict, config_value = key.split("_", maxsplit=1)
-                config[config_dict][config_value] = to_write
+            if value in ["0", 0]:
+                to_write = False
+            elif value == "1":
+                to_write = True
+            else:
+                to_write = value
 
-        RedisArchivist().set_message("config", config, expire=False)
+            config_dict, config_value = key.split("_", maxsplit=1)
+            self.config[config_dict][config_value] = to_write
+
+        RedisArchivist().set_message("config", self.config, expire=False)
 
     @staticmethod
     def set_user_config(form_post, user_id):
         """set values in redis for user settings"""
         for key, value in form_post.items():
-            to_write = value[0]
-            if len(to_write):
-                if to_write.isdigit():
-                    to_write = int(to_write)
-                message = {"status": to_write}
-                redis_key = f"{user_id}:{key}"
-                RedisArchivist().set_message(redis_key, message, expire=False)
+            if not value:
+                continue
+
+            message = {"status": value}
+            redis_key = f"{user_id}:{key}"
+            RedisArchivist().set_message(redis_key, message, expire=False)
 
     def get_colors(self):
         """overwrite config if user has set custom values"""
@@ -172,12 +171,11 @@ class ScheduleBuilder:
         print("processing form, restart container for changes to take effect")
         redis_config = self.config
         for key, value in form_post.items():
-            to_check = value[0]
-            if key in self.SCHEDULES and to_check:
+            if key in self.SCHEDULES and value:
                 try:
-                    to_write = self.value_builder(key, to_check)
+                    to_write = self.value_builder(key, value)
                 except ValueError:
-                    print(f"failed: {key} {to_check}")
+                    print(f"failed: {key} {value}")
                     mess_dict = {
                         "status": "message:setting",
                         "level": "error",
@@ -188,8 +186,8 @@ class ScheduleBuilder:
                     return
 
                 redis_config["scheduler"][key] = to_write
-            if key in self.CONFIG and to_check:
-                redis_config["scheduler"][key] = int(to_check)
+            if key in self.CONFIG and value:
+                redis_config["scheduler"][key] = int(value)
         RedisArchivist().set_message("config", redis_config, expire=False)
         mess_dict = {
             "status": "message:setting",
@@ -199,29 +197,33 @@ class ScheduleBuilder:
         }
         RedisArchivist().set_message("message:setting", mess_dict)
 
-    def value_builder(self, key, to_check):
+    def value_builder(self, key, value):
         """validate single cron form entry and return cron dict"""
-        print(f"change schedule for {key} to {to_check}")
-        if to_check == "0":
+        print(f"change schedule for {key} to {value}")
+        if value == "0":
             # deactivate this schedule
             return False
-        if re.search(r"[\d]{1,2}\/[\d]{1,2}", to_check):
+        if re.search(r"[\d]{1,2}\/[\d]{1,2}", value):
             # number/number cron format will fail in celery
             print("number/number schedule formatting not supported")
             raise ValueError
 
         keys = ["minute", "hour", "day_of_week"]
-        if to_check == "auto":
+        if value == "auto":
             # set to sensible default
             values = self.SCHEDULES[key].split()
         else:
-            values = to_check.split()
+            values = value.split()
 
         if len(keys) != len(values):
-            print(f"failed to parse {to_check} for {key}")
+            print(f"failed to parse {value} for {key}")
             raise ValueError("invalid input")
 
         to_write = dict(zip(keys, values))
+        all_hours = [int(i) for i in re.split(r"\D+", to_write["hour"])]
+        if max(all_hours) > 23:
+            print("hour can't be greater than 23")
+            raise ValueError("invalid input")
         try:
             int(to_write["minute"])
         except ValueError as error:

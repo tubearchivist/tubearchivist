@@ -4,8 +4,10 @@ functionality:
 - check for missing thumbnails
 """
 
+import base64
 import os
 from collections import Counter
+from io import BytesIO
 from time import sleep
 
 import requests
@@ -15,7 +17,7 @@ from home.src.ta.config import AppConfig
 from home.src.ta.helper import ignore_filelist
 from home.src.ta.ta_redis import RedisArchivist
 from mutagen.mp4 import MP4, MP4Cover
-from PIL import Image
+from PIL import Image, ImageFilter
 
 
 class ThumbManager:
@@ -240,6 +242,21 @@ class ThumbManager:
                 "message": "Downloading Playlist Art.",
             }
             RedisArchivist().set_message("message:download", mess_dict)
+
+    def get_base64_blur(self, youtube_id):
+        """return base64 encoded placeholder"""
+        img_path = self.vid_thumb_path(youtube_id)
+        file_path = os.path.join(self.CACHE_DIR, img_path)
+        img_raw = Image.open(file_path)
+        img_raw.thumbnail((img_raw.width // 20, img_raw.height // 20))
+        img_blur = img_raw.filter(ImageFilter.BLUR)
+        buffer = BytesIO()
+        img_blur.save(buffer, format="JPEG")
+        img_data = buffer.getvalue()
+        img_base64 = base64.b64encode(img_data).decode()
+        data_url = f"data:image/jpg;base64,{img_base64}"
+
+        return data_url
 
     @staticmethod
     def vid_thumb_path(youtube_id):
