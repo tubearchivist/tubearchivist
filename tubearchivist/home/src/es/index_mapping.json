@@ -50,6 +50,9 @@
                         },
                         "index_playlists": {
                             "type": "boolean"
+                        },
+                        "integrate_sponsorblock": {
+                            "type" : "boolean"
                         }
                     }
                 }
@@ -130,6 +133,9 @@
                                 },
                                 "index_playlists": {
                                     "type": "boolean"
+                                },
+                                "integrate_sponsorblock": {
+                                    "type" : "boolean"
                                 }
                             }
                         }
