@@ -333,7 +333,7 @@ function createPlayer(button) {
     var videoData = getVideoData(videoId);
 
     var sponsorBlockElements = '';
-    if (videoData.config.downloads.integrate_sponsorblock) {
+    if (videoData.config.downloads.integrate_sponsorblock && (typeof(videoData.data.channel.channel_overwrites) == "undefined" || typeof(videoData.data.channel.channel_overwrites.integrate_sponsorblock) == "undefined" || videoData.data.channel.channel_overwrites.integrate_sponsorblock == true)) {
         sponsorBlock = videoData.data.sponsorblock;
         if (!sponsorBlock) {
             sponsorBlockElements = `
