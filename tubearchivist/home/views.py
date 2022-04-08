@@ -670,7 +670,7 @@ class VideoView(View):
 
     def get(self, request, video_id):
         """get single video"""
-        colors, cast = self.read_config(user_id=request.user.id)
+        config_handler = AppConfig(request.user.id)
         path = f"ta_video/_doc/{video_id}"
         look_up = SearchHandler(path, config=False)
         video_hit = look_up.get_data()
@@ -692,9 +692,10 @@ class VideoView(View):
             "video": video_data,
             "playlist_nav": playlist_nav,
             "title": video_title,
-            "colors": colors,
-            "cast": cast,
+            "colors": config_handler.colors,
+            "cast": config_handler.config["application"]["enable_cast"],
             "version": settings.TA_VERSION,
+            "config": config_handler.config,
         }
         return render(request, "home/video.html", context)
 
@@ -710,14 +711,6 @@ class VideoView(View):
                 all_navs.append(playlist.nav)
 
         return all_navs
-
-    @staticmethod
-    def read_config(user_id):
-        """read config file"""
-        config_handler = AppConfig(user_id)
-        cast = config_handler.config["application"]["enable_cast"]
-        colors = config_handler.colors
-        return colors, cast
 
     @staticmethod
     def star_creator(rating):
