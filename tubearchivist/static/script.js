@@ -377,7 +377,6 @@ function createPlayer(button) {
     var channelName = videoData.data.channel.channel_name;
 
     removePlayer();
-    // document.getElementById(videoId).outerHTML = ''; // Remove watch indicator from video info
 
     // If cast integration is enabled create cast button
     var castButton = '';
@@ -725,28 +724,28 @@ function postVideoProgress(videoId, videoProgress) {
 }
 
 // Send sponsor segment when given video id and and timestamps
-// function postSponsorSegment(videoId, startTime, endTime) {
-//     var apiEndpoint = "/api/video/" + videoId + "/sponsor/";
-//     var data = {
-//         "segment": {
-//             "startTime": startTime,
-//             "endTime": endTime
-//         }
-//     };
-//     apiRequest(apiEndpoint, "POST", data);
-// }
+function postSponsorSegment(videoId, startTime, endTime) {
+    var apiEndpoint = "/api/video/" + videoId + "/sponsor/";
+    var data = {
+        "segment": {
+            "startTime": startTime,
+            "endTime": endTime
+        }
+    };
+    apiRequest(apiEndpoint, "POST", data);
+}
 
 // Send sponsor segment when given video id and and timestamps
-// function postSponsorSegmentVote(videoId, uuid, vote) {
-//     var apiEndpoint = "/api/video/" + videoId + "/sponsor/";
-//     var data = {
-//         "vote": {
-//             "uuid": uuid,
-//             "yourVote": vote
-//         }
-//     };
-//     apiRequest(apiEndpoint, "POST", data);
-// }
+function postSponsorSegmentVote(videoId, uuid, vote) {
+    var apiEndpoint = "/api/video/" + videoId + "/sponsor/";
+    var data = {
+        "vote": {
+            "uuid": uuid,
+            "yourVote": vote
+        }
+    };
+    apiRequest(apiEndpoint, "POST", data);
+}
 
 // Makes api requests when passed an endpoint and method ("GET", "POST", "DELETE")
 function apiRequest(apiEndpoint, method, data) {
