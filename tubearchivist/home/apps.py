@@ -97,9 +97,8 @@ class StartupCheck:
 
         if invalid:
             print(
-                "minial required elasticsearch version: "
-                + f"{self.MIN_MAJOR}.{self.MIN_MINOR}, "
-                + "please update to recommended version."
+                "required elasticsearch version: "
+                + f"{self.MIN_MAJOR}.{self.MIN_MINOR}"
             )
             sys.exit(1)
 

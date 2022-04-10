@@ -1,4 +1,4 @@
-beautifulsoup4==4.10.0
+beautifulsoup4==4.11.1
 celery==5.2.6
 Django==4.0.3
 django-cors-headers==3.11.0
@@ -9,4 +9,4 @@ requests==2.27.1
 ryd-client==0.0.3
 uWSGI==2.0.20
 whitenoise==6.0.0
-yt_dlp==2022.3.8.2
+yt_dlp==2022.4.8

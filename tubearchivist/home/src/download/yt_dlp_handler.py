@@ -177,7 +177,9 @@ class VideoDownloader:
             except yt_dlp.utils.DownloadError:
                 print("failed to download " + youtube_id)
                 continue
-            vid_dict = index_new_video(youtube_id)
+            vid_dict = index_new_video(
+                youtube_id, video_overwrites=self.video_overwrites
+            )
             self.channels.add(vid_dict["channel"]["channel_id"])
             self.move_to_archive(vid_dict)
             self._delete_from_pending(youtube_id)
