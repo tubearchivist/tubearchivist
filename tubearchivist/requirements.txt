@@ -1,4 +1,4 @@
-beautifulsoup4==4.11.0
+beautifulsoup4==4.11.1
 celery==5.2.6
 Django==4.0.3
 django-cors-headers==3.11.0
