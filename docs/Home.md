@@ -9,6 +9,7 @@ Table of contents:
 * [Settings](Settings): All the configuration options
 * [Video](Video): All details of a single video and playlist navigation.
 * [Users](Users): User management admin interface
+* [Installation](Installation): WIP - detailed installation instructions for various platforms.
 
 ## Getting Started
 1. [Subscribe](Channels#channels-overview) to some of your favourite YouTube channels.
