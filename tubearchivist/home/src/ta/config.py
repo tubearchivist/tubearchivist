@@ -220,17 +220,32 @@ class ScheduleBuilder:
             raise ValueError("invalid input")
 
         to_write = dict(zip(keys, values))
-        all_hours = [int(i) for i in re.split(r"\D+", to_write["hour"])]
-        if max(all_hours) > 23:
-            print("hour can't be greater than 23")
-            raise ValueError("invalid input")
-        try:
-            int(to_write["minute"])
-        except ValueError as error:
-            print("too frequent: only number in minutes are supported")
-            raise ValueError("invalid input") from error
+        self._validate_cron(to_write)
 
         return to_write
+
+    @staticmethod
+    def _validate_cron(to_write):
+        """validate all fields, raise value error for impossible schedule"""
+        all_hours = list(re.split(r"\D+", to_write["hour"]))
+        for hour in all_hours:
+            if hour.isdigit() and int(hour) > 23:
+                print("hour can not be greater than 23")
+                raise ValueError("invalid input")
+
+        all_days = list(re.split(r"\D+", to_write["day_of_week"]))
+        for day in all_days:
+            if day.isdigit() and int(day) > 6:
+                print("day can not be greater than 6")
+                raise ValueError("invalid input")
+
+        if not to_write["minute"].isdigit():
+            print("too frequent: only number in minutes are supported")
+            raise ValueError("invalid input")
+
+        if int(to_write["minute"]) > 59:
+            print("minutes can not be greater than 59")
+            raise ValueError("invalid input")
 
     def build_schedule(self):
         """build schedule dict as expected by app.conf.beat_schedule"""
