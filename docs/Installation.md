@@ -1,4 +1,4 @@
-# Alternative installation instructions
+# Detailed Installation Instructions for Various Platforms
 
 ## Unraid
 
