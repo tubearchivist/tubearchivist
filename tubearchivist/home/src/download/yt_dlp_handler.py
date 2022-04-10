@@ -181,6 +181,13 @@ class VideoDownloader:
                 youtube_id, video_overwrites=self.video_overwrites
             )
             self.channels.add(vid_dict["channel"]["channel_id"])
+            mess_dict = {
+                "status": "message:download",
+                "level": "info",
+                "title": "Moving....",
+                "message": "Moving downloaded file to storage folder",
+            }
+            RedisArchivist().set_message("message:download", mess_dict)            
             self.move_to_archive(vid_dict)
             self._delete_from_pending(youtube_id)
 
