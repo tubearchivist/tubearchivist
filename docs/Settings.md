@@ -34,7 +34,7 @@ Additional settings passed to yt-dlp.
 
 ## Integrations
 All third party integrations of TubeArchivist will **always** be *opt in*.
-- **API**: Your access token for the Tube Archivist API. 
+- **API**: Your access token for the Tube Archivist API.
 - **returnyoutubedislike.com**: This will get return dislikes and average ratings for each video by integrating with the API from [returnyoutubedislike.com](https://www.returnyoutubedislike.com/).
 - **Cast**: Enabling the cast integration in the settings page will load an additional JS library from **Google**.
     * Requirements
@@ -55,7 +55,7 @@ Examples:
 - **0 15 \***: Run task every day at 15:00 in the afternoon.
 - **30 8 \*/2**: Run task every second day of the week (Sun, Tue, Thu, Sat) at 08:30 in the morning.
 - **0 \*/3,8-17 \***: Execute every hour divisible by 3, and every hour during office hours (8 in the morning - 5 in the afternoon).
-- **0 8,16 \***: Execute every day at 8 in the morning and at 4 in the afternoon. 
+- **0 8,16 \***: Execute every day at 8 in the morning and at 4 in the afternoon.
 - **auto**: Sensible default.
 - **0**: (zero), deactivate that task.
 
@@ -71,9 +71,9 @@ That's the equivalent task as run from the downloads page looking through your c
 Start downloading all videos currently in the download queue.
 
 ## Refresh Metadata
-Rescan videos, channels and playlists on youtube and update metadata periodically. This will also deactivate an item and exclude it from future refreshes if the link on YouTube is no longer available. This task is meant to be run once per day, set your schedule accordingly. 
+Rescan videos, channels and playlists on youtube and update metadata periodically. This will also deactivate an item and exclude it from future refreshes if the link on YouTube is no longer available. This task is meant to be run once per day, set your schedule accordingly.
 
-The field **Refresh older than x days** takes a number where TubeArchivist will consider an item as *outdated*. This value is used to calculate how many items need to be refreshed today based on the total indexed. This will spread out the requests to YouTube. Sensible value here is **90** days. 
+The field **Refresh older than x days** takes a number where TubeArchivist will consider an item as *outdated*. This value is used to calculate how many items need to be refreshed today based on the total indexed. This will spread out the requests to YouTube. Sensible value here is **90** days.
 
 ## Thumbnail check
 This will check if all expected thumbnails are there and will delete any artwork without matching video.
@@ -130,5 +130,6 @@ This function will go through all your media files and looks at the whole index 
 - Should the filename not match with the indexed media url, this will rename the video files correctly and update the index with the new link.
 - When you delete media files from the filesystem outside of the Tube Archivist interface, this will delete leftover metadata from the index.
 - When you have media files that are not indexed yet, this will grab the metadata from YouTube like it was a newly downloaded video. This can be useful when restoring from an older backup file with missing metadata but already downloaded mediafiles. NOTE: This only works if the media files are named in the same convention as Tube Archivist does, particularly the YouTube ID needs to be at the same index in the filename, alternatively see above for *Manual Media Files Import*.
+-This will also check all of your thumbnails and download any that are missing.
 
 BE AWARE: There is no undo.
