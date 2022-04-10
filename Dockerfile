@@ -41,7 +41,9 @@ RUN mkdir /app
 
 # install python dependencies
 COPY ./tubearchivist/requirements.txt /requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt --src /usr/local/src
+RUN pip install --upgrade pip && \
+    pip install --upgrade setuptools && \
+    pip install --no-cache-dir -r requirements.txt --src /usr/local/src
 
 # copy config files
 COPY docker_assets/nginx.conf /etc/nginx/sites-available/default
