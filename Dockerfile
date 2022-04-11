@@ -9,10 +9,6 @@ ARG TARGETPLATFORM
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends build-essential gcc curl
 
-# install requirements
-COPY ./tubearchivist/requirements.txt /requirements.txt
-RUN pip install --user -r requirements.txt
-
 # get newest patched ffmpeg and ffprobe builds for amd64 fall back to repo ffmpeg for arm64
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ] ; then \
     curl -s https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest \
@@ -26,6 +22,10 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ] ; then \
     ; elif [ "$TARGETPLATFORM" = "linux/arm64" ] ; then \
         apt-get -y update && apt-get -y install --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/* \
     ; fi
+
+# install requirements
+COPY ./tubearchivist/requirements.txt /requirements.txt
+RUN pip install --user -r requirements.txt
 
 # build final image
 FROM python:3.10.4-slim-bullseye as tubearchivist
