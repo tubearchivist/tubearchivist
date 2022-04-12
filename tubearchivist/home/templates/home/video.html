@@ -5,31 +5,11 @@
 <div class="video-main"></div>
 <div class="notifications" id="notifications"></div>
 <div class="sponsorblock" id="sponsorblock">
-    {% if video.channel.channel_overwrites.integrate_sponsorblock %}
-        {% if video.channel.channel_overwrites.integrate_sponsorblock == True %}
-            {% if not video.sponsorblock %}
-                <h4>This video doesn't have any sponsor segments added. To add a segment go to <u><a href="https://www.youtube.com/watch?v={{ video.youtube_id }}">this video on YouTube</a></u> and add a segment using the <u><a href="https://sponsor.ajay.app/">SponsorBlock</a></u> extension.</h4>
-            {% endif %}
-            {% if video.sponsorblock %}
-                {% for segment in video.sponsorblock %}
-                    {% if segment.locked != 1 %}
-                        <h4>This video has unlocked sponsor segments. Go to <u><a href="https://www.youtube.com/watch?v={{ video.youtube_id }}">this video on YouTube</a></u> and vote on the segments using the <u><a href="https://sponsor.ajay.app/">SponsorBlock</a></u> extension.</h4>
-                        {{ break }}
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-        {% endif %}
-    {% elif config.downloads.integrate_sponsorblock %}
-        {% if not video.sponsorblock %}
+    {% if video.sponsorblock.is_enabled %}
+        {% if video.sponsorblock.segments|length == 0 %}
             <h4>This video doesn't have any sponsor segments added. To add a segment go to <u><a href="https://www.youtube.com/watch?v={{ video.youtube_id }}">this video on YouTube</a></u> and add a segment using the <u><a href="https://sponsor.ajay.app/">SponsorBlock</a></u> extension.</h4>
-        {% endif %}
-        {% if video.sponsorblock %}
-            {% for segment in video.sponsorblock %}
-                {% if segment.locked != 1 %}
-                    <h4>This video has unlocked sponsor segments. Go to <u><a href="https://www.youtube.com/watch?v={{ video.youtube_id }}">this video on YouTube</a></u> and vote on the segments using the <u><a href="https://sponsor.ajay.app/">SponsorBlock</a></u> extension.</h4>
-                    {{ break }}
-                {% endif %}
-            {% endfor %}
+        {% elif video.sponsorblock.has_unlocked %}
+            <h4>This video has unlocked sponsor segments. Go to <u><a href="https://www.youtube.com/watch?v={{ video.youtube_id }}">this video on YouTube</a></u> and vote on the segments using the <u><a href="https://sponsor.ajay.app/">SponsorBlock</a></u> extension.</h4>
         {% endif %}
     {% endif %}
 </div>
