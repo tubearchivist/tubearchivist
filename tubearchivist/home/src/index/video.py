@@ -292,6 +292,7 @@ class SponsorBlock:
     def __init__(self, user_id=False):
         self.user_id = user_id
         self.user_agent = f"{settings.TA_UPSTREAM} {settings.TA_VERSION}"
+        self.last_refresh = int(datetime.now().strftime("%s"))
 
     def get_sb_id(self):
         """get sponsorblock userid or generate if needed"""
@@ -315,9 +316,35 @@ class SponsorBlock:
         response = requests.get(url, headers=headers)
         if not response.ok:
             print(f"{youtube_id}: sponsorblock failed: {response.text}")
-            return False
+            sponsor_dict = {
+                "last_refresh": self.last_refresh,
+                "is_enabled": True,
+                "segments": [],
+            }
+        else:
+            all_segments = response.json()
+            sponsor_dict = self._get_sponsor_dict(all_segments)
 
-        return response.json()
+        return sponsor_dict
+
+    def _get_sponsor_dict(self, all_segments):
+        """format and process response"""
+        has_unlocked = False
+        cleaned_segments = []
+        for segment in all_segments:
+            if not segment["locked"]:
+                has_unlocked = True
+            del segment["userID"]
+            del segment["description"]
+            cleaned_segments.append(segment)
+
+        sponsor_dict = {
+            "last_refresh": self.last_refresh,
+            "has_unlocked": has_unlocked,
+            "is_enabled": True,
+            "segments": cleaned_segments,
+        }
+        return sponsor_dict
 
     def post_timestamps(self, youtube_id, start_time, end_time):
         """post timestamps to api"""
