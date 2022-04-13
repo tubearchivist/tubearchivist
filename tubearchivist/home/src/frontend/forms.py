@@ -200,7 +200,7 @@ class ChannelOverwriteForm(forms.Form):
 
     SP_CHOICES = [
         ("", "-- change sponsorblock integrations"),
-        ("0", "disable sponsorblock integration"),
+        ("disable", "disable sponsorblock integration"),
         ("1", "enable sponsorblock integration"),
     ]
 

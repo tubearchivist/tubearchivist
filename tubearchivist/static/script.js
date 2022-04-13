@@ -333,24 +333,21 @@ function createPlayer(button) {
     var videoData = getVideoData(videoId);
 
     var sponsorBlockElements = '';
-    if (videoData.config.downloads.integrate_sponsorblock && (typeof(videoData.data.channel.channel_overwrites) == "undefined" || typeof(videoData.data.channel.channel_overwrites.integrate_sponsorblock) == "undefined" || videoData.data.channel.channel_overwrites.integrate_sponsorblock == true)) {
+    if (videoData.data.sponsorblock.is_enabled) {
         sponsorBlock = videoData.data.sponsorblock;
-        if (!sponsorBlock) {
+        if (sponsorBlock.segments.length == 0) {
             sponsorBlockElements = `
             <div class="sponsorblock" id="sponsorblock">
                 <h4>This video doesn't have any sponsor segments added. To add a segment go to <u><a href="https://www.youtube.com/watch?v=${videoId}">this video on Youtube</a></u> and add a segment using the <u><a href="https://sponsor.ajay.app/">SponsorBlock</a></u> extension.</h4>
             </div>
             `;
         } else {
-            for(let i in sponsorBlock) {
-                if(sponsorBlock[i].locked != 1) {
-                    sponsorBlockElements = `
-                    <div class="sponsorblock" id="sponsorblock">
-                        <h4>This video has unlocked sponsor segments. Go to <u><a href="https://www.youtube.com/watch?v=${videoId}">this video on YouTube</a></u> and vote on the segments using the <u><a href="https://sponsor.ajay.app/">SponsorBlock</a></u> extension.</h4>
-                    </div>
-                    `;
-                    break;
-                }
+            if (sponsorBlock.has_unlocked) {
+                sponsorBlockElements = `
+                <div class="sponsorblock" id="sponsorblock">
+                    <h4>This video has unlocked sponsor segments. Go to <u><a href="https://www.youtube.com/watch?v=${videoId}">this video on YouTube</a></u> and vote on the segments using the <u><a href="https://sponsor.ajay.app/">SponsorBlock</a></u> extension.</h4>
+                </div>
+                `;
             }
         }
     }
@@ -424,53 +421,6 @@ function createPlayer(button) {
     const divPlayer = document.getElementById("player");
     divPlayer.innerHTML = markup;
 }
-
-// function sendSponsorBlockVote(uuid, vote) {
-//     var videoId = getVideoPlayerVideoId();
-//     postSponsorSegmentVote(videoId, uuid, vote);
-// }
-
-// var sponsorBlockTimestamps = [];
-// function sendSponsorBlockSegment() {
-//     var videoId = getVideoPlayerVideoId();
-//     var currentTime = getVideoPlayerCurrentTime();
-//     var sponsorBlockElement = document.getElementById("sponsorblock");
-//     if (sponsorBlockTimestamps[1]) {
-//         if (sponsorBlockTimestamps[1] > sponsorBlockTimestamps[0]) {
-//             postSponsorSegment(videoId, sponsorBlockTimestamps[0], sponsorBlockTimestamps[1]);
-//             sponsorBlockElement.innerHTML = `
-//             <p>Timestamps sent! (Not really)</p>
-//             `;
-//             setTimeout(function(){
-//                 sponsorBlockElement.innerHTML = `
-//                 <img src="/static/img/PlayerStartIconSponsorBlocker.svg" class="sponsorblockIcon"><button onclick="sendSponsorBlockSegment()">Start</button>
-//                 `;
-//             }, 3000);
-//         } else {
-//             sponsorBlockElement.innerHTML = `
-//             <span class="danger-zone">Invalid Timestamps!</span>
-//             `;
-//             setTimeout(function(){
-//                 sponsorBlockElement.innerHTML = `
-//                 <img src="/static/img/PlayerStartIconSponsorBlocker.svg" class="sponsorblockIcon"><button onclick="sendSponsorBlockSegment()">Start</button>
-//                 `;
-//             }, 3000);
-//         }
-//         sponsorBlockTimestamps = [];
-//     } else if (sponsorBlockTimestamps[0]) {
-//         sponsorBlockTimestamps.push(currentTime);
-//         sponsorBlockElement.innerHTML = `
-//         <img src="/static/img/PlayerStartIconSponsorBlocker.svg" class="sponsorblockIcon" onclick="getVideoPlayer().currentTime = '${sponsorBlockTimestamps[0]}'"><p>${sponsorBlockTimestamps[0].toFixed(1)} s | </p>
-//         <img src="/static/img/PlayerStopIconSponsorBlocker.svg" class="sponsorblockIcon" onclick="getVideoPlayer().currentTime = '${sponsorBlockTimestamps[1]}'"><p>${sponsorBlockTimestamps[1].toFixed(1)} s | </p>
-//         <img src="/static/img/PlayerUploadIconSponsorBlocker.svg" class="sponsorblockIcon"><button onclick="sendSponsorBlockSegment()">Confirm</button>
-//         `;
-//     } else {
-//         sponsorBlockTimestamps.push(currentTime);
-//         sponsorBlockElement.innerHTML = `
-//         <img src="/static/img/PlayerStopIconSponsorBlocker.svg" class="sponsorblockIcon"><button onclick="sendSponsorBlockSegment()">End</button>
-//         `;
-//     }
-// }
 
 // Add video tag to video page when passed a video id, function loaded on page load `video.html (115-117)`
 function insertVideoTag(videoData, videoProgress) {
@@ -563,23 +513,14 @@ function onVideoProgress() {
     var videoElement = getVideoPlayer();
     // var sponsorBlockElement = document.getElementById("sponsorblock");
     var notificationsElement = document.getElementById("notifications");
-    if (sponsorBlock) {
-        for(let i in sponsorBlock) {
-            if(sponsorBlock[i].segment[0] <= currentTime + 0.3 && sponsorBlock[i].segment[0] >= currentTime) {
-                videoElement.currentTime = sponsorBlock[i].segment[1];
-                notificationsElement.innerHTML += `<h3 id="notification-${sponsorBlock[i].UUID}">Skipped sponsor segment from ${formatTime(sponsorBlock[i].segment[0])} to ${formatTime(sponsorBlock[i].segment[1])}.</h3>`;
+    if (sponsorBlock.segments.length > 0) {
+        for(let i in sponsorBlock.segments) {
+            if(sponsorBlock.segments[i].segment[0] <= currentTime + 0.3 && sponsorBlock.segments[i].segment[0] >= currentTime) {
+                videoElement.currentTime = sponsorBlock.segments[i].segment[1];
+                notificationsElement.innerHTML += `<h3 id="notification-${sponsorBlock.segments[i].UUID}">Skipped sponsor segment from ${formatTime(sponsorBlock.segments[i].segment[0])} to ${formatTime(sponsorBlock.segments[i].segment[1])}.</h3>`;
             }
-            // if(currentTime >= sponsorBlock[i].segment[1] && currentTime <= sponsorBlock[i].segment[1] + 0.2) {
-            //     if(sponsorBlock[i].locked != 1) {
-            //         sponsorBlockElement.innerHTML += `
-            //         <div id="${sponsorBlock[i].UUID}">
-            //             <button onclick="sendSponsorBlockVote('${sponsorBlock[i].UUID}', 1)">Up Vote</button>
-            //             <button onclick="sendSponsorBlockVote('${sponsorBlock[i].UUID}', -1)">Down Vote</button>
-            //         </div>`;
-            //     }
-            // }
-            if(currentTime > sponsorBlock[i].segment[1] + 10) {
-                var notificationsElementUUID = document.getElementById("notification-" + sponsorBlock[i].UUID);
+            if(currentTime > sponsorBlock.segments[i].segment[1] + 10) {
+                var notificationsElementUUID = document.getElementById("notification-" + sponsorBlock.segments[i].UUID);
                 if(notificationsElementUUID) {
                     notificationsElementUUID.outerHTML = '';
                 }
@@ -601,6 +542,12 @@ function onVideoEnded() {
     var videoId = getVideoPlayerVideoId();
     if (!getVideoPlayerWatchStatus()) { // Check if video is already marked as watched
         updateVideoWatchStatus(videoId, "unwatched");
+    }
+    for(let i in sponsorBlock.segments) {
+        var notificationsElementUUID = document.getElementById("notification-" + sponsorBlock.segments[i].UUID);
+        if(notificationsElementUUID) {
+            notificationsElementUUID.outerHTML = '';
+        }
     }
 }
 

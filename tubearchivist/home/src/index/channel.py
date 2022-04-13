@@ -351,6 +351,9 @@ class YoutubeChannel(YouTubeItem):
         for key, value in overwrites.items():
             if key not in valid_keys:
                 raise ValueError(f"invalid overwrite key: {key}")
+            if value == "disable":
+                to_write[key] = False
+                continue
             if value in [0, "0"]:
                 del to_write[key]
                 continue

@@ -218,6 +218,19 @@
                             "index": false
                         }
                     }
+                },
+                "sponsorblock": {
+                    "properties": {
+                        "last_refresh": {
+                            "type": "date"
+                        },
+                        "has_unlocked": {
+                            "type": "boolean"
+                        },
+                        "is_enabled": {
+                            "type": "boolean"
+                        }
+                    }
                 }
             },
             "expected_set": {
