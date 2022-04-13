@@ -412,16 +412,18 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def _check_get_sb(self):
         """check if need to run sponsor block"""
+        integrate = False
         if self.config["downloads"]["integrate_sponsorblock"]:
-            return True
-        try:
-            single_overwrite = self.video_overwrites[self.youtube_id]
-            _ = single_overwrite["integrate_sponsorblock"]
-            return True
-        except KeyError:
-            return False
+            integrate = True
 
-        return False
+        if self.video_overwrites:
+            single_overwrite = self.video_overwrites.get(self.youtube_id)
+            if not single_overwrite:
+                return integrate
+
+            integrate = single_overwrite.get("integrate_sponsorblock", False)
+
+        return integrate
 
     def _process_youtube_meta(self):
         """extract relevant fields from youtube"""
