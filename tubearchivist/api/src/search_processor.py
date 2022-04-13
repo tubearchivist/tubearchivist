@@ -40,6 +40,8 @@ class SearchProcess:
             processed = self._process_video(result["_source"])
         if index == "ta_channel":
             processed = self._process_channel(result["_source"])
+        if index == "ta_playlist":
+            processed = self._process_playlist(result["_source"])
 
         return processed
 
@@ -80,3 +82,19 @@ class SearchProcess:
         )
 
         return dict(sorted(video_dict.items()))
+
+    @staticmethod
+    def _process_playlist(playlist_dict):
+        """run on single playlist dict"""
+        playlist_id = playlist_dict["playlist_id"]
+        playlist_last_refresh = date_praser(
+            playlist_dict["playlist_last_refresh"]
+        )
+        playlist_dict.update(
+            {
+                "playlist_thumbnail": f"/cache/playlists/{playlist_id}.jpg",
+                "playlist_last_refresh": playlist_last_refresh,
+            }
+        )
+
+        return dict(sorted(playlist_dict.items()))

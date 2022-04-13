@@ -258,6 +258,22 @@ class PlaylistApiView(ApiBaseView):
         return Response(self.response, status=self.status_code)
 
 
+class PlaylistApiListView(ApiBaseView):
+    """resolves to /api/playlist/
+    GET: returns list of indexed playlists
+    """
+
+    search_base = "ta_playlist/_search/"
+
+    def get(self, request):
+        # pylint: disable=unused-argument
+        """handle get request"""
+        data = {"query": {"match_all": {}}}
+        self.get_document_list(data)
+        self.get_paginate()
+        return Response(self.response)
+
+
 class DownloadApiView(ApiBaseView):
     """resolves to /api/download/<video_id>/
     GET: returns metadata dict of an item in the download queue

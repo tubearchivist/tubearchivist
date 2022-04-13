@@ -123,6 +123,9 @@ POST /api/channel/
 ## Channel Item View
 /api/channel/\<channel_id>/
 
+## Playlist List View
+/api/playlist/
+
 ## Playlists Item View
 /api/playlist/\<playlist_id>/
 

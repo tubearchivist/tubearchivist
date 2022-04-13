@@ -7,6 +7,7 @@ from api.views import (
     DownloadApiView,
     LoginApiView,
     PingView,
+    PlaylistApiListView,
     PlaylistApiView,
     VideoApiListView,
     VideoApiView,
@@ -52,6 +53,11 @@ urlpatterns = [
         "playlist/<slug:playlist_id>/",
         PlaylistApiView.as_view(),
         name="api-playlist",
+    ),
+    path(
+        "playlist/",
+        PlaylistApiListView.as_view(),
+        name="api-playlist-list",
     ),
     path(
         "download/",
