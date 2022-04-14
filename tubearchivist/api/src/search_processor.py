@@ -69,6 +69,7 @@ class SearchProcess:
         vid_last_refresh = date_praser(video_dict["vid_last_refresh"])
         published = date_praser(video_dict["published"])
         vid_thumb_url = ThumbManager().vid_thumb_path(video_id)
+        base64_blur = ThumbManager().get_base64_blur(video_id)
         channel = self._process_channel(video_dict["channel"])
 
         video_dict.update(
@@ -78,6 +79,7 @@ class SearchProcess:
                 "vid_last_refresh": vid_last_refresh,
                 "published": published,
                 "vid_thumb_url": vid_thumb_url,
+                "vid_thumb_base64": base64_blur
             }
         )
 
