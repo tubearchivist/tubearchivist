@@ -187,9 +187,16 @@ class VideoDownloader:
                 "title": "Moving....",
                 "message": "Moving downloaded file to storage folder",
             }
-            RedisArchivist().set_message("message:download", mess_dict)
+            RedisArchivist().set_message("message:download", mess_dict, False)
 
             self.move_to_archive(vid_dict)
+            mess_dict = {
+                "status": "message:download",
+                "level": "info",
+                "title": "Completed",
+                "message": "",
+            }
+            RedisArchivist().set_message("message:download", mess_dict, 4)
             self._delete_from_pending(youtube_id)
 
         # post processing
