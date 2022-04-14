@@ -151,7 +151,7 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Implement [Apprise](https://github.com/caronc/apprise) for notifications ([#97](https://github.com/bbilly1/tubearchivist/issues/97))
 - [ ] Add [SponsorBlock](https://sponsor.ajay.app/) integration
 - [ ] Add passing browser cookies to yt-dlp ([#199](https://github.com/bbilly1/tubearchivist/issues/199))
-- [ ] User created playlists ([#108](https://github.com/bbilly1/tubearchivist/issues/108))
+- [ ] User created playlists, random and repeat controls ([#108](https://github.com/bbilly1/tubearchivist/issues/108), [#220](https://github.com/bbilly1/tubearchivist/issues/220))
 - [ ] Auto play or play next link
 - [ ] Show similar videos on video page
 - [ ] Multi language support

@@ -133,7 +133,7 @@ class Pagination:
         """validate pagination with total_hits after making api call"""
         page_get = self.page_get
         max_pages = math.ceil(total_hits / self.page_size)
-        if total_hits > 10000:
+        if total_hits >= 10000:
             # es returns maximal 10000 results
             self.pagination["max_hits"] = True
             max_pages = max_pages - 1
