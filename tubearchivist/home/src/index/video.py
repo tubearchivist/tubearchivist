@@ -170,6 +170,11 @@ class SubtitleParser:
 
         self.all_cues = []
         for idx, event in enumerate(all_events):
+            if "dDurationMs" not in event:
+                # some events won't have a duration
+                print(f"failed to parse event without duration: {event}")
+                continue
+
             cue = {
                 "start": self._ms_conv(event["tStartMs"]),
                 "end": self._ms_conv(event["tStartMs"] + event["dDurationMs"]),
