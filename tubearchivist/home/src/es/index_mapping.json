@@ -193,6 +193,22 @@
                         }
                     }
                 },
+                "stats" : {
+                    "properties" : {
+                        "average_rating" : {
+                            "type" : "float"
+                        },
+                        "dislike_count" : {
+                            "type" : "long"
+                        },
+                        "like_count" : {
+                            "type" : "long"
+                        },
+                        "view_count" : {
+                            "type" : "long"
+                        }
+                    }
+                },
                 "subtitles": {
                     "properties": {
                         "ext": {
