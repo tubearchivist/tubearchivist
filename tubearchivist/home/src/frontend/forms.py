@@ -202,6 +202,7 @@ class ChannelOverwriteForm(forms.Form):
         ("", "-- change sponsorblock integrations"),
         ("disable", "disable sponsorblock integration"),
         ("1", "enable sponsorblock integration"),
+        ("0", "unset sponsorblock integration"),
     ]
 
     download_format = forms.CharField(label=False, required=False)
