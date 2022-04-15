@@ -93,6 +93,8 @@
                     <p>Enable <a href="https://sponsor.ajay.app/" target="_blank">SponsorBlock</a>: <span class="settings-current">
                         {% if channel_info.channel_overwrites.integrate_sponsorblock %}
                             {{ channel_info.channel_overwrites.integrate_sponsorblock }}
+                        {% elif channel_info.channel_overwrites.integrate_sponsorblock == False %}
+                            Disabled
                         {% else %}
                             False
                         {% endif %}</span></p>

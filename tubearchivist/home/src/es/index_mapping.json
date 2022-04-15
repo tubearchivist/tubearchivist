@@ -193,6 +193,22 @@
                         }
                     }
                 },
+                "stats" : {
+                    "properties" : {
+                        "average_rating" : {
+                            "type" : "float"
+                        },
+                        "dislike_count" : {
+                            "type" : "long"
+                        },
+                        "like_count" : {
+                            "type" : "long"
+                        },
+                        "view_count" : {
+                            "type" : "long"
+                        }
+                    }
+                },
                 "subtitles": {
                     "properties": {
                         "ext": {
@@ -229,6 +245,31 @@
                         },
                         "is_enabled": {
                             "type": "boolean"
+                        },
+                        "segments" : {
+                            "properties" : {
+                                "UUID" : {
+                                    "type": "keyword"
+                                },
+                                "actionType" : {
+                                    "type": "keyword"
+                                },
+                                "category" : {
+                                    "type": "keyword"
+                                },
+                                "locked" : {
+                                    "type" : "short"
+                                },
+                                "segment" : {
+                                    "type" : "float"
+                                },
+                                "videoDuration" : {
+                                    "type" : "float"
+                                },
+                                "votes" : {
+                                    "type" : "long"
+                                }
+                            }
                         }
                     }
                 }

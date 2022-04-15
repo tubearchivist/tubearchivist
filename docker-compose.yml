@@ -11,19 +11,19 @@ services:
       - media:/youtube
       - cache:/cache
     environment:
-      - ES_URL=http://archivist-es:9200
-      - REDIS_HOST=archivist-redis
+      - ES_URL=http://archivist-es:9200     # needs protocol e.g. http and port
+      - REDIS_HOST=archivist-redis          # don't add protocol
       - HOST_UID=1000
       - HOST_GID=1000
-      - TA_USERNAME=tubearchivist
-      - TA_PASSWORD=verysecret
-      - ELASTIC_PASSWORD=verysecret
-      - TZ=America/New_York
+      - TA_USERNAME=tubearchivist           # your initial TA credentials
+      - TA_PASSWORD=verysecret              # your initial TA credentials
+      - ELASTIC_PASSWORD=verysecret         # set password for Elasticsearch
+      - TZ=America/New_York                 # set your time zone
     depends_on:
       - archivist-es
       - archivist-redis
   archivist-redis:
-    image: redislabs/rejson:latest      # For arm64 just update this line with bbilly1/rejson:latest
+    image: redislabs/rejson:latest          # for arm64 use bbilly1/rejson
     container_name: archivist-redis
     restart: always
     expose:
@@ -33,12 +33,12 @@ services:
     depends_on:
       - archivist-es
   archivist-es:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.1
+    image: bbilly1/tubearchivist-es         # only for amd64, or use official es 7.17.2
     container_name: archivist-es
     restart: always
     environment:
       - "xpack.security.enabled=true"
-      - "ELASTIC_PASSWORD=verysecret"
+      - "ELASTIC_PASSWORD=verysecret"       # matching Elasticsearch password
       - "discovery.type=single-node"
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
@@ -46,7 +46,7 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - es:/usr/share/elasticsearch/data
+      - es:/usr/share/elasticsearch/data    # check for permission error when using bind mount, see readme
     expose:
       - "9200"
 

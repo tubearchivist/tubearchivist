@@ -41,6 +41,9 @@ class Reindex:
         """get daily refresh values"""
         total_videos = self._get_total_hits("ta_video")
         video_daily = ceil(total_videos / self.interval * self.MULTIPLY)
+        if video_daily >= 10000:
+            video_daily = 9999
+
         total_channels = self._get_total_hits("ta_channel")
         channel_daily = ceil(total_channels / self.interval * self.MULTIPLY)
         total_playlists = self._get_total_hits("ta_playlist")

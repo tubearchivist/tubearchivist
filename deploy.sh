@@ -103,8 +103,9 @@ function validate {
 # update latest tag compatible es for set and forget
 function sync_latest_es {
 
-    printf "\nsync new es version:\n"
-    read -r VERSION
+    VERSION=$(grep "bbilly1/tubearchivist-es" docker-compose.yml | awk '{print $NF}')
+    printf "\nsync new ES version %s\nContinue?\n" "$VERSION"
+    read -rn 1
 
     if [[ $(systemctl is-active docker) != 'active' ]]; then
         echo "starting docker"

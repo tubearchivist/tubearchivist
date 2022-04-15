@@ -47,8 +47,8 @@
 Once your YouTube video collection grows, it becomes hard to search and find a specific video. That's where Tube Archivist comes in: By indexing your video collection with metadata from YouTube, you can organize, search and enjoy your archived YouTube videos without hassle offline through a convenient web interface.
 
 ## Connect
-- [Discord](https://discord.gg/AFwz8nE7BK): Connect with us on our brand new Discord server.
-- [r/TubeArchivist](https://www.reddit.com/r/TubeArchivist/): Join our brand new Subreddit.
+- [Discord](https://discord.gg/AFwz8nE7BK): Connect with us on our Discord server.
+- [r/TubeArchivist](https://www.reddit.com/r/TubeArchivist/): Join our Subreddit.
 
 ## Installing and updating
 Take a look at the example `docker-compose.yml` file provided. Use the *latest* or the named semantic version tag. The *unstable* tag is for intermediate testing and as the name implies, is **unstable** and not be used on your main installation but in a [testing environment](CONTRIBUTING.md).  
@@ -76,7 +76,9 @@ Should that not be an option, the Tube Archivist container takes these two addit
 Changing any of these two environment variables will change the files *nginx.conf* and *uwsgi.ini* at startup using `sed` in your container.
 
 ### Elasticsearch
-**Note**: Newest Tube Archivist depends on Elasticsearch version 7.17 to provide an automatic updatepath. 
+**Note**: Newest Tube Archivist depends on Elasticsearch version 7.17 to provide an automatic updatepath in the future. 
+
+Use `bbilly1/tubearchivist-es` to automatically get the recommended version, or use the official image with the version tag in the docker-compose file.
 
 Stores video meta data and makes everything searchable. Also keeps track of the download queue.
   - Needs to be accessible over the default port `9200`
@@ -98,7 +100,7 @@ For some architectures it might be required to run Redis JSON on a nonstandard p
 ### Updating Tube Archivist
 You will see the current version number of **Tube Archivist** in the footer of the interface so you can compare it with the latest release to make sure you are running the *latest and greatest*.  
 * There can be breaking changes between updates, particularly as the application grows, new environment variables or settings might be required for you to set in the your docker-compose file. *Always* check the **release notes**: Any breaking changes will be marked there.  
-* All testing and development is done with the Elasticsearch version number as mentioned in the provided *docker-compose.yml* file. This will be updated when a new release of Elasticsearch is available. Running an older version of Elasticsearch is most likely not going to result in any issues, but it's still recommended to run the same version as mentioned.
+* All testing and development is done with the Elasticsearch version number as mentioned in the provided *docker-compose.yml* file. This will be updated when a new release of Elasticsearch is available. Running an older version of Elasticsearch is most likely not going to result in any issues, but it's still recommended to run the same version as mentioned. Use `bbilly1/tubearchivist-es` to automatically get the recommended version.
 
 ### Alternative installation instructions:
 - **arm64**: The Tube Archivist container is multi arch, so is Elasticsearch. RedisJSON doesn't offer arm builds, you can use `bbilly1/rejson`, an unofficial rebuild for arm64.
