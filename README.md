@@ -2,6 +2,8 @@
 
 <center><h1>Your self hosted YouTube media server</h1></center>
 
+Tube Archivist has a new home: https://github.com/tubearchivist/tubearchivist
+
 ## Table of contents:
 * [Wiki](https://github.com/bbilly1/tubearchivist/wiki) for a detailed documentation, with [FAQ](https://github.com/bbilly1/tubearchivist/wiki/FAQ)
 * [Core functionality](#core-functionality)
