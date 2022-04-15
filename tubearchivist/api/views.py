@@ -1,7 +1,6 @@
 """all API views"""
 
 from api.src.search_processor import SearchProcess
-from home.src.download.thumbnails import ThumbManager
 from home.src.es.connect import ElasticWrap
 from home.src.index.video import SponsorBlock
 from home.src.ta.config import AppConfig
@@ -44,25 +43,6 @@ class ApiBaseView(APIView):
             self.response["data"] = False
         self.status_code = status_code
 
-    def process_keys(self):
-        """process keys for frontend"""
-        all_keys = self.response["data"].keys()
-        if "media_url" in all_keys:
-            media_url = self.response["data"]["media_url"]
-            self.response["data"]["media_url"] = f"/media/{media_url}"
-        if "vid_thumb_url" in all_keys:
-            youtube_id = self.response["data"]["youtube_id"]
-            vid_thumb_url = ThumbManager().vid_thumb_path(youtube_id)
-            cache_dir = self.response["config"]["application"]["cache_dir"]
-            new_thumb = f"{cache_dir}/{vid_thumb_url}"
-            self.response["data"]["vid_thumb_url"] = new_thumb
-        if "subtitles" in all_keys:
-            all_subtitles = self.response["data"]["subtitles"]
-            for idx, _ in enumerate(all_subtitles):
-                url = self.response["data"]["subtitles"][idx]["media_url"]
-                new_url = f"/media/{url}"
-                self.response["data"]["subtitles"][idx]["media_url"] = new_url
-
     def get_paginate(self):
         """add pagination detail to response"""
         self.response["paginate"] = False
@@ -86,8 +66,6 @@ class VideoApiView(ApiBaseView):
         # pylint: disable=unused-argument
         """get request"""
         self.get_document(video_id)
-        if self.response.get("data"):
-            self.process_keys()
         return Response(self.response, status=self.status_code)
 
 
