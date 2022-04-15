@@ -5,7 +5,7 @@
 Tube Archivist has a new home: https://github.com/tubearchivist/tubearchivist
 
 ## Table of contents:
-* [Wiki](https://github.com/bbilly1/tubearchivist/wiki) for a detailed documentation, with [FAQ](https://github.com/bbilly1/tubearchivist/wiki/FAQ)
+* [Wiki](https://github.com/tubearchivist/tubearchivist/wiki) for a detailed documentation, with [FAQ](https://github.com/tubearchivist/tubearchivist/wiki/FAQ)
 * [Core functionality](#core-functionality)
 * [Screenshots](#screenshots)
 * [Problem Tube Archivist tries to solve](#problem-tube-archivist-tries-to-solve)
@@ -106,7 +106,7 @@ You will see the current version number of **Tube Archivist** in the footer of t
 
 ### Alternative installation instructions:
 - **arm64**: The Tube Archivist container is multi arch, so is Elasticsearch. RedisJSON doesn't offer arm builds, you can use `bbilly1/rejson`, an unofficial rebuild for arm64.
-- **Synology**: There is a [discussion thread](https://github.com/bbilly1/tubearchivist/discussions/48) with Synology installation instructions.
+- **Synology**: There is a [discussion thread](https://github.com/tubearchivist/tubearchivist/discussions/48) with Synology installation instructions.
 - **Unraid**: The three containers needed are all in the Community Applications. First install `TubeArchivist RedisJSON` followed by `TubeArchivist ES`, and finally you can install `TubeArchivist`. If you have unraid specific issues, report those to the [support thread](https://forums.unraid.net/topic/114073-support-crocs-tube-archivist/ "support thread").
 - **Helm Chart**: There is a Helm Chart available at https://github.com/insuusvenerati/helm-charts. Mostly self-explanatory but feel free to ask questions in the discord / subreddit.
 
@@ -152,20 +152,20 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] User roles
 - [ ] Podcast mode to serve channel as mp3
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
-- [ ] Implement [Apprise](https://github.com/caronc/apprise) for notifications ([#97](https://github.com/bbilly1/tubearchivist/issues/97))
+- [ ] Implement [Apprise](https://github.com/caronc/apprise) for notifications ([#97](https://github.com/tubearchivist/tubearchivist/issues/97))
 - [ ] Add [SponsorBlock](https://sponsor.ajay.app/) integration
-- [ ] Add passing browser cookies to yt-dlp ([#199](https://github.com/bbilly1/tubearchivist/issues/199))
-- [ ] User created playlists, random and repeat controls ([#108](https://github.com/bbilly1/tubearchivist/issues/108), [#220](https://github.com/bbilly1/tubearchivist/issues/220))
+- [ ] Add passing browser cookies to yt-dlp ([#199](https://github.com/tubearchivist/tubearchivist/issues/199))
+- [ ] User created playlists, random and repeat controls ([#108](https://github.com/tubearchivist/tubearchivist/issues/108), [#220](https://github.com/tubearchivist/tubearchivist/issues/220))
 - [ ] Auto play or play next link
 - [ ] Show similar videos on video page
 - [ ] Multi language support
 - [ ] Show total video downloaded vs total videos available in channel
 - [ ] Make items in grid row configurable to use more of the screen
 - [ ] Add statistics of index
-- [ ] Implement complete offline media file import from json file ([#138](https://github.com/bbilly1/tubearchivist/issues/138))
-- [ ] Filter and query in search form, search by url query ([#134](https://github.com/bbilly1/tubearchivist/issues/134), [#139](https://github.com/bbilly1/tubearchivist/issues/139))
-- [ ] Auto ignore videos by keyword ([#163](https://github.com/bbilly1/tubearchivist/issues/163))
-- [ ] Custom searchable notes to videos, channels, playlists ([#144](https://github.com/bbilly1/tubearchivist/issues/144))
+- [ ] Implement complete offline media file import from json file ([#138](https://github.com/tubearchivist/tubearchivist/issues/138))
+- [ ] Filter and query in search form, search by url query ([#134](https://github.com/tubearchivist/tubearchivist/issues/134), [#139](https://github.com/tubearchivist/tubearchivist/issues/139))
+- [ ] Auto ignore videos by keyword ([#163](https://github.com/tubearchivist/tubearchivist/issues/163))
+- [ ] Custom searchable notes to videos, channels, playlists ([#144](https://github.com/tubearchivist/tubearchivist/issues/144))
 
 Implemented:
 - [X] Implement per channel settings [2022-03-26]

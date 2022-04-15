@@ -12,7 +12,7 @@
 # docker buildx inspect --bootstrap
 
 # more details:
-# https://github.com/bbilly1/tubearchivist/issues/6
+# https://github.com/tubearchivist/tubearchivist/issues/6
 
 set -e
 

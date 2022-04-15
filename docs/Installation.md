@@ -13,7 +13,7 @@ Tube Archivist, and all if it's dependencies are located in the [community appli
 ![enter image description here](https://i.imgur.com/ycAqFRU.png)
 This is the easiest container to setup of the thee, just make sure that you do not have any port conflicts, and that your `/data` is mounted to the correct path. The other containers will map to the same directory.
 
-If you need to install `TubeArchivist-RedisJSON`on a different port, you'll have to follow [these steps](https://github.com/bbilly1/tubearchivist#redis-on-a-custom-port) later on when installing the `TubeArchivist` container
+If you need to install `TubeArchivist-RedisJSON`on a different port, you'll have to follow [these steps](https://github.com/tubearchivist/tubearchivist#redis-on-a-custom-port) later on when installing the `TubeArchivist` container
 
 
 ### Step 2: Install  `TubeArchivist-ES`
@@ -34,7 +34,7 @@ It's finally time to set up TubeArchivist!
    Make sure that this is an empty directory to not cause confusion when
    starting the application. If you have existing videos that you'd like
    to import into Tube Archivist, please checkout the [settings
-   wiki.](https://github.com/bbilly1/tubearchivist/wiki/Settings#manual-media-files-import)
+   wiki.](https://github.com/tubearchivist/tubearchivist/wiki/Settings#manual-media-files-import)
    
    
 - `Appdata:` This should be the same base path as the other two containers.

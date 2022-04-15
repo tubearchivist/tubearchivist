@@ -5,7 +5,7 @@ If you haven't already, the best place to start is the README. This will give yo
 
 ## Report a bug
 
-If you notice something is not working as expected, check to see if it has been previously reported in the [open issues](https://github.com/bbilly1/tubearchivist/issues).
+If you notice something is not working as expected, check to see if it has been previously reported in the [open issues](https://github.com/tubearchivist/tubearchivist/issues).
 If it has not yet been disclosed, go ahead and create an issue.  
 If the issue doesn't move forward due to a lack of response, I assume it's solved and will close it after some time to keep the list fresh. 
 
