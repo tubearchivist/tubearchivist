@@ -377,6 +377,7 @@ def backup_all_indexes(reason):
 
     for index in backup_handler.index_config:
         index_name = index["index_name"]
+        print(f"backup: export in progress for {index_name}")
         if not backup_handler.index_exists(index_name):
             continue
         all_results = backup_handler.get_all_documents(index_name)
