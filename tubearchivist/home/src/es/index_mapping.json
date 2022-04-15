@@ -245,6 +245,31 @@
                         },
                         "is_enabled": {
                             "type": "boolean"
+                        },
+                        "segments" : {
+                            "properties" : {
+                                "UUID" : {
+                                    "type": "keyword"
+                                },
+                                "actionType" : {
+                                    "type": "keyword"
+                                },
+                                "category" : {
+                                    "type": "keyword"
+                                },
+                                "locked" : {
+                                    "type" : "short"
+                                },
+                                "segment" : {
+                                    "type" : "float"
+                                },
+                                "videoDuration" : {
+                                    "type" : "float"
+                                },
+                                "votes" : {
+                                    "type" : "long"
+                                }
+                            }
                         }
                     }
                 }
