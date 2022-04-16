@@ -7,11 +7,15 @@ Functionality:
 import urllib.parse
 
 from home.src.download.thumbnails import ThumbManager
+from home.src.ta.config import AppConfig
 from home.src.ta.helper import date_praser
 
 
 class SearchProcess:
     """process search results"""
+
+    CONFIG = AppConfig().config
+    CACHE_DIR = CONFIG["application"]["cache_dir"]
 
     def __init__(self, response):
         self.response = response
@@ -42,6 +46,8 @@ class SearchProcess:
             processed = self._process_channel(result["_source"])
         if index == "ta_playlist":
             processed = self._process_playlist(result["_source"])
+        if index == "ta_download":
+            processed = self._process_download(result["_source"])
 
         return processed
 
@@ -64,8 +70,6 @@ class SearchProcess:
 
     def _process_video(self, video_dict):
         """run on single video dict"""
-        # fix cache_dir build dynamic
-        cache_dir = "/cache"
         video_id = video_dict["youtube_id"]
         media_url = urllib.parse.quote(video_dict["media_url"])
         vid_last_refresh = date_praser(video_dict["vid_last_refresh"])
@@ -84,7 +88,7 @@ class SearchProcess:
                 "media_url": f"/media/{media_url}",
                 "vid_last_refresh": vid_last_refresh,
                 "published": published,
-                "vid_thumb_url": f"{cache_dir}/{vid_thumb_url}",
+                "vid_thumb_url": f"{self.CACHE_DIR}/{vid_thumb_url}",
             }
         )
 
@@ -105,3 +109,17 @@ class SearchProcess:
         )
 
         return dict(sorted(playlist_dict.items()))
+
+    def _process_download(self, download_dict):
+        """run on single download item"""
+        video_id = download_dict["youtube_id"]
+        vid_thumb_url = ThumbManager().vid_thumb_path(video_id)
+        published = date_praser(download_dict["published"])
+
+        download_dict.update(
+            {
+                "vid_thumb_url": f"{self.CACHE_DIR}/{vid_thumb_url}",
+                "published": published,
+            }
+        )
+        return dict(sorted(download_dict.items()))
