@@ -333,7 +333,7 @@ function createPlayer(button) {
     var videoData = getVideoData(videoId);
 
     var sponsorBlockElements = '';
-    if (videoData.data.sponsorblock.is_enabled) {
+    if (videoData.data.sponsorblock && videoData.data.sponsorblock.is_enabled) {
         sponsorBlock = videoData.data.sponsorblock;
         if (sponsorBlock.segments.length == 0) {
             sponsorBlockElements = `
