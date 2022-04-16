@@ -64,6 +64,8 @@ class SearchProcess:
 
     def _process_video(self, video_dict):
         """run on single video dict"""
+        # fix cache_dir build dynamic
+        cache_dir = "/cache"
         video_id = video_dict["youtube_id"]
         media_url = urllib.parse.quote(video_dict["media_url"])
         vid_last_refresh = date_praser(video_dict["vid_last_refresh"])
@@ -71,13 +73,18 @@ class SearchProcess:
         vid_thumb_url = ThumbManager().vid_thumb_path(video_id)
         channel = self._process_channel(video_dict["channel"])
 
+        if "subtitles" in video_dict:
+            for idx, _ in enumerate(video_dict["subtitles"]):
+                url = video_dict["subtitles"][idx]["media_url"]
+                video_dict["subtitles"][idx]["media_url"] = f"/media/{url}"
+
         video_dict.update(
             {
                 "channel": channel,
-                "media_url": media_url,
+                "media_url": f"/media/{media_url}",
                 "vid_last_refresh": vid_last_refresh,
                 "published": published,
-                "vid_thumb_url": vid_thumb_url,
+                "vid_thumb_url": f"{cache_dir}/{vid_thumb_url}",
             }
         )
 
