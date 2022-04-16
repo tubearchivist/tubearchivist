@@ -10,7 +10,6 @@ from datetime import datetime
 
 import requests
 from django.conf import settings
-from home.src.download.thumbnails import ThumbManager
 from home.src.es.connect import ElasticWrap
 from home.src.index import channel as ta_channel
 from home.src.index.generic import YouTubeItem
@@ -437,7 +436,8 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
         published = upload_date_time.strftime("%Y-%m-%d")
         last_refresh = int(datetime.now().strftime("%s"))
-        base64_blur = ThumbManager().get_base64_blur(self.youtube_id)
+        # base64_blur = ThumbManager().get_base64_blur(self.youtube_id)
+        base64_blur = False
         # build json_data basics
         self.json_data = {
             "title": self.youtube_meta["title"],
