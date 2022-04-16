@@ -333,7 +333,7 @@ function createPlayer(button) {
     var videoData = getVideoData(videoId);
 
     var sponsorBlockElements = '';
-    if (videoData.data.sponsorblock.is_enabled) {
+    if (videoData.data.sponsorblock && videoData.data.sponsorblock.is_enabled) {
         sponsorBlock = videoData.data.sponsorblock;
         if (sponsorBlock.segments.length == 0) {
             sponsorBlockElements = `
@@ -505,19 +505,21 @@ function getVideoPlayerWatchStatus() {
     return watched;
 }
 
-// Runs on video playback, marks video as watched if video gets to 90% or higher, sends position to api
+// Runs on video playback, marks video as watched if video gets to 90% or higher, sends position to api, SB skipping
 function onVideoProgress() {
     var videoId = getVideoPlayerVideoId();
     var currentTime = getVideoPlayerCurrentTime();
     var duration = getVideoPlayerDuration();
     var videoElement = getVideoPlayer();
-    // var sponsorBlockElement = document.getElementById("sponsorblock");
     var notificationsElement = document.getElementById("notifications");
-    if (sponsorBlock.segments.length > 0) {
+    if (sponsorBlock && sponsorBlock.segments) {
         for(let i in sponsorBlock.segments) {
-            if(sponsorBlock.segments[i].segment[0] <= currentTime + 0.3 && sponsorBlock.segments[i].segment[0] >= currentTime) {
+            if(currentTime >= sponsorBlock.segments[i].segment[0] && currentTime <= sponsorBlock.segments[i].segment[0] + 0.3) {
                 videoElement.currentTime = sponsorBlock.segments[i].segment[1];
-                notificationsElement.innerHTML += `<h3 id="notification-${sponsorBlock.segments[i].UUID}">Skipped sponsor segment from ${formatTime(sponsorBlock.segments[i].segment[0])} to ${formatTime(sponsorBlock.segments[i].segment[1])}.</h3>`;
+                var notificationElement = document.getElementById("notification-" + sponsorBlock.segments[i].UUID);
+                if (!notificationElement) {
+                    notificationsElement.innerHTML += `<h3 id="notification-${sponsorBlock.segments[i].UUID}">Skipped sponsor segment from ${formatTime(sponsorBlock.segments[i].segment[0])} to ${formatTime(sponsorBlock.segments[i].segment[1])}.</h3>`;
+                }
             }
             if(currentTime > sponsorBlock.segments[i].segment[1] + 10) {
                 var notificationsElementUUID = document.getElementById("notification-" + sponsorBlock.segments[i].UUID);
