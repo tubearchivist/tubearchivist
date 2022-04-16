@@ -154,4 +154,4 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 
 # TA application settings
 TA_UPSTREAM = "https://github.com/tubearchivist/tubearchivist"
-TA_VERSION = "v0.1.3"
+TA_VERSION = "v0.1.4"
