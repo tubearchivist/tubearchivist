@@ -153,10 +153,9 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Podcast mode to serve channel as mp3
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
 - [ ] Implement [Apprise](https://github.com/caronc/apprise) for notifications ([#97](https://github.com/tubearchivist/tubearchivist/issues/97))
-- [ ] Add [SponsorBlock](https://sponsor.ajay.app/) integration
 - [ ] Add passing browser cookies to yt-dlp ([#199](https://github.com/tubearchivist/tubearchivist/issues/199))
 - [ ] User created playlists, random and repeat controls ([#108](https://github.com/tubearchivist/tubearchivist/issues/108), [#220](https://github.com/tubearchivist/tubearchivist/issues/220))
-- [ ] Auto play or play next link
+- [ ] Auto play or play next link ([#226](https://github.com/tubearchivist/tubearchivist/issues/226))
 - [ ] Show similar videos on video page
 - [ ] Multi language support
 - [ ] Show total video downloaded vs total videos available in channel
@@ -166,8 +165,10 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Filter and query in search form, search by url query ([#134](https://github.com/tubearchivist/tubearchivist/issues/134), [#139](https://github.com/tubearchivist/tubearchivist/issues/139))
 - [ ] Auto ignore videos by keyword ([#163](https://github.com/tubearchivist/tubearchivist/issues/163))
 - [ ] Custom searchable notes to videos, channels, playlists ([#144](https://github.com/tubearchivist/tubearchivist/issues/144))
+- [ ] Download video comments
 
 Implemented:
+- [X] Add [SponsorBlock](https://sponsor.ajay.app/) integration [2022-04-16]
 - [X] Implement per channel settings [2022-03-26]
 - [X] Subtitle download & indexing [2022-02-13]
 - [X] Fancy advanced unified search interface [2022-01-08]
