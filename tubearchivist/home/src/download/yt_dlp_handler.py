@@ -196,7 +196,7 @@ class VideoDownloader:
                 "title": "Completed",
                 "message": "",
             }
-            RedisArchivist().set_message("message:download", mess_dict, 4)
+            RedisArchivist().set_message("message:download", mess_dict, 10)
             self._delete_from_pending(youtube_id)
 
         # post processing
