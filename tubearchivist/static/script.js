@@ -512,7 +512,7 @@ function onVideoProgress() {
     var duration = getVideoPlayerDuration();
     var videoElement = getVideoPlayer();
     var notificationsElement = document.getElementById("notifications");
-    if (sponsorBlock.segments) {
+    if (sponsorBlock && sponsorBlock.segments) {
         for(let i in sponsorBlock.segments) {
             if(currentTime >= sponsorBlock.segments[i].segment[0] && currentTime <= sponsorBlock.segments[i].segment[0] + 0.3) {
                 videoElement.currentTime = sponsorBlock.segments[i].segment[1];
