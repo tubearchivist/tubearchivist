@@ -52,7 +52,10 @@ class ApiBaseView(APIView):
         print(self.search_base)
         response, status_code = ElasticWrap(self.search_base).get(data=data)
         self.response["data"] = SearchProcess(response).process()
-        self.status_code = status_code
+        if self.response["data"]:
+            self.status_code = status_code
+        else:
+            self.status_code = 404
 
 
 class VideoApiView(ApiBaseView):
@@ -238,7 +241,7 @@ class ChannelApiVideoView(ApiBaseView):
         self.get_document_list(data)
         self.get_paginate()
 
-        return Response(self.response)
+        return Response(self.response, status=self.status_code)
 
 
 class PlaylistApiListView(ApiBaseView):
@@ -286,7 +289,7 @@ class PlaylistApiVideoView(ApiBaseView):
         }
         self.get_document_list(data)
         self.get_paginate()
-        return Response(self.response)
+        return Response(self.response, status=self.status_code)
 
 
 class DownloadApiView(ApiBaseView):
