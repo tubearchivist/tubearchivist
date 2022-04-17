@@ -337,14 +337,28 @@ class DownloadApiListView(ApiBaseView):
     """resolves to /api/download/
     GET: returns latest videos in the download queue
     POST: add a list of videos to download queue
+    DELETE: remove items based on query filter
     """
 
     search_base = "ta_download/_search/"
+    valid_filter = ["pending", "ignore"]
 
     def get(self, request):
         # pylint: disable=unused-argument
         """get request"""
-        data = {"query": {"match_all": {}}}
+        query_filter = request.GET.get("filter", False)
+        data = {
+            "query": {"match_all": {}},
+            "sort": [{"timestamp": {"order": "asc"}}],
+        }
+        if query_filter:
+            if query_filter not in self.valid_filter:
+                message = f"invalid url query filder: {query_filter}"
+                print(message)
+                return Response({"message": message}, status=400)
+
+            data["query"] = {"term": {"status": {"value": query_filter}}}
+
         self.get_document_list(data)
         self.get_paginate()
         return Response(self.response)
@@ -373,6 +387,20 @@ class DownloadApiListView(ApiBaseView):
         extrac_dl.delay(youtube_ids)
 
         return Response(data)
+
+    def delete(self, request):
+        """delete download queue"""
+        query_filter = request.GET.get("filter", False)
+        if query_filter not in self.valid_filter:
+            message = f"invalid url query filter: {query_filter}"
+            print(message)
+            return Response({"message": message}, status=400)
+
+        message = f"delete queue by status: {query_filter}"
+        print(message)
+        PendingInteract(status=query_filter).delete_by_status()
+
+        return Response({"message": message})
 
 
 class PingView(ApiBaseView):

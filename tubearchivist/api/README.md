@@ -136,7 +136,10 @@ POST /api/channel/
 /api/playlist/\<playlist_id>/video/
 
 ## Download Queue List View
-/api/download/
+GET /api/download/
+
+Parameter:
+- filter: pending, ignore
 
 ### Add list of videos to download queue
 POST /api/download/
@@ -147,6 +150,10 @@ POST /api/download/
     ]
 }
 ```
+
+### Delete download queue items by filter
+DELETE /api/download/?filter=ignore  
+DELETE /api/download/?filter=pending
 
 ## Download Queue Item View
 GET /api/download/\<video_id>/  
