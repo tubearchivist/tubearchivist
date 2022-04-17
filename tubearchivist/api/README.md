@@ -149,8 +149,25 @@ POST /api/download/
 ```
 
 ## Download Queue Item View
-/api/download/\<video_id>/
+GET /api/download/\<video_id>/  
+POST /api/download/\<video_id>/
 
+Ignore video in download queue:
+```json
+{
+    "status": "ignore"
+}
+```
+
+Add to queue previously ignored video:
+```json
+{
+    "status": "pending"
+}
+```
+
+DELETE /api/download/\<video_id>/  
+Forget or delete from download queue
 
 ## Ping View
 Validate your connection with the API  

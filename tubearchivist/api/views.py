@@ -1,11 +1,12 @@
 """all API views"""
 
 from api.src.search_processor import SearchProcess
+from home.src.download.queue import PendingInteract
 from home.src.es.connect import ElasticWrap
 from home.src.index.video import SponsorBlock
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import UrlListParser
-from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 from home.tasks import extrac_dl, subscribe_to
 from rest_framework.authentication import (
     SessionAuthentication,
@@ -295,15 +296,41 @@ class PlaylistApiVideoView(ApiBaseView):
 class DownloadApiView(ApiBaseView):
     """resolves to /api/download/<video_id>/
     GET: returns metadata dict of an item in the download queue
+    POST: update status of item to pending or ignore
+    DELETE: forget from download queue
     """
 
     search_base = "ta_download/_doc/"
+    valid_status = ["pending", "ignore"]
 
     def get(self, request, video_id):
         # pylint: disable=unused-argument
         """get request"""
         self.get_document(video_id)
         return Response(self.response, status=self.status_code)
+
+    def post(self, request, video_id):
+        """post to video to change status"""
+        item_status = request.data["status"]
+        if item_status not in self.valid_status:
+            message = f"{video_id}: invalid status {item_status}"
+            print(message)
+            return Response({"message": message}, status=400)
+
+        print(f"{video_id}: change status to {item_status}")
+        PendingInteract(video_id=video_id, status=item_status).update_status()
+        RedisQueue().clear_item(video_id)
+
+        return Response(request.data)
+
+    @staticmethod
+    def delete(request, video_id):
+        # pylint: disable=unused-argument
+        """delete single video from queue"""
+        print(f"{video_id}: delete from queue")
+        PendingInteract(video_id=video_id).delete_item()
+
+        return Response({"success": True})
 
 
 class DownloadApiListView(ApiBaseView):
