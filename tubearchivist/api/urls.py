@@ -2,12 +2,14 @@
 
 from api.views import (
     ChannelApiListView,
+    ChannelApiVideoView,
     ChannelApiView,
     DownloadApiListView,
     DownloadApiView,
     LoginApiView,
     PingView,
     PlaylistApiListView,
+    PlaylistApiVideoView,
     PlaylistApiView,
     VideoApiListView,
     VideoApiView,
@@ -50,14 +52,24 @@ urlpatterns = [
         name="api-channel",
     ),
     path(
-        "playlist/<slug:playlist_id>/",
-        PlaylistApiView.as_view(),
-        name="api-playlist",
+        "channel/<slug:channel_id>/video/",
+        ChannelApiVideoView.as_view(),
+        name="api-channel-video",
     ),
     path(
         "playlist/",
         PlaylistApiListView.as_view(),
         name="api-playlist-list",
+    ),
+    path(
+        "playlist/<slug:playlist_id>/",
+        PlaylistApiView.as_view(),
+        name="api-playlist",
+    ),
+    path(
+        "playlist/<slug:playlist_id>/video/",
+        PlaylistApiVideoView.as_view(),
+        name="api-playlist-video",
     ),
     path(
         "download/",

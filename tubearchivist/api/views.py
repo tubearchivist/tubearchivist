@@ -222,6 +222,41 @@ class ChannelApiListView(ApiBaseView):
         return Response(data)
 
 
+class ChannelApiVideoView(ApiBaseView):
+    """resolves to /api/channel/<channel-id>/video
+    GET: returns a list of videos of channel
+    """
+
+    search_base = "ta_video/_search/"
+
+    def get(self, request, channel_id):
+        # pylint: disable=unused-argument
+        """handle get request"""
+        data = {
+            "query": {"term": {"channel.channel_id": {"value": channel_id}}}
+        }
+        self.get_document_list(data)
+        self.get_paginate()
+
+        return Response(self.response)
+
+
+class PlaylistApiListView(ApiBaseView):
+    """resolves to /api/playlist/
+    GET: returns list of indexed playlists
+    """
+
+    search_base = "ta_playlist/_search/"
+
+    def get(self, request):
+        # pylint: disable=unused-argument
+        """handle get request"""
+        data = {"query": {"match_all": {}}}
+        self.get_document_list(data)
+        self.get_paginate()
+        return Response(self.response)
+
+
 class PlaylistApiView(ApiBaseView):
     """resolves to /api/playlist/<playlist_id>/
     GET: returns metadata dict of playlist
@@ -236,17 +271,19 @@ class PlaylistApiView(ApiBaseView):
         return Response(self.response, status=self.status_code)
 
 
-class PlaylistApiListView(ApiBaseView):
-    """resolves to /api/playlist/
-    GET: returns list of indexed playlists
+class PlaylistApiVideoView(ApiBaseView):
+    """resolves to /api/playlist/<playlist_id>/video
+    GET: returns list of videos in playlist
     """
 
-    search_base = "ta_playlist/_search/"
+    search_base = "ta_video/_search/"
 
-    def get(self, request):
+    def get(self, request, playlist_id):
         # pylint: disable=unused-argument
         """handle get request"""
-        data = {"query": {"match_all": {}}}
+        data = {
+            "query": {"term": {"playlist.keyword": {"value": playlist_id}}}
+        }
         self.get_document_list(data)
         self.get_paginate()
         return Response(self.response)

@@ -123,11 +123,17 @@ POST /api/channel/
 ## Channel Item View
 /api/channel/\<channel_id>/
 
+## Channel Videos View
+/api/channel/\<channel_id>/video/
+
 ## Playlist List View
 /api/playlist/
 
 ## Playlists Item View
 /api/playlist/\<playlist_id>/
+
+## Playlist Videos View
+/api/playlist/\<playlist_id>/video/
 
 ## Download Queue List View
 /api/download/
