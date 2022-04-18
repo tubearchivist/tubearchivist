@@ -195,6 +195,11 @@ class SubtitleParser:
 
             if flatten:
                 # fix overlapping retiming issue
+                if "dDurationMs" not in flatten[-1]:
+                    # some events won't have a duration
+                    print(f"failed to parse event without duration: {event}")
+                    continue
+
                 last_end = flatten[-1]["tStartMs"] + flatten[-1]["dDurationMs"]
                 if event["tStartMs"] < last_end:
                     joined = flatten[-1]["segs"][0]["utf8"] + "\n" + text
