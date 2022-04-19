@@ -134,7 +134,9 @@ chown 1000:0 /path/to/mount/point
 This will match the permissions with the **UID** and **GID** of elasticsearch within the container and should fix the issue.
 
 ### Disk usage
-The Elasticsearch index will turn to *read only* if the disk usage of the container goes above 95% until the usage drops below 90% again. Similar to that, TubeArchivist will become all sorts of messed up when running out of disk space. There are some error messages in the logs when that happens, but it's best to make sure to have enough disk space before starting to download.
+The Elasticsearch index will turn to *read only* if the disk usage of the container goes above 95% until the usage drops below 90% again, you will see error messages like `disk usage exceeded flood-stage watermark`, [link](https://github.com/tubearchivist/tubearchivist#disk-usage).  
+
+Similar to that, TubeArchivist will become all sorts of messed up when running out of disk space. There are some error messages in the logs when that happens, but it's best to make sure to have enough disk space before starting to download.
 
 ## Getting Started
 1. Go through the **settings** page and look at the available options. Particularly set *Download Format* to your desired video quality before downloading. **Tube Archivist** downloads the best available quality by default. To support iOS or MacOS and some other browsers a compatible format must be specified. For example:
