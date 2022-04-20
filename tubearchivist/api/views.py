@@ -3,6 +3,7 @@
 from api.src.search_processor import SearchProcess
 from home.src.download.queue import PendingInteract
 from home.src.es.connect import ElasticWrap
+from home.src.index.generic import Pagination
 from home.src.index.video import SponsorBlock
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import UrlListParser
@@ -25,12 +26,14 @@ class ApiBaseView(APIView):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
     search_base = False
+    data = {"query": {"match_all": {}}}
 
     def __init__(self):
         super().__init__()
         self.response = {"data": False, "config": AppConfig().config}
         self.status_code = False
         self.context = False
+        self.pagination_handler = False
 
     def get_document(self, document_id):
         """get single document from es"""
@@ -44,19 +47,32 @@ class ApiBaseView(APIView):
             self.response["data"] = False
         self.status_code = status_code
 
-    def get_paginate(self):
-        """add pagination detail to response"""
-        self.response["paginate"] = False
+    def initiate_pagination(self, request):
+        """set initial pagination values"""
+        user_id = request.user.id
+        page_get = int(request.GET.get("page", 0))
+        self.pagination_handler = Pagination(page_get, user_id)
+        self.data.update(
+            {
+                "size": self.pagination_handler.pagination["page_size"],
+                "from": self.pagination_handler.pagination["page_from"],
+            }
+        )
 
-    def get_document_list(self, data):
+    def get_document_list(self, request):
         """get a list of results"""
         print(self.search_base)
-        response, status_code = ElasticWrap(self.search_base).get(data=data)
+        self.initiate_pagination(request)
+        es_handler = ElasticWrap(self.search_base)
+        response, status_code = es_handler.get(data=self.data)
         self.response["data"] = SearchProcess(response).process()
         if self.response["data"]:
             self.status_code = status_code
         else:
             self.status_code = 404
+
+        self.pagination_handler.validate(response["hits"]["total"]["value"])
+        self.response["paginate"] = self.pagination_handler.pagination
 
 
 class VideoApiView(ApiBaseView):
@@ -81,11 +97,9 @@ class VideoApiListView(ApiBaseView):
     search_base = "ta_video/_search/"
 
     def get(self, request):
-        # pylint: disable=unused-argument
         """get request"""
-        data = {"query": {"match_all": {}}}
-        self.get_document_list(data)
-        self.get_paginate()
+        self.data.update({"sort": [{"published": {"order": "desc"}}]})
+        self.get_document_list(request)
 
         return Response(self.response)
 
@@ -200,11 +214,11 @@ class ChannelApiListView(ApiBaseView):
     search_base = "ta_channel/_search/"
 
     def get(self, request):
-        # pylint: disable=unused-argument
         """get request"""
-        data = {"query": {"match_all": {}}}
-        self.get_document_list(data)
-        self.get_paginate()
+        self.get_document_list(request)
+        self.data.update(
+            {"sort": [{"channel_name.keyword": {"order": "asc"}}]}
+        )
 
         return Response(self.response)
 
@@ -234,13 +248,16 @@ class ChannelApiVideoView(ApiBaseView):
     search_base = "ta_video/_search/"
 
     def get(self, request, channel_id):
-        # pylint: disable=unused-argument
         """handle get request"""
-        data = {
-            "query": {"term": {"channel.channel_id": {"value": channel_id}}}
-        }
-        self.get_document_list(data)
-        self.get_paginate()
+        self.data.update(
+            {
+                "query": {
+                    "term": {"channel.channel_id": {"value": channel_id}}
+                },
+                "sort": [{"published": {"order": "desc"}}],
+            }
+        )
+        self.get_document_list(request)
 
         return Response(self.response, status=self.status_code)
 
@@ -253,11 +270,11 @@ class PlaylistApiListView(ApiBaseView):
     search_base = "ta_playlist/_search/"
 
     def get(self, request):
-        # pylint: disable=unused-argument
         """handle get request"""
-        data = {"query": {"match_all": {}}}
-        self.get_document_list(data)
-        self.get_paginate()
+        self.data.update(
+            {"sort": [{"playlist_name.keyword": {"order": "asc"}}]}
+        )
+        self.get_document_list(request)
         return Response(self.response)
 
 
@@ -283,13 +300,13 @@ class PlaylistApiVideoView(ApiBaseView):
     search_base = "ta_video/_search/"
 
     def get(self, request, playlist_id):
-        # pylint: disable=unused-argument
         """handle get request"""
-        data = {
-            "query": {"term": {"playlist.keyword": {"value": playlist_id}}}
+        self.data["query"] = {
+            "term": {"playlist.keyword": {"value": playlist_id}}
         }
-        self.get_document_list(data)
-        self.get_paginate()
+        self.data.update({"sort": [{"published": {"order": "desc"}}]})
+
+        self.get_document_list(request)
         return Response(self.response, status=self.status_code)
 
 
@@ -344,11 +361,9 @@ class DownloadApiListView(ApiBaseView):
     valid_filter = ["pending", "ignore"]
 
     def get(self, request):
-        # pylint: disable=unused-argument
         """get request"""
         query_filter = request.GET.get("filter", False)
-        data = {
-            "query": {"match_all": {}},
+        self.data.update = {
             "sort": [{"timestamp": {"order": "asc"}}],
         }
         if query_filter:
@@ -357,10 +372,9 @@ class DownloadApiListView(ApiBaseView):
                 print(message)
                 return Response({"message": message}, status=400)
 
-            data["query"] = {"term": {"status": {"value": query_filter}}}
+            self.data["query"] = {"term": {"status": {"value": query_filter}}}
 
-        self.get_document_list(data)
-        self.get_paginate()
+        self.get_document_list(request)
         return Response(self.response)
 
     @staticmethod

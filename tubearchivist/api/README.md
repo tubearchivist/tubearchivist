@@ -20,6 +20,19 @@ headers = {"Authorization": "Token xxxxxxxxxx"}
 response = requests.get(url, headers=headers)
 ```
 
+## Pagination
+The list views return a paginate object with the following keys:
+- page_size: int current page size set in config
+- page_from: int first result idx
+- prev_pages: array of ints of previous pages, if available
+- current_page: int current page from query
+- max_hits: reached: bool if max of 10k results is reached
+- last_page: int of last page link
+- next_pages: array of ints of next pages
+- total_hits: int total results
+
+Pass page number as a query parameter: `page=2`. Defaults to *0*, `page=1` is redundant and falls back to *0*. If a page query doesn't return any results, you'll get `HTTP 404 Not Found`.
+
 ## Login View
 Return token and user ID for username and password:  
 POST /api/login
