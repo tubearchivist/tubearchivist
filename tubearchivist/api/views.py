@@ -364,9 +364,7 @@ class DownloadApiListView(ApiBaseView):
     def get(self, request):
         """get request"""
         query_filter = request.GET.get("filter", False)
-        self.data.update = {
-            "sort": [{"timestamp": {"order": "asc"}}],
-        }
+        self.data.update({"sort": [{"timestamp": {"order": "asc"}}]})
         if query_filter:
             if query_filter not in self.valid_filter:
                 message = f"invalid url query filder: {query_filter}"
