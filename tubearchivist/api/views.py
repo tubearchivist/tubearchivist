@@ -26,11 +26,12 @@ class ApiBaseView(APIView):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
     search_base = False
-    data = {"query": {"match_all": {}}}
+    data = False
 
     def __init__(self):
         super().__init__()
         self.response = {"data": False, "config": AppConfig().config}
+        self.data = {"query": {"match_all": {}}}
         self.status_code = False
         self.context = False
         self.pagination_handler = False
