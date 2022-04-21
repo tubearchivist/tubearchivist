@@ -67,6 +67,7 @@ The main Python application that displays and serves your video collection, buil
   - Change the environment variables `TA_USERNAME` and `TA_PASSWORD` to create the initial credentials. 
   - `ELASTIC_PASSWORD` is for the password for Elasticsearch. The environment variable `ELASTIC_USER` is optional, should you want to change the username from the default *elastic*.
   - For the scheduler to know what time it is, set your timezone with the `TZ` environment variable, defaults to *UTC*.
+  - `DJANGO_REMOTE_USER_HEADER="REMOTE_USER"` changes the header used in django RemoteUserBackend, `DJANGO_REMOTE_USER_CREATE_UNKNOWN_USER=True or False` allows automatic user creation if the matching remote_user username does not match a user in django.
 
 ### Port collisions
 If you have a collision on port `8000`, best solution is to use dockers *HOST_PORT* and *CONTAINER_PORT* distinction: To for example change the interface to port 9000 use `9000:8000` in your docker-compose file.  
