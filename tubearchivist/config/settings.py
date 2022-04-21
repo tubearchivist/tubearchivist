@@ -59,7 +59,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    'config.middleware.CustomRemoteUserMiddleware',
+    "config.middleware.CustomRemoteUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -118,8 +118,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = "home.Account"
 AUTHENTICATION_BACKENDS = [
-    'config.auth_backends.CustomRemoteUserBackend',
-    'django.contrib.auth.backends.ModelBackend',
+    "config.auth_backends.CustomRemoteUserBackend",
+    "django.contrib.auth.backends.ModelBackend",
 ]
 
 
@@ -147,7 +147,7 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "/login/"
-LOGOUT_REDIRECT_URL = environ.get('DJANGO_LOGOUT_REDIRECT_URL', "/login/")
+LOGOUT_REDIRECT_URL = environ.get("DJANGO_LOGOUT_REDIRECT_URL", "/login/")
 
 # Cors needed for browser extension
 # background.js makes the request so HTTP_ORIGIN will be from extension
