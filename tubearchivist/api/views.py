@@ -1,6 +1,7 @@
 """all API views"""
 
 from api.src.search_processor import SearchProcess
+from api.src.task_processor import TaskHandler
 from home.src.download.queue import PendingInteract
 from home.src.es.connect import ElasticWrap
 from home.src.index.generic import Pagination
@@ -446,3 +447,18 @@ class LoginApiView(ObtainAuthToken):
         print(f"returning token for user with id {user.pk}")
 
         return Response({"token": token.key, "user_id": user.pk})
+
+
+class TaskApiView(ApiBaseView):
+    """resolves to /api/task/
+    POST: start a new background task
+    """
+
+    def post(self, request):
+        """handle post request"""
+
+        data = request.data
+        print(data)
+        response = TaskHandler(data).run_task()
+
+        return Response(response)
