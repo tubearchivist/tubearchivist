@@ -1,11 +1,14 @@
 """all API views"""
 
 from api.src.search_processor import SearchProcess
+from api.src.task_processor import TaskHandler
+from home.src.download.queue import PendingInteract
 from home.src.es.connect import ElasticWrap
+from home.src.index.generic import Pagination
 from home.src.index.video import SponsorBlock
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import UrlListParser
-from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 from home.tasks import extrac_dl, subscribe_to
 from rest_framework.authentication import (
     SessionAuthentication,
@@ -24,12 +27,15 @@ class ApiBaseView(APIView):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
     search_base = False
+    data = False
 
     def __init__(self):
         super().__init__()
         self.response = {"data": False, "config": AppConfig().config}
+        self.data = {"query": {"match_all": {}}}
         self.status_code = False
         self.context = False
+        self.pagination_handler = False
 
     def get_document(self, document_id):
         """get single document from es"""
@@ -43,19 +49,32 @@ class ApiBaseView(APIView):
             self.response["data"] = False
         self.status_code = status_code
 
-    def get_paginate(self):
-        """add pagination detail to response"""
-        self.response["paginate"] = False
+    def initiate_pagination(self, request):
+        """set initial pagination values"""
+        user_id = request.user.id
+        page_get = int(request.GET.get("page", 0))
+        self.pagination_handler = Pagination(page_get, user_id)
+        self.data.update(
+            {
+                "size": self.pagination_handler.pagination["page_size"],
+                "from": self.pagination_handler.pagination["page_from"],
+            }
+        )
 
-    def get_document_list(self, data):
+    def get_document_list(self, request):
         """get a list of results"""
         print(self.search_base)
-        response, status_code = ElasticWrap(self.search_base).get(data=data)
+        self.initiate_pagination(request)
+        es_handler = ElasticWrap(self.search_base)
+        response, status_code = es_handler.get(data=self.data)
         self.response["data"] = SearchProcess(response).process()
         if self.response["data"]:
             self.status_code = status_code
         else:
             self.status_code = 404
+
+        self.pagination_handler.validate(response["hits"]["total"]["value"])
+        self.response["paginate"] = self.pagination_handler.pagination
 
 
 class VideoApiView(ApiBaseView):
@@ -80,11 +99,9 @@ class VideoApiListView(ApiBaseView):
     search_base = "ta_video/_search/"
 
     def get(self, request):
-        # pylint: disable=unused-argument
         """get request"""
-        data = {"query": {"match_all": {}}}
-        self.get_document_list(data)
-        self.get_paginate()
+        self.data.update({"sort": [{"published": {"order": "desc"}}]})
+        self.get_document_list(request)
 
         return Response(self.response)
 
@@ -199,11 +216,11 @@ class ChannelApiListView(ApiBaseView):
     search_base = "ta_channel/_search/"
 
     def get(self, request):
-        # pylint: disable=unused-argument
         """get request"""
-        data = {"query": {"match_all": {}}}
-        self.get_document_list(data)
-        self.get_paginate()
+        self.get_document_list(request)
+        self.data.update(
+            {"sort": [{"channel_name.keyword": {"order": "asc"}}]}
+        )
 
         return Response(self.response)
 
@@ -233,13 +250,16 @@ class ChannelApiVideoView(ApiBaseView):
     search_base = "ta_video/_search/"
 
     def get(self, request, channel_id):
-        # pylint: disable=unused-argument
         """handle get request"""
-        data = {
-            "query": {"term": {"channel.channel_id": {"value": channel_id}}}
-        }
-        self.get_document_list(data)
-        self.get_paginate()
+        self.data.update(
+            {
+                "query": {
+                    "term": {"channel.channel_id": {"value": channel_id}}
+                },
+                "sort": [{"published": {"order": "desc"}}],
+            }
+        )
+        self.get_document_list(request)
 
         return Response(self.response, status=self.status_code)
 
@@ -252,11 +272,11 @@ class PlaylistApiListView(ApiBaseView):
     search_base = "ta_playlist/_search/"
 
     def get(self, request):
-        # pylint: disable=unused-argument
         """handle get request"""
-        data = {"query": {"match_all": {}}}
-        self.get_document_list(data)
-        self.get_paginate()
+        self.data.update(
+            {"sort": [{"playlist_name.keyword": {"order": "asc"}}]}
+        )
+        self.get_document_list(request)
         return Response(self.response)
 
 
@@ -282,22 +302,25 @@ class PlaylistApiVideoView(ApiBaseView):
     search_base = "ta_video/_search/"
 
     def get(self, request, playlist_id):
-        # pylint: disable=unused-argument
         """handle get request"""
-        data = {
-            "query": {"term": {"playlist.keyword": {"value": playlist_id}}}
+        self.data["query"] = {
+            "term": {"playlist.keyword": {"value": playlist_id}}
         }
-        self.get_document_list(data)
-        self.get_paginate()
+        self.data.update({"sort": [{"published": {"order": "desc"}}]})
+
+        self.get_document_list(request)
         return Response(self.response, status=self.status_code)
 
 
 class DownloadApiView(ApiBaseView):
     """resolves to /api/download/<video_id>/
     GET: returns metadata dict of an item in the download queue
+    POST: update status of item to pending or ignore
+    DELETE: forget from download queue
     """
 
     search_base = "ta_download/_doc/"
+    valid_status = ["pending", "ignore"]
 
     def get(self, request, video_id):
         # pylint: disable=unused-argument
@@ -305,21 +328,53 @@ class DownloadApiView(ApiBaseView):
         self.get_document(video_id)
         return Response(self.response, status=self.status_code)
 
+    def post(self, request, video_id):
+        """post to video to change status"""
+        item_status = request.data["status"]
+        if item_status not in self.valid_status:
+            message = f"{video_id}: invalid status {item_status}"
+            print(message)
+            return Response({"message": message}, status=400)
+
+        print(f"{video_id}: change status to {item_status}")
+        PendingInteract(video_id=video_id, status=item_status).update_status()
+        RedisQueue().clear_item(video_id)
+
+        return Response(request.data)
+
+    @staticmethod
+    def delete(request, video_id):
+        # pylint: disable=unused-argument
+        """delete single video from queue"""
+        print(f"{video_id}: delete from queue")
+        PendingInteract(video_id=video_id).delete_item()
+
+        return Response({"success": True})
+
 
 class DownloadApiListView(ApiBaseView):
     """resolves to /api/download/
     GET: returns latest videos in the download queue
     POST: add a list of videos to download queue
+    DELETE: remove items based on query filter
     """
 
     search_base = "ta_download/_search/"
+    valid_filter = ["pending", "ignore"]
 
     def get(self, request):
-        # pylint: disable=unused-argument
         """get request"""
-        data = {"query": {"match_all": {}}}
-        self.get_document_list(data)
-        self.get_paginate()
+        query_filter = request.GET.get("filter", False)
+        self.data.update({"sort": [{"timestamp": {"order": "asc"}}]})
+        if query_filter:
+            if query_filter not in self.valid_filter:
+                message = f"invalid url query filder: {query_filter}"
+                print(message)
+                return Response({"message": message}, status=400)
+
+            self.data["query"] = {"term": {"status": {"value": query_filter}}}
+
+        self.get_document_list(request)
         return Response(self.response)
 
     @staticmethod
@@ -346,6 +401,20 @@ class DownloadApiListView(ApiBaseView):
         extrac_dl.delay(youtube_ids)
 
         return Response(data)
+
+    def delete(self, request):
+        """delete download queue"""
+        query_filter = request.GET.get("filter", False)
+        if query_filter not in self.valid_filter:
+            message = f"invalid url query filter: {query_filter}"
+            print(message)
+            return Response({"message": message}, status=400)
+
+        message = f"delete queue by status: {query_filter}"
+        print(message)
+        PendingInteract(status=query_filter).delete_by_status()
+
+        return Response({"message": message})
 
 
 class PingView(ApiBaseView):
@@ -378,3 +447,18 @@ class LoginApiView(ObtainAuthToken):
         print(f"returning token for user with id {user.pk}")
 
         return Response({"token": token.key, "user_id": user.pk})
+
+
+class TaskApiView(ApiBaseView):
+    """resolves to /api/task/
+    POST: start a new background task
+    """
+
+    def post(self, request):
+        """handle post request"""
+
+        data = request.data
+        print(data)
+        response = TaskHandler(data).run_task()
+
+        return Response(response)

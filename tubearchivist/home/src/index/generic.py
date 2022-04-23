@@ -147,3 +147,4 @@ class Pagination:
         ]
 
         self.pagination["next_pages"] = next_pages
+        self.pagination["total_hits"] = total_hits
