@@ -146,7 +146,16 @@ LOGOUT_REDIRECT_URL = "/login/"
 
 # Cors needed for browser extension
 # background.js makes the request so HTTP_ORIGIN will be from extension
-CORS_ALLOWED_ORIGIN_REGEXES = [r"moz-extension://*", r"chrome-extension://*"]
+if environ.get("DISABLE_CORS"):
+    # disable cors
+    CORS_ORIGIN_ALLOW_ALL = True
+else:
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        r"moz-extension://*",
+        r"chrome-extension://*",
+    ]
+    CORS_ALLOWED_ORIGINS = ["http://localhost:8080"]
+
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "mode",
