@@ -350,7 +350,10 @@ function createPlayer(button) {
                 `;
             }
         }
+    } else {
+        sponsorBlock = null;
     }
+
     var videoProgress = getVideoProgress(videoId).position;
     var videoName = videoData.data.title;
 
