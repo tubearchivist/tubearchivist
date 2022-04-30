@@ -36,6 +36,10 @@ class CookieHandler:
     def use(self):
         """make cookie available in FS"""
         cookie = RedisArchivist().get_message(self.COOKIE_KEY)
+        if isinstance(cookie, dict):
+            print("no cookie imported")
+            raise FileNotFoundError
+
         with open(self.COOKIE_PATH, "w", encoding="utf-8") as cookie_file:
             cookie_file.write(cookie)
 
@@ -60,7 +64,11 @@ class CookieHandler:
 
     def validate(self):
         """validate cookie using the liked videos playlist"""
-        _ = self.use()
+        try:
+            _ = self.use()
+        except FileNotFoundError:
+            return False
+
         url = "https://www.youtube.com/playlist?list=LL"
         yt_obs = {
             "quiet": True,
