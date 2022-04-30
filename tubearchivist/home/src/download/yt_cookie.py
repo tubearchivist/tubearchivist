@@ -6,6 +6,7 @@ functionality:
 
 import os
 
+import yt_dlp
 from home.src.ta.config import AppConfig
 from home.src.ta.ta_redis import RedisArchivist
 
@@ -58,3 +59,21 @@ class CookieHandler:
         self.hide()
         RedisArchivist().del_message(self.cookie_key)
         print("cookie: revoked")
+
+    def validate(self):
+        """validate cookie using the liked videos playlist"""
+        _ = self.use()
+        url = "https://www.youtube.com/playlist?list=LL"
+        yt_obs = {
+            "quiet": True,
+            "skip_download": True,
+            "extract_flat": True,
+            "cookiefile": self.cookie_path,
+        }
+        try:
+            response = yt_dlp.YoutubeDL(yt_obs).extract_info(url)
+        except yt_dlp.utils.DownloadError:
+            print("failed to validate cookie")
+            response = False
+
+        return bool(response)
