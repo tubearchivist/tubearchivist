@@ -17,10 +17,8 @@ class CookieHandler:
     CONFIG = AppConfig().config
     CACHE_PATH = CONFIG["application"]["cache_dir"]
     COOKIE_FILE_NAME = "cookies.google.txt"
-
-    def __init__(self, user_id):
-        self.cookie_path = f"cookie_{user_id}.txt"
-        self.cookie_key = f"{user_id}:cookie"
+    COOKIE_KEY = "cookie"
+    COOKIE_PATH = "cookie.txt"
 
     def import_cookie(self):
         """import cookie from file"""
@@ -30,24 +28,24 @@ class CookieHandler:
         with open(import_path, encoding="utf-8") as cookie_file:
             cookie = cookie_file.read()
 
-        RedisArchivist().set_message(self.cookie_key, cookie, expire=False)
+        RedisArchivist().set_message(self.COOKIE_KEY, cookie, expire=False)
 
         os.remove(import_path)
         print("cookie: import successfully")
 
     def use(self):
         """make cookie available in FS"""
-        cookie = RedisArchivist().get_message(self.cookie_key)
-        with open(self.cookie_path, "w", encoding="utf-8") as cookie_file:
+        cookie = RedisArchivist().get_message(self.COOKIE_KEY)
+        with open(self.COOKIE_PATH, "w", encoding="utf-8") as cookie_file:
             cookie_file.write(cookie)
 
         print("cookie: made available")
-        return self.cookie_path
+        return self.COOKIE_PATH
 
     def hide(self):
         """hide cookie file if not in use"""
         try:
-            os.remove(self.cookie_path)
+            os.remove(self.COOKIE_PATH)
         except FileExistsError:
             print("cookie: not available")
             return
@@ -57,7 +55,7 @@ class CookieHandler:
     def revoke(self):
         """revoke cookie"""
         self.hide()
-        RedisArchivist().del_message(self.cookie_key)
+        RedisArchivist().del_message(self.COOKIE_KEY)
         print("cookie: revoked")
 
     def validate(self):
@@ -68,7 +66,7 @@ class CookieHandler:
             "quiet": True,
             "skip_download": True,
             "extract_flat": True,
-            "cookiefile": self.cookie_path,
+            "cookiefile": self.COOKIE_PATH,
         }
         try:
             response = yt_dlp.YoutubeDL(yt_obs).extract_info(url)
