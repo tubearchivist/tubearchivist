@@ -13,8 +13,10 @@ from home.src.download.subscriptions import (
     PlaylistSubscription,
 )
 from home.src.download.thumbnails import ThumbManager
+from home.src.download.yt_cookie import CookieHandler
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.playlist import YoutubePlaylist
+from home.src.ta.config import AppConfig
 from home.src.ta.helper import DurationConverter
 from home.src.ta.ta_redis import RedisArchivist
 
@@ -119,11 +121,28 @@ class PendingInteract:
 class PendingList(PendingIndex):
     """manage the pending videos list"""
 
+    yt_obs = {
+        "default_search": "ytsearch",
+        "quiet": True,
+        "check_formats": "selected",
+        "noplaylist": True,
+        "writethumbnail": True,
+        "simulate": True,
+    }
+
     def __init__(self, youtube_ids=False):
         super().__init__()
+        self.process_config()
         self.youtube_ids = youtube_ids
         self.to_skip = False
         self.missing_videos = False
+
+    def process_config(self):
+        """add user config to yt_obs"""
+        config = AppConfig().config
+        if config["downloads"]["cookie_import"]:
+            cookie_path = CookieHandler().use()
+            self.yt_obs.update({"cookiefile": cookie_path})
 
     def parse_url_list(self):
         """extract youtube ids from list"""
@@ -223,16 +242,8 @@ class PendingList(PendingIndex):
 
     def get_youtube_details(self, youtube_id):
         """get details from youtubedl for single pending video"""
-        obs = {
-            "default_search": "ytsearch",
-            "quiet": True,
-            "check_formats": "selected",
-            "noplaylist": True,
-            "writethumbnail": True,
-            "simulate": True,
-        }
         try:
-            vid = yt_dlp.YoutubeDL(obs).extract_info(youtube_id)
+            vid = yt_dlp.YoutubeDL(self.yt_obs).extract_info(youtube_id)
         except yt_dlp.utils.DownloadError:
             print("failed to extract info for: " + youtube_id)
             return False
