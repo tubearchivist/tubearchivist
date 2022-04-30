@@ -46,7 +46,7 @@ class CookieHandler:
         """hide cookie file if not in use"""
         try:
             os.remove(self.COOKIE_PATH)
-        except FileExistsError:
+        except FileNotFoundError:
             print("cookie: not available")
             return
 
