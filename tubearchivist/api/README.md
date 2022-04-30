@@ -213,3 +213,21 @@ POST /api/task/
 List of valid task names:
 - **download_pending**: Start the download queue
 - **rescan_pending**: Rescan your subscriptions
+
+
+## Cookie View
+Check your youtube cookie settings  
+GET /api/cookie/
+```json
+{
+    "cookie_enabled": true
+}
+```
+
+POST /api/cookie/  
+Send empty post request to validate cookie.
+```json
+{
+    "cookie_validated": true
+}
+```

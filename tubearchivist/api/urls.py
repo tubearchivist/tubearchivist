@@ -4,6 +4,7 @@ from api.views import (
     ChannelApiListView,
     ChannelApiVideoView,
     ChannelApiView,
+    CookieView,
     DownloadApiListView,
     DownloadApiView,
     LoginApiView,
@@ -86,5 +87,10 @@ urlpatterns = [
         "task/",
         TaskApiView.as_view(),
         name="api-task",
+    ),
+    path(
+        "cookie/",
+        CookieView.as_view(),
+        name="api-cookie",
     ),
 ]
