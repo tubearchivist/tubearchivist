@@ -6,6 +6,7 @@ functionality:
 import math
 
 import yt_dlp
+from home.src.download.yt_cookie import CookieHandler
 from home.src.es.connect import ElasticWrap
 from home.src.ta.config import AppConfig
 from home.src.ta.ta_redis import RedisArchivist
@@ -37,6 +38,9 @@ class YouTubeItem:
         """read user conf"""
         self.config = AppConfig().config
         self.app_conf = self.config["application"]
+        if self.config["downloads"]["cookie_import"]:
+            cookie_path = CookieHandler().use()
+            self.yt_obs.update({"cookiefile": cookie_path})
 
     def get_from_youtube(self):
         """use yt-dlp to get meta data from youtube"""
