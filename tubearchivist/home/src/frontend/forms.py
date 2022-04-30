@@ -86,6 +86,12 @@ class ApplicationSettingsForm(forms.Form):
         ("1", "enable subtitle index"),
     ]
 
+    COOKIE_IMPORT_CHOICES = [
+        ("", "-- change cookie settings"),
+        ("0", "disable cookie"),
+        ("1", "enable cookie"),
+    ]
+
     subscriptions_channel_size = forms.IntegerField(required=False)
     downloads_limit_count = forms.IntegerField(required=False)
     downloads_limit_speed = forms.IntegerField(required=False)
@@ -105,6 +111,9 @@ class ApplicationSettingsForm(forms.Form):
     )
     downloads_subtitle_index = forms.ChoiceField(
         widget=forms.Select, choices=SUBTITLE_INDEX_CHOICES, required=False
+    )
+    downloads_cookie_import = forms.ChoiceField(
+        widget=forms.Select, choices=COOKIE_IMPORT_CHOICES, required=False
     )
     downloads_integrate_ryd = forms.ChoiceField(
         widget=forms.Select, choices=RYD_CHOICES, required=False

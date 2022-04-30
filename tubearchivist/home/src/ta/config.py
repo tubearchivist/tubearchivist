@@ -83,6 +83,7 @@ class AppConfig:
 
     def update_config(self, form_post):
         """update config values from settings form"""
+        updated = []
         for key, value in form_post.items():
             if not value and not isinstance(value, int):
                 continue
@@ -96,8 +97,10 @@ class AppConfig:
 
             config_dict, config_value = key.split("_", maxsplit=1)
             self.config[config_dict][config_value] = to_write
+            updated.append((config_value, to_write))
 
         RedisArchivist().set_message("config", self.config, expire=False)
+        return updated
 
     @staticmethod
     def set_user_config(form_post, user_id):

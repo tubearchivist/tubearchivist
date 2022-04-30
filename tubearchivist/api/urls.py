@@ -4,6 +4,7 @@ from api.views import (
     ChannelApiListView,
     ChannelApiVideoView,
     ChannelApiView,
+    CookieView,
     DownloadApiListView,
     DownloadApiView,
     LoginApiView,
@@ -11,6 +12,7 @@ from api.views import (
     PlaylistApiListView,
     PlaylistApiVideoView,
     PlaylistApiView,
+    TaskApiView,
     VideoApiListView,
     VideoApiView,
     VideoProgressView,
@@ -80,5 +82,15 @@ urlpatterns = [
         "download/<slug:video_id>/",
         DownloadApiView.as_view(),
         name="api-download",
+    ),
+    path(
+        "task/",
+        TaskApiView.as_view(),
+        name="api-task",
+    ),
+    path(
+        "cookie/",
+        CookieView.as_view(),
+        name="api-cookie",
     ),
 ]

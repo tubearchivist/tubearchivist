@@ -115,6 +115,14 @@
             </div>
         </div>
         <div class="settings-group">
+            <h2 id="format">Cookie</h2>
+            <div class="settings-item">
+                <p>Import YouTube cookie: <span class="settings-current">{{ config.downloads.cookie_import }}</span><br></p>
+                <i>Place your cookie file named <span class="settings-current">cookies.google.txt</span> in /cache/import before enabling.</i><br>
+                {{ app_form.downloads_cookie_import }}
+            </div>
+        </div>
+        <div class="settings-group">
             <h2 id="integrations">Integrations</h2>
             <div class="settings-item">
                 <p>API token: <button type="button" onclick="textReveal()" id="text-reveal-button">Show</button></p>

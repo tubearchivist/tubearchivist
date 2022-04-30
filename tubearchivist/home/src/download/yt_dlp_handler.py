@@ -14,6 +14,7 @@ from time import sleep
 import yt_dlp
 from home.src.download.queue import PendingList
 from home.src.download.subscriptions import PlaylistSubscription
+from home.src.download.yt_cookie import CookieHandler
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
@@ -290,6 +291,9 @@ class VideoDownloader:
             self.obs["ratelimit"] = (
                 self.config["downloads"]["limit_speed"] * 1024
             )
+        if self.config["downloads"]["cookie_import"]:
+            cookie_path = CookieHandler().use()
+            self.obs["cookiefile"] = cookie_path
 
         throttle = self.config["downloads"]["throttledratelimit"]
         if throttle:

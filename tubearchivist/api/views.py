@@ -1,7 +1,9 @@
 """all API views"""
 
 from api.src.search_processor import SearchProcess
+from api.src.task_processor import TaskHandler
 from home.src.download.queue import PendingInteract
+from home.src.download.yt_cookie import CookieHandler
 from home.src.es.connect import ElasticWrap
 from home.src.index.generic import Pagination
 from home.src.index.video import SponsorBlock
@@ -446,3 +448,42 @@ class LoginApiView(ObtainAuthToken):
         print(f"returning token for user with id {user.pk}")
 
         return Response({"token": token.key, "user_id": user.pk})
+
+
+class TaskApiView(ApiBaseView):
+    """resolves to /api/task/
+    POST: start a new background task
+    """
+
+    def post(self, request):
+        """handle post request"""
+
+        data = request.data
+        print(data)
+        response = TaskHandler(data).run_task()
+
+        return Response(response)
+
+
+class CookieView(ApiBaseView):
+    """resolves to /api/cookie/
+    GET: check if cookie is enabled
+    POST: verify validity of cookie
+    """
+
+    @staticmethod
+    def get(request):
+        """handle get request"""
+        # pylint: disable=unused-argument
+        config = AppConfig().config
+        cookie_enabled = config["downloads"]["cookie_import"]
+
+        return Response({"cookie_enabled": cookie_enabled})
+
+    @staticmethod
+    def post(request):
+        """handle post request"""
+        # pylint: disable=unused-argument
+        validated = CookieHandler().validate()
+
+        return Response({"cookie_validated": validated})

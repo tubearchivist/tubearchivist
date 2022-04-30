@@ -26,6 +26,7 @@
         "subtitle": false,
         "subtitle_source": false,
         "subtitle_index": false,
+        "cookie_import": false,
         "throttledratelimit": false,
         "integrate_ryd": false,
         "integrate_sponsorblock": false
