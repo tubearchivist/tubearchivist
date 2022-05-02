@@ -173,7 +173,7 @@ class UrlListParser:
             id_type = "video"
         elif str_len == 24:
             id_type = "channel"
-        elif str_len in [34, 18]:
+        elif str_len in [34, 18] or id_str in ["LL", "WL"]:
             id_type = "playlist"
         else:
             # unable to parse
