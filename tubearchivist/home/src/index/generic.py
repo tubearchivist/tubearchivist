@@ -23,6 +23,7 @@ class YouTubeItem:
         "default_search": "ytsearch",
         "skip_download": True,
         "check_formats": "selected",
+        "socket_timeout": 3,
         "noplaylist": True,
     }
 

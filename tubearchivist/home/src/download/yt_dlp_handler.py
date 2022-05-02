@@ -281,6 +281,7 @@ class VideoDownloader:
             "writethumbnail": False,
             "noplaylist": True,
             "check_formats": "selected",
+            "socket_timeout": 3,
         }
 
     def _build_obs_user(self):

@@ -128,6 +128,7 @@ class PendingList(PendingIndex):
         "noplaylist": True,
         "writethumbnail": True,
         "simulate": True,
+        "socket_timeout": 3,
     }
 
     def __init__(self, youtube_ids=False):
