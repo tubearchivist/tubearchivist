@@ -168,7 +168,7 @@ class PlaylistSubscription:
     def channel_validate(channel_id):
         """make sure channel of playlist is there"""
         channel = YoutubeChannel(channel_id)
-        channel.build_json()
+        channel.build_json(upload=True)
 
     @staticmethod
     def change_subscribe(playlist_id, subscribe_status):
