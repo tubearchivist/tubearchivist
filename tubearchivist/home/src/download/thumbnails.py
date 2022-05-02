@@ -296,6 +296,7 @@ class ThumbManager:
     def get_thumb_list(self):
         """get list of mediafiles and matching thumbnails"""
         pending = queue.PendingList()
+        pending.get_download()
         pending.get_indexed()
 
         video_list = []
