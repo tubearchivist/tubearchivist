@@ -19,7 +19,6 @@ from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 from home.tasks import (
     download_pending,
     download_single,
-    extrac_dl,
     index_channel_playlists,
     kill_dl,
     re_sync_thumbs,
@@ -230,9 +229,7 @@ class PostData:
         """add single youtube_id to download queue"""
         video_id = self.exec_val
         print(f"{video_id}: add single vid to download queue")
-        PendingInteract(video_id=video_id).delete_item()
-        video_ids = UrlListParser(video_id).process_list()
-        extrac_dl.delay(video_ids)
+        PendingInteract(video_id=video_id, status="pending").update_status()
         return {"success": True}
 
     def _delete_queue(self):
