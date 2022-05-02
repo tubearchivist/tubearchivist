@@ -86,7 +86,7 @@ class YouTubeItem:
     def del_in_es(self):
         """delete item from elastic search"""
         print(f"{self.youtube_id}: delete from es")
-        _, _ = ElasticWrap(self.es_path).delete()
+        _, _ = ElasticWrap(self.es_path).delete(refresh=True)
 
 
 class Pagination:

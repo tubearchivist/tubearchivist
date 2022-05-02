@@ -75,8 +75,10 @@ class ElasticWrap:
 
         return response.json(), response.status_code
 
-    def delete(self, data=False):
+    def delete(self, data=False, refresh=False):
         """delete document from es"""
+        if refresh:
+            self.url = f"{self.url}/?refresh=true"
         if data:
             response = requests.delete(self.url, json=data, auth=self.auth)
         else:
