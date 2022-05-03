@@ -41,6 +41,7 @@ class DownloadPostProcess:
         self.auto_delete_all()
         self.auto_delete_overwrites()
         self.validate_playlists()
+        self.clear_cookie()
 
     def auto_delete_all(self):
         """handle auto delete"""
@@ -139,6 +140,11 @@ class DownloadPostProcess:
             )
         else:
             RedisArchivist().set_message("message:download", mess_dict)
+
+    def clear_cookie(self):
+        """hide cookie file"""
+        if self.download.config["downloads"]["cookie_import"]:
+            CookieHandler().hide()
 
 
 class VideoDownloader:
