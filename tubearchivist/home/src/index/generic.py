@@ -23,6 +23,7 @@ class YouTubeItem:
         "default_search": "ytsearch",
         "skip_download": True,
         "check_formats": "selected",
+        "socket_timeout": 3,
         "noplaylist": True,
     }
 
@@ -85,7 +86,7 @@ class YouTubeItem:
     def del_in_es(self):
         """delete item from elastic search"""
         print(f"{self.youtube_id}: delete from es")
-        _, _ = ElasticWrap(self.es_path).delete()
+        _, _ = ElasticWrap(self.es_path).delete(refresh=True)
 
 
 class Pagination:

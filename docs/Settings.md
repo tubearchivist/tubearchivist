@@ -32,6 +32,27 @@ Additional settings passed to yt-dlp.
 - **Source Settings**: User created subtitles are provided from the uploader and are usually the video script. Auto generated is from YouTube, quality varies, particularly for auto translated tracks.
 - **Index Settings**: Enabling subtitle indexing will add the lines to Elasticsearch and will make subtitles searchable. This will increase the index size and is not recommended on low-end hardware.
 
+## Cookie
+Importing your YouTube Cookie into Tube Archivist allows yt-dlp to bypass age restrictions, gives access to private videos and your *watch later* or *liked videos*.
+
+### Security concerns
+Cookies are used to store your session and contain your access token to your google account. Treat that file with utmost care as you would any other password or credential. *Tube Archivist* stores your cookie in Redis and will export the file container internally if it's needed.
+
+### Export your cookie
+- Install **Cookies.txt** addon for [chrome](https://chrome.google.com/webstore/detail/get-cookiestxt/bgaddhkoddajcdgocldbbfleckgcbcid) or [firefox](https://addons.mozilla.org/firefox/addon/cookies-txt).
+- Visit YouTube and login with whichever YouTube account you wish to use to generate the cookies.
+- Click on the extension icon in the toolbar - it will drop down showing the active cookies for YT.
+- Click Export to export the cookies, filename is by default *cookies.google.txt*.
+
+### Import your cookie
+Place the file *cookies.google.txt* into the */cache/import* folder of Tube Archivist and enable the cookie import. Once you click on *Update Application Configurations* to save your changes, your cookie will get imported and stored internally.
+
+### Use your cookie
+Once imported, additionally to the advantages above, your [Watch Later](https://www.youtube.com/playlist?list=WL) and [Liked Videos](https://www.youtube.com/playlist?list=LL) become a regular playlist you can download and subscribe to as any other [playlist](Playlists).
+
+### Limitation
+There is only one cookie per Tube Archivist instance, this will be shared between all users.
+
 ## Integrations
 All third party integrations of TubeArchivist will **always** be *opt in*.
 - **API**: Your access token for the Tube Archivist API.

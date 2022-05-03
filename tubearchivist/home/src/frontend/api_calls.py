@@ -19,7 +19,6 @@ from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 from home.tasks import (
     download_pending,
     download_single,
-    extrac_dl,
     index_channel_playlists,
     kill_dl,
     re_sync_thumbs,
@@ -111,7 +110,7 @@ class PostData:
     def _ignore(self):
         """ignore from download queue"""
         video_id = self.exec_val
-        print(f"ignore video {video_id}")
+        print(f"{video_id}: ignore video from download queue")
         PendingInteract(video_id=video_id, status="ignore").update_status()
         # also clear from redis queue
         RedisQueue().clear_item(video_id)
@@ -123,7 +122,7 @@ class PostData:
         print("download pending")
         running = download_pending.delay()
         task_id = running.id
-        print("set task id: " + task_id)
+        print(f"{task_id}: set task id")
         RedisArchivist().set_message("dl_queue_id", task_id, expire=False)
         return {"success": True}
 
@@ -146,7 +145,7 @@ class PostData:
     def _unsubscribe(self):
         """unsubscribe from channels or playlists"""
         id_unsub = self.exec_val
-        print("unsubscribe from " + id_unsub)
+        print(f"{id_unsub}: unsubscribe")
         to_unsub_list = UrlListParser(id_unsub).process_list()
         for to_unsub in to_unsub_list:
             unsub_type = to_unsub["type"]
@@ -167,7 +166,7 @@ class PostData:
     def _subscribe(self):
         """subscribe to channel or playlist, called from js buttons"""
         id_sub = self.exec_val
-        print("subscribe to " + id_sub)
+        print(f"{id_sub}: subscribe")
         subscribe_to.delay(id_sub)
         return {"success": True}
 
@@ -203,7 +202,7 @@ class PostData:
     def _dlnow(self):
         """start downloading single vid now"""
         youtube_id = self.exec_val
-        print("downloading: " + youtube_id)
+        print(f"{youtube_id}: downloading now")
         running = download_single.delay(youtube_id=youtube_id)
         task_id = running.id
         print("set task id: " + task_id)
@@ -222,17 +221,15 @@ class PostData:
     def _forget_ignore(self):
         """delete from ta_download index"""
         video_id = self.exec_val
-        print(f"forgetting from download index: {video_id}")
+        print(f"{video_id}: forget from download")
         PendingInteract(video_id=video_id).delete_item()
         return {"success": True}
 
     def _add_single(self):
         """add single youtube_id to download queue"""
         video_id = self.exec_val
-        print(f"add vid to dl queue: {video_id}")
-        PendingInteract(video_id=video_id).delete_item()
-        video_ids = UrlListParser(video_id).process_list()
-        extrac_dl.delay(video_ids)
+        print(f"{video_id}: add single vid to download queue")
+        PendingInteract(video_id=video_id, status="pending").update_status()
         return {"success": True}
 
     def _delete_queue(self):

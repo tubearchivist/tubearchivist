@@ -103,7 +103,7 @@ class PendingInteract:
     def delete_item(self):
         """delete single item from pending"""
         path = f"ta_download/_doc/{self.video_id}"
-        _, _ = ElasticWrap(path).delete()
+        _, _ = ElasticWrap(path).delete(refresh=True)
 
     def delete_by_status(self):
         """delete all matching item by status"""
@@ -128,6 +128,7 @@ class PendingList(PendingIndex):
         "noplaylist": True,
         "writethumbnail": True,
         "simulate": True,
+        "socket_timeout": 3,
     }
 
     def __init__(self, youtube_ids=False):
