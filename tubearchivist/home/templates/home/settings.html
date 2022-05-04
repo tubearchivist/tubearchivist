@@ -119,10 +119,12 @@
             <div class="settings-item">
                 <p>Import YouTube cookie: <span class="settings-current">{{ config.downloads.cookie_import }}</span><br></p>
                 <i>Place your cookie file named <span class="settings-current">cookies.google.txt</span> in /cache/import before enabling.</i><br>
-                {{ app_form.downloads_cookie_import }}
-                <button onclick="handleCookieValidate()" type="button">Validate Cookie File</button>
-                <br><br>
-                <div id="cookieMessage"></div>
+                {{ app_form.downloads_cookie_import }}<br>
+                {% if config.downloads.cookie_import %}
+                    <div id="cookieMessage">
+                        <button onclick="handleCookieValidate()" type="button" id="cookieButton">Validate Cookie File</button>
+                    </div>
+                {% endif %}
             </div>
         </div>
         <div class="settings-group">

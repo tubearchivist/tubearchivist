@@ -700,7 +700,9 @@ function postSponsorSegmentVote(videoId, uuid, vote) {
 }
 
 function handleCookieValidate() {
+    document.getElementById("cookieButton").remove();
     var cookieMessageElement = document.getElementById("cookieMessage");
+    cookieMessageElement.innerHTML = `<span>Processing.</span>`;
     response = postCookieValidate();
     if (response.cookie_validated == true) {
         cookieMessageElement.innerHTML = `<span>The cookie file is valid.</span>`;
