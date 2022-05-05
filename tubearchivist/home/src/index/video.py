@@ -156,6 +156,9 @@ class YoutubeSubtitle:
         youtube_id = self.video.youtube_id
         # delete files
         videos_base = self.video.config["application"]["videos"]
+        if not self.video.json_data.get("subtitles"):
+            return
+
         files = [i["media_url"] for i in self.video.json_data["subtitles"]]
         for file_name in files:
             file_path = os.path.join(videos_base, file_name)
@@ -607,6 +610,12 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         if subtitles:
             self.json_data["subtitles"] = subtitles
             handler.download_subtitles(relevant_subtitles=subtitles)
+
+    def update_media_url(self):
+        """update only media_url in es for reindex channel rename"""
+        data = {"doc": {"media_url": self.json_data["media_url"]}}
+        path = f"{self.index_name}/_update/{self.youtube_id}"
+        _, _ = ElasticWrap(path).post(data=data)
 
 
 def index_new_video(youtube_id, video_overwrites=False):
