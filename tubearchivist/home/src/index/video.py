@@ -151,6 +151,23 @@ class YoutubeSubtitle:
         """send subtitle to es for indexing"""
         _, _ = ElasticWrap("_bulk").post(data=query_str, ndjson=True)
 
+    def delete(self):
+        """delete subtitles from index and filesystem"""
+        youtube_id = self.video.youtube_id
+        # delete files
+        videos_base = self.video.config["application"]["videos"]
+        files = [i["media_url"] for i in self.video.json_data["subtitles"]]
+        for file_name in files:
+            file_path = os.path.join(videos_base, file_name)
+            try:
+                os.remove(file_path)
+            except FileNotFoundError:
+                print(f"{youtube_id}: {file_path} failed to delete")
+        # delete from index
+        path = "ta_subtitle/_delete_by_query?refresh=true"
+        data = {"query": {"term": {"youtube_id": {"value": youtube_id}}}}
+        _, _ = ElasticWrap(path).post(data=data)
+
 
 class SubtitleParser:
     """parse subtitle str from youtube"""
@@ -542,21 +559,20 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         """delete video file, meta data"""
         self.get_from_es()
         video_base = self.app_conf["videos"]
-        to_del = [self.json_data.get("media_url")]
-
-        all_subtitles = self.json_data.get("subtitles")
-        if all_subtitles:
-            to_del = to_del + [i.get("media_url") for i in all_subtitles]
-
-        for media_url in to_del:
-            file_path = os.path.join(video_base, media_url)
-            try:
-                os.remove(file_path)
-            except FileNotFoundError:
-                print(f"{self.youtube_id}: failed {media_url}, continue.")
+        media_url = self.json_data.get("media_url")
+        file_path = os.path.join(video_base, media_url)
+        try:
+            os.remove(file_path)
+        except FileNotFoundError:
+            print(f"{self.youtube_id}: failed {media_url}, continue.")
 
         self.del_in_es()
         self.delete_subtitles()
+
+    def delete_subtitles(self):
+        """delete indexed subtitles"""
+        print(f"{self.youtube_id}: delete subtitles")
+        YoutubeSubtitle(self).delete()
 
     def _get_ryd_stats(self):
         """get optional stats from returnyoutubedislikeapi.com"""
@@ -591,12 +607,6 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         if subtitles:
             self.json_data["subtitles"] = subtitles
             handler.download_subtitles(relevant_subtitles=subtitles)
-
-    def delete_subtitles(self):
-        """delete indexed subtitles"""
-        path = "ta_subtitle/_delete_by_query?refresh=true"
-        data = {"query": {"term": {"youtube_id": {"value": self.youtube_id}}}}
-        _, _ = ElasticWrap(path).post(data=data)
 
 
 def index_new_video(youtube_id, video_overwrites=False):
