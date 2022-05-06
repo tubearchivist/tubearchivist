@@ -219,10 +219,11 @@ class PendingList(PendingIndex):
             thumb_handler.download_vid(thumb_needed)
             self._notify_add(idx)
 
-        # add last newline
-        bulk_list.append("\n")
-        query_str = "\n".join(bulk_list)
-        _, _ = ElasticWrap("_bulk").post(query_str, ndjson=True)
+        if bulk_list:
+            # add last newline
+            bulk_list.append("\n")
+            query_str = "\n".join(bulk_list)
+            _, _ = ElasticWrap("_bulk").post(query_str, ndjson=True)
 
     def _notify_add(self, idx):
         """send notification for adding videos to download queue"""
@@ -246,7 +247,11 @@ class PendingList(PendingIndex):
         try:
             vid = yt_dlp.YoutubeDL(self.yt_obs).extract_info(youtube_id)
         except yt_dlp.utils.DownloadError:
-            print("failed to extract info for: " + youtube_id)
+            print(f"{youtube_id}: failed to extract info")
+            return False
+        if vid.get("id") != youtube_id:
+            # skip premium videos with different id
+            print(f"{youtube_id}: skipping premium video, id not matching")
             return False
         # stop if video is streaming live now
         if vid["is_live"]:

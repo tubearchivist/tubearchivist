@@ -4,12 +4,15 @@ functionality:
 - index and update in es
 """
 
+import os
+import shutil
 from datetime import datetime
 from math import ceil
 from time import sleep
 
 from home.src.download.queue import PendingList
 from home.src.download.thumbnails import ThumbManager
+from home.src.download.yt_dlp_handler import VideoDownloader
 from home.src.es.connect import ElasticWrap
 from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
@@ -211,7 +214,12 @@ class Reindex:
         # videos
         print(f"reindexing {len(self.all_youtube_ids)} videos")
         for youtube_id in self.all_youtube_ids:
-            self._reindex_single_video(youtube_id)
+            try:
+                self._reindex_single_video(youtube_id)
+            except FileNotFoundError:
+                # handle channel name change here
+                ChannelUrlFixer(youtube_id, self.config).run()
+                self._reindex_single_video(youtube_id)
             if sleep_interval:
                 sleep(sleep_interval)
         # channels
@@ -231,3 +239,62 @@ class Reindex:
                 self._reindex_single_playlist(playlist_id, all_indexed_ids)
                 if sleep_interval:
                     sleep(sleep_interval)
+
+
+class ChannelUrlFixer:
+    """fix not matching channel names in reindex"""
+
+    def __init__(self, youtube_id, config):
+        self.youtube_id = youtube_id
+        self.config = config
+        self.video = False
+
+    def run(self):
+        """check and run if needed"""
+        print(f"{self.youtube_id}: failed to build channel path, try to fix.")
+        video_path_is, video_folder_is = self.get_as_is()
+        if not os.path.exists(video_path_is):
+            print(f"giving up reindex, video in video: {self.video.json_data}")
+            raise ValueError
+
+        _, video_folder_should = self.get_as_should()
+
+        if video_folder_is != video_folder_should:
+            self.process(video_path_is)
+        else:
+            print(f"{self.youtube_id}: skip channel url fixer")
+
+    def get_as_is(self):
+        """get video object as is"""
+        self.video = YoutubeVideo(self.youtube_id)
+        self.video.get_from_es()
+        video_path_is = os.path.join(
+            self.config["application"]["videos"],
+            self.video.json_data["media_url"],
+        )
+        video_folder_is = os.path.split(video_path_is)[0]
+
+        return video_path_is, video_folder_is
+
+    def get_as_should(self):
+        """add fresh metadata from remote"""
+        self.video.get_from_youtube()
+        self.video.add_file_path()
+
+        video_path_should = os.path.join(
+            self.config["application"]["videos"],
+            self.video.json_data["media_url"],
+        )
+        video_folder_should = os.path.split(video_path_should)[0]
+        return video_path_should, video_folder_should
+
+    def process(self, video_path_is):
+        """fix filepath"""
+        print(f"{self.youtube_id}: fixing channel rename.")
+        cache_dir = self.config["application"]["cache_dir"]
+        new_file_path = os.path.join(
+            cache_dir, "download", self.youtube_id + ".mp4"
+        )
+        shutil.move(video_path_is, new_file_path)
+        VideoDownloader().move_to_archive(self.video.json_data)
+        self.video.update_media_url()

@@ -699,6 +699,24 @@ function postSponsorSegmentVote(videoId, uuid, vote) {
     apiRequest(apiEndpoint, "POST", data);
 }
 
+function handleCookieValidate() {
+    document.getElementById("cookieButton").remove();
+    var cookieMessageElement = document.getElementById("cookieMessage");
+    cookieMessageElement.innerHTML = `<span>Processing.</span>`;
+    response = postCookieValidate();
+    if (response.cookie_validated == true) {
+        cookieMessageElement.innerHTML = `<span>The cookie file is valid.</span>`;
+    } else {
+        cookieMessageElement.innerHTML = `<span class="danger-zone">Warning, the cookie file is invalid.</span>`;
+    }
+}
+
+// Check youtube cookie settings
+function postCookieValidate() {
+    var apiEndpoint = "/api/cookie/";
+    return apiRequest(apiEndpoint, "POST");
+}
+
 // Makes api requests when passed an endpoint and method ("GET", "POST", "DELETE")
 function apiRequest(apiEndpoint, method, data) {
     const xhttp = new XMLHttpRequest();
