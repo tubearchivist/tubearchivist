@@ -36,7 +36,7 @@ Additional settings passed to yt-dlp.
 Importing your YouTube Cookie into Tube Archivist allows yt-dlp to bypass age restrictions, gives access to private videos and your *watch later* or *liked videos*.
 
 ### Security concerns
-Cookies are used to store your session and contain your access token to your google account. Treat that file with utmost care as you would any other password or credential. *Tube Archivist* stores your cookie in Redis and will export the file container internally if it's needed.
+Cookies are used to store your session and contain your access token to your google account, this file can be used to take over your account. Treat that file with utmost care as you would any other password or credential. *Tube Archivist* stores your cookie in Redis and will export the file container internally if it's needed.
 
 ### Export your cookie
 - Install **Cookies.txt** addon for [chrome](https://chrome.google.com/webstore/detail/get-cookiestxt/bgaddhkoddajcdgocldbbfleckgcbcid) or [firefox](https://addons.mozilla.org/firefox/addon/cookies-txt).
@@ -45,7 +45,9 @@ Cookies are used to store your session and contain your access token to your goo
 - Click Export to export the cookies, filename is by default *cookies.google.txt*.
 
 ### Import your cookie
-Place the file *cookies.google.txt* into the */cache/import* folder of Tube Archivist and enable the cookie import. Once you click on *Update Application Configurations* to save your changes, your cookie will get imported and stored internally.
+Place the file *cookies.google.txt* into the *cache/import* folder of Tube Archivist and enable the cookie import. Once you click on *Update Application Configurations* to save your changes, your cookie will get imported and stored internally.
+
+Once imported, a **Validate Cookie File** button will show, where you can confirm if your cookie is working or not.
 
 ### Use your cookie
 Once imported, additionally to the advantages above, your [Watch Later](https://www.youtube.com/playlist?list=WL) and [Liked Videos](https://www.youtube.com/playlist?list=LL) become a regular playlist you can download and subscribe to as any other [playlist](Playlists).
