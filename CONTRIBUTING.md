@@ -19,7 +19,7 @@ I have learned the hard way, that working on a dockerized application outside of
 
 This is my setup I have landed on, YMMV:
 - Clone the repo, work on it with your favorite code editor in your local filesystem. *testing* branch is the where all the changes are happening, might be unstable and is WIP.
-- Then I have a VM on KVM hypervisor running standard Ubuntu Server LTS with docker installed. The VM keeps my projects separate and offers convenient snapshot functionality. The VM also offers ways to simulate lowend environments by limiting CPU cores and memory. But you could also just run docker on your host system.
+- Then I have a VM on KVM hypervisor running standard Ubuntu Server LTS with docker installed. The VM keeps my projects separate and offers convenient snapshot functionality. The VM also offers ways to simulate lowend environments by limiting CPU cores and memory. You can use this [Ansible Docker Ubuntu](https://github.com/bbilly1/ansible-playbooks) playbook to get started quickly. But you could also just run docker on your host system.
 - The `Dockerfile` is structured in a way that the actual application code is in the last layer so rebuilding the image with only code changes utilizes the build cache for everything else and will just take a few seconds.
 - Take a look at the `deploy.sh` file. I have my local DNS resolve `tubearchivist.local` to the IP of the VM for convenience. To deploy the latest changes and rebuild the application to the testing VM run:
 ```bash
@@ -32,11 +32,11 @@ This is my setup I have landed on, YMMV:
 ## Working with Elasticsearch
 Additionally to the required services as listed in the example docker-compose file, the **Dev Tools** of [Kibana](https://www.elastic.co/guide/en/kibana/current/docker.html) are invaluable for running and testing Elasticsearch queries.  
 
-If you want to run queries in on the Elasticsearch container directly from your host with for example `curl` or something like *postman*, you might want to **publish** the port 9200 instead of just **exposing** it.
+If you want to run queries on the Elasticsearch container directly from your host with for example `curl` or something like *postman*, you might want to **publish** the port 9200 instead of just **exposing** it.
 
 ## Implementing a new feature
 
-Do you see anything on the roadmap that you would like to take a closer look at but you are not sure, what's the best way to tackle that? Or anything not on there yet you'd like to implement but are not sure how? Open up an issue and we try to find a solution together.
+Do you see anything on the roadmap that you would like to take a closer look at but you are not sure, what's the best way to tackle that? Or anything not on there yet you'd like to implement but are not sure how? Reach out on Discord and we'll look into it together.
 
 ## Making changes
 
@@ -53,10 +53,10 @@ If you want to see what's in your container, checkout the matching release tag. 
 
 ## Code formatting and linting
 
-To keep things clean and consistent for everybody, there is a github action setup to lint and check the changes. You can test your code locally first if you want. For example if you made changes in the **download** module, run
+To keep things clean and consistent for everybody, there is a github action setup to lint and check the changes. You can test your code locally first if you want. For example if you made changes in the **video** module, run
 
 ```shell
-./deploy.sh validate tubearchivist/home/src/download.py
+./deploy.sh validate tubearchivist/home/src/index/video.py
 ```
 
 to validate your changes. If you omit the path, all the project files will get checked. This is subject to change as the codebase improves. 
