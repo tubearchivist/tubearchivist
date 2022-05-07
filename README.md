@@ -5,11 +5,12 @@
 Tube Archivist has a new home: https://github.com/tubearchivist/tubearchivist
 
 ## Table of contents:
-* [Wiki](https://github.com/tubearchivist/tubearchivist/wiki) for a detailed documentation, with [FAQ](https://github.com/tubearchivist/tubearchivist/wiki/FAQ)
+* [Wiki](https://github.com/tubearchivist/tubearchivist/wiki) with [FAQ](https://github.com/tubearchivist/tubearchivist/wiki/FAQ)
 * [Core functionality](#core-functionality)
 * [Screenshots](#screenshots)
 * [Problem Tube Archivist tries to solve](#problem-tube-archivist-tries-to-solve)
 * [Connect](#connect)
+* [Extended Universe](#extended-universe)
 * [Installing and updating](#installing-and-updating)
 * [Getting Started](#getting-started)
 * [Potential pitfalls](#potential-pitfalls)
@@ -51,6 +52,9 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 ## Connect
 - [Discord](https://discord.gg/AFwz8nE7BK): Connect with us on our Discord server.
 - [r/TubeArchivist](https://www.reddit.com/r/TubeArchivist/): Join our Subreddit.
+
+## Extended Universe
+- [Browser Extension](https://github.com/tubearchivist/browser-extension) Tube Archivist Companion, for [Firefox](https://addons.mozilla.org/addon/tubearchivist-companion/) and [Chrome](https://chrome.google.com/webstore/detail/tubearchivist-companion/jjnkmicfnfojkkgobdfeieblocadmcie)
 
 ## Installing and updating
 Take a look at the example `docker-compose.yml` file provided. Use the *latest* or the named semantic version tag. The *unstable* tag is for intermediate testing and as the name implies, is **unstable** and not be used on your main installation but in a [testing environment](CONTRIBUTING.md).  
