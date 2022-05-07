@@ -40,6 +40,9 @@ class CookieHandler:
             print("no cookie imported")
             raise FileNotFoundError
 
+        if os.path.exists(self.COOKIE_PATH):
+            return self.COOKIE_PATH
+
         with open(self.COOKIE_PATH, "w", encoding="utf-8") as cookie_file:
             cookie_file.write(cookie)
 
