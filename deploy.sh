@@ -33,7 +33,7 @@ function sync_blackhole {
         . -e ssh "$host":tubearchivist
 
     echo "$PASS" | ssh "$host" 'sudo -S docker buildx build --platform linux/amd64 -t bbilly1/tubearchivist:latest tubearchivist --load 2>/dev/null'
-    echo "$PASS" | ssh "$host" 'sudo -S docker-compose up -d 2>/dev/null'
+    echo "$PASS" | ssh "$host" 'sudo -S docker compose up -d 2>/dev/null'
 
 }
 
@@ -69,7 +69,7 @@ function sync_test {
     fi
 
     ssh "$host" "docker buildx build --build-arg INSTALL_DEBUG=1 --platform $platform -t bbilly1/tubearchivist:latest tubearchivist --load"
-    ssh "$host" 'docker-compose -f docker/docker-compose.yml up -d'
+    ssh "$host" 'docker compose -f docker/docker-compose.yml up -d'
 
 }
 

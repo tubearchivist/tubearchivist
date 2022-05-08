@@ -5,11 +5,12 @@
 Tube Archivist has a new home: https://github.com/tubearchivist/tubearchivist
 
 ## Table of contents:
-* [Wiki](https://github.com/tubearchivist/tubearchivist/wiki) for a detailed documentation, with [FAQ](https://github.com/tubearchivist/tubearchivist/wiki/FAQ)
+* [Wiki](https://github.com/tubearchivist/tubearchivist/wiki) with [FAQ](https://github.com/tubearchivist/tubearchivist/wiki/FAQ)
 * [Core functionality](#core-functionality)
 * [Screenshots](#screenshots)
 * [Problem Tube Archivist tries to solve](#problem-tube-archivist-tries-to-solve)
 * [Connect](#connect)
+* [Extended Universe](#extended-universe)
 * [Installing and updating](#installing-and-updating)
 * [Getting Started](#getting-started)
 * [Potential pitfalls](#potential-pitfalls)
@@ -51,6 +52,10 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 ## Connect
 - [Discord](https://discord.gg/AFwz8nE7BK): Connect with us on our Discord server.
 - [r/TubeArchivist](https://www.reddit.com/r/TubeArchivist/): Join our Subreddit.
+
+## Extended Universe
+- [Browser Extension](https://github.com/tubearchivist/browser-extension) Tube Archivist Companion, for [Firefox](https://addons.mozilla.org/addon/tubearchivist-companion/) and [Chrome](https://chrome.google.com/webstore/detail/tubearchivist-companion/jjnkmicfnfojkkgobdfeieblocadmcie)
+- [Tube Archivist Metrics](https://github.com/tubearchivist/tubearchivist-metrics) to create statistics in Prometheus/OpenMetrics format.
 
 ## Installing and updating
 Take a look at the example `docker-compose.yml` file provided. Use the *latest* or the named semantic version tag. The *unstable* tag is for intermediate testing and as the name implies, is **unstable** and not be used on your main installation but in a [testing environment](CONTRIBUTING.md).  
@@ -155,7 +160,6 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Podcast mode to serve channel as mp3
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
 - [ ] Implement [Apprise](https://github.com/caronc/apprise) for notifications ([#97](https://github.com/tubearchivist/tubearchivist/issues/97))
-- [ ] Add passing browser cookies to yt-dlp ([#199](https://github.com/tubearchivist/tubearchivist/issues/199))
 - [ ] User created playlists, random and repeat controls ([#108](https://github.com/tubearchivist/tubearchivist/issues/108), [#220](https://github.com/tubearchivist/tubearchivist/issues/220))
 - [ ] Auto play or play next link ([#226](https://github.com/tubearchivist/tubearchivist/issues/226))
 - [ ] Show similar videos on video page
@@ -170,6 +174,7 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Download video comments
 
 Implemented:
+- [X] Add passing browser cookies to yt-dlp [2022-05-08]
 - [X] Add [SponsorBlock](https://sponsor.ajay.app/) integration [2022-04-16]
 - [X] Implement per channel settings [2022-03-26]
 - [X] Subtitle download & indexing [2022-02-13]

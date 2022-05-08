@@ -145,6 +145,16 @@ class PendingList(PendingIndex):
             cookie_path = CookieHandler().use()
             self.yt_obs.update({"cookiefile": cookie_path})
 
+    def close_config(self):
+        """remove config after task finished"""
+        config = AppConfig().config
+        if config["downloads"]["cookie_import"]:
+            CookieHandler().hide()
+            try:
+                del self.yt_obs["cookiefile"]
+            except KeyError:
+                pass
+
     def parse_url_list(self):
         """extract youtube ids from list"""
         self.missing_videos = []
@@ -224,6 +234,8 @@ class PendingList(PendingIndex):
             bulk_list.append("\n")
             query_str = "\n".join(bulk_list)
             _, _ = ElasticWrap("_bulk").post(query_str, ndjson=True)
+
+        self.close_config()
 
     def _notify_add(self, idx):
         """send notification for adding videos to download queue"""
