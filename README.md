@@ -160,7 +160,6 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Podcast mode to serve channel as mp3
 - [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
 - [ ] Implement [Apprise](https://github.com/caronc/apprise) for notifications ([#97](https://github.com/tubearchivist/tubearchivist/issues/97))
-- [ ] Add passing browser cookies to yt-dlp ([#199](https://github.com/tubearchivist/tubearchivist/issues/199))
 - [ ] User created playlists, random and repeat controls ([#108](https://github.com/tubearchivist/tubearchivist/issues/108), [#220](https://github.com/tubearchivist/tubearchivist/issues/220))
 - [ ] Auto play or play next link ([#226](https://github.com/tubearchivist/tubearchivist/issues/226))
 - [ ] Show similar videos on video page
@@ -175,6 +174,7 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Download video comments
 
 Implemented:
+- [X] Add passing browser cookies to yt-dlp [2022-05-08]
 - [X] Add [SponsorBlock](https://sponsor.ajay.app/) integration [2022-04-16]
 - [X] Implement per channel settings [2022-03-26]
 - [X] Subtitle download & indexing [2022-02-13]
