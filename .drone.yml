@@ -11,11 +11,8 @@ steps:
       from_secret: docker_username
     password:
       from_secret: docker_password
-    repo: bbilly1/tubearchivist-test
+    repo: bbilly2/tubearchivist-test
     tags:
       - unstable
     dry_run: True
     target: linux/amd64
-
-image_pull_secrets:
-- dockerconfigjson
