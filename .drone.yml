@@ -13,10 +13,9 @@ steps:
   environment:
     TARGETPLATFORM: linux/amd64
   settings:
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
     repo: bbilly1/tubearchivist-test
     tags:
       - unstable
+
+image_pull_secrets:
+- dockerconfigjson
