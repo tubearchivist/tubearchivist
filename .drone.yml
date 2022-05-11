@@ -18,4 +18,3 @@ steps:
     repo: bbilly2/tubearchivist-test
     tags:
       - unstable
-    dry_run: True
