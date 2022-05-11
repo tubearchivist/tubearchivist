@@ -16,3 +16,6 @@ steps:
       - unstable
     dry_run: True
     target: linux/amd64
+
+image_pull_secrets:
+- dockerconfigjson
