@@ -1,0 +1,17 @@
+kind: pipeline
+type: docker
+name: unstable
+
+steps:
+- name: docker  
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    repo: bbilly1/tubearchivist-test
+    tags:
+      - unstable
+    dry_run: True
+    target: linux/amd64
