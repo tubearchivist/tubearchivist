@@ -16,6 +16,7 @@ steps:
     repo: bbilly1/tubearchivist-test
     tags:
       - unstable
-
-image_pull_secrets:
-- dockerconfigjson
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_token
