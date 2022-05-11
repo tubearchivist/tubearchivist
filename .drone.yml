@@ -17,6 +17,6 @@ steps:
       from_secret: docker_username
     password:
       from_secret: docker_password
-    repo: bbilly2/tubearchivist-test
+    repo: bbilly1/tubearchivist-test
     tags:
       - unstable
