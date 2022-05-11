@@ -2,6 +2,10 @@ kind: pipeline
 type: docker
 name: unstable
 
+platform:
+  os: linux
+  arch: amd64
+
 # test comment
 steps:
 - name: docker  
@@ -15,4 +19,3 @@ steps:
     tags:
       - unstable
     dry_run: True
-    target: linux/amd64
