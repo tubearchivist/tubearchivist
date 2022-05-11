@@ -10,8 +10,6 @@ platform:
 steps:
 - name: docker  
   image: plugins/docker
-  environment:
-    TARGETPLATFORM: linux/amd64
   settings:
     repo: bbilly1/tubearchivist-test
     tags:
@@ -20,3 +18,5 @@ steps:
       from_secret: docker_username
     password:
       from_secret: docker_token
+    build_args:
+      - TARGETPLATFORM=linux/amd64
