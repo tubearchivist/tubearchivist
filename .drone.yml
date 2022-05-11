@@ -10,6 +10,8 @@ platform:
 steps:
 - name: docker  
   image: plugins/docker
+  environment:
+    TARGETPLATFORM: linux/amd64
   settings:
     username:
       from_secret: docker_username
