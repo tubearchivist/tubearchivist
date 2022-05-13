@@ -58,7 +58,7 @@ steps:
     username:
       from_secret: docker_username
     password:
-      from_secret: docker_password
+      from_secret: docker_token
     platforms:
     - linux/amd64
     - linux/arm64
