@@ -1,0 +1,68 @@
+kind: pipeline
+type: docker
+name: amd64
+
+platform:
+  os: linux
+  arch: amd64
+
+# test comment
+steps:
+- name: docker  
+  image: plugins/docker
+  settings:
+    repo: bbilly1/tubearchivist-test
+    tags:
+      - unstable
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_token
+    build_args:
+      - TARGETPLATFORM=linux/amd64
+
+---
+kind: pipeline
+type: docker
+name: arm64
+
+platform:
+  os: linux
+  arch: arm64
+
+steps:
+- name: docker
+  image: plugins/docker
+  settings:
+    repo: bbilly1/tubearchivist-test
+    tags:
+      - unstable
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_token
+    build_args:
+      - TARGETPLATFORM=linux/arm64
+
+---
+kind: pipeline
+type: docker
+name: manifest
+
+steps:
+- name: manifest
+  image: plugins/manifest
+  settings:
+    target: bbilly1/tubearchivist-test
+    template: bbilly1/tubearchivist-test:unstable-OS-ARCH
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_token
+    platforms:
+    - linux/amd64
+    - linux/arm64
+
+depends_on:
+- amd64
+- arm64
