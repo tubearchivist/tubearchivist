@@ -167,6 +167,7 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Show total video downloaded vs total videos available in channel
 - [ ] Make items in grid row configurable to use more of the screen
 - [ ] Add statistics of index
+- [ ] Download speed schedule ([#198](https://github.com/tubearchivist/tubearchivist/issues/198))
 - [ ] Implement complete offline media file import from json file ([#138](https://github.com/tubearchivist/tubearchivist/issues/138))
 - [ ] Filter and query in search form, search by url query ([#134](https://github.com/tubearchivist/tubearchivist/issues/134), [#139](https://github.com/tubearchivist/tubearchivist/issues/139))
 - [ ] Auto ignore videos by keyword ([#163](https://github.com/tubearchivist/tubearchivist/issues/163))
