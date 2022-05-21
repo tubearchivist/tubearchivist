@@ -54,3 +54,16 @@ It's finally time to set up TubeArchivist!
 
 ### From there, you should be able to start up your containers and you're good to go!
 If you're still having trouble, join us on [discord](https://discord.gg/AFwz8nE7BK) and come to the #unraid channel.
+
+<br />
+<br />
+
+## Truenas Scale 
+
+Truenas Scale can be a bit confusing, with its k3s kubernetes implementation. 
+
+However, there is a step by step guide available for it's users here:
+
+https://heavysetup.info/applications/tube-archivist/dataset/
+
+- Ensure you are navigating the columns under `Tube Archivist` on the left hand side of the screen
