@@ -313,6 +313,17 @@ class VideoDownloader:
                     "add_metadata": True,
                 }
             )
+            postprocessors.append(
+                {
+                    "key": "MetadataFromField",
+                    "formats": [
+                        "%(title)s:%(meta_title)s",
+                        "%(uploader)s:%(meta_artist)s",
+                        ":(?P<album>)",
+                    ],
+                    "when": "pre_process",
+                }
+            )
 
         if self.config["downloads"]["add_thumbnail"]:
             postprocessors.append(
