@@ -8,7 +8,6 @@ import json
 import os
 
 import redis
-from home.src.ta.helper import ignore_filelist
 
 
 class RedisBase:
@@ -94,27 +93,6 @@ class RedisArchivist(RedisBase):
                 all_messages.append(json_str)
 
         return all_messages
-
-    @staticmethod
-    def monitor_cache_dir(cache_dir):
-        """
-        look at download cache dir directly as alternative progress info
-        """
-        dl_cache = os.path.join(cache_dir, "download")
-        all_cache_file = os.listdir(dl_cache)
-        cache_file = ignore_filelist(all_cache_file)
-        if cache_file:
-            filename = cache_file[0][12:].replace("_", " ").split(".")[0]
-            mess_dict = {
-                "status": "message:download",
-                "level": "info",
-                "title": "Downloading: " + filename,
-                "message": "",
-            }
-        else:
-            return False
-
-        return mess_dict
 
 
 class RedisQueue(RedisBase):
