@@ -12,8 +12,21 @@ import yt_dlp
 class YtWrap:
     """wrap calls to yt"""
 
-    def __init__(self, obs):
-        self.obs = obs
+    OBS_BASE = {
+        "default_search": "ytsearch",
+        "quiet": True,
+        "check_formats": "selected",
+        "socket_timeout": 2,
+    }
+
+    def __init__(self, obs_request):
+        self.obs_request = obs_request
+        self.build_obs()
+
+    def build_obs(self):
+        """build yt-dlp obs"""
+        self.obs = self.OBS_BASE.copy()
+        self.obs.update(self.obs_request)
 
     def download(self, url):
         """make download request"""
@@ -28,6 +41,10 @@ class YtWrap:
 
     def extract(self, url):
         """make extract request"""
-        response = yt_dlp.YoutubeDL(self.obs).extract_info(url)
+        try:
+            response = yt_dlp.YoutubeDL(self.obs).extract_info(url)
+        except (yt_dlp.utils.ExtractorError, yt_dlp.utils.DownloadError):
+            print(f"{url}: failed to get info from youtube")
+            response = False
 
         return response
