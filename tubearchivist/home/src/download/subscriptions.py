@@ -17,10 +17,7 @@ class ChannelSubscription:
     """manage the list of channels subscribed"""
 
     def __init__(self):
-        config = AppConfig().config
-        self.es_url = config["application"]["es_url"]
-        self.es_auth = config["application"]["es_auth"]
-        self.channel_size = config["subscriptions"]["channel_size"]
+        self.config = AppConfig().config
 
     @staticmethod
     def get_channels(subscribed_only=True):
@@ -44,9 +41,9 @@ class ChannelSubscription:
             "extract_flat": True,
         }
         if limit:
-            obs["playlistend"] = self.channel_size
+            obs["playlistend"] = self.config["subscriptions"]["channel_size"]
 
-        channel = YtWrap(obs).extract(channel_id)
+        channel = YtWrap(obs, self.config).extract(channel_id)
         if not channel:
             return False
 

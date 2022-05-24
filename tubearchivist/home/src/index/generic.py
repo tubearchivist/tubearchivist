@@ -5,7 +5,6 @@ functionality:
 
 import math
 
-from home.src.download.yt_cookie import CookieHandler
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap
 from home.src.ta.config import AppConfig
@@ -25,24 +24,16 @@ class YouTubeItem:
 
     def __init__(self, youtube_id):
         self.youtube_id = youtube_id
-        self.config = False
-        self.app_conf = False
-        self.youtube_meta = False
-        self.json_data = False
-        self._get_conf()
-
-    def _get_conf(self):
-        """read user conf"""
         self.config = AppConfig().config
         self.app_conf = self.config["application"]
-        if self.config["downloads"]["cookie_import"]:
-            cookie_path = CookieHandler().use()
-            self.yt_obs.update({"cookiefile": cookie_path})
+        self.youtube_meta = False
+        self.json_data = False
 
     def get_from_youtube(self):
         """use yt-dlp to get meta data from youtube"""
         print(f"{self.youtube_id}: get metadata from youtube")
-        response = YtWrap(self.yt_obs).extract(self.yt_base + self.youtube_id)
+        url = self.yt_base + self.youtube_id
+        response = YtWrap(self.yt_obs, self.config).extract(url)
 
         self.youtube_meta = response
 

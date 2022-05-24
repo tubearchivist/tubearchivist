@@ -3,7 +3,7 @@
 from api.src.search_processor import SearchProcess
 from api.src.task_processor import TaskHandler
 from home.src.download.queue import PendingInteract
-from home.src.download.yt_cookie import CookieHandler
+from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.connect import ElasticWrap
 from home.src.index.generic import Pagination
 from home.src.index.video import SponsorBlock
@@ -484,6 +484,7 @@ class CookieView(ApiBaseView):
     def post(request):
         """handle post request"""
         # pylint: disable=unused-argument
-        validated = CookieHandler().validate()
+        config = AppConfig().config
+        validated = CookieHandler(config).validate()
 
         return Response({"cookie_validated": validated})

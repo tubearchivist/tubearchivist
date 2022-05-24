@@ -315,7 +315,7 @@ class YoutubeChannel(YouTubeItem):
             + "/playlists?view=1&sort=dd&shelf_id=0"
         )
         obs = {"skip_download": True, "extract_flat": True}
-        playlists = YtWrap(obs).extract(url)
+        playlists = YtWrap(obs, self.config).extract(url)
         all_entries = [(i["id"], i["title"]) for i in playlists["entries"]]
         self.all_playlists = all_entries
 

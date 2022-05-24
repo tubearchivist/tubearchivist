@@ -14,7 +14,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views import View
-from home.src.download.yt_cookie import CookieHandler
+from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.index_setup import get_available_backups
 from home.src.frontend.api_calls import PostData
 from home.src.frontend.forms import (
@@ -795,18 +795,19 @@ class SettingsView(View):
     def post(self, request):
         """handle form post to update settings"""
         user_form = UserSettingsForm(request.POST)
+        config_handler = AppConfig()
         if user_form.is_valid():
             user_form_post = user_form.cleaned_data
             if any(user_form_post.values()):
-                AppConfig().set_user_config(user_form_post, request.user.id)
+                config_handler.set_user_config(user_form_post, request.user.id)
 
         app_form = ApplicationSettingsForm(request.POST)
         if app_form.is_valid():
             app_form_post = app_form.cleaned_data
             if app_form_post:
                 print(app_form_post)
-                updated = AppConfig().update_config(app_form_post)
-                self.post_process_updated(updated)
+                updated = config_handler.update_config(app_form_post)
+                self.post_process_updated(updated, config_handler.config)
 
         scheduler_form = SchedulerSettingsForm(request.POST)
         if scheduler_form.is_valid():
@@ -819,7 +820,7 @@ class SettingsView(View):
         return redirect("settings", permanent=True)
 
     @staticmethod
-    def post_process_updated(updated):
+    def post_process_updated(updated, config):
         """apply changes for config"""
         if not updated:
             return
@@ -827,9 +828,9 @@ class SettingsView(View):
         for config_value, updated_value in updated:
             if config_value == "cookie_import":
                 if updated_value:
-                    CookieHandler().import_cookie()
+                    CookieHandler(config).import_cookie()
                 else:
-                    CookieHandler().revoke()
+                    CookieHandler(config).revoke()
 
 
 def progress(request):

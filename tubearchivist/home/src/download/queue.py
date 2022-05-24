@@ -12,7 +12,6 @@ from home.src.download.subscriptions import (
     PlaylistSubscription,
 )
 from home.src.download.thumbnails import ThumbManager
-from home.src.download.yt_cookie import CookieHandler
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.playlist import YoutubePlaylist
@@ -133,27 +132,10 @@ class PendingList(PendingIndex):
 
     def __init__(self, youtube_ids=False):
         super().__init__()
-        self.process_config()
+        self.config = AppConfig().config
         self.youtube_ids = youtube_ids
         self.to_skip = False
         self.missing_videos = False
-
-    def process_config(self):
-        """add user config to yt_obs"""
-        config = AppConfig().config
-        if config["downloads"]["cookie_import"]:
-            cookie_path = CookieHandler().use()
-            self.yt_obs.update({"cookiefile": cookie_path})
-
-    def close_config(self):
-        """remove config after task finished"""
-        config = AppConfig().config
-        if config["downloads"]["cookie_import"]:
-            CookieHandler().hide()
-            try:
-                del self.yt_obs["cookiefile"]
-            except KeyError:
-                pass
 
     def parse_url_list(self):
         """extract youtube ids from list"""
@@ -235,8 +217,6 @@ class PendingList(PendingIndex):
             query_str = "\n".join(bulk_list)
             _, _ = ElasticWrap("_bulk").post(query_str, ndjson=True)
 
-        self.close_config()
-
     def _notify_add(self, idx):
         """send notification for adding videos to download queue"""
         progress = f"{idx + 1}/{len(self.missing_videos)}"
@@ -256,7 +236,7 @@ class PendingList(PendingIndex):
 
     def get_youtube_details(self, youtube_id):
         """get details from youtubedl for single pending video"""
-        vid = YtWrap(self.yt_obs).extract(youtube_id)
+        vid = YtWrap(self.yt_obs, self.config).extract(youtube_id)
         if not vid:
             return False
 
