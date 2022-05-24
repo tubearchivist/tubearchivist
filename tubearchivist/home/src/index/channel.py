@@ -10,10 +10,10 @@ import re
 from datetime import datetime
 
 import requests
-import yt_dlp
 from bs4 import BeautifulSoup
 from home.src.download import queue  # partial import
 from home.src.download.thumbnails import ThumbManager
+from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.generic import YouTubeItem
 from home.src.index.playlist import YoutubePlaylist
@@ -314,12 +314,8 @@ class YoutubeChannel(YouTubeItem):
             f"https://www.youtube.com/channel/{self.youtube_id}"
             + "/playlists?view=1&sort=dd&shelf_id=0"
         )
-        obs = {
-            "quiet": True,
-            "skip_download": True,
-            "extract_flat": True,
-        }
-        playlists = yt_dlp.YoutubeDL(obs).extract_info(url)
+        obs = {"skip_download": True, "extract_flat": True}
+        playlists = YtWrap(obs).extract(url)
         all_entries = [(i["id"], i["title"]) for i in playlists["entries"]]
         self.all_playlists = all_entries
 
