@@ -5,8 +5,8 @@ functionality:
 
 import math
 
-import yt_dlp
 from home.src.download.yt_cookie import CookieHandler
+from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap
 from home.src.ta.config import AppConfig
 from home.src.ta.ta_redis import RedisArchivist
@@ -19,11 +19,7 @@ class YouTubeItem:
     index_name = False
     yt_base = False
     yt_obs = {
-        "quiet": True,
-        "default_search": "ytsearch",
         "skip_download": True,
-        "check_formats": "selected",
-        "socket_timeout": 3,
         "noplaylist": True,
     }
 
@@ -46,15 +42,7 @@ class YouTubeItem:
     def get_from_youtube(self):
         """use yt-dlp to get meta data from youtube"""
         print(f"{self.youtube_id}: get metadata from youtube")
-        try:
-            yt_item = yt_dlp.YoutubeDL(self.yt_obs)
-            response = yt_item.extract_info(self.yt_base + self.youtube_id)
-        except (
-            yt_dlp.utils.ExtractorError,
-            yt_dlp.utils.DownloadError,
-        ):
-            print(f"{self.youtube_id}: failed to get info from youtube")
-            response = False
+        response = YtWrap(self.yt_obs).extract(self.yt_base + self.youtube_id)
 
         self.youtube_meta = response
 

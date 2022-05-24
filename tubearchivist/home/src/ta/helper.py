@@ -11,7 +11,7 @@ import unicodedata
 from datetime import datetime
 from urllib.parse import parse_qs, urlparse
 
-import yt_dlp
+from home.src.download.yt_dlp_base import YtWrap
 
 
 def clean_string(file_name):
@@ -184,14 +184,12 @@ class UrlListParser:
     @staticmethod
     def extract_channel_name(url):
         """find channel id from channel name with yt-dlp help"""
-        obs = {
-            "default_search": "ytsearch",
-            "quiet": True,
+        obs_request = {
             "skip_download": True,
             "extract_flat": True,
             "playlistend": 0,
         }
-        url_info = yt_dlp.YoutubeDL(obs).extract_info(url, download=False)
+        url_info = YtWrap(obs_request).extract(url)
         try:
             channel_id = url_info["channel_id"]
         except KeyError as error:
