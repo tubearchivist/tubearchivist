@@ -4,8 +4,6 @@ functionality:
 - handle yt-dlp errors
 """
 
-from time import sleep
-
 import yt_dlp
 
 
@@ -30,14 +28,14 @@ class YtWrap:
 
     def download(self, url):
         """make download request"""
-
         with yt_dlp.YoutubeDL(self.obs) as ydl:
             try:
                 ydl.download([url])
             except yt_dlp.utils.DownloadError:
-                print(f"{url}: failed to download, retry...")
-                sleep(3)
-                ydl.download([url])
+                print(f"{url}: failed to download.")
+                return False
+
+        return True
 
     def extract(self, url):
         """make extract request"""
