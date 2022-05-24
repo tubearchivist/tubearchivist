@@ -7,13 +7,13 @@ Functionality:
 import json
 from datetime import datetime
 
-import yt_dlp
 from home.src.download.subscriptions import (
     ChannelSubscription,
     PlaylistSubscription,
 )
 from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_cookie import CookieHandler
+from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.config import AppConfig
@@ -256,11 +256,10 @@ class PendingList(PendingIndex):
 
     def get_youtube_details(self, youtube_id):
         """get details from youtubedl for single pending video"""
-        try:
-            vid = yt_dlp.YoutubeDL(self.yt_obs).extract_info(youtube_id)
-        except yt_dlp.utils.DownloadError:
-            print(f"{youtube_id}: failed to extract info")
+        vid = YtWrap(self.yt_obs).extract(youtube_id)
+        if not vid:
             return False
+
         if vid.get("id") != youtube_id:
             # skip premium videos with different id
             print(f"{youtube_id}: skipping premium video, id not matching")

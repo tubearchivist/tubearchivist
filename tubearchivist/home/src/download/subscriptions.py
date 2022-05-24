@@ -4,8 +4,8 @@ Functionality:
 - handle playlist subscriptions
 """
 
-import yt_dlp
 from home.src.download import queue  # partial import
+from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import IndexPaginate
 from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
@@ -39,23 +39,18 @@ class ChannelSubscription:
 
     def get_last_youtube_videos(self, channel_id, limit=True):
         """get a list of last videos from channel"""
-        url = f"https://www.youtube.com/channel/{channel_id}/videos"
         obs = {
-            "default_search": "ytsearch",
-            "quiet": True,
             "skip_download": True,
             "extract_flat": True,
         }
         if limit:
             obs["playlistend"] = self.channel_size
 
-        try:
-            chan = yt_dlp.YoutubeDL(obs).extract_info(url, download=False)
-        except yt_dlp.utils.DownloadError:
-            print(f"{channel_id}: failed to extract videos, skipping.")
+        channel = YtWrap(obs).extract(channel_id)
+        if not channel:
             return False
 
-        last_videos = [(i["id"], i["title"]) for i in chan["entries"]]
+        last_videos = [(i["id"], i["title"]) for i in channel["entries"]]
         return last_videos
 
     def find_missing(self):
