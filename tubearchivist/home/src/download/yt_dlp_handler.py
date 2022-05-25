@@ -9,12 +9,10 @@ functionality:
 import os
 import shutil
 from datetime import datetime
-from time import sleep
 
-import yt_dlp
 from home.src.download.queue import PendingList
 from home.src.download.subscriptions import PlaylistSubscription
-from home.src.download.yt_cookie import CookieHandler
+from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
@@ -41,7 +39,6 @@ class DownloadPostProcess:
         self.auto_delete_all()
         self.auto_delete_overwrites()
         self.validate_playlists()
-        self.pending.close_config()
 
     def auto_delete_all(self):
         """handle auto delete"""
@@ -174,11 +171,10 @@ class VideoDownloader:
             if not youtube_id:
                 break
 
-            try:
-                self._dl_single_vid(youtube_id)
-            except yt_dlp.utils.DownloadError:
-                print("failed to download " + youtube_id)
+            success = self._dl_single_vid(youtube_id)
+            if not success:
                 continue
+
             vid_dict = index_new_video(
                 youtube_id, video_overwrites=self.video_overwrites
             )
@@ -293,9 +289,6 @@ class VideoDownloader:
             self.obs["ratelimit"] = (
                 self.config["downloads"]["limit_speed"] * 1024
             )
-        if self.config["downloads"]["cookie_import"]:
-            cookie_path = CookieHandler().use()
-            self.obs["cookiefile"] = cookie_path
 
         throttle = self.config["downloads"]["throttledratelimit"]
         if throttle:
@@ -359,13 +352,7 @@ class VideoDownloader:
             if youtube_id in file_name:
                 obs["outtmpl"] = os.path.join(dl_cache, file_name)
 
-        with yt_dlp.YoutubeDL(obs) as ydl:
-            try:
-                ydl.download([youtube_id])
-            except yt_dlp.utils.DownloadError:
-                print("retry failed download: " + youtube_id)
-                sleep(10)
-                ydl.download([youtube_id])
+        success = YtWrap(obs, self.config).download(youtube_id)
 
         if self.obs["writethumbnail"]:
             # webp files don't get cleaned up automatically
@@ -374,6 +361,8 @@ class VideoDownloader:
             for file_name in to_clean:
                 file_path = os.path.join(dl_cache, file_name)
                 os.remove(file_path)
+
+        return success
 
     def move_to_archive(self, vid_dict):
         """move downloaded video from cache to archive"""

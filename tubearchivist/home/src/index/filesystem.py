@@ -12,7 +12,6 @@ import shutil
 import subprocess
 
 from home.src.download.queue import PendingList
-from home.src.download.yt_cookie import CookieHandler
 from home.src.download.yt_dlp_handler import VideoDownloader
 from home.src.es.connect import ElasticWrap
 from home.src.index.reindex import Reindex
@@ -309,12 +308,6 @@ def scan_filesystem():
 def reindex_old_documents():
     """daily refresh of old documents"""
     handler = Reindex()
-    if handler.config["downloads"]["cookie_import"]:
-        CookieHandler().use()
-    try:
-        handler.check_outdated()
-        handler.reindex()
-        RedisArchivist().set_message("last_reindex", handler.now, expire=False)
-    finally:
-        if handler.config["downloads"]["cookie_import"]:
-            CookieHandler().hide()
+    handler.check_outdated()
+    handler.reindex()
+    RedisArchivist().set_message("last_reindex", handler.now, expire=False)
