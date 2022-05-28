@@ -133,6 +133,11 @@ button:hover {
     margin: 0 auto;
 }
 
+.boxed-content.boxed-4 {
+    max-width: 1200px;
+    width: 80%;
+}
+
 .boxed-content.boxed-5,
 .boxed-content.boxed-6,
 .boxed-content.boxed-7 {
@@ -335,12 +340,14 @@ button:hover {
     margin: 15px 0;
 }
 
-.view-icons {
+.view-icons,
+.grid-count {
     display: flex;
     justify-content: end;
 }
 
-.view-icons img {
+.view-icons img,
+.grid-count img {
     width: 30px;
     margin: 5px 10px;
     cursor: pointer;
@@ -1077,7 +1084,11 @@ button:hover {
     .boxed-content {
         width: 90%;
     }
-    .video-list.grid,
+    .video-list.grid.grid-3,
+    .video-list.grid.grid-4,
+    .video-list.grid.grid-5,
+    .video-list.grid.grid-6,
+    .video-list.grid.grid-7,
     .dl-list.grid,
     .channel-list.grid,
     .playlist-list.grid {
@@ -1107,6 +1118,9 @@ button:hover {
         position: unset;
         transform: unset;
     }
+    .grid-count {
+        display: none;
+    }
     .video-player {
         height: unset;
         padding: 20px 0
@@ -1121,7 +1135,11 @@ button:hover {
     * {
         word-wrap: anywhere;
     }
-    .video-list.grid,
+    .video-list.grid.grid-3,
+    .video-list.grid.grid-4,
+    .video-list.grid.grid-5,
+    .video-list.grid.grid-6,
+    .video-list.grid.grid-7,
     .dl-list.grid,
     .channel-list.grid,
     .video-item.list,
