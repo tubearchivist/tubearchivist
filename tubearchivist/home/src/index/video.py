@@ -189,9 +189,9 @@ class SubtitleParser:
 
         self.all_cues = []
         for idx, event in enumerate(all_events):
-            if "dDurationMs" not in event:
-                # some events won't have a duration
-                print(f"failed to parse event without duration: {event}")
+            if "dDurationMs" not in event or "segs" not in event:
+                # some events won't have a duration or segs
+                print(f"skipping subtitle event without content: {event}")
                 continue
 
             cue = {
@@ -215,15 +215,16 @@ class SubtitleParser:
 
             if flatten:
                 # fix overlapping retiming issue
-                if "dDurationMs" not in flatten[-1]:
-                    # some events won't have a duration
-                    print(f"failed to parse event without duration: {event}")
+                last = flatten[-1]
+                if "dDurationMs" not in last or "segs" not in last:
+                    # some events won't have a duration or segs
+                    print(f"skipping subtitle event without content: {event}")
                     continue
 
-                last_end = flatten[-1]["tStartMs"] + flatten[-1]["dDurationMs"]
+                last_end = last["tStartMs"] + last["dDurationMs"]
                 if event["tStartMs"] < last_end:
-                    joined = flatten[-1]["segs"][0]["utf8"] + "\n" + text
-                    flatten[-1]["segs"][0]["utf8"] = joined
+                    joined = last["segs"][0]["utf8"] + "\n" + text
+                    last["segs"][0]["utf8"] = joined
                     continue
 
             event.update({"segs": [{"utf8": text}]})
