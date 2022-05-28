@@ -121,6 +121,16 @@ function changeView(image) {
     }, 500);
 }
 
+function changeGridItems(image) {
+    var operator = image.getAttribute("data-value");
+    var payload = JSON.stringify({'change_grid': operator});
+    sendPost(payload);
+    setTimeout(function(){
+        location.reload();
+        return false;
+    }, 500);
+}
+
 function toggleCheckbox(checkbox) {
     // pass checkbox id as key and checkbox.checked as value
     var toggleId = checkbox.id;

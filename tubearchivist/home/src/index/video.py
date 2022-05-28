@@ -12,6 +12,7 @@ import requests
 from django.conf import settings
 from home.src.es.connect import ElasticWrap
 from home.src.index import channel as ta_channel
+from home.src.index import playlist as ta_playlist
 from home.src.index.generic import YouTubeItem
 from home.src.ta.helper import (
     DurationConverter,
@@ -189,9 +190,9 @@ class SubtitleParser:
 
         self.all_cues = []
         for idx, event in enumerate(all_events):
-            if "dDurationMs" not in event:
-                # some events won't have a duration
-                print(f"failed to parse event without duration: {event}")
+            if "dDurationMs" not in event or "segs" not in event:
+                # some events won't have a duration or segs
+                print(f"skipping subtitle event without content: {event}")
                 continue
 
             cue = {
@@ -215,15 +216,16 @@ class SubtitleParser:
 
             if flatten:
                 # fix overlapping retiming issue
-                if "dDurationMs" not in flatten[-1]:
-                    # some events won't have a duration
-                    print(f"failed to parse event without duration: {event}")
+                last = flatten[-1]
+                if "dDurationMs" not in last or "segs" not in last:
+                    # some events won't have a duration or segs
+                    print(f"skipping subtitle event without content: {event}")
                     continue
 
-                last_end = flatten[-1]["tStartMs"] + flatten[-1]["dDurationMs"]
+                last_end = last["tStartMs"] + last["dDurationMs"]
                 if event["tStartMs"] < last_end:
-                    joined = flatten[-1]["segs"][0]["utf8"] + "\n" + text
-                    flatten[-1]["segs"][0]["utf8"] = joined
+                    joined = last["segs"][0]["utf8"] + "\n" + text
+                    last["segs"][0]["utf8"] = joined
                     continue
 
             event.update({"segs": [{"utf8": text}]})
@@ -560,6 +562,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def delete_media_file(self):
         """delete video file, meta data"""
+        print(f"{self.youtube_id}: delete video")
         self.get_from_es()
         video_base = self.app_conf["videos"]
         media_url = self.json_data.get("media_url")
@@ -569,8 +572,27 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         except FileNotFoundError:
             print(f"{self.youtube_id}: failed {media_url}, continue.")
 
+        self.del_in_playlists()
         self.del_in_es()
         self.delete_subtitles()
+
+    def del_in_playlists(self):
+        """remove downloaded in playlist"""
+        all_playlists = self.json_data.get("playlist")
+        if not all_playlists:
+            return
+
+        for playlist_id in all_playlists:
+            print(f"{playlist_id}: delete video {self.youtube_id}")
+            playlist = ta_playlist.YoutubePlaylist(playlist_id)
+            playlist.get_from_es()
+            entries = playlist.json_data["playlist_entries"]
+            for idx, entry in enumerate(entries):
+                if entry["youtube_id"] == self.youtube_id:
+                    playlist.json_data["playlist_entries"][idx].update(
+                        {"downloaded": False}
+                    )
+            playlist.upload_to_es()
 
     def delete_subtitles(self):
         """delete indexed subtitles"""

@@ -77,6 +77,15 @@ class ArchivistViewConfig(View):
 
         return view_style
 
+    def _get_grid_items(self):
+        """return items per row to show in grid view"""
+        grid_key = f"{self.user_id}:grid_items"
+        grid_items = self.user_conf.get_message(grid_key)["status"]
+        if not grid_items:
+            grid_items = self.default_conf["default_view"]["grid_items"]
+
+        return grid_items
+
     def get_all_view_styles(self):
         """get dict of all view stiles for search form"""
         all_keys = ["channel", "playlist", "home"]
@@ -120,6 +129,7 @@ class ArchivistViewConfig(View):
             "sort_by": self._get_sort_by(),
             "sort_order": self._get_sort_order(),
             "view_style": self._get_view_style(),
+            "grid_items": self._get_grid_items(),
             "hide_watched": self._get_hide_watched(),
             "show_ignored_only": self._get_show_ignore_only(),
             "show_subed_only": self._get_show_subed_only(),

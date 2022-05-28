@@ -1,12 +1,12 @@
 {% extends "home/base.html" %}
 {% block content %}
 {% load static %}
-<div class="boxed-content">
+<div class="boxed-content {% if view_style == "grid" %}boxed-{{ grid_items }}{% endif %}">
     {% if continue_vids %}
         <div class="title-bar">
             <h1>Continue Watching</h1>
         </div>
-        <div class="video-list {{ view_style }}">
+        <div class="video-list {{ view_style }} {% if view_style == "grid" %}grid-{{ grid_items }}{% endif %}">
             {% for video in continue_vids %}
                 <div class="video-item {{ view_style }}">
                     <a href="#player" data-id="{{ video.source.youtube_id }}" onclick="createPlayer(this)">
@@ -74,14 +74,21 @@
         </div>
         <div class="view-icons">
             <img src="{% static 'img/icon-sort.svg' %}" alt="sort-icon" onclick="showForm()" id="animate-icon">
+            {% if view_style == "grid" %}
+                <div class="grid-count">
+                    <span>{{ grid_items }}</span>
+                    <img src="{% static 'img/icon-add.svg' %}" onclick="changeGridItems(this)" data-value="{{ grid_items|add:"1"}}" alt="grid plus row">
+                    <img src="{% static 'img/icon-substract.svg' %}" onclick="changeGridItems(this)" data-value="{{ grid_items|add:"-1"}}" alt="grid minus row">
+                </div>
+            {% endif %}
             <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="grid" alt="grid view">
             <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="list" alt="list view">
         </div>
     </div>
 </div>
 <div id="player" class="player-wrapper"></div>
-<div class="boxed-content">
-    <div class="video-list {{ view_style }}">
+<div class="boxed-content {% if view_style == "grid" %}boxed-{{ grid_items }}{% endif %}">
+    <div class="video-list {{ view_style }} {% if view_style == "grid" %}grid-{{ grid_items }}{% endif %}">
         {% if results %}
             {% for video in results %}
                 <div class="video-item {{ view_style }}">
