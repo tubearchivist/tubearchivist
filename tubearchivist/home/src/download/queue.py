@@ -172,6 +172,8 @@ class PendingList(PendingIndex):
         """add video to list"""
         if url not in self.missing_videos and url not in self.to_skip:
             self.missing_videos.append(url)
+        else:
+            print(f"{url}: skipped adding already indexed video to download.")
 
     def _parse_channel(self, url):
         """add all videos of channel to list"""
