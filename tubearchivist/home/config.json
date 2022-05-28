@@ -8,7 +8,8 @@
         "home": "grid",
         "channel": "list",
         "downloads": "list",
-        "playlist": "grid"
+        "playlist": "grid",
+        "grid_items": 3
     },
     "subscriptions": {
         "auto_search": false,

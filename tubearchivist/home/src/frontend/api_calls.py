@@ -54,6 +54,7 @@ class PostData:
             "watched": self._watched,
             "un_watched": self._un_watched,
             "change_view": self._change_view,
+            "change_grid": self._change_grid,
             "rescan_pending": self._rescan_pending,
             "ignore": self._ignore,
             "dl_pending": self._dl_pending,
@@ -98,6 +99,17 @@ class PostData:
         key = f"{self.current_user}:view:{origin}"
         print(f"change view: {key} to {new_view}")
         RedisArchivist().set_message(key, {"status": new_view}, expire=False)
+        return {"success": True}
+
+    def _change_grid(self):
+        """process change items in grid"""
+        grid_items = int(self.exec_val)
+        grid_items = max(grid_items, 3)
+        grid_items = min(grid_items, 7)
+
+        key = f"{self.current_user}:grid_items"
+        print(f"change grid items: {grid_items}")
+        RedisArchivist().set_message(key, {"status": grid_items}, expire=False)
         return {"success": True}
 
     @staticmethod

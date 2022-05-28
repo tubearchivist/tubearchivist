@@ -133,6 +133,13 @@ button:hover {
     margin: 0 auto;
 }
 
+.boxed-content.boxed-5,
+.boxed-content.boxed-6,
+.boxed-content.boxed-7 {
+    max-width: unset;
+    width: 85%;
+}
+
 .round-img img {
     border-radius: 50%;
 }
@@ -395,8 +402,24 @@ button:hover {
     margin-top: 1rem;
 }
 
-.video-list.grid {
+.video-list.grid.grid-3 {
     grid-template-columns: 1fr 1fr 1fr;
+}
+
+.video-list.grid.grid-4 {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.video-list.grid.grid-5 {
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+}
+
+.video-list.grid.grid-6 {
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+.video-list.grid.grid-7 {
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
 }
 
 .video-list.list {
