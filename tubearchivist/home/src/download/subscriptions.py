@@ -43,7 +43,8 @@ class ChannelSubscription:
         if limit:
             obs["playlistend"] = self.config["subscriptions"]["channel_size"]
 
-        channel = YtWrap(obs, self.config).extract(channel_id)
+        url = f"https://www.youtube.com/channel/{channel_id}/videos"
+        channel = YtWrap(obs, self.config).extract(url)
         if not channel:
             return False
 
