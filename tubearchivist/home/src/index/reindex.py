@@ -153,6 +153,7 @@ class Reindex:
         date_downloaded = video.json_data["date_downloaded"]
         channel_dict = video.json_data["channel"]
         playlist = video.json_data.get("playlist")
+        subtitles = video.json_data.get("subtitles")
 
         # get new
         video.build_json()
@@ -160,7 +161,7 @@ class Reindex:
             video.deactivate()
             return
 
-        video.delete_subtitles()
+        video.delete_subtitles(subtitles=subtitles)
         video.check_subtitles()
 
         # add back
