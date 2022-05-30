@@ -346,10 +346,16 @@ button:hover {
     justify-content: end;
 }
 
-.view-icons img,
-.grid-count img {
+.view-icons img {
     width: 30px;
     margin: 5px 10px;
+    cursor: pointer;
+    filter: var(--img-filter);
+}
+
+.grid-count img {
+    width: 15px;
+    margin: 5px;
     cursor: pointer;
     filter: var(--img-filter);
 }

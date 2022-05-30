@@ -76,9 +76,12 @@
             <img src="{% static 'img/icon-sort.svg' %}" alt="sort-icon" onclick="showForm()" id="animate-icon">
             {% if view_style == "grid" %}
                 <div class="grid-count">
-                    <span>{{ grid_items }}</span>
-                    <img src="{% static 'img/icon-add.svg' %}" onclick="changeGridItems(this)" data-value="{{ grid_items|add:"1"}}" alt="grid plus row">
-                    <img src="{% static 'img/icon-substract.svg' %}" onclick="changeGridItems(this)" data-value="{{ grid_items|add:"-1"}}" alt="grid minus row">
+                    {% if grid_items < 7 %}
+                        <img src="{% static 'img/icon-add.svg' %}" onclick="changeGridItems(this)" data-value="{{ grid_items|add:"1"}}" alt="grid plus row">
+                    {% endif %}
+                    {% if grid_items > 3 %}
+                        <img src="{% static 'img/icon-substract.svg' %}" onclick="changeGridItems(this)" data-value="{{ grid_items|add:"-1"}}" alt="grid minus row">
+                    {% endif %}
                 </div>
             {% endif %}
             <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="home" data-value="grid" alt="grid view">
