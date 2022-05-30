@@ -203,10 +203,10 @@ function deleteQueue(button) {
     var to_delete = button.getAttribute('data-id');
     var payload = JSON.stringify({'deleteQueue': to_delete});
     sendPost(payload);
-    setTimeout(function(){
-        location.reload();
-        return false;
-    }, 1000);
+    // clear button
+    var message = document.createElement('p');
+    message.innerText = 'deleting download queue: ' + to_delete;
+    document.getElementById(button.id).replaceWith(message);
 }
 
 function stopQueue() {
