@@ -269,9 +269,12 @@ class PendingList(PendingIndex):
             "vid_thumb_url": vid["thumbnail"],
             "title": vid["title"],
             "channel_id": vid["channel_id"],
-            "channel_indexed": vid["channel_id"] in self.all_channels,
             "duration": duration_str,
             "published": published,
             "timestamp": int(datetime.now().strftime("%s")),
         }
+        if self.all_channels:
+            youtube_details.update(
+                {"channel_indexed": vid["channel_id"] in self.all_channels}
+            )
         return youtube_details
