@@ -203,10 +203,10 @@ function deleteQueue(button) {
     var to_delete = button.getAttribute('data-id');
     var payload = JSON.stringify({'deleteQueue': to_delete});
     sendPost(payload);
-    setTimeout(function(){
-        location.reload();
-        return false;
-    }, 1000);
+    // clear button
+    var message = document.createElement('p');
+    message.innerText = 'deleting download queue: ' + to_delete;
+    document.getElementById(button.id).replaceWith(message);
 }
 
 function stopQueue() {
@@ -785,21 +785,25 @@ function setProgressBar(videoId, currentTime, duration) {
 }
 
 // multi search form
+let searchTimeout = null;
 function searchMulti(query) {
-    if (query.length > 1) {
-        var payload = JSON.stringify({'multi_search': query});
-        var http = new XMLHttpRequest();
-        http.onreadystatechange = function() {
-            if (http.readyState === 4) {
-                allResults = JSON.parse(http.response).results;
-                populateMultiSearchResults(allResults);
-            }
-        };
-        http.open("POST", "/process/", true);
-        http.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
-        http.setRequestHeader("Content-type", "application/json");
-        http.send(payload);
-    }
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function () {
+        if (query.length > 1) {
+            var payload = JSON.stringify({'multi_search': query});
+            var http = new XMLHttpRequest();
+            http.onreadystatechange = function() {
+                if (http.readyState === 4) {
+                    allResults = JSON.parse(http.response).results;
+                    populateMultiSearchResults(allResults);
+                }
+            };
+            http.open("POST", "/process/", true);
+            http.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
+            http.setRequestHeader("Content-type", "application/json");
+            http.send(payload);
+        }
+    }, 500);
 }
 
 function getViewDefaults(view) {

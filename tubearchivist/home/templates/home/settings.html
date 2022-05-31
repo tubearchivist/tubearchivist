@@ -270,6 +270,12 @@
         <h1>Actions</h1>
     </div>
     <div class="settings-group">
+        <h2>Delete download queue</h2>
+        <p>Delete your pending or previously ignored videos from your download queue.<p>
+        <button onclick="deleteQueue(this)" id="ignore-button" data-id="ignore" title="Delete all previously ignored videos from the queue">Delete all ignored</button>
+        <button onclick="deleteQueue(this)" id="pending-button" data-id="pending" title="Delete all pending videos from the queue">Delete all queued</button>
+    </div>
+    <div class="settings-group">
         <h2>Manual media files import.</h2>
         <p>Add files to the <span class="settings-current">cache/import</span> folder. Make sure to follow the instructions in the Github <a href="https://github.com/tubearchivist/tubearchivist/wiki/Settings" target="_blank">Wiki</a>.</p>
         <div id="manual-import">

@@ -1,7 +1,7 @@
 {% extends "home/base.html" %}
 {% block content %}
 <div id="player" class="player-wrapper"></div>
-<div class="boxed-content">
+<div class="boxed-content {% if all_styles.home == "grid" %}boxed-{{ grid_items }}{% endif %}">
     <div class="title-bar">
         <h1>Search your Archive</h1>
     </div>
@@ -10,7 +10,7 @@
     </div>
     <div class="multi-search-result">
         <h2>Video Results</h2>
-        <div id="video-results" class="video-list {{ all_styles.home }}">
+        <div id="video-results" class="video-list {{ all_styles.home }} {% if all_styles.home == "grid" %}grid-{{ grid_items }}{% endif %}">
             <p>No videos found.</p>
         </div>
     </div>

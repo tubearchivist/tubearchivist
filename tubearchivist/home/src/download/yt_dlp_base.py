@@ -30,7 +30,8 @@ class YtWrap:
         """build yt-dlp obs"""
         self.obs = self.OBS_BASE.copy()
         self.obs.update(self.obs_request)
-        self.add_cookie()
+        if self.config:
+            self.add_cookie()
 
     def add_cookie(self):
         """add cookie if enabled"""

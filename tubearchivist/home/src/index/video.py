@@ -67,7 +67,7 @@ class YoutubeSubtitle:
             return False
 
         video_media_url = self.video.json_data["media_url"]
-        media_url = video_media_url.replace(".mp4", f"-{lang}.vtt")
+        media_url = video_media_url.replace(".mp4", f".{lang}.vtt")
         all_formats = all_subtitles.get(lang)
         if not all_formats:
             return False
@@ -103,7 +103,7 @@ class YoutubeSubtitle:
             return False
 
         video_media_url = self.video.json_data["media_url"]
-        media_url = video_media_url.replace(".mp4", f"-{lang}.vtt")
+        media_url = video_media_url.replace(".mp4", f".{lang}.vtt")
         all_formats = all_subtitles.get(lang)
         if not all_formats:
             # no user subtitles found
@@ -152,15 +152,19 @@ class YoutubeSubtitle:
         """send subtitle to es for indexing"""
         _, _ = ElasticWrap("_bulk").post(data=query_str, ndjson=True)
 
-    def delete(self):
+    def delete(self, subtitles=False):
         """delete subtitles from index and filesystem"""
         youtube_id = self.video.youtube_id
-        # delete files
         videos_base = self.video.config["application"]["videos"]
-        if not self.video.json_data.get("subtitles"):
-            return
+        # delete files
+        if subtitles:
+            files = [i["media_url"] for i in subtitles]
+        else:
+            if not self.video.json_data.get("subtitles"):
+                return
 
-        files = [i["media_url"] for i in self.video.json_data["subtitles"]]
+            files = [i["media_url"] for i in self.video.json_data["subtitles"]]
+
         for file_name in files:
             file_path = os.path.join(videos_base, file_name)
             try:
@@ -594,10 +598,10 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
                     )
             playlist.upload_to_es()
 
-    def delete_subtitles(self):
+    def delete_subtitles(self, subtitles=False):
         """delete indexed subtitles"""
         print(f"{self.youtube_id}: delete subtitles")
-        YoutubeSubtitle(self).delete()
+        YoutubeSubtitle(self).delete(subtitles=subtitles)
 
     def _get_ryd_stats(self):
         """get optional stats from returnyoutubedislikeapi.com"""
