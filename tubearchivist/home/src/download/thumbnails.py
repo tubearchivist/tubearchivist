@@ -17,7 +17,9 @@ from home.src.ta.config import AppConfig
 from home.src.ta.helper import ignore_filelist
 from home.src.ta.ta_redis import RedisArchivist
 from mutagen.mp4 import MP4, MP4Cover
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFile, ImageFilter
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class ThumbManager:
