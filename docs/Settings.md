@@ -36,7 +36,7 @@ Additional settings passed to yt-dlp.
 Importing your YouTube Cookie into Tube Archivist allows yt-dlp to bypass age restrictions, gives access to private videos and your *watch later* or *liked videos*.
 
 ### Security concerns
-Cookies are used to store your session and contain your access token to your google account, this file can be used to take over your account. Treat that file with utmost care as you would any other password or credential. *Tube Archivist* stores your cookie in Redis and will export the file container internally if it's needed.
+Cookies are used to store your session and contain your access token to your google account, this file can be used to take over your account. Treat that file with utmost care as you would any other password or credential. *Tube Archivist* stores your cookie in Redis and will automatically append it to yt-dlp for every request.
 
 ### Export your cookie
 - Install **Cookies.txt** addon for [chrome](https://chrome.google.com/webstore/detail/get-cookiestxt/bgaddhkoddajcdgocldbbfleckgcbcid) or [firefox](https://addons.mozilla.org/firefox/addon/cookies-txt).
@@ -108,6 +108,9 @@ Create a zip file of the metadata and select **Max auto backups to keep** to aut
 
 # Actions
 Additional database functionality.
+
+## Delete download queue
+The button **Delete all queued** will delete all pending videos from the download queue. The button **Delete all ignored** will delete all videos you have previously ignored.
 
 ## Manual Media Files Import
 So far this depends on the video you are trying to import to be still available on YouTube to get the metadata. Add the files you'd like to import to the */cache/import* folder. Then start the process from the settings page *Manual Media Files Import*. Make sure to follow one of the two methods below.
