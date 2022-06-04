@@ -165,7 +165,6 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Show similar videos on video page
 - [ ] Multi language support
 - [ ] Show total video downloaded vs total videos available in channel
-- [ ] Make items in grid row configurable to use more of the screen
 - [ ] Add statistics of index
 - [ ] Download speed schedule ([#198](https://github.com/tubearchivist/tubearchivist/issues/198))
 - [ ] Implement complete offline media file import from json file ([#138](https://github.com/tubearchivist/tubearchivist/issues/138))
@@ -175,6 +174,7 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Download video comments
 
 Implemented:
+- [X] Make items in grid row configurable to use more of the screen [2022-06-04]
 - [X] Add passing browser cookies to yt-dlp [2022-05-08]
 - [X] Add [SponsorBlock](https://sponsor.ajay.app/) integration [2022-04-16]
 - [X] Implement per channel settings [2022-03-26]
