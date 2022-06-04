@@ -144,7 +144,35 @@ function sync_unstable {
 }
 
 
+# new function, sync only tag, build with build server
 function sync_docker {
+
+    # check things
+    if [[ $(git branch --show-current) != 'master' ]]; then
+        echo 'you are not on master, dummy!'
+        return
+    fi
+
+    echo "latest tags:"
+    git tag | tail -n 5 | sort -r
+
+    printf "\ncreate new version:\n"
+    read -r VERSION
+
+    echo "push new tag: $VERSION?"
+    read -rn 1
+
+    # create release tag
+    echo "commits since last version:"
+    git log "$(git describe --tags --abbrev=0)"..HEAD --oneline
+    git tag -a "$VERSION" -m "new release version $VERSION"
+    git push origin "$VERSION"
+
+}
+
+
+# old builder, sync tag, build and push locally
+function sync_docker_old {
 
     # check things
     if [[ $(git branch --show-current) != 'master' ]]; then
@@ -158,7 +186,7 @@ function sync_docker {
     fi
 
     echo "latest tags:"
-    git tag | tail -n 10
+    git tag | tail -n 5 | sort -r
 
     printf "\ncreate new version:\n"
     read -r VERSION
@@ -176,7 +204,7 @@ function sync_docker {
     echo "commits since last version:"
     git log "$(git describe --tags --abbrev=0)"..HEAD --oneline
     git tag -a "$VERSION" -m "new release version $VERSION"
-    git push all "$VERSION"
+    git push origin "$VERSION"
 
 }
 
@@ -191,7 +219,6 @@ elif [[ $1 == "validate" ]]; then
     validate "$2"
 elif [[ $1 == "docker" ]]; then
     sync_docker
-    sync_unstable
 elif [[ $1 == "unstable" ]]; then
     sync_unstable
 elif [[ $1 == "es" ]]; then
