@@ -452,8 +452,17 @@ class LoginApiView(ObtainAuthToken):
 
 class TaskApiView(ApiBaseView):
     """resolves to /api/task/
+    GET: check if ongoing background task
     POST: start a new background task
     """
+
+    def get(request):
+        """handle get request"""
+        response = {"rescan": False,"download":False}
+        response["rescan"] = RedisArchivist().get_lock("rescan").owned()
+        response["download"] = RedisArchivist().get_lock("rescan").owned()
+
+        return Response(response)
 
     def post(self, request):
         """handle post request"""
