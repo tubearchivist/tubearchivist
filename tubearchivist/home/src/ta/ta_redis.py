@@ -80,6 +80,12 @@ class RedisArchivist(RedisBase):
         redis_lock = self.conn.lock(self.NAME_SPACE + lock_key)
         return redis_lock
 
+    def is_locked(self, lock_key):
+        """check if lock is set"""
+        lock_name = self.NAME_SPACE + lock_key
+        is_locked = bool(self.conn.execute_command("GET", lock_name))
+        return is_locked
+
     def get_progress(self):
         """get a list of all progress messages"""
         all_messages = []
