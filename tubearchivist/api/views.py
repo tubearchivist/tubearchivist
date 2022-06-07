@@ -455,7 +455,7 @@ class TaskApiView(ApiBaseView):
     GET: check if ongoing background task
     POST: start a new background task
     """
-    
+
     @staticmethod
     def get(request):
         """handle get request"""
