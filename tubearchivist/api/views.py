@@ -455,12 +455,13 @@ class TaskApiView(ApiBaseView):
     GET: check if ongoing background task
     POST: start a new background task
     """
-
+    
+    @staticmethod
     def get(request):
         """handle get request"""
         response = {"rescan": False, "download": False}
-        response["rescan"] = RedisArchivist().get_lock("rescan").owned()
-        response["download"] = RedisArchivist().get_lock("rescan").owned()
+        response["rescan"] = RedisArchivist().is_locked("rescan").owned()
+        response["download"] = RedisArchivist().is_locked("rescan").owned()
 
         return Response(response)
 
