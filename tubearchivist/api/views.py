@@ -456,6 +456,10 @@ class TaskApiView(ApiBaseView):
     POST: start a new background task
     """
 
+    @staticmethod
+    def get(request):
+        return Response({"Test": "success"})
+
     # @staticmethod
     # def get(request):
     #     """handle get request"""
