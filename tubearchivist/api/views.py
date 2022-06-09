@@ -456,15 +456,15 @@ class TaskApiView(ApiBaseView):
     POST: start a new background task
     """
 
-    @staticmethod
-    def get(request):
-        """handle get request"""
+    # @staticmethod
+    # def get(request):
+    #     """handle get request"""
 
-        response = {"rescan": False, "download": False}
-        response["rescan"] = RedisArchivist().is_locked("rescan")
-        response["download"] = RedisArchivist().is_locked("download")
+    #     response = {"rescan": False, "download": False}
+    #     response["rescan"] = RedisArchivist().is_locked("rescan")
+    #     response["download"] = RedisArchivist().is_locked("download")
 
-        return Response(response)
+    #     return Response(response)
 
     def post(self, request):
         """handle post request"""
