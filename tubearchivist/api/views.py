@@ -458,17 +458,13 @@ class TaskApiView(ApiBaseView):
 
     @staticmethod
     def get(request):
-        return Response({"Test": "success"})
+        """handle get request"""
 
-    # @staticmethod
-    # def get(request):
-    #     """handle get request"""
+        response = {"rescan": False, "download": False}
+        response["rescan"] = RedisArchivist().is_locked("rescan_pending")
+        response["download"] = RedisArchivist().is_locked("download_pending")
 
-    #     response = {"rescan": False, "download": False}
-    #     response["rescan"] = RedisArchivist().is_locked("rescan")
-    #     response["download"] = RedisArchivist().is_locked("download")
-
-    #     return Response(response)
+        return Response(response)
 
     def post(self, request):
         """handle post request"""
