@@ -202,6 +202,20 @@ When valid returns message with user id:
 ```
 
 ## Task View
+GET /api/task/
+POST /api/task/
+
+Check if there is an ongoing task:
+GET /api/task/
+
+Returns:
+```json
+{
+    "rescan": "false",
+    "download": "false"
+}
+```
+
 Start a background task
 POST /api/task/
 ```json
