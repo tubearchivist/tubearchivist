@@ -460,9 +460,9 @@ class TaskApiView(ApiBaseView):
     def get(request):
         """handle get request"""
 
-        response = {"rescan": False, "download": False}
-        response["rescan"] = RedisArchivist().is_locked("rescan")
-        response["download"] = RedisArchivist().is_locked("download")
+        response = {"rescan": False, "downloading": False}
+        for key in response.keys():
+            response[key] = RedisArchivist().is_locked(key)
 
         return Response(response)
 
