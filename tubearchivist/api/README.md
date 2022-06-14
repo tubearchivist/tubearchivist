@@ -212,7 +212,7 @@ Returns:
 ```json
 {
     "rescan": false,
-    "download": false
+    "downloading": false
 }
 ```
 
