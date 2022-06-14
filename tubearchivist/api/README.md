@@ -211,8 +211,8 @@ GET /api/task/
 Returns:
 ```json
 {
-    "rescan": "false",
-    "download": "false"
+    "rescan": false,
+    "download": false
 }
 ```
 
