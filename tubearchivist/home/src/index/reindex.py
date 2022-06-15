@@ -12,6 +12,7 @@ from time import sleep
 
 from home.src.download.queue import PendingList
 from home.src.download.thumbnails import ThumbManager
+from home.src.download.yt_dlp_base import CookieHandler
 from home.src.download.yt_dlp_handler import VideoDownloader
 from home.src.es.connect import ElasticWrap
 from home.src.index.channel import YoutubeChannel
@@ -39,6 +40,13 @@ class Reindex:
         self.all_youtube_ids = False
         self.all_channel_ids = False
         self.all_playlist_ids = False
+
+    def check_cookie(self):
+        """validate cookie if enabled"""
+        if self.config["downloads"]["cookie_import"]:
+            valid = CookieHandler(self.config).validate()
+            if not valid:
+                return
 
     def _get_daily(self):
         """get daily refresh values"""

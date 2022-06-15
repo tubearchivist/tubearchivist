@@ -12,7 +12,7 @@ from datetime import datetime
 
 from home.src.download.queue import PendingList
 from home.src.download.subscriptions import PlaylistSubscription
-from home.src.download.yt_dlp_base import YtWrap
+from home.src.download.yt_dlp_base import CookieHandler, YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
@@ -155,10 +155,7 @@ class VideoDownloader:
 
     def run_queue(self):
         """setup download queue in redis loop until no more items"""
-        pending = PendingList()
-        pending.get_download()
-        pending.get_channels()
-        self.video_overwrites = pending.video_overwrites
+        self._setup_queue()
 
         queue = RedisQueue()
 
@@ -185,7 +182,9 @@ class VideoDownloader:
                 "title": "Moving....",
                 "message": "Moving downloaded file to storage folder",
             }
-            RedisArchivist().set_message("message:download", mess_dict, False)
+            RedisArchivist().set_message(
+                "message:download", mess_dict, expire=False
+            )
 
             self.move_to_archive(vid_dict)
             mess_dict = {
@@ -200,6 +199,18 @@ class VideoDownloader:
         # post processing
         self._add_subscribed_channels()
         DownloadPostProcess(self).run()
+
+    def _setup_queue(self):
+        """setup required and validate"""
+        if self.config["downloads"]["cookie_import"]:
+            valid = CookieHandler(self.config).validate()
+            if not valid:
+                return
+
+        pending = PendingList()
+        pending.get_download()
+        pending.get_channels()
+        self.video_overwrites = pending.video_overwrites
 
     @staticmethod
     def add_pending():

@@ -95,15 +95,35 @@ class CookieHandler:
         """revoke cookie"""
         RedisArchivist().del_message("cookie")
         RedisArchivist().set_message(
-            "config", False, path=".downloads.cookie_import"
+            "config", False, path=".downloads.cookie_import", expire=False
         )
         print("cookie: revoked")
 
     def validate(self):
         """validate cookie using the liked videos playlist"""
+        print("validating cookie")
         obs_request = {
             "skip_download": True,
             "extract_flat": True,
         }
-        response = YtWrap(obs_request, self.config).extract("LL")
+        validator = YtWrap(obs_request, self.config)
+        response = validator.extract("LL")
+
+        # update in redis to avoid expiring
+        modified = validator.obs["cookiefile"].getvalue()
+        if modified:
+            RedisArchivist().set_message("cookie", modified, expire=False)
+
+        if not response:
+            mess_dict = {
+                "status": "message:download",
+                "level": "error",
+                "title": "Cookie validation failed, exiting...",
+                "message": "",
+            }
+            RedisArchivist().set_message(
+                "message:download", mess_dict, expire=4
+            )
+            print("cookie validation failed, exiting...")
+
         return bool(response)
