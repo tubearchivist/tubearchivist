@@ -846,9 +846,6 @@ class SettingsView(View):
             handler.import_cookie()
             valid = handler.validate()
             if not valid:
-                RedisArchivist().set_message(
-                    "config", False, path=".downloads.cookie_import"
-                )
                 handler.revoke()
                 message = {
                     "status": "message:setting",

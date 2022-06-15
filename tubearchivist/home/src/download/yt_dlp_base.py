@@ -94,6 +94,9 @@ class CookieHandler:
     def revoke():
         """revoke cookie"""
         RedisArchivist().del_message("cookie")
+        RedisArchivist().set_message(
+            "config", False, path=".downloads.cookie_import"
+        )
         print("cookie: revoked")
 
     def validate(self):
