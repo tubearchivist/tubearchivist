@@ -829,18 +829,38 @@ class SettingsView(View):
         sleep(1)
         return redirect("settings", permanent=True)
 
-    @staticmethod
-    def post_process_updated(updated, config):
+    def post_process_updated(self, updated, config):
         """apply changes for config"""
         if not updated:
             return
 
         for config_value, updated_value in updated:
             if config_value == "cookie_import":
-                if updated_value:
-                    CookieHandler(config).import_cookie()
-                else:
-                    CookieHandler(config).revoke()
+                self.process_cookie(config, updated_value)
+
+    @staticmethod
+    def process_cookie(config, updated_value):
+        """import and validate cookie"""
+        handler = CookieHandler(config)
+        if updated_value:
+            handler.import_cookie()
+            valid = handler.validate()
+            if not valid:
+                RedisArchivist().set_message(
+                    "config", False, path=".downloads.cookie_import"
+                )
+                handler.revoke()
+                message = {
+                    "status": "message:setting",
+                    "level": "error",
+                    "title": "Cookie import failed",
+                    "message": "",
+                }
+                RedisArchivist().set_message(
+                    "message:setting", message=message
+                )
+        else:
+            handler.revoke()
 
 
 def progress(request):

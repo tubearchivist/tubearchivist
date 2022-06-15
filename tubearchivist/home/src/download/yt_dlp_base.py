@@ -5,6 +5,7 @@ functionality:
 """
 
 import os
+from http import cookiejar
 from io import StringIO
 
 import yt_dlp
@@ -54,9 +55,12 @@ class YtWrap:
         """make extract request"""
         try:
             response = yt_dlp.YoutubeDL(self.obs).extract_info(url)
+        except cookiejar.LoadError:
+            print("cookie file is invalid")
+            return False
         except (yt_dlp.utils.ExtractorError, yt_dlp.utils.DownloadError):
             print(f"{url}: failed to get info from youtube")
-            response = False
+            return False
 
         return response
 
