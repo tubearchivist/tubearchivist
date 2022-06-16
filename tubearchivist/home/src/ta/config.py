@@ -99,7 +99,7 @@ class AppConfig:
             self.config[config_dict][config_value] = to_write
             updated.append((config_value, to_write))
 
-        RedisArchivist().set_message("config", self.config, expire=False)
+        RedisArchivist().set_message("config", self.config)
         return updated
 
     @staticmethod
@@ -111,7 +111,7 @@ class AppConfig:
 
             message = {"status": value}
             redis_key = f"{user_id}:{key}"
-            RedisArchivist().set_message(redis_key, message, expire=False)
+            RedisArchivist().set_message(redis_key, message)
 
     def get_colors(self):
         """overwrite config if user has set custom values"""
@@ -151,7 +151,7 @@ class AppConfig:
                     needs_update = True
 
         if needs_update:
-            RedisArchivist().set_message("config", redis_config, expire=False)
+            RedisArchivist().set_message("config", redis_config)
 
 
 class ScheduleBuilder:
@@ -165,6 +165,7 @@ class ScheduleBuilder:
         "run_backup": "0 18 0",
     }
     CONFIG = ["check_reindex_days", "run_backup_rotate"]
+    MSG = "message:setting"
 
     def __init__(self):
         self.config = AppConfig().config
@@ -180,25 +181,27 @@ class ScheduleBuilder:
                 except ValueError:
                     print(f"failed: {key} {value}")
                     mess_dict = {
-                        "status": "message:setting",
+                        "status": self.MSG,
                         "level": "error",
                         "title": "Scheduler update failed.",
                         "message": "Invalid schedule input",
                     }
-                    RedisArchivist().set_message("message:setting", mess_dict)
+                    RedisArchivist().set_message(
+                        self.MSG, mess_dict, expire=True
+                    )
                     return
 
                 redis_config["scheduler"][key] = to_write
             if key in self.CONFIG and value:
                 redis_config["scheduler"][key] = int(value)
-        RedisArchivist().set_message("config", redis_config, expire=False)
+        RedisArchivist().set_message("config", redis_config)
         mess_dict = {
-            "status": "message:setting",
+            "status": self.MSG,
             "level": "info",
             "title": "Scheduler changed.",
             "message": "Please restart container for changes to take effect",
         }
-        RedisArchivist().set_message("message:setting", mess_dict)
+        RedisArchivist().set_message(self.MSG, mess_dict, expire=True)
 
     def value_builder(self, key, value):
         """validate single cron form entry and return cron dict"""

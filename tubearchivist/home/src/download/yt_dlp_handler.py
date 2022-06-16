@@ -125,18 +125,19 @@ class DownloadPostProcess:
             + f"{id_c + 1}/{len(self.download.channels)}"
         )
         message = f"Progress: {id_p + 1}/{len(all_channel_playlist)}"
+        key = "message:download"
         mess_dict = {
-            "status": "message:download",
+            "status": key,
             "level": "info",
             "title": title,
             "message": message,
         }
         if id_p + 1 == len(all_channel_playlist):
-            RedisArchivist().set_message(
-                "message:download", mess_dict, expire=4
-            )
+            expire = 4
         else:
-            RedisArchivist().set_message("message:download", mess_dict)
+            expire = True
+
+        RedisArchivist().set_message(key, mess_dict, expire=expire)
 
 
 class VideoDownloader:
@@ -144,6 +145,8 @@ class VideoDownloader:
     handle the video download functionality
     if not initiated with list, take from queue
     """
+
+    MSG = "message:download"
 
     def __init__(self, youtube_id_list=False):
         self.obs = False
@@ -177,23 +180,21 @@ class VideoDownloader:
             )
             self.channels.add(vid_dict["channel"]["channel_id"])
             mess_dict = {
-                "status": "message:download",
+                "status": self.MSG,
                 "level": "info",
                 "title": "Moving....",
                 "message": "Moving downloaded file to storage folder",
             }
-            RedisArchivist().set_message(
-                "message:download", mess_dict, expire=False
-            )
+            RedisArchivist().set_message(self.MSG, mess_dict)
 
             self.move_to_archive(vid_dict)
             mess_dict = {
-                "status": "message:download",
+                "status": self.MSG,
                 "level": "info",
                 "title": "Completed",
                 "message": "",
             }
-            RedisArchivist().set_message("message:download", mess_dict, 10)
+            RedisArchivist().set_message(self.MSG, mess_dict, expire=10)
             self._delete_from_pending(youtube_id)
 
         # post processing
@@ -212,16 +213,15 @@ class VideoDownloader:
         pending.get_channels()
         self.video_overwrites = pending.video_overwrites
 
-    @staticmethod
-    def add_pending():
+    def add_pending(self):
         """add pending videos to download queue"""
         mess_dict = {
-            "status": "message:download",
+            "status": self.MSG,
             "level": "info",
             "title": "Looking for videos to download",
             "message": "Scanning your download queue.",
         }
-        RedisArchivist().set_message("message:download", mess_dict)
+        RedisArchivist().set_message(self.MSG, mess_dict, expire=True)
         pending = PendingList()
         pending.get_download()
         to_add = [i["youtube_id"] for i in pending.all_pending]
@@ -229,18 +229,17 @@ class VideoDownloader:
             # there is nothing pending
             print("download queue is empty")
             mess_dict = {
-                "status": "message:download",
+                "status": self.MSG,
                 "level": "error",
                 "title": "Download queue is empty",
                 "message": "Add some videos to the queue first.",
             }
-            RedisArchivist().set_message("message:download", mess_dict)
+            RedisArchivist().set_message(self.MSG, mess_dict, expire=True)
             return
 
         RedisQueue().add_list(to_add)
 
-    @staticmethod
-    def _progress_hook(response):
+    def _progress_hook(self, response):
         """process the progress_hooks from yt_dlp"""
         # title
         path = os.path.split(response["filename"])[-1][12:]
@@ -257,12 +256,12 @@ class VideoDownloader:
         except KeyError:
             message = "processing"
         mess_dict = {
-            "status": "message:download",
+            "status": self.MSG,
             "level": "info",
             "title": title,
             "message": message,
         }
-        RedisArchivist().set_message("message:download", mess_dict)
+        RedisArchivist().set_message(self.MSG, mess_dict, expire=True)
 
     def _build_obs(self):
         """collection to build all obs passed to yt-dlp"""

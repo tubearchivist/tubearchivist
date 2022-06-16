@@ -310,4 +310,4 @@ def reindex_old_documents():
     handler = Reindex()
     handler.check_outdated()
     handler.reindex()
-    RedisArchivist().set_message("last_reindex", handler.now, expire=False)
+    RedisArchivist().set_message("last_reindex", handler.now)

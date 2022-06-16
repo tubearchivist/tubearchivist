@@ -131,7 +131,7 @@ class VideoProgressView(ApiBaseView):
         position = request.data.get("position", 0)
         key = f"{request.user.id}:progress:{video_id}"
         message = {"position": position, "youtube_id": video_id}
-        RedisArchivist().set_message(key, message, expire=False)
+        RedisArchivist().set_message(key, message)
         self.response = request.data
 
         return Response(self.response)
@@ -459,7 +459,7 @@ class TaskApiView(ApiBaseView):
     @staticmethod
     def get(request):
         """handle get request"""
-
+        # pylint: disable=unused-argument
         response = {"rescan": False, "downloading": False}
         for key in response.keys():
             response[key] = RedisArchivist().is_locked(key)

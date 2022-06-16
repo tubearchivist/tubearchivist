@@ -394,14 +394,15 @@ class DownloadView(ArchivistResultsView):
                 youtube_ids = UrlListParser(url_str).process_list()
             except ValueError:
                 # failed to process
+                key = "message:add"
                 print(f"failed to parse: {url_str}")
                 mess_dict = {
-                    "status": "message:add",
+                    "status": key,
                     "level": "error",
                     "title": "Failed to extract links.",
                     "message": "Not a video, channel or playlist ID or URL",
                 }
-                RedisArchivist().set_message("message:add", mess_dict)
+                RedisArchivist().set_message(key, mess_dict, expire=True)
                 return redirect("downloads")
 
             print(youtube_ids)
@@ -512,13 +513,14 @@ class ChannelView(ArchivistResultsView):
         """handle http post requests"""
         subscribe_form = SubscribeToChannelForm(data=request.POST)
         if subscribe_form.is_valid():
+            key = "message:subchannel"
             message = {
-                "status": "message:subchannel",
+                "status": key,
                 "level": "info",
                 "title": "Subscribing to Channels",
                 "message": "Parsing form data",
             }
-            RedisArchivist().set_message("message:subchannel", message=message)
+            RedisArchivist().set_message(key, message=message, expire=True)
             url_str = request.POST.get("subscribe")
             print(url_str)
             subscribe_to.delay(url_str)
@@ -659,15 +661,14 @@ class PlaylistView(ArchivistResultsView):
         if subscribe_form.is_valid():
             url_str = request.POST.get("subscribe")
             print(url_str)
+            key = "message:subplaylist"
             message = {
-                "status": "message:subplaylist",
+                "status": key,
                 "level": "info",
                 "title": "Subscribing to Playlists",
                 "message": "Parsing form data",
             }
-            RedisArchivist().set_message(
-                "message:subplaylist", message=message
-            )
+            RedisArchivist().set_message(key, message=message, expire=True)
             subscribe_to.delay(url_str)
 
         sleep(1)
@@ -847,15 +848,14 @@ class SettingsView(View):
             valid = handler.validate()
             if not valid:
                 handler.revoke()
+                key = "message:setting"
                 message = {
-                    "status": "message:setting",
+                    "status": key,
                     "level": "error",
                     "title": "Cookie import failed",
                     "message": "",
                 }
-                RedisArchivist().set_message(
-                    "message:setting", message=message
-                )
+                RedisArchivist().set_message(key, message=message, expire=True)
         else:
             handler.revoke()
 

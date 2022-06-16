@@ -150,7 +150,7 @@ class PendingList(PendingIndex):
                 "title": "Adding to download queue.",
                 "message": "Extracting lists",
             }
-            RedisArchivist().set_message("message:add", mess_dict)
+            RedisArchivist().set_message("message:add", mess_dict, expire=True)
             self._process_entry(entry)
 
     def _process_entry(self, entry):
@@ -229,10 +229,11 @@ class PendingList(PendingIndex):
             "message": "Progress: " + progress,
         }
         if idx + 1 == len(self.missing_videos):
-            RedisArchivist().set_message("message:add", mess_dict, expire=4)
+            expire = 4
         else:
-            RedisArchivist().set_message("message:add", mess_dict)
+            expire = True
 
+        RedisArchivist().set_message("message:add", mess_dict, expire=expire)
         if idx + 1 % 25 == 0:
             print("adding to queue progress: " + progress)
 

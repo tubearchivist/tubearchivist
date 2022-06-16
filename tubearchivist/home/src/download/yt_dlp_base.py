@@ -85,7 +85,7 @@ class CookieHandler:
         with open(import_path, encoding="utf-8") as cookie_file:
             cookie = cookie_file.read()
 
-        RedisArchivist().set_message("cookie", cookie, expire=False)
+        RedisArchivist().set_message("cookie", cookie)
 
         os.remove(import_path)
         print("cookie: import successful")
@@ -95,7 +95,7 @@ class CookieHandler:
         """revoke cookie"""
         RedisArchivist().del_message("cookie")
         RedisArchivist().set_message(
-            "config", False, path=".downloads.cookie_import", expire=False
+            "config", False, path=".downloads.cookie_import"
         )
         print("cookie: revoked")
 
@@ -112,7 +112,7 @@ class CookieHandler:
         # update in redis to avoid expiring
         modified = validator.obs["cookiefile"].getvalue()
         if modified:
-            RedisArchivist().set_message("cookie", modified, expire=False)
+            RedisArchivist().set_message("cookie", modified)
 
         if not response:
             mess_dict = {

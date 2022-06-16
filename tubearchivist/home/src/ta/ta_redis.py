@@ -34,7 +34,7 @@ class RedisArchivist(RedisBase):
         "setting",
     ]
 
-    def set_message(self, key, message, path=".", expire=True):
+    def set_message(self, key, message, path=".", expire=False):
         """write new message to redis"""
         self.conn.execute_command(
             "JSON.SET", self.NAME_SPACE + key, path, json.dumps(message)

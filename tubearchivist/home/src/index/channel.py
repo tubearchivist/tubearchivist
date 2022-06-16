@@ -153,6 +153,7 @@ class YoutubeChannel(YouTubeItem):
     es_path = False
     index_name = "ta_channel"
     yt_base = "https://www.youtube.com/channel/"
+    msg = "message:playlistscan"
 
     def __init__(self, youtube_id):
         super().__init__(youtube_id)
@@ -252,12 +253,12 @@ class YoutubeChannel(YouTubeItem):
         self.get_from_es()
         channel_name = self.json_data["channel_name"]
         mess_dict = {
-            "status": "message:playlistscan",
+            "status": self.msg,
             "level": "info",
             "title": "Looking for playlists",
             "message": f"{channel_name}: Scanning channel in progress",
         }
-        RedisArchivist().set_message("message:playlistscan", mess_dict)
+        RedisArchivist().set_message(self.msg, mess_dict, expire=True)
         self.get_all_playlists()
         if not self.all_playlists:
             print(f"{self.youtube_id}: no playlists found.")
@@ -272,12 +273,12 @@ class YoutubeChannel(YouTubeItem):
         """send notification"""
         channel_name = self.json_data["channel_name"]
         mess_dict = {
-            "status": "message:playlistscan",
+            "status": self.msg,
             "level": "info",
             "title": f"{channel_name}: Scanning channel for playlists",
             "message": f"Progress: {idx + 1}/{len(self.all_playlists)}",
         }
-        RedisArchivist().set_message("message:playlistscan", mess_dict)
+        RedisArchivist().set_message(self.msg, mess_dict, expire=True)
         print("add playlist: " + playlist[1])
 
     @staticmethod

@@ -98,7 +98,7 @@ class PostData:
         origin, new_view = self.exec_val.split(":")
         key = f"{self.current_user}:view:{origin}"
         print(f"change view: {key} to {new_view}")
-        RedisArchivist().set_message(key, {"status": new_view}, expire=False)
+        RedisArchivist().set_message(key, {"status": new_view})
         return {"success": True}
 
     def _change_grid(self):
@@ -109,7 +109,7 @@ class PostData:
 
         key = f"{self.current_user}:grid_items"
         print(f"change grid items: {grid_items}")
-        RedisArchivist().set_message(key, {"status": grid_items}, expire=False)
+        RedisArchivist().set_message(key, {"status": grid_items})
         return {"success": True}
 
     @staticmethod
@@ -135,7 +135,7 @@ class PostData:
         running = download_pending.delay()
         task_id = running.id
         print(f"{task_id}: set task id")
-        RedisArchivist().set_message("dl_queue_id", task_id, expire=False)
+        RedisArchivist().set_message("dl_queue_id", task_id)
         return {"success": True}
 
     def _queue_handler(self):
@@ -187,11 +187,11 @@ class PostData:
         sort_order = {"status": self.exec_val}
         if self.exec_val in ["asc", "desc"]:
             RedisArchivist().set_message(
-                f"{self.current_user}:sort_order", sort_order, expire=False
+                f"{self.current_user}:sort_order", sort_order
             )
         else:
             RedisArchivist().set_message(
-                f"{self.current_user}:sort_by", sort_order, expire=False
+                f"{self.current_user}:sort_by", sort_order
             )
         return {"success": True}
 
@@ -200,7 +200,7 @@ class PostData:
         key = f"{self.current_user}:hide_watched"
         message = {"status": bool(int(self.exec_val))}
         print(f"toggle {key}: {message}")
-        RedisArchivist().set_message(key, message, expire=False)
+        RedisArchivist().set_message(key, message)
         return {"success": True}
 
     def _show_subed_only(self):
@@ -208,7 +208,7 @@ class PostData:
         key = f"{self.current_user}:show_subed_only"
         message = {"status": bool(int(self.exec_val))}
         print(f"toggle {key}: {message}")
-        RedisArchivist().set_message(key, message, expire=False)
+        RedisArchivist().set_message(key, message)
         return {"success": True}
 
     def _dlnow(self):
@@ -218,7 +218,7 @@ class PostData:
         running = download_single.delay(youtube_id=youtube_id)
         task_id = running.id
         print("set task id: " + task_id)
-        RedisArchivist().set_message("dl_queue_id", task_id, expire=False)
+        RedisArchivist().set_message("dl_queue_id", task_id)
         return {"success": True}
 
     def _show_ignored_only(self):
@@ -227,7 +227,7 @@ class PostData:
         key = f"{self.current_user}:show_ignored_only"
         value = {"status": show_value}
         print(f"Filter download view ignored only: {show_value}")
-        RedisArchivist().set_message(key, value, expire=False)
+        RedisArchivist().set_message(key, value)
         return {"success": True}
 
     def _forget_ignore(self):
