@@ -5,7 +5,12 @@ if [[ -z "$ELASTIC_USER" ]]; then
     export ELASTIC_USER=elastic
 fi
 
-: "${ELASTIC_PASSWORD:?"Missing required environment variable"}"
+required="Missing required environment variable"
+if [[ ! -f .superuser_created ]]; then
+    : "${TA_USERNAME:?$required}"
+    : "${TA_PASSWORD?$required}"
+fi
+: "${ELASTIC_PASSWORD:?$required}"
 
 # ugly nginx and uwsgi port overwrite with env vars
 if [[ -n "$TA_PORT" ]]; then
@@ -34,9 +39,14 @@ done
 python manage.py makemigrations
 python manage.py migrate
 
-[[ -n $TA_USERNAME && -v TA_PASSWORD ]] && \
+if [[ -f .superuser_created ]]; then
+    echo -e "\e[33;1m[WARNING]\e[0m This is not the first run! Skipping" \
+        "superuser creation.\nTo force it, remove $(pwd)/.superuser_created"
+else
     export DJANGO_SUPERUSER_PASSWORD=$TA_PASSWORD && \
-    python manage.py createsuperuser --noinput --name "$TA_USERNAME"
+        python manage.py createsuperuser --noinput --name "$TA_USERNAME" && \
+        touch .superuser_created
+fi
 
 python manage.py collectstatic --noinput -c
 nginx &
