@@ -43,9 +43,17 @@ if [[ -f .superuser_created ]]; then
     echo -e "\e[33;1m[WARNING]\e[0m This is not the first run! Skipping" \
         "superuser creation.\nTo force it, remove $(pwd)/.superuser_created"
 else
-    export DJANGO_SUPERUSER_PASSWORD=$TA_PASSWORD && \
-        python manage.py createsuperuser --noinput --name "$TA_USERNAME" && \
-        touch .superuser_created
+    export DJANGO_SUPERUSER_PASSWORD=$TA_PASSWORD
+    output="$(python manage.py createsuperuser --noinput --name "$TA_USERNAME" 2>&1)"
+
+    case "$output" in
+        *"Superuser created successfully"*)
+            echo "$output" && touch .superuser_created ;;
+        *"That name is already taken."*)
+            echo "Superuser already exists. Creation will be skipped on next start."
+            touch .superuser_created ;;
+        *) echo "$output" && exit 1
+    esac
 fi
 
 python manage.py collectstatic --noinput -c
