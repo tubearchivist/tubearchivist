@@ -8,7 +8,7 @@ fi
 required="Missing required environment variable"
 if [[ ! -f .superuser_created ]]; then
     : "${TA_USERNAME:?$required}"
-    : "${TA_PASSWORD?$required}"
+    : "${TA_PASSWORD:?$required}"
 fi
 : "${ELASTIC_PASSWORD:?$required}"
 
