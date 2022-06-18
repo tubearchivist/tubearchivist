@@ -5,13 +5,7 @@ if [[ -z "$ELASTIC_USER" ]]; then
     export ELASTIC_USER=elastic
 fi
 
-ENV_VARS=("TA_USERNAME" "TA_PASSWORD" "ELASTIC_PASSWORD" "ELASTIC_USER")
-for each in "${ENV_VARS[@]}"; do
-    if ! [[ -v $each ]]; then
-        echo "missing environment variable $each"
-        exit 1
-    fi
-done
+: "${ELASTIC_PASSWORD:?"Missing required environment variable"}"
 
 # ugly nginx and uwsgi port overwrite with env vars
 if [[ -n "$TA_PORT" ]]; then
@@ -39,7 +33,9 @@ done
 # start python application
 python manage.py makemigrations
 python manage.py migrate
-export DJANGO_SUPERUSER_PASSWORD=$TA_PASSWORD && \
+
+[[ -n $TA_USERNAME && -v TA_PASSWORD ]] && \
+    export DJANGO_SUPERUSER_PASSWORD=$TA_PASSWORD && \
     python manage.py createsuperuser --noinput --name "$TA_USERNAME"
 
 python manage.py collectstatic --noinput -c
