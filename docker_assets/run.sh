@@ -5,9 +5,11 @@ if [[ -z "$ELASTIC_USER" ]]; then
     export ELASTIC_USER=elastic
 fi
 
-checkfile=/cache/.superuser_created
+lockfile=/cache/initsu.lock
+[[ -d /cache ]] || lockfile=initsu.lock
+
 required="Missing required environment variable"
-[[ -f $checkfile ]] || : "${TA_USERNAME:?$required}"
+[[ -f $lockfile ]] || : "${TA_USERNAME:?$required}"
 : "${TA_PASSWORD:?$required}"
 : "${ELASTIC_PASSWORD:?$required}"
 
@@ -38,19 +40,19 @@ done
 python manage.py makemigrations
 python manage.py migrate
 
-if [[ -f $checkfile ]]; then
+if [[ -f $lockfile ]]; then
     echo -e "\e[33;1m[WARNING]\e[0m This is not the first run! Skipping" \
-        "superuser creation.\nTo force it, remove $checkfile"
+        "superuser creation.\nTo force it, remove $lockfile"
 else
     export DJANGO_SUPERUSER_PASSWORD=$TA_PASSWORD
     output="$(python manage.py createsuperuser --noinput --name "$TA_USERNAME" 2>&1)"
 
     case "$output" in
         *"Superuser created successfully"*)
-            echo "$output" && touch $checkfile ;;
+            echo "$output" && touch $lockfile ;;
         *"That name is already taken."*)
             echo "Superuser already exists. Creation will be skipped on next start."
-            touch $checkfile ;;
+            touch $lockfile ;;
         *) echo "$output" && exit 1
     esac
 fi
