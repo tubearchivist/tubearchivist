@@ -85,10 +85,18 @@ class CookieHandler:
         with open(import_path, encoding="utf-8") as cookie_file:
             cookie = cookie_file.read()
 
-        RedisArchivist().set_message("cookie", cookie)
+        self.set_cookie(cookie)
 
         os.remove(import_path)
         print("cookie: import successful")
+
+    def set_cookie(self, cookie):
+        """set cookie str and activate in cofig"""
+        RedisArchivist().set_message("cookie", cookie)
+        path = ".downloads.cookie_import"
+        RedisArchivist().set_message("config", True, path=path)
+        self.config["downloads"]["cookie_import"] = True
+        print("cookie: activated and stored in Redis")
 
     @staticmethod
     def revoke():
