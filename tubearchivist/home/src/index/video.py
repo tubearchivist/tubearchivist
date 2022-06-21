@@ -339,7 +339,7 @@ class SponsorBlock:
         sb_id = RedisArchivist().get_message(key)
         if not sb_id["status"]:
             sb_id = {"status": randomizor(32)}
-            RedisArchivist().set_message(key, sb_id, expire=False)
+            RedisArchivist().set_message(key, sb_id)
 
         return sb_id
 

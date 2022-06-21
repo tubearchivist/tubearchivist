@@ -50,5 +50,5 @@ class TaskHandler:
         print("download pending")
         running = download_pending.delay()
         print("set task id: " + running.id)
-        RedisArchivist().set_message("dl_queue_id", running.id, expire=False)
+        RedisArchivist().set_message("dl_queue_id", running.id)
         return {"success": True}

@@ -48,7 +48,7 @@ def update_subscribed():
         "title": "Rescanning channels and playlists.",
         "message": "Looking for new videos.",
     }
-    RedisArchivist().set_message("message:rescan", message)
+    RedisArchivist().set_message("message:rescan", message, expire=True)
 
     have_lock = False
     my_lock = RedisArchivist().get_lock("rescan")
@@ -108,13 +108,14 @@ def download_single(youtube_id):
     try:
         have_lock = my_lock.acquire(blocking=False)
         if have_lock:
+            key = "message:download"
             mess_dict = {
-                "status": "message:download",
+                "status": key,
                 "level": "info",
                 "title": "Download single video",
                 "message": "processing",
             }
-            RedisArchivist().set_message("message:download", mess_dict)
+            RedisArchivist().set_message(key, mess_dict, expire=True)
             VideoDownloader().run_queue()
         else:
             print("Download queue already running.")
@@ -196,7 +197,7 @@ def kill_dl(task_id):
         "title": "Canceling download process",
         "message": "Canceling download queue now.",
     }
-    RedisArchivist().set_message("message:download", mess_dict)
+    RedisArchivist().set_message("message:download", mess_dict, expire=True)
 
 
 @shared_task
@@ -245,13 +246,14 @@ def subscribe_to(url_str):
             channel_id_sub, channel_subscribed=True
         )
         # notify for channels
+        key = "message:subchannel"
         message = {
-            "status": "message:subchannel",
+            "status": key,
             "level": "info",
             "title": "Subscribing to Channels",
             "message": f"Processing {counter} of {len(to_subscribe_list)}",
         }
-        RedisArchivist().set_message("message:subchannel", message=message)
+        RedisArchivist().set_message(key, message=message, expire=True)
         counter = counter + 1
 
 
@@ -260,13 +262,14 @@ def index_channel_playlists(channel_id):
     """add all playlists of channel to index"""
     channel = YoutubeChannel(channel_id)
     # notify
+    key = "message:playlistscan"
     mess_dict = {
-        "status": "message:playlistscan",
+        "status": key,
         "level": "info",
         "title": "Looking for playlists",
         "message": f'Scanning channel "{channel.youtube_id}" in progress',
     }
-    RedisArchivist().set_message("message:playlistscan", mess_dict)
+    RedisArchivist().set_message(key, mess_dict, expire=True)
     channel.index_channel_playlists()
 
 

@@ -28,6 +28,7 @@ class StartupCheck:
         self.release_lock()
         index_check()
         self.sync_redis_state()
+        self.set_redis_conf()
         self.make_folders()
         self.set_has_run()
 
@@ -44,6 +45,10 @@ class StartupCheck:
         """make sure redis gets new config.json values"""
         print("sync redis")
         self.config_handler.load_new_defaults()
+
+    def set_redis_conf(self):
+        """set conf values for redis"""
+        self.redis_con.conn.config_set("timeout", 3600)
 
     def make_folders(self):
         """make needed cache folders here so docker doesn't mess it up"""

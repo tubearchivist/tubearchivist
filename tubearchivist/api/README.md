@@ -1,6 +1,9 @@
 # TubeArchivist API
 Documentation of available API endpoints.  
-**Note: This is very early alpha and will change!**
+
+Note:  
+- This is very early stages and will change!
+- Check the commit history to see if a documented feature is already in your release
 
 ## Authentication
 API token will get automatically created, accessible on the settings page. Token needs to be passed as an authorization header with every request. Additionally session based authentication is enabled too: When you are logged into your TubeArchivist instance, you'll have access to the api in the browser for testing.
@@ -216,7 +219,7 @@ Returns:
 }
 ```
 
-Start a background task
+Start a background task  
 POST /api/task/
 ```json
 {
@@ -243,5 +246,27 @@ Send empty post request to validate cookie.
 ```json
 {
     "cookie_validated": true
+}
+```
+
+PUT /api/cookie/  
+Send put request containing the cookie as a string:
+```json
+{
+    "cookie": "your-cookie-as-string"
+}
+```
+Imports and validates cookie, returns on success:
+```json
+{
+    "cookie_import": "done",
+    "cookie_validated": true
+}
+```
+Or returns status code 400 on failure:
+```json
+{
+    "cookie_import": "fail",
+    "cookie_validated": false
 }
 ```

@@ -76,11 +76,13 @@ class ChannelSubscription:
                 "message": f"Progress: {idx + 1}/{len(all_channels)}",
             }
             if idx + 1 == len(all_channels):
-                RedisArchivist().set_message(
-                    "message:rescan", message=message, expire=4
-                )
+                expire = 4
             else:
-                RedisArchivist().set_message("message:rescan", message=message)
+                expire = True
+
+            RedisArchivist().set_message(
+                "message:rescan", message=message, expire=expire
+            )
 
         return missing_videos
 
@@ -152,7 +154,7 @@ class PlaylistSubscription:
                 "message": f"Processing {idx + 1} of {len(new_playlists)}",
             }
             RedisArchivist().set_message(
-                "message:subplaylist", message=message
+                "message:subplaylist", message=message, expire=True
             )
 
         return new_thumbs
@@ -206,7 +208,9 @@ class PlaylistSubscription:
                 "title": "Scanning playlists: Looking for new videos.",
                 "message": f"Progress: {idx + 1}/{len(all_playlists)}",
             }
-            RedisArchivist().set_message("message:rescan", message=message)
+            RedisArchivist().set_message(
+                "message:rescan", message=message, expire=True
+            )
 
             for video in all_missing:
                 youtube_id = video["youtube_id"]

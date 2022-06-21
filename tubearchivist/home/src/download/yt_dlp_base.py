@@ -5,6 +5,7 @@ functionality:
 """
 
 import os
+from http import cookiejar
 from io import StringIO
 
 import yt_dlp
@@ -54,9 +55,12 @@ class YtWrap:
         """make extract request"""
         try:
             response = yt_dlp.YoutubeDL(self.obs).extract_info(url)
+        except cookiejar.LoadError:
+            print("cookie file is invalid")
+            return False
         except (yt_dlp.utils.ExtractorError, yt_dlp.utils.DownloadError):
             print(f"{url}: failed to get info from youtube")
-            response = False
+            return False
 
         return response
 
@@ -81,22 +85,53 @@ class CookieHandler:
         with open(import_path, encoding="utf-8") as cookie_file:
             cookie = cookie_file.read()
 
-        RedisArchivist().set_message("cookie", cookie, expire=False)
+        self.set_cookie(cookie)
 
         os.remove(import_path)
         print("cookie: import successful")
+
+    def set_cookie(self, cookie):
+        """set cookie str and activate in cofig"""
+        RedisArchivist().set_message("cookie", cookie)
+        path = ".downloads.cookie_import"
+        RedisArchivist().set_message("config", True, path=path)
+        self.config["downloads"]["cookie_import"] = True
+        print("cookie: activated and stored in Redis")
 
     @staticmethod
     def revoke():
         """revoke cookie"""
         RedisArchivist().del_message("cookie")
+        RedisArchivist().set_message(
+            "config", False, path=".downloads.cookie_import"
+        )
         print("cookie: revoked")
 
     def validate(self):
         """validate cookie using the liked videos playlist"""
+        print("validating cookie")
         obs_request = {
             "skip_download": True,
             "extract_flat": True,
         }
-        response = YtWrap(obs_request, self.config).extract("LL")
+        validator = YtWrap(obs_request, self.config)
+        response = validator.extract("LL")
+
+        # update in redis to avoid expiring
+        modified = validator.obs["cookiefile"].getvalue()
+        if modified:
+            RedisArchivist().set_message("cookie", modified)
+
+        if not response:
+            mess_dict = {
+                "status": "message:download",
+                "level": "error",
+                "title": "Cookie validation failed, exiting...",
+                "message": "",
+            }
+            RedisArchivist().set_message(
+                "message:download", mess_dict, expire=4
+            )
+            print("cookie validation failed, exiting...")
+
         return bool(response)

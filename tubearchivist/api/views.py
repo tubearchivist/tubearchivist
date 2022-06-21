@@ -131,7 +131,7 @@ class VideoProgressView(ApiBaseView):
         position = request.data.get("position", 0)
         key = f"{request.user.id}:progress:{video_id}"
         message = {"position": position, "youtube_id": video_id}
-        RedisArchivist().set_message(key, message, expire=False)
+        RedisArchivist().set_message(key, message)
         self.response = request.data
 
         return Response(self.response)
@@ -459,7 +459,7 @@ class TaskApiView(ApiBaseView):
     @staticmethod
     def get(request):
         """handle get request"""
-
+        # pylint: disable=unused-argument
         response = {"rescan": False, "downloading": False}
         for key in response.keys():
             response[key] = RedisArchivist().is_locked(key)
@@ -480,6 +480,7 @@ class CookieView(ApiBaseView):
     """resolves to /api/cookie/
     GET: check if cookie is enabled
     POST: verify validity of cookie
+    PUT: import cookie
     """
 
     @staticmethod
@@ -499,3 +500,27 @@ class CookieView(ApiBaseView):
         validated = CookieHandler(config).validate()
 
         return Response({"cookie_validated": validated})
+
+    @staticmethod
+    def put(request):
+        """handle put request"""
+        # pylint: disable=unused-argument
+        config = AppConfig().config
+        cookie = request.data.get("cookie")
+        if not cookie:
+            message = "missing cookie key in request data"
+            print(message)
+            return Response({"message": message}, status=400)
+
+        print(f"cookie preview:\n\n{cookie[:300]}")
+        handler = CookieHandler(config)
+        handler.set_cookie(cookie)
+        validated = handler.validate()
+        if not validated:
+            handler.revoke()
+            message = {"cookie_import": "fail", "cookie_validated": validated}
+            print(f"cookie: {message}")
+            return Response({"message": message}, status=400)
+
+        message = {"cookie_import": "done", "cookie_validated": validated}
+        return Response(message)

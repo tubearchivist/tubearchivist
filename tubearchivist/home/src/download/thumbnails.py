@@ -193,11 +193,13 @@ class ThumbManager:
                     "message": "Downloading Thumbnails, Progress: " + progress,
                 }
                 if idx + 1 == len(missing_thumbs):
-                    RedisArchivist().set_message(
-                        "message:add", mess_dict, expire=4
-                    )
+                    expire = 4
                 else:
-                    RedisArchivist().set_message("message:add", mess_dict)
+                    expire = True
+
+                RedisArchivist().set_message(
+                    "message:add", mess_dict, expire=expire
+                )
 
             if idx + 1 % 25 == 0:
                 print("thumbnail progress: " + progress)
@@ -226,7 +228,8 @@ class ThumbManager:
                 "title": "Processing Channels",
                 "message": "Downloading Channel Art.",
             }
-            RedisArchivist().set_message("message:download", mess_dict)
+            key = "message:download"
+            RedisArchivist().set_message(key, mess_dict, expire=True)
 
     def download_playlist(self, missing_playlists):
         """download needed artwork for playlists"""
@@ -243,7 +246,8 @@ class ThumbManager:
                 "title": "Processing Playlists",
                 "message": "Downloading Playlist Art.",
             }
-            RedisArchivist().set_message("message:download", mess_dict)
+            key = "message:download"
+            RedisArchivist().set_message(key, mess_dict, expire=True)
 
     def get_base64_blur(self, youtube_id):
         """return base64 encoded placeholder"""
