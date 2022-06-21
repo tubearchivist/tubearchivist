@@ -216,7 +216,7 @@ Returns:
 }
 ```
 
-Start a background task
+Start a background task  
 POST /api/task/
 ```json
 {
@@ -243,5 +243,27 @@ Send empty post request to validate cookie.
 ```json
 {
     "cookie_validated": true
+}
+```
+
+PUT /api/cookie/  
+Send put request containing the cookie as a string:
+```json
+{
+    "cookie": "your-cookie-as-string"
+}
+```
+Imports and validates cookie, returns on success:
+```json
+{
+    "cookie_import": "done",
+    "cookie_validated": true
+}
+```
+Or returns status code 400 on failure:
+```json
+{
+    "cookie_import": "fail",
+    "cookie_validated": false
 }
 ```
