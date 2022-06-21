@@ -1,6 +1,9 @@
 # TubeArchivist API
 Documentation of available API endpoints.  
-**Note: This is very early alpha and will change!**
+
+Note:  
+- This is very early stages and will change!
+- Check the commit history to see if a documented feature is already in your release
 
 ## Authentication
 API token will get automatically created, accessible on the settings page. Token needs to be passed as an authorization header with every request. Additionally session based authentication is enabled too: When you are logged into your TubeArchivist instance, you'll have access to the api in the browser for testing.
