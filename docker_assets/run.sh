@@ -5,8 +5,9 @@ if [[ -z "$ELASTIC_USER" ]]; then
     export ELASTIC_USER=elastic
 fi
 
-lockfile=/cache/initsu.lock
-[[ -d /cache ]] || lockfile=initsu.lock
+cachedir=/cache
+[[ -d $cachedir ]] || cachedir=.
+lockfile=${cachedir}/initsu.lock
 
 required="Missing required environment variable"
 [[ -f $lockfile ]] || : "${TA_USERNAME:?$required}"
@@ -61,5 +62,5 @@ python manage.py collectstatic --noinput -c
 nginx &
 celery -A home.tasks worker --loglevel=INFO &
 celery -A home beat --loglevel=INFO \
-    -s "${BEAT_SCHEDULE_PATH:-/cache/celerybeat-schedule}" &
+    -s "${BEAT_SCHEDULE_PATH:-${cachedir}/celerybeat-schedule}" &
 uwsgi --ini uwsgi.ini
