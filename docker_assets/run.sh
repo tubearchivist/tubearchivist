@@ -5,13 +5,14 @@ if [[ -z "$ELASTIC_USER" ]]; then
     export ELASTIC_USER=elastic
 fi
 
-ENV_VARS=("TA_USERNAME" "TA_PASSWORD" "ELASTIC_PASSWORD" "ELASTIC_USER")
-for each in "${ENV_VARS[@]}"; do
-    if ! [[ -v $each ]]; then
-        echo "missing environment variable $each"
-        exit 1
-    fi
-done
+cachedir=/cache
+[[ -d $cachedir ]] || cachedir=.
+lockfile=${cachedir}/initsu.lock
+
+required="Missing required environment variable"
+[[ -f $lockfile ]] || : "${TA_USERNAME:?$required}"
+: "${TA_PASSWORD:?$required}"
+: "${ELASTIC_PASSWORD:?$required}"
 
 # ugly nginx and uwsgi port overwrite with env vars
 if [[ -n "$TA_PORT" ]]; then
@@ -39,12 +40,27 @@ done
 # start python application
 python manage.py makemigrations
 python manage.py migrate
-export DJANGO_SUPERUSER_PASSWORD=$TA_PASSWORD && \
-    python manage.py createsuperuser --noinput --name "$TA_USERNAME"
+
+if [[ -f $lockfile ]]; then
+    echo -e "\e[33;1m[WARNING]\e[0m This is not the first run! Skipping" \
+        "superuser creation.\nTo force it, remove $lockfile"
+else
+    export DJANGO_SUPERUSER_PASSWORD=$TA_PASSWORD
+    output="$(python manage.py createsuperuser --noinput --name "$TA_USERNAME" 2>&1)"
+
+    case "$output" in
+        *"Superuser created successfully"*)
+            echo "$output" && touch $lockfile ;;
+        *"That name is already taken."*)
+            echo "Superuser already exists. Creation will be skipped on next start."
+            touch $lockfile ;;
+        *) echo "$output" && exit 1
+    esac
+fi
 
 python manage.py collectstatic --noinput -c
 nginx &
 celery -A home.tasks worker --loglevel=INFO &
 celery -A home beat --loglevel=INFO \
-    -s "${BEAT_SCHEDULE_PATH:-/cache/celerybeat-schedule}" &
+    -s "${BEAT_SCHEDULE_PATH:-${cachedir}/celerybeat-schedule}" &
 uwsgi --ini uwsgi.ini
