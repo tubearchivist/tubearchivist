@@ -488,9 +488,11 @@ class CookieView(ApiBaseView):
         """handle get request"""
         # pylint: disable=unused-argument
         config = AppConfig().config
-        cookie_enabled = config["downloads"]["cookie_import"]
+        valid = RedisArchivist().get_message("cookie:valid")
+        response = {"cookie_enabled": config["downloads"]["cookie_import"]}
+        response.update(valid)
 
-        return Response({"cookie_enabled": cookie_enabled})
+        return Response(response)
 
     @staticmethod
     def post(request):

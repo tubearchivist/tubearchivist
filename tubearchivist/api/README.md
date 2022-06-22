@@ -233,11 +233,14 @@ List of valid task names:
 
 
 ## Cookie View
-Check your youtube cookie settings  
+Check your youtube cookie settings, *status* turns to `true` if cookie has been validated.  
 GET /api/cookie/
 ```json
 {
-    "cookie_enabled": true
+    "cookie_enabled": true,
+    "status": true,
+    "validated": <timestamp>,
+    "validated_str": "timestamp"
 }
 ```
 
