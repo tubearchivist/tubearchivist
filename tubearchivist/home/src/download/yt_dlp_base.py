@@ -103,6 +103,7 @@ class CookieHandler:
     def revoke():
         """revoke cookie"""
         RedisArchivist().del_message("cookie")
+        RedisArchivist().del_message("cookie:valid")
         RedisArchivist().set_message(
             "config", False, path=".downloads.cookie_import"
         )
