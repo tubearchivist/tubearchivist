@@ -1086,8 +1086,12 @@ button:hover {
 }
 
 /* tablet */
-@media screen and (max-width: 1000px) {
-    .boxed-content {
+@media screen and (max-width: 1000px), screen and (max-height: 850px) {
+    .boxed-content,
+    .boxed-content.boxed-4,
+    .boxed-content.boxed-5,
+    .boxed-content.boxed-6,
+    .boxed-content.boxed-7 {
         width: 90%;
     }
     .video-list.grid.grid-3,

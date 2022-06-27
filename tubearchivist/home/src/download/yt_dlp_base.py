@@ -5,6 +5,7 @@ functionality:
 """
 
 import os
+from datetime import datetime
 from http import cookiejar
 from io import StringIO
 
@@ -102,6 +103,7 @@ class CookieHandler:
     def revoke():
         """revoke cookie"""
         RedisArchivist().del_message("cookie")
+        RedisArchivist().del_message("cookie:valid")
         RedisArchivist().set_message(
             "config", False, path=".downloads.cookie_import"
         )
@@ -115,7 +117,8 @@ class CookieHandler:
             "extract_flat": True,
         }
         validator = YtWrap(obs_request, self.config)
-        response = validator.extract("LL")
+        response = bool(validator.extract("LL"))
+        self.store_validation(response)
 
         # update in redis to avoid expiring
         modified = validator.obs["cookiefile"].getvalue()
@@ -134,4 +137,15 @@ class CookieHandler:
             )
             print("cookie validation failed, exiting...")
 
-        return bool(response)
+        return response
+
+    @staticmethod
+    def store_validation(response):
+        """remember last validation"""
+        now = datetime.now()
+        message = {
+            "status": response,
+            "validated": int(now.strftime("%s")),
+            "validated_str": now.strftime("%Y-%m-%d %H:%M"),
+        }
+        RedisArchivist().set_message("cookie:valid", message)
