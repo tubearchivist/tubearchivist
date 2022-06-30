@@ -4,9 +4,9 @@ Django==4.0.5
 django-cors-headers==3.13.0
 djangorestframework==3.13.1
 Pillow==9.1.1
-redis==4.3.3
-requests==2.28.0
+redis==4.3.4
+requests==2.28.1
 ryd-client==0.0.3
 uWSGI==2.0.20
 whitenoise==6.2.0
-yt_dlp==2022.6.22.1
+yt_dlp==2022.6.29
