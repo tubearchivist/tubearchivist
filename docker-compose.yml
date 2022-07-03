@@ -4,7 +4,7 @@ services:
   tubearchivist:
     container_name: tubearchivist
     restart: unless-stopped
-    image: bbilly1/tubearchivist:latest
+    image: bbilly1/tubearchivist
     ports:
       - 8000:8000
     volumes:
@@ -23,7 +23,7 @@ services:
       - archivist-es
       - archivist-redis
   archivist-redis:
-    image: redislabs/rejson:latest          # for arm64 use bbilly1/rejson
+    image: redislabs/rejson                 # for arm64 use bbilly1/rejson
     container_name: archivist-redis
     restart: unless-stopped
     expose:
