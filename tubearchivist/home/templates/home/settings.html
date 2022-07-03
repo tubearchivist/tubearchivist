@@ -118,7 +118,8 @@
             <h2 id="format">Cookie</h2>
             <div class="settings-item">
                 <p>Import YouTube cookie: <span class="settings-current">{{ config.downloads.cookie_import }}</span><br></p>
-                <i>Place your cookie file named <span class="settings-current">cookies.google.txt</span> in <span class="settings-current">cache/import</span> before enabling. Instructions in the <a href="https://github.com/tubearchivist/tubearchivist/wiki/Settings" target="_blank">Wiki.</a></i><br>
+                <p>For automatic cookie import use <b>Tube Archivist Companion</b> <a href="https://github.com/tubearchivist/browser-extension" target="_blank">browser extension</a>.</p> 
+                <i>For manual cookie import, place your cookie file named <span class="settings-current">cookies.google.txt</span> in <span class="settings-current">cache/import</span> before enabling. Instructions in the <a href="https://github.com/tubearchivist/tubearchivist/wiki/Settings" target="_blank">Wiki.</a></i><br>
                 {{ app_form.downloads_cookie_import }}<br>
                 {% if config.downloads.cookie_import %}
                     <div id="cookieMessage">
