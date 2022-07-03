@@ -95,7 +95,7 @@ That's the equivalent task as run from the downloads page looking through your c
 Start downloading all videos currently in the download queue.
 
 ## Refresh Metadata
-Rescan videos, channels and playlists on youtube and update metadata periodically. This will also deactivate an item and exclude it from future refreshes if the link on YouTube is no longer available. This task is meant to be run once per day, set your schedule accordingly.
+Rescan videos, channels and playlists on youtube and update metadata periodically. This will also refresh your subtitles based on your current settings. If an item is no longer available on YouTube, this will deactivate it and exclude it from future refreshes. This task is meant to be run once per day, set your schedule accordingly.
 
 The field **Refresh older than x days** takes a number where TubeArchivist will consider an item as *outdated*. This value is used to calculate how many items need to be refreshed today based on the total indexed. This will spread out the requests to YouTube. Sensible value here is **90** days.
 
