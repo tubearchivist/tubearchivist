@@ -36,15 +36,18 @@ Additional settings passed to yt-dlp.
 Importing your YouTube Cookie into Tube Archivist allows yt-dlp to bypass age restrictions, gives access to private videos and your *watch later* or *liked videos*.
 
 ### Security concerns
-Cookies are used to store your session and contain your access token to your google account, this file can be used to take over your account. Treat that file with utmost care as you would any other password or credential. *Tube Archivist* stores your cookie in Redis and will automatically append it to yt-dlp for every request.
+Cookies are used to store your session and contain your access token to your google account, this information can be used to take over your account. Treat that data with utmost care as you would any other password or credential. *Tube Archivist* stores your cookie in Redis and will automatically append it to yt-dlp for every request.
 
-### Export your cookie
+### Auto import
+Easiest way to import your cookie is to use the **Tube Archivist Companion** [browser extension](https://github.com/tubearchivist/browser-extension) for Firefox and Chrome.
+
+### Alternative Manual Export your cookie
 - Install **Cookies.txt** addon for [chrome](https://chrome.google.com/webstore/detail/get-cookiestxt/bgaddhkoddajcdgocldbbfleckgcbcid) or [firefox](https://addons.mozilla.org/firefox/addon/cookies-txt).
 - Visit YouTube and login with whichever YouTube account you wish to use to generate the cookies.
 - Click on the extension icon in the toolbar - it will drop down showing the active cookies for YT.
 - Click Export to export the cookies, filename is by default *cookies.google.txt*.
 
-### Import your cookie
+### Alternative Manual Import your cookie
 Place the file *cookies.google.txt* into the *cache/import* folder of Tube Archivist and enable the cookie import. Once you click on *Update Application Configurations* to save your changes, your cookie will get imported and stored internally.
 
 Once imported, a **Validate Cookie File** button will show, where you can confirm if your cookie is working or not.
