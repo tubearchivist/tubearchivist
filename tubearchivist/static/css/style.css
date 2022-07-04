@@ -817,6 +817,18 @@ button:hover {
     transform: translateX(-30%);
 }
 
+.info-box-item.channel-nav {
+    justify-content: center;
+}
+
+.info-box-item.channel-nav a {
+    padding: 0 1rem;
+}
+
+.info-box-item.channel-nav a:hover {
+    text-decoration: underline;
+}
+
 /* playlist overview page */
 .playlist-list.list {
     display: grid;

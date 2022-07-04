@@ -8,6 +8,7 @@ import json
 import urllib.parse
 from time import sleep
 
+from api.src.search_processor import SearchProcess
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
@@ -15,6 +16,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views import View
 from home.src.download.yt_dlp_base import CookieHandler
+from home.src.es.connect import ElasticWrap
 from home.src.es.index_setup import get_available_backups
 from home.src.frontend.api_calls import PostData
 from home.src.frontend.forms import (
@@ -475,6 +477,34 @@ class ChannelIdView(ArchivistResultsView):
 
         sleep(1)
         return redirect("channel_id", channel_id, permanent=True)
+
+
+class ChannelIdAboutView(ArchivistResultsView):
+    """resolves to /channel/<channel-id>/about/
+    show metadata, handle per channel conf
+    """
+
+    view_origin = "channel"
+
+    def get(self, request, channel_id):
+        """handle get request"""
+        self.initiate_vars(request)
+
+        path = f"ta_channel/_doc/{channel_id}"
+        response, _ = ElasticWrap(path).get()
+
+        channel_info = SearchProcess(response).process()
+        channel_name = channel_info["channel_name"]
+
+        self.context.update(
+            {
+                "title": "Channel: About " + channel_name,
+                "channel_info": channel_info,
+                "channel_overwrite_form": ChannelOverwriteForm,
+            }
+        )
+
+        return render(request, "home/channel_id_about.html", self.context)
 
 
 class ChannelView(ArchivistResultsView):

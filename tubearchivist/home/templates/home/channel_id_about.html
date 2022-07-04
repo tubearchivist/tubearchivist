@@ -1,0 +1,110 @@
+{% extends "home/base.html" %}
+{% block content %}
+{% load static %}
+{% load humanize %}
+<div class="boxed-content">
+    <div class="channel-banner">
+        <a href="{% url 'channel_id' channel_info.channel_id %}"><img src="{{ channel_info.channel_banner_url }}" alt="channel_banner"></a>
+    </div>
+    <div class="info-box-item channel-nav">
+        <a href="{% url 'channel_id' channel_info.channel_id %}"><h3>Videos</h3></a>
+        <a href="#"><h3>Playlists</h3></a>
+        <a href="{% url 'channel_id_about' channel_info.channel_id %}"><h3>About</h3></a>
+    </div>
+    <div class="info-box info-box-3">
+        <div class="info-box-item">
+            <div class="round-img">
+                <a href="{% url 'channel_id' channel_info.channel_id %}">
+                    <img src="{{ channel_info.channel_thumb_url }}" alt="channel-thumb">
+                </a>
+            </div>
+            <div>
+                <h3><a href="{% url 'channel_id' channel_info.channel_id %}">{{ channel_info.channel_name }}</a></h3>
+                {% if channel_info.channel_subs >= 1000000 %}
+                    <p>Subscribers: {{ channel_info.channel_subs|intword }}</p>
+                {% else %}
+                    <p>Subscribers: {{ channel_info.channel_subs|intcomma }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="info-box-item">
+            <div>
+                <p>Last refreshed: {{ channel_info.channel_last_refresh }}</p>
+                {% if channel_info.channel_active %}
+                    <p>Youtube: <a href="https://www.youtube.com/channel/{{ channel_info.channel_id }}" target="_blank">Active</a></p>
+                {% else %}
+                    <p>Youtube: Deactivated</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="info-box-item">
+            <div>
+                {% if channel_info.channel_views >= 1000000 %}
+                    <p>Channel views: {{ channel_info.channel_views|intword }}</p>
+                {% elif channel_info.channel_views > 0 %}
+                    <p>Channel views: {{ channel_info.channel_views|intcomma }}</p>
+                {% endif %}
+                <button onclick="deleteConfirm()" id="delete-item">Delete Channel</button>
+                <div class="delete-confirm" id="delete-button">
+                    <span>Delete {{ channel_info.channel_name }} including all videos? </span><button class="danger-button" onclick="deleteChannel(this)" data-id="{{ channel_info.channel_id }}">Delete</button> <button onclick="cancelDelete()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if channel_info.channel_description %}
+        <div class="info-box-item description-box">
+            <div class="description-text">
+                <p>Description:</p>
+                {{ channel_info.channel_description|linebreaks }}
+            </div>
+        </div>
+    {% endif %}
+    <div id="overwrite-form" class="info-box">
+        <div class="info-box-item">
+            <form class="overwrite-form" action="/channel/{{ channel_info.channel_id }}/" method="POST">
+                {% csrf_token %}
+                <div class="overwrite-form-item">
+                    <p>Download format: <span class="settings-current">
+                        {% if channel_info.channel_overwrites.download_format %}
+                            {{ channel_info.channel_overwrites.download_format }}
+                        {% else %}
+                            False
+                        {% endif %}</span></p>
+                    {{ channel_overwrite_form.download_format }}<br>
+                </div>
+                <div class="overwrite-form-item">
+                    <p>Auto delete watched videos after x days: <span class="settings-current">
+                        {% if channel_info.channel_overwrites.autodelete_days %}
+                            {{ channel_info.channel_overwrites.autodelete_days }}
+                        {% else %}
+                            False
+                        {% endif %}</span></p>
+                    {{ channel_overwrite_form.autodelete_days }}<br>
+                </div>
+                <div class="overwrite-form-item">
+                    <p>Index playlists: <span class="settings-current">
+                        {% if channel_info.channel_overwrites.index_playlists %}
+                            {{ channel_info.channel_overwrites.index_playlists }}
+                        {% else %}
+                            False
+                        {% endif %}</span></p>
+                    {{ channel_overwrite_form.index_playlists }}<br>
+                </div>
+                <div class="overwrite-form-item">
+                    <p>Enable <a href="https://sponsor.ajay.app/" target="_blank">SponsorBlock</a>: <span class="settings-current">
+                        {% if channel_info.channel_overwrites.integrate_sponsorblock %}
+                            {{ channel_info.channel_overwrites.integrate_sponsorblock }}
+                        {% elif channel_info.channel_overwrites.integrate_sponsorblock == False %}
+                            Disabled
+                        {% else %}
+                            False
+                        {% endif %}</span></p>
+                    {{ channel_overwrite_form.integrate_sponsorblock }}<br>
+                </div>
+                <button type="submit">Save Channel Overwrites</button>
+            </form>
+        </div>
+    </div>
+    <p>{{ channel_info }}</p>
+</div>
+{% endblock content %}

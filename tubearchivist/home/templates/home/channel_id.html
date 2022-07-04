@@ -6,6 +6,11 @@
     <div class="channel-banner">
         <a href="/channel/{{ channel_info.channel_id }}/"><img src="/cache/channels/{{ channel_info.channel_id }}_banner.jpg" alt="channel_banner"></a>
     </div>
+    <div class="info-box-item channel-nav">
+        <a href="{% url 'channel_id' channel_info.channel_id %}"><h3>Videos</h3></a>
+        <a href="#"><h3>Playlists</h3></a>
+        <a href="{% url 'channel_id_about' channel_info.channel_id %}"><h3>About</h3></a>
+    </div>
     <div id="notifications" data="channel_id"></div>
     <div class="info-box info-box-3">
         <div class="info-box-item">
