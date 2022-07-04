@@ -12,6 +12,17 @@
         <a href="{% url 'channel_id_about' channel_info.channel_id %}"><h3>About</h3></a>
     </div>
     <div class="view-controls">
+        <div class="toggle">
+            <span>Show subscribed only:</span>
+            <div class="toggleBox">
+                <input id="show_subed_only" onclick="toggleCheckbox(this)" type="checkbox" {% if show_subed_only %}checked{% endif %}>
+                {% if not show_subed_only %}
+                    <label for="" class="ofbtn">Off</label>
+                {% else %}
+                    <label for="" class="onbtn">On</label>
+                {% endif %}
+            </div>
+        </div>
         <div class="view-icons">
             <img src="{% static 'img/icon-gridview.svg' %}" onclick="changeView(this)" data-origin="playlist" data-value="grid" alt="grid view">
             <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="playlist" data-value="list" alt="list view">

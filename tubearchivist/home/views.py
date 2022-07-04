@@ -549,9 +549,12 @@ class ChannelIdPlaylistView(ArchivistResultsView):
     def _update_view_data(self, channel_id):
         """update view specific data dict"""
         self.data["sort"] = [{"playlist_name.keyword": {"order": "asc"}}]
-        self.data["query"] = {
-            "term": {"playlist_channel_id": {"value": channel_id}}
-        }
+        must_list = [{"match": {"playlist_channel_id": channel_id}}]
+
+        if self.context["show_subed_only"]:
+            must_list.append({"match": {"playlist_subscribed": True}})
+
+        self.data["query"] = {"bool": {"must": must_list}}
 
     def _get_channel_meta(self, channel_id):
         """get metadata for channel"""
