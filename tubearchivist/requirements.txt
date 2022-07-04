@@ -1,6 +1,6 @@
 beautifulsoup4==4.11.1
 celery==5.2.7
-Django==4.0.5
+Django==4.0.6
 django-cors-headers==3.13.0
 djangorestframework==3.13.1
 Pillow==9.2.0
