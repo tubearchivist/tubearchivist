@@ -8,6 +8,7 @@ import json
 import urllib.parse
 from time import sleep
 
+from api.src.search_processor import SearchProcess
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
@@ -15,6 +16,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views import View
 from home.src.download.yt_dlp_base import CookieHandler
+from home.src.es.connect import ElasticWrap
 from home.src.es.index_setup import get_available_backups
 from home.src.frontend.api_calls import PostData
 from home.src.frontend.forms import (
@@ -440,7 +442,6 @@ class ChannelIdView(ArchivistResultsView):
             {
                 "title": "Channel: " + channel_name,
                 "channel_info": channel_info,
-                "channel_overwrite_form": ChannelOverwriteForm,
             }
         )
 
@@ -475,6 +476,93 @@ class ChannelIdView(ArchivistResultsView):
 
         sleep(1)
         return redirect("channel_id", channel_id, permanent=True)
+
+
+class ChannelIdAboutView(ArchivistResultsView):
+    """resolves to /channel/<channel-id>/about/
+    show metadata, handle per channel conf
+    """
+
+    view_origin = "channel"
+
+    def get(self, request, channel_id):
+        """handle get request"""
+        self.initiate_vars(request)
+
+        path = f"ta_channel/_doc/{channel_id}"
+        response, _ = ElasticWrap(path).get()
+
+        channel_info = SearchProcess(response).process()
+        channel_name = channel_info["channel_name"]
+
+        self.context.update(
+            {
+                "title": "Channel: About " + channel_name,
+                "channel_info": channel_info,
+                "channel_overwrite_form": ChannelOverwriteForm,
+            }
+        )
+
+        return render(request, "home/channel_id_about.html", self.context)
+
+    @staticmethod
+    def post(request, channel_id):
+        """handle post request"""
+        print(f"handle post from {channel_id}")
+        channel_overwrite_form = ChannelOverwriteForm(request.POST)
+        if channel_overwrite_form.is_valid():
+            overwrites = channel_overwrite_form.cleaned_data
+            print(f"{channel_id}: set overwrites {overwrites}")
+            channel_overwrites(channel_id, overwrites=overwrites)
+            if overwrites.get("index_playlists") == "1":
+                index_channel_playlists.delay(channel_id)
+
+        sleep(1)
+        return redirect("channel_id_about", channel_id, permanent=True)
+
+
+class ChannelIdPlaylistView(ArchivistResultsView):
+    """resolves to /channel/<channel-id>/playlist/
+    show all playlists of channel
+    """
+
+    view_origin = "playlist"
+    es_search = "ta_playlist/_search"
+
+    def get(self, request, channel_id):
+        """handle get request"""
+        self.initiate_vars(request)
+        self._update_view_data(channel_id)
+        self.find_results()
+
+        channel_info = self._get_channel_meta(channel_id)
+        channel_name = channel_info["channel_name"]
+        self.context.update(
+            {
+                "title": "Channel: Playlists " + channel_name,
+                "channel_info": channel_info,
+            }
+        )
+
+        return render(request, "home/channel_id_playlist.html", self.context)
+
+    def _update_view_data(self, channel_id):
+        """update view specific data dict"""
+        self.data["sort"] = [{"playlist_name.keyword": {"order": "asc"}}]
+        must_list = [{"match": {"playlist_channel_id": channel_id}}]
+
+        if self.context["show_subed_only"]:
+            must_list.append({"match": {"playlist_subscribed": True}})
+
+        self.data["query"] = {"bool": {"must": must_list}}
+
+    def _get_channel_meta(self, channel_id):
+        """get metadata for channel"""
+        path = f"ta_channel/_doc/{channel_id}"
+        response, _ = ElasticWrap(path).get()
+        channel_info = SearchProcess(response).process()
+
+        return channel_info
 
 
 class ChannelView(ArchivistResultsView):

@@ -6,6 +6,8 @@ from django.contrib.auth.views import LogoutView
 from django.urls import path
 from home.views import (
     AboutView,
+    ChannelIdAboutView,
+    ChannelIdPlaylistView,
     ChannelIdView,
     ChannelView,
     DownloadView,
@@ -41,6 +43,16 @@ urlpatterns = [
         "channel/<slug:channel_id>/",
         login_required(ChannelIdView.as_view()),
         name="channel_id",
+    ),
+    path(
+        "channel/<slug:channel_id>/about/",
+        login_required(ChannelIdAboutView.as_view()),
+        name="channel_id_about",
+    ),
+    path(
+        "channel/<slug:channel_id>/playlist/",
+        login_required(ChannelIdPlaylistView.as_view()),
+        name="channel_id_playlist",
     ),
     path(
         "video/<slug:video_id>/",
