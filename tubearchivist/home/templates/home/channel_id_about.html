@@ -8,7 +8,7 @@
     </div>
     <div class="info-box-item channel-nav">
         <a href="{% url 'channel_id' channel_info.channel_id %}"><h3>Videos</h3></a>
-        <a href="#"><h3>Playlists</h3></a>
+        <a href="{% url 'channel_id_playlist' channel_info.channel_id %}"><h3>Playlists</h3></a>
         <a href="{% url 'channel_id_about' channel_info.channel_id %}"><h3>About</h3></a>
     </div>
     <div class="info-box info-box-3">
@@ -61,7 +61,7 @@
     {% endif %}
     <div id="overwrite-form" class="info-box">
         <div class="info-box-item">
-            <form class="overwrite-form" action="/channel/{{ channel_info.channel_id }}/" method="POST">
+            <form class="overwrite-form" action="/channel/{{ channel_info.channel_id }}/about/" method="POST">
                 {% csrf_token %}
                 <div class="overwrite-form-item">
                     <p>Download format: <span class="settings-current">
@@ -105,6 +105,5 @@
             </form>
         </div>
     </div>
-    <p>{{ channel_info }}</p>
 </div>
 {% endblock content %}

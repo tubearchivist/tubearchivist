@@ -442,7 +442,6 @@ class ChannelIdView(ArchivistResultsView):
             {
                 "title": "Channel: " + channel_name,
                 "channel_info": channel_info,
-                "channel_overwrite_form": ChannelOverwriteForm,
             }
         )
 
@@ -505,6 +504,62 @@ class ChannelIdAboutView(ArchivistResultsView):
         )
 
         return render(request, "home/channel_id_about.html", self.context)
+
+    @staticmethod
+    def post(request, channel_id):
+        """handle post request"""
+        print(f"handle post from {channel_id}")
+        channel_overwrite_form = ChannelOverwriteForm(request.POST)
+        if channel_overwrite_form.is_valid():
+            overwrites = channel_overwrite_form.cleaned_data
+            print(f"{channel_id}: set overwrites {overwrites}")
+            channel_overwrites(channel_id, overwrites=overwrites)
+            if overwrites.get("index_playlists") == "1":
+                index_channel_playlists.delay(channel_id)
+
+        sleep(1)
+        return redirect("channel_id_about", channel_id, permanent=True)
+
+
+class ChannelIdPlaylistView(ArchivistResultsView):
+    """resolves to /channel/<channel-id>/playlist/
+    show all playlists of channel
+    """
+
+    view_origin = "playlist"
+    es_search = "ta_playlist/_search"
+
+    def get(self, request, channel_id):
+        """handle get request"""
+        self.initiate_vars(request)
+        self._update_view_data(channel_id)
+        self.find_results()
+
+        channel_info = self._get_channel_meta(channel_id)
+        channel_name = channel_info["channel_name"]
+        self.context.update(
+            {
+                "title": "Channel: Playlists " + channel_name,
+                "channel_info": channel_info,
+            }
+        )
+
+        return render(request, "home/channel_id_playlist.html", self.context)
+
+    def _update_view_data(self, channel_id):
+        """update view specific data dict"""
+        self.data["sort"] = [{"playlist_name.keyword": {"order": "asc"}}]
+        self.data["query"] = {
+            "term": {"playlist_channel_id": {"value": channel_id}}
+        }
+
+    def _get_channel_meta(self, channel_id):
+        """get metadata for channel"""
+        path = f"ta_channel/_doc/{channel_id}"
+        response, _ = ElasticWrap(path).get()
+        channel_info = SearchProcess(response).process()
+
+        return channel_info
 
 
 class ChannelView(ArchivistResultsView):

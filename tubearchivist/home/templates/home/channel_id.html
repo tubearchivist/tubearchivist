@@ -8,7 +8,7 @@
     </div>
     <div class="info-box-item channel-nav">
         <a href="{% url 'channel_id' channel_info.channel_id %}"><h3>Videos</h3></a>
-        <a href="#"><h3>Playlists</h3></a>
+        <a href="{% url 'channel_id_playlist' channel_info.channel_id %}"><h3>Playlists</h3></a>
         <a href="{% url 'channel_id_about' channel_info.channel_id %}"><h3>About</h3></a>
     </div>
     <div id="notifications" data="channel_id"></div>
@@ -58,65 +58,9 @@
                     <p>Total Videos archived: {{ max_hits }}</p>
                     <p>Watched: <button title="Mark all videos from {{ channel_info.channel_name }} as watched" type="button" id="watched-button" data-id="{{ channel_info.channel_id }}" onclick="isWatchedButton(this)">Mark as watched</button></p>
                 {% endif %}
-                <button {% if channel_info.channel_overwrites %} class="danger-button"{% endif %} onclick="showOverwrite()" title="Overwrite settings for channel {{ channel_info.channel_name }}">Configure</button>
-                <a href="/playlist/?search={{ channel_info.channel_id }}" title="Show all playlists belonging to {{ channel_info.channel_name }}"><button>Show Playlists</button></a>
             </div>
         </div>
     </div>
-    <div id="overwrite-form" class="info-box{% if not channel_info.channel_overwrites %} hidden-overwrite{% endif %}">
-        <div class="info-box-item">
-            <form class="overwrite-form" action="/channel/{{ channel_info.channel_id }}/" method="POST">
-                {% csrf_token %}
-                <div class="overwrite-form-item">
-                    <p>Download format: <span class="settings-current">
-                        {% if channel_info.channel_overwrites.download_format %}
-                            {{ channel_info.channel_overwrites.download_format }}
-                        {% else %}
-                            False
-                        {% endif %}</span></p>
-                    {{ channel_overwrite_form.download_format }}<br>
-                </div>
-                <div class="overwrite-form-item">
-                    <p>Auto delete watched videos after x days: <span class="settings-current">
-                        {% if channel_info.channel_overwrites.autodelete_days %}
-                            {{ channel_info.channel_overwrites.autodelete_days }}
-                        {% else %}
-                            False
-                        {% endif %}</span></p>
-                    {{ channel_overwrite_form.autodelete_days }}<br>
-                </div>
-                <div class="overwrite-form-item">
-                    <p>Index playlists: <span class="settings-current">
-                        {% if channel_info.channel_overwrites.index_playlists %}
-                            {{ channel_info.channel_overwrites.index_playlists }}
-                        {% else %}
-                            False
-                        {% endif %}</span></p>
-                    {{ channel_overwrite_form.index_playlists }}<br>
-                </div>
-                <div class="overwrite-form-item">
-                    <p>Enable <a href="https://sponsor.ajay.app/" target="_blank">SponsorBlock</a>: <span class="settings-current">
-                        {% if channel_info.channel_overwrites.integrate_sponsorblock %}
-                            {{ channel_info.channel_overwrites.integrate_sponsorblock }}
-                        {% elif channel_info.channel_overwrites.integrate_sponsorblock == False %}
-                            Disabled
-                        {% else %}
-                            False
-                        {% endif %}</span></p>
-                    {{ channel_overwrite_form.integrate_sponsorblock }}<br>
-                </div>
-                <button type="submit">Save Channel Overwrites</button>
-            </form>
-        </div>
-    </div>
-    {% if channel_info.channel_description %}
-        <div class="info-box-item description-box">
-            <p>Description: <button onclick="textReveal()" id="text-reveal-button">Show</button></p>
-            <div id="text-reveal" class="description-text">
-                {{ channel_info.channel_description|linebreaks }}
-            </div>
-        </div>
-    {% endif %}
 </div>
 <div class="boxed-content {% if view_style == "grid" %}boxed-{{ grid_items }}{% endif %}">
     <div class="view-controls">
