@@ -52,13 +52,18 @@
         </div>
     </div>
     {% if channel_info.channel_description %}
+        <div class="description-box">
+            <h2>Description</h2>
+        </div>
         <div class="info-box-item description-box">
             <div class="description-text">
-                <p>Description:</p>
                 {{ channel_info.channel_description|linebreaks }}
             </div>
         </div>
     {% endif %}
+    <div class="description-box">
+        <h2>Costomize {{ channel_info.channel_name }}</h2>
+    </div>
     <div id="overwrite-form" class="info-box">
         <div class="info-box-item">
             <form class="overwrite-form" action="/channel/{{ channel_info.channel_id }}/about/" method="POST">
