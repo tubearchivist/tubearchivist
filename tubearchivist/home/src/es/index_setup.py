@@ -188,17 +188,6 @@ class ElasticBackup:
 
         self.backup_files.append(file_path)
 
-    def write_ta_json(self, all_results, index_name):
-        """write generic json file to disk"""
-        file_name = f"ta_{index_name}-{self.timestamp}.json"
-        file_path = os.path.join(self.cache_dir, "backup", file_name)
-        to_write = [i["_source"] for i in all_results]
-        file_content = json.dumps(to_write)
-        with open(file_path, "w", encoding="utf-8") as f:
-            f.write(file_content)
-
-        self.backup_files.append(file_path)
-
     def zip_it(self):
         """pack it up into single zip file"""
         file_name = f"ta_backup-{self.timestamp}-{self.reason}.zip"
@@ -383,7 +372,6 @@ def backup_all_indexes(reason):
         all_results = backup_handler.get_all_documents(index_name)
         file_content = backup_handler.build_bulk(all_results)
         backup_handler.write_es_json(file_content, index_name)
-        backup_handler.write_ta_json(all_results, index_name)
 
     backup_handler.zip_it()
 
