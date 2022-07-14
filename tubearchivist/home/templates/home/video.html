@@ -79,8 +79,8 @@
     {% if video.description %}
         <div class="info-box-item description-box">
             <p>Description: <button onclick="textReveal()" id="text-reveal-button">Show</button></p>
-            <div id="text-reveal" class="description-text">
-                {{ video.description|linebreaks }}
+            <div id="text-reveal" class="description-text" onload="textRevealButtonVisibilityUpdate()">
+                {{ video.description|linebreaksbr|urlizetrunc:50 }}
             </div>
         </div>
     {% endif %}

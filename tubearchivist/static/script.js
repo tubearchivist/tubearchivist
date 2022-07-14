@@ -967,6 +967,7 @@ function createPlaylist(playlist, viewStyle) {
 
 
 // generic
+
 function sendPost(payload) {
     var http = new XMLHttpRequest();
     http.open("POST", "/process/", true);
@@ -991,16 +992,35 @@ function getCookie(c_name) {
 
 
 // animations
+
 function textReveal() {
     var textBox = document.getElementById('text-reveal');
     var button = document.getElementById('text-reveal-button');
-    var textBoxHeight = textBox.style.height;
-    if (textBoxHeight === 'unset') {
-        textBox.style.height = '0px';
-        button.innerText = 'Show';
+    var textBoxLineClamp = textBox.style["-webkit-line-clamp"];
+    if (textBoxLineClamp === 'none') {
+        textBox.style["-webkit-line-clamp"] = '4';
+        button.innerText = 'Show more';
     } else {
-        textBox.style.height = 'unset';
-        button.innerText = 'Hide';
+        textBox.style["-webkit-line-clamp"] = 'none';
+        button.innerText = 'Show less';
+    }
+}
+
+// hide "show more" button if all text is already visible
+function textRevealButtonVisibilityUpdate() {
+    var element = document.getElementById('text-reveal');
+
+    var textBoxLineClamp = element.style["-webkit-line-clamp"];
+    if (textBoxLineClamp === 'none')
+        return; // text box is in revealed state
+
+    if (element.offsetHeight < element.scrollHeight
+        || element.offsetWidth < element.scrollWidth) {
+        // the element has an overflow, show read more button
+        element.style.display = "block";
+    } else {
+        // the element doesn't have overflow
+        element.style.display = "none";
     }
 }
 

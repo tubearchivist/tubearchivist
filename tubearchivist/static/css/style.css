@@ -365,8 +365,10 @@ button:hover {
 }
 
 #text-reveal {
-    height: 0px;
     overflow: hidden;
+    display: -webkit-inline-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
 }
 
 
