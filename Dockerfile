@@ -54,12 +54,11 @@ RUN if [ "$INSTALL_DEBUG" ] ; then \
     ; fi
 
 # make folders
-RUN mkdir /cache
-RUN mkdir /youtube
-RUN mkdir /app
+RUN mkdir /cache /youtube /app
 
 # copy config files
 COPY docker_assets/nginx.conf /etc/nginx/sites-available/default
+RUN sed -i 's/^user www\-data\;$/user root\;/' /etc/nginx/nginx.conf
 
 # copy application into container
 COPY ./tubearchivist /app
