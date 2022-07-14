@@ -30,7 +30,7 @@ SECRET_KEY = PW_HASH.hexdigest()
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(environ.get("DJANGO_DEBUG"))
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [i.strip() for i in environ.get("TA_HOST").split()]
 
 
 # Application definition
