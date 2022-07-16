@@ -266,7 +266,7 @@ class ManualImport:
         if ext == ".mp4":
             new_file = video_file + ext
             dest_path = os.path.join(self.CACHE_DIR, "download", new_file)
-            shutil.move(video_path, dest_path)
+            shutil.move(video_path, dest_path, copy_function=shutil.copy)
         else:
             print(f"processing with ffmpeg: {video_file}")
             new_file = video_file + ".mp4"

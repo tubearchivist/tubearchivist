@@ -304,6 +304,6 @@ class ChannelUrlFixer:
         new_file_path = os.path.join(
             cache_dir, "download", self.youtube_id + ".mp4"
         )
-        shutil.move(video_path_is, new_file_path)
+        shutil.move(video_path_is, new_file_path, copy_function=shutil.copy)
         VideoDownloader().move_to_archive(self.video.json_data)
         self.video.update_media_url()
