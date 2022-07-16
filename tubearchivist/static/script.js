@@ -967,6 +967,7 @@ function createPlaylist(playlist, viewStyle) {
 
 
 // generic
+
 function sendPost(payload) {
     var http = new XMLHttpRequest();
     http.open("POST", "/process/", true);
@@ -991,18 +992,56 @@ function getCookie(c_name) {
 
 
 // animations
+
 function textReveal() {
-    var textBox = document.getElementById('text-reveal');
-    var button = document.getElementById('text-reveal-button');
+    var textBox = document.getElementById("text-reveal");
+    var button = document.getElementById("text-reveal-button");
     var textBoxHeight = textBox.style.height;
-    if (textBoxHeight === 'unset') {
-        textBox.style.height = '0px';
-        button.innerText = 'Show';
+    if (textBoxHeight === "unset") {
+        textBox.style.height = "0px";
+        button.innerText = "Show";
     } else {
-        textBox.style.height = 'unset';
-        button.innerText = 'Hide';
+        textBox.style.height = "unset";
+        button.innerText = "Hide";
     }
 }
+
+function textExpand() {
+    var textBox = document.getElementById("text-expand");
+    var button = document.getElementById("text-expand-button");
+    var textBoxLineClamp = textBox.style["-webkit-line-clamp"];
+    if (textBoxLineClamp === "none") {
+        textBox.style["-webkit-line-clamp"] = "4";
+        button.innerText = "Show more";
+    } else {
+        textBox.style["-webkit-line-clamp"] = "none";
+        button.innerText = "Show less";
+    }
+}
+
+// hide "show more" button if all text is already visible
+function textExpandButtonVisibilityUpdate() {
+    var textBox = document.getElementById("text-expand");
+    var button = document.getElementById("text-expand-button");
+    if (!textBox || !button)
+        return;
+
+    var textBoxLineClamp = textBox.style["-webkit-line-clamp"];
+    if (textBoxLineClamp === "none")
+        return; // text box is in revealed state
+
+    if (textBox.offsetHeight < textBox.scrollHeight
+        || textBox.offsetWidth < textBox.scrollWidth) {
+        // the element has an overflow, show read more button
+        button.style.display = "inline-block";
+    } else {
+        // the element doesn't have overflow
+        button.style.display = "none";
+    }
+}
+
+document.addEventListener("readystatechange", textExpandButtonVisibilityUpdate);
+window.addEventListener("resize", textExpandButtonVisibilityUpdate);
 
 function showForm() {
     var formElement = document.getElementById('hidden-form');

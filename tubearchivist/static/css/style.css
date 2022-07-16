@@ -365,8 +365,15 @@ button:hover {
 }
 
 #text-reveal {
-    height: 0px;
+    height: 0;
     overflow: hidden;
+}
+
+#text-expand {
+    overflow: hidden;
+    display: -webkit-inline-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
 }
 
 
@@ -591,6 +598,8 @@ button:hover {
 
 .description-box {
     margin-top: 1rem;
+    padding: 15px;
+    background-color: var(--highlight-bg);
 }
 
 .info-box-3 {
