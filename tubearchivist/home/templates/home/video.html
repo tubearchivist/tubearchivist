@@ -77,11 +77,11 @@
         </div>
     </div>
     {% if video.description %}
-        <div class="info-box-item description-box">
-            <p>Description: <button onclick="textExpand()" id="text-expand-button">Show more</button></p>
+        <div class="description-box">
             <p id="text-expand" class="description-text">
                 {{ video.description|linebreaksbr|urlizetrunc:50 }}
             </p>
+            <button onclick="textExpand()" id="text-expand-button">Show more</button>
         </div>
     {% endif %}
     {% if playlist_nav %}

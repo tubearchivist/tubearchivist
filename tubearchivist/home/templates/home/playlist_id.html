@@ -56,11 +56,11 @@
         </div>
     </div>
     {% if playlist_info.playlist_description %}
-        <div class="info-box-item description-box">
-            <p>Description: <button onclick="textExpand()" id="text-expand-button">Show more</button></p>
+        <div class="description-box">
             <p id="text-expand" class="description-text">
                 {{ playlist_info.playlist_description|linebreaksbr|urlizetrunc:50 }}
             </p>
+            <button onclick="textExpand()" id="text-expand-button">Show more</button>
         </div>
     {% endif %}
 </div>

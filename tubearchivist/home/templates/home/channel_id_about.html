@@ -53,12 +53,10 @@
     </div>
     {% if channel_info.channel_description %}
         <div class="description-box">
-            <h2>Description</h2>
-        </div>
-        <div class="info-box-item description-box">
-            <div class="description-text">
-                {{ channel_info.channel_description|linebreaks }}
-            </div>
+            <p id="text-expand" class="description-text">
+                {{ channel_info.channel_description|linebreaksbr|urlizetrunc:50 }}
+            </p>
+            <button onclick="textExpand()" id="text-expand-button">Show more</button>
         </div>
     {% endif %}
     <div class="description-box">
