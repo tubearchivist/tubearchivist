@@ -37,6 +37,9 @@ class ChannelScraper:
         """main method to return channel dict"""
         self.get_soup()
         self._extract_yt_json()
+        if self._is_deactivated():
+            return False
+
         self._parse_channel_main()
         self._parse_channel_meta()
         return self.json_data
@@ -67,6 +70,16 @@ class ChannelScraper:
         script_content = script_content.split("var ytInitialData = ")[1]
         json_raw = script_content.rstrip(";</script>")
         self.yt_json = json.loads(json_raw)
+
+    def _is_deactivated(self):
+        """check if channel is deactivated"""
+        alert_text = "This channel does not exist."
+        alerts = self.yt_json.get("alerts")
+        if alerts and alert_text in str(alerts):
+            print(f"{self.channel_id}: {alert_text}")
+            return True
+
+        return False
 
     def _parse_channel_main(self):
         """extract maintab values from scraped channel json data"""

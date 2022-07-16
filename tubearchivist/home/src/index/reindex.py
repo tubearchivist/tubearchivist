@@ -195,6 +195,10 @@ class Reindex:
         subscribed = channel.json_data["channel_subscribed"]
         overwrites = channel.json_data.get("channel_overwrites", False)
         channel.get_from_youtube()
+        if not channel.json_data:
+            channel.deactivate()
+            return
+
         channel.json_data["channel_subscribed"] = subscribed
         if overwrites:
             channel.json_data["channel_overwrites"] = overwrites

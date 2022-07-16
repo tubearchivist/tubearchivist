@@ -13,6 +13,7 @@ required="Missing required environment variable"
 [[ -f $lockfile ]] || : "${TA_USERNAME:?$required}"
 : "${TA_PASSWORD:?$required}"
 : "${ELASTIC_PASSWORD:?$required}"
+: "${TA_HOST:?$required}"
 
 # ugly nginx and uwsgi port overwrite with env vars
 if [[ -n "$TA_PORT" ]]; then
