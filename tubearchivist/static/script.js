@@ -997,12 +997,12 @@ function textReveal() {
     var textBox = document.getElementById("text-reveal");
     var button = document.getElementById("text-reveal-button");
     var textBoxHeight = textBox.style.height;
-    if (textBoxHeight === 'unset') {
-        textBox.style.height = '0px';
-        button.innerText = 'Show';
+    if (textBoxHeight === "unset") {
+        textBox.style.height = "0px";
+        button.innerText = "Show";
     } else {
-        textBox.style.height = 'unset';
-        button.innerText = 'Hide';
+        textBox.style.height = "unset";
+        button.innerText = "Hide";
     }
 }
 
@@ -1040,7 +1040,7 @@ function textExpandButtonVisibilityUpdate() {
     }
 }
 
-window.addEventListener("load", textExpandButtonVisibilityUpdate);
+document.addEventListener("readystatechange", textExpandButtonVisibilityUpdate);
 window.addEventListener("resize", textExpandButtonVisibilityUpdate);
 
 function showForm() {
