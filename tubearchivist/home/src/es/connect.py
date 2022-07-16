@@ -91,16 +91,22 @@ class ElasticWrap:
 
 
 class IndexPaginate:
-    """use search_after to go through whole index"""
+    """use search_after to go through whole index
+    kwargs:
+    - size: int, overwrite DEFAULT_SIZE
+    - keep_source: bool, keep _source key from es resutls
+    - callback: obj, Class with run method collback for every loop
+    """
 
     DEFAULT_SIZE = 500
 
-    def __init__(self, index_name, data, size=False, keep_source=False):
+    def __init__(self, index_name, data, **kwargs):
         self.index_name = index_name
         self.data = data
         self.pit_id = False
-        self.size = size
-        self.keep_source = keep_source
+        self.size = kwargs.get("size")
+        self.keep_source = kwargs.get("keep_source")
+        self.callback = kwargs.get("callback")
 
     def get_results(self):
         """get all results"""
@@ -122,14 +128,13 @@ class IndexPaginate:
             print(self.data)
             raise ValueError("missing sort key in data")
 
-        size = self.size or self.DEFAULT_SIZE
-
-        self.data["size"] = size
+        self.data["size"] = self.size or self.DEFAULT_SIZE
         self.data["pit"] = {"id": self.pit_id, "keep_alive": "10m"}
 
     def run_loop(self):
         """loop through results until last hit"""
         all_results = []
+        counter = 0
         while True:
             response, _ = ElasticWrap("_search").get(data=self.data)
             all_hits = response["hits"]["hits"]
@@ -139,10 +144,18 @@ class IndexPaginate:
                         source = hit
                     else:
                         source = hit["_source"]
-                    search_after = hit["sort"]
-                    all_results.append(source)
+
+                    if not self.callback:
+                        all_results.append(source)
+
+                if self.callback:
+                    self.callback(all_hits, self.index_name).run()
+                    if counter % 10 == 0:
+                        print(f"{self.index_name}: processing page {counter}")
+                    counter = counter + 1
+
                 # update search_after with last hit data
-                self.data["search_after"] = search_after
+                self.data["search_after"] = all_hits[-1]["sort"]
             else:
                 break
 
