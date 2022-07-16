@@ -78,10 +78,10 @@
     </div>
     {% if video.description %}
         <div class="info-box-item description-box">
-            <p>Description: <button onclick="textReveal()" id="text-reveal-button">Show</button></p>
-            <div id="text-reveal" class="description-text" onload="textRevealButtonVisibilityUpdate()">
+            <p>Description: <button onclick="textExpand()" id="text-expand-button">Show more</button></p>
+            <p id="text-expand" class="description-text">
                 {{ video.description|linebreaksbr|urlizetrunc:50 }}
-            </div>
+            </p>
         </div>
     {% endif %}
     {% if playlist_nav %}
