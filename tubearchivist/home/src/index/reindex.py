@@ -305,9 +305,9 @@ class ChannelUrlFixer:
         """fix filepath"""
         print(f"{self.youtube_id}: fixing channel rename.")
         cache_dir = self.config["application"]["cache_dir"]
-        new_file_path = os.path.join(
+        new_path = os.path.join(
             cache_dir, "download", self.youtube_id + ".mp4"
         )
-        shutil.move(video_path_is, new_file_path, copy_function=shutil.copy)
+        shutil.move(video_path_is, new_path, copy_function=shutil.copyfile)
         VideoDownloader().move_to_archive(self.video.json_data)
         self.video.update_media_url()

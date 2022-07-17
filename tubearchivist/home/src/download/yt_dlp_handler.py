@@ -395,12 +395,12 @@ class VideoDownloader:
         for file_str in all_cached:
             if vid_dict["youtube_id"] in file_str:
                 old_file = file_str
-        old_file_path = os.path.join(cache_dir, "download", old_file)
-        new_file_path = os.path.join(videos, vid_dict["media_url"])
+        old_path = os.path.join(cache_dir, "download", old_file)
+        new_path = os.path.join(videos, vid_dict["media_url"])
         # move media file and fix permission
-        shutil.move(old_file_path, new_file_path, copy_function=shutil.copy)
+        shutil.move(old_path, new_path, copy_function=shutil.copyfile)
         if host_uid and host_gid:
-            os.chown(new_file_path, host_uid, host_gid)
+            os.chown(new_path, host_uid, host_gid)
 
     @staticmethod
     def _delete_from_pending(youtube_id):
