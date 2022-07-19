@@ -146,34 +146,8 @@ class SearchForm:
 
     def multi_search(self, search_query):
         """searching through index"""
-        path = "ta_video,ta_channel,ta_playlist/_search"
-        data = {
-            "size": 30,
-            "query": {
-                "multi_match": {
-                    "query": search_query,
-                    "type": "bool_prefix",
-                    "operator": "and",
-                    "fuzziness": "auto",
-                    "fields": [
-                        "category",
-                        "channel_description",
-                        "channel_name._2gram",
-                        "channel_name._3gram",
-                        "channel_name.search_as_you_type",
-                        "playlist_description",
-                        "playlist_name._2gram",
-                        "playlist_name._3gram",
-                        "playlist_name.search_as_you_type",
-                        "tags",
-                        "title._2gram",
-                        "title._3gram",
-                        "title.search_as_you_type",
-                    ],
-                }
-            },
-        }
-        look_up = SearchHandler(path, config=self.CONFIG, data=data)
+        path, query = SearchParser(search_query).run()
+        look_up = SearchHandler(path, config=self.CONFIG, data=query)
         search_results = look_up.get_data()
         all_results = self.build_results(search_results)
 
@@ -201,3 +175,178 @@ class SearchForm:
         }
 
         return all_results
+
+
+class SearchParser:
+    """handle structured searches"""
+
+    def __init__(self, search_query):
+        self.query_words = search_query.lower().split()
+        self.query_map = False
+        self.append_to = "term"
+
+    def run(self):
+        """collection, return path and query dict for es"""
+        print(f"query words: {self.query_words}")
+        query_type = self._find_map()
+        self._run_words()
+        self._delete_unset()
+        self._match_data_types()
+
+        path, query = QueryBuilder(self.query_map, query_type).run()
+
+        return path, query
+
+    def _find_map(self):
+        """find query in keyword map"""
+        first_word = self.query_words[0]
+        key_word_map = self._get_map()
+
+        if ":" in first_word:
+            index_match, query_string = first_word.split(":")
+            if index_match in key_word_map:
+                self.query_map = key_word_map.get(index_match)
+                self.query_words[0] = query_string
+                return index_match
+
+        self.query_map = key_word_map.get("simple")
+        print(f"query_map: {self.query_map}")
+
+        return "simple"
+
+    @staticmethod
+    def _get_map():
+        """return map to build on"""
+        return {
+            "simple": {
+                "index": "ta_video,ta_channel,ta_playlist",
+                "term": [],
+            },
+            "video": {
+                "index": "ta_video",
+                "term": [],
+                "channel": [],
+                "active": [],
+            },
+            "channel": {
+                "index": "ta_channel",
+                "term": [],
+                "active": [],
+                "subscribed": [],
+            },
+            "playlist": {
+                "index": "ta_playlist",
+                "term": [],
+                "active": [],
+                "subscribed": [],
+            },
+            "all": {
+                "index": "ta_subtitle",
+                "term": [],
+            },
+        }
+
+    def _run_words(self):
+        """append word by word"""
+        for word in self.query_words:
+            if ":" in word:
+                keyword, search_string = word.split(":")
+                if keyword in self.query_map:
+                    self.append_to = keyword
+                    word = search_string
+
+            if word:
+                self.query_map[self.append_to].append(word)
+
+    def _delete_unset(self):
+        """delete unset keys"""
+        new_query_map = {}
+        for key, value in self.query_map.items():
+            if value:
+                new_query_map.update({key: value})
+        self.query_map = new_query_map
+
+    def _match_data_types(self):
+        """match values with data types"""
+        for key, value in self.query_map.items():
+            if key in ["term", "channel"]:
+                self.query_map[key] = " ".join(self.query_map[key])
+            if key in ["active", "subscribed"]:
+                self.query_map[key] = "yes" in value
+
+
+class QueryBuilder:
+    """build query for ES from form data"""
+
+    def __init__(self, query_map, query_type):
+        self.query_map = query_map
+        self.query_type = query_type
+
+    def run(self):
+        """build query"""
+        path = self._build_path()
+        query = self.build_query()
+        print(f"es path: {path}")
+        print(f"query: {query}")
+
+        return path, query
+
+    def _build_path(self):
+        """build es index search path"""
+        return f"{self.query_map.get('index')}/_search"
+
+    def build_query(self):
+        """build query based on query_type"""
+
+        exec_map = {
+            "video": self._build_video,
+        }
+
+        build_must_list = exec_map[self.query_type]
+
+        query = {"query": {"bool": {"must": build_must_list()}}}
+
+        return query
+
+    def _build_video(self):
+        """build video query"""
+        must_list = []
+
+        if (term := self.query_map.get("term")) is not None:
+            must_list.append(
+                {
+                    "multi_match": {
+                        "query": term,
+                        "type": "bool_prefix",
+                        "fuzziness": "auto",
+                        "fields": [
+                            "title._2gram",
+                            "title._3gram",
+                            "title.search_as_you_type",
+                            "tags",
+                            "category",
+                        ],
+                    }
+                }
+            )
+
+        if (active := self.query_map.get("active")) is not None:
+            must_list.append({"term": {"active": {"value": active}}})
+
+        if (channel := self.query_map.get("channel")) is not None:
+            must_list.append(
+                {
+                    "multi_match": {
+                        "query": channel,
+                        "type": "bool_prefix",
+                        "fuzziness": "auto",
+                        "fields": [
+                            "channel.channel_name._2gram",
+                            "channel.channel_name._3gram",
+                            "channel.channel_name.search_as_you_type",
+                        ],
+                    }
+                }
+            )
+
+        return must_list
