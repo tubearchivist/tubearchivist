@@ -301,6 +301,7 @@ class QueryBuilder:
         exec_map = {
             "video": self._build_video,
             "channel": self._build_channel,
+            "playlist": self._build_playlist,
         }
 
         build_must_list = exec_map[self.query_type]
@@ -376,9 +377,40 @@ class QueryBuilder:
         if (active := self.query_map.get("active")) is not None:
             must_list.append({"term": {"channel_active": {"value": active}}})
 
-        if (active := self.query_map.get("subscribed")) is not None:
+        if (subscribed := self.query_map.get("subscribed")) is not None:
             must_list.append(
-                {"term": {"channel_subscribed": {"value": active}}}
+                {"term": {"channel_subscribed": {"value": subscribed}}}
+            )
+
+        return must_list
+
+    def _build_playlist(self):
+        """build query for playlist"""
+        must_list = []
+
+        if (term := self.query_map.get("term")) is not None:
+            must_list.append(
+                {
+                    "multi_match": {
+                        "query": term,
+                        "type": "bool_prefix",
+                        "fuzziness": "auto",
+                        "fields": [
+                            "playlist_description",
+                            "playlist_name._2gram",
+                            "playlist_name._3gram",
+                            "playlist_name.search_as_you_type",
+                        ],
+                    }
+                }
+            )
+
+        if (active := self.query_map.get("active")) is not None:
+            must_list.append({"term": {"playlist_active": {"value": active}}})
+
+        if (subscribed := self.query_map.get("subscribed")) is not None:
+            must_list.append(
+                {"term": {"playlist_subscribed": {"value": subscribed}}}
             )
 
         return must_list
