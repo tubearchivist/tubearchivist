@@ -794,8 +794,8 @@ function searchMulti(query) {
             var http = new XMLHttpRequest();
             http.onreadystatechange = function() {
                 if (http.readyState === 4) {
-                    allResults = JSON.parse(http.response).results;
-                    populateMultiSearchResults(allResults);
+                    response = JSON.parse(http.response);
+                    populateMultiSearchResults(response.results, response.queryType);
                 }
             };
             http.open("POST", "/process/", true);
@@ -811,36 +811,63 @@ function getViewDefaults(view) {
     return defaultView;
 }
 
-function populateMultiSearchResults(allResults) {
+function populateMultiSearchResults(allResults, queryType) {
     // videos
     var defaultVideo = getViewDefaults("home");
     var allVideos = allResults.video_results;
     var videoBox = document.getElementById("video-results");
     videoBox.innerHTML = "";
-    for (let index = 0; index < allVideos.length; index++) {
-        const video = allVideos[index].source;
-        const videoDiv = createVideo(video, defaultVideo);
-        videoBox.appendChild(videoDiv);
+    videoBox.parentElement.style.display = "block";
+    if (allVideos.length > 0) {
+        for (let index = 0; index < allVideos.length; index++) {
+            const video = allVideos[index].source;
+            const videoDiv = createVideo(video, defaultVideo);
+            videoBox.appendChild(videoDiv);
+        }
+    } else {
+        if (queryType === "simple" || queryType == "video") {
+            videoBox.innerHTML = "<p>No videos found.</p>";
+        } else {
+            videoBox.parentElement.style.display = "none";
+        }
     }
     // channels
     var defaultChannel = getViewDefaults("channel");
     var allChannels = allResults.channel_results;
     var channelBox = document.getElementById("channel-results");
     channelBox.innerHTML = "";
-    for (let index = 0; index < allChannels.length; index++) {
-        const channel = allChannels[index].source;
-        const channelDiv = createChannel(channel, defaultChannel);
-        channelBox.appendChild(channelDiv);
+    channelBox.parentElement.style.display = "block";
+    if (allChannels.length > 0) {
+        for (let index = 0; index < allChannels.length; index++) {
+            const channel = allChannels[index].source;
+            const channelDiv = createChannel(channel, defaultChannel);
+            channelBox.appendChild(channelDiv);
+        }
+    } else {
+        if (queryType === "simple" || queryType == "channel") {
+            channelBox.innerHTML = "<p>No channels found.</p>";
+        } else {
+            channelBox.parentElement.style.display = "none";
+        }
     }
     // playlists
     var defaultPlaylist = getViewDefaults("playlist");
     var allPlaylists = allResults.playlist_results;
     var playlistBox = document.getElementById("playlist-results");
     playlistBox.innerHTML = "";
-    for (let index = 0; index < allPlaylists.length; index++) {
-        const playlist = allPlaylists[index].source;
-        const playlistDiv = createPlaylist(playlist, defaultPlaylist);
-        playlistBox.appendChild(playlistDiv);
+    playlistBox.parentElement.style.display = "block";
+    if (allPlaylists.length > 0) {
+        for (let index = 0; index < allPlaylists.length; index++) {
+            const playlist = allPlaylists[index].source;
+            const playlistDiv = createPlaylist(playlist, defaultPlaylist);
+            playlistBox.appendChild(playlistDiv);
+        }
+    } else {
+        if (queryType === "simple" || queryType == "playlist") {
+            playlistBox.innerHTML = "<p>No playlists found.</p>";
+        } else {
+            playlistBox.parentElement.style.display = "none";
+        }
     }
 }
 
