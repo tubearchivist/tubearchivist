@@ -299,6 +299,7 @@ class QueryBuilder:
         """build query based on query_type"""
 
         exec_map = {
+            "simple": self._build_simple,
             "video": self._build_video,
             "channel": self._build_channel,
             "playlist": self._build_playlist,
@@ -309,6 +310,34 @@ class QueryBuilder:
         query = {"query": {"bool": {"must": build_must_list()}}}
 
         return query
+
+    def _build_simple(self):
+        """build simple cross index query"""
+        must_list = []
+
+        if (term := self.query_map.get("term")) is not None:
+            must_list.append(
+                {
+                    "multi_match": {
+                        "query": term,
+                        "type": "bool_prefix",
+                        "fuzziness": "auto",
+                        "fields": [
+                            "channel_name._2gram",
+                            "channel_name._3gram",
+                            "channel_name.search_as_you_type",
+                            "playlist_name._2gram",
+                            "playlist_name._3gram",
+                            "playlist_name.search_as_you_type",
+                            "title._2gram",
+                            "title._3gram",
+                            "title.search_as_you_type",
+                        ],
+                    }
+                }
+            )
+
+        return must_list
 
     def _build_video(self):
         """build video query"""
