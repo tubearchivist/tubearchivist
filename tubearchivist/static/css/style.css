@@ -781,6 +781,10 @@ button:hover {
 }
 
 /* multi search page */
+.multi-search-box {
+    padding-right: 20px;
+}
+
 .multi-search-box input {
     width: 100%;
 }

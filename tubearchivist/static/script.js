@@ -869,6 +869,24 @@ function populateMultiSearchResults(allResults, queryType) {
             playlistBox.parentElement.style.display = "none";
         }
     }
+    // fulltext
+    var allFullText = allResults.fulltext_results;
+    var fullTextBox = document.getElementById("fulltext-results");
+    fullTextBox.innerHTML = "";
+    fullTextBox.parentElement.style.display = "block";
+    if (allFullText.length > 0) {
+        for (let i = 0; i < allFullText.length; i++) {
+            const fullText = allFullText[i];
+            const fullTextDiv = createFulltext(fullText);
+            fullTextBox.appendChild(fullTextDiv);
+        }
+    } else {
+        if (queryType === "simple" || queryType == "full") {
+            fullTextBox.innerHTML = "<p>No fulltext items found.</p>";
+        } else {
+            fullTextBox.parentElement.style.display = "none";
+        }
+    }
 }
 
 
@@ -992,6 +1010,40 @@ function createPlaylist(playlist, viewStyle) {
     return playlistDiv;
 }
 
+function createFulltext(fullText) {
+    const videoId = fullText.source.youtube_id;
+    const videoTitle = fullText.source.title;
+    const thumbUrl = fullText.source.vid_thumb_url;
+    const channelId = fullText.source.subtitle_channel_id;
+    const channelName = fullText.source.subtitle_channel;
+    const subtitleLine = fullText.highlight.subtitle_line[0];
+    const subtitle_start = fullText.source.subtitle_start.split(".")[0];
+    const subtitle_end = fullText.source.subtitle_end.split(".")[0];
+    const markup = `
+    <a href="#player" data-id="${videoId}" onclick="createPlayer(this)">
+        <div class="video-thumb-wrap list">
+            <div class="video-thumb">
+                <img src="${thumbUrl}" alt="video-thumb">
+            </div>
+            <div class="video-play">
+                <img src="/static/img/icon-play.svg" alt="play-icon">
+            </div>
+        </div>
+    </a>
+    <div class="video-desc list">
+        <p>${subtitle_start} - ${subtitle_end}</p>
+        <p>${subtitleLine}</p>    
+        <div>
+            <a href="/channel/${channelId}/"><h3>${channelName}</h3></a>
+            <a class="video-more" href="/video/${videoId}/"><h2>${videoTitle}</h2></a>
+        </div>
+    </div>
+    `
+    const fullTextDiv = document.createElement("div");
+    fullTextDiv.setAttribute("class", "video-item list");
+    fullTextDiv.innerHTML = markup;
+    return fullTextDiv
+}
 
 // generic
 

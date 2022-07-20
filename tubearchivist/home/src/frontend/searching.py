@@ -136,6 +136,11 @@ class SearchHandler:
                 date_str = datetime.strftime(date_refresh, "%d %b, %Y")
                 hit["source"]["channel"]["channel_last_refresh"] = date_str
 
+        if "subtitle_fragment_id" in hit_keys:
+            youtube_id = hit["source"]["youtube_id"]
+            thumb_path = ThumbManager().vid_thumb_path(youtube_id)
+            hit["source"]["vid_thumb_url"] = f"/cache/{thumb_path}"
+
         return hit
 
 
@@ -159,6 +164,7 @@ class SearchForm:
         video_results = []
         channel_results = []
         playlist_results = []
+        fulltext_results = []
         if search_results:
             for result in search_results:
                 if result["_index"] == "ta_video":
@@ -167,11 +173,14 @@ class SearchForm:
                     channel_results.append(result)
                 elif result["_index"] == "ta_playlist":
                     playlist_results.append(result)
+                elif result["_index"] == "ta_subtitle":
+                    fulltext_results.append(result)
 
         all_results = {
             "video_results": video_results,
             "channel_results": channel_results,
             "playlist_results": playlist_results,
+            "fulltext_results": fulltext_results,
         }
 
         return all_results
@@ -240,7 +249,7 @@ class SearchParser:
                 "active": [],
                 "subscribed": [],
             },
-            "all": {
+            "full": {
                 "index": "ta_subtitle",
                 "term": [],
             },
@@ -303,11 +312,18 @@ class QueryBuilder:
             "video": self._build_video,
             "channel": self._build_channel,
             "playlist": self._build_playlist,
+            "full": self._build_fulltext,
         }
 
         build_must_list = exec_map[self.query_type]
 
-        query = {"size": 30, "query": {"bool": {"must": build_must_list()}}}
+        if self.query_type == "full":
+            query = build_must_list()
+        else:
+            query = {
+                "size": 30,
+                "query": {"bool": {"must": build_must_list()}},
+            }
 
         return query
 
@@ -448,3 +464,36 @@ class QueryBuilder:
             )
 
         return must_list
+
+    def _build_fulltext(self):
+        """build query for fulltext search"""
+        must_list = []
+
+        if (term := self.query_map.get("term")) is not None:
+            must_list.append(
+                {
+                    "match": {
+                        "subtitle_line": {
+                            "query": term,
+                            "fuzziness": "auto",
+                        }
+                    }
+                }
+            )
+
+        query = {
+            "size": 30,
+            "_source": {"excludes": "subtitle_line"},
+            "query": {"bool": {"must": must_list}},
+            "highlight": {
+                "fields": {
+                    "subtitle_line": {
+                        "number_of_fragments": 0,
+                        "pre_tags": ['<span class="settings-current">'],
+                        "post_tags": ["</span>"],
+                    }
+                }
+            },
+        }
+
+        return query
