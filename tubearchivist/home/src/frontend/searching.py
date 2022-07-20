@@ -146,12 +146,12 @@ class SearchForm:
 
     def multi_search(self, search_query):
         """searching through index"""
-        path, query = SearchParser(search_query).run()
+        path, query, query_type = SearchParser(search_query).run()
         look_up = SearchHandler(path, config=self.CONFIG, data=query)
         search_results = look_up.get_data()
         all_results = self.build_results(search_results)
 
-        return {"results": all_results}
+        return {"results": all_results, "queryType": query_type}
 
     @staticmethod
     def build_results(search_results):
@@ -195,7 +195,7 @@ class SearchParser:
 
         path, query = QueryBuilder(self.query_map, query_type).run()
 
-        return path, query
+        return path, query, query_type
 
     def _find_map(self):
         """find query in keyword map"""
