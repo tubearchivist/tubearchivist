@@ -351,9 +351,9 @@ class QueryBuilder:
                         "type": "bool_prefix",
                         "fuzziness": "auto",
                         "fields": [
-                            "title._2gram",
-                            "title._3gram",
-                            "title.search_as_you_type",
+                            "title._2gram^2",
+                            "title._3gram^2",
+                            "title.search_as_you_type^2",
                             "tags",
                             "category",
                         ],
@@ -395,9 +395,9 @@ class QueryBuilder:
                         "fuzziness": "auto",
                         "fields": [
                             "channel_description",
-                            "channel_name._2gram",
-                            "channel_name._3gram",
-                            "channel_name.search_as_you_type",
+                            "channel_name._2gram^2",
+                            "channel_name._3gram^2",
+                            "channel_name.search_as_you_type^2",
                         ],
                     }
                 }
@@ -426,9 +426,9 @@ class QueryBuilder:
                         "fuzziness": "auto",
                         "fields": [
                             "playlist_description",
-                            "playlist_name._2gram",
-                            "playlist_name._3gram",
-                            "playlist_name.search_as_you_type",
+                            "playlist_name._2gram^2",
+                            "playlist_name._3gram^2",
+                            "playlist_name.search_as_you_type^2",
                         ],
                     }
                 }
