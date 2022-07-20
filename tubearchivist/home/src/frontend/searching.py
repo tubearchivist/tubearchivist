@@ -300,6 +300,7 @@ class QueryBuilder:
 
         exec_map = {
             "video": self._build_video,
+            "channel": self._build_channel,
         }
 
         build_must_list = exec_map[self.query_type]
@@ -347,6 +348,37 @@ class QueryBuilder:
                         ],
                     }
                 }
+            )
+
+        return must_list
+
+    def _build_channel(self):
+        """build query for channel"""
+        must_list = []
+
+        if (term := self.query_map.get("term")) is not None:
+            must_list.append(
+                {
+                    "multi_match": {
+                        "query": term,
+                        "type": "bool_prefix",
+                        "fuzziness": "auto",
+                        "fields": [
+                            "channel_description",
+                            "channel_name._2gram",
+                            "channel_name._3gram",
+                            "channel_name.search_as_you_type",
+                        ],
+                    }
+                }
+            )
+
+        if (active := self.query_map.get("active")) is not None:
+            must_list.append({"term": {"channel_active": {"value": active}}})
+
+        if (active := self.query_map.get("subscribed")) is not None:
+            must_list.append(
+                {"term": {"channel_subscribed": {"value": active}}}
             )
 
         return must_list
