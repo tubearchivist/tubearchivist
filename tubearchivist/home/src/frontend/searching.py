@@ -307,7 +307,7 @@ class QueryBuilder:
 
         build_must_list = exec_map[self.query_type]
 
-        query = {"query": {"bool": {"must": build_must_list()}}}
+        query = {"size": 30, "query": {"bool": {"must": build_must_list()}}}
 
         return query
 
@@ -322,6 +322,7 @@ class QueryBuilder:
                         "query": term,
                         "type": "bool_prefix",
                         "fuzziness": "auto",
+                        "operator": "and",
                         "fields": [
                             "channel_name._2gram",
                             "channel_name._3gram",
@@ -350,6 +351,7 @@ class QueryBuilder:
                         "query": term,
                         "type": "bool_prefix",
                         "fuzziness": "auto",
+                        "operator": "and",
                         "fields": [
                             "title._2gram^2",
                             "title._3gram^2",
@@ -371,6 +373,7 @@ class QueryBuilder:
                         "query": channel,
                         "type": "bool_prefix",
                         "fuzziness": "auto",
+                        "operator": "and",
                         "fields": [
                             "channel.channel_name._2gram",
                             "channel.channel_name._3gram",
@@ -393,6 +396,7 @@ class QueryBuilder:
                         "query": term,
                         "type": "bool_prefix",
                         "fuzziness": "auto",
+                        "operator": "and",
                         "fields": [
                             "channel_description",
                             "channel_name._2gram^2",
@@ -424,6 +428,7 @@ class QueryBuilder:
                         "query": term,
                         "type": "bool_prefix",
                         "fuzziness": "auto",
+                        "operator": "and",
                         "fields": [
                             "playlist_description",
                             "playlist_name._2gram^2",
