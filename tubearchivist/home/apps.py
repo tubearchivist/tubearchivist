@@ -12,8 +12,8 @@ from home.src.ta.ta_redis import RedisArchivist
 class StartupCheck:
     """checks to run at application startup"""
 
-    MIN_MAJOR, MAX_MAJOR = 7, 7
-    MIN_MINOR = 17
+    MIN_MAJOR, MAX_MAJOR = 8, 8
+    MIN_MINOR = 0
 
     def __init__(self):
         self.config_handler = ArchivistConfig()
