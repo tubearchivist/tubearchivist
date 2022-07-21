@@ -909,7 +909,7 @@ function createVideo(video, viewStyle) {
     const channelName = video.channel.channel_name;
     // build markup
     const markup = `
-    <a href="#player" data-src="/media/${mediaUrl}" data-thumb="${thumbUrl}" data-title="${videoTitle}" data-channel="${channelName}" data-channel-id="${channelId}" data-id="${videoId}" onclick="createPlayer(this)">
+    <a href="#player" data-id="${videoId}" onclick="createPlayer(this)">
         <div class="video-thumb-wrap ${viewStyle}">
             <div class="video-thumb">
                 <img src="${thumbUrl}" alt="video-thumb">
