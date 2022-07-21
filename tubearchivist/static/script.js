@@ -877,8 +877,10 @@ function populateMultiSearchResults(allResults, queryType) {
     if (allFullText.length > 0) {
         for (let i = 0; i < allFullText.length; i++) {
             const fullText = allFullText[i];
-            const fullTextDiv = createFulltext(fullText);
-            fullTextBox.appendChild(fullTextDiv);
+            if ("highlight" in fullText) {
+                const fullTextDiv = createFulltext(fullText);
+                fullTextBox.appendChild(fullTextDiv);
+            }
         }
     } else {
         if (queryType === "simple" || queryType == "full") {
