@@ -241,12 +241,8 @@ class VideoDownloader:
 
     def _progress_hook(self, response):
         """process the progress_hooks from yt_dlp"""
-        # title
-        path = os.path.split(response["filename"])[-1][12:]
-        filename = os.path.splitext(os.path.splitext(path)[0])[0]
-        filename_clean = filename.replace("_", " ")
-        title = "Downloading: " + filename_clean
-        # message
+        title = "Downloading: " + response["info_dict"]["title"]
+
         try:
             percent = response["_percent_str"]
             size = response["_total_bytes_str"]
@@ -255,6 +251,7 @@ class VideoDownloader:
             message = f"{percent} of {size} at {speed} - time left: {eta}"
         except KeyError:
             message = "processing"
+
         mess_dict = {
             "status": self.MSG,
             "level": "info",
@@ -274,11 +271,9 @@ class VideoDownloader:
         self.obs = {
             "default_search": "ytsearch",
             "merge_output_format": "mp4",
-            "restrictfilenames": True,
             "outtmpl": (
                 self.config["application"]["cache_dir"]
-                + "/download/"
-                + self.config["application"]["file_template"]
+                + "/download/%(id)s.mp4"
             ),
             "progress_hooks": [self._progress_hook],
             "noprogress": True,

@@ -125,7 +125,11 @@
 <script>
     var videoData = getVideoData('{{ video.youtube_id }}');
     sponsorBlock = videoData.data.sponsorblock;
-    var videoProgress = getVideoProgress('{{ video.youtube_id }}').position;
+    {% if position %}
+        var videoProgress = {{ position }}
+    {% else %}
+        var videoProgress = getVideoProgress('{{ video.youtube_id }}').position;
+    {% endif %}
     window.onload = insertVideoTag(videoData, videoProgress);
 </script>
 {% endblock content %}

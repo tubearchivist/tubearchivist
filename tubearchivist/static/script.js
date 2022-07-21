@@ -336,10 +336,18 @@ function cancelDelete() {
     document.getElementById("delete-item").style.display = 'block';
 }
 
+// get seconds from hh:mm:ss.ms timestamp
+function getSeconds(timestamp) {
+    var elements = timestamp.split(":", 3);
+    var secs = parseInt(elements[0]) * 60 * 60 + parseInt(elements[1]) * 60 + parseFloat(elements[2])
+    return secs
+}
+
 // player
 var sponsorBlock = [];
 function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
+    var videoPosition = button.getAttribute('data-position');
     var videoData = getVideoData(videoId);
 
     var sponsorBlockElements = '';
@@ -363,8 +371,11 @@ function createPlayer(button) {
     } else {
         sponsorBlock = null;
     }
-
-    var videoProgress = getVideoProgress(videoId).position;
+    if (videoPosition) {
+        var videoProgress = getSeconds(videoPosition)
+    } else {
+        var videoProgress = getVideoProgress(videoId).position;
+    }
     var videoName = videoData.data.title;
 
     var videoTag = createVideoTag(videoData, videoProgress);
@@ -761,7 +772,9 @@ function removePlayer() {
         playerElement.innerHTML = '';
         // append played status
         var videoInfo = document.getElementById('video-info-' + youtubeId);
-        videoInfo.insertBefore(playedStatus, videoInfo.firstChild);
+        if (videoInfo) {
+            videoInfo.insertBefore(playedStatus, videoInfo.firstChild);
+        }
     }
 }
 
@@ -794,8 +807,8 @@ function searchMulti(query) {
             var http = new XMLHttpRequest();
             http.onreadystatechange = function() {
                 if (http.readyState === 4) {
-                    allResults = JSON.parse(http.response).results;
-                    populateMultiSearchResults(allResults);
+                    response = JSON.parse(http.response);
+                    populateMultiSearchResults(response.results, response.queryType);
                 }
             };
             http.open("POST", "/process/", true);
@@ -811,36 +824,83 @@ function getViewDefaults(view) {
     return defaultView;
 }
 
-function populateMultiSearchResults(allResults) {
+function populateMultiSearchResults(allResults, queryType) {
     // videos
     var defaultVideo = getViewDefaults("home");
     var allVideos = allResults.video_results;
     var videoBox = document.getElementById("video-results");
     videoBox.innerHTML = "";
-    for (let index = 0; index < allVideos.length; index++) {
-        const video = allVideos[index].source;
-        const videoDiv = createVideo(video, defaultVideo);
-        videoBox.appendChild(videoDiv);
+    videoBox.parentElement.style.display = "block";
+    if (allVideos.length > 0) {
+        for (let index = 0; index < allVideos.length; index++) {
+            const video = allVideos[index].source;
+            const videoDiv = createVideo(video, defaultVideo);
+            videoBox.appendChild(videoDiv);
+        }
+    } else {
+        if (queryType === "simple" || queryType == "video") {
+            videoBox.innerHTML = "<p>No videos found.</p>";
+        } else {
+            videoBox.parentElement.style.display = "none";
+        }
     }
     // channels
     var defaultChannel = getViewDefaults("channel");
     var allChannels = allResults.channel_results;
     var channelBox = document.getElementById("channel-results");
     channelBox.innerHTML = "";
-    for (let index = 0; index < allChannels.length; index++) {
-        const channel = allChannels[index].source;
-        const channelDiv = createChannel(channel, defaultChannel);
-        channelBox.appendChild(channelDiv);
+    channelBox.parentElement.style.display = "block";
+    if (allChannels.length > 0) {
+        for (let index = 0; index < allChannels.length; index++) {
+            const channel = allChannels[index].source;
+            const channelDiv = createChannel(channel, defaultChannel);
+            channelBox.appendChild(channelDiv);
+        }
+    } else {
+        if (queryType === "simple" || queryType == "channel") {
+            channelBox.innerHTML = "<p>No channels found.</p>";
+        } else {
+            channelBox.parentElement.style.display = "none";
+        }
     }
     // playlists
     var defaultPlaylist = getViewDefaults("playlist");
     var allPlaylists = allResults.playlist_results;
     var playlistBox = document.getElementById("playlist-results");
     playlistBox.innerHTML = "";
-    for (let index = 0; index < allPlaylists.length; index++) {
-        const playlist = allPlaylists[index].source;
-        const playlistDiv = createPlaylist(playlist, defaultPlaylist);
-        playlistBox.appendChild(playlistDiv);
+    playlistBox.parentElement.style.display = "block";
+    if (allPlaylists.length > 0) {
+        for (let index = 0; index < allPlaylists.length; index++) {
+            const playlist = allPlaylists[index].source;
+            const playlistDiv = createPlaylist(playlist, defaultPlaylist);
+            playlistBox.appendChild(playlistDiv);
+        }
+    } else {
+        if (queryType === "simple" || queryType == "playlist") {
+            playlistBox.innerHTML = "<p>No playlists found.</p>";
+        } else {
+            playlistBox.parentElement.style.display = "none";
+        }
+    }
+    // fulltext
+    var allFullText = allResults.fulltext_results;
+    var fullTextBox = document.getElementById("fulltext-results");
+    fullTextBox.innerHTML = "";
+    fullTextBox.parentElement.style.display = "block";
+    if (allFullText.length > 0) {
+        for (let i = 0; i < allFullText.length; i++) {
+            const fullText = allFullText[i];
+            if ("highlight" in fullText) {
+                const fullTextDiv = createFulltext(fullText);
+                fullTextBox.appendChild(fullTextDiv);
+            }
+        }
+    } else {
+        if (queryType === "simple" || queryType == "full") {
+            fullTextBox.innerHTML = "<p>No fulltext items found.</p>";
+        } else {
+            fullTextBox.parentElement.style.display = "none";
+        }
     }
 }
 
@@ -862,7 +922,7 @@ function createVideo(video, viewStyle) {
     const channelName = video.channel.channel_name;
     // build markup
     const markup = `
-    <a href="#player" data-src="/media/${mediaUrl}" data-thumb="${thumbUrl}" data-title="${videoTitle}" data-channel="${channelName}" data-channel-id="${channelId}" data-id="${videoId}" onclick="createPlayer(this)">
+    <a href="#player" data-id="${videoId}" onclick="createPlayer(this)">
         <div class="video-thumb-wrap ${viewStyle}">
             <div class="video-thumb">
                 <img src="${thumbUrl}" alt="video-thumb">
@@ -965,6 +1025,40 @@ function createPlaylist(playlist, viewStyle) {
     return playlistDiv;
 }
 
+function createFulltext(fullText) {
+    const videoId = fullText.source.youtube_id;
+    const videoTitle = fullText.source.title;
+    const thumbUrl = fullText.source.vid_thumb_url;
+    const channelId = fullText.source.subtitle_channel_id;
+    const channelName = fullText.source.subtitle_channel;
+    const subtitleLine = fullText.highlight.subtitle_line[0];
+    const subtitle_start = fullText.source.subtitle_start.split(".")[0];
+    const subtitle_end = fullText.source.subtitle_end.split(".")[0];
+    const markup = `
+    <a href="#player" data-id="${videoId}" data-position="${subtitle_start}" onclick="createPlayer(this)">
+        <div class="video-thumb-wrap list">
+            <div class="video-thumb">
+                <img src="${thumbUrl}" alt="video-thumb">
+            </div>
+            <div class="video-play">
+                <img src="/static/img/icon-play.svg" alt="play-icon">
+            </div>
+        </div>
+    </a>
+    <div class="video-desc list">
+        <p>${subtitle_start} - ${subtitle_end}</p>
+        <p>${subtitleLine}</p>    
+        <div>
+            <a href="/channel/${channelId}/"><h3>${channelName}</h3></a>
+            <a class="video-more" href="/video/${videoId}/?t=${subtitle_start}"><h2>${videoTitle}</h2></a>
+        </div>
+    </div>
+    `
+    const fullTextDiv = document.createElement("div");
+    fullTextDiv.setAttribute("class", "video-item list");
+    fullTextDiv.innerHTML = markup;
+    return fullTextDiv
+}
 
 // generic
 

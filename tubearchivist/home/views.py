@@ -35,7 +35,7 @@ from home.src.index.channel import channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.config import AppConfig, ScheduleBuilder
-from home.src.ta.helper import UrlListParser
+from home.src.ta.helper import UrlListParser, time_parser
 from home.src.ta.ta_redis import RedisArchivist
 from home.tasks import extrac_dl, index_channel_playlists, subscribe_to
 from rest_framework.authtoken.models import Token
@@ -771,6 +771,7 @@ class VideoView(View):
     def get(self, request, video_id):
         """get single video"""
         config_handler = AppConfig(request.user.id)
+        position = time_parser(request.GET.get("t"))
         path = f"ta_video/_doc/{video_id}"
         look_up = SearchHandler(path, config=False)
         video_hit = look_up.get_data()
@@ -796,6 +797,7 @@ class VideoView(View):
             "cast": config_handler.config["application"]["enable_cast"],
             "version": settings.TA_VERSION,
             "config": config_handler.config,
+            "position": position,
         }
         return render(request, "home/video.html", context)
 

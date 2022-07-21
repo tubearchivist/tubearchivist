@@ -105,6 +105,18 @@ def date_praser(timestamp):
     return datetime.strftime(date_obj, "%d %b, %Y")
 
 
+def time_parser(timestamp):
+    """return seconds from timestamp, false on empty"""
+    if not timestamp:
+        return False
+
+    if timestamp.isnumeric():
+        return int(timestamp)
+
+    hours, minutes, seconds = timestamp.split(":", maxsplit=3)
+    return int(hours) * 60 * 60 + int(minutes) * 60 + float(seconds)
+
+
 class UrlListParser:
     """take a multi line string and detect valid youtube ids"""
 
