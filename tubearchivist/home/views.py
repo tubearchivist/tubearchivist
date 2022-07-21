@@ -929,25 +929,36 @@ class SettingsView(View):
             if config_value == "cookie_import":
                 self.process_cookie(config, updated_value)
 
-    @staticmethod
-    def process_cookie(config, updated_value):
+    def process_cookie(self, config, updated_value):
         """import and validate cookie"""
         handler = CookieHandler(config)
         if updated_value:
-            handler.import_cookie()
+            try:
+                handler.import_cookie()
+            except FileNotFoundError:
+                print("cookie: import failed, file not found")
+                handler.revoke()
+                self._fail_message("Cookie file not found.")
+                return
+
             valid = handler.validate()
             if not valid:
                 handler.revoke()
-                key = "message:setting"
-                message = {
-                    "status": key,
-                    "level": "error",
-                    "title": "Cookie import failed",
-                    "message": "",
-                }
-                RedisArchivist().set_message(key, message=message, expire=True)
+                self._fail_message("Failed to validate cookie file.")
         else:
             handler.revoke()
+
+    @staticmethod
+    def _fail_message(message_line):
+        """notify our failure"""
+        key = "message:setting"
+        message = {
+            "status": key,
+            "level": "error",
+            "title": "Cookie import failed",
+            "message": message_line,
+        }
+        RedisArchivist().set_message(key, message=message, expire=True)
 
 
 def progress(request):

@@ -83,8 +83,13 @@ class CookieHandler:
         """import cookie from file"""
         cache_path = self.config["application"]["cache_dir"]
         import_path = os.path.join(cache_path, "import", "cookies.google.txt")
-        with open(import_path, encoding="utf-8") as cookie_file:
-            cookie = cookie_file.read()
+
+        try:
+            with open(import_path, encoding="utf-8") as cookie_file:
+                cookie = cookie_file.read()
+        except FileNotFoundError as err:
+            print(f"cookie: {import_path} file not found")
+            raise err
 
         self.set_cookie(cookie)
 
