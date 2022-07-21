@@ -133,6 +133,8 @@ class AppConfig:
 
         # check for customizations
         if not redis_config:
+            config = self.get_config()
+            RedisArchivist().set_message("config", config)
             return
 
         needs_update = False
