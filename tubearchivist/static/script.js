@@ -336,10 +336,18 @@ function cancelDelete() {
     document.getElementById("delete-item").style.display = 'block';
 }
 
+// get seconds from hh:mm:ss.ms timestamp
+function getSeconds(timestamp) {
+    var elements = timestamp.split(":", 3);
+    var secs = parseInt(elements[0]) * 60 * 60 + parseInt(elements[1]) * 60 + parseFloat(elements[2])
+    return secs
+}
+
 // player
 var sponsorBlock = [];
 function createPlayer(button) {
     var videoId = button.getAttribute('data-id');
+    var videoPosition = button.getAttribute('data-position');
     var videoData = getVideoData(videoId);
 
     var sponsorBlockElements = '';
@@ -363,8 +371,11 @@ function createPlayer(button) {
     } else {
         sponsorBlock = null;
     }
-
-    var videoProgress = getVideoProgress(videoId).position;
+    if (videoPosition) {
+        var videoProgress = getSeconds(videoPosition)
+    } else {
+        var videoProgress = getVideoProgress(videoId).position;
+    }
     var videoName = videoData.data.title;
 
     var videoTag = createVideoTag(videoData, videoProgress);
@@ -761,7 +772,9 @@ function removePlayer() {
         playerElement.innerHTML = '';
         // append played status
         var videoInfo = document.getElementById('video-info-' + youtubeId);
-        videoInfo.insertBefore(playedStatus, videoInfo.firstChild);
+        if (videoInfo) {
+            videoInfo.insertBefore(playedStatus, videoInfo.firstChild);
+        }
     }
 }
 
@@ -1022,7 +1035,7 @@ function createFulltext(fullText) {
     const subtitle_start = fullText.source.subtitle_start.split(".")[0];
     const subtitle_end = fullText.source.subtitle_end.split(".")[0];
     const markup = `
-    <a href="#player" data-id="${videoId}" onclick="createPlayer(this)">
+    <a href="#player" data-id="${videoId}" data-position="${subtitle_start}" onclick="createPlayer(this)">
         <div class="video-thumb-wrap list">
             <div class="video-thumb">
                 <img src="${thumbUrl}" alt="video-thumb">
@@ -1037,7 +1050,7 @@ function createFulltext(fullText) {
         <p>${subtitleLine}</p>    
         <div>
             <a href="/channel/${channelId}/"><h3>${channelName}</h3></a>
-            <a class="video-more" href="/video/${videoId}/"><h2>${videoTitle}</h2></a>
+            <a class="video-more" href="/video/${videoId}/?t=${subtitle_start}"><h2>${videoTitle}</h2></a>
         </div>
     </div>
     `
