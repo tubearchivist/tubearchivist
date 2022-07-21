@@ -252,6 +252,8 @@ class SearchParser:
             "full": {
                 "index": "ta_subtitle",
                 "term": [],
+                "lang": [],
+                "source": [],
             },
         }
 
@@ -479,6 +481,14 @@ class QueryBuilder:
                         }
                     }
                 }
+            )
+
+        if (lang := self.query_map.get("lang")) is not None:
+            must_list.append({"term": {"subtitle_lang": {"value": lang[0]}}})
+
+        if (source := self.query_map.get("source")) is not None:
+            must_list.append(
+                {"term": {"subtitle_source": {"value": source[0]}}}
             )
 
         query = {
