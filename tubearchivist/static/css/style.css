@@ -452,7 +452,7 @@ button:hover {
 
 .video-item.list {
     display: grid;
-    grid-template-columns: 25% auto;
+    grid-template-columns: 28% auto;
 }
 
 .video-progress-bar {
