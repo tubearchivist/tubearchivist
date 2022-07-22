@@ -415,6 +415,12 @@ button:hover {
     margin: 10px 10px 10px 0;
 }
 
+/* fix for safari full screen not scaling full */
+video:-webkit-full-screen {
+    max-height: unset !important;
+    max-width: unset !important;
+}
+
 /* video list */
 .video-list {
     display: grid;
