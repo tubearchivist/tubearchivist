@@ -30,7 +30,25 @@ This is my setup I have landed on, YMMV:
 - This `deploy.sh` script is not meant to be universally usable for every possible environment but could serve as an idea on how to automatically rebuild containers to test changes - customize to your liking. 
 
 ## Working with Elasticsearch
-Additionally to the required services as listed in the example docker-compose file, the **Dev Tools** of [Kibana](https://www.elastic.co/guide/en/kibana/current/docker.html) are invaluable for running and testing Elasticsearch queries.  
+Additionally to the required services as listed in the example docker-compose file, the **Dev Tools** of [Kibana](https://www.elastic.co/guide/en/kibana/current/docker.html) are invaluable for running and testing Elasticsearch queries. 
+
+**Quick start**  
+Generate your access token in Elasitcsearch:
+```bash
+bin/elasticsearch-service-tokens create elastic/kibana kibana
+```
+
+Example docker compose, use same version as for Elasticsearch:
+```yml
+kibana:
+  image: docker.elastic.co/kibana/kibana:0.0.0
+  container_name: kibana
+  environment:
+    - "ELASTICSEARCH_HOSTS=http://archivist-es:9200"
+    - "ELASTICSEARCH_SERVICEACCOUNTTOKEN=<your-token-here>"
+  ports:
+    - "5601:5601"
+```
 
 If you want to run queries on the Elasticsearch container directly from your host with for example `curl` or something like *postman*, you might want to **publish** the port 9200 instead of just **exposing** it.
 
