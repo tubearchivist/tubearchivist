@@ -1,6 +1,7 @@
 """handle custom startup functions"""
 
 import os
+import sys
 
 from django.apps import AppConfig
 from home.src.es.connect import ElasticWrap
@@ -104,7 +105,7 @@ class StartupCheck:
                 "required elasticsearch version: "
                 + f"{self.MIN_MAJOR}.{self.MIN_MINOR}"
             )
-            # sys.exit(1)
+            sys.exit(1)
 
         print("elasticsearch version check passed")
 
