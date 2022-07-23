@@ -115,7 +115,6 @@ You will see the current version number of **Tube Archivist** in the footer of t
 
 ### Alternative installation instructions:
 - **arm64**: The Tube Archivist container is multi arch, so is Elasticsearch. RedisJSON doesn't offer arm builds, you can use `bbilly1/rejson`, an unofficial rebuild for arm64.
-- **Synology**: There is a [discussion thread](https://github.com/tubearchivist/tubearchivist/discussions/48) with Synology installation instructions.
 - **Unraid**: The three containers needed are all in the Community Applications. First install `TubeArchivist RedisJSON` followed by `TubeArchivist ES`, and finally you can install `TubeArchivist`. If you have unraid specific issues, report those to the [support thread](https://forums.unraid.net/topic/114073-support-crocs-tube-archivist/ "support thread").
 - **Helm Chart**: There is a Helm Chart available at https://github.com/insuusvenerati/helm-charts. Mostly self-explanatory but feel free to ask questions in the discord / subreddit.
 
@@ -200,7 +199,6 @@ Implemented:
 ## Known limitations
 - Video files created by Tube Archivist need to be playable in your browser of choice. Not every codec is compatible with every browser and might require some testing with format selection. 
 - Every limitation of **yt-dlp** will also be present in Tube Archivist. If **yt-dlp** can't download or extract a video for any reason, Tube Archivist won't be able to either.
-- For now this is meant to be run in a trusted network environment. Not everything is properly authenticated.
 - There is currently no flexibility in naming of the media files.
 
 
