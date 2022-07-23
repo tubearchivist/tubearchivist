@@ -458,7 +458,7 @@ video:-webkit-full-screen {
 
 .video-item.list {
     display: grid;
-    grid-template-columns: 28% auto;
+    grid-template-columns: 26% auto;
 }
 
 .video-progress-bar {
