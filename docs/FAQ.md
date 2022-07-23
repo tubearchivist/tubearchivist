@@ -15,7 +15,7 @@ Defining the scope is important for the success of any project:
 - A too narrow scope will make this project uninteresting and will exclude audiences that could also benefit from this project.
 - Not defining a scope will easily lead to misunderstandings and false hopes of where this project tries to go.
 
-Of course this is subject to change, as this project continues to grow and more people contribute.
+Of course this is subject to change: The scope can be expanded as this project continues to grow and more people contribute.
 
 ## 2. Emby/Plex/Jellyfin/Kodi integrations
 Although there are similarities between these excellent projects and Tube Archivist, they have a very different use case. Trying to fit the metadata relations and database structure of a YouTube archival project into these media servers that specialize in Movies and TV shows is always going to be limiting.
