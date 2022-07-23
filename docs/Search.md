@@ -1,18 +1,16 @@
 # Search Page
-
-**Functionality described here is not yet in the regular release.**
-
 Accessible at `/search/` of your **Tube Archivist**, search your archive for Videos, Channels and Playlists - or even full text search throughout your indexed subtitles.
 
 - All your queries are case insensitive and are normalized to lowercase.
 - All your queries are analyzed for the english language, this means *singular*, *plural* and word variations like *-ing*, *-ed*, *-able* etc are treated as synonyms.
 - Fuzzy search is activated for all your searches. This can catch typos in your queries or in the matching documents with one to two letters difference, depending on the query length.
 - All text searches are ranked, meaning the better a match the higher ranked the result. Unless otherwise stated, queries with multiple words are processed with the `and` operator, meaning all words need to match so each word will narrow down the result.
+- This will return 30 results per query, pagination is not implemented yet.
 
 Just start typing to start a *simple* search or start your query with a primary keyword to search for a specific type and narrow down the result with secondary keywords. Secondary keywords can be in any order. Use *yes* or *no* for boolean values.
 
 ## Simple
-Start your query without a keyword to make a simple query. This will search in *video titles*, *channel names* and *playlist titles* and will return matching Videos, Channels and Playlists. Keyword searches will return more results in a particular category due to the fact that more fields are searched for matches.
+Start your query without a keyword to make a simple query. This will search in *video titles*, *channel names* and *playlist titles* and will return matching videos, channels and playlists. Keyword searches will return more results in a particular category due to the fact that more fields are searched for matches.
 
 ## Video
 Start your query with the primary keyword `video:` to search for videos only. This will search through the *video titles*, *tags* and *category* fields. Narrow your search down with secondary keywords:
