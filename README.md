@@ -85,6 +85,18 @@ Should that not be an option, the Tube Archivist container takes these two addit
 
 Changing any of these two environment variables will change the files *nginx.conf* and *uwsgi.ini* at startup using `sed` in your container.
 
+## LDAP Authentication
+LDAP authentication is not yet available in *stable* builds but is implemented for *unstable*. It can be enabled and configured using the following environment variables:
+
+ - `TA_LDAP` (ex: `true`) Set to anything besides empty string to use LDAP authentication instead of local user authentication.
+ - `TA_LDAP_SERVER_URI` (ex: `ldap://ldap-server:389`) Set to the uri of your LDAP server.
+ - `TA_LDAP_BIND_DN` (ex: `uid=search-user,ou=users,dc=your-server`) DN of the user that is able to perform searches on your LDAP account.
+ - `TA_LDAP_BIND_PASSWORD` (ex: `yoursecretpassword`) Password for the search user.
+ - `TA_LDAP_USER_BASE` (ex: `ou=users,dc=your-server`) Search base for user filter.
+ - `TA_LDAP_USER_FILTER` (ex: `(objectClass=user)`) Filter for valid users. Login usernames are automatically matched using `uid` and does not need to be specified in this filter.
+
+When LDAP authentication is enabled django passwords (e.g. the password defined in TA_PASSWORD) will not allow you to login, only the LDAP server is used.
+
 ### Elasticsearch
 **Note**: Newest Tube Archivist depends on Elasticsearch version 7.17 to provide an automatic updatepath in the future. 
 

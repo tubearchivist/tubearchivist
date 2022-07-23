@@ -7,7 +7,7 @@ FROM python:3.10.5-slim-bullseye AS builder
 ARG TARGETPLATFORM
 
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends build-essential gcc
+RUN apt-get install -y --no-install-recommends build-essential gcc libldap2-dev libsasl2-dev libssl-dev
 
 # install requirements
 COPY ./tubearchivist/requirements.txt /requirements.txt
