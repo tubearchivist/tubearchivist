@@ -171,12 +171,12 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Add statistics of index
 - [ ] Download speed schedule ([#198](https://github.com/tubearchivist/tubearchivist/issues/198))
 - [ ] Implement complete offline media file import from json file ([#138](https://github.com/tubearchivist/tubearchivist/issues/138))
-- [ ] Filter and query in search form, search by url query ([#134](https://github.com/tubearchivist/tubearchivist/issues/134), [#139](https://github.com/tubearchivist/tubearchivist/issues/139))
 - [ ] Auto ignore videos by keyword ([#163](https://github.com/tubearchivist/tubearchivist/issues/163))
 - [ ] Custom searchable notes to videos, channels, playlists ([#144](https://github.com/tubearchivist/tubearchivist/issues/144))
 - [ ] Download video comments
 
 Implemented:
+- [X] Filter and query in search form, search by url query [2022-07-23]
 - [X] Make items in grid row configurable to use more of the screen [2022-06-04]
 - [X] Add passing browser cookies to yt-dlp [2022-05-08]
 - [X] Add [SponsorBlock](https://sponsor.ajay.app/) integration [2022-04-16]
