@@ -31,6 +31,7 @@ SECRET_KEY = PW_HASH.hexdigest()
 DEBUG = bool(environ.get("DJANGO_DEBUG"))
 
 ALLOWED_HOSTS = [i.strip() for i in environ.get("TA_HOST").split()]
+CSRF_TRUSTED_ORIGINS = [i.strip() for i in environ.get("TA_HOST").split()]
 
 
 # Application definition
