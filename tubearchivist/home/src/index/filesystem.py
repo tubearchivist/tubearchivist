@@ -297,6 +297,46 @@ class ImportFolderScanner:
         if current_video["thumb"]:
             return
 
+        media_file = current_video["media"]
+        media_path = os.path.join(self.CACHE_DIR, "import", media_file)
+        base_name, ext = os.path.splitext(media_path)
+
+        if ext == ".mkv":
+            thumb_stream = self._get_mkv_thumb_stream(media_path)
+        elif ext == ".mp4":
+            thumb_stream = 0
+        elif ext == ".webm":
+            print("webm doesn't support thumbnail embed")
+
+    @staticmethod
+    def _get_mkv_thumb_stream(media_path):
+        """get stream idx of thumbnail for mkv files"""
+        streams_raw = subprocess.run(
+            [
+                "ffprobe",
+                "-v",
+                "error",
+                "-show_entries",
+                "stream_tags",
+                "-print_format",
+                "json",
+                media_path,
+            ],
+            capture_output=True,
+            check=True,
+        )
+        streams = json.loads(streams_raw.stdout.decode())
+
+        for idx, stream in enumerate(streams["streams"]):
+            tags = stream["tags"]
+            if "mimetype" in tags and tags["filename"].startswith("cover"):
+                return idx
+
+        return False
+
+
+        # ffprobe /cache/import/The\ Single\ Australian\ Farm\ That’s\ Bigger\ Than\ 49\ Countries\ \[YiSN21jKp4s\].mkv -hide_banner -show_entries "stream_tags" -print_format json
+
         # write thumb to disk here
         # ffmpeg -dump_attachment:t "" -i filename.mkv
         # ffmpeg -i video.mp4 -map 0:v -map -0:V -c copy cover.jpg
