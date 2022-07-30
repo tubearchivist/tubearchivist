@@ -33,6 +33,7 @@ SECRET_KEY = PW_HASH.hexdigest()
 DEBUG = bool(environ.get("DJANGO_DEBUG"))
 
 ALLOWED_HOSTS = [i.strip() for i in environ.get("TA_HOST").split()]
+CSRF_TRUSTED_ORIGINS = [i.strip() for i in environ.get("TA_HOST").split()]
 
 
 # Application definition
@@ -192,4 +193,4 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 
 # TA application settings
 TA_UPSTREAM = "https://github.com/tubearchivist/tubearchivist"
-TA_VERSION = "v0.2.0"
+TA_VERSION = "v0.2.1-unstable"
