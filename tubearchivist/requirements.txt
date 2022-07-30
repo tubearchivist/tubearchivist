@@ -10,3 +10,4 @@ ryd-client==0.0.3
 uWSGI==2.0.20
 whitenoise==6.2.0
 yt_dlp==2022.7.18
+django-auth-ldap==4.1.0

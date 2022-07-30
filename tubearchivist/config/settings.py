@@ -14,7 +14,9 @@ import hashlib
 from os import environ, path
 from pathlib import Path
 
+import ldap
 from corsheaders.defaults import default_headers
+from django_auth_ldap.config import LDAPSearch
 from home.src.ta.config import AppConfig
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -83,6 +85,33 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+if bool(environ.get("TA_LDAP")):
+    global AUTH_LDAP_SERVER_URI
+    AUTH_LDAP_SERVER_URI = environ.get("TA_LDAP_SERVER_URI")
+
+    global AUTH_LDAP_BIND_DN
+    AUTH_LDAP_BIND_DN = environ.get("TA_LDAP_BIND_DN")
+
+    global AUTH_LDAP_BIND_PASSWORD
+    AUTH_LDAP_BIND_PASSWORD = environ.get("TA_LDAP_BIND_PASSWORD")
+
+    global AUTH_LDAP_USER_SEARCH
+    AUTH_LDAP_USER_SEARCH = LDAPSearch(
+        environ.get("TA_LDAP_USER_BASE"),
+        ldap.SCOPE_SUBTREE,
+        "(&(uid=%(user)s)" + environ.get("TA_LDAP_USER_FILTER") + ")",
+    )
+
+    global AUTH_LDAP_USER_ATTR_MAP
+    AUTH_LDAP_USER_ATTR_MAP = {
+        "username": "uid",
+        "first_name": "givenName",
+        "last_name": "sn",
+        "email": "mail",
+    }
+
+    global AUTHENTICATION_BACKENDS
+    AUTHENTICATION_BACKENDS = ("django_auth_ldap.backend.LDAPBackend",)
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
