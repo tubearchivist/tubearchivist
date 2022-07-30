@@ -301,23 +301,74 @@ class ImportFolderScanner:
         media_path = os.path.join(self.CACHE_DIR, "import", media_file)
         base_name, ext = os.path.splitext(media_path)
 
+        new_path = False
         if ext == ".mkv":
-            thumb_stream = self._get_mkv_thumb_stream(media_path)
+            idx, thumb_type = self._get_mkv_thumb_stream(media_path)
+            if idx:
+                new_path = self.dump_mpv_thumb(media_path, idx, thumb_type)
+
         elif ext == ".mp4":
-            thumb_stream = 0
-        elif ext == ".webm":
-            print("webm doesn't support thumbnail embed")
+            thumb_type = self.get_mp4_thumb_type(media_path)
+            if thumb_type:
+                new_path = self.dump_mp4_thumb(media_path, thumb_type)
+
+        if new_path:
+            current_video["thumb"] = new_path
+
+    def _get_mkv_thumb_stream(self, media_path):
+        """get stream idx of thumbnail for mkv files"""
+        streams = self._get_streams(media_path)
+        attachments = [
+            i for i in streams["streams"] if i["codec_type"] == "attachment"
+        ]
+
+        for idx, stream in enumerate(attachments):
+            tags = stream["tags"]
+            if "mimetype" in tags and tags["filename"].startswith("cover"):
+                _, ext = os.path.splitext(tags["filename"])
+                return idx, ext
+
+        return False, False
 
     @staticmethod
-    def _get_mkv_thumb_stream(media_path):
-        """get stream idx of thumbnail for mkv files"""
+    def dump_mpv_thumb(media_path, idx, thumb_type):
+        """write cover to disk for mkv"""
+        _, media_ext = os.path.splitext(media_path)
+        new_path = f"{media_path.rstrip(media_ext)}{thumb_type}"
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-v",
+                "quiet",
+                f"-dump_attachment:t:{idx}",
+                new_path,
+                "-i",
+                media_path,
+            ],
+            check=False,
+        )
+
+        return new_path
+
+    def get_mp4_thumb_type(self, media_path):
+        """dedect filetype of embedded thumbnail"""
+        streams = self._get_streams(media_path)
+
+        for stream in streams["streams"]:
+            if stream["codec_name"] in ["png", "jpg"]:
+                return stream["codec_name"]
+
+        return False
+
+    @staticmethod
+    def _get_streams(media_path):
+        """return all streams from media_path"""
         streams_raw = subprocess.run(
             [
                 "ffprobe",
                 "-v",
                 "error",
-                "-show_entries",
-                "stream_tags",
+                "-show_streams",
                 "-print_format",
                 "json",
                 media_path,
@@ -327,20 +378,31 @@ class ImportFolderScanner:
         )
         streams = json.loads(streams_raw.stdout.decode())
 
-        for idx, stream in enumerate(streams["streams"]):
-            tags = stream["tags"]
-            if "mimetype" in tags and tags["filename"].startswith("cover"):
-                return idx
+        return streams
 
-        return False
+    @staticmethod
+    def dump_mp4_thumb(media_path, thumb_type):
+        """save cover to disk"""
+        _, ext = os.path.splitext(media_path)
+        new_path = f"{media_path.rstrip(ext)}.{thumb_type}"
 
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-i",
+                media_path,
+                "-map",
+                "0:v",
+                "-map",
+                "-0:V",
+                "-c",
+                "copy",
+                new_path,
+            ],
+            check=True,
+        )
 
-        # ffprobe /cache/import/The\ Single\ Australian\ Farm\ That’s\ Bigger\ Than\ 49\ Countries\ \[YiSN21jKp4s\].mkv -hide_banner -show_entries "stream_tags" -print_format json
-
-        # write thumb to disk here
-        # ffmpeg -dump_attachment:t "" -i filename.mkv
-        # ffmpeg -i video.mp4 -map 0:v -map -0:V -c copy cover.jpg
-        # webm
+        return new_path
 
     def _convert_video(self, current_video):
         """convert if needed"""
