@@ -191,7 +191,8 @@ class ImportFolderScanner:
 
     def get_all_files(self):
         """get all files in /import"""
-        all_files = ignore_filelist(os.listdir(self.IMPORT_DIR))
+        rel_paths = ignore_filelist(os.listdir(self.IMPORT_DIR))
+        all_files = [os.path.join(self.IMPORT_DIR, i) for i in rel_paths]
         all_files.sort()
 
         return all_files
@@ -301,9 +302,8 @@ class ImportFolderScanner:
         if current_video["thumb"]:
             return
 
-        media_file = current_video["media"]
-        media_path = os.path.join(self.CACHE_DIR, "import", media_file)
-        base_name, ext = os.path.splitext(media_path)
+        media_path = current_video["media"]
+        _, ext = os.path.splitext(media_path)
 
         new_path = False
         if ext == ".mkv":
@@ -369,8 +369,7 @@ class ImportFolderScanner:
         if not current_video["thumb"]:
             return
 
-        thumb_file = current_video["thumb"]
-        thumb_path = os.path.join(self.CACHE_DIR, "import", thumb_file)
+        thumb_path = current_video["thumb"]
 
         base_path, ext = os.path.splitext(thumb_path)
         if ext == ".jpg":
@@ -429,9 +428,7 @@ class ImportFolderScanner:
 
     def _convert_video(self, current_video):
         """convert if needed"""
-        current_path = os.path.join(
-            self.CACHE_DIR, "import", current_video["media"]
-        )
+        current_path = current_video["media"]
         base_path, ext = os.path.splitext(current_path)
         if ext == ".mp4":
             return
