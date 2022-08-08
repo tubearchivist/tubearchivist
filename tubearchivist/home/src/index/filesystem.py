@@ -19,6 +19,9 @@ from home.src.index.video import index_new_video
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import clean_string, ignore_filelist
 from home.src.ta.ta_redis import RedisArchivist
+from PIL import Image, ImageFile
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class FilesystemScanner:
@@ -248,6 +251,7 @@ class ImportFolderScanner:
         for current_video in self.to_import:
             self._detect_youtube_id(current_video)
             self._dump_thumb(current_video)
+            self._convert_thumb(current_video)
             self._convert_video(current_video)
 
     def _detect_youtube_id(self, current_video):
@@ -359,6 +363,25 @@ class ImportFolderScanner:
                 return stream["codec_name"]
 
         return False
+
+    def _convert_thumb(self, current_video):
+        """convert all thumbnails to jpg"""
+        if not current_video["thumb"]:
+            return
+
+        thumb_file = current_video["thumb"]
+        thumb_path = os.path.join(self.CACHE_DIR, "import", thumb_file)
+
+        base_path, ext = os.path.splitext(thumb_path)
+        if ext == ".jpg":
+            return
+
+        new_path = f"{base_path}.jpg"
+        img_raw = Image.open(thumb_path)
+        img_raw.convert("RGB").save(new_path)
+
+        os.remove(thumb_path)
+        current_video["thumb"] = new_path
 
     @staticmethod
     def _get_streams(media_path):
