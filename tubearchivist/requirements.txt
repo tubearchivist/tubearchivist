@@ -1,6 +1,7 @@
 beautifulsoup4==4.11.1
 celery==5.2.7
-Django==4.0.6
+Django==4.1
+django-auth-ldap==4.1.0
 django-cors-headers==3.13.0
 djangorestframework==3.13.1
 Pillow==9.2.0
@@ -10,4 +11,3 @@ ryd-client==0.0.3
 uWSGI==2.0.20
 whitenoise==6.2.0
 yt_dlp==2022.7.18
-django-auth-ldap==4.1.0
