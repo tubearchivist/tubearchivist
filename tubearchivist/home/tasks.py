@@ -20,7 +20,7 @@ from home.src.download.yt_dlp_handler import VideoDownloader
 from home.src.es.index_setup import backup_all_indexes, restore_from_backup
 from home.src.index.channel import YoutubeChannel
 from home.src.index.filesystem import (
-    ManualImport,
+    ImportFolderScanner,
     reindex_old_documents,
     scan_filesystem,
 )
@@ -150,10 +150,7 @@ def run_manual_import():
     try:
         have_lock = my_lock.acquire(blocking=False)
         if have_lock:
-            import_handler = ManualImport()
-            if import_handler.identified:
-                all_videos_added = import_handler.process_import()
-                ThumbManager().download_vid(all_videos_added)
+            ImportFolderScanner().scan()
         else:
             print("Did not acquire lock form import.")
 
