@@ -41,7 +41,6 @@ class YoutubePlaylist(YouTubeItem):
             self.process_youtube_meta()
             self.get_entries()
             self.json_data["playlist_entries"] = self.all_members
-            self.get_playlist_art()
             self.json_data["playlist_subscribed"] = subscribed
 
     def process_youtube_meta(self):
