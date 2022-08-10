@@ -12,6 +12,7 @@ import shutil
 import subprocess
 
 from home.src.download.queue import PendingList
+from home.src.download.thumbnails import ThumbManager
 from home.src.es.connect import ElasticWrap
 from home.src.index.reindex import Reindex
 from home.src.index.video import YoutubeVideo, index_new_video
@@ -466,13 +467,17 @@ class ManualImport:
 
     def index_metadata(self):
         """get metadata from yt or json"""
-        video = YoutubeVideo(self.current_video["video_id"])
+        video_id = self.current_video["video_id"]
+        video = YoutubeVideo(video_id)
         video.build_json(
             youtube_meta_overwrite=self._get_info_json(),
             media_path=self.current_video["media"],
         )
         video.check_subtitles()
         video.upload_to_es()
+
+        url = video.json_data["vid_thumb_url"]
+        ThumbManager(video_id).download_video_thumb(url)
 
         return video.json_data
 
