@@ -35,6 +35,8 @@ class ThumbManagerBase:
 
     def download_raw(self, url):
         """download thumbnail for video"""
+        if not url:
+            return self.get_fallback()
 
         for i in range(3):
             try:
