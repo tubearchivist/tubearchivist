@@ -473,6 +473,10 @@ class ManualImport:
             youtube_meta_overwrite=self._get_info_json(),
             media_path=self.current_video["media"],
         )
+        if not video.json_data:
+            print(f"{video_id}: manual import failed, and no metadata found.")
+            raise ValueError
+
         video.check_subtitles()
         video.upload_to_es()
 
