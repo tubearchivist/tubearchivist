@@ -425,6 +425,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         self.channel_id = False
         self.video_overwrites = video_overwrites
         self.es_path = f"{self.index_name}/_doc/{youtube_id}"
+        self.offline_import = False
 
     def build_json(self, youtube_meta_overwrite=False, media_path=False):
         """build json dict of video"""
@@ -434,6 +435,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
         if not self.youtube_meta:
             self.youtube_meta = youtube_meta_overwrite
+            self.offline_import = True
 
         self._process_youtube_meta()
         self._add_channel()

@@ -476,8 +476,13 @@ class ManualImport:
         video.check_subtitles()
         video.upload_to_es()
 
-        url = video.json_data["vid_thumb_url"]
-        ThumbManager(video_id).download_video_thumb(url)
+        if video.offline_import and self.current_video["thumb"]:
+            old_path = self.current_video["thumb"]
+            new_path = ThumbManager(video_id).vid_thumb_path(absolute=True)
+            shutil.move(old_path, new_path, copy_function=shutil.copyfile)
+        else:
+            url = video.json_data["vid_thumb_url"]
+            ThumbManager(video_id).download_video_thumb(url)
 
         return video.json_data
 
