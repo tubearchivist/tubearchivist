@@ -1,5 +1,7 @@
 """all api urls"""
 
+from django.urls import path
+
 from api.views import (
     ChannelApiListView,
     ChannelApiVideoView,
@@ -12,13 +14,13 @@ from api.views import (
     PlaylistApiListView,
     PlaylistApiVideoView,
     PlaylistApiView,
+    SearchView,
     TaskApiView,
     VideoApiListView,
     VideoApiView,
     VideoProgressView,
     VideoSponsorView,
 )
-from django.urls import path
 
 urlpatterns = [
     path("ping/", PingView.as_view(), name="ping"),
@@ -92,5 +94,10 @@ urlpatterns = [
         "cookie/",
         CookieView.as_view(),
         name="api-cookie",
+    ),
+    path(
+        "search/",
+        SearchView.as_view(),
+        name="api-search",
     ),
 ]

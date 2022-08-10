@@ -1,10 +1,9 @@
 """all API views"""
 
-from api.src.search_processor import SearchProcess
-from api.src.task_processor import TaskHandler
 from home.src.download.queue import PendingInteract
 from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.connect import ElasticWrap
+from home.src.frontend.searching import SearchForm
 from home.src.index.generic import Pagination
 from home.src.index.video import SponsorBlock
 from home.src.ta.config import AppConfig
@@ -20,6 +19,9 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from api.src.search_processor import SearchProcess
+from api.src.task_processor import TaskHandler
 
 
 class ApiBaseView(APIView):
@@ -526,3 +528,22 @@ class CookieView(ApiBaseView):
 
         message = {"cookie_import": "done", "cookie_validated": validated}
         return Response(message)
+
+
+class SearchView(ApiBaseView):
+    """resolves to /api/search/
+    GET: run a search with the string in the ?query parameter
+    """
+
+    @staticmethod
+    def get(request):
+        """handle get request"""
+        """search through all indexes"""
+        search_query = request.GET.get("query", None)
+        if search_query is None:
+            return Response(
+                {"message": "no search query specified"}, status=400
+            )
+        print("searching for: " + search_query)
+        search_results = SearchForm().multi_search(search_query)
+        return Response(search_results)
