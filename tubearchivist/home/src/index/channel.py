@@ -192,11 +192,11 @@ class YoutubeChannel(YouTubeItem):
     def get_channel_art(self):
         """download channel art for new channels"""
         channel_id = self.youtube_id
-        channel_thumb = self.json_data["channel_thumb_url"]
-        channel_banner = self.json_data["channel_banner_url"]
-        ThumbManager().download_chan(
-            [(channel_id, channel_thumb, channel_banner)]
+        urls = (
+            self.json_data["channel_thumb_url"],
+            self.json_data["channel_banner_url"],
         )
+        ThumbManager(channel_id, item_type="channel").download(urls)
 
     def sync_to_videos(self):
         """sync new channel_dict to all videos of channel"""

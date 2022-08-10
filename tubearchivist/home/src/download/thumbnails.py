@@ -6,134 +6,62 @@ functionality:
 
 import base64
 import os
-from collections import Counter
 from io import BytesIO
 from time import sleep
 
 import requests
 from home.src.download import queue  # partial import
-from home.src.download import subscriptions  # partial import
+from home.src.es.connect import IndexPaginate
 from home.src.ta.config import AppConfig
-from home.src.ta.helper import ignore_filelist
-from home.src.ta.ta_redis import RedisArchivist
 from mutagen.mp4 import MP4, MP4Cover
 from PIL import Image, ImageFile, ImageFilter
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
-class ThumbManager:
-    """handle thumbnails related functions"""
+class ThumbManagerBase:
+    """base class for thumbnail management"""
 
     CONFIG = AppConfig().config
-    MEDIA_DIR = CONFIG["application"]["videos"]
     CACHE_DIR = CONFIG["application"]["cache_dir"]
     VIDEO_DIR = os.path.join(CACHE_DIR, "videos")
     CHANNEL_DIR = os.path.join(CACHE_DIR, "channels")
     PLAYLIST_DIR = os.path.join(CACHE_DIR, "playlists")
 
-    def get_all_thumbs(self):
-        """get all video artwork already downloaded"""
-        all_thumb_folders = ignore_filelist(os.listdir(self.VIDEO_DIR))
-        all_thumbs = []
-        for folder in all_thumb_folders:
-            folder_path = os.path.join(self.VIDEO_DIR, folder)
-            if os.path.isfile(folder_path):
-                self.update_path(folder)
-                all_thumbs.append(folder_path)
-                continue
-                # raise exemption here in a future version
-                # raise FileExistsError("video cache dir has files inside")
+    def __init__(self, item_id, item_type, fallback=False):
+        self.item_id = item_id
+        self.item_type = item_type
+        self.fallback = fallback
 
-            all_folder_thumbs = ignore_filelist(os.listdir(folder_path))
-            all_thumbs.extend(all_folder_thumbs)
+    def download_raw(self, url):
+        """download thumbnail for video"""
 
-        return all_thumbs
+        for i in range(3):
+            try:
+                response = requests.get(url, stream=True)
+                if response.ok:
+                    return Image.open(response.raw)
+                if response.status_code == 404:
+                    return self.get_fallback()
 
-    def update_path(self, file_name):
-        """reorganize thumbnails into folders as update path from v0.0.5"""
-        folder_name = file_name[0].lower()
-        folder_path = os.path.join(self.VIDEO_DIR, folder_name)
-        old_file = os.path.join(self.VIDEO_DIR, file_name)
-        new_file = os.path.join(folder_path, file_name)
-        os.makedirs(folder_path, exist_ok=True)
-        os.rename(old_file, new_file)
+            except ConnectionError:
+                print(f"{self.item_id}: retry thumbnail download {url}")
+                sleep((i + 1) ** i)
 
-    def get_needed_thumbs(self, missing_only=False):
-        """get a list of all missing thumbnails"""
-        all_thumbs = self.get_all_thumbs()
+        return False
 
-        pending = queue.PendingList()
-        pending.get_download()
-        pending.get_indexed()
+    def get_fallback(self):
+        """get fallback thumbnail if not available"""
+        if self.fallback:
+            img_raw = Image.open(self.fallback)
+            return img_raw
 
-        needed_thumbs = []
-        for video in pending.all_videos:
-            youtube_id = video["youtube_id"]
-            thumb_url = video["vid_thumb_url"]
-            if missing_only:
-                if youtube_id + ".jpg" not in all_thumbs:
-                    needed_thumbs.append((youtube_id, thumb_url))
-            else:
-                needed_thumbs.append((youtube_id, thumb_url))
-
-        for video in pending.all_pending + pending.all_ignored:
-            youtube_id = video["youtube_id"]
-            thumb_url = video["vid_thumb_url"]
-            if missing_only:
-                if youtube_id + ".jpg" not in all_thumbs:
-                    needed_thumbs.append((youtube_id, thumb_url))
-            else:
-                needed_thumbs.append((youtube_id, thumb_url))
-
-        return needed_thumbs
-
-    def get_missing_channels(self):
-        """get all channel artwork"""
-        all_channel_art = os.listdir(self.CHANNEL_DIR)
-        files = [i[0:24] for i in all_channel_art]
-        cached_channel_ids = [k for (k, v) in Counter(files).items() if v > 1]
-        channel_sub = subscriptions.ChannelSubscription()
-        channels = channel_sub.get_channels(subscribed_only=False)
-
-        missing_channels = []
-        for channel in channels:
-            channel_id = channel["channel_id"]
-            if channel_id not in cached_channel_ids:
-                channel_banner = channel["channel_banner_url"]
-                channel_thumb = channel["channel_thumb_url"]
-                missing_channels.append(
-                    (channel_id, channel_thumb, channel_banner)
-                )
-
-        return missing_channels
-
-    def get_missing_playlists(self):
-        """get all missing playlist artwork"""
-        all_downloaded = ignore_filelist(os.listdir(self.PLAYLIST_DIR))
-        all_ids_downloaded = [i.replace(".jpg", "") for i in all_downloaded]
-        playlist_sub = subscriptions.PlaylistSubscription()
-        playlists = playlist_sub.get_playlists(subscribed_only=False)
-
-        missing_playlists = []
-        for playlist in playlists:
-            playlist_id = playlist["playlist_id"]
-            if playlist_id not in all_ids_downloaded:
-                playlist_thumb = playlist["playlist_thumbnail"]
-                missing_playlists.append((playlist_id, playlist_thumb))
-
-        return missing_playlists
-
-    def get_raw_img(self, img_url, thumb_type):
-        """get raw image from youtube and handle 404"""
-        try:
-            app_root = self.CONFIG["application"]["app_root"]
-        except KeyError:
-            # lazy keyerror fix to not have to deal with a strange startup
-            # racing contition between the threads in HomeConfig.ready()
-            app_root = "/app"
+        app_root = self.CONFIG["application"]["app_root"]
         default_map = {
             "video": os.path.join(
+                app_root, "static/img/default-video-thumb.jpg"
+            ),
+            "playlist": os.path.join(
                 app_root, "static/img/default-video-thumb.jpg"
             ),
             "icon": os.path.join(
@@ -143,116 +71,134 @@ class ThumbManager:
                 app_root, "static/img/default-channel-banner.jpg"
             ),
         }
-        if img_url:
-            try:
-                response = requests.get(img_url, stream=True)
-            except ConnectionError:
-                sleep(5)
-                response = requests.get(img_url, stream=True)
-            if not response.ok and not response.status_code == 404:
-                print("retry thumbnail download for " + img_url)
-                sleep(5)
-                response = requests.get(img_url, stream=True)
-        else:
-            response = False
-        if not response or response.status_code == 404:
-            # use default
-            img_raw = Image.open(default_map[thumb_type])
-        else:
-            # use response
-            img_obj = response.raw
-            img_raw = Image.open(img_obj)
+
+        img_raw = Image.open(default_map[self.item_type])
 
         return img_raw
 
-    def download_vid(self, missing_thumbs, notify=True):
-        """download all missing thumbnails from list"""
-        print(f"downloading {len(missing_thumbs)} thumbnails")
-        for idx, (youtube_id, thumb_url) in enumerate(missing_thumbs):
-            folder_path = os.path.join(self.VIDEO_DIR, youtube_id[0].lower())
-            thumb_path = os.path.join(
-                self.CACHE_DIR, self.vid_thumb_path(youtube_id)
-            )
 
-            os.makedirs(folder_path, exist_ok=True)
-            img_raw = self.get_raw_img(thumb_url, "video")
+class ThumbManager(ThumbManagerBase):
+    """handle thumbnails related functions"""
 
-            width, height = img_raw.size
-            if not width / height == 16 / 9:
-                new_height = width / 16 * 9
-                offset = (height - new_height) / 2
-                img_raw = img_raw.crop((0, offset, width, height - offset))
-            img_raw.convert("RGB").save(thumb_path)
+    def __init__(self, item_id, item_type="video", fallback=False):
+        super().__init__(item_id, item_type, fallback=fallback)
 
-            progress = f"{idx + 1}/{len(missing_thumbs)}"
-            if notify:
-                mess_dict = {
-                    "status": "message:add",
-                    "level": "info",
-                    "title": "Processing Videos",
-                    "message": "Downloading Thumbnails, Progress: " + progress,
-                }
-                if idx + 1 == len(missing_thumbs):
-                    expire = 4
-                else:
-                    expire = True
+    def download(self, url):
+        """download thumbnail"""
+        print(f"{self.item_id}: download {self.item_type} thumbnail")
+        if self.item_type == "video":
+            self.download_video_thumb(url)
+        elif self.item_type == "channel":
+            self.download_channel_art(url)
+        elif self.item_type == "playlist":
+            self.download_playlist_thumb(url)
 
-                RedisArchivist().set_message(
-                    "message:add", mess_dict, expire=expire
-                )
+    def delete(self):
+        """delete thumbnail file"""
+        print(f"{self.item_id}: delete {self.item_type} thumbnail")
+        if self.item_type == "video":
+            self.delete_video_thumb()
+        elif self.item_type == "channel":
+            self.delete_channel_thumb()
+        elif self.item_type == "playlist":
+            self.delete_playlist_thumb()
 
-            if idx + 1 % 25 == 0:
-                print("thumbnail progress: " + progress)
+    def download_video_thumb(self, url, skip_existing=False):
+        """pass url for video thumbnail"""
+        folder_path = os.path.join(self.VIDEO_DIR, self.item_id[0].lower())
+        thumb_path = self.vid_thumb_path(absolute=True)
 
-    def download_chan(self, missing_channels):
-        """download needed artwork for channels"""
-        print(f"downloading {len(missing_channels)} channel artwork")
-        for channel in missing_channels:
-            channel_id, channel_thumb, channel_banner = channel
+        if skip_existing and os.path.exists(thumb_path):
+            return
 
-            thumb_path = os.path.join(
-                self.CHANNEL_DIR, channel_id + "_thumb.jpg"
-            )
-            img_raw = self.get_raw_img(channel_thumb, "icon")
-            img_raw.convert("RGB").save(thumb_path)
+        os.makedirs(folder_path, exist_ok=True)
+        img_raw = self.download_raw(url)
+        width, height = img_raw.size
 
-            banner_path = os.path.join(
-                self.CHANNEL_DIR, channel_id + "_banner.jpg"
-            )
-            img_raw = self.get_raw_img(channel_banner, "banner")
-            img_raw.convert("RGB").save(banner_path)
+        if not width / height == 16 / 9:
+            new_height = width / 16 * 9
+            offset = (height - new_height) / 2
+            img_raw = img_raw.crop((0, offset, width, height - offset))
 
-            mess_dict = {
-                "status": "message:download",
-                "level": "info",
-                "title": "Processing Channels",
-                "message": "Downloading Channel Art.",
-            }
-            key = "message:download"
-            RedisArchivist().set_message(key, mess_dict, expire=True)
+        img_raw.convert("RGB").save(thumb_path)
 
-    def download_playlist(self, missing_playlists):
-        """download needed artwork for playlists"""
-        print(f"downloading {len(missing_playlists)} playlist artwork")
-        for playlist in missing_playlists:
-            playlist_id, playlist_thumb_url = playlist
-            thumb_path = os.path.join(self.PLAYLIST_DIR, playlist_id + ".jpg")
-            img_raw = self.get_raw_img(playlist_thumb_url, "video")
-            img_raw.convert("RGB").save(thumb_path)
+    def vid_thumb_path(self, absolute=False):
+        """build expected path for video thumbnail from youtube_id"""
+        folder_name = self.item_id[0].lower()
+        folder_path = os.path.join("videos", folder_name)
+        thumb_path = os.path.join(folder_path, f"{self.item_id}.jpg")
+        if absolute:
+            thumb_path = os.path.join(self.CACHE_DIR, thumb_path)
 
-            mess_dict = {
-                "status": "message:download",
-                "level": "info",
-                "title": "Processing Playlists",
-                "message": "Downloading Playlist Art.",
-            }
-            key = "message:download"
-            RedisArchivist().set_message(key, mess_dict, expire=True)
+        return thumb_path
 
-    def get_base64_blur(self, youtube_id):
+    def download_channel_art(self, urls, skip_existing=False):
+        """pass tuple of channel thumbnails"""
+        channel_thumb, channel_banner = urls
+        self._download_channel_thumb(channel_thumb, skip_existing)
+        self._download_channel_banner(channel_banner, skip_existing)
+
+    def _download_channel_thumb(self, channel_thumb, skip_existing):
+        """download channel thumbnail"""
+
+        thumb_path = os.path.join(
+            self.CHANNEL_DIR, f"{self.item_id}_thumb.jpg"
+        )
+        self.item_type = "icon"
+
+        if skip_existing and os.path.exists(thumb_path):
+            return
+
+        img_raw = self.download_raw(channel_thumb)
+        img_raw.convert("RGB").save(thumb_path)
+
+    def _download_channel_banner(self, channel_banner, skip_existing):
+        """download channel banner"""
+
+        banner_path = os.path.join(
+            self.CHANNEL_DIR, self.item_id + "_banner.jpg"
+        )
+        self.item_type = "banner"
+        if skip_existing and os.path.exists(banner_path):
+            return
+
+        img_raw = self.download_raw(channel_banner)
+        img_raw.convert("RGB").save(banner_path)
+
+    def download_playlist_thumb(self, url, skip_existing=False):
+        """pass thumbnail url"""
+        thumb_path = os.path.join(self.PLAYLIST_DIR, f"{self.item_id}.jpg")
+        if skip_existing and os.path.exists(thumb_path):
+            return
+
+        img_raw = self.download_raw(url)
+        img_raw.convert("RGB").save(thumb_path)
+
+    def delete_video_thumb(self):
+        """delete video thumbnail if exists"""
+        thumb_path = self.vid_thumb_path()
+        to_delete = os.path.join(self.CACHE_DIR, thumb_path)
+        if os.path.exists(to_delete):
+            os.remove(to_delete)
+
+    def delete_channel_thumb(self):
+        """delete all artwork of channel"""
+        thumb = os.path.join(self.CHANNEL_DIR, f"{self.item_id}_thumb.jpg")
+        banner = os.path.join(self.CHANNEL_DIR, f"{self.item_id}_banner.jpg")
+        if os.path.exists(thumb):
+            os.remove(thumb)
+        if os.path.exists(banner):
+            os.remove(banner)
+
+    def delete_playlist_thumb(self):
+        """delete playlist thumbnail"""
+        thumb_path = os.path.join(self.PLAYLIST_DIR, f"{self.item_id}.jpg")
+        if os.path.exists(thumb_path):
+            os.remove(thumb_path)
+
+    def get_vid_base64_blur(self):
         """return base64 encoded placeholder"""
-        img_path = self.vid_thumb_path(youtube_id)
-        file_path = os.path.join(self.CACHE_DIR, img_path)
+        file_path = os.path.join(self.CACHE_DIR, self.vid_thumb_path())
         img_raw = Image.open(file_path)
         img_raw.thumbnail((img_raw.width // 20, img_raw.height // 20))
         img_blur = img_raw.filter(ImageFilter.BLUR)
@@ -264,40 +210,109 @@ class ThumbManager:
 
         return data_url
 
-    @staticmethod
-    def vid_thumb_path(youtube_id):
-        """build expected path for video thumbnail from youtube_id"""
-        folder_name = youtube_id[0].lower()
-        folder_path = os.path.join("videos", folder_name)
-        thumb_path = os.path.join(folder_path, youtube_id + ".jpg")
-        return thumb_path
 
-    def delete_vid_thumb(self, youtube_id):
-        """delete video thumbnail if exists"""
-        thumb_path = self.vid_thumb_path(youtube_id)
-        to_delete = os.path.join(self.CACHE_DIR, thumb_path)
-        if os.path.exists(to_delete):
-            os.remove(to_delete)
+class ValidatorCallback:
+    """handle callback validate thumbnails page by page"""
 
-    def delete_chan_thumb(self, channel_id):
-        """delete all artwork of channel"""
-        thumb = os.path.join(self.CHANNEL_DIR, channel_id + "_thumb.jpg")
-        banner = os.path.join(self.CHANNEL_DIR, channel_id + "_banner.jpg")
-        if os.path.exists(thumb):
-            os.remove(thumb)
-        if os.path.exists(banner):
-            os.remove(banner)
+    def __init__(self, source, index_name):
+        self.source = source
+        self.index_name = index_name
 
-    def cleanup_downloaded(self):
-        """find downloaded thumbnails without video indexed"""
-        all_thumbs = self.get_all_thumbs()
-        all_indexed = self.get_needed_thumbs()
-        all_needed_thumbs = [i[0] + ".jpg" for i in all_indexed]
-        for thumb in all_thumbs:
-            if thumb not in all_needed_thumbs:
-                # cleanup
-                youtube_id = thumb.rstrip(".jpg")
-                self.delete_vid_thumb(youtube_id)
+    def run(self):
+        """run the task for page"""
+        print(f"{self.index_name}: validate artwork")
+        if self.index_name == "ta_video":
+            self._validate_videos()
+        elif self.index_name == "ta_channel":
+            self._validate_channels()
+        elif self.index_name == "ta_playlist":
+            self._validate_playlists()
+
+    def _validate_videos(self):
+        """check if video thumbnails are correct"""
+        for video in self.source:
+            url = video["_source"]["vid_thumb_url"]
+            handler = ThumbManager(video["_source"]["youtube_id"])
+            handler.download_video_thumb(url, skip_existing=True)
+
+    def _validate_channels(self):
+        """check if all channel artwork is there"""
+        for channel in self.source:
+            urls = (
+                channel["_source"]["channel_thumb_url"],
+                channel["_source"]["channel_banner_url"],
+            )
+            handler = ThumbManager(channel["_source"]["channel_id"])
+            handler.download_channel_art(urls, skip_existing=True)
+
+    def _validate_playlists(self):
+        """check if all playlist artwork is there"""
+        for playlist in self.source:
+            url = playlist["_source"]["playlist_thumbnail"]
+            handler = ThumbManager(playlist["_source"]["playlist_id"])
+            handler.download_playlist_thumb(url, skip_existing=True)
+
+
+class ThumbValidator:
+    """validate thumbnails"""
+
+    def download_missing(self):
+        """download all missing artwork"""
+        self.download_missing_videos()
+        self.download_missing_channels()
+        self.download_missing_playlists()
+
+    def download_missing_videos(self):
+        """get all missing video thumbnails"""
+        data = {
+            "query": {"term": {"active": {"value": True}}},
+            "sort": [{"youtube_id": {"order": "asc"}}],
+            "_source": ["vid_thumb_url", "youtube_id"],
+        }
+        paginate = IndexPaginate(
+            "ta_video", data, size=5000, callback=ValidatorCallback
+        )
+        _ = paginate.get_results()
+
+    def download_missing_channels(self):
+        """get all missing channel thumbnails"""
+        data = {
+            "query": {"term": {"channel_active": {"value": True}}},
+            "sort": [{"channel_id": {"order": "asc"}}],
+            "_source": {
+                "excludes": ["channel_description", "channel_overwrites"]
+            },
+        }
+        paginate = IndexPaginate(
+            "ta_channel", data, callback=ValidatorCallback
+        )
+        _ = paginate.get_results()
+
+    def download_missing_playlists(self):
+        """get all missing playlist artwork"""
+        data = {
+            "query": {"term": {"playlist_active": {"value": True}}},
+            "sort": [{"playlist_id": {"order": "asc"}}],
+            "_source": ["playlist_id", "playlist_thumbnail"],
+        }
+        paginate = IndexPaginate(
+            "ta_playlist", data, callback=ValidatorCallback
+        )
+        _ = paginate.get_results()
+
+
+class ThumbFilesystem:
+    """filesystem tasks for thumbnails"""
+
+    CONFIG = AppConfig().config
+    CACHE_DIR = CONFIG["application"]["cache_dir"]
+    MEDIA_DIR = CONFIG["application"]["videos"]
+    VIDEO_DIR = os.path.join(CACHE_DIR, "videos")
+
+    def sync(self):
+        """embed thumbnails to mediafiles"""
+        video_list = self.get_thumb_list()
+        self._embed_thumbs(video_list)
 
     def get_thumb_list(self):
         """get list of mediafiles and matching thumbnails"""
@@ -307,10 +322,10 @@ class ThumbManager:
 
         video_list = []
         for video in pending.all_videos:
-            youtube_id = video["youtube_id"]
+            video_id = video["youtube_id"]
             media_url = os.path.join(self.MEDIA_DIR, video["media_url"])
             thumb_path = os.path.join(
-                self.CACHE_DIR, self.vid_thumb_path(youtube_id)
+                self.CACHE_DIR, ThumbManager(video_id).vid_thumb_path()
             )
             video_list.append(
                 {
@@ -322,7 +337,7 @@ class ThumbManager:
         return video_list
 
     @staticmethod
-    def write_all_thumbs(video_list):
+    def _embed_thumbs(video_list):
         """rewrite the thumbnail into media file"""
 
         counter = 1
@@ -340,15 +355,3 @@ class ThumbManager:
             if counter % 50 == 0:
                 print(f"thumbnail write progress {counter}/{len(video_list)}")
             counter = counter + 1
-
-
-def validate_thumbnails():
-    """check if all thumbnails are there and organized correctly"""
-    handler = ThumbManager()
-    thumbs_to_download = handler.get_needed_thumbs(missing_only=True)
-    handler.download_vid(thumbs_to_download)
-    missing_channels = handler.get_missing_channels()
-    handler.download_chan(missing_channels)
-    missing_playlists = handler.get_missing_playlists()
-    handler.download_playlist(missing_playlists)
-    handler.cleanup_downloaded()

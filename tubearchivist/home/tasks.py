@@ -15,7 +15,7 @@ from home.src.download.subscriptions import (
     ChannelSubscription,
     PlaylistSubscription,
 )
-from home.src.download.thumbnails import ThumbManager, validate_thumbnails
+from home.src.download.thumbnails import ThumbFilesystem, ThumbValidator
 from home.src.download.yt_dlp_handler import VideoDownloader
 from home.src.es.index_setup import backup_all_indexes, restore_from_backup
 from home.src.index.channel import YoutubeChannel
@@ -201,21 +201,19 @@ def kill_dl(task_id):
 def rescan_filesystem():
     """check the media folder for mismatches"""
     scan_filesystem()
-    validate_thumbnails()
+    ThumbValidator().download_missing()
 
 
 @shared_task(name="thumbnail_check")
 def thumbnail_check():
     """validate thumbnails"""
-    validate_thumbnails()
+    ThumbValidator().download_missing()
 
 
 @shared_task
 def re_sync_thumbs():
     """sync thumbnails to mediafiles"""
-    handler = ThumbManager()
-    video_list = handler.get_thumb_list()
-    handler.write_all_thumbs(video_list)
+    ThumbFilesystem().sync()
 
 
 @shared_task
@@ -226,9 +224,7 @@ def subscribe_to(url_str):
     for item in to_subscribe_list:
         to_sub_id = item["url"]
         if item["type"] == "playlist":
-            new_thumbs = PlaylistSubscription().process_url_str([item])
-            if new_thumbs:
-                ThumbManager().download_playlist(new_thumbs)
+            PlaylistSubscription().process_url_str([item])
             continue
 
         if item["type"] == "video":

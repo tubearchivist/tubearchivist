@@ -161,10 +161,7 @@ class PendingList(PendingIndex):
             self._parse_channel(entry["url"])
         elif entry["type"] == "playlist":
             self._parse_playlist(entry["url"])
-            new_thumbs = PlaylistSubscription().process_url_str(
-                [entry], subscribed=False
-            )
-            ThumbManager().download_playlist(new_thumbs)
+            PlaylistSubscription().process_url_str([entry], subscribed=False)
         else:
             raise ValueError(f"invalid url_type: {entry}")
 
@@ -198,7 +195,6 @@ class PendingList(PendingIndex):
         self.get_channels()
         bulk_list = []
 
-        thumb_handler = ThumbManager()
         for idx, youtube_id in enumerate(self.missing_videos):
             video_details = self.get_youtube_details(youtube_id)
             if not video_details:
@@ -209,8 +205,9 @@ class PendingList(PendingIndex):
             bulk_list.append(json.dumps(action))
             bulk_list.append(json.dumps(video_details))
 
-            thumb_needed = [(youtube_id, video_details["vid_thumb_url"])]
-            thumb_handler.download_vid(thumb_needed)
+            url = video_details["vid_thumb_url"]
+            ThumbManager(youtube_id).download_video_thumb(url)
+
             self._notify_add(idx)
 
         if bulk_list:
