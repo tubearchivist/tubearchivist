@@ -217,6 +217,7 @@ Implemented:
 ## Donate
 The best donation to **Tube Archivist** is your time, take a look at the [contribution page](CONTRIBUTING.md) to get started.  
 Second best way to support the development is to provide for caffeinated beverages:
+* [GitHub Sponsor](https://github.com/sponsors/bbilly1) become a sponsor here on GitHub
 * [Paypal.me](https://paypal.me/bbilly1) for a one time coffee
 * [Paypal Subscription](https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-03770005GR991451KMFGVPMQ) for a monthly coffee
 * [ko-fi.com](https://ko-fi.com/bbilly1) for an alternative platform
