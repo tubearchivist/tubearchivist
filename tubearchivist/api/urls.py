@@ -1,7 +1,5 @@
 """all api urls"""
 
-from django.urls import path
-
 from api.views import (
     ChannelApiListView,
     ChannelApiVideoView,
@@ -21,6 +19,7 @@ from api.views import (
     VideoProgressView,
     VideoSponsorView,
 )
+from django.urls import path
 
 urlpatterns = [
     path("ping/", PingView.as_view(), name="ping"),

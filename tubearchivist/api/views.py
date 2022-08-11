@@ -1,5 +1,7 @@
 """all API views"""
 
+from api.src.search_processor import SearchProcess
+from api.src.task_processor import TaskHandler
 from home.src.download.queue import PendingInteract
 from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.connect import ElasticWrap
@@ -19,9 +21,6 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from api.src.search_processor import SearchProcess
-from api.src.task_processor import TaskHandler
 
 
 class ApiBaseView(APIView):
