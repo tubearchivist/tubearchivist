@@ -41,7 +41,6 @@ class YoutubePlaylist(YouTubeItem):
             self.process_youtube_meta()
             self.get_entries()
             self.json_data["playlist_entries"] = self.all_members
-            self.get_playlist_art()
             self.json_data["playlist_subscribed"] = subscribed
 
     def process_youtube_meta(self):
@@ -81,12 +80,10 @@ class YoutubePlaylist(YouTubeItem):
 
         self.all_members = all_members
 
-    @staticmethod
-    def get_playlist_art():
+    def get_playlist_art(self):
         """download artwork of playlist"""
-        thumbnails = ThumbManager()
-        missing_playlists = thumbnails.get_missing_playlists()
-        thumbnails.download_playlist(missing_playlists)
+        url = self.json_data["playlist_thumbnail"]
+        ThumbManager(self.youtube_id, item_type="playlist").download(url)
 
     def add_vids_to_playlist(self):
         """sync the playlist id to videos"""
@@ -145,17 +142,15 @@ class YoutubePlaylist(YouTubeItem):
             previous_item = False
         else:
             previous_item = all_entries[current_idx - 1]
-            prev_thumb = ThumbManager().vid_thumb_path(
-                previous_item["youtube_id"]
-            )
-            previous_item["vid_thumb"] = prev_thumb
+            prev_id = previous_item["youtube_id"]
+            previous_item["vid_thumb"] = ThumbManager(prev_id).vid_thumb_path()
 
         if current_idx == len(all_entries) - 1:
             next_item = False
         else:
             next_item = all_entries[current_idx + 1]
-            next_thumb = ThumbManager().vid_thumb_path(next_item["youtube_id"])
-            next_item["vid_thumb"] = next_thumb
+            next_id = next_item["youtube_id"]
+            next_item["vid_thumb"] = ThumbManager(next_id).vid_thumb_path()
 
         self.nav = {
             "playlist_meta": {

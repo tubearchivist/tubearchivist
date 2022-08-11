@@ -181,10 +181,10 @@ class Reindex:
 
         video.upload_to_es()
 
-        thumb_handler = ThumbManager()
-        thumb_handler.delete_vid_thumb(youtube_id)
-        to_download = (youtube_id, video.json_data["vid_thumb_url"])
-        thumb_handler.download_vid([to_download], notify=False)
+        thumb_handler = ThumbManager(youtube_id)
+        thumb_handler.delete_video_thumb()
+        thumb_handler.download_video_thumb(video.json_data["vid_thumb_url"])
+
         return
 
     @staticmethod

@@ -425,18 +425,23 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         self.channel_id = False
         self.video_overwrites = video_overwrites
         self.es_path = f"{self.index_name}/_doc/{youtube_id}"
+        self.offline_import = False
 
-    def build_json(self):
+    def build_json(self, youtube_meta_overwrite=False, media_path=False):
         """build json dict of video"""
         self.get_from_youtube()
-        if not self.youtube_meta:
+        if not self.youtube_meta and not youtube_meta_overwrite:
             return
+
+        if not self.youtube_meta:
+            self.youtube_meta = youtube_meta_overwrite
+            self.offline_import = True
 
         self._process_youtube_meta()
         self._add_channel()
         self._add_stats()
         self.add_file_path()
-        self.add_player()
+        self.add_player(media_path)
         if self.config["downloads"]["integrate_ryd"]:
             self._get_ryd_stats()
 
@@ -487,7 +492,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     def _add_channel(self):
         """add channel dict to video json_data"""
         channel = ta_channel.YoutubeChannel(self.channel_id)
-        channel.build_json(upload=True)
+        channel.build_json(upload=True, fallback=self.youtube_meta)
         self.json_data.update({"channel": channel.json_data})
 
     def _add_stats(self):
@@ -495,13 +500,14 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         # likes
         like_count = self.youtube_meta.get("like_count", 0)
         dislike_count = self.youtube_meta.get("dislike_count", 0)
+        average_rating = self.youtube_meta.get("average_rating", 0)
         self.json_data.update(
             {
                 "stats": {
                     "view_count": self.youtube_meta["view_count"],
                     "like_count": like_count,
                     "dislike_count": dislike_count,
-                    "average_rating": self.youtube_meta["average_rating"],
+                    "average_rating": average_rating,
                 }
             }
         )
@@ -518,8 +524,28 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
         raise FileNotFoundError
 
-    def add_player(self):
+    def add_player(self, media_path=False):
         """add player information for new videos"""
+        vid_path = self._get_vid_path(media_path)
+
+        duration_handler = DurationConverter()
+        duration = duration_handler.get_sec(vid_path)
+        duration_str = duration_handler.get_str(duration)
+        self.json_data.update(
+            {
+                "player": {
+                    "watched": False,
+                    "duration": duration,
+                    "duration_str": duration_str,
+                }
+            }
+        )
+
+    def _get_vid_path(self, media_path=False):
+        """get path of media file"""
+        if media_path:
+            return media_path
+
         try:
             # when indexing from download task
             vid_path = self.build_dl_cache_path()
@@ -535,18 +561,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             else:
                 raise FileNotFoundError("could not find video file") from err
 
-        duration_handler = DurationConverter()
-        duration = duration_handler.get_sec(vid_path)
-        duration_str = duration_handler.get_str(duration)
-        self.json_data.update(
-            {
-                "player": {
-                    "watched": False,
-                    "duration": duration,
-                    "duration_str": duration_str,
-                }
-            }
-        )
+        return vid_path
 
     def add_file_path(self):
         """build media_url for where file will be located"""

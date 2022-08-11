@@ -74,7 +74,7 @@ class SearchProcess:
         media_url = urllib.parse.quote(video_dict["media_url"])
         vid_last_refresh = date_praser(video_dict["vid_last_refresh"])
         published = date_praser(video_dict["published"])
-        vid_thumb_url = ThumbManager().vid_thumb_path(video_id)
+        vid_thumb_url = ThumbManager(video_id).vid_thumb_path()
         channel = self._process_channel(video_dict["channel"])
 
         if "subtitles" in video_dict:
@@ -113,7 +113,7 @@ class SearchProcess:
     def _process_download(self, download_dict):
         """run on single download item"""
         video_id = download_dict["youtube_id"]
-        vid_thumb_url = ThumbManager().vid_thumb_path(video_id)
+        vid_thumb_url = ThumbManager(video_id).vid_thumb_path()
         published = date_praser(download_dict["published"])
 
         download_dict.update(

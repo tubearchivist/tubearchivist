@@ -119,7 +119,7 @@ class SearchHandler:
 
         if "vid_thumb_url" in hit_keys:
             youtube_id = hit["source"]["youtube_id"]
-            thumb_path = ThumbManager().vid_thumb_path(youtube_id)
+            thumb_path = ThumbManager(youtube_id).vid_thumb_path()
             hit["source"]["vid_thumb_url"] = thumb_path
 
         if "channel_last_refresh" in hit_keys:
@@ -138,7 +138,7 @@ class SearchHandler:
 
         if "subtitle_fragment_id" in hit_keys:
             youtube_id = hit["source"]["youtube_id"]
-            thumb_path = ThumbManager().vid_thumb_path(youtube_id)
+            thumb_path = ThumbManager(youtube_id).vid_thumb_path()
             hit["source"]["vid_thumb_url"] = f"/cache/{thumb_path}"
 
         return hit

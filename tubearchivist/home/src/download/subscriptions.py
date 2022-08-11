@@ -5,6 +5,7 @@ Functionality:
 """
 
 from home.src.download import queue  # partial import
+from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import IndexPaginate
 from home.src.index.channel import YoutubeChannel
@@ -129,11 +130,9 @@ class PlaylistSubscription:
         all_indexed = IndexPaginate("ta_video", data).get_results()
         all_youtube_ids = [i["youtube_id"] for i in all_indexed]
 
-        new_thumbs = []
         for idx, playlist in enumerate(new_playlists):
-            url_type = playlist["type"]
             playlist_id = playlist["url"]
-            if not url_type == "playlist":
+            if not playlist["type"] == "playlist":
                 print(f"{playlist_id} not a playlist, skipping...")
                 continue
 
@@ -144,8 +143,11 @@ class PlaylistSubscription:
             playlist_h.upload_to_es()
             playlist_h.add_vids_to_playlist()
             self.channel_validate(playlist_h.json_data["playlist_channel_id"])
-            thumb = playlist_h.json_data["playlist_thumbnail"]
-            new_thumbs.append((playlist_id, thumb))
+
+            url = playlist_h.json_data["playlist_thumbnail"]
+            thumb = ThumbManager(playlist_id, item_type="playlist")
+            thumb.download_playlist_thumb(url)
+
             # notify
             message = {
                 "status": "message:subplaylist",
@@ -156,8 +158,6 @@ class PlaylistSubscription:
             RedisArchivist().set_message(
                 "message:subplaylist", message=message, expire=True
             )
-
-        return new_thumbs
 
     @staticmethod
     def channel_validate(channel_id):

@@ -220,3 +220,12 @@ Second best way to support the development is to provide for caffeinated beverag
 * [Paypal.me](https://paypal.me/bbilly1) for a one time coffee
 * [Paypal Subscription](https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-03770005GR991451KMFGVPMQ) for a monthly coffee
 * [ko-fi.com](https://ko-fi.com/bbilly1) for an alternative platform
+
+
+## Sponsor
+Big thank you to [Digitalocean](https://www.digitalocean.com/) for generously donating credit for the tubearchivist.com VPS and buildserver. 
+<p>
+  <a href="https://www.digitalocean.com/">
+    <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/PoweredByDO/DO_Powered_by_Badge_blue.svg" width="201px">
+  </a>
+</p>
