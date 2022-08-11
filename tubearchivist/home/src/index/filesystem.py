@@ -250,6 +250,10 @@ class ImportFolderScanner:
     def process_videos(self):
         """loop through all videos"""
         for current_video in self.to_import:
+            if not current_video["media"]:
+                print(f"{current_video}: no matching media file found.")
+                raise ValueError
+
             self._detect_youtube_id(current_video)
             self._dump_thumb(current_video)
             self._convert_thumb(current_video)
