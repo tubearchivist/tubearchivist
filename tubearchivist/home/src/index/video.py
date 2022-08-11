@@ -492,7 +492,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     def _add_channel(self):
         """add channel dict to video json_data"""
         channel = ta_channel.YoutubeChannel(self.channel_id)
-        channel.build_json(upload=True)
+        channel.build_json(upload=True, fallback=self.youtube_meta)
         self.json_data.update({"channel": channel.json_data})
 
     def _add_stats(self):
@@ -500,13 +500,14 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         # likes
         like_count = self.youtube_meta.get("like_count", 0)
         dislike_count = self.youtube_meta.get("dislike_count", 0)
+        average_rating = self.youtube_meta.get("average_rating", 0)
         self.json_data.update(
             {
                 "stats": {
                     "view_count": self.youtube_meta["view_count"],
                     "like_count": like_count,
                     "dislike_count": dislike_count,
-                    "average_rating": self.youtube_meta["average_rating"],
+                    "average_rating": average_rating,
                 }
             }
         )

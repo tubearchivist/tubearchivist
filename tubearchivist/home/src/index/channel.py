@@ -173,30 +173,71 @@ class YoutubeChannel(YouTubeItem):
         self.es_path = f"{self.index_name}/_doc/{youtube_id}"
         self.all_playlists = False
 
-    def build_json(self, upload=False):
+    def build_json(self, upload=False, fallback=False):
         """get from es or from youtube"""
         self.get_from_es()
         if self.json_data:
             return
 
-        self.get_from_youtube()
+        self.get_from_youtube(fallback)
+
         if upload:
             self.upload_to_es()
         return
 
-    def get_from_youtube(self):
+    def get_from_youtube(self, fallback=False):
         """use bs4 to scrape channel about page"""
         self.json_data = ChannelScraper(self.youtube_id).get_json()
+
+        if not self.json_data and fallback:
+            self._video_fallback(fallback)
+
         self.get_channel_art()
+
+    def _video_fallback(self, fallback):
+        """use video metadata as fallback"""
+        print(f"{self.youtube_id}: fallback to video metadata")
+        self.json_data = {
+            "channel_active": False,
+            "channel_last_refresh": int(datetime.now().strftime("%s")),
+            "channel_subs": fallback.get("channel_follower_count", 0),
+            "channel_name": fallback["uploader"],
+            "channel_banner_url": False,
+            "channel_tvart_url": False,
+            "channel_id": self.youtube_id,
+            "channel_subscribed": False,
+            "channel_description": False,
+            "channel_thumb_url": False,
+            "channel_views": 0,
+        }
+        self._info_json_fallback()
+
+    def _info_json_fallback(self):
+        """read channel info.json for additional metadata"""
+        info_json = os.path.join(
+            self.config["application"]["cache_dir"],
+            "import",
+            f"{self.youtube_id}.info.json",
+        )
+        if os.path.exists(info_json):
+            print(f"{self.youtube_id}: read info.json file")
+            with open(info_json, "r", encoding="utf-8") as f:
+                content = json.loads(f.read())
+
+            self.json_data.update(
+                {
+                    "channel_subs": content["channel_follower_count"],
+                    "channel_description": content["description"],
+                }
+            )
 
     def get_channel_art(self):
         """download channel art for new channels"""
-        channel_id = self.youtube_id
         urls = (
             self.json_data["channel_thumb_url"],
             self.json_data["channel_banner_url"],
         )
-        ThumbManager(channel_id, item_type="channel").download(urls)
+        ThumbManager(self.youtube_id, item_type="channel").download(urls)
 
     def sync_to_videos(self):
         """sync new channel_dict to all videos of channel"""

@@ -467,7 +467,7 @@ class ManualImport:
         """run all"""
         json_data = self.index_metadata()
         self._move_to_archive(json_data)
-        self._cleanup()
+        self._cleanup(json_data)
 
     def index_metadata(self):
         """get metadata from yt or json"""
@@ -517,7 +517,7 @@ class ManualImport:
         new_path = os.path.join(channel_folder, file)
         shutil.move(old_path, new_path, copy_function=shutil.copyfile)
 
-    def _cleanup(self):
+    def _cleanup(self, json_data):
         """cleanup leftover files"""
         if os.path.exists(self.current_video["metadata"]):
             os.remove(self.current_video["metadata"])
@@ -528,6 +528,14 @@ class ManualImport:
         for subtitle_file in self.current_video["subtitle"]:
             if os.path.exists(subtitle_file):
                 os.remove(subtitle_file)
+
+        channel_info = os.path.join(
+            self.config["application"]["cache_dir"],
+            "import",
+            f"{json_data['channel']['channel_id']}.info.json",
+        )
+        if os.path.exists(channel_info):
+            os.remove(channel_info)
 
 
 def scan_filesystem():
