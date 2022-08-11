@@ -9,7 +9,6 @@ from home.src.download.subscriptions import (
     ChannelSubscription,
     PlaylistSubscription,
 )
-from home.src.frontend.searching import SearchForm
 from home.src.frontend.watched import WatchState
 from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
@@ -74,7 +73,6 @@ class PostData:
             "db-backup": self._db_backup,
             "db-restore": self._db_restore,
             "fs-rescan": self._fs_rescan,
-            "multi_search": self._multi_search,
             "delete-video": self._delete_video,
             "delete-channel": self._delete_channel,
             "delete-playlist": self._delete_playlist,
@@ -285,13 +283,6 @@ class PostData:
         print("start filesystem scan")
         rescan_filesystem.delay()
         return {"success": True}
-
-    def _multi_search(self):
-        """search through all indexes"""
-        search_query = self.exec_val
-        print("searching for: " + search_query)
-        search_results = SearchForm().multi_search(search_query)
-        return search_results
 
     def _delete_video(self):
         """delete media file, metadata and thumb"""
