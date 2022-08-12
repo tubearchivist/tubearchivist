@@ -162,8 +162,19 @@ def run_manual_import():
 @shared_task(name="run_backup")
 def run_backup(reason="auto"):
     """called from settings page, dump backup to zip file"""
-    backup_all_indexes(reason)
-    print("backup finished")
+    have_lock = False
+    my_lock = RedisArchivist().get_lock("run_backup")
+
+    try:
+        have_lock = my_lock.acquire(blocking=False)
+        if have_lock:
+            backup_all_indexes(reason)
+        else:
+            print("Did not acquire lock for backup task.")
+    finally:
+        if have_lock:
+            my_lock.release()
+            print("backup finished")
 
 
 @shared_task
