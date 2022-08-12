@@ -631,8 +631,8 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             return False
 
         dislikes = {
-            "dislike_count": result["dislikes"],
-            "average_rating": result["rating"],
+            "dislike_count": result.get("dislikes", 0),
+            "average_rating": result.get("rating", 0),
         }
         self.json_data["stats"].update(dislikes)
 
