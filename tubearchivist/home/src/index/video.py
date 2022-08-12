@@ -119,6 +119,7 @@ class YoutubeSubtitle:
     def download_subtitles(self, relevant_subtitles):
         """download subtitle files to archive"""
         videos_base = self.video.config["application"]["videos"]
+        indexed = []
         for subtitle in relevant_subtitles:
             dest_path = os.path.join(videos_base, subtitle["media_url"])
             source = subtitle["source"]
@@ -133,11 +134,18 @@ class YoutubeSubtitle:
 
             parser = SubtitleParser(response.text, lang, source)
             parser.process()
+            if not parser.all_cues:
+                continue
+
             subtitle_str = parser.get_subtitle_str()
             self._write_subtitle_file(dest_path, subtitle_str)
             if self.video.config["downloads"]["subtitle_index"]:
                 query_str = parser.create_bulk_import(self.video, source)
                 self._index_subtitle(query_str)
+
+            indexed.append(subtitle)
+
+        return indexed
 
     @staticmethod
     def _write_subtitle_file(dest_path, subtitle_str):
@@ -188,11 +196,15 @@ class SubtitleParser:
 
     def process(self):
         """extract relevant que data"""
+        self.all_cues = []
         all_events = self.subtitle_raw.get("events")
+
+        if not all_events:
+            return
+
         if self.source == "auto":
             all_events = self._flat_auto_caption(all_events)
 
-        self.all_cues = []
         for idx, event in enumerate(all_events):
             if "dDurationMs" not in event or "segs" not in event:
                 # some events won't have a duration or segs
@@ -649,8 +661,8 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         handler = YoutubeSubtitle(self)
         subtitles = handler.get_subtitles()
         if subtitles:
-            self.json_data["subtitles"] = subtitles
-            handler.download_subtitles(relevant_subtitles=subtitles)
+            indexed = handler.download_subtitles(relevant_subtitles=subtitles)
+            self.json_data["subtitles"] = indexed
 
     def update_media_url(self):
         """update only media_url in es for reindex channel rename"""
