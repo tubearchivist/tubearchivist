@@ -159,12 +159,14 @@ class MultiSearchForm(forms.Form):
 class AddToQueueForm(forms.Form):
     """text area form to add to downloads"""
 
+    HELP_TEXT = "Enter at least one video, channel or playlist id/URL here..."
+
     vid_url = forms.CharField(
         label=False,
         widget=forms.Textarea(
             attrs={
                 "rows": 4,
-                "placeholder": "Enter Video Urls or IDs here...",
+                "placeholder": HELP_TEXT,
             }
         ),
     )
