@@ -31,7 +31,7 @@ body:
     id: help
     attributes:
       label: Your help is needed!
-      description: This project is ambitious as it is, please help implement your feature.
+      description: This project is ambitious as it is, please contribute.
       options:
-        - label: Yes I can help!
+        - label: Yes I can help with this feature request!
           required: false
