@@ -124,7 +124,7 @@ Before we setup TubeArchivist, we need to setup the directories/folders. You are
    4. Click on the `Create🔽` button and choose *create Folder*.
    5. **Name** the folder "media".
 #### 7. Confirm Folder Structure
-Once all of the folders have been created, it should have a folder structure within Docker\TubeArchivist that includes "cache", "es", "media", and "redis" fodlers.
+Once all of the folders have been created, it should have a folder structure within Docker\TubeArchivist that includes "cache", "es", "media", and "redis" folders.
 ![Synology - Docker Folder Structure](assets/Synology_0.2.0_Docker-Folder-Structure.png)
 
 #### 8. Change Permissions - CLI Required
@@ -220,7 +220,7 @@ Once all of the folders have been created, it should have a folder structure wit
     9. In the **Port Settings** tab, replace the "Auto" entry under **Local Port** with the port that will be used to connect to TubeArchivist (default is 8000).
     10. In the **Links** tab, select the "tubearchivist-es" container from the **Container Name** dropdown and provide it the same alias, "tubearchivist-es".
     11. In the **Links** tab, select the "tubearchivist-redis" container from the **Container Name** dropdown and provide it the same alias, "tubearchivist-redis".
-    12. In the **Environment** tab, add in the following TubeArchivist specific environment variables that may apply.
+    12. In the **Environment** tab, add in the following TubeArchivist specific environment variables that may apply. **Change the variables as-is appropriate to your use case. Follow the [README section](https://github.com/tubearchivist/tubearchivist#tube-archivist) for details on what to set each variable.**
         - "TA_HOST=synology.local"
         - "ES_URL=http://tubearchivist-es:9200"
         - "REDIS_HOST=tubearchivist-redis"
