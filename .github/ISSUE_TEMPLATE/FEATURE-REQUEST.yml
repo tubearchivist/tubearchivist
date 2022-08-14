@@ -1,0 +1,37 @@
+name: Feature Request
+description: Create a new feature request
+title: "[Feature Request]: "
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to help improve this project!
+
+  - type: checkboxes
+    id: already
+    attributes:
+      label: Already implemented?
+      options:
+        - label: I have read through the [wiki](https://github.com/tubearchivist/tubearchivist/wiki).
+          required: true
+        - label: I understand the [scope](https://github.com/tubearchivist/tubearchivist/wiki/FAQ) of this project and am aware of the [known limitations](https://github.com/tubearchivist/tubearchivist#known-limitations).
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Your Feature Request
+      value: "## Is your feature request related to a problem? Please describe.\n\n## Describe the solution you'd like\n\n## Additional context"
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Your help is needed!
+      description: This project is ambitious as it is, please contribute.
+      options:
+        - label: Yes I can help with this feature request!
+          required: false
