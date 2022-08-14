@@ -1,0 +1,45 @@
+name: Installation Help
+description: There is an issue with installing or configuring Tube Archivist
+title: "[Installation]: "
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is most likely not the best place to ask for installation help. There is a helpful community on [Discord](https://github.com/tubearchivist/tubearchivist#connect).
+
+  - type: checkboxes
+    id: instructions
+    attributes:
+      label: Installation instructions
+      options:
+        - label: I have read and understand the [installation instructions](https://github.com/tubearchivist/tubearchivist#installing-and-updating).
+          required: true
+        - label: My issue is not described in the [potential pitfalls](https://github.com/tubearchivist/tubearchivist#potential-pitfalls) section.
+          required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: On what operating system do you want to install Tube Archivist on?
+      placeholder: ex. Linux, Unraid, Synology...
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Your installation or setup question
+      placeholder: Describe your issue
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant Docker logs. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+    validations:
+      required: true
