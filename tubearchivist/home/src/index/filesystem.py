@@ -20,6 +20,7 @@ from home.src.ta.config import AppConfig
 from home.src.ta.helper import clean_string, ignore_filelist
 from home.src.ta.ta_redis import RedisArchivist
 from PIL import Image, ImageFile
+from yt_dlp.utils import ISO639Utils
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -257,6 +258,7 @@ class ImportFolderScanner:
             self._detect_youtube_id(current_video)
             self._dump_thumb(current_video)
             self._convert_thumb(current_video)
+            self._get_subtitles(current_video)
             self._convert_video(current_video)
 
             ManualImport(current_video, self.CONFIG).run()
@@ -387,6 +389,34 @@ class ImportFolderScanner:
 
         os.remove(thumb_path)
         current_video["thumb"] = new_path
+
+    def _get_subtitles(self, current_video):
+        """find all subtitles in media file"""
+        if current_video["subtitle"]:
+            return
+
+        media_path = current_video["media"]
+        streams = self._get_streams(media_path)
+        base_path, ext = os.path.splitext(media_path)
+
+        if ext == ".webm":
+            print(f"{media_path}: subtitle extract from webm not supported")
+            return
+
+        for idx, stream in enumerate(streams["streams"]):
+            if stream["codec_type"] == "subtitle":
+                lang = ISO639Utils.long2short(stream["tags"]["language"])
+                sub_path = f"{base_path}.{lang}.vtt"
+                self._dump_subtitle(idx, media_path, sub_path)
+                current_video["subtitle"].append(sub_path)
+
+    @staticmethod
+    def _dump_subtitle(idx, media_path, sub_path):
+        """extract subtitle from media file"""
+        subprocess.run(
+            ["ffmpeg", "-i", media_path, "-map", f"0:{idx}", sub_path],
+            check=True,
+        )
 
     @staticmethod
     def _get_streams(media_path):
