@@ -511,7 +511,7 @@ class ManualImport:
             print(f"{video_id}: manual import failed, and no metadata found.")
             raise ValueError
 
-        video.check_subtitles()
+        video.check_subtitles(subtitle_files=self.current_video["subtitle"])
         video.upload_to_es()
 
         if video.offline_import and self.current_video["thumb"]:
@@ -546,6 +546,12 @@ class ManualImport:
         old_path = self.current_video["media"]
         new_path = os.path.join(channel_folder, file)
         shutil.move(old_path, new_path, copy_function=shutil.copyfile)
+
+        base_name, _ = os.path.splitext(new_path)
+        for old_path in self.current_video["subtitle"]:
+            lang = old_path.split(".")[-2]
+            new_path = f"{base_name}.{lang}.vtt"
+            shutil.move(old_path, new_path, copy_function=shutil.copyfile)
 
     def _cleanup(self, json_data):
         """cleanup leftover files"""

@@ -344,13 +344,37 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         if sponsorblock:
             self.json_data["sponsorblock"] = sponsorblock
 
-    def check_subtitles(self):
+    def check_subtitles(self, subtitle_files=False):
         """optionally add subtitles"""
+        if self.offline_import and subtitle_files:
+            indexed = self._offline_subtitles(subtitle_files)
+            self.json_data["subtitles"] = indexed
+            return
+
         handler = YoutubeSubtitle(self)
         subtitles = handler.get_subtitles()
         if subtitles:
             indexed = handler.download_subtitles(relevant_subtitles=subtitles)
             self.json_data["subtitles"] = indexed
+
+    def _offline_subtitles(self, subtitle_files):
+        """import offline subtitles"""
+        base_name, _ = os.path.splitext(self.json_data["media_url"])
+        subtitles = []
+        for subtitle in subtitle_files:
+            lang = subtitle.split(".")[-2]
+            subtitle_media_url = f"{base_name}.{lang}.vtt"
+            to_add = {
+                "ext": "vtt",
+                "url": False,
+                "name": lang,
+                "lang": lang,
+                "source": "file",
+                "media_url": subtitle_media_url,
+            }
+            subtitles.append(to_add)
+
+        return subtitles
 
     def update_media_url(self):
         """update only media_url in es for reindex channel rename"""
