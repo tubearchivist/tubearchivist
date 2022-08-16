@@ -40,13 +40,13 @@ class ThumbManagerBase:
 
         for i in range(3):
             try:
-                response = requests.get(url, stream=True)
+                response = requests.get(url, stream=True, timeout=5)
                 if response.ok:
                     return Image.open(response.raw)
                 if response.status_code == 404:
                     return self.get_fallback()
 
-            except ConnectionError:
+            except requests.exceptions.RequestException:
                 print(f"{self.item_id}: retry thumbnail download {url}")
                 sleep((i + 1) ** i)
 

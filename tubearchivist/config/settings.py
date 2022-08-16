@@ -33,7 +33,13 @@ SECRET_KEY = PW_HASH.hexdigest()
 DEBUG = bool(environ.get("DJANGO_DEBUG"))
 
 ALLOWED_HOSTS = [i.strip() for i in environ.get("TA_HOST").split()]
-CSRF_TRUSTED_ORIGINS = [i.strip() for i in environ.get("TA_HOST").split()]
+
+CSRF_TRUSTED_ORIGINS = []
+for host in ALLOWED_HOSTS:
+    if host.startswith("http://") or host.startswith("https://"):
+        CSRF_TRUSTED_ORIGINS.append(host)
+    else:
+        CSRF_TRUSTED_ORIGINS.append(f"http://{host}")
 
 
 # Application definition
@@ -87,6 +93,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 if bool(environ.get("TA_LDAP")):
+    # pylint: disable=global-at-module-level
     global AUTH_LDAP_SERVER_URI
     AUTH_LDAP_SERVER_URI = environ.get("TA_LDAP_SERVER_URI")
 
@@ -97,6 +104,7 @@ if bool(environ.get("TA_LDAP")):
     AUTH_LDAP_BIND_PASSWORD = environ.get("TA_LDAP_BIND_PASSWORD")
 
     global AUTH_LDAP_USER_SEARCH
+    # pylint: disable=no-member
     AUTH_LDAP_USER_SEARCH = LDAPSearch(
         environ.get("TA_LDAP_USER_BASE"),
         ldap.SCOPE_SUBTREE,

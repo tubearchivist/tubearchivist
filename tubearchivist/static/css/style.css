@@ -459,6 +459,8 @@ video:-webkit-full-screen {
 .video-item.list {
     display: grid;
     grid-template-columns: 26% auto;
+    background-color: var(--highlight-bg);
+    align-items: center;
 }
 
 .video-progress-bar {
@@ -508,8 +510,7 @@ video:-webkit-full-screen {
 
 .video-desc.list {
     padding: 10px;
-    height: unset;
-    background-color: var(--highlight-bg);
+    height: 100%;
     display: flex;
     flex-wrap: wrap-reverse;
     align-content: center;

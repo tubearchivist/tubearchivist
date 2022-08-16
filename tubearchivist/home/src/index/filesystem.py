@@ -20,6 +20,7 @@ from home.src.ta.config import AppConfig
 from home.src.ta.helper import clean_string, ignore_filelist
 from home.src.ta.ta_redis import RedisArchivist
 from PIL import Image, ImageFile
+from yt_dlp.utils import ISO639Utils
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -257,6 +258,7 @@ class ImportFolderScanner:
             self._detect_youtube_id(current_video)
             self._dump_thumb(current_video)
             self._convert_thumb(current_video)
+            self._get_subtitles(current_video)
             self._convert_video(current_video)
 
             ManualImport(current_video, self.CONFIG).run()
@@ -314,7 +316,7 @@ class ImportFolderScanner:
         new_path = False
         if ext == ".mkv":
             idx, thumb_type = self._get_mkv_thumb_stream(media_path)
-            if idx:
+            if idx is not None:
                 new_path = self.dump_mpv_thumb(media_path, idx, thumb_type)
 
         elif ext == ".mp4":
@@ -338,7 +340,7 @@ class ImportFolderScanner:
                 _, ext = os.path.splitext(tags["filename"])
                 return idx, ext
 
-        return False, False
+        return None, None
 
     @staticmethod
     def dump_mpv_thumb(media_path, idx, thumb_type):
@@ -387,6 +389,34 @@ class ImportFolderScanner:
 
         os.remove(thumb_path)
         current_video["thumb"] = new_path
+
+    def _get_subtitles(self, current_video):
+        """find all subtitles in media file"""
+        if current_video["subtitle"]:
+            return
+
+        media_path = current_video["media"]
+        streams = self._get_streams(media_path)
+        base_path, ext = os.path.splitext(media_path)
+
+        if ext == ".webm":
+            print(f"{media_path}: subtitle extract from webm not supported")
+            return
+
+        for idx, stream in enumerate(streams["streams"]):
+            if stream["codec_type"] == "subtitle":
+                lang = ISO639Utils.long2short(stream["tags"]["language"])
+                sub_path = f"{base_path}.{lang}.vtt"
+                self._dump_subtitle(idx, media_path, sub_path)
+                current_video["subtitle"].append(sub_path)
+
+    @staticmethod
+    def _dump_subtitle(idx, media_path, sub_path):
+        """extract subtitle from media file"""
+        subprocess.run(
+            ["ffmpeg", "-i", media_path, "-map", f"0:{idx}", sub_path],
+            check=True,
+        )
 
     @staticmethod
     def _get_streams(media_path):
@@ -481,7 +511,7 @@ class ManualImport:
             print(f"{video_id}: manual import failed, and no metadata found.")
             raise ValueError
 
-        video.check_subtitles()
+        video.check_subtitles(subtitle_files=self.current_video["subtitle"])
         video.upload_to_es()
 
         if video.offline_import and self.current_video["thumb"]:
@@ -516,6 +546,12 @@ class ManualImport:
         old_path = self.current_video["media"]
         new_path = os.path.join(channel_folder, file)
         shutil.move(old_path, new_path, copy_function=shutil.copyfile)
+
+        base_name, _ = os.path.splitext(new_path)
+        for old_path in self.current_video["subtitle"]:
+            lang = old_path.split(".")[-2]
+            new_path = f"{base_name}.{lang}.vtt"
+            shutil.move(old_path, new_path, copy_function=shutil.copyfile)
 
     def _cleanup(self, json_data):
         """cleanup leftover files"""

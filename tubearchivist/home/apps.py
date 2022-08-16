@@ -77,6 +77,7 @@ class StartupCheck:
             "dl_queue",
             "dl_queue_id",
             "rescan",
+            "run_backup",
         ]
         for lock in all_locks:
             response = self.redis_con.del_message(lock)

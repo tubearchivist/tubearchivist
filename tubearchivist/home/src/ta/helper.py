@@ -158,12 +158,12 @@ class UrlListParser:
         if parsed.query:
             # detect from query string
             query_parsed = parse_qs(parsed.query)
-            if "v" in query_parsed.keys():
+            if "v" in query_parsed:
                 youtube_id = query_parsed["v"][0]
                 _ = self.find_valid_id(youtube_id)
                 return youtube_id, "video"
 
-            if "list" in query_parsed.keys():
+            if "list" in query_parsed:
                 youtube_id = query_parsed["list"][0]
                 return youtube_id, "playlist"
 
@@ -202,13 +202,19 @@ class UrlListParser:
             "playlistend": 0,
         }
         url_info = YtWrap(obs_request).extract(url)
-        try:
-            channel_id = url_info["channel_id"]
-        except KeyError as error:
-            print(f"failed to extract channel id from {url}")
-            raise ValueError from error
+        channel_id = url_info.get("channel_id", False)
+        if channel_id:
+            return channel_id
 
-        return channel_id
+        url = url_info.get("url", False)
+        if url:
+            # handle old channel name redirect with url path split
+            channel_id = urlparse(url).path.strip("/").split("/")[1]
+
+            return channel_id
+
+        print(f"failed to extract channel id from {url}")
+        raise ValueError
 
 
 class DurationConverter:
