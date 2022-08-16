@@ -316,7 +316,7 @@ class ImportFolderScanner:
         new_path = False
         if ext == ".mkv":
             idx, thumb_type = self._get_mkv_thumb_stream(media_path)
-            if idx:
+            if idx is not None:
                 new_path = self.dump_mpv_thumb(media_path, idx, thumb_type)
 
         elif ext == ".mp4":
@@ -340,7 +340,7 @@ class ImportFolderScanner:
                 _, ext = os.path.splitext(tags["filename"])
                 return idx, ext
 
-        return False, False
+        return None, None
 
     @staticmethod
     def dump_mpv_thumb(media_path, idx, thumb_type):
