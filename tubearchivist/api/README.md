@@ -5,6 +5,36 @@ Note:
 - This is very early stages and will change!
 - Check the commit history to see if a documented feature is already in your release
 
+## Table of contents
+- [Authentication](#authentication)
+- [Pagination](#pagination)
+
+**Video**
+- [Video List](#video-list-view)
+- [Video Single](#video-item-view)
+- [Video Single Progress](#video-progress-view)
+- [Video Single Sponsorblock](#sponsor-block-view) WIP
+
+**Channel**
+- [Channel List](#channel-list-view)
+- [Channel Single](#channel-item-view)
+- [Channel Video List](#channel-videos-view)
+
+**Playlist**
+- [Playlist List](#playlist-list-view)
+- [Playlist Single](#playlist-item-view)
+- [Playlist Videos List](#playlist-videos-view)
+
+**Download queue**
+- [Download Queue List](#download-queue-list-view)
+- [Download Queue Single](#download-queue-item-view)
+
+**Additional**
+- [Login](#login-view)
+- [Task](#task-view) WIP
+- [Cookie](#cookie-view)
+- [Ping](#ping-view)
+
 ## Authentication
 API token will get automatically created, accessible on the settings page. Token needs to be passed as an authorization header with every request. Additionally session based authentication is enabled too: When you are logged into your TubeArchivist instance, you'll have access to the api in the browser for testing.
 
@@ -25,34 +55,16 @@ response = requests.get(url, headers=headers)
 
 ## Pagination
 The list views return a paginate object with the following keys:
-- page_size: int current page size set in config
-- page_from: int first result idx
-- prev_pages: array of ints of previous pages, if available
-- current_page: int current page from query
-- max_hits: reached: bool if max of 10k results is reached
-- last_page: int of last page link
-- next_pages: array of ints of next pages
-- total_hits: int total results
+- page_size: *int* current page size set in config
+- page_from: *int* first result idx
+- prev_pages: *array of ints* of previous pages, if available
+- current_page: *int* current page from query
+- max_hits: *bool* if max of 10k results is reached
+- last_page: *int* of last page link
+- next_pages: *array of ints* of next pages
+- total_hits: *int* total results
 
 Pass page number as a query parameter: `page=2`. Defaults to *0*, `page=1` is redundant and falls back to *0*. If a page query doesn't return any results, you'll get `HTTP 404 Not Found`.
-
-## Login View
-Return token and user ID for username and password:  
-POST /api/login
-```json
-{
-    "username": "tubearchivist",
-    "password": "verysecret"
-}
-```
-
-after successful login returns 
-```json
-{
-    "token": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-    "user_id": 1
-}
-```
 
 ## Video List View
 /api/video/
@@ -145,7 +157,7 @@ POST /api/channel/
 ## Playlist List View
 /api/playlist/
 
-## Playlists Item View
+## Playlist Item View
 /api/playlist/\<playlist_id>/
 
 ## Playlist Videos View
@@ -192,15 +204,21 @@ Add to queue previously ignored video:
 DELETE /api/download/\<video_id>/  
 Forget or delete from download queue
 
-## Ping View
-Validate your connection with the API  
-GET /api/ping
-
-When valid returns message with user id: 
+## Login View
+Return token and user ID for username and password:  
+POST /api/login
 ```json
 {
-    "response": "pong",
-    "user": 1
+    "username": "tubearchivist",
+    "password": "verysecret"
+}
+```
+
+after successful login returns 
+```json
+{
+    "token": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "user_id": 1
 }
 ```
 
@@ -271,5 +289,17 @@ Or returns status code 400 on failure:
 {
     "cookie_import": "fail",
     "cookie_validated": false
+}
+```
+
+## Ping View
+Validate your connection with the API  
+GET /api/ping
+
+When valid returns message with user id: 
+```json
+{
+    "response": "pong",
+    "user": 1
 }
 ```
