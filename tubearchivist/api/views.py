@@ -536,8 +536,8 @@ class SearchView(ApiBaseView):
 
     @staticmethod
     def get(request):
-        """handle get request"""
-        """search through all indexes"""
+        """handle get request
+        search through all indexes"""
         search_query = request.GET.get("query", None)
         if search_query is None:
             return Response(

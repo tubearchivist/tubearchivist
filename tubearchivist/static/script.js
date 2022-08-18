@@ -810,7 +810,7 @@ function searchMulti(query) {
                     populateMultiSearchResults(response.results, response.queryType);
                 }
             };
-            http.open("GET", `/api/search?query=${query}`, true);
+            http.open("GET", `/api/search/?query=${query}`, true);
             http.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
             http.setRequestHeader("Content-type", "application/json");
             http.send();
