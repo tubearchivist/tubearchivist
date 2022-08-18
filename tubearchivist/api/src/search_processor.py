@@ -22,7 +22,7 @@ class SearchProcess:
         self.processed = False
 
     def process(self):
-        """dedect type and process"""
+        """detect type and process"""
         if "_source" in self.response.keys():
             # single
             self.processed = self._process_result(self.response)
@@ -37,7 +37,7 @@ class SearchProcess:
         return self.processed
 
     def _process_result(self, result):
-        """dedect which type of data to process"""
+        """detect which type of data to process"""
         index = result["_index"]
         processed = False
         if index == "ta_video":

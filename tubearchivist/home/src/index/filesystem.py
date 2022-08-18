@@ -363,7 +363,7 @@ class ImportFolderScanner:
         return new_path
 
     def get_mp4_thumb_type(self, media_path):
-        """dedect filetype of embedded thumbnail"""
+        """detect filetype of embedded thumbnail"""
         streams = self._get_streams(media_path)
 
         for stream in streams["streams"]:

@@ -173,13 +173,13 @@ class UrlListParser:
             _ = self.find_valid_id(youtube_id)
             return youtube_id, "channel"
 
-        # dedect channel with yt_dlp
+        # detect channel with yt_dlp
         youtube_id = self.extract_channel_name(parsed.geturl())
         return youtube_id, "channel"
 
     @staticmethod
     def find_valid_id(id_str):
-        """dedect valid id from length of string"""
+        """detect valid id from length of string"""
         str_len = len(id_str)
         if str_len == 11:
             id_type = "video"
