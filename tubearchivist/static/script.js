@@ -803,7 +803,6 @@ function searchMulti(query) {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(function () {
         if (query.length > 1) {
-            var payload = JSON.stringify({'multi_search': query});
             var http = new XMLHttpRequest();
             http.onreadystatechange = function() {
                 if (http.readyState === 4) {
@@ -811,10 +810,10 @@ function searchMulti(query) {
                     populateMultiSearchResults(response.results, response.queryType);
                 }
             };
-            http.open("POST", "/process/", true);
+            http.open("GET", `/api/search/?query=${query}`, true);
             http.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
             http.setRequestHeader("Content-type", "application/json");
-            http.send(payload);
+            http.send();
         }
     }, 500);
 }

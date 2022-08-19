@@ -12,6 +12,7 @@ from api.views import (
     PlaylistApiListView,
     PlaylistApiVideoView,
     PlaylistApiView,
+    SearchView,
     TaskApiView,
     VideoApiListView,
     VideoApiView,
@@ -92,5 +93,10 @@ urlpatterns = [
         "cookie/",
         CookieView.as_view(),
         name="api-cookie",
+    ),
+    path(
+        "search/",
+        SearchView.as_view(),
+        name="api-search",
     ),
 ]
