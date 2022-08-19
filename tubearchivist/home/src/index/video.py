@@ -320,23 +320,22 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def _get_ryd_stats(self):
         """get optional stats from returnyoutubedislikeapi.com"""
+        # pylint: disable=broad-except
         try:
             print(f"{self.youtube_id}: get ryd stats")
             result = ryd_client.get(self.youtube_id)
-        except requests.exceptions.ConnectionError:
-            print(f"{self.youtube_id}: failed to query ryd api, skipping")
-            return False
+        except Exception as err:
+            print(f"{self.youtube_id}: failed to query ryd api {err}")
+            return
 
         if result["status"] == 404:
-            return False
+            return
 
         dislikes = {
             "dislike_count": result.get("dislikes", 0),
             "average_rating": result.get("rating", 0),
         }
         self.json_data["stats"].update(dislikes)
-
-        return True
 
     def _get_sponsorblock(self):
         """get optional sponsorblock timestamps from sponsor.ajay.app"""

@@ -33,6 +33,7 @@ until curl -u "$ELASTIC_USER":"$ELASTIC_PASSWORD" "$ES_URL" -fs; do
     if [[ $counter -eq 12 ]]; then
         # fail after 2 min
         echo "failed to connect to elastic search, exiting..."
+        curl -u "$ELASTIC_USER":"$ELASTIC_PASSWORD" "$ES_URL"?pretty
         exit 1
     fi
     sleep 10
