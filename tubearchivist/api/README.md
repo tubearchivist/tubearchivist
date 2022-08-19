@@ -33,6 +33,7 @@ Note:
 - [Login](#login-view)
 - [Task](#task-view) WIP
 - [Cookie](#cookie-view)
+- [Search](#search-view)
 - [Ping](#ping-view)
 
 ## Authentication
@@ -291,6 +292,11 @@ Or returns status code 400 on failure:
     "cookie_validated": false
 }
 ```
+
+## Search View
+GET /api/search/?query=\<query>
+
+Returns search results from your query.
 
 ## Ping View
 Validate your connection with the API  
