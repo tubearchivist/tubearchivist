@@ -1,5 +1,12 @@
 # Detailed Installation Instructions for Various Platforms
 
+## Table of Contents
+- [Unraid](#unraid)
+- [Truenas Scale](#truenas-scale)
+- [Synology](#synology)
+
+These are beginners guides installation instructions for additional platforms generously provided by users of these platforms. When in doubt, verify the details with the [Readme](https://github.com/tubearchivist/tubearchivist#installing-and-updating). If you see any issues here while using these instructions, please contribute. 
+
 ## Unraid
 
 Tube Archivist, and all if it's dependencies are located in the [community applications](https://forums.unraid.net/topic/38582-plug-in-community-applications/) store. The three containers you will need are as follows:

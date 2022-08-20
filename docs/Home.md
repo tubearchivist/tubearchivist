@@ -10,7 +10,7 @@ Table of contents:
 * [Video](Video): All details of a single video and playlist navigation.
 * [Users](Users): User management admin interface
 * [Search](Search): Search your archive
-* [Installation](Installation): WIP - detailed installation instructions for various platforms.
+* [Installation](Installation): Detailed installation instructions for various platforms.
 
 ## Getting Started
 1. [Subscribe](Channels#channels-overview) to some of your favourite YouTube channels.

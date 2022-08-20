@@ -127,8 +127,8 @@ You will see the current version number of **Tube Archivist** in the footer of t
 
 ### Alternative installation instructions:
 - **arm64**: The Tube Archivist container is multi arch, so is Elasticsearch. RedisJSON doesn't offer arm builds, you can use `bbilly1/rejson`, an unofficial rebuild for arm64.
-- **Unraid**: The three containers needed are all in the Community Applications. First install `TubeArchivist RedisJSON` followed by `TubeArchivist ES`, and finally you can install `TubeArchivist`. If you have unraid specific issues, report those to the [support thread](https://forums.unraid.net/topic/114073-support-crocs-tube-archivist/ "support thread").
 - **Helm Chart**: There is a Helm Chart available at https://github.com/insuusvenerati/helm-charts. Mostly self-explanatory but feel free to ask questions in the discord / subreddit.
+- **Wiki**: There are additional helpful installation instructions in the [wiki](https://github.com/tubearchivist/tubearchivist/wiki/Installation) for Unraid, Truenas and Synology.
 
 
 ## Potential pitfalls
