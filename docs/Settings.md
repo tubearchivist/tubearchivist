@@ -133,6 +133,8 @@ Detect the YouTube ID from filename, this accepts the default yt-dlp naming conv
 - The YouTube ID in square brackets at the end of the filename is the crucial part.
 
 ### Offline import:
+**NOTE**: This is untested. Please provide feedback.  
+
 If the video you are trying to import is not available on YouTube any more, **Tube Archivist** can import the required metadata:
 - The file `<base-name>.info.json` is required to extract the required information.
 - Add the thumbnail as `<base-name>.<ext>`, where valid file extensions are *.jpg*, *.png* or *.webp*. If there is no thumbnail file, **Tube Archivist** will try to extract it from the media file or will fallback to a default thumbnail.
