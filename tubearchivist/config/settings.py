@@ -119,6 +119,12 @@ if bool(environ.get("TA_LDAP")):
         "email": "mail",
     }
 
+    if bool(environ.get("TA_LDAP_DISABLE_CERT_CHECK")):
+        global AUTH_LDAP_GLOBAL_OPTIONS
+        AUTH_LDAP_GLOBAL_OPTIONS = {
+            ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_NEVER,
+        }
+
     global AUTHENTICATION_BACKENDS
     AUTHENTICATION_BACKENDS = ("django_auth_ldap.backend.LDAPBackend",)
 
