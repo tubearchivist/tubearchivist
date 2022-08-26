@@ -555,11 +555,13 @@ class ManualImport:
 
     def _cleanup(self, json_data):
         """cleanup leftover files"""
-        if os.path.exists(self.current_video["metadata"]):
-            os.remove(self.current_video["metadata"])
+        meta_data = self.current_video["metadata"]
+        if meta_data and os.path.exists(meta_data):
+            os.remove(meta_data)
 
-        if os.path.exists(self.current_video["thumb"]):
-            os.remove(self.current_video["thumb"])
+        thumb = self.current_video["thumb"]
+        if thumb and os.path.exists(thumb):
+            os.remove(thumb)
 
         for subtitle_file in self.current_video["subtitle"]:
             if os.path.exists(subtitle_file):
