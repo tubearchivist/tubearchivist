@@ -91,6 +91,7 @@ You can configure LDAP with the following environment variables:
 
  - `TA_LDAP` (ex: `true`) Set to anything besides empty string to use LDAP authentication **instead** of local user authentication.
  - `TA_LDAP_SERVER_URI` (ex: `ldap://ldap-server:389`) Set to the uri of your LDAP server.
+ - `TA_LDAP_DISABLE_CERT_CHECK` (ex: `true`) Set to anything besides empty string to disable certificate checking when connecting over LDAPS. (currently only in the unstable release, pending inclusion into stable)
  - `TA_LDAP_BIND_DN` (ex: `uid=search-user,ou=users,dc=your-server`) DN of the user that is able to perform searches on your LDAP account.
  - `TA_LDAP_BIND_PASSWORD` (ex: `yoursecretpassword`) Password for the search user.
  - `TA_LDAP_USER_BASE` (ex: `ou=users,dc=your-server`) Search base for user filter.
