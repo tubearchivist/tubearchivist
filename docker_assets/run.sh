@@ -6,7 +6,7 @@ if [[ -z "$ELASTIC_USER" ]]; then
 fi
 
 if [[ -z "$DJANGO_DEBUG" ]]; then
-    export DJANGO_DEBUG=False
+    export DJANGO_DEBUG=""
 fi
 
 cachedir=/cache
