@@ -15,7 +15,7 @@ body:
       options:
         - label: I have read through the [wiki](https://github.com/tubearchivist/tubearchivist/wiki).
           required: true
-        - label: I understand the [scope](https://github.com/tubearchivist/tubearchivist/wiki/FAQ) of this project and am aware of the [known limitations](https://github.com/tubearchivist/tubearchivist#known-limitations).
+        - label: I understand the [scope](https://github.com/tubearchivist/tubearchivist/wiki/FAQ) of this project and am aware of the [known limitations](https://github.com/tubearchivist/tubearchivist#known-limitations) and my idea is not already on the [roadmap](https://github.com/tubearchivist/tubearchivist#roadmap).
           required: true
 
   - type: textarea
