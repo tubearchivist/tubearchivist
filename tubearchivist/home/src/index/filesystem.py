@@ -217,9 +217,7 @@ class ImportFolderScanner:
         last_base = False
 
         for file_path in all_files:
-            base_name_raw, ext = os.path.splitext(file_path)
-            base_name, _ = os.path.splitext(base_name_raw)
-
+            base_name, ext = self._detect_base_name(file_path)
             key, file_path = self._detect_type(file_path, ext)
             if not key or not file_path:
                 continue
@@ -238,6 +236,18 @@ class ImportFolderScanner:
 
         if current_video.get("media"):
             self.to_import.append(current_video)
+
+    def _detect_base_name(self, file_path):
+        """extract base_name and ext for matching"""
+        base_name_raw, ext = os.path.splitext(file_path)
+        base_name, ext2 = os.path.splitext(base_name_raw)
+
+        if ext2:
+            if ISO639Utils.short2long(ext2.strip(".")) or ext2 == ".info":
+                # valid secondary extension
+                return base_name, ext
+
+        return base_name_raw, ext
 
     def _detect_type(self, file_path, ext):
         """detect metadata type for file"""
