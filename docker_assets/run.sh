@@ -5,6 +5,10 @@ if [[ -z "$ELASTIC_USER" ]]; then
     export ELASTIC_USER=elastic
 fi
 
+if [[ -z "$DJANGO_DEBUG" ]]; then
+    export DJANGO_DEBUG=False
+fi
+
 cachedir=/cache
 [[ -d $cachedir ]] || cachedir=.
 lockfile=${cachedir}/initsu.lock
