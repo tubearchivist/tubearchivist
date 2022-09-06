@@ -224,6 +224,7 @@ class ImportFolderScanner:
 
             if base_name != last_base:
                 if last_base:
+                    print(f"manual import: {current_video}")
                     self.to_import.append(current_video)
 
                 current_video = self._get_template()
@@ -235,6 +236,7 @@ class ImportFolderScanner:
                 current_video[key] = file_path
 
         if current_video.get("media"):
+            print(f"manual import: {current_video}")
             self.to_import.append(current_video)
 
     def _detect_base_name(self, file_path):
@@ -270,12 +272,12 @@ class ImportFolderScanner:
             self._convert_thumb(current_video)
             self._get_subtitles(current_video)
             self._convert_video(current_video)
+            print(f"manual import: {current_video}")
 
             ManualImport(current_video, self.CONFIG).run()
 
     def _detect_youtube_id(self, current_video):
         """find video id from filename or json"""
-        print(current_video)
         youtube_id = self._extract_id_from_filename(current_video["media"])
         if youtube_id:
             current_video["video_id"] = youtube_id
@@ -286,7 +288,6 @@ class ImportFolderScanner:
             current_video["video_id"] = youtube_id
             return
 
-        print(current_video["media"])
         raise ValueError("failed to find video id")
 
     @staticmethod
