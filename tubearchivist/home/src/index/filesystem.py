@@ -527,7 +527,8 @@ class ManualImport:
 
         if video.offline_import and self.current_video["thumb"]:
             old_path = self.current_video["thumb"]
-            new_path = ThumbManager(video_id).vid_thumb_path(absolute=True)
+            thumbs = ThumbManager(video_id)
+            new_path = thumbs.vid_thumb_path(absolute=True, create_folder=True)
             shutil.move(old_path, new_path, copy_function=shutil.copyfile)
         else:
             url = video.json_data["vid_thumb_url"]
