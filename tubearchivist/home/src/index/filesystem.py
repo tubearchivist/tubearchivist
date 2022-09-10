@@ -217,15 +217,14 @@ class ImportFolderScanner:
         last_base = False
 
         for file_path in all_files:
-            base_name_raw, ext = os.path.splitext(file_path)
-            base_name, _ = os.path.splitext(base_name_raw)
-
+            base_name, ext = self._detect_base_name(file_path)
             key, file_path = self._detect_type(file_path, ext)
             if not key or not file_path:
                 continue
 
             if base_name != last_base:
                 if last_base:
+                    print(f"manual import: {current_video}")
                     self.to_import.append(current_video)
 
                 current_video = self._get_template()
@@ -237,7 +236,20 @@ class ImportFolderScanner:
                 current_video[key] = file_path
 
         if current_video.get("media"):
+            print(f"manual import: {current_video}")
             self.to_import.append(current_video)
+
+    def _detect_base_name(self, file_path):
+        """extract base_name and ext for matching"""
+        base_name_raw, ext = os.path.splitext(file_path)
+        base_name, ext2 = os.path.splitext(base_name_raw)
+
+        if ext2:
+            if ISO639Utils.short2long(ext2.strip(".")) or ext2 == ".info":
+                # valid secondary extension
+                return base_name, ext
+
+        return base_name_raw, ext
 
     def _detect_type(self, file_path, ext):
         """detect metadata type for file"""
@@ -260,12 +272,12 @@ class ImportFolderScanner:
             self._convert_thumb(current_video)
             self._get_subtitles(current_video)
             self._convert_video(current_video)
+            print(f"manual import: {current_video}")
 
             ManualImport(current_video, self.CONFIG).run()
 
     def _detect_youtube_id(self, current_video):
         """find video id from filename or json"""
-        print(current_video)
         youtube_id = self._extract_id_from_filename(current_video["media"])
         if youtube_id:
             current_video["video_id"] = youtube_id
@@ -276,7 +288,6 @@ class ImportFolderScanner:
             current_video["video_id"] = youtube_id
             return
 
-        print(current_video["media"])
         raise ValueError("failed to find video id")
 
     @staticmethod
@@ -516,7 +527,8 @@ class ManualImport:
 
         if video.offline_import and self.current_video["thumb"]:
             old_path = self.current_video["thumb"]
-            new_path = ThumbManager(video_id).vid_thumb_path(absolute=True)
+            thumbs = ThumbManager(video_id)
+            new_path = thumbs.vid_thumb_path(absolute=True, create_folder=True)
             shutil.move(old_path, new_path, copy_function=shutil.copyfile)
         else:
             url = video.json_data["vid_thumb_url"]
@@ -555,11 +567,13 @@ class ManualImport:
 
     def _cleanup(self, json_data):
         """cleanup leftover files"""
-        if os.path.exists(self.current_video["metadata"]):
-            os.remove(self.current_video["metadata"])
+        meta_data = self.current_video["metadata"]
+        if meta_data and os.path.exists(meta_data):
+            os.remove(meta_data)
 
-        if os.path.exists(self.current_video["thumb"]):
-            os.remove(self.current_video["thumb"])
+        thumb = self.current_video["thumb"]
+        if thumb and os.path.exists(thumb):
+            os.remove(thumb)
 
         for subtitle_file in self.current_video["subtitle"]:
             if os.path.exists(subtitle_file):

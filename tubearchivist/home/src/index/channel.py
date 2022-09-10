@@ -73,13 +73,14 @@ class ChannelScraper:
 
     def _is_deactivated(self):
         """check if channel is deactivated"""
-        alert_text = "This channel does not exist."
         alerts = self.yt_json.get("alerts")
-        if alerts and alert_text in str(alerts):
-            print(f"{self.channel_id}: {alert_text}")
-            return True
+        if not alerts:
+            return False
 
-        return False
+        for alert in alerts:
+            alert_text = alert["alertRenderer"]["text"]["simpleText"]
+            print(f"{self.channel_id}: failed to extract, {alert_text}")
+            return True
 
     def _parse_channel_main(self):
         """extract maintab values from scraped channel json data"""
@@ -226,8 +227,8 @@ class YoutubeChannel(YouTubeItem):
 
             self.json_data.update(
                 {
-                    "channel_subs": content["channel_follower_count"],
-                    "channel_description": content["description"],
+                    "channel_subs": content.get("channel_follower_count", 0),
+                    "channel_description": content.get("description", False),
                 }
             )
 

@@ -124,13 +124,17 @@ class ThumbManager(ThumbManagerBase):
 
         img_raw.convert("RGB").save(thumb_path)
 
-    def vid_thumb_path(self, absolute=False):
+    def vid_thumb_path(self, absolute=False, create_folder=False):
         """build expected path for video thumbnail from youtube_id"""
         folder_name = self.item_id[0].lower()
         folder_path = os.path.join("videos", folder_name)
         thumb_path = os.path.join(folder_path, f"{self.item_id}.jpg")
         if absolute:
             thumb_path = os.path.join(self.CACHE_DIR, thumb_path)
+
+        if create_folder:
+            folder_path = os.path.join(self.CACHE_DIR, folder_path)
+            os.makedirs(folder_path, exist_ok=True)
 
         return thumb_path
 
