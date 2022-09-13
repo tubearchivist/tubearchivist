@@ -456,6 +456,10 @@ video:-webkit-full-screen {
     overflow: hidden;
 }
 
+.video-item:hover .video-thumb span {
+    opacity: 1;
+}
+
 .video-item.list {
     display: grid;
     grid-template-columns: 26% auto;
@@ -474,6 +478,16 @@ video:-webkit-full-screen {
 .video-thumb img {
     width: 100%;
     position: relative;
+}
+
+.video-thumb span {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background-color: var(--accent-font-light);
+    padding: 5px;
+    opacity: 0;
+    transition: 300ms ease-in-out;
 }
 
 .video-play img {
@@ -512,7 +526,7 @@ video:-webkit-full-screen {
     padding: 10px;
     height: 100%;
     display: flex;
-    flex-wrap: wrap-reverse;
+    flex-wrap: wrap;
     align-content: center;
 }
 
@@ -907,73 +921,6 @@ video:-webkit-full-screen {
     cursor: pointer;
 }
 
-.dl-list.list {
-    display: block;
-}
-
-.dl-list.grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-gap: 1rem;
-}
-
-.dl-item.list {
-    display: flex;
-    margin: 15px 0;
-    align-items: center;
-    background-color: var(--highlight-bg);
-}
-
-.dl-item.grid {
-    display: flex;
-    flex-wrap: wrap;
-    background-color: var(--highlight-bg);
-}
-
-.dl-check {
-    width: 30px;
-}
-
-.dl-item:hover > .dl-thumb span {
-    opacity: 1;
-}
-
-.dl-thumb {
-    position: relative;
-}
-
-.dl-thumb span {
-    position: absolute;
-    top: 5px;
-    left: 5px;
-    background-color: var(--accent-font-light);
-    padding: 5px;
-    opacity: 0;
-    transition: 300ms ease-in-out;
-}
-
-.dl-thumb.list {
-    width: 25%;
-}
-
-.dl-thumb.grid {
-    width: 100%;
-}
-
-.dl-item img {
-    width: 100%;
-}
-
-.dl-desc.list {
-    padding: 0 15px;
-    width: 75%;
-}
-
-.dl-desc.grid {
-    padding: 15px;
-    width: 100%;
-}
-
 .dl-control-icons {
     display: flex;
     justify-content: center;
@@ -1131,13 +1078,9 @@ video:-webkit-full-screen {
     .video-list.grid.grid-5,
     .video-list.grid.grid-6,
     .video-list.grid.grid-7,
-    .dl-list.grid,
     .channel-list.grid,
     .playlist-list.grid {
         grid-template-columns: 1fr 1fr;
-    }
-    .dl-thumb.list {
-        width: 35%;
     }
     .video-item.list,
     .playlist-item.list {
@@ -1182,7 +1125,6 @@ video:-webkit-full-screen {
     .video-list.grid.grid-5,
     .video-list.grid.grid-6,
     .video-list.grid.grid-7,
-    .dl-list.grid,
     .channel-list.grid,
     .video-item.list,
     .playlist-list.list,
@@ -1230,15 +1172,6 @@ video:-webkit-full-screen {
     }
     .description-box {
         display: block;
-    }
-    .dl-item {
-        display: block;
-    }
-    .dl-thumb {
-        width: 100%;
-    }
-    .dl-desc {
-        padding: 15px;
     }
     .backup-grid-row {
         display: flex;
