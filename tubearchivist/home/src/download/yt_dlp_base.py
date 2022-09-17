@@ -20,7 +20,8 @@ class YtWrap:
         "default_search": "ytsearch",
         "quiet": True,
         "check_formats": "selected",
-        "socket_timeout": 2,
+        "socket_timeout": 3,
+        "extractor_retries": 3,
     }
 
     def __init__(self, obs_request, config=False):

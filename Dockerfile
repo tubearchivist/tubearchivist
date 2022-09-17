@@ -3,7 +3,7 @@
 
 
 # First stage to build python wheel
-FROM python:3.10.5-slim-bullseye AS builder
+FROM python:3.10.7-slim-bullseye AS builder
 ARG TARGETPLATFORM
 
 RUN apt-get update
@@ -14,7 +14,7 @@ COPY ./tubearchivist/requirements.txt /requirements.txt
 RUN pip install --user -r requirements.txt
 
 # build final image
-FROM python:3.10.5-slim-bullseye as tubearchivist
+FROM python:3.10.7-slim-bullseye as tubearchivist
 
 ARG TARGETPLATFORM
 ARG INSTALL_DEBUG

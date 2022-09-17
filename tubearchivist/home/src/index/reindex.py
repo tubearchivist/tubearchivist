@@ -72,14 +72,11 @@ class Reindex:
 
     def _get_unrated_vids(self):
         """get max 200 videos without rating if ryd integration is enabled"""
-        data = {
-            "size": 200,
-            "query": {
-                "bool": {
-                    "must_not": [{"exists": {"field": "stats.average_rating"}}]
-                }
-            },
-        }
+        must_not_list = [
+            {"exists": {"field": "stats.average_rating"}},
+            {"term": {"active": {"value": False}}},
+        ]
+        data = {"size": 200, "query": {"bool": {"must_not": must_not_list}}}
         response, _ = ElasticWrap("ta_video/_search").get(data=data)
 
         missing_rating = [i["_id"] for i in response["hits"]["hits"]]
