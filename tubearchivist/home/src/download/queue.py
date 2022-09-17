@@ -196,6 +196,7 @@ class PendingList(PendingIndex):
         bulk_list = []
 
         for idx, youtube_id in enumerate(self.missing_videos):
+            print(f"{youtube_id}: add to download queue")
             video_details = self.get_youtube_details(youtube_id)
             if not video_details:
                 continue
