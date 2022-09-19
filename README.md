@@ -63,6 +63,8 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 ## Installing and updating
 Take a look at the example `docker-compose.yml` file provided. Use the *latest* or the named semantic version tag. The *unstable* tag is for intermediate testing and as the name implies, is **unstable** and not be used on your main installation but in a [testing environment](CONTRIBUTING.md).  
 
+For minimal system requirements, the Tube Archivist stack needs around 2GB of available memory for a small testing setup and around 4GB of available memory for a mid to large sized installation.  
+
 Tube Archivist depends on three main components split up into separate docker containers:  
 
 ### Tube Archivist
