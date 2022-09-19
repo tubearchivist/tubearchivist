@@ -231,6 +231,7 @@ class YoutubeChannel(YouTubeItem):
                     "channel_description": content.get("description", False),
                 }
             )
+            os.remove(info_json)
 
     def get_channel_art(self):
         """download channel art for new channels"""
