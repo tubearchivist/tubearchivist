@@ -362,7 +362,7 @@ class DownloadView(ArchivistResultsView):
     def get(self, request):
         """handle get request"""
         self.initiate_vars(request)
-        self._update_view_data()
+        self._update_view_data(request)
         self.find_results()
         self.context.update(
             {
@@ -372,15 +372,24 @@ class DownloadView(ArchivistResultsView):
         )
         return render(request, "home/downloads.html", self.context)
 
-    def _update_view_data(self):
+    def _update_view_data(self, request):
         """update downloads view specific data dict"""
         if self.context["show_ignored_only"]:
             filter_view = "ignore"
         else:
             filter_view = "pending"
+
+        must_list = [{"term": {"status": {"value": filter_view}}}]
+
+        channel_filter = request.GET.get("channel", False)
+        if channel_filter:
+            must_list.append(
+                {"term": {"channel_id": {"value": channel_filter}}}
+            )
+
         self.data.update(
             {
-                "query": {"term": {"status": {"value": filter_view}}},
+                "query": {"bool": {"must": must_list}},
                 "sort": [{"timestamp": {"order": "asc"}}],
             }
         )
