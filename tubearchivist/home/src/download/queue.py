@@ -246,7 +246,7 @@ class PendingList(PendingIndex):
             print(f"{youtube_id}: skipping premium video, id not matching")
             return False
         # stop if video is streaming live now
-        if vid["is_live"]:
+        if vid["live_status"] in ["is_upcoming", "is_live"]:
             return False
 
         return self._parse_youtube_details(vid)
