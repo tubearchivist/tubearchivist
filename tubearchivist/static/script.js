@@ -140,7 +140,7 @@ function toggleCheckbox(checkbox) {
     var payload = JSON.stringify(payloadDict);
     sendPost(payload);
     setTimeout(function(){
-        var currPage = window.location.pathname;
+        var currPage = window.location.pathname + window.location.search;
         window.location.replace(currPage);
         return false;
     }, 500);

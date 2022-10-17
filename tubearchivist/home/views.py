@@ -31,7 +31,7 @@ from home.src.frontend.forms import (
     UserSettingsForm,
 )
 from home.src.frontend.searching import SearchHandler
-from home.src.index.channel import channel_overwrites
+from home.src.index.channel import YoutubeChannel, channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.config import AppConfig, ScheduleBuilder
@@ -237,14 +237,10 @@ class ArchivistResultsView(ArchivistViewConfig):
 
     def initiate_vars(self, request):
         """search in es for vidoe hits"""
-        page_get = int(request.GET.get("page", 0))
         self.user_id = request.user.id
         self.config_builder(self.user_id)
         self.search_get = request.GET.get("search", False)
-        search_encoded = self._url_encode(self.search_get)
-        self.pagination_handler = Pagination(
-            page_get=page_get, user_id=self.user_id, search_get=search_encoded
-        )
+        self.pagination_handler = Pagination(request)
         self.sort_by = self._sort_by_overwrite()
         self._initial_data()
 
@@ -362,7 +358,7 @@ class DownloadView(ArchivistResultsView):
     def get(self, request):
         """handle get request"""
         self.initiate_vars(request)
-        self._update_view_data()
+        self._update_view_data(request)
         self.find_results()
         self.context.update(
             {
@@ -372,15 +368,33 @@ class DownloadView(ArchivistResultsView):
         )
         return render(request, "home/downloads.html", self.context)
 
-    def _update_view_data(self):
+    def _update_view_data(self, request):
         """update downloads view specific data dict"""
         if self.context["show_ignored_only"]:
             filter_view = "ignore"
         else:
             filter_view = "pending"
+
+        must_list = [{"term": {"status": {"value": filter_view}}}]
+
+        channel_filter = request.GET.get("channel", False)
+        if channel_filter:
+            must_list.append(
+                {"term": {"channel_id": {"value": channel_filter}}}
+            )
+
+            channel = YoutubeChannel(channel_filter)
+            channel.get_from_es()
+            self.context.update(
+                {
+                    "channel_filter_id": channel_filter,
+                    "channel_filter_name": channel.json_data["channel_name"],
+                }
+            )
+
         self.data.update(
             {
-                "query": {"term": {"status": {"value": filter_view}}},
+                "query": {"bool": {"must": must_list}},
                 "sort": [{"timestamp": {"order": "asc"}}],
             }
         )
@@ -414,7 +428,37 @@ class DownloadView(ArchivistResultsView):
         return redirect("downloads", permanent=True)
 
 
-class ChannelIdView(ArchivistResultsView):
+class ChannelIdBaseView(ArchivistResultsView):
+    """base class for all channel-id views"""
+
+    def get_channel_meta(self, channel_id):
+        """get metadata for channel"""
+        path = f"ta_channel/_doc/{channel_id}"
+        response, _ = ElasticWrap(path).get()
+        channel_info = SearchProcess(response).process()
+
+        return channel_info
+
+    def channel_has_pending(self, channel_id):
+        """check if channel has pending videos in queue"""
+        path = "ta_download/_search"
+        data = {
+            "size": 1,
+            "query": {
+                "bool": {
+                    "must": [
+                        {"term": {"status": {"value": "pending"}}},
+                        {"term": {"channel_id": {"value": channel_id}}},
+                    ]
+                }
+            },
+        }
+        response, _ = ElasticWrap(path).get(data=data)
+
+        self.context.update({"has_pending": bool(response["hits"]["hits"])})
+
+
+class ChannelIdView(ChannelIdBaseView):
     """resolves to /channel/<channel-id>/
     display single channel page from channel_id
     """
@@ -428,6 +472,7 @@ class ChannelIdView(ArchivistResultsView):
         self._update_view_data(channel_id)
         self.find_results()
         self.match_progress()
+        self.channel_has_pending(channel_id)
 
         if self.context["results"]:
             channel_info = self.context["results"][0]["source"]["channel"]
@@ -478,7 +523,7 @@ class ChannelIdView(ArchivistResultsView):
         return redirect("channel_id", channel_id, permanent=True)
 
 
-class ChannelIdAboutView(ArchivistResultsView):
+class ChannelIdAboutView(ChannelIdBaseView):
     """resolves to /channel/<channel-id>/about/
     show metadata, handle per channel conf
     """
@@ -488,6 +533,7 @@ class ChannelIdAboutView(ArchivistResultsView):
     def get(self, request, channel_id):
         """handle get request"""
         self.initiate_vars(request)
+        self.channel_has_pending(channel_id)
 
         path = f"ta_channel/_doc/{channel_id}"
         response, _ = ElasticWrap(path).get()
@@ -521,7 +567,7 @@ class ChannelIdAboutView(ArchivistResultsView):
         return redirect("channel_id_about", channel_id, permanent=True)
 
 
-class ChannelIdPlaylistView(ArchivistResultsView):
+class ChannelIdPlaylistView(ChannelIdBaseView):
     """resolves to /channel/<channel-id>/playlist/
     show all playlists of channel
     """
@@ -534,8 +580,9 @@ class ChannelIdPlaylistView(ArchivistResultsView):
         self.initiate_vars(request)
         self._update_view_data(channel_id)
         self.find_results()
+        self.channel_has_pending(channel_id)
 
-        channel_info = self._get_channel_meta(channel_id)
+        channel_info = self.get_channel_meta(channel_id)
         channel_name = channel_info["channel_name"]
         self.context.update(
             {
@@ -555,14 +602,6 @@ class ChannelIdPlaylistView(ArchivistResultsView):
             must_list.append({"match": {"playlist_subscribed": True}})
 
         self.data["query"] = {"bool": {"must": must_list}}
-
-    def _get_channel_meta(self, channel_id):
-        """get metadata for channel"""
-        path = f"ta_channel/_doc/{channel_id}"
-        response, _ = ElasticWrap(path).get()
-        channel_info = SearchProcess(response).process()
-
-        return channel_info
 
 
 class ChannelView(ArchivistResultsView):

@@ -61,6 +61,7 @@ The list views return a paginate object with the following keys:
 - prev_pages: *array of ints* of previous pages, if available
 - current_page: *int* current page from query
 - max_hits: *bool* if max of 10k results is reached
+- params: *str* additional url encoded query parameters
 - last_page: *int* of last page link
 - next_pages: *array of ints* of next pages
 - total_hits: *int* total results
@@ -169,6 +170,7 @@ GET /api/download/
 
 Parameter:
 - filter: pending, ignore
+- channel: channel-id
 
 ### Add list of videos to download queue
 POST /api/download/

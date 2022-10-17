@@ -10,6 +10,9 @@
         <a href="{% url 'channel_id' channel_info.channel_id %}"><h3>Videos</h3></a>
         <a href="{% url 'channel_id_playlist' channel_info.channel_id %}"><h3>Playlists</h3></a>
         <a href="{% url 'channel_id_about' channel_info.channel_id %}"><h3>About</h3></a>
+        {% if has_pending %}
+            <a href="{% url 'downloads' %}?channel={{ channel_info.channel_id }}"><h3>Downloads</h3></a>
+        {% endif %}
     </div>
     <div id="notifications" data="channel_id"></div>
     <div class="info-box info-box-2">

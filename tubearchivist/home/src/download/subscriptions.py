@@ -63,6 +63,7 @@ class ChannelSubscription:
 
         for idx, channel in enumerate(all_channels):
             channel_id = channel["channel_id"]
+            print(f"{channel_id}: find missing videos.")
             last_videos = self.get_last_youtube_videos(channel_id)
 
             if last_videos:

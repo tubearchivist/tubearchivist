@@ -3,7 +3,7 @@
 {% block content %}
 <div class="boxed-content">
     <div class="title-bar">
-        <h1>Downloads</h1>
+        <h1>Downloads {% if channel_filter_id %} for {{ channel_filter_name }}{% endif %}</h1>
     </div>
     <div id="notifications" data="download"></div>
     <div id="downloadControl"></div>
@@ -55,7 +55,7 @@
             <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="downloads" data-value="list" alt="list view">
         </div>
     </div>
-    <h3>Total videos: {{ max_hits }}{% if max_hits == 10000 %}+{% endif %}</h3>
+    <h3>Total videos: {{ max_hits }}{% if max_hits == 10000 %}+{% endif %} {% if channel_filter_id %} - from channel <i>{{ channel_filter_name }}</i>{% endif %}</h3>
 </div>
 <div class="boxed-content {% if view_style == "grid" %}boxed-{{ grid_items }}{% endif %}">
     <div class="video-list {{ view_style }} {% if view_style == "grid" %}grid-{{ grid_items }}{% endif %}">
