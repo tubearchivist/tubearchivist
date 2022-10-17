@@ -170,6 +170,7 @@ GET /api/download/
 
 Parameter:
 - filter: pending, ignore
+- channel: channel-id
 
 ### Add list of videos to download queue
 POST /api/download/

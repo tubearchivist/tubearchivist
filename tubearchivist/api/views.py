@@ -366,13 +366,23 @@ class DownloadApiListView(ApiBaseView):
         """get request"""
         query_filter = request.GET.get("filter", False)
         self.data.update({"sort": [{"timestamp": {"order": "asc"}}]})
+
+        must_list = []
         if query_filter:
             if query_filter not in self.valid_filter:
                 message = f"invalid url query filder: {query_filter}"
                 print(message)
                 return Response({"message": message}, status=400)
 
-            self.data["query"] = {"term": {"status": {"value": query_filter}}}
+            must_list.append({"term": {"status": {"value": query_filter}}})
+
+        filter_channel = request.GET.get("channel", False)
+        if filter_channel:
+            must_list.append(
+                {"term": {"channel_id": {"value": filter_channel}}}
+            )
+
+        self.data["query"] = {"bool": {"must": must_list}}
 
         self.get_document_list(request)
         return Response(self.response)
