@@ -53,9 +53,7 @@ class ApiBaseView(APIView):
 
     def initiate_pagination(self, request):
         """set initial pagination values"""
-        user_id = request.user.id
-        page_get = int(request.GET.get("page", 0))
-        self.pagination_handler = Pagination(page_get, user_id)
+        self.pagination_handler = Pagination(request)
         self.data.update(
             {
                 "size": self.pagination_handler.pagination["page_size"],

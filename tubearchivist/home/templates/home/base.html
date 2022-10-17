@@ -79,16 +79,16 @@
             <div class="pagination">
                 {% if pagination %}
                     {% if pagination.current_page > 1 %}
-                        {% if pagination.search_get %}
-                        <a class="pagination-item" href="{{ request.path }}?search={{ pagination.search_get }}">First</a>
+                        {% if pagination.params %}
+                        <a class="pagination-item" href="{{ request.path }}?{{ pagination.params }}">First</a>
                         {% else %}
                         <a class="pagination-item" href="{{ request.path }}">First</a>
                         {% endif %}
                     {% endif %}
                     {% if pagination.prev_pages %}
                         {% for page in pagination.prev_pages %}
-                            {% if pagination.search_get %}
-                            <a class="pagination-item" href="?page={{ page }}&search={{ pagination.search_get }}">{{ page }}</a>
+                            {% if pagination.params %}
+                            <a class="pagination-item" href="?page={{ page }}&{{ pagination.params }}">{{ page }}</a>
                             {% else %}
                             <a class="pagination-item" href="?page={{ page }}">{{ page }}</a>
                             {% endif %}
@@ -100,16 +100,16 @@
                     {% if pagination.next_pages %}
                         <span> ></span>
                         {% for page in pagination.next_pages %}
-                            {% if pagination.search_get %}
-                            <a class="pagination-item" href="?page={{ page }}&search={{ pagination.search_get }}">{{ page }}</a>
+                            {% if pagination.params %}
+                            <a class="pagination-item" href="?page={{ page }}&{{ pagination.params }}">{{ page }}</a>
                             {% else %}
                             <a class="pagination-item" href="?page={{ page }}">{{ page }}</a>
                             {% endif %}
                         {% endfor %}
                     {% endif %}
                     {% if pagination.last_page > 0 %}
-                        {% if pagination.search_get %}
-                        <a class="pagination-item" href="?page={{ pagination.last_page }}&search={{ pagination.search_get }}">
+                        {% if pagination.params %}
+                        <a class="pagination-item" href="?page={{ pagination.last_page }}&{{ pagination.params }}">
                             {% if pagination.max_hits %}
                                 Max ({{ pagination.last_page }})
                             {% else %}

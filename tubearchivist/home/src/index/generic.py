@@ -73,16 +73,25 @@ class Pagination:
     figure out the pagination based on page size and total_hits
     """
 
-    def __init__(self, page_get, user_id, search_get=False):
-        self.user_id = user_id
+    def __init__(self, request):
+        self.request = request
+        self.page_get = False
+        self.params = False
+        self.get_params()
         self.page_size = self.get_page_size()
-        self.page_get = page_get
-        self.search_get = search_get
         self.pagination = self.first_guess()
+
+    def get_params(self):
+        """process url query parameters"""
+        query_dict = self.request.GET.copy()
+        self.page_get = int(query_dict.get("page", 0))
+
+        _ = query_dict.pop("page", False)
+        self.params = query_dict.urlencode()
 
     def get_page_size(self):
         """get default or user modified page_size"""
-        key = f"{self.user_id}:page_size"
+        key = f"{self.request.user.id}:page_size"
         page_size = RedisArchivist().get_message(key)["status"]
         if not page_size:
             config = AppConfig().config
@@ -108,9 +117,9 @@ class Pagination:
             "prev_pages": prev_pages,
             "current_page": page_get,
             "max_hits": False,
+            "params": self.params,
         }
-        if self.search_get:
-            pagination.update({"search_get": self.search_get})
+
         return pagination
 
     def validate(self, total_hits):
