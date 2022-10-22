@@ -1102,12 +1102,12 @@ function textReveal() {
 function textExpand() {
     var textBox = document.getElementById("text-expand");
     var button = document.getElementById("text-expand-button");
-    var textBoxLineClamp = textBox.style["-webkit-line-clamp"];
-    if (textBoxLineClamp === "none") {
+    var style = window.getComputedStyle(textBox)
+    if (style.webkitLineClamp === "none") {
         textBox.style["-webkit-line-clamp"] = "4";
         button.innerText = "Show more";
     } else {
-        textBox.style["-webkit-line-clamp"] = "none";
+        textBox.style["-webkit-line-clamp"] = "unset";
         button.innerText = "Show less";
     }
 }
@@ -1119,8 +1119,9 @@ function textExpandButtonVisibilityUpdate() {
     if (!textBox || !button)
         return;
 
-    var textBoxLineClamp = textBox.style["-webkit-line-clamp"];
-    if (textBoxLineClamp === "none")
+    var styles = window.getComputedStyle(textBox);
+    var textBoxLineClamp = styles.webkitLineClamp;
+    if (textBoxLineClamp === "unset")
         return; // text box is in revealed state
 
     if (textBox.offsetHeight < textBox.scrollHeight
@@ -1145,6 +1146,14 @@ function showForm() {
         formElement.style.display = "";
     }
     animate('animate-icon', 'pulse-img');
+}
+
+function channelFilterDownload(value) {
+    if (value === "all") {
+        window.location = "/downloads/";
+    } else {
+        window.location.search = "?channel=" + value;
+    }
 }
 
 function showOverwrite() {

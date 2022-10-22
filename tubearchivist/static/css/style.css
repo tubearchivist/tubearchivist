@@ -344,6 +344,7 @@ button:hover {
 .grid-count {
     display: flex;
     justify-content: end;
+    align-items: center;
 }
 
 .view-icons img {

@@ -14,7 +14,7 @@ from home.src.download import queue  # partial import
 from home.src.es.connect import IndexPaginate
 from home.src.ta.config import AppConfig
 from mutagen.mp4 import MP4, MP4Cover
-from PIL import Image, ImageFile, ImageFilter
+from PIL import Image, ImageFile, ImageFilter, UnidentifiedImageError
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -42,7 +42,12 @@ class ThumbManagerBase:
             try:
                 response = requests.get(url, stream=True, timeout=5)
                 if response.ok:
-                    return Image.open(response.raw)
+                    try:
+                        return Image.open(response.raw)
+                    except UnidentifiedImageError:
+                        print(f"failed to open thumbnail: {url}")
+                        return self.get_fallback()
+
                 if response.status_code == 404:
                     return self.get_fallback()
 

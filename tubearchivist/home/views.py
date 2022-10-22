@@ -364,6 +364,7 @@ class DownloadView(ArchivistResultsView):
             {
                 "title": "Downloads",
                 "add_form": AddToQueueForm(),
+                "channel_agg_list": self._get_channel_agg(),
             }
         )
         return render(request, "home/downloads.html", self.context)
@@ -398,6 +399,38 @@ class DownloadView(ArchivistResultsView):
                 "sort": [{"timestamp": {"order": "asc"}}],
             }
         )
+
+    def _get_channel_agg(self):
+        """get pending channel with count"""
+        data = {
+            "size": 0,
+            "query": {"term": {"status": {"value": "pending"}}},
+            "aggs": {
+                "channel_downloads": {
+                    "multi_terms": {
+                        "size": 30,
+                        "terms": [
+                            {"field": "channel_name.keyword"},
+                            {"field": "channel_id"},
+                        ],
+                        "order": {"_count": "desc"},
+                    }
+                }
+            },
+        }
+        response, _ = ElasticWrap(self.es_search).get(data=data)
+        buckets = response["aggregations"]["channel_downloads"]["buckets"]
+
+        buckets_sorted = []
+        for i in buckets:
+            bucket = {
+                "name": i["key"][0],
+                "id": i["key"][1],
+                "count": i["doc_count"],
+            }
+            buckets_sorted.append(bucket)
+
+        return buckets_sorted
 
     @staticmethod
     def post(request):

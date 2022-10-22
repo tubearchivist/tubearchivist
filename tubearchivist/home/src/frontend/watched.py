@@ -57,6 +57,14 @@ class WatchState:
             print(response)
             raise ValueError("failed to mark video as watched")
 
+    def _get_source(self):
+        """build source line for update_by_query script"""
+        source = [
+            "ctx._source.player['watched'] = true",
+            f"ctx._source.player['watched_date'] = {self.stamp}",
+        ]
+        return "; ".join(source)
+
     def mark_channel_watched(self):
         """change watched status of every video in channel"""
         path = "ta_video/_update_by_query"
@@ -67,7 +75,7 @@ class WatchState:
         data = {
             "query": {"bool": {"must": must_list}},
             "script": {
-                "source": "ctx._source.player['watched'] = true",
+                "source": self._get_source(),
                 "lang": "painless",
             },
         }
@@ -87,7 +95,7 @@ class WatchState:
         data = {
             "query": {"bool": {"must": must_list}},
             "script": {
-                "source": "ctx._source.player['watched'] = true",
+                "source": self._get_source(),
                 "lang": "painless",
             },
         }

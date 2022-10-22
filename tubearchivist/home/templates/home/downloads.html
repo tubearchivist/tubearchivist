@@ -41,6 +41,15 @@
             </div>
         </div>
         <div class="view-icons">
+            {% if channel_agg_list|length > 1 %}
+                <span>Filter:</span>
+                <select name="channel_filter" id="channel_filter" onchange="channelFilterDownload(this.value)">
+                    <option value="all" {% if not channel_filter_id %}selected{% endif %}>all</option>
+                    {% for channel in channel_agg_list %}
+                        <option {% if channel_filter_id == channel.id %}selected{% endif %} value="{{ channel.id }}">{{ channel.name }} ({{channel.count}})</option>
+                    {% endfor %}
+                </select>
+            {% endif %}
             {% if view_style == "grid" %}
                 <div class="grid-count">
                     {% if grid_items < 7 %}
