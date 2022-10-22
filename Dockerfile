@@ -3,7 +3,7 @@
 
 
 # First stage to build python wheel
-FROM python:3.10.7-slim-bullseye AS builder
+FROM python:3.10.8-slim-bullseye AS builder
 ARG TARGETPLATFORM
 
 RUN apt-get update
