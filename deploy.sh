@@ -18,11 +18,7 @@ set -e
 
 function sync_blackhole {
 
-    # docker commands need sudo, only build amd64
     host="blackhole.local"
-
-    read -sp 'Password: ' remote_pw
-    export PASS=$remote_pw
     
     rsync -a --progress --delete-after \
         --exclude ".git" \
@@ -32,8 +28,8 @@ function sync_blackhole {
         --exclude "db.sqlite3" \
         . -e ssh "$host":tubearchivist
 
-    echo "$PASS" | ssh "$host" 'sudo -S docker buildx build --platform linux/amd64 -t bbilly1/tubearchivist:latest tubearchivist --load 2>/dev/null'
-    echo "$PASS" | ssh "$host" 'sudo -S docker compose up -d 2>/dev/null'
+    ssh "$host" 'docker build -t bbilly1/tubearchivist tubearchivist'
+    ssh "$host" 'docker compose up -d'
 
 }
 
