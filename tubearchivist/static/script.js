@@ -1147,6 +1147,14 @@ function showForm() {
     animate('animate-icon', 'pulse-img');
 }
 
+function channelFilterDownload(value) {
+    if (value === "all") {
+        window.location = "/downloads/";
+    } else {
+        window.location.search = "?channel=" + value;
+    }
+}
+
 function showOverwrite() {
     var overwriteDiv = document.getElementById("overwrite-form");
     if (overwriteDiv.classList.contains("hidden-overwrite")) {
