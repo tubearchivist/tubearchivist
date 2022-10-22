@@ -24,7 +24,7 @@ Each channel will get a dedicated channel detail page accessible at `/channel/<c
 
 Additionally there is a *Channel Playlist* page, accessible at `/channel/<channel-id>/playlist/` to show all indexed playlists from this channel. 
 
-On the *Channel About* page you can see additional metadata.
+On the *Channel About* page, accessible at `/channel/<channel-id>/about/`, you can see additional metadata.
 - The button **Delete Channel** will delete the channel plus all videos of this channel, both media files and metadata additionally this will also delete playlists metadata belonging to that channel.
 
 The channel customize form gives options to change settings on a per channel basis. Any configurations here will overwrite your configurations from the [settings](Settings) page.
@@ -32,3 +32,5 @@ The channel customize form gives options to change settings on a per channel bas
 - **Auto Delete**: Automatically delete watched videos from this channel after selected days.
 - **Index Playlists**: Automatically add all Playlists with at least a video downloaded to your index. Only do this for channels where you care about playlists as this will slow down indexing new videos for having to check which playlist this belongs to.
 - **SponsorBlock**: Using [SponsorBlock](https://sponsor.ajay.app/) to get and skip sponsored content. Customize per channel: You can *disable* or *enable* SponsorBlock for certain channels only to overwrite the behavior set on the [Settings](settings) page. Selecting *unset* will remove the overwrite and your setting will fall back to the default on the settings page.
+
+If you have any videos pending in the download queue, a *Downloads* link will show, bringing you directly to the [downloads](Downloads) page, filtering the list by the selected channel.
