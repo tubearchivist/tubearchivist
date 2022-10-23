@@ -48,9 +48,17 @@ class SponsorBlock:
         url = f"{self.API}/skipSegments?videoID={youtube_id}"
         headers = {"User-Agent": self.user_agent}
         print(f"{youtube_id}: get sponsorblock timestamps")
-        response = requests.get(url, headers=headers)
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+        except requests.ReadTimeout:
+            print(f"{youtube_id}: sponsorblock API timeout")
+            return False
+
         if not response.ok:
-            print(f"{youtube_id}: sponsorblock failed: {response.text}")
+            print(f"{youtube_id}: sponsorblock failed: {response.status_code}")
+            if response.status_code == 503:
+                return False
+
             sponsor_dict = {
                 "last_refresh": self.last_refresh,
                 "is_enabled": True,
