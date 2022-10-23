@@ -143,3 +143,8 @@ class RedisQueue(RedisBase):
     def trim(self, size):
         """trim the queue based on settings amount"""
         self.conn.execute_command("LTRIM", self.key, 0, size)
+
+    def has_item(self):
+        """check if queue as at least one pending item"""
+        result = self.conn.execute_command("LRANGE", self.key, 0, 0)
+        return bool(result)

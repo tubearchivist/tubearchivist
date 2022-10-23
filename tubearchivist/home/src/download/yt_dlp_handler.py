@@ -175,6 +175,14 @@ class VideoDownloader:
             if not success:
                 continue
 
+            mess_dict = {
+                "status": self.MSG,
+                "level": "info",
+                "title": "Indexing....",
+                "message": "Add video metadata to index.",
+            }
+            RedisArchivist().set_message(self.MSG, mess_dict, expire=60)
+
             vid_dict = index_new_video(
                 youtube_id, video_overwrites=self.video_overwrites
             )
@@ -187,12 +195,17 @@ class VideoDownloader:
             }
             RedisArchivist().set_message(self.MSG, mess_dict)
 
+            if queue.has_item():
+                message = "Continue with next video."
+            else:
+                message = "Download queue is finished."
+
             self.move_to_archive(vid_dict)
             mess_dict = {
                 "status": self.MSG,
                 "level": "info",
                 "title": "Completed",
-                "message": "",
+                "message": message,
             }
             RedisArchivist().set_message(self.MSG, mess_dict, expire=10)
             self._delete_from_pending(youtube_id)
