@@ -744,6 +744,22 @@ video:-webkit-full-screen {
 /* video page */
 .video-main {
     margin: 1rem 0;
+    position: relative; /* needed for modal */
+}
+
+.video-modal {
+    position: absolute;
+    z-index: 1;
+    top: 20%;
+    width: 100%;
+    text-align: center;
+}
+
+.video-modal-text {
+    background: rgba(0,0,0,.5);
+    color: #eeeeee;
+    font-size: 1.3em;
+    display: none;
 }
 
 .video-main video {

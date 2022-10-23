@@ -1,4 +1,3 @@
-
 function sortChange(sortValue) {
     var payload = JSON.stringify({'sort_order': sortValue});
     sendPost(payload);
@@ -411,7 +410,7 @@ function createPlayer(button) {
     } else {
         var watchStatusIndicator = createWatchStatusIndicator(videoId, "unwatched");
     }
-    
+
 
     var playerStats = `<div class="thumb-icon player-stats"><img src="/static/img/icon-eye.svg" alt="views icon"><span>${videoViews}</span>`;
     if (videoData.data.stats.like_count) {
@@ -449,8 +448,8 @@ function createPlayer(button) {
 // Add video tag to video page when passed a video id, function loaded on page load `video.html (115-117)`
 function insertVideoTag(videoData, videoProgress) {
     var videoTag = createVideoTag(videoData, videoProgress);
-    var videoMain = document.getElementsByClassName("video-main");
-    videoMain[0].innerHTML = videoTag;
+    var videoMain = document.querySelector(".video-main");
+    videoMain.innerHTML += videoTag;
 }
 
 // Generates a video tag with subtitles when passed videoData and videoProgress.
@@ -793,8 +792,8 @@ function setProgressBar(videoId, currentTime, duration) {
     }
 
     // progressBar = document.getElementById("progress-" + videoId);
-    
-    
+
+
 }
 
 // multi search form
@@ -1046,7 +1045,7 @@ function createFulltext(fullText) {
     </a>
     <div class="video-desc list">
         <p>${subtitle_start} - ${subtitle_end}</p>
-        <p>${subtitleLine}</p>    
+        <p>${subtitleLine}</p>
         <div>
             <a href="/channel/${channelId}/"><h3>${channelName}</h3></a>
             <a class="video-more" href="/video/${videoId}/?t=${subtitle_start}"><h2>${videoTitle}</h2></a>
@@ -1173,3 +1172,130 @@ function animate(elementId, animationClass) {
         toAnimate.classList.remove(animationClass);
     }
 }
+
+// keep track of changes to the subtitles list made with the native UI
+// needed so that when toggling subtitles with the shortcut we go to the last selected one, not the first one
+addEventListener('DOMContentLoaded', recordTextTrackChanges);
+
+let lastSeenTextTrack = 0;
+function recordTextTrackChanges() {
+    let player = getVideoPlayer();
+    player.textTracks.addEventListener('change', () => {
+        let active = [...player.textTracks].findIndex(x => x.mode === 'showing');
+        if (active !== -1) {
+            lastSeenTextTrack = active;
+        }
+    });
+}
+
+// keyboard shortcuts for the video player
+document.addEventListener('keydown', doShortcut);
+
+let modalHideTimeout = -1;
+function showModal(html, duration) {
+    let player = getVideoPlayer();
+    let modal = document.querySelector('.video-modal-text');
+    modal.innerHTML = html;
+    modal.style.display = 'initial';
+    clearTimeout(modalHideTimeout);
+    modalHideTimeout = setTimeout(() => { modal.style.display = 'none'; }, duration);
+}
+
+let videoSpeeds = [.25, .5, .75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3];
+function doShortcut(e) {
+    if (!(e.target instanceof HTMLElement)) {
+        return;
+    }
+    let target = e.target;
+    let targetName = target.nodeName.toLowerCase();
+    if (targetName === 'textarea' || targetName === 'input' || targetName === 'select' || target.isContentEditable) {
+        return;
+    }
+    if (e.altKey || e.ctrlKey || e.metaKey) {
+        return;
+    }
+    let player = getVideoPlayer();
+    if (player == null) {
+        // not on the video page
+        return;
+    }
+    switch (e.key) {
+        case 'c': {
+            // toggle captions
+            let tracks = [...player.textTracks];
+            if (tracks.length === 0) {
+                break;
+            }
+            let active = tracks.find(x => x.mode === 'showing');
+            if (active != null) {
+                active.mode = 'disabled';
+            } else {
+                tracks[lastSeenTextTrack].mode = 'showing';
+            }
+            break;
+        }
+        case 'm': {
+            player.muted = !player.muted;
+            break;
+        }
+        case 'ArrowLeft': {
+            if (targetName === 'video') {
+                // hitting arrows while the video is focused will use the built-in skip
+                break;
+            }
+            showModal('- 5 seconds', 500);
+            player.currentTime -= 5;
+            break;
+        }
+        case 'ArrowRight': {
+            if (targetName === 'video') {
+                // hitting space while the video is focused will use the built-in skip
+                break;
+            }
+            showModal('+ 5 seconds', 500);
+            player.currentTime += 5;
+            break;
+        }
+        case '<':
+        case '>': {
+            // change speed
+            let currentSpeedIdx = videoSpeeds.findIndex(s => s >= player.playbackRate);
+            if (currentSpeedIdx === -1) {
+                // handle the case where the user manually set the speed above our max speed
+                currentSpeedIdx = videoSpeeds.length - 1;
+            }
+            let newSpeedIdx = e.key === '<' ? Math.max(0, currentSpeedIdx - 1) : Math.min(videoSpeeds.length - 1, currentSpeedIdx + 1);
+            let newSpeed = videoSpeeds[newSpeedIdx];
+            player.playbackRate = newSpeed;
+            showModal(newSpeed + 'x', 500);
+            break;
+        }
+        case ' ': {
+            if (targetName === 'video') {
+                // hitting space while the video is focused will toggle it anyway
+                break;
+            }
+            e.preventDefault();
+            if (player.paused) {
+                player.play();
+            } else {
+                player.pause();
+            }
+            break;
+        }
+        case '?': {
+            showModal(`
+                <table style="margin: auto; background: rgba(0,0,0,.5)"><tbody>
+                <tr><td>Show help</td><td>?</td>
+                <tr><td>Toggle mute</td><td>m</td>
+                <tr><td>Toggle subtitles (if available)</td><td>c</td>
+                <tr><td>Increase speed</td><td>&gt;</td>
+                <tr><td>Decrease speed</td><td>&lt;</td>
+                <tr><td>Back 5 seconds</td><td>←</td>
+                <tr><td>Forward 5 seconds</td><td>→</td>
+            `, 3000);
+            break;
+        }
+    }
+}
+
