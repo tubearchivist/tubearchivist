@@ -45,13 +45,19 @@ class YoutubePlaylist(YouTubeItem):
 
     def process_youtube_meta(self):
         """extract relevant fields from youtube"""
+        try:
+            playlist_thumbnail = self.youtube_meta["thumbnails"][-1]["url"]
+        except IndexError:
+            print(f"{self.youtube_id}: thumbnail extraction failed")
+            playlist_thumbnail = False
+
         self.json_data = {
             "playlist_id": self.youtube_id,
             "playlist_active": True,
             "playlist_name": self.youtube_meta["title"],
             "playlist_channel": self.youtube_meta["channel"],
             "playlist_channel_id": self.youtube_meta["channel_id"],
-            "playlist_thumbnail": self.youtube_meta["thumbnails"][-1]["url"],
+            "playlist_thumbnail": playlist_thumbnail,
             "playlist_description": self.youtube_meta["description"] or False,
             "playlist_last_refresh": int(datetime.now().strftime("%s")),
         }
