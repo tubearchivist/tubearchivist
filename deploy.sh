@@ -28,7 +28,7 @@ function sync_blackhole {
         --exclude "db.sqlite3" \
         . -e ssh "$host":tubearchivist
 
-    ssh "$host" 'docker build -t bbilly1/tubearchivist tubearchivist'
+    ssh "$host" 'docker build -t bbilly1/tubearchivist --build-arg TARGETPLATFORM="linux/amd64" tubearchivist'
     ssh "$host" 'docker compose up -d'
 
 }
