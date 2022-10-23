@@ -29,7 +29,7 @@ The **Add to Download Queue** icon <img src="assets/icon-add.png?raw=true" alt="
 ## The Download Queue
 Below the three buttons you find the download queue. New items will get added at the bottom of the queue, the next video to download once you click on **Start Download** will be the first in the list.
 
-You can filter the download queue with the **filter** dropdown box. Select the channel to filter by name, the number in parentheses indicates how many videos you have pending from this channel. Reset the filter by selecting *all* from the dropdown. This will generate links for the top 30 channels with pending videos.
+You can filter the download queue with the **filter** dropdown box, the filter will show once you have more than one channel in the download queue. Select the channel to filter by name, the number in parentheses indicates how many videos you have pending from this channel. Reset the filter by selecting *all* from the dropdown. This will generate links for the top 30 channels with pending videos.
 
 Every video in the download queue has two buttons:
 - **Ignore**: This will remove that video from the download queue and this video will not get added again, even when you **Rescan Subscriptions**.
