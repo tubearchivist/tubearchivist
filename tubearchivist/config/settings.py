@@ -103,20 +103,55 @@ if bool(environ.get("TA_LDAP")):
     global AUTH_LDAP_BIND_PASSWORD
     AUTH_LDAP_BIND_PASSWORD = environ.get("TA_LDAP_BIND_PASSWORD")
 
+    
+    # Bind options
+
+    # Since these are new environment variables, taking the opporunity to use more accurate 
+    # env names. 
+    # Given Names are *_technically_* different from Personal names, as people who change their names
+    # have different given names and personal names, and they go by personal names.
+    # Additionally, "LastName" is actually incorrect for many cultures, such as Korea, where the 
+    # family name comes first, and the personal name comes last. 
+    
+    # But we all know people are going to try to guess at these, so still want to include 
+    # names that people will guess, hence using first/last as well.
+
+    global AUTH_LDAP_BIND_ATTR_USERNAME
+    AUTH_LDAP_BIND_ATTR_USERNAME = environ.get("TA_LDAP_BIND_ATTR_USERNAME") or environ.get("TA_LDAP_BIND_ATTR_UID") or "uid",
+
+    global AUTH_LDAP_BIND_ATTR_PERSONALNAME
+    AUTH_LDAP_BIND_ATTR_PERSONALNAME = environ.get("TA_LDAP_BIND_ATTR_PERSONALNAME") or environ.get("TA_LDAP_BIND_ATTR_FIRSTNAME") or "givenName",
+
+    global AUTH_LDAP_BIND_ATTR_SURNAME 
+    AUTH_LDAP_BIND_ATTR_SURNAME = environ.get("TA_LDAP_BIND_ATTR_SURNAME") or environ.get("TA_LDAP_BIND_ATTR_LASTNAME") or "sn",
+
+    global AUTH_LDAP_BIND_ATTR_EMAIL
+    AUTH_LDAP_BIND_ATTR_EMAIL = environ.get("TA_LDAP_BIND_ATTR_EMAIL") or "mail",
+
+
+
+    global AUTH_LDAP_USER_BASE
+    AUTH_LDAP_USER_BASE = environ.get("TA_LDAP_USER_BASE")
+
+    global AUTH_LDAP_USER_FILTER
+    AUTH_LDAP_USER_FILTER = environ.get("TA_LDAP_USER_FILTER")
+
     global AUTH_LDAP_USER_SEARCH
     # pylint: disable=no-member
     AUTH_LDAP_USER_SEARCH = LDAPSearch(
-        environ.get("TA_LDAP_USER_BASE"),
+        AUTH_LDAP_USER_BASE,
         ldap.SCOPE_SUBTREE,
-        "(&(uid=%(user)s)" + environ.get("TA_LDAP_USER_FILTER") + ")",
+        "(&(%(AUTH_LDAP_BIND_ATTR_USERNAME)s=%(user)s)" + AUTH_LDAP_USER_FILTER + ")",
     )
+
+
 
     global AUTH_LDAP_USER_ATTR_MAP
     AUTH_LDAP_USER_ATTR_MAP = {
-        "username": "uid",
-        "first_name": "givenName",
-        "last_name": "sn",
-        "email": "mail",
+        "username": AUTH_LDAP_BIND_ATTR_USERNAME,
+        "first_name": AUTH_LDAP_BIND_ATTR_PERSONALNAME,
+        "last_name": AUTH_LDAP_BIND_ATTR_SURNAME,
+        "email": AUTH_LDAP_BIND_ATTR_EMAIL,
     }
 
     if bool(environ.get("TA_LDAP_DISABLE_CERT_CHECK")):
