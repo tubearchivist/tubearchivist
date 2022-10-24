@@ -425,6 +425,7 @@ function createPlayer(button) {
 
     const markup = `
     <div class="video-player" data-id="${videoId}">
+        <div class="video-modal"><span class="video-modal-text"></span></div>
         ${videoTag}
         <div class="notifications" id="notifications"></div>
         ${sponsorBlockElements}
@@ -443,6 +444,7 @@ function createPlayer(button) {
     `;
     const divPlayer = document.getElementById("player");
     divPlayer.innerHTML = markup;
+    recordTextTrackChanges();
 }
 
 // Add video tag to video page when passed a video id, function loaded on page load `video.html (115-117)`
@@ -1180,6 +1182,9 @@ addEventListener('DOMContentLoaded', recordTextTrackChanges);
 let lastSeenTextTrack = 0;
 function recordTextTrackChanges() {
     let player = getVideoPlayer();
+    if (player == null) {
+        return;
+    }
     player.textTracks.addEventListener('change', () => {
         let active = [...player.textTracks].findIndex(x => x.mode === 'showing');
         if (active !== -1) {

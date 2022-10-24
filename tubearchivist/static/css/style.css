@@ -388,6 +388,7 @@ button:hover {
     display: grid;
     align-content: space-evenly;
     height: 100vh;
+    position: relative; /* needed for modal */
 }
 
 .notifications {
