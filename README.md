@@ -61,9 +61,11 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 - [Tube Archivist Metrics](https://github.com/tubearchivist/tubearchivist-metrics) to create statistics in Prometheus/OpenMetrics format.
 
 ## Installing and updating
-There's dedicated user-contributed install steps under [docs/Installation.md](./docs/Installation.md) for certain specialized operating systems (e.g. Unraid) which you can use instead of this section if you happen to be using one of those. Otherwise, continue on.
+There's dedicated user-contributed install steps under [docs/Installation.md](./docs/Installation.md) for Unraid, Truenas and Synology which you can use instead of this section if you happen to be using one of those. Otherwise, continue on.
 
 For minimal system requirements, the Tube Archivist stack needs around 2GB of available memory for a small testing setup and around 4GB of available memory for a mid to large sized installation.  
+
+Note for arm64 hosts: The Tube Archivist container is multi arch, so is Elasticsearch. RedisJSON doesn't offer arm builds, but you can use the image `bbilly1/rejson` (an unofficial rebuild for arm64) instead of [the official one](https://github.com/tubearchivist/tubearchivist/blob/4af12aee15620e330adf3624c984c3acf6d0ac8b/docker-compose.yml#L27).
 
 This project requires docker. Ensure it is installed and running on your system.
 
@@ -154,11 +156,9 @@ You will see the current version number of **Tube Archivist** in the footer of t
 * There can be breaking changes between updates, particularly as the application grows, new environment variables or settings might be required for you to set in the your docker-compose file. *Always* check the **release notes**: Any breaking changes will be marked there.  
 * All testing and development is done with the Elasticsearch version number as mentioned in the provided *docker-compose.yml* file. This will be updated when a new release of Elasticsearch is available. Running an older version of Elasticsearch is most likely not going to result in any issues, but it's still recommended to run the same version as mentioned. Use `bbilly1/tubearchivist-es` to automatically get the recommended version.
 
-### Alternative installation instructions:
-- **arm64**: The Tube Archivist container is multi arch, so is Elasticsearch. RedisJSON doesn't offer arm builds, you can use `bbilly1/rejson`, an unofficial rebuild for arm64.
-- **Helm Chart**: There is a Helm Chart available at https://github.com/insuusvenerati/helm-charts. Mostly self-explanatory but feel free to ask questions in the discord / subreddit.
-- **Wiki**: There are additional helpful installation instructions in the [wiki](https://github.com/tubearchivist/tubearchivist/wiki/Installation) for Unraid, Truenas and Synology.
+### Helm charts
 
+There is a Helm Chart available at https://github.com/insuusvenerati/helm-charts. Mostly self-explanatory but feel free to ask questions in the discord / subreddit.
 
 ## Potential pitfalls
 ### vm.max_map_count
