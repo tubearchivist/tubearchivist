@@ -104,7 +104,7 @@ if bool(environ.get("TA_LDAP")):
     AUTH_LDAP_BIND_PASSWORD = environ.get("TA_LDAP_BIND_PASSWORD")
 
     
-    # Bind options
+    # Attribute mapping options
 
     # Since these are new environment variables, taking the opporunity to use more accurate 
     # env names. 
