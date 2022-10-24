@@ -116,17 +116,17 @@ if bool(environ.get("TA_LDAP")):
     # But we all know people are going to try to guess at these, so still want to include 
     # names that people will guess, hence using first/last as well.
 
-    global AUTH_LDAP_BIND_ATTR_USERNAME
-    AUTH_LDAP_BIND_ATTR_USERNAME = environ.get("TA_LDAP_BIND_ATTR_USERNAME") or environ.get("TA_LDAP_BIND_ATTR_UID") or "uid",
+    global AUTH_LDAP_USER_ATTR_MAP_USERNAME
+    AUTH_LDAP_USER_ATTR_MAP_USERNAME = environ.get("TA_LDAP_USER_ATTR_MAP_USERNAME") or environ.get("TA_LDAP_USER_ATTR_MAP_UID") or "uid",
 
-    global AUTH_LDAP_BIND_ATTR_PERSONALNAME
-    AUTH_LDAP_BIND_ATTR_PERSONALNAME = environ.get("TA_LDAP_BIND_ATTR_PERSONALNAME") or environ.get("TA_LDAP_BIND_ATTR_FIRSTNAME") or "givenName",
+    global AUTH_LDAP_USER_ATTR_MAP_PERSONALNAME
+    AUTH_LDAP_USER_ATTR_MAP_PERSONALNAME = environ.get("TA_LDAP_USER_ATTR_MAP_PERSONALNAME") or environ.get("TA_LDAP_USER_ATTR_MAP_FIRSTNAME") or "givenName",
 
-    global AUTH_LDAP_BIND_ATTR_SURNAME 
-    AUTH_LDAP_BIND_ATTR_SURNAME = environ.get("TA_LDAP_BIND_ATTR_SURNAME") or environ.get("TA_LDAP_BIND_ATTR_LASTNAME") or "sn",
+    global AUTH_LDAP_USER_ATTR_MAP_SURNAME 
+    AUTH_LDAP_USER_ATTR_MAP_SURNAME = environ.get("TA_LDAP_USER_ATTR_MAP_SURNAME") or environ.get("TA_LDAP_USER_ATTR_MAP_LASTNAME") or "sn",
 
-    global AUTH_LDAP_BIND_ATTR_EMAIL
-    AUTH_LDAP_BIND_ATTR_EMAIL = environ.get("TA_LDAP_BIND_ATTR_EMAIL") or "mail",
+    global AUTH_LDAP_USER_ATTR_MAP_EMAIL
+    AUTH_LDAP_USER_ATTR_MAP_EMAIL = environ.get("TA_LDAP_USER_ATTR_MAP_EMAIL") or environ.get("TA_LDAP_USER_ATTR_MAP_MAIL") or "mail",
 
 
 
@@ -141,17 +141,17 @@ if bool(environ.get("TA_LDAP")):
     AUTH_LDAP_USER_SEARCH = LDAPSearch(
         AUTH_LDAP_USER_BASE,
         ldap.SCOPE_SUBTREE,
-        "(&(%(AUTH_LDAP_BIND_ATTR_USERNAME)s=%(user)s)" + AUTH_LDAP_USER_FILTER + ")",
+        "(&(%(AUTH_LDAP_USER_ATTR_MAP_USERNAME)s=%(user)s)" + AUTH_LDAP_USER_FILTER + ")",
     )
 
 
 
     global AUTH_LDAP_USER_ATTR_MAP
     AUTH_LDAP_USER_ATTR_MAP = {
-        "username": AUTH_LDAP_BIND_ATTR_USERNAME,
-        "first_name": AUTH_LDAP_BIND_ATTR_PERSONALNAME,
-        "last_name": AUTH_LDAP_BIND_ATTR_SURNAME,
-        "email": AUTH_LDAP_BIND_ATTR_EMAIL,
+        "username": AUTH_LDAP_USER_ATTR_MAP_USERNAME,
+        "first_name": AUTH_LDAP_USER_ATTR_MAP_PERSONALNAME,
+        "last_name": AUTH_LDAP_USER_ATTR_MAP_SURNAME,
+        "email": AUTH_LDAP_USER_ATTR_MAP_EMAIL,
     }
 
     if bool(environ.get("TA_LDAP_DISABLE_CERT_CHECK")):
