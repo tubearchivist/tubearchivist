@@ -76,6 +76,10 @@ Do you see anything on the roadmap that you would like to take a closer look at 
 
 To fix a bug or implement a feature, fork the repository and make all changes to the testing branch. When ready, create a pull request.
 
+## Making changes to the JavaScript
+
+The JavaScript does not require any build step; you just edit the files directly. However, there is config for eslint and prettier (a linter and formatter respectively); their use is recommended but not required. To use them, install `node`, run `npm i` from the root directory of this repository to install dependencies, then run `npm run lint` and `npm run format` to run eslint and prettier respectively.
+
 ## Releases
 
 There are three different docker tags:
