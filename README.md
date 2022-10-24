@@ -89,6 +89,8 @@ From a terminal, `cd` into the directory you saved the `docker-compose.yml` file
 
 You can follow the logs with `docker compose logs -f`. Once it's ready it will print something like `celery@1234567890ab ready`. At this point you should be able to go to `http://your-host:8000` and log in with the `TA_USER`/`TA_PASSWORD` credentials.
 
+You can bring the application down by running `docker compose down` in the same directory.
+
 Use the *latest* (the default) or a named semantic version tag for the docker images. The *unstable* tag is for intermediate testing and as the name implies, is **unstable** and not be used on your main installation but in a [testing environment](CONTRIBUTING.md).  
 
 ## Installation Details
