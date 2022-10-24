@@ -1,3 +1,4 @@
+'use strict';
 module.exports = {
   extends: [
     'eslint:recommended',
@@ -9,4 +10,8 @@ module.exports = {
   env: {
     browser: true,
   },
+  rules: {
+    strict: ['error', 'global'],
+    'no-unused-vars': ['error', { vars: 'local' }]
+  }
 };

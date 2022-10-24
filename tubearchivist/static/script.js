@@ -1,3 +1,7 @@
+'use strict';
+
+/* globals checkMessages */
+
 function sortChange(sortValue) {
     var payload = JSON.stringify({'sort_order': sortValue});
     sendPost(payload);
@@ -9,6 +13,7 @@ function sortChange(sortValue) {
 
 // Updates video watch status when passed a video id and it's current state (ex if the video was unwatched but you want to mark it as watched you will pass "unwatched")
 function updateVideoWatchStatus(input1, videoCurrentWatchStatus) {
+    let videoId;
     if (videoCurrentWatchStatus) {
         videoId = input1;
     } else if (input1.getAttribute("data-id")) {
@@ -19,13 +24,14 @@ function updateVideoWatchStatus(input1, videoCurrentWatchStatus) {
     postVideoProgress(videoId, 0); // Reset video progress on watched/unwatched;
     removeProgressBar(videoId);
 
+    let watchStatusIndicator, payload;
     if (videoCurrentWatchStatus == "watched") {
-        var watchStatusIndicator = createWatchStatusIndicator(videoId, "unwatched");
-        var payload = JSON.stringify({'un_watched': videoId});
+        watchStatusIndicator = createWatchStatusIndicator(videoId, "unwatched");
+        payload = JSON.stringify({'un_watched': videoId});
         sendPost(payload);
     } else if (videoCurrentWatchStatus == "unwatched") {
-        var watchStatusIndicator = createWatchStatusIndicator(videoId, "watched");
-        var payload = JSON.stringify({'watched': videoId});
+        watchStatusIndicator = createWatchStatusIndicator(videoId, "watched");
+        payload = JSON.stringify({'watched': videoId});
         sendPost(payload);
     }
 
@@ -39,12 +45,13 @@ function updateVideoWatchStatus(input1, videoCurrentWatchStatus) {
 
 // Creates a watch status indicator when passed a video id and the videos watch status
 function createWatchStatusIndicator(videoId, videoWatchStatus) {
+    let seen, title;
     if (videoWatchStatus == "watched") {
-        var seen = "seen";
-        var title = "Mark as unwatched";
+        seen = "seen";
+        title = "Mark as unwatched";
     } else if (videoWatchStatus == "unwatched") {
-        var seen = "unseen";
-        var title = "Mark as watched";
+        seen = "unseen";
+        title = "Mark as watched";
     }
     var watchStatusIndicator = `<img src="/static/img/icon-${seen}.svg" alt="${seen}-icon" data-id="${videoId}" data-status="${videoWatchStatus}" onclick="updateVideoWatchStatus(this)" class="watch-button" title="${title}">`;
     return watchStatusIndicator;
@@ -69,7 +76,7 @@ function removeProgressBar(videoId) {
 }
 
 function isWatchedButton(button) {
-    youtube_id = button.getAttribute("data-id");
+    var youtube_id = button.getAttribute("data-id");
     var payload = JSON.stringify({'watched': youtube_id});
     button.remove();
     sendPost(payload);
@@ -287,7 +294,7 @@ function resetToken() {
 
 // delete from file system
 function deleteConfirm() {
-    to_show = document.getElementById("delete-button");
+    var to_show = document.getElementById("delete-button");
     document.getElementById("delete-item").style.display = 'none';
     to_show.style.display = "block";
 }
@@ -370,10 +377,11 @@ function createPlayer(button) {
     } else {
         sponsorBlock = null;
     }
+    let videoProgress;
     if (videoPosition) {
-        var videoProgress = getSeconds(videoPosition)
+        videoProgress = getSeconds(videoPosition)
     } else {
-        var videoProgress = getVideoProgress(videoId).position;
+        videoProgress = getVideoProgress(videoId).position;
     }
     var videoName = videoData.data.title;
 
@@ -387,7 +395,7 @@ function createPlayer(button) {
             var playlistData = getPlaylistData(subbedPlaylists[0]); // Playlist data for first subscribed playlist
             var playlistId = playlistData.playlist_id;
             var playlistName = playlistData.playlist_name;
-            var playlist = `<h5><a href="/playlist/${playlistId}/">${playlistName}</a></h5>`;
+            playlist = `<h5><a href="/playlist/${playlistId}/">${playlistName}</a></h5>`;
         }
     }
 
@@ -401,14 +409,15 @@ function createPlayer(button) {
     // If cast integration is enabled create cast button
     var castButton = '';
     if (videoData.config.application.enable_cast) {
-        var castButton = `<google-cast-launcher id="castbutton"></google-cast-launcher>`;
+        castButton = `<google-cast-launcher id="castbutton"></google-cast-launcher>`;
     }
 
     // Watched indicator
+    var watchStatusIndicator;
     if (videoData.data.player.watched) {
-        var watchStatusIndicator = createWatchStatusIndicator(videoId, "watched");
+        watchStatusIndicator = createWatchStatusIndicator(videoId, "watched");
     } else {
-        var watchStatusIndicator = createWatchStatusIndicator(videoId, "unwatched");
+        watchStatusIndicator = createWatchStatusIndicator(videoId, "unwatched");
     }
 
 
@@ -582,11 +591,11 @@ function watchedThreshold(currentTime, duration) {
     var watched = false;
     if (duration <= 1800){ // If video is less than 30 min
         if ((currentTime / duration) >= 0.90) { // Mark as watched at 90%
-            var watched = true;
+            watched = true;
         }
     } else { // If video is more than 30 min
         if (currentTime >= (duration - 120)) { // Mark as watched if there is two minutes left
-            var watched = true;
+            watched = true;
         }
     }
     return watched;
@@ -602,14 +611,15 @@ function onVideoPause() {
 // Format numbers for frontend
 function formatNumbers(number) {
     var numberUnformatted = parseFloat(number);
+    let numberFormatted;
     if (numberUnformatted > 999999999) {
-        var numberFormatted = (numberUnformatted / 1000000000).toFixed(1).toString() + "B";
+        numberFormatted = (numberUnformatted / 1000000000).toFixed(1).toString() + "B";
     } else if (numberUnformatted > 999999) {
-        var numberFormatted = (numberUnformatted / 1000000).toFixed(1).toString() + "M";
+        numberFormatted = (numberUnformatted / 1000000).toFixed(1).toString() + "M";
     } else if (numberUnformatted > 999) {
-        var numberFormatted = (numberUnformatted / 1000).toFixed(1).toString() + "K";
+        numberFormatted = (numberUnformatted / 1000).toFixed(1).toString() + "K";
     } else {
-        var numberFormatted = numberUnformatted;
+        numberFormatted = numberUnformatted;
     }
     return numberFormatted;
 }
@@ -621,15 +631,17 @@ function formatTime(time) {
     var secondsUnformatted  = time % 60;
 
     var hoursFormatted = Math.trunc(hoursUnformatted);
+    let minutesFormatted;
     if(minutesUnformatted < 10 && hoursFormatted > 0) {
-        var minutesFormatted  = "0" + Math.trunc(minutesUnformatted);
+        minutesFormatted  = "0" + Math.trunc(minutesUnformatted);
     } else {
-        var minutesFormatted = Math.trunc(minutesUnformatted);
+        minutesFormatted = Math.trunc(minutesUnformatted);
     }
+    let secondsFormatted;
     if(secondsUnformatted < 10) {
-        var secondsFormatted = "0" + Math.trunc(secondsUnformatted);
+        secondsFormatted = "0" + Math.trunc(secondsUnformatted);
     } else {
-        var secondsFormatted = Math.trunc(secondsUnformatted);
+        secondsFormatted = Math.trunc(secondsUnformatted);
     }
 
     var timeUnformatted = '';
@@ -725,7 +737,7 @@ function handleCookieValidate() {
     document.getElementById("cookieButton").remove();
     var cookieMessageElement = document.getElementById("cookieMessage");
     cookieMessageElement.innerHTML = `<span>Processing.</span>`;
-    response = postCookieValidate();
+    var response = postCookieValidate();
     if (response.cookie_validated == true) {
         cookieMessageElement.innerHTML = `<span>The cookie file is valid.</span>`;
     } else {
@@ -807,7 +819,7 @@ function searchMulti(query) {
             var http = new XMLHttpRequest();
             http.onreadystatechange = function() {
                 if (http.readyState === 4) {
-                    response = JSON.parse(http.response);
+                    var response = JSON.parse(http.response);
                     populateMultiSearchResults(response.results, response.queryType);
                 }
             };
@@ -908,15 +920,16 @@ function populateMultiSearchResults(allResults, queryType) {
 function createVideo(video, viewStyle) {
     // create video item div from template
     const videoId = video.youtube_id;
-    const mediaUrl = video.media_url;
+    // const mediaUrl = video.media_url;
     const thumbUrl = "/cache/" + video.vid_thumb_url;
     const videoTitle = video.title;
     const videoPublished = video.published;
     const videoDuration = video.player.duration_str;
+    let watchStatusIndicator;
     if (video.player.watched) {
-        var watchStatusIndicator = createWatchStatusIndicator(videoId, "watched");
+        watchStatusIndicator = createWatchStatusIndicator(videoId, "watched");
     } else {
-        var watchStatusIndicator = createWatchStatusIndicator(videoId, "unwatched");
+        watchStatusIndicator = createWatchStatusIndicator(videoId, "unwatched");
     };
     const channelId = video.channel.channel_id;
     const channelName = video.channel.channel_name;
@@ -956,10 +969,11 @@ function createChannel(channel, viewStyle) {
     const channelName = channel.channel_name;
     const channelSubs = channel.channel_subs;
     const channelLastRefresh = channel.channel_last_refresh;
+    let button;
     if (channel.channel_subscribed) {
-        var button = `<button class="unsubscribe" type="button" id="${channelId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${channelName}">Unsubscribe</button>`;
+        button = `<button class="unsubscribe" type="button" id="${channelId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${channelName}">Unsubscribe</button>`;
     } else {
-        var button = `<button type="button" id="${channelId}" onclick="subscribe(this.id)" title="Subscribe to ${channelName}">Subscribe</button>`;
+        button = `<button type="button" id="${channelId}" onclick="subscribe(this.id)" title="Subscribe to ${channelName}">Subscribe</button>`;
     }
     // build markup
     const markup = `
@@ -1001,10 +1015,11 @@ function createPlaylist(playlist, viewStyle) {
     const playlistChannelId = playlist.playlist_channel_id;
     const playlistChannel = playlist.playlist_channel;
     const playlistLastRefresh = playlist.playlist_last_refresh;
+    let button;
     if (playlist.playlist_subscribed) {
-        var button = `<button class="unsubscribe" type="button" id="${playlistId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${playlistName}">Unsubscribe</button>`;
+        button = `<button class="unsubscribe" type="button" id="${playlistId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${playlistName}">Unsubscribe</button>`;
     } else {
-        var button = `<button type="button" id="${playlistId}" onclick="subscribe(this.id)" title="Subscribe to ${playlistName}">Subscribe</button>`;
+        button = `<button type="button" id="${playlistId}" onclick="subscribe(this.id)" title="Subscribe to ${playlistName}">Subscribe</button>`;
     }
     const markup = `
     <div class="playlist-thumbnail">
@@ -1073,10 +1088,10 @@ function sendPost(payload) {
 
 function getCookie(c_name) {
     if (document.cookie.length > 0) {
-        c_start = document.cookie.indexOf(c_name + "=");
+        var c_start = document.cookie.indexOf(c_name + "=");
         if (c_start != -1) {
             c_start = c_start + c_name.length + 1;
-            c_end = document.cookie.indexOf(";", c_start);
+            var c_end = document.cookie.indexOf(";", c_start);
             if (c_end == -1) c_end = document.cookie.length;
             return unescape(document.cookie.substring(c_start,c_end));
         }
@@ -1198,7 +1213,6 @@ document.addEventListener('keydown', doShortcut);
 
 let modalHideTimeout = -1;
 function showModal(html, duration) {
-    let player = getVideoPlayer();
     let modal = document.querySelector('.video-modal-text');
     modal.innerHTML = html;
     modal.style.display = 'initial';

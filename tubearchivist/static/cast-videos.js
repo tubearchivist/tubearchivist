@@ -1,3 +1,7 @@
+'use strict';
+
+/* global cast chrome getVideoPlayerVideoId postVideoProgress setProgressBar getVideoPlayer getVideoPlayerWatchStatus watchedThreshold isWatched getVideoData getURL getVideoPlayerCurrentTime */
+
 function initializeCastApi() {
     cast.framework.CastContext.getInstance().setOptions({
         receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID, // Use built in receiver app on cast device, see https://developers.google.com/cast/docs/styled_receiver if you want to be able to add a theme, splash screen or watermark. Has a $5 one time fee.
@@ -9,18 +13,18 @@ function initializeCastApi() {
 
     // Add event listerner to check if a connection to a cast device is initiated
     playerController.addEventListener(
-        cast.framework.RemotePlayerEventType.IS_CONNECTED_CHANGED, function() { 
-            castConnectionChange(player) 
+        cast.framework.RemotePlayerEventType.IS_CONNECTED_CHANGED, function() {
+            castConnectionChange(player)
         }
     );
     playerController.addEventListener(
-        cast.framework.RemotePlayerEventType.CURRENT_TIME_CHANGED, function() { 
-            castVideoProgress(player) 
+        cast.framework.RemotePlayerEventType.CURRENT_TIME_CHANGED, function() {
+            castVideoProgress(player)
         }
     );
     playerController.addEventListener(
-        cast.framework.RemotePlayerEventType.IS_PAUSED_CHANGED, function() { 
-            castVideoPaused(player) 
+        cast.framework.RemotePlayerEventType.IS_PAUSED_CHANGED, function() {
+            castVideoPaused(player)
         }
     );
 }
@@ -69,27 +73,27 @@ function castVideoPaused(player) {
 function castStart() {
     var castSession = cast.framework.CastContext.getInstance().getCurrentSession();
     // Check if there is already media playing on the cast target to prevent recasting on page reload or switching to another video page
-    if (!castSession.getMediaSession()) { 
+    if (!castSession.getMediaSession()) {
         var videoId = getVideoPlayerVideoId();
         var videoData = getVideoData(videoId);
         var contentId = getURL() + videoData.data.media_url;
         var contentTitle = videoData.data.title;
         var contentImage = getURL() + videoData.data.vid_thumb_url;
 
-        contentType = 'video/mp4'; // Set content type, only videos right now so it is hard coded
-        contentCurrentTime = getVideoPlayerCurrentTime(); // Get video's current position
-        contentActiveSubtitle = [];
+        var contentType = 'video/mp4'; // Set content type, only videos right now so it is hard coded
+        var contentCurrentTime = getVideoPlayerCurrentTime(); // Get video's current position
+        var contentActiveSubtitle = [];
         // Check if a subtitle is turned on.
-        for (var i = 0; i < getVideoPlayer().textTracks.length; i++) {
+        for (let i = 0; i < getVideoPlayer().textTracks.length; i++) {
             if (getVideoPlayer().textTracks[i].mode == "showing") {
                 contentActiveSubtitle =[i + 1];
             }
         }
-        contentSubtitles = [];
+        var contentSubtitles = [];
         var videoSubtitles = videoData.data.subtitles; // Array of subtitles
         if (typeof(videoSubtitles) != 'undefined' && videoData.config.downloads.subtitle) {
-            for (var i = 0; i < videoSubtitles.length; i++) {
-                subtitle = new chrome.cast.media.Track(i, chrome.cast.media.TrackType.TEXT);
+            for (let i = 0; i < videoSubtitles.length; i++) {
+                var subtitle = new chrome.cast.media.Track(i, chrome.cast.media.TrackType.TEXT);
                 subtitle.trackContentId = videoSubtitles[i].media_url;
                 subtitle.trackContentType = 'text/vtt';
                 subtitle.subtype = chrome.cast.media.TextTrackType.SUBTITLES;
@@ -100,7 +104,7 @@ function castStart() {
             }
         }
 
-        mediaInfo = new chrome.cast.media.MediaInfo(contentId, contentType); // Create MediaInfo var that contains url and content type
+        var mediaInfo = new chrome.cast.media.MediaInfo(contentId, contentType); // Create MediaInfo var that contains url and content type
         // mediaInfo.streamType = chrome.cast.media.StreamType.BUFFERED; // Set type of stream, BUFFERED, LIVE, OTHER
         mediaInfo.metadata = new chrome.cast.media.GenericMediaMetadata(); // Create metadata var and add it to MediaInfo
         mediaInfo.metadata.title = contentTitle.replace("&amp;", "&"); // Set the video title
@@ -108,20 +112,20 @@ function castStart() {
         // mediaInfo.textTrackStyle = new chrome.cast.media.TextTrackStyle();
         mediaInfo.tracks = contentSubtitles;
 
-        var request = new chrome.cast.media.LoadRequest(mediaInfo); // Create request with the previously set MediaInfo. 
+        var request = new chrome.cast.media.LoadRequest(mediaInfo); // Create request with the previously set MediaInfo.
         // request.queueData = new chrome.cast.media.QueueData(); // See https://developers.google.com/cast/docs/reference/web_sender/chrome.cast.media.QueueData for playlist support.
         request.currentTime = shiftCurrentTime(contentCurrentTime); // Set video start position based on the browser video position
         request.activeTrackIds = contentActiveSubtitle; // Set active subtitle based on video player
         // request.autoplay = false; // Set content to auto play, true by default
         castSession.loadMedia(request).then(
-            function() { 
+            function() {
                 castSuccessful();
-            }, 
-            function() { 
-                castFailed(errorCode); 
+            },
+            function(error) {
+                castFailed(error.code);
             }
         ); // Send request to cast device
-    }   
+    }
 }
 
 function shiftCurrentTime(contentCurrentTime) { // Shift media back 3 seconds to prevent missing some of the content

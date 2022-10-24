@@ -1,7 +1,9 @@
 /**
  * Handle multi channel notifications
- * 
+ *
  */
+
+'use strict';
 
 checkMessages()
 
