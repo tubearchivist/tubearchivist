@@ -77,7 +77,6 @@ Edit the following values from that file:
   - `HOST_GID`: as above but GID.
   - `TA_HOST`: change it to the address of the machine you're running this on. This can be an IP address or a domain name.
   - `TA_PASSWORD`: pick a password to use when logging in.
-  - `TA_PASSWORD`: pick a password to use when logging in.
   - `ELASTIC_PASSWORD`: pick a password for the elastic service. You won't need to type this yourself.
   - `TZ`: your time zone. If you don't know yours, you can look it up [here](https://www.timezoneconverter.com/cgi-bin/findzone/findzone).
 - under `archivist-es`->`environment`:
