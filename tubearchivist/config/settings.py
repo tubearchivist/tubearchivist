@@ -117,16 +117,16 @@ if bool(environ.get("TA_LDAP")):
     # names that people will guess, hence using first/last as well.
 
     global AUTH_LDAP_USER_ATTR_MAP_USERNAME
-    AUTH_LDAP_USER_ATTR_MAP_USERNAME = environ.get("TA_LDAP_USER_ATTR_MAP_USERNAME") or environ.get("TA_LDAP_USER_ATTR_MAP_UID") or "uid",
+    AUTH_LDAP_USER_ATTR_MAP_USERNAME = environ.get("TA_LDAP_USER_ATTR_MAP_USERNAME") or environ.get("TA_LDAP_USER_ATTR_MAP_UID") or "uid"
 
     global AUTH_LDAP_USER_ATTR_MAP_PERSONALNAME
-    AUTH_LDAP_USER_ATTR_MAP_PERSONALNAME = environ.get("TA_LDAP_USER_ATTR_MAP_PERSONALNAME") or environ.get("TA_LDAP_USER_ATTR_MAP_FIRSTNAME") or "givenName",
+    AUTH_LDAP_USER_ATTR_MAP_PERSONALNAME = environ.get("TA_LDAP_USER_ATTR_MAP_PERSONALNAME") or environ.get("TA_LDAP_USER_ATTR_MAP_FIRSTNAME") or environ.get("TA_LDAP_USER_ATTR_MAP_GIVENNAME") or "givenName"
 
     global AUTH_LDAP_USER_ATTR_MAP_SURNAME 
-    AUTH_LDAP_USER_ATTR_MAP_SURNAME = environ.get("TA_LDAP_USER_ATTR_MAP_SURNAME") or environ.get("TA_LDAP_USER_ATTR_MAP_LASTNAME") or "sn",
+    AUTH_LDAP_USER_ATTR_MAP_SURNAME = environ.get("TA_LDAP_USER_ATTR_MAP_SURNAME") or environ.get("TA_LDAP_USER_ATTR_MAP_LASTNAME") or environ.get("TA_LDAP_USER_ATTR_MAP_FAMILYNAME") or "sn"
 
     global AUTH_LDAP_USER_ATTR_MAP_EMAIL
-    AUTH_LDAP_USER_ATTR_MAP_EMAIL = environ.get("TA_LDAP_USER_ATTR_MAP_EMAIL") or environ.get("TA_LDAP_USER_ATTR_MAP_MAIL") or "mail",
+    AUTH_LDAP_USER_ATTR_MAP_EMAIL = environ.get("TA_LDAP_USER_ATTR_MAP_EMAIL") or environ.get("TA_LDAP_USER_ATTR_MAP_MAIL") or "mail"
 
 
 
@@ -141,7 +141,7 @@ if bool(environ.get("TA_LDAP")):
     AUTH_LDAP_USER_SEARCH = LDAPSearch(
         AUTH_LDAP_USER_BASE,
         ldap.SCOPE_SUBTREE,
-        "(&(%(AUTH_LDAP_USER_ATTR_MAP_USERNAME)s=%(user)s)" + AUTH_LDAP_USER_FILTER + ")",
+        "(&("+AUTH_LDAP_USER_ATTR_MAP_USERNAME+"=%(user)s)" + AUTH_LDAP_USER_FILTER + ")",
     )
 
 
