@@ -7,7 +7,6 @@ function sortChange(sortValue) {
   sendPost(payload);
   setTimeout(function () {
     location.reload();
-    return false;
   }, 500);
 }
 
@@ -82,7 +81,6 @@ function isWatchedButton(button) {
   sendPost(payload);
   setTimeout(function () {
     location.reload();
-    return false;
   }, 1000);
 }
 
@@ -123,7 +121,6 @@ function changeView(image) {
   sendPost(payload);
   setTimeout(function () {
     location.reload();
-    return false;
   }, 500);
 }
 
@@ -133,7 +130,6 @@ function changeGridItems(image) {
   sendPost(payload);
   setTimeout(function () {
     location.reload();
-    return false;
   }, 500);
 }
 
@@ -148,7 +144,6 @@ function toggleCheckbox(checkbox) {
   setTimeout(function () {
     let currPage = window.location.pathname + window.location.search;
     window.location.replace(currPage);
-    return false;
   }, 500);
 }
 
@@ -307,7 +302,6 @@ function deleteVideo(button) {
   setTimeout(function () {
     let redirect = '/channel/' + to_redirect;
     window.location.replace(redirect);
-    return false;
   }, 1000);
 }
 
@@ -317,7 +311,6 @@ function deleteChannel(button) {
   sendPost(payload);
   setTimeout(function () {
     window.location.replace('/channel/');
-    return false;
   }, 1000);
 }
 
@@ -333,7 +326,6 @@ function deletePlaylist(button) {
   sendPost(payload);
   setTimeout(function () {
     window.location.replace('/playlist/');
-    return false;
   }, 1000);
 }
 
