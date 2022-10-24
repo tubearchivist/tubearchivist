@@ -1,13 +1,13 @@
 ## Contributing to Tube Archivist
 
-Welcome, and thanks for showing interest in improving Tube Archivist!
+Welcome, and thanks for showing interest in improving Tube Archivist!  
 If you haven't already, the best place to start is the README. This will give you an overview on what the project is all about.
 
 ## Report a bug
 
 If you notice something is not working as expected, check to see if it has been previously reported in the [open issues](https://github.com/tubearchivist/tubearchivist/issues).
-If it has not yet been disclosed, go ahead and create an issue.
-If the issue doesn't move forward due to a lack of response, I assume it's solved and will close it after some time to keep the list fresh.
+If it has not yet been disclosed, go ahead and create an issue.  
+If the issue doesn't move forward due to a lack of response, I assume it's solved and will close it after some time to keep the list fresh. 
 
 ## Wiki
 
@@ -43,12 +43,12 @@ You may find it nice to run everything inside of a VM, though this is not necess
 ```
 - The command above will call the docker build command with `--build-arg INSTALL_DEBUG=1` to install additional useful debug tools.
 - The `test` argument takes another optional argument to build for a specific architecture valid options are: `amd64`, `arm64` and `multi`, default is `amd64`.
-- This `deploy.sh` script is not meant to be universally usable for every possible environment but could serve as an idea on how to automatically rebuild containers to test changes - customize to your liking.
+- This `deploy.sh` script is not meant to be universally usable for every possible environment but could serve as an idea on how to automatically rebuild containers to test changes - customize to your liking. 
 
 ## Working with Elasticsearch
-Additionally to the required services as listed in the example docker-compose file, the **Dev Tools** of [Kibana](https://www.elastic.co/guide/en/kibana/current/docker.html) are invaluable for running and testing Elasticsearch queries.
+Additionally to the required services as listed in the example docker-compose file, the **Dev Tools** of [Kibana](https://www.elastic.co/guide/en/kibana/current/docker.html) are invaluable for running and testing Elasticsearch queries. 
 
-**Quick start**
+**Quick start**  
 Generate your access token in Elasitcsearch:
 ```bash
 bin/elasticsearch-service-tokens create elastic/kibana kibana
@@ -80,7 +80,7 @@ To fix a bug or implement a feature, fork the repository and make all changes to
 
 There are three different docker tags:
 - **latest**: As the name implies is the latest multiarch release for regular usage.
-- **unstable**: Intermediate amd64 builds for quick testing and improved collaboration. Don't mix with a *latest* installation, for your testing environment only. This is untested and WIP and will have breaking changes between commits that might require a reset to resolve.
+- **unstable**: Intermediate amd64 builds for quick testing and improved collaboration. Don't mix with a *latest* installation, for your testing environment only. This is untested and WIP and will have breaking changes between commits that might require a reset to resolve. 
 - **semantic versioning**: There will be a handful named version tags that will also have a matching release and tag on github.
 
 If you want to see what's in your container, checkout the matching release tag. A merge to **master** usually means a *latest* or *unstable* release. If you want to preview changes in your testing environment, pull the *unstable* tag or clone the repository and build the docker container with the Dockerfile from the **testing** branch.
@@ -93,4 +93,4 @@ To keep things clean and consistent for everybody, there is a github action setu
 ./deploy.sh validate tubearchivist/home/src/index/video.py
 ```
 
-to validate your changes. If you omit the path, all the project files will get checked. This is subject to change as the codebase improves.
+to validate your changes. If you omit the path, all the project files will get checked. This is subject to change as the codebase improves. 
