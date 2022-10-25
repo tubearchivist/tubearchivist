@@ -47,7 +47,8 @@ RUN if [ "$TARGETPLATFORM" = "linux/arm64" ] ; then \
         | xargs curl -L --output ffmpeg.tar.xz ; \
     fi && \
     tar -xf ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ "ffmpeg" && \
-    tar -xf ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ "ffprobe"
+    tar -xf ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ "ffprobe" && \
+    rm ffmpeg.tar.xz
 
 # install debug tools for testing environment
 RUN if [ "$INSTALL_DEBUG" ] ; then \
