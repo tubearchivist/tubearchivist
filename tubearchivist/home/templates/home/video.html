@@ -2,7 +2,9 @@
 {% block content %}
 {% load static %}
 {% load humanize %}
-<div class="video-main"></div>
+<div class="video-main">
+    <div class="video-modal"><span class="video-modal-text"></span></div>
+</div>
 <div class="notifications" id="notifications"></div>
 <div class="sponsorblock" id="sponsorblock">
     {% if video.sponsorblock.is_enabled %}
@@ -67,7 +69,7 @@
                     <p class="thumb-icon"><img class="dislike" src="{% static 'img/icon-thumb.svg' %}" alt="thumbs-down">: {{ video.stats.dislike_count|intcomma }}</p>
                 {% endif %}
                 {% if video.stats.average_rating %}
-                    <p class="rating-stars">Rating: 
+                    <p class="rating-stars">Rating:
                         {% for star in video.stats.average_rating %}
                             <img src="/static/img/icon-star-{{ star }}.svg" alt="{{ star }}">
                         {% endfor %}
@@ -90,7 +92,7 @@
                 <a href="{% url 'playlist_id' playlist_item.playlist_meta.playlist_id %}">
                     <h3>Playlist [{{ playlist_item.playlist_meta.current_idx|add:"1" }}]: {{ playlist_item.playlist_meta.playlist_name }}</h3>
                 </a>
-                <div class="playlist-nav">    
+                <div class="playlist-nav">
                     <div class="playlist-nav-item">
                         {% if playlist_item.playlist_previous %}
                             <a href="{% url 'video' playlist_item.playlist_previous.youtube_id %}">
