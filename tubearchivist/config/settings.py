@@ -103,32 +103,47 @@ if bool(environ.get("TA_LDAP")):
     global AUTH_LDAP_BIND_PASSWORD
     AUTH_LDAP_BIND_PASSWORD = environ.get("TA_LDAP_BIND_PASSWORD")
 
-    
     # Attribute mapping options
 
-    # Since these are new environment variables, taking the opporunity to use more accurate 
-    # env names. 
+    # Since these are new environment variables, taking the opporunity to use more accurate
+    # env names.
     # Given Names are *_technically_* different from Personal names, as people who change their names
     # have different given names and personal names, and they go by personal names.
-    # Additionally, "LastName" is actually incorrect for many cultures, such as Korea, where the 
-    # family name comes first, and the personal name comes last. 
-    
-    # But we all know people are going to try to guess at these, so still want to include 
+    # Additionally, "LastName" is actually incorrect for many cultures, such as Korea, where the
+    # family name comes first, and the personal name comes last.
+
+    # But we all know people are going to try to guess at these, so still want to include
     # names that people will guess, hence using first/last as well.
 
     global AUTH_LDAP_USER_ATTR_MAP_USERNAME
-    AUTH_LDAP_USER_ATTR_MAP_USERNAME = environ.get("TA_LDAP_USER_ATTR_MAP_USERNAME") or environ.get("TA_LDAP_USER_ATTR_MAP_UID") or "uid"
+    AUTH_LDAP_USER_ATTR_MAP_USERNAME = (
+        environ.get("TA_LDAP_USER_ATTR_MAP_USERNAME")
+        or environ.get("TA_LDAP_USER_ATTR_MAP_UID")
+        or "uid"
+    )
 
     global AUTH_LDAP_USER_ATTR_MAP_PERSONALNAME
-    AUTH_LDAP_USER_ATTR_MAP_PERSONALNAME = environ.get("TA_LDAP_USER_ATTR_MAP_PERSONALNAME") or environ.get("TA_LDAP_USER_ATTR_MAP_FIRSTNAME") or environ.get("TA_LDAP_USER_ATTR_MAP_GIVENNAME") or "givenName"
+    AUTH_LDAP_USER_ATTR_MAP_PERSONALNAME = (
+        environ.get("TA_LDAP_USER_ATTR_MAP_PERSONALNAME")
+        or environ.get("TA_LDAP_USER_ATTR_MAP_FIRSTNAME")
+        or environ.get("TA_LDAP_USER_ATTR_MAP_GIVENNAME")
+        or "givenName"
+    )
 
-    global AUTH_LDAP_USER_ATTR_MAP_SURNAME 
-    AUTH_LDAP_USER_ATTR_MAP_SURNAME = environ.get("TA_LDAP_USER_ATTR_MAP_SURNAME") or environ.get("TA_LDAP_USER_ATTR_MAP_LASTNAME") or environ.get("TA_LDAP_USER_ATTR_MAP_FAMILYNAME") or "sn"
+    global AUTH_LDAP_USER_ATTR_MAP_SURNAME
+    AUTH_LDAP_USER_ATTR_MAP_SURNAME = (
+        environ.get("TA_LDAP_USER_ATTR_MAP_SURNAME")
+        or environ.get("TA_LDAP_USER_ATTR_MAP_LASTNAME")
+        or environ.get("TA_LDAP_USER_ATTR_MAP_FAMILYNAME")
+        or "sn"
+    )
 
     global AUTH_LDAP_USER_ATTR_MAP_EMAIL
-    AUTH_LDAP_USER_ATTR_MAP_EMAIL = environ.get("TA_LDAP_USER_ATTR_MAP_EMAIL") or environ.get("TA_LDAP_USER_ATTR_MAP_MAIL") or "mail"
-
-
+    AUTH_LDAP_USER_ATTR_MAP_EMAIL = (
+        environ.get("TA_LDAP_USER_ATTR_MAP_EMAIL")
+        or environ.get("TA_LDAP_USER_ATTR_MAP_MAIL")
+        or "mail"
+    )
 
     global AUTH_LDAP_USER_BASE
     AUTH_LDAP_USER_BASE = environ.get("TA_LDAP_USER_BASE")
@@ -141,14 +156,12 @@ if bool(environ.get("TA_LDAP")):
     AUTH_LDAP_USER_SEARCH = LDAPSearch(
         AUTH_LDAP_USER_BASE,
         ldap.SCOPE_SUBTREE,
-        "(&(" +
-        AUTH_LDAP_USER_ATTR_MAP_USERNAME +
-        "=%(user)s)" + 
-        AUTH_LDAP_USER_FILTER + 
-        ")",
+        "(&("
+        + AUTH_LDAP_USER_ATTR_MAP_USERNAME
+        + "=%(user)s)"
+        + AUTH_LDAP_USER_FILTER
+        + ")",
     )
-
-
 
     global AUTH_LDAP_USER_ATTR_MAP
     AUTH_LDAP_USER_ATTR_MAP = {
