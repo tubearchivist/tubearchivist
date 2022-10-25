@@ -44,6 +44,9 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ] ; then \
         rm ffmpeg.tar.xz \
     ; elif [ "$TARGETPLATFORM" = "linux/arm64" ] ; then \
         apt-get -y update && apt-get -y install --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/* \
+    ; else \
+        >&2 echo "Specify TARGETPLATFORM as either linux/amd64 or linux/arm64." ; \
+        exit 1 \
     ; fi
 
 # install debug tools for testing environment
