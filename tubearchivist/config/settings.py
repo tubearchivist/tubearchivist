@@ -141,7 +141,11 @@ if bool(environ.get("TA_LDAP")):
     AUTH_LDAP_USER_SEARCH = LDAPSearch(
         AUTH_LDAP_USER_BASE,
         ldap.SCOPE_SUBTREE,
-        "(&("+AUTH_LDAP_USER_ATTR_MAP_USERNAME+"=%(user)s)" + AUTH_LDAP_USER_FILTER + ")",
+        "(&(" +
+        AUTH_LDAP_USER_ATTR_MAP_USERNAME +
+        "=%(user)s)" + 
+        AUTH_LDAP_USER_FILTER + 
+        ")",
     )
 
 
