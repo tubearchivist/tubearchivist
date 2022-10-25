@@ -6,8 +6,8 @@
 FROM python:3.10.8-slim-bullseye AS builder
 ARG TARGETPLATFORM
 
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends build-essential gcc libldap2-dev libsasl2-dev libssl-dev
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential gcc libldap2-dev libsasl2-dev libssl-dev
 
 # install requirements
 COPY ./tubearchivist/requirements.txt /requirements.txt
@@ -32,19 +32,22 @@ RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recomm
     curl \
     xz-utils && rm -rf /var/lib/apt/lists/*
 
-# get newest patched ffmpeg and ffprobe builds for amd64 fall back to repo ffmpeg for arm64
-RUN if [ "$TARGETPLATFORM" = "linux/amd64" ] ; then \
+# install patched ffmpeg build, default to linux64
+RUN if [ "$TARGETPLATFORM" = "linux/arm64" ] ; then \
+    curl -s https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest \
+        | grep browser_download_url \
+        | grep ".*master.*linuxarm64.*tar.xz" \
+        | cut -d '"' -f 4 \
+        | xargs curl -L --output ffmpeg.tar.xz ; \
+    else \
     curl -s https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest \
         | grep browser_download_url \
         | grep ".*master.*linux64.*tar.xz" \
         | cut -d '"' -f 4 \
-        | xargs curl -L --output ffmpeg.tar.xz && \
-        tar -xf ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ "ffmpeg" && \
-        tar -xf ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ "ffprobe" && \
-        rm ffmpeg.tar.xz \
-    ; elif [ "$TARGETPLATFORM" = "linux/arm64" ] ; then \
-        apt-get -y update && apt-get -y install --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/* \
-    ; fi
+        | xargs curl -L --output ffmpeg.tar.xz ; \
+    fi && \
+    tar -xf ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ "ffmpeg" && \
+    tar -xf ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ "ffprobe"
 
 # install debug tools for testing environment
 RUN if [ "$INSTALL_DEBUG" ] ; then \
