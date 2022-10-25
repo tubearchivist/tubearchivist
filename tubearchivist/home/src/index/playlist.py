@@ -18,7 +18,10 @@ class YoutubePlaylist(YouTubeItem):
 
     es_path = False
     index_name = "ta_playlist"
-    yt_obs = {"extract_flat": True}
+    yt_obs = {
+        "extract_flat": True,
+        "allow_playlist_files": True,
+    }
     yt_base = "https://www.youtube.com/playlist?list="
 
     def __init__(self, youtube_id):
