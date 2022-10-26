@@ -103,18 +103,22 @@ if bool(environ.get("TA_LDAP")):
     global AUTH_LDAP_BIND_PASSWORD
     AUTH_LDAP_BIND_PASSWORD = environ.get("TA_LDAP_BIND_PASSWORD")
 
+    
+    """
+    Since these are new environment variables, taking the opporunity to use 
+    more accurate env names.
+    Given Names are *_technically_* different from Personal names, as people
+    who change their names have different given names and personal names, 
+    and they go by personal names. Additionally, "LastName" is actually
+    incorrect for many cultures, such as Korea, where the
+    family name comes first, and the personal name comes last.
+
+    But we all know people are going to try to guess at these, so still want
+    to include names that people will guess, hence using first/last as well.
+    """
+
     # Attribute mapping options
-
-    # Since these are new environment variables, taking the opporunity to use more accurate
-    # env names.
-    # Given Names are *_technically_* different from Personal names, as people who change their names
-    # have different given names and personal names, and they go by personal names.
-    # Additionally, "LastName" is actually incorrect for many cultures, such as Korea, where the
-    # family name comes first, and the personal name comes last.
-
-    # But we all know people are going to try to guess at these, so still want to include
-    # names that people will guess, hence using first/last as well.
-
+    
     global AUTH_LDAP_USER_ATTR_MAP_USERNAME
     AUTH_LDAP_USER_ATTR_MAP_USERNAME = (
         environ.get("TA_LDAP_USER_ATTR_MAP_USERNAME")
