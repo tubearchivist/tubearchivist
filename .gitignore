@@ -6,3 +6,6 @@ db.sqlite3
 
 # vscode custom conf
 .vscode
+
+# JavaScript stuff
+node_modules
