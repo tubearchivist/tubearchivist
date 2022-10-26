@@ -11,11 +11,12 @@ jobs:
       - run: pip install --upgrade pip wheel
       - run: pip install bandit black codespell flake8 flake8-bugbear
                          flake8-comprehensions isort
-      - run: black --check --diff --line-length 79 .
-      - run: codespell --skip="./.git,./package.json,./package-lock.json,./node_modules"
-      - run: flake8 . --count --max-complexity=10 --max-line-length=79
-                      --show-source --statistics
-      - run: isort --check-only --line-length 79 --profile black .
+      - run: ./deploy.sh validate
+      # - run: black --check --diff --line-length 79 .
+      # - run: codespell --skip="./.git,./package.json,./package-lock.json,./node_modules"
+      # - run: flake8 . --count --max-complexity=10 --max-line-length=79
+      #                 --show-source --statistics
+      # - run: isort --check-only --line-length 79 --profile black .
       # - run: pip install -r tubearchivist/requirements.txt
       # - run: mkdir --parents --verbose .mypy_cache
       # - run: mypy --ignore-missing-imports --install-types --non-interactive .
