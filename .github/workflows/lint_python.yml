@@ -4,13 +4,13 @@ jobs:
   lint_python:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
       # note: this logic is duplicated in the `validate` function in ./deploy.sh
       # if you update this file, you should update that as well
       - run: pip install --upgrade pip wheel
       - run: pip install bandit black codespell flake8 flake8-bugbear
-                         flake8-comprehensions isort
+                         flake8-comprehensions isort requests
       - run: ./deploy.sh validate
       # - run: black --check --diff --line-length 79 .
       # - run: codespell --skip="./.git,./package.json,./package-lock.json,./node_modules"
