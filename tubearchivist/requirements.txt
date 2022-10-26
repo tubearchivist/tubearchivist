@@ -8,6 +8,6 @@ Pillow==9.2.0
 redis==4.3.4
 requests==2.28.1
 ryd-client==0.0.6
-uWSGI==2.0.20
+uWSGI==2.0.21
 whitenoise==6.2.0
 yt_dlp==2022.10.4
