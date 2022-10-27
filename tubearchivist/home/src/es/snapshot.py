@@ -70,19 +70,26 @@ class ElasticSnapshot:
 
     def _check_policy_exists(self):
         """check if snapshot policy is set correctly"""
+        policy = self._get_policy()
+        expected_policy = self._build_policy_data()
+        if not policy:
+            print(f"snapshot: create policy {self.POLICY} {expected_policy}")
+            return False
+
+        if policy != expected_policy:
+            print(f"snapshot: update policy settings {expected_policy}")
+            return False
+
+        return True
+
+    def _get_policy(self):
+        """get policy from es"""
         path = f"_slm/policy/{self.POLICY}"
         response, statuscode = ElasticWrap(path).get()
-        expected_policy = self._build_policy_data()
-        if statuscode == 200:
-            print(f"snapshot: policy {self.POLICY} exists")
-            matching = response["ta_daily"]["policy"] == expected_policy
-            if not matching:
-                print(f"snapshot: update policy settings {expected_policy}")
-
-            return matching
-
-        print(f"snapshot: create policy {self.POLICY} {expected_policy}")
-        return False
+        if statuscode != 200:
+            return False
+        else:
+            return response[self.POLICY]
 
     def create_policy(self):
         """create snapshot lifetime policy"""
@@ -116,7 +123,14 @@ class ElasticSnapshot:
         if statuscode == 200:
             print(f"snapshot: executing now: {response}")
 
-    def get_all_snapshots(self):
+    def get_snapshot_stats(self):
+        """get snapshot info for frontend"""
+        snapshot_info = self._build_policy_details()
+        snapshot_info.update({"snapshots": self._get_all_snapshots()})
+
+        return snapshot_info
+
+    def _get_all_snapshots(self):
         """get a list of all registered snapshots"""
         path = f"_snapshot/{self.REPO}/*?sort=start_time&order=desc"
         response, statuscode = ElasticWrap(path).get()
@@ -140,6 +154,19 @@ class ElasticSnapshot:
             snap_dicts.append(snap_dict)
 
         return snap_dicts
+
+    def _build_policy_details(self):
+        """get additional policy details"""
+        policy = self._get_policy()
+        next_exec = policy["next_execution_millis"]
+        next_exec_date = datetime.fromtimestamp(next_exec // 1000)
+        next_exec_str = next_exec_date.strftime("%Y-%m-%d %H:%M")
+        expire_after = policy["policy"]["retention"]["expire_after"]
+        policy_metadata = {
+            "next_exec_str": next_exec_str,
+            "expire_after": expire_after,
+        }
+        return policy_metadata
 
     @staticmethod
     def _date_converter(date_utc):
