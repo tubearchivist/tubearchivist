@@ -32,3 +32,5 @@ A minimal configuration of Elasticsearch (ES) is provided in the example docker-
 
 ## 5. When I subscribe to a channel it only downloads the most recent 50 videos
 Subscribing to a channel is a different operation from downloading it. You can [add the channel to the download queue](https://github.com/tubearchivist/tubearchivist/wiki/Downloads#add-to-download-queue) to download all past videos.
+
+If you want to download the existing videos and also automatically download new videos, then you should both download the channel and subscribe to it.
