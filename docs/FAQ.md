@@ -29,3 +29,8 @@ So Docker is the only supported installation method. If you don't have any exper
 
 ## 4. Finetuning Elasticsearch
 A minimal configuration of Elasticsearch (ES) is provided in the example docker-compose.yml file. ES is highly configurable and very interesting to learn more about. Refer to the [documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html) if you want to get into it.
+
+## 5. When I subscribe to a channel it only downloads the most recent 50 videos
+Subscribing to a channel is a different operation from downloading it. You can [add the channel to the download queue](https://github.com/tubearchivist/tubearchivist/wiki/Downloads#add-to-download-queue) to download all past videos.
+
+If you want to download the existing videos and also automatically download new videos, then you should both download the channel and subscribe to it.
