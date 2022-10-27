@@ -28,7 +28,7 @@
             </div>
         </div>
     </div>
-    <div class="view-controls">
+    <div class="view-controls three">
         <div class="toggle">
             <span>Show only ignored videos:</span>
             <div class="toggleBox">
@@ -42,7 +42,6 @@
         </div>
         <div class="view-icons">
             {% if channel_agg_list|length > 1 %}
-                <span>Filter:</span>
                 <select name="channel_filter" id="channel_filter" onchange="channelFilterDownload(this.value)">
                     <option value="all" {% if not channel_filter_id %}selected{% endif %}>all</option>
                     {% for channel in channel_agg_list %}

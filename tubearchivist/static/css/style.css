@@ -1182,6 +1182,10 @@ video:-webkit-full-screen {
         margin: 15px;
         text-align: center;
     }
+    .view-controls.three {
+        grid-template-columns: unset;
+        justify-content: center;
+    }
     .sort {
         display: block;
     }
