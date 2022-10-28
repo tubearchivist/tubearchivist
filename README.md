@@ -191,7 +191,7 @@ Similar to that, TubeArchivist will become all sorts of messed up when running o
 ## Getting Started
 1. Go through the **settings** page and look at the available options. Particularly set *Download Format* to your desired video quality before downloading. **Tube Archivist** downloads the best available quality by default. To support iOS or MacOS and some other browsers a compatible format must be specified. For example:
 ```
-bestvideo[VCODEC=avc1]+bestaudio[ACODEC=mp4a]/mp4
+bestvideo[vcodec*=avc1]+bestaudio[acodec*=mp4a]/mp4
 ```
 2. Subscribe to some of your favorite YouTube channels on the **channels** page. 
 3. On the **downloads** page, click on *Rescan subscriptions* to add videos from the subscribed channels to your Download queue or click on *Add to download queue* to manually add Video IDs, links, channels or playlists.
