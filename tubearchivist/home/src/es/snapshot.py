@@ -42,6 +42,10 @@ class ElasticSnapshot:
         if not policy_exists:
             self.create_policy()
 
+        is_outdated = self._needs_startup_snapshot()
+        if is_outdated:
+            self.take_snapshot_now()
+
     def _check_repo_exists(self):
         """check if expected repo already exists"""
         path = f"_snapshot/{self.REPO}"
@@ -76,10 +80,11 @@ class ElasticSnapshot:
             print(f"snapshot: create policy {self.POLICY} {expected_policy}")
             return False
 
-        if policy != expected_policy:
+        if policy["policy"] != expected_policy:
             print(f"snapshot: update policy settings {expected_policy}")
             return False
 
+        print("snapshot: policy is set.")
         return True
 
     def _get_policy(self):
@@ -88,8 +93,8 @@ class ElasticSnapshot:
         response, statuscode = ElasticWrap(path).get()
         if statuscode != 200:
             return False
-        else:
-            return response[self.POLICY]
+
+        return response[self.POLICY]
 
     def create_policy(self):
         """create snapshot lifetime policy"""
@@ -115,6 +120,22 @@ class ElasticSnapshot:
                 "max_count": 50,
             },
         }
+
+    def _needs_startup_snapshot(self):
+        """check if last snapshot is expired"""
+        snap_dicts = self._get_all_snapshots()
+        if not snap_dicts:
+            print("snapshot: create initial snapshot")
+            return True
+
+        last_stamp = snap_dicts[0]["end_stamp"]
+        now = int(datetime.now().strftime("%s"))
+        outdated = (now - last_stamp) / 60 / 60 > 24
+        if outdated:
+            print("snapshot: is outdated, create new now")
+
+        print("snapshot: last snapshot is up-to-date")
+        return outdated
 
     def take_snapshot_now(self):
         """execute daily snapshot now"""
@@ -147,8 +168,9 @@ class ElasticSnapshot:
         for snapshot in all_snapshots:
             snap_dict = {
                 "id": snapshot["snapshot"],
-                "start": self._date_converter(snapshot["start_time"]),
-                "end": self._date_converter(snapshot["end_time"]),
+                "start_date": self._date_converter(snapshot["start_time"]),
+                "end_date": self._date_converter(snapshot["end_time"]),
+                "end_stamp": snapshot["end_time_in_millis"] // 1000,
                 "duration_s": snapshot["duration_in_millis"] // 1000,
             }
             snap_dicts.append(snap_dict)
