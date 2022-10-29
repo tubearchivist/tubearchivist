@@ -45,7 +45,7 @@ class ElasticSnapshot:
 
         is_outdated = self._needs_startup_snapshot()
         if is_outdated:
-            self.take_snapshot_now()
+            _ = self.take_snapshot_now()
 
     def _check_repo_exists(self):
         """check if expected repo already exists"""
@@ -145,6 +145,8 @@ class ElasticSnapshot:
         if statuscode == 200:
             print(f"snapshot: executing now: {response}")
 
+        return response
+
     def get_snapshot_stats(self):
         """get snapshot info for frontend"""
         snapshot_info = self._build_policy_details()
@@ -156,9 +158,7 @@ class ElasticSnapshot:
     def get_single_snapshot(self, snapshot_id):
         """get single snapshot metadata"""
         path = f"_snapshot/{self.REPO}/{snapshot_id}"
-        print(path)
         response, statuscode = ElasticWrap(path).get()
-        print(response)
         if statuscode == 404:
             print(f"snapshots: not found: {snapshot_id}")
             return False
@@ -237,3 +237,18 @@ class ElasticSnapshot:
         response, statuscode = ElasticWrap(path).post(data=data)
         if statuscode == 200:
             print(f"snapshot: executing now: {response}")
+            return response
+
+        print(f"snapshot: failed to restore, {statuscode} {response}")
+        return False
+
+    def delete_single_snapshot(self, snapshot_id):
+        """delete single snapshot from index"""
+        path = f"_snapshot/{self.REPO}/{snapshot_id}"
+        response, statuscode = ElasticWrap(path).delete()
+        if statuscode == 200:
+            print(f"snapshot: deleting {snapshot_id} {response}")
+            return response
+
+        print(f"snapshot: failed to delete, {statuscode} {response}")
+        return False
