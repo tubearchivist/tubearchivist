@@ -153,6 +153,23 @@
                 {{ app_form.application_enable_cast }}
             </div>
         </div>
+        <div class="settings-group">
+            <h2 id="snapshots">Snapshots</h2>
+            <div class="settings-item">
+                <p>Current system snapshot: <span class="settings-current">{{ config.application.enable_snapshot }}</span></p>
+                <i>Automatically create daily deduplicated snapshots of the index, stored in Elasticsearch. Read first before activating: Wiki.</i><br>
+                {{ app_form.application_enable_snapshot }}
+            </div>
+            <div>
+                {% if snapshots %}
+                    <p>Create next snapshot: <span class="settings-current">{{ snapshots.next_exec_str }}</span>, snapshots expire after <span class="settings-current">{{ snapshots.expire_after }}</span></p>
+                    <br>
+                    {% for snapshot in snapshots.snapshots %}
+                        <p><button data-id="{{ snapshot.id }}">Restore</button> Snapshot created on: <span class="settings-current">{{ snapshot.start_date }}</span>, took <span class="settings-current">{{ snapshot.duration_s }}s</span> to create</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
         <button type="submit" name="application-settings">Update Application Configurations</button>
     </form>
     <div class="title-bar">

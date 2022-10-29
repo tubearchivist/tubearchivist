@@ -34,6 +34,7 @@ class ElasticSnapshot:
 
     def setup(self):
         """setup the snapshot in ES, create or update if needed"""
+        print("snapshot: run setup")
         repo_exists = self._check_repo_exists()
         if not repo_exists:
             self.create_repo()

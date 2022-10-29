@@ -74,6 +74,12 @@ class ApplicationSettingsForm(forms.Form):
         ("1", "enable Cast"),
     ]
 
+    SNAPSHOT_CHOICES = [
+        ("", "-- change snapshot settings --"),
+        ("0", "disable system snapshots"),
+        ("1", "enable system snapshots"),
+    ]
+
     SUBTITLE_SOURCE_CHOICES = [
         ("", "-- change subtitle source settings"),
         ("user", "only download user created"),
@@ -123,6 +129,9 @@ class ApplicationSettingsForm(forms.Form):
     )
     application_enable_cast = forms.ChoiceField(
         widget=forms.Select, choices=CAST_CHOICES, required=False
+    )
+    application_enable_snapshot = forms.ChoiceField(
+        widget=forms.Select, choices=SNAPSHOT_CHOICES, required=False
     )
 
 
