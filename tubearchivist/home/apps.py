@@ -63,10 +63,7 @@ class StartupCheck:
         cache_dir = self.config_handler.config["application"]["cache_dir"]
         for folder in folders:
             folder_path = os.path.join(cache_dir, folder)
-            try:
-                os.makedirs(folder_path)
-            except FileExistsError:
-                continue
+            os.makedirs(folder_path, exist_ok=True)
 
     def release_lock(self):
         """make sure there are no leftover locks set in redis"""
