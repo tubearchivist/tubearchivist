@@ -225,7 +225,7 @@ Return snapshot config and a list of available snapshots.
 ```
 
 POST /api/snapshot/  
-Create new snapshot now, will return immediatly, task will run async in the background, will return snapshot name: 
+Create new snapshot now, will return immediately, task will run async in the background, will return snapshot name: 
 ```json
 {
     "snapshot_name": "ta_daily_<random-id>
