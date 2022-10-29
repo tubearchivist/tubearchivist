@@ -6,6 +6,7 @@ import sys
 from django.apps import AppConfig
 from home.src.es.connect import ElasticWrap
 from home.src.es.index_setup import index_check
+from home.src.es.snapshot import ElasticSnapshot
 from home.src.ta.config import AppConfig as ArchivistConfig
 from home.src.ta.ta_redis import RedisArchivist
 
@@ -30,6 +31,7 @@ class StartupCheck:
         self.sync_redis_state()
         self.set_redis_conf()
         self.make_folders()
+        self.snapshot_check()
         self.set_has_run()
 
     def get_has_run(self):
@@ -80,6 +82,14 @@ class StartupCheck:
             response = self.redis_con.del_message(lock)
             if response:
                 print("deleted leftover key from redis: " + lock)
+
+    def snapshot_check(self):
+        """setup snapshot config, create if needed"""
+        active = self.config_handler.config["application"]["enable_snapshot"]
+        if not active:
+            return
+
+        ElasticSnapshot().setup()
 
     def is_invalid(self, version):
         """return true if es version is invalid, false if ok"""
