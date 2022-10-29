@@ -147,7 +147,8 @@ class ElasticSnapshot:
     def get_snapshot_stats(self):
         """get snapshot info for frontend"""
         snapshot_info = self._build_policy_details()
-        snapshot_info.update({"snapshots": self._get_all_snapshots()})
+        if snapshot_info:
+            snapshot_info.update({"snapshots": self._get_all_snapshots()})
 
         return snapshot_info
 
@@ -180,6 +181,9 @@ class ElasticSnapshot:
     def _build_policy_details(self):
         """get additional policy details"""
         policy = self._get_policy()
+        if not policy:
+            return False
+
         next_exec = policy["next_execution_millis"]
         next_exec_date = datetime.fromtimestamp(next_exec // 1000)
         next_exec_str = next_exec_date.strftime("%Y-%m-%d %H:%M")
