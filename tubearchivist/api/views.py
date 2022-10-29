@@ -5,6 +5,7 @@ from api.src.task_processor import TaskHandler
 from home.src.download.queue import PendingInteract
 from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.connect import ElasticWrap
+from home.src.es.snapshot import ElasticSnapshot
 from home.src.frontend.searching import SearchForm
 from home.src.index.generic import Pagination
 from home.src.index.video import SponsorBlock
@@ -481,6 +482,70 @@ class TaskApiView(ApiBaseView):
         data = request.data
         print(data)
         response = TaskHandler(data).run_task()
+
+        return Response(response)
+
+
+class SnapshotApiListView(ApiBaseView):
+    """resolves to /api/snapshot/
+    GET: returns snashot config plus list of existing snapshots
+    POST: take snapshot now
+    """
+
+    @staticmethod
+    def get(request):
+        """handle get request"""
+        # pylint: disable=unused-argument
+        snapshots = ElasticSnapshot().get_snapshot_stats()
+
+        return Response(snapshots)
+
+    @staticmethod
+    def post(request):
+        """take snapshot now with post request"""
+        # pylint: disable=unused-argument
+        response = ElasticSnapshot().take_snapshot_now()
+
+        return Response(response)
+
+
+class SnapshotApiView(ApiBaseView):
+    """resolves to /api/snapshot/<snapshot-id>/
+    GET: return a single snapshot
+    POST: restore snapshot
+    DELETE: delete a snapshot
+    """
+
+    @staticmethod
+    def get(request, snapshot_id):
+        """handle get request"""
+        # pylint: disable=unused-argument
+        snapshot = ElasticSnapshot().get_single_snapshot(snapshot_id)
+
+        if not snapshot:
+            return Response({"message": "snapshot not found"}, status=404)
+
+        return Response(snapshot)
+
+    @staticmethod
+    def post(request, snapshot_id):
+        """restore snapshot with post request"""
+        # pylint: disable=unused-argument
+        response = ElasticSnapshot().restore_all(snapshot_id)
+        if not response:
+            message = {"message": "failed to restore snapshot"}
+            return Response(message, status=400)
+
+        return Response(response)
+
+    @staticmethod
+    def delete(request, snapshot_id):
+        """delete snapshot from index"""
+        # pylint: disable=unused-argument
+        response = ElasticSnapshot().delete_single_snapshot(snapshot_id)
+        if not response:
+            message = {"message": "failed to delete snapshot"}
+            return Response(message, status=400)
 
         return Response(response)
 
