@@ -109,7 +109,7 @@ class ElasticSnapshot:
         """build policy dict from config"""
         return {
             "schedule": "0 30 1 * * ?",
-            "name": f"<{self.POLICY}_{{now/d}}>",
+            "name": f"<{self.POLICY}_>",
             "repository": self.REPO,
             "config": {
                 "indices": self.all_indices,
@@ -153,6 +153,19 @@ class ElasticSnapshot:
 
         return snapshot_info
 
+    def get_single_snapshot(self, snapshot_id):
+        """get single snapshot metadata"""
+        path = f"_snapshot/{self.REPO}/{snapshot_id}"
+        print(path)
+        response, statuscode = ElasticWrap(path).get()
+        print(response)
+        if statuscode == 404:
+            print(f"snapshots: not found: {snapshot_id}")
+            return False
+
+        snapshot = response["snapshots"][0]
+        return self._parse_single_snapshot(snapshot)
+
     def _get_all_snapshots(self):
         """get a list of all registered snapshots"""
         path = f"_snapshot/{self.REPO}/*?sort=start_time&order=desc"
@@ -168,16 +181,23 @@ class ElasticSnapshot:
 
         snap_dicts = []
         for snapshot in all_snapshots:
-            snap_dict = {
-                "id": snapshot["snapshot"],
-                "start_date": self._date_converter(snapshot["start_time"]),
-                "end_date": self._date_converter(snapshot["end_time"]),
-                "end_stamp": snapshot["end_time_in_millis"] // 1000,
-                "duration_s": snapshot["duration_in_millis"] // 1000,
-            }
+            snap_dict = self._parse_single_snapshot(snapshot)
             snap_dicts.append(snap_dict)
 
         return snap_dicts
+
+    def _parse_single_snapshot(self, snapshot):
+        """extract relevant metadata from single snapshot"""
+        snap_dict = {
+            "id": snapshot["snapshot"],
+            "state": snapshot["state"],
+            "es_version": snapshot["version"],
+            "start_date": self._date_converter(snapshot["start_time"]),
+            "end_date": self._date_converter(snapshot["end_time"]),
+            "end_stamp": snapshot["end_time_in_millis"] // 1000,
+            "duration_s": snapshot["duration_in_millis"] // 1000,
+        }
+        return snap_dict
 
     def _build_policy_details(self):
         """get additional policy details"""
@@ -190,6 +210,7 @@ class ElasticSnapshot:
         next_exec_str = next_exec_date.strftime("%Y-%m-%d %H:%M")
         expire_after = policy["policy"]["retention"]["expire_after"]
         policy_metadata = {
+            "next_exec": next_exec_date,
             "next_exec_str": next_exec_str,
             "expire_after": expire_after,
         }
