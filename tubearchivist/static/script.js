@@ -287,6 +287,16 @@ function resetToken() {
   document.getElementById('text-reveal').replaceWith(message);
 }
 
+// restore from snapshot 
+function restoreSnapshot(snapshotId) {
+  console.log('restore ' + snapshotId);
+  let apiEndpoint = '/api/snapshot/' + snapshotId + '/';
+  apiRequest(apiEndpoint, 'POST');
+  let message = document.createElement('p');
+  message.innerText = 'Snapshot restore started';
+  document.getElementById(snapshotId).parentElement.replaceWith(message);
+}
+
 // delete from file system
 function deleteConfirm() {
   let to_show = document.getElementById('delete-button');

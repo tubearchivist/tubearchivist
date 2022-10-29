@@ -165,7 +165,7 @@
                     <p>Create next snapshot: <span class="settings-current">{{ snapshots.next_exec_str }}</span>, snapshots expire after <span class="settings-current">{{ snapshots.expire_after }}</span></p>
                     <br>
                     {% for snapshot in snapshots.snapshots %}
-                        <p><button data-id="{{ snapshot.id }}">Restore</button> Snapshot created on: <span class="settings-current">{{ snapshot.start_date }}</span>, took <span class="settings-current">{{ snapshot.duration_s }}s</span> to create</p>
+                        <p><button id="{{ snapshot.id }}" onclick="restoreSnapshot(id)">Restore</button> Snapshot created on: <span class="settings-current">{{ snapshot.start_date }}</span>, took <span class="settings-current">{{ snapshot.duration_s }}s</span> to create.</p>
                     {% endfor %}
                 {% endif %}
             </div>
