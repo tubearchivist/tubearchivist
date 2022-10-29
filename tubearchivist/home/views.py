@@ -18,6 +18,7 @@ from django.views import View
 from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.connect import ElasticWrap
 from home.src.es.index_setup import get_available_backups
+from home.src.es.snapshot import ElasticSnapshot
 from home.src.frontend.api_calls import PostData
 from home.src.frontend.forms import (
     AddToQueueForm,
@@ -942,6 +943,7 @@ class SettingsView(View):
         user_form = UserSettingsForm()
         app_form = ApplicationSettingsForm()
         scheduler_form = SchedulerSettingsForm()
+        snapshots = ElasticSnapshot().get_snapshot_stats()
         token = self.get_token(request)
 
         context = {
@@ -953,6 +955,7 @@ class SettingsView(View):
             "user_form": user_form,
             "app_form": app_form,
             "scheduler_form": scheduler_form,
+            "snapshots": snapshots,
             "version": settings.TA_VERSION,
         }
 
@@ -1000,6 +1003,8 @@ class SettingsView(View):
         for config_value, updated_value in updated:
             if config_value == "cookie_import":
                 self.process_cookie(config, updated_value)
+            if config_value == "enable_snapshot":
+                ElasticSnapshot().setup()
 
     def process_cookie(self, config, updated_value):
         """import and validate cookie"""

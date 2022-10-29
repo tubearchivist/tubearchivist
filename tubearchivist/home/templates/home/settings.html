@@ -77,7 +77,7 @@
                 <ul>
                     <li><span class="settings-current">bestvideo[height<=720]+bestaudio/best[height<=720]</span>: best audio and max video height of 720p.</li>
                     <li><span class="settings-current">bestvideo[height<=1080]+bestaudio/best[height<=1080]</span>: best audio and max video height of 1080p.</li>
-                    <li><span class="settings-current">bestvideo[height<=1080][VCODEC=avc1]+bestaudio[ACODEC=mp4a]/mp4</span>: Max 1080p video height with iOS compatible video and audio codecs.</li>
+                    <li><span class="settings-current">bestvideo[height<=1080][VCODEC*=avc1]+bestaudio[ACODEC*=mp4a]/mp4</span>: Max 1080p video height with iOS compatible video and audio codecs.</li>
                     <li><span class="settings-current">0</span>: deactivate and download the best quality possible as decided by yt-dlp.</li>
                 </ul>
                 <i>Make sure your custom format gets merged into a single file. Check out the <a href="https://github.com/yt-dlp/yt-dlp#format-selection" target="_blank">documentation</a> for valid configurations.</i><br>
@@ -151,6 +151,23 @@
                 <p>Current Cast integration: <span class="settings-current">{{ config.application.enable_cast }}</span></p>
                 <i>Enabling Cast will load an additional JS library from Google. HTTPS and a supported browser are required for this integration.</i><br>
                 {{ app_form.application_enable_cast }}
+            </div>
+        </div>
+        <div class="settings-group">
+            <h2 id="snapshots">Snapshots</h2>
+            <div class="settings-item">
+                <p>Current system snapshot: <span class="settings-current">{{ config.application.enable_snapshot }}</span></p>
+                <i>Automatically create daily deduplicated snapshots of the index, stored in Elasticsearch. Read first before activating: Wiki.</i><br>
+                {{ app_form.application_enable_snapshot }}
+            </div>
+            <div>
+                {% if snapshots %}
+                    <p>Create next snapshot: <span class="settings-current">{{ snapshots.next_exec_str }}</span>, snapshots expire after <span class="settings-current">{{ snapshots.expire_after }}</span></p>
+                    <br>
+                    {% for snapshot in snapshots.snapshots %}
+                        <p><button id="{{ snapshot.id }}" onclick="restoreSnapshot(id)">Restore</button> Snapshot created on: <span class="settings-current">{{ snapshot.start_date }}</span>, took <span class="settings-current">{{ snapshot.duration_s }}s</span> to create.</p>
+                    {% endfor %}
+                {% endif %}
             </div>
         </div>
         <button type="submit" name="application-settings">Update Application Configurations</button>

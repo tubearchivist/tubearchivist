@@ -13,6 +13,8 @@ from api.views import (
     PlaylistApiVideoView,
     PlaylistApiView,
     SearchView,
+    SnapshotApiListView,
+    SnapshotApiView,
     TaskApiView,
     VideoApiListView,
     VideoApiView,
@@ -88,6 +90,16 @@ urlpatterns = [
         "task/",
         TaskApiView.as_view(),
         name="api-task",
+    ),
+    path(
+        "snapshot/",
+        SnapshotApiListView.as_view(),
+        name="api-snapshot-list",
+    ),
+    path(
+        "snapshot/<slug:snapshot_id>/",
+        SnapshotApiView.as_view(),
+        name="api-snapshot",
     ),
     path(
         "cookie/",

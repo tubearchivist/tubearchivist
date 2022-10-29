@@ -72,6 +72,15 @@ Requirements:
     You need the following headers: Content-Type, Accept-Encoding, and Range. Note that the last two headers, Accept-Encoding and Range, are additional headers that you may not have needed previously.  
     Wildcards "*" cannot be used for the Access-Control-Allow-Origin header. If the page has protected media content, it must use a domain instead of a wildcard.
 
+## Snapshots
+System snapshots will automatically make daily snapshots of the Elasticsearch index. Snapshots are deduplicated, meaning that each snapshot will only have to backup changes since the last snapshot. There is also a cleanup function implemented, that will remove snapshots older than 30 days. Due to this improvements compared to our previous solution, system snapshots will replace the current backup system in a future version.
+
+Before activating system snapshots, you'll have to add two additional environment variables to the *archivist-es* container:
+```
+path.repo=/usr/share/elasticsearch/data/snapshot
+TZ=America/New_York
+```
+The variable `path.repo` will set folder where the snapshots will go inside the Elasticsearch container, you can't change the folder, but the variable needs to be set. For the `TZ` variable, set the same as you have for the Tube Archivist container. Rebuild the container for changes to take effect, e.g `docker compose up -d`.
 
 # Scheduler Setup
 Schedule settings expect a cron like format, where the first value is minute, second is hour and third is day of the week. Day 0 is Sunday, day 1 is Monday etc.
