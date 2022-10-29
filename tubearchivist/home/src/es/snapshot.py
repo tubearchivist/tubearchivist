@@ -205,12 +205,12 @@ class ElasticSnapshot:
         if not policy:
             return False
 
-        next_exec = policy["next_execution_millis"]
-        next_exec_date = datetime.fromtimestamp(next_exec // 1000)
+        next_exec = policy["next_execution_millis"] // 1000
+        next_exec_date = datetime.fromtimestamp(next_exec)
         next_exec_str = next_exec_date.strftime("%Y-%m-%d %H:%M")
         expire_after = policy["policy"]["retention"]["expire_after"]
         policy_metadata = {
-            "next_exec": next_exec_date,
+            "next_exec": next_exec,
             "next_exec_str": next_exec_str,
             "expire_after": expire_after,
         }
