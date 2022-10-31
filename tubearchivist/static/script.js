@@ -297,6 +297,15 @@ function restoreSnapshot(snapshotId) {
   document.getElementById(snapshotId).parentElement.replaceWith(message);
 }
 
+function createSnapshot() {
+  console.log('create snapshot now');
+  let apiEndpoint = '/api/snapshot/';
+  apiRequest(apiEndpoint, 'POST');
+  let message = document.createElement('span');
+  message.innerText = 'Snapshot in progress';
+  document.getElementById('createButton').replaceWith(message);
+}
+
 // delete from file system
 function deleteConfirm() {
   let to_show = document.getElementById('delete-button');
