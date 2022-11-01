@@ -36,7 +36,7 @@
             <img src="{% static 'img/icon-listview.svg' %}" onclick="changeView(this)" data-origin="channel" data-value="list" alt="list view">
         </div>
     </div>
-    <h2>Total matching channels: {{ max_hits }}</h2>
+    <h2>Total channels: {{ max_hits }}</h2>
     <div class="channel-list {{ view_style }}">
         {% if results %}
             {% for channel in results %}
