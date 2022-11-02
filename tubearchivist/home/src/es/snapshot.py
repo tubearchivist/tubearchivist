@@ -107,8 +107,11 @@ class ElasticSnapshot:
 
     def _build_policy_data(self):
         """build policy dict from config"""
+        at_12 = datetime.now().replace(hour=12, minute=0, second=0)
+        hour = at_12.astimezone(ZoneInfo("UTC")).hour
+
         return {
-            "schedule": "0 30 1 * * ?",
+            "schedule": f"0 0 {hour} * * ?",
             "name": f"<{self.POLICY}_>",
             "repository": self.REPO,
             "config": {
