@@ -38,10 +38,11 @@ services:
     container_name: archivist-es
     restart: unless-stopped
     environment:
-      - "xpack.security.enabled=true"
       - "ELASTIC_PASSWORD=verysecret"       # matching Elasticsearch password
-      - "discovery.type=single-node"
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "xpack.security.enabled=true"
+      - "discovery.type=single-node"
+      - "path.repo=/usr/share/elasticsearch/data/snapshot"
     ulimits:
       memlock:
         soft: -1
