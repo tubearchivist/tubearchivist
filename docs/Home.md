@@ -30,3 +30,12 @@ Table of contents:
 An empty checkbox icon <img src="assets/icon-unseen.png?raw=true" alt="unseen icon" width="20px" style="margin:0 5px;"> will show for videos you haven't marked as watched. Click on it and the icon will change to a filled checkbox <img src="assets/icon-seen.png?raw=true" alt="seen icon" width="20px" style="margin:0 5px;"> indicating it as watched - click again to revert.
 
 When available the <img src="assets/icon-gridview.png?raw=true" alt="gridview icon" width="20px" style="margin:0 5px;"> gridview icon will display the list in a grid. A grid row holds 3 items by default, use the <img src="assets/icon-add.png?raw=true" alt="listview icon" width="20px" style="margin:0 5px;"> icon to add more or the <img src="assets/icon-substract.png?raw=true" alt="listview icon" width="20px" style="margin:0 5px;"> icon to remove items per row, depending on your screen size. The <img src="assets/icon-listview.png?raw=true" alt="listview icon" width="20px" style="margin:0 5px;"> listview icon will arrange the items in a list. The sort icon <img src="assets/icon-sort.png?raw=true" alt="listview icon" width="20px" style="margin:0 5px;"> will open additional sort options.
+
+You can control the video player with the following keyboard shortcuts:
+- `?`: Show help
+- `m`: toggle mute
+- `c`: toggle subtitles if available
+- `>`: increase playback speed
+- `<`: decrease playback speed
+- `←` (left arrow): jump back 5 seconds
+- `→` (right arrow): jump forward 5 seconds
