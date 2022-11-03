@@ -73,14 +73,20 @@ Requirements:
     Wildcards "*" cannot be used for the Access-Control-Allow-Origin header. If the page has protected media content, it must use a domain instead of a wildcard.
 
 ## Snapshots
-System snapshots will automatically make daily snapshots of the Elasticsearch index. Snapshots are deduplicated, meaning that each snapshot will only have to backup changes since the last snapshot. There is also a cleanup function implemented, that will remove snapshots older than 30 days. Due to this improvements compared to our previous solution, system snapshots will replace the current backup system in a future version.
+System snapshots will automatically make daily snapshots of the Elasticsearch index. The task will start at 12pm your local time. Snapshots are deduplicated, meaning that each snapshot will only have to backup changes since the last snapshot. The initial snapshot may be slow, but subsequent runs will be much faster. There is also a cleanup function implemented, that will remove snapshots older than 30 days.
 
-Before activating system snapshots, you'll have to add two additional environment variables to the *archivist-es* container:
+This will make a snapshot of your metadata index only, no media files or additional configuration variables you have set on the settings page will be backed up.
+
+Due to these improvements compared to the previous backup solution, system snapshots will replace the current backup system in a future version.
+
+Before activating system snapshots, you'll have to add one additional environment variables to the *archivist-es* container:
 ```
 path.repo=/usr/share/elasticsearch/data/snapshot
-TZ=America/New_York
 ```
-The variable `path.repo` will set folder where the snapshots will go inside the Elasticsearch container, you can't change the folder, but the variable needs to be set. For the `TZ` variable, set the same as you have for the Tube Archivist container. Rebuild the container for changes to take effect, e.g `docker compose up -d`.
+The variable `path.repo` will set the folder where the snapshots will go inside the Elasticsearch container, you can't change it, but the variable needs to be set. Rebuild the container for changes to take effect, e.g `docker compose up -d`.
+
+- **Create snapshot now**: Will start the snapshot process now, outside of the regular daily schedule.
+- **Restore**: Restore your index to that point in time.
 
 # Scheduler Setup
 Schedule settings expect a cron like format, where the first value is minute, second is hour and third is day of the week. Day 0 is Sunday, day 1 is Monday etc.
