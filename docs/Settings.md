@@ -102,7 +102,7 @@ Examples:
 NOTE:
 - Changes in the scheduler settings require a container restart to take effect.
 - Cron format as *number*/*number* are none standard cron and are not supported by the scheduler, for example **0 0/12 \*** is invalid, use **0 \*/12 \*** instead.
-- Avoid an unnecessary frequent schedule to not get blocked by YouTube. For that reason * or wildcards for minutes are not supported.
+- Avoid an unnecessary frequent schedule to not get blocked by YouTube. For that reason, the scheduler doesn't support schedules that trigger more than once per hour.
 
 ## Rescan Subscriptions
 That's the equivalent task as run from the downloads page looking through your channel and playlist and add missing videos to the download queue.
