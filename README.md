@@ -16,7 +16,7 @@
 * [Extended Universe](#extended-universe)
 * [Installing and updating](#installing-and-updating)
 * [Getting Started](#getting-started)
-* [Potential pitfalls](#potential-pitfalls)
+* [Common Errors](#common-errors)
 * [Roadmap](#roadmap)
 * [Known limitations](#known-limitations)
 * [Donate](#donate)
@@ -165,7 +165,7 @@ You will see the current version number of **Tube Archivist** in the footer of t
 
 There is a Helm Chart available at https://github.com/insuusvenerati/helm-charts. Mostly self-explanatory but feel free to ask questions in the discord / subreddit.
 
-## Potential pitfalls
+## Common Errors
 ### vm.max_map_count
 **Elastic Search** in Docker requires the kernel setting of the host machine `vm.max_map_count` to be set to at least 262144.
 
