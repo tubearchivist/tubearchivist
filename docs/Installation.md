@@ -195,7 +195,9 @@ Once all of the folders have been created, it should have a folder structure wit
         - "GID=0"
         - "xpack.security.enabled=true"
         - "ELASTIC_PASSWORD=verysecret" 
+        - "path.repo=/usr/share/elasticsearch/data/snapshot"
           > Do not use the default password as it is very insecure.
+          > Activating snapshots for backups should only be done *after* setting the `path.repo` setting.
         ![Synology - ElasticSearch Environment Configurations](assets/Synology_0.2.0_Docker-ES-Env-Conf.png)
     12. Click on the **Apply** button.
     13. Back on the **Create Container** screen, click the **Next** button.
