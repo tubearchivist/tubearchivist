@@ -460,6 +460,72 @@
                 },
                 "number_of_replicas": "0"
             }
+        },
+        {
+            "index_name": "comments",
+            "expected_map": {
+                "youtube_id": {
+                    "type": "keyword"
+                },
+                "comment_last_refresh": {
+                    "type": "date"
+                },
+                "comment_comments": {
+                    "properties": {
+                        "comment_id": {
+                            "type": "keyword"
+                        },
+                        "comment_text": {
+                            "type" : "text"
+                        },
+                        "comment_timestamp": {
+                            "type": "date"
+                        },
+                        "comment_time_text": {
+                            "type" : "text"
+                        },
+                        "comment_likecount": {
+                            "type": "long"
+                        },
+                        "comment_is_favorited": {
+                            "type": "boolean"
+                        },
+                        "comment_author": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256,
+                                    "normalizer": "to_lower"
+                                }
+                            }
+                        },
+                        "comment_author_id": {
+                            "type": "keyword"
+                        },
+                        "comment_author_thumbnail": {
+                            "type": "keyword"
+                        },
+                        "comment_author_is_uploader": {
+                            "type": "boolean"
+                        },
+                        "comment_parent": {
+                            "type": "keyword"
+                        }
+                    }
+                }
+            },
+            "expected_set": {
+                "analysis": {
+                    "normalizer": {
+                        "to_lower": {
+                            "type": "custom",
+                            "filter": ["lowercase"]
+                        }
+                    }
+                },
+                "number_of_replicas": "0"
+            }
         }
     ]
 }
