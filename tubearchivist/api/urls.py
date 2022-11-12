@@ -18,6 +18,7 @@ from api.views import (
     TaskApiView,
     VideoApiListView,
     VideoApiView,
+    VideoCommentView,
     VideoProgressView,
     VideoSponsorView,
 )
@@ -40,6 +41,11 @@ urlpatterns = [
         "video/<slug:video_id>/progress/",
         VideoProgressView.as_view(),
         name="api-video-progress",
+    ),
+    path(
+        "video/<slug:video_id>/comment/",
+        VideoCommentView.as_view(),
+        name="api-video-comment",
     ),
     path(
         "video/<slug:video_id>/sponsor/",

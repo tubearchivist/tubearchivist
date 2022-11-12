@@ -145,6 +145,22 @@ class VideoProgressView(ApiBaseView):
         return Response(self.response)
 
 
+class VideoCommentView(ApiBaseView):
+    """resolves to /api/video/<video_id>/comment/
+    handle video comments
+    GET: return all comments from video with reply threads
+    """
+
+    search_base = "ta_comment/_doc/"
+
+    def get(self, request, video_id):
+        """get video comments"""
+        # pylint: disable=unused-argument
+        self.get_document(video_id)
+
+        return Response(self.response, status=self.status_code)
+
+
 class VideoSponsorView(ApiBaseView):
     """resolves to /api/video/<video_id>/sponsor/
     handle sponsor block integration
