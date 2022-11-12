@@ -16,13 +16,13 @@ class Comments:
 
     def __init__(self, youtube_id):
         self.youtube_id = youtube_id
-        self.es_path = f"ta_comments/_doc/{youtube_id}"
+        self.es_path = f"ta_comment/_doc/{youtube_id}"
         self.max_comments = "all,100,all,30"
         self.json_data = False
 
     def build_json(self):
         """build json document for es"""
-        comments_raw = self.get_comments()
+        comments_raw = self.get_yt_comments()
         comments_format = self.format_comments(comments_raw)
 
         self.json_data = {
@@ -53,7 +53,7 @@ class Comments:
 
         return yt_obs
 
-    def get_comments(self):
+    def get_yt_comments(self):
         """get comments from youtube"""
         print(f"comments: get comments with format {self.max_comments}")
         yt_obs = self.build_yt_obs()
@@ -99,3 +99,12 @@ class Comments:
     def delete_comments(self):
         """delete comments from es"""
         _, _ = ElasticWrap(self.es_path).delete()
+
+    def get_es_comments(self):
+        """get comments from ES"""
+        response, statuscode = ElasticWrap(self.es_path).get()
+        if statuscode == 404:
+            print(f"comments: not found {self.youtube_id}")
+            return False
+
+        return response

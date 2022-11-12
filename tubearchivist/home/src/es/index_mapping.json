@@ -462,7 +462,7 @@
             }
         },
         {
-            "index_name": "comments",
+            "index_name": "comment",
             "expected_map": {
                 "youtube_id": {
                     "type": "keyword"
