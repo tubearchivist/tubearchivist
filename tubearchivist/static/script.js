@@ -287,7 +287,7 @@ function resetToken() {
   document.getElementById('text-reveal').replaceWith(message);
 }
 
-// restore from snapshot 
+// restore from snapshot
 function restoreSnapshot(snapshotId) {
   console.log('restore ' + snapshotId);
   let apiEndpoint = '/api/snapshot/' + snapshotId + '/';
@@ -1102,6 +1102,81 @@ function createFulltext(fullText) {
   fullTextDiv.setAttribute('class', 'video-item list');
   fullTextDiv.innerHTML = markup;
   return fullTextDiv;
+}
+
+function getComments(videoId) {
+  let apiEndpoint = '/api/video/' + videoId + '/comment/';
+  let response = apiRequest(apiEndpoint, 'GET');
+  let allComments = response.data;
+
+  writeComments(allComments);
+}
+
+function writeComments(allComments) {
+  let commentsListBox = document.getElementById('comments-list');
+  for (let i = 0; i < allComments.length; i++) {
+    const rootComment = allComments[i];
+
+    let commentBox = createCommentBox(rootComment, true);
+
+    // add replies to commentBox
+    if (rootComment.comment_replies) {
+      let commentReplyBox = document.createElement('div');
+      commentReplyBox.setAttribute('class', 'comments-replies');
+      for (let j = 0; j < rootComment.comment_replies.length; j++) {
+        const commentReply = rootComment.comment_replies[j];
+        let commentReplyDiv = createCommentBox(commentReply, false);
+        commentReplyBox.appendChild(commentReplyDiv);
+      }
+      if (rootComment.comment_replies.length > 0) {
+        commentBox.appendChild(commentReplyBox);
+      }
+    }
+    commentsListBox.appendChild(commentBox);
+  }
+}
+
+function createCommentBox(comment, isRoot) {
+  let commentBox = document.createElement('div');
+  commentBox.setAttribute('class', 'comment-box');
+
+  let commentClass;
+  if (isRoot) {
+    commentClass = 'root-comment';
+  } else {
+    commentClass = 'reply-comment';
+  }
+
+  commentBox.classList.add = commentClass;
+
+  let commentAuthor = document.createElement('h3');
+  commentAuthor.innerText = comment.comment_author;
+  if (comment.comment_author_is_uploader) {
+    commentAuthor.setAttribute('class', 'comment-highlight');
+  }
+  commentBox.appendChild(commentAuthor);
+
+  let commentText = document.createElement('p');
+  commentText.innerText = comment.comment_text;
+  commentBox.appendChild(commentText);
+
+  const spacer = '<span class="space-carrot">|</span>';
+  let commentMeta = document.createElement('div');
+  commentMeta.setAttribute('class', 'comment-meta');
+
+  commentMeta.innerHTML = `<span>${comment.comment_time_text}</span>`;
+
+  if (comment.comment_likecount > 0) {
+    commentMeta.innerHTML += `${spacer}<span class="thumb-icon"><img src="/static/img/icon-thumb.svg"> ${comment.comment_likecount}</span>`;
+  }
+
+  if (comment.comment_is_favorited) {
+    commentMeta.innerHTML += `${spacer}<span class="comment-like"><img src="/static/img/icon-heart.svg"></span>`;
+  }
+
+  commentBox.appendChild(commentMeta);
+
+  return commentBox;
 }
 
 // generic

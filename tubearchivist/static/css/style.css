@@ -619,7 +619,8 @@ video:-webkit-full-screen {
     margin-top: 1rem;
 }
 
-.description-box {
+.description-box,
+.comments-section {
     margin-top: 1rem;
     padding: 15px;
     background-color: var(--highlight-bg);
@@ -778,6 +779,10 @@ video:-webkit-full-screen {
     margin-left: 5px;
 }
 
+.thumb-icon {
+    display: flex;
+}
+
 .thumb-icon img,
 .rating-stars img {
     width: 20px;
@@ -817,6 +822,36 @@ video:-webkit-full-screen {
 .playlist-desc {
     padding: 5px;
     width: 100%;
+}
+
+.comment-box {
+    padding-bottom: 1rem;
+}
+
+.comments-replies {
+    padding-left: 3rem;
+}
+
+.comment-highlight {
+    background-color: var(--main-font);
+    padding: 3px;
+    color: var(--accent-font-dark);
+    font-family: Sen-bold, sans-serif;
+    width: fit-content;
+}
+
+.comment-meta {
+    display: flex;
+}
+
+.space-carrot {
+    margin: 0 10px;
+}
+
+.comment-like img {
+    width: 20px;
+    margin-left: 5px;
+    filter: var(--img-filter-error);
 }
 
 /* multi search page */

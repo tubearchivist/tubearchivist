@@ -123,6 +123,11 @@
             </div>
         {% endfor %}
     {% endif %}
+    <div class="comments-section">
+        <h3>Comments</h3>
+        <div id="comments-list" class="comments-list">
+        </div>
+    </div>
 </div>
 <script>
     var videoData = getVideoData('{{ video.youtube_id }}');
