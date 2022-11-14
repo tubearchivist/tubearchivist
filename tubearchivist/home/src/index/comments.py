@@ -74,7 +74,13 @@ class Comments:
     def clean_comment(self, comment):
         """parse metadata from comment for indexing"""
         time_text_datetime = datetime.utcfromtimestamp(comment["timestamp"])
-        time_text = time_text_datetime.strftime("%Y-%m-%d %H:%M:%S")
+
+        if time_text_datetime.hour == 0 and time_text_datetime.minute == 0:
+            format_string = "%Y-%m-%d"
+        else:
+            format_string = "%Y-%m-%d %H:%M"
+
+        time_text = time_text_datetime.strftime(format_string)
 
         cleaned_comment = {
             "comment_id": comment["id"],
