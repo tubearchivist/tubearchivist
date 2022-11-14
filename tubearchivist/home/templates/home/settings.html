@@ -157,7 +157,7 @@
             <h2 id="snapshots">Snapshots</h2>
             <div class="settings-item">
                 <p>Current system snapshot: <span class="settings-current">{{ config.application.enable_snapshot }}</span></p>
-                <i>Automatically create daily deduplicated snapshots of the index, stored in Elasticsearch. Read first before activating: Wiki.</i><br>
+                <i>Automatically create daily deduplicated snapshots of the index, stored in Elasticsearch. Read first before activating: <a target="_blank" href="https://github.com/tubearchivist/tubearchivist/wiki/Settings#snapshots">Wiki</a>.</i><br>
                 {{ app_form.application_enable_snapshot }}
             </div>
             <div>
@@ -186,7 +186,7 @@
             <p>Note:</p>
             <ul>
                 <li>Changes in the scheduler settings require a container restart to take effect.</li>
-                <li>Avoid an unnecessary frequent schedule to not get blocked by YouTube. For that reason <i>*</i> or <i>wildcard</i> for minutes is not supported.</li>
+                <li>Avoid an unnecessary frequent schedule to not get blocked by YouTube. For that reason, the scheduler doesn't support schedules that trigger more than once per hour.</li>
             </ul>
         </div>
     </div>

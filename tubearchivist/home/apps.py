@@ -85,8 +85,8 @@ class StartupCheck:
 
     def snapshot_check(self):
         """setup snapshot config, create if needed"""
-        active = self.config_handler.config["application"]["enable_snapshot"]
-        if not active:
+        app = self.config_handler.config["application"]
+        if not app.get("enable_snapshot"):
             return
 
         ElasticSnapshot().setup()

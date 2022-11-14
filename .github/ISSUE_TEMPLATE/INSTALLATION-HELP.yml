@@ -15,7 +15,7 @@ body:
       options:
         - label: I have read and understand the [installation instructions](https://github.com/tubearchivist/tubearchivist#installing-and-updating).
           required: true
-        - label: My issue is not described in the [potential pitfalls](https://github.com/tubearchivist/tubearchivist#potential-pitfalls) section.
+        - label: My issue is not described in the [common errors](https://github.com/tubearchivist/tubearchivist#common-errors) section.
           required: true
 
   - type: input

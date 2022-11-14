@@ -98,7 +98,9 @@ class ApplicationSettingsForm(forms.Form):
         ("1", "enable cookie"),
     ]
 
-    subscriptions_channel_size = forms.IntegerField(required=False)
+    subscriptions_channel_size = forms.IntegerField(
+        required=False, min_value=1
+    )
     downloads_limit_count = forms.IntegerField(required=False)
     downloads_limit_speed = forms.IntegerField(required=False)
     downloads_throttledratelimit = forms.IntegerField(required=False)

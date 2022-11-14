@@ -73,14 +73,20 @@ Requirements:
     Wildcards "*" cannot be used for the Access-Control-Allow-Origin header. If the page has protected media content, it must use a domain instead of a wildcard.
 
 ## Snapshots
-System snapshots will automatically make daily snapshots of the Elasticsearch index. Snapshots are deduplicated, meaning that each snapshot will only have to backup changes since the last snapshot. There is also a cleanup function implemented, that will remove snapshots older than 30 days. Due to this improvements compared to our previous solution, system snapshots will replace the current backup system in a future version.
+System snapshots will automatically make daily snapshots of the Elasticsearch index. The task will start at 12pm your local time. Snapshots are deduplicated, meaning that each snapshot will only have to backup changes since the last snapshot. The initial snapshot may be slow, but subsequent runs will be much faster. There is also a cleanup function implemented, that will remove snapshots older than 30 days.
 
-Before activating system snapshots, you'll have to add two additional environment variables to the *archivist-es* container:
+This will make a snapshot of your metadata index only, no media files or additional configuration variables you have set on the settings page will be backed up.
+
+Due to these improvements compared to the previous backup solution, system snapshots will replace the current backup system in a future version.
+
+Before activating system snapshots, you'll have to add one additional environment variables to the *archivist-es* container:
 ```
 path.repo=/usr/share/elasticsearch/data/snapshot
-TZ=America/New_York
 ```
-The variable `path.repo` will set folder where the snapshots will go inside the Elasticsearch container, you can't change the folder, but the variable needs to be set. For the `TZ` variable, set the same as you have for the Tube Archivist container. Rebuild the container for changes to take effect, e.g `docker compose up -d`.
+The variable `path.repo` will set the folder where the snapshots will go inside the Elasticsearch container, you can't change it, but the variable needs to be set. Rebuild the container for changes to take effect, e.g `docker compose up -d`.
+
+- **Create snapshot now**: Will start the snapshot process now, outside of the regular daily schedule.
+- **Restore**: Restore your index to that point in time.
 
 # Scheduler Setup
 Schedule settings expect a cron like format, where the first value is minute, second is hour and third is day of the week. Day 0 is Sunday, day 1 is Monday etc.
@@ -96,7 +102,7 @@ Examples:
 NOTE:
 - Changes in the scheduler settings require a container restart to take effect.
 - Cron format as *number*/*number* are none standard cron and are not supported by the scheduler, for example **0 0/12 \*** is invalid, use **0 \*/12 \*** instead.
-- Avoid an unnecessary frequent schedule to not get blocked by YouTube. For that reason * or wildcards for minutes are not supported.
+- Avoid an unnecessary frequent schedule to not get blocked by YouTube. For that reason, the scheduler doesn't support schedules that trigger more than once per hour.
 
 ## Rescan Subscriptions
 That's the equivalent task as run from the downloads page looking through your channel and playlist and add missing videos to the download queue.
@@ -123,6 +129,8 @@ Additional database functionality.
 The button **Delete all queued** will delete all pending videos from the download queue. The button **Delete all ignored** will delete all videos you have previously ignored.
 
 ## Manual Media Files Import
+NOTE: This is inherently error prone, as there are many variables, some outside of the control of this project. Read this carefully and use at your own risk. 
+
 Add the files you'd like to import to the */cache/import* folder. Only add files, don't add subdirectories. All files you are adding, need to have the same *base name* as the media file. Then start the process from the settings page *Manual Media Files Import*.
 
 Valid media extensions are *.mp4*, *.mkv* or *.webm*. If you have other file extensions or incompatible codecs, convert them first to mp4. **Tube Archivist** can identify the videos with one of the following methods.
@@ -140,11 +148,9 @@ Detect the YouTube ID from filename, this accepts the default yt-dlp naming conv
 - The YouTube ID in square brackets at the end of the filename is the crucial part.
 
 ### Offline import:
-**NOTE**: This is untested. Please provide feedback.  
-
 If the video you are trying to import is not available on YouTube any more, **Tube Archivist** can import the required metadata:
 - The file `<base-name>.info.json` is required to extract the required information.
-- Add the thumbnail as `<base-name>.<ext>`, where valid file extensions are *.jpg*, *.png* or *.webp*. If there is no thumbnail file, **Tube Archivist** will try to extract it from the media file or will fallback to a default thumbnail.
+- Add the thumbnail as `<base-name>.<ext>`, where valid file extensions are *.jpg*, *.png* or *.webp*. If there is no thumbnail file, **Tube Archivist** will try to extract the embedded cover from the media file or will fallback to a default thumbnail.
 - Add subtitles as `<base-name>.<lang>.vtt` where *lang* is the two letter ISO country code. This will archive all subtitle files you add to the import folder, independent from your configurations. Subtitles can be archived and used in the player, but they can't be indexed or made searchable due to the fact, that they have a very different structure than the subtitles as **Tube Archivist** needs them.
 - For videos, where the whole channel is not available any more, you can add the `<channel-id>.info.json` file as generated by *youtube-dl/yt-dlp* to get the full metadata. Alternatively **Tube Archivist** will extract as much info as possible from the video info.json file. 
 

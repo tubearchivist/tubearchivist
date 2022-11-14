@@ -3,7 +3,10 @@ Accessible at `/search/` of your **Tube Archivist**, search your archive for Vid
 
 - All your queries are case insensitive and are normalized to lowercase.
 - All your queries are analyzed for the english language, this means *singular*, *plural* and word variations like *-ing*, *-ed*, *-able* etc are treated as synonyms.
-- Fuzzy search is activated for all your searches. This can catch typos in your queries or in the matching documents with one to two letters difference, depending on the query length.
+- Fuzzy search is activated for all your searches by default. This can catch typos in your queries or in the matching documents with one to two letters difference, depending on the query length. You can configure fuzziness with the secondary keyword `fuzzy:`, e.g:
+  - `fuzzy:0` or `fuzzy:no`: Deactivate fuzzy matching.
+  - `fuzzy:1`: Set fuzziness to one letter difference.
+  - `fuzzy:2`: Set fuzziness to two letters difference.
 - All text searches are ranked, meaning the better a match the higher ranked the result. Unless otherwise stated, queries with multiple words are processed with the `and` operator, meaning all words need to match so each word will narrow down the result.
 - This will return 30 results per query, pagination is not implemented yet.
 

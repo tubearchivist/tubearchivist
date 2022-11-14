@@ -191,7 +191,7 @@ class SearchParser:
 
     def __init__(self, search_query):
         self.query_words = search_query.lower().split()
-        self.query_map = False
+        self.query_map = {"term": [], "fuzzy": []}
         self.append_to = "term"
 
     def run(self):
@@ -214,11 +214,11 @@ class SearchParser:
         if ":" in first_word:
             index_match, query_string = first_word.split(":")
             if index_match in key_word_map:
-                self.query_map = key_word_map.get(index_match)
+                self.query_map.update(key_word_map.get(index_match))
                 self.query_words[0] = query_string
                 return index_match
 
-        self.query_map = key_word_map.get("simple")
+        self.query_map.update(key_word_map.get("simple"))
         print(f"query_map: {self.query_map}")
 
         return "simple"
@@ -229,29 +229,24 @@ class SearchParser:
         return {
             "simple": {
                 "index": "ta_video,ta_channel,ta_playlist",
-                "term": [],
             },
             "video": {
                 "index": "ta_video",
-                "term": [],
                 "channel": [],
                 "active": [],
             },
             "channel": {
                 "index": "ta_channel",
-                "term": [],
                 "active": [],
                 "subscribed": [],
             },
             "playlist": {
                 "index": "ta_playlist",
-                "term": [],
                 "active": [],
                 "subscribed": [],
             },
             "full": {
                 "index": "ta_subtitle",
-                "term": [],
                 "lang": [],
                 "source": [],
             },
@@ -329,6 +324,20 @@ class QueryBuilder:
 
         return query
 
+    def _get_fuzzy(self):
+        """return fuziness valuee"""
+        fuzzy_value = self.query_map.get("fuzzy", ["auto"])[0]
+        if fuzzy_value == "no":
+            return 0
+
+        if not fuzzy_value.isdigit():
+            return "auto"
+
+        if int(fuzzy_value) > 2:
+            return "2"
+
+        return fuzzy_value
+
     def _build_simple(self):
         """build simple cross index query"""
         must_list = []
@@ -339,7 +348,7 @@ class QueryBuilder:
                     "multi_match": {
                         "query": term,
                         "type": "bool_prefix",
-                        "fuzziness": "auto",
+                        "fuzziness": self._get_fuzzy(),
                         "operator": "and",
                         "fields": [
                             "channel_name._2gram",
@@ -368,7 +377,7 @@ class QueryBuilder:
                     "multi_match": {
                         "query": term,
                         "type": "bool_prefix",
-                        "fuzziness": "auto",
+                        "fuzziness": self._get_fuzzy(),
                         "operator": "and",
                         "fields": [
                             "title._2gram^2",
@@ -390,7 +399,7 @@ class QueryBuilder:
                     "multi_match": {
                         "query": channel,
                         "type": "bool_prefix",
-                        "fuzziness": "auto",
+                        "fuzziness": self._get_fuzzy(),
                         "operator": "and",
                         "fields": [
                             "channel.channel_name._2gram",
@@ -413,7 +422,7 @@ class QueryBuilder:
                     "multi_match": {
                         "query": term,
                         "type": "bool_prefix",
-                        "fuzziness": "auto",
+                        "fuzziness": self._get_fuzzy(),
                         "operator": "and",
                         "fields": [
                             "channel_description",
@@ -445,7 +454,7 @@ class QueryBuilder:
                     "multi_match": {
                         "query": term,
                         "type": "bool_prefix",
-                        "fuzziness": "auto",
+                        "fuzziness": self._get_fuzzy(),
                         "operator": "and",
                         "fields": [
                             "playlist_description",
@@ -477,7 +486,7 @@ class QueryBuilder:
                     "match": {
                         "subtitle_line": {
                             "query": term,
-                            "fuzziness": "auto",
+                            "fuzziness": self._get_fuzzy(),
                         }
                     }
                 }
