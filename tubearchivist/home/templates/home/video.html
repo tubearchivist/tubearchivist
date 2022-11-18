@@ -123,11 +123,14 @@
             </div>
         {% endfor %}
     {% endif %}
-    <div class="comments-section">
-        <h3>Comments</h3>
-        <div id="comments-list" class="comments-list">
+    {% if video.comment_count %}
+        <div class="comments-section">
+            <h3>Comments: {{video.comment_count}}</h3>
+            <div id="comments-list" class="comments-list">
+            </div>
         </div>
-    </div>
+        <script>getComments('{{ video.youtube_id }}')</script>
+    {% endif %}
 </div>
 <script>
     var videoData = getVideoData('{{ video.youtube_id }}');

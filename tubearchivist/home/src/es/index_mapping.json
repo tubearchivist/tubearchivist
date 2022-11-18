@@ -193,6 +193,9 @@
                         }
                     }
                 },
+                "comment_count": {
+                    "type": "long"
+                },
                 "stats" : {
                     "properties" : {
                         "average_rating" : {

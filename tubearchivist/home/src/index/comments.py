@@ -20,18 +20,19 @@ class Comments:
         self.es_path = f"ta_comment/_doc/{youtube_id}"
         self.json_data = False
         self.config = config
+        self.comments_format = False
 
     def build_json(self):
         """build json document for es"""
         print(f"{self.youtube_id}: get comments")
         self._check_config()
         comments_raw = self.get_yt_comments()
-        comments_format = self.format_comments(comments_raw)
+        self.format_comments(comments_raw)
 
         self.json_data = {
             "youtube_id": self.youtube_id,
             "comment_last_refresh": int(datetime.now().strftime("%s")),
-            "comment_comments": comments_format,
+            "comment_comments": self.comments_format,
         }
 
     def _check_config(self):
@@ -77,7 +78,7 @@ class Comments:
             cleaned_comment = self.clean_comment(comment)
             comments.append(cleaned_comment)
 
-        return comments
+        self.comments_format = comments
 
     def clean_comment(self, comment):
         """parse metadata from comment for indexing"""
@@ -109,6 +110,14 @@ class Comments:
     def upload_comments(self):
         """upload comments to es"""
         _, _ = ElasticWrap(self.es_path).put(self.json_data)
+
+        vid_path = f"ta_video/_update/{self.youtube_id}"
+        data = {
+            "doc": {
+                "comment_count": len(self.comments_format)
+            }
+        }
+        _, _ = ElasticWrap(vid_path).post(data=data)
 
     def delete_comments(self):
         """delete comments from es"""
