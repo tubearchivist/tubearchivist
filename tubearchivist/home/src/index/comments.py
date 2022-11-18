@@ -112,11 +112,7 @@ class Comments:
         _, _ = ElasticWrap(self.es_path).put(self.json_data)
 
         vid_path = f"ta_video/_update/{self.youtube_id}"
-        data = {
-            "doc": {
-                "comment_count": len(self.comments_format)
-            }
-        }
+        data = {"doc": {"comment_count": len(self.comments_format)}}
         _, _ = ElasticWrap(vid_path).post(data=data)
 
     def delete_comments(self):
