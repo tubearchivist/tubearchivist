@@ -26,7 +26,7 @@ class Comments:
     def build_json(self):
         """build json document for es"""
         print(f"{self.youtube_id}: get comments")
-        self._check_config()
+        self.check_config()
 
         if not self.is_activated:
             return
@@ -40,7 +40,7 @@ class Comments:
             "comment_comments": self.comments_format,
         }
 
-    def _check_config(self):
+    def check_config(self):
         """read config if not attached"""
         if not self.config:
             self.config = AppConfig().config
@@ -127,6 +127,7 @@ class Comments:
 
     def delete_comments(self):
         """delete comments from es"""
+        print(f"{self.youtube_id}: delete comments")
         _, _ = ElasticWrap(self.es_path).delete(refresh=True)
 
     def get_es_comments(self):
