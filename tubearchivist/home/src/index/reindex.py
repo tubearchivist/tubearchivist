@@ -16,6 +16,7 @@ from home.src.download.yt_dlp_base import CookieHandler
 from home.src.download.yt_dlp_handler import VideoDownloader
 from home.src.es.connect import ElasticWrap
 from home.src.index.channel import YoutubeChannel
+from home.src.index.comments import Comments
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video import YoutubeVideo
 from home.src.ta.config import AppConfig
@@ -147,8 +148,7 @@ class Reindex:
         if integrate_ryd:
             self._get_unrated_vids()
 
-    @staticmethod
-    def _reindex_single_video(youtube_id):
+    def _reindex_single_video(self, youtube_id):
         """refresh data for single video"""
         video = YoutubeVideo(youtube_id)
 
@@ -181,6 +181,8 @@ class Reindex:
         thumb_handler = ThumbManager(youtube_id)
         thumb_handler.delete_video_thumb()
         thumb_handler.download_video_thumb(video.json_data["vid_thumb_url"])
+
+        Comments(youtube_id, config=self.config).reindex_comments()
 
         return
 

@@ -27,6 +27,8 @@
         "subtitle": false,
         "subtitle_source": false,
         "subtitle_index": false,
+        "comment_max": false,
+        "comment_sort": "top",
         "cookie_import": false,
         "throttledratelimit": false,
         "integrate_ryd": false,
