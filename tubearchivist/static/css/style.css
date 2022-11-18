@@ -786,7 +786,7 @@ video:-webkit-full-screen {
 .thumb-icon img,
 .rating-stars img {
     width: 20px;
-    margin: 0;
+    margin: 0 5px;
     filter: var(--img-filter);
 }
 
@@ -830,6 +830,7 @@ video:-webkit-full-screen {
 
 .comments-replies {
     padding-left: 3rem;
+    margin-top: 1rem;
 }
 
 .comment-highlight {
@@ -845,7 +846,7 @@ video:-webkit-full-screen {
 }
 
 .space-carrot {
-    margin: 0 10px;
+    margin: 0 5px;
 }
 
 .comment-like img {
