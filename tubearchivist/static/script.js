@@ -1167,7 +1167,8 @@ function createCommentBox(comment, isRoot) {
   commentMeta.innerHTML = `<span>${comment.comment_time_text}</span>`;
 
   if (comment.comment_likecount > 0) {
-    commentMeta.innerHTML += `${spacer}<span class="thumb-icon"><img src="/static/img/icon-thumb.svg"> ${comment.comment_likecount}</span>`;
+    let numberFormatted = formatNumbers(comment.comment_likecount)
+    commentMeta.innerHTML += `${spacer}<span class="thumb-icon"><img src="/static/img/icon-thumb.svg"> ${numberFormatted}</span>`;
   }
 
   if (comment.comment_is_favorited) {
