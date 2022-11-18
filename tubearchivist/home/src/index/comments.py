@@ -20,12 +20,17 @@ class Comments:
         self.es_path = f"ta_comment/_doc/{youtube_id}"
         self.json_data = False
         self.config = config
+        self.is_activated = False
         self.comments_format = False
 
     def build_json(self):
         """build json document for es"""
         print(f"{self.youtube_id}: get comments")
         self._check_config()
+
+        if not self.is_activated:
+            return
+
         comments_raw = self.get_yt_comments()
         self.format_comments(comments_raw)
 
@@ -39,6 +44,8 @@ class Comments:
         """read config if not attached"""
         if not self.config:
             self.config = AppConfig().config
+
+        self.is_activated = bool(self.config["downloads"]["comment_max"])
 
     def build_yt_obs(self):
         """
@@ -109,6 +116,9 @@ class Comments:
 
     def upload_comments(self):
         """upload comments to es"""
+        if not self.is_activated:
+            return
+
         _, _ = ElasticWrap(self.es_path).put(self.json_data)
 
         vid_path = f"ta_video/_update/{self.youtube_id}"
@@ -117,7 +127,7 @@ class Comments:
 
     def delete_comments(self):
         """delete comments from es"""
-        _, _ = ElasticWrap(self.es_path).delete()
+        _, _ = ElasticWrap(self.es_path).delete(refresh=True)
 
     def get_es_comments(self):
         """get comments from ES"""
@@ -126,4 +136,19 @@ class Comments:
             print(f"comments: not found {self.youtube_id}")
             return False
 
-        return response
+        return response.get("_source")
+
+    def reindex_comments(self):
+        """update comments from youtube"""
+        if not self.is_activated:
+            return
+
+        self.build_json()
+        es_comments = self.get_es_comments()
+
+        if not self.comments_format and es_comments["comment_comments"]:
+            # don't overwrite comments in es
+            return
+
+        self.delete_comments()
+        self.upload_comments()

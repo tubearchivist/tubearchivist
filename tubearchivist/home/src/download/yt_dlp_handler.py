@@ -147,7 +147,7 @@ class DownloadPostProcess:
             return
 
         for video_id in self.download.videos:
-            comment = Comments(video_id)
+            comment = Comments(video_id, config=self.download.config)
             comment.build_json()
             comment.upload_comments()
 
