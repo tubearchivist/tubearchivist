@@ -9,19 +9,21 @@ from datetime import datetime
 
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap
+from home.src.ta.config import AppConfig
 
 
 class Comments:
     """hold all comments functionality"""
 
-    def __init__(self, youtube_id):
+    def __init__(self, youtube_id, config=False):
         self.youtube_id = youtube_id
         self.es_path = f"ta_comment/_doc/{youtube_id}"
-        self.max_comments = "all,100,all,30"
         self.json_data = False
+        self.config = config
 
     def build_json(self):
         """build json document for es"""
+        self._check_config()
         comments_raw = self.get_yt_comments()
         comments_format = self.format_comments(comments_raw)
 
@@ -31,13 +33,19 @@ class Comments:
             "comment_comments": comments_format,
         }
 
+    def _check_config(self):
+        """read config if not attached"""
+        if not self.config:
+            self.config = AppConfig().config
+
     def build_yt_obs(self):
         """
         get extractor config
         max-comments,max-parents,max-replies,max-replies-per-thread
         """
-        max_comments_list = [i.strip() for i in self.max_comments.split(",")]
-        comment_sort = "top"
+        max_comments = self.config["downloads"]["comment_max"]
+        max_comments_list = [i.strip() for i in max_comments.split(",")]
+        comment_sort = self.config["downloads"]["comment_sort"]
 
         yt_obs = {
             "skip_download": True,
@@ -55,7 +63,7 @@ class Comments:
 
     def get_yt_comments(self):
         """get comments from youtube"""
-        print(f"comments: get comments with format {self.max_comments}")
+        print("comments: get comments")
         yt_obs = self.build_yt_obs()
         info_json = YtWrap(yt_obs).extract(self.youtube_id)
         comments_raw = info_json.get("comments")

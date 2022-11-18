@@ -115,6 +115,24 @@
             </div>
         </div>
         <div class="settings-group">
+            <h2 id="comments">Comments</h2>
+            <div class="settings-item">
+                <p>Download and index comments: <span class="settings-current">{{ config.downloads.comment_max }}</span><br>
+                <i>Follow the yt-dlp max_comments documentation, <a href="https://github.com/yt-dlp/yt-dlp#youtube" target="_blank">max-comments,max-parents,max-replies,max-replies-per-thread</a>:</i><br>
+                <p>Example configurations:</p>
+                <ul>
+                    <li><span class="settings-current">all,100,all,30</span>: Get 100 max-parents and 30 max-replies-per-thread.</li>
+                    <li><span class="settings-current">1000,all,all,50</span>: Get a total of 1000 comments over all, 50 replies per thread.</li>
+                </ul>
+                {{ app_form.downloads_comment_max }}</p>
+            </div>
+            <div class="settings-item">
+                <p>Selected comment sort method: <span class="settings-current">{{ config.downloads.comment_sort }}</span><br>
+                <i>Select how many comments and threads to download:</i><br>
+                {{ app_form.downloads_comment_sort }}</p>
+            </div>
+        </div>
+        <div class="settings-group">
             <h2 id="format">Cookie</h2>
             <div class="settings-item">
                 <p>Import YouTube cookie: <span class="settings-current">{{ config.downloads.cookie_import }}</span><br></p>
