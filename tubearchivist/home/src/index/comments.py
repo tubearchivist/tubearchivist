@@ -23,6 +23,7 @@ class Comments:
 
     def build_json(self):
         """build json document for es"""
+        print(f"{self.youtube_id}: get comments")
         self._check_config()
         comments_raw = self.get_yt_comments()
         comments_format = self.format_comments(comments_raw)
@@ -63,7 +64,6 @@ class Comments:
 
     def get_yt_comments(self):
         """get comments from youtube"""
-        print("comments: get comments")
         yt_obs = self.build_yt_obs()
         info_json = YtWrap(yt_obs).extract(self.youtube_id)
         comments_raw = info_json.get("comments")
