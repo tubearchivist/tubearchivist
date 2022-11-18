@@ -473,6 +473,9 @@
                 "comment_last_refresh": {
                     "type": "date"
                 },
+                "comment_channel_id": {
+                    "type": "keyword"
+                },
                 "comment_comments": {
                     "properties": {
                         "comment_id": {

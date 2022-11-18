@@ -31,12 +31,13 @@ class Comments:
         if not self.is_activated:
             return
 
-        comments_raw = self.get_yt_comments()
+        comments_raw, channel_id = self.get_yt_comments()
         self.format_comments(comments_raw)
 
         self.json_data = {
             "youtube_id": self.youtube_id,
             "comment_last_refresh": int(datetime.now().strftime("%s")),
+            "comment_channel_id": channel_id,
             "comment_comments": self.comments_format,
         }
 
@@ -75,7 +76,8 @@ class Comments:
         yt_obs = self.build_yt_obs()
         info_json = YtWrap(yt_obs).extract(self.youtube_id)
         comments_raw = info_json.get("comments")
-        return comments_raw
+        channel_id = info_json.get("channel_id")
+        return comments_raw, channel_id
 
     def format_comments(self, comments_raw):
         """process comments to match format"""
@@ -141,6 +143,7 @@ class Comments:
 
     def reindex_comments(self):
         """update comments from youtube"""
+        self.check_config()
         if not self.is_activated:
             return
 
