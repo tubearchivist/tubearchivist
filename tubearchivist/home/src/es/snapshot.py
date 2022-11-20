@@ -116,6 +116,7 @@ class ElasticSnapshot:
             "repository": self.REPO,
             "config": {
                 "indices": self.all_indices,
+                "ignore_unavailable": True,
                 "include_global_state": True,
             },
             "retention": {
