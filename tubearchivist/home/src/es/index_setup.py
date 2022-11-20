@@ -384,7 +384,9 @@ def backup_all_indexes(reason):
         index_name = index["index_name"]
         print(f"backup: export in progress for {index_name}")
         if not backup_handler.index_exists(index_name):
+            print(f"skip backup for not yet existing index {index_name}")
             continue
+
         backup_handler.backup_index(index_name)
 
     backup_handler.zip_it()
