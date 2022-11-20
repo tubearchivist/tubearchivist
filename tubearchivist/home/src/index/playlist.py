@@ -41,6 +41,10 @@ class YoutubePlaylist(YouTubeItem):
 
         if scrape or not self.json_data:
             self.get_from_youtube()
+            if not self.youtube_meta:
+                self.json_data = False
+                return
+
             self.process_youtube_meta()
             self.get_entries()
             self.json_data["playlist_entries"] = self.all_members
