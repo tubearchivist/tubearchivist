@@ -842,7 +842,8 @@ video:-webkit-full-screen {
 
 .comments-replies {
     display: none;
-    padding-left: 3rem;
+    padding-left: 1rem;
+    border-left: 1px solid var(--accent-font-light);
     margin-top: 1rem;
 }
 
