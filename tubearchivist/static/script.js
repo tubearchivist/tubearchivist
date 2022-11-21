@@ -1123,17 +1123,47 @@ function writeComments(allComments) {
     if (rootComment.comment_replies) {
       let commentReplyBox = document.createElement('div');
       commentReplyBox.setAttribute('class', 'comments-replies');
-      for (let j = 0; j < rootComment.comment_replies.length; j++) {
+      commentReplyBox.setAttribute('id', rootComment.comment_id + '-replies');
+      let totalReplies = rootComment.comment_replies.length;
+      if (totalReplies > 0) {
+        let replyButton = createReplyButton(rootComment.comment_id + '-replies', totalReplies);
+        commentBox.appendChild(replyButton);
+      }
+      for (let j = 0; j < totalReplies; j++) {
         const commentReply = rootComment.comment_replies[j];
         let commentReplyDiv = createCommentBox(commentReply, false);
         commentReplyBox.appendChild(commentReplyDiv);
       }
-      if (rootComment.comment_replies.length > 0) {
+      if (totalReplies > 0) {
         commentBox.appendChild(commentReplyBox);
       }
     }
     commentsListBox.appendChild(commentBox);
   }
+}
+
+function createReplyButton(replyId, totalReplies) {
+  let replyButton = document.createElement('button');
+  replyButton.innerHTML = `<span id="toggle-icon">+</span> ${totalReplies} replies`;
+  replyButton.setAttribute('data-id', replyId);
+  replyButton.setAttribute('onclick', 'toggleCommentReplies(this)');
+  return replyButton
+}
+
+function toggleCommentReplies(button) {
+
+  let commentReplyId = button.getAttribute("data-id");
+  console.log('toggle comment reply for ' + commentReplyId);
+  let state = document.getElementById(commentReplyId).style.display;
+
+  if (state == "none" || state == false) {
+    document.getElementById(commentReplyId).style.display = "block";
+    button.querySelector("#toggle-icon").innerHTML = "-";
+  } else {
+    document.getElementById(commentReplyId).style.display = "none";
+    button.querySelector("#toggle-icon").innerHTML = "+";
+  }
+
 }
 
 function createCommentBox(comment, isRoot) {

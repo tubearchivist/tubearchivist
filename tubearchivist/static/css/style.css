@@ -829,6 +829,7 @@ video:-webkit-full-screen {
 }
 
 .comments-replies {
+    display: none;
     padding-left: 3rem;
     margin-top: 1rem;
 }
