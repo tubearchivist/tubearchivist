@@ -1147,23 +1147,20 @@ function createReplyButton(replyId, totalReplies) {
   replyButton.innerHTML = `<span id="toggle-icon">+</span> ${totalReplies} replies`;
   replyButton.setAttribute('data-id', replyId);
   replyButton.setAttribute('onclick', 'toggleCommentReplies(this)');
-  return replyButton
+  return replyButton;
 }
 
 function toggleCommentReplies(button) {
-
-  let commentReplyId = button.getAttribute("data-id");
-  console.log('toggle comment reply for ' + commentReplyId);
+  let commentReplyId = button.getAttribute('data-id');
   let state = document.getElementById(commentReplyId).style.display;
 
-  if (state == "none" || state == false) {
-    document.getElementById(commentReplyId).style.display = "block";
-    button.querySelector("#toggle-icon").innerHTML = "-";
+  if (state === 'none' || state === "") {
+    document.getElementById(commentReplyId).style.display = 'block';
+    button.querySelector('#toggle-icon').innerHTML = '-';
   } else {
-    document.getElementById(commentReplyId).style.display = "none";
-    button.querySelector("#toggle-icon").innerHTML = "+";
+    document.getElementById(commentReplyId).style.display = 'none';
+    button.querySelector('#toggle-icon').innerHTML = '+';
   }
-
 }
 
 function createCommentBox(comment, isRoot) {
@@ -1197,7 +1194,7 @@ function createCommentBox(comment, isRoot) {
   commentMeta.innerHTML = `<span>${comment.comment_time_text}</span>`;
 
   if (comment.comment_likecount > 0) {
-    let numberFormatted = formatNumbers(comment.comment_likecount)
+    let numberFormatted = formatNumbers(comment.comment_likecount);
     commentMeta.innerHTML += `${spacer}<span class="thumb-icon"><img src="/static/img/icon-thumb.svg"> ${numberFormatted}</span>`;
   }
 
