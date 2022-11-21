@@ -82,6 +82,8 @@ Edit the following values from that file:
 - under `archivist-es`->`environment`:
   - `"ELASTIC_PASSWORD=verysecret"`: change `verysecret` to match the ELASTIC_PASSWORD you picked above.
 
+**Note:** if you are using podman instead of docker, you will need to make some additional changes to that file, as listed in the [installation docs page](https://github.com/tubearchivist/tubearchivist/blob/master/docs/Installation.md).
+
 By default Docker will store all data, including downloaded data, in its own data-root directory (which you can find by running `docker info` and looking for the "Docker Root Dir"). If you want to use other locations, you can replace the `media:`, `cache:`, `redis:`, and `es:` volume names with absolute paths; if you do, remove them from the `volumes:` list at the bottom of the file.
 
 From a terminal, `cd` into the directory you saved the `docker-compose.yml` file in and run `docker compose up --detach`. The first time you do this it will download the appropriate images, which can take a minute.
