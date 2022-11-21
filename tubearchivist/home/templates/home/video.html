@@ -69,15 +69,24 @@
                     <p class="thumb-icon"><img class="dislike" src="{% static 'img/icon-thumb.svg' %}" alt="thumbs-down">: {{ video.stats.dislike_count|intcomma }}</p>
                 {% endif %}
                 {% if video.stats.average_rating %}
-                    <p class="rating-stars">Rating:
+                    <div class="rating-stars">
                         {% for star in video.stats.average_rating %}
                             <img src="/static/img/icon-star-{{ star }}.svg" alt="{{ star }}">
                         {% endfor %}
-                    </p>
+                    </div>
                 {% endif %}
             </div>
         </div>
     </div>
+    {% if video.tags %}
+        <div class="description-box">
+            <div class="video-tag-box">
+                {% for tag in video.tags %}
+                    <span class="video-tag">{{ tag }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
     {% if video.description %}
         <div class="description-box">
             <p id="text-expand" class="description-text">
