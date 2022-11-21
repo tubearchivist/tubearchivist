@@ -838,6 +838,7 @@ video:-webkit-full-screen {
 
 .comment-box {
     padding-bottom: 1rem;
+    overflow: hidden;
 }
 
 .comments-replies {
