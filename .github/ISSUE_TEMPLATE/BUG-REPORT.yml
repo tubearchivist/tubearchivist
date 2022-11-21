@@ -11,7 +11,7 @@ body:
   - type: checkboxes
     id: latest
     attributes:
-      label: I've read the documentation:
+      label: "I've read the documentation"
       options:
         - label: I'm running the latest version of Tube Archivist and have read the [release notes](https://github.com/tubearchivist/tubearchivist/releases/latest).
           required: true
