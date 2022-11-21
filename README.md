@@ -61,7 +61,7 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 - [Tube Archivist Metrics](https://github.com/tubearchivist/tubearchivist-metrics) to create statistics in Prometheus/OpenMetrics format.
 
 ## Installing and updating
-There's dedicated user-contributed install steps under [docs/Installation.md](./docs/Installation.md) for Unraid, Truenas and Synology which you can use instead of this section if you happen to be using one of those. Otherwise, continue on.
+There's dedicated user-contributed install steps under [docs/Installation.md](./docs/Installation.md) for podman, Unraid, Truenas and Synology which you can use instead of this section if you happen to be using one of those. Otherwise, continue on.
 
 For minimal system requirements, the Tube Archivist stack needs around 2GB of available memory for a small testing setup and around 4GB of available memory for a mid to large sized installation.  
 
@@ -81,8 +81,6 @@ Edit the following values from that file:
   - `TZ`: your time zone. If you don't know yours, you can look it up [here](https://www.timezoneconverter.com/cgi-bin/findzone/findzone).
 - under `archivist-es`->`environment`:
   - `"ELASTIC_PASSWORD=verysecret"`: change `verysecret` to match the ELASTIC_PASSWORD you picked above.
-
-**Note:** if you are using podman instead of docker, you will need to make some additional changes to that file, as listed in the [installation docs page](https://github.com/tubearchivist/tubearchivist/blob/master/docs/Installation.md).
 
 By default Docker will store all data, including downloaded data, in its own data-root directory (which you can find by running `docker info` and looking for the "Docker Root Dir"). If you want to use other locations, you can replace the `media:`, `cache:`, `redis:`, and `es:` volume names with absolute paths; if you do, remove them from the `volumes:` list at the bottom of the file.
 
