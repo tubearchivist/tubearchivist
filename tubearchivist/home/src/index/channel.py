@@ -193,6 +193,9 @@ class YoutubeChannel(YouTubeItem):
         if not self.json_data and fallback:
             self._video_fallback(fallback)
 
+        if not self.json_data:
+            return
+
         self.get_channel_art()
 
     def _video_fallback(self, fallback):

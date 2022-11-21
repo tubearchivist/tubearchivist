@@ -196,6 +196,7 @@ class Reindex:
         channel.get_from_youtube()
         if not channel.json_data:
             channel.deactivate()
+            channel.sync_to_videos()
             return
 
         channel.json_data["channel_subscribed"] = subscribed
