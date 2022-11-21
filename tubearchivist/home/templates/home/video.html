@@ -132,6 +132,12 @@
             </div>
         {% endfor %}
     {% endif %}
+    <div class="description-box">
+        <h3>Similar Videos</h3>
+        <div class="video-list grid grid-3" id="similar-videos">
+        </div>
+        <script>getSimilarVideos('{{ video.youtube_id }}')</script>
+    </div>
     {% if video.comment_count %}
         <div class="comments-section">
             <h3>Comments: {{video.comment_count}}</h3>

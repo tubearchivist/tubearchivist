@@ -793,7 +793,11 @@ function apiRequest(apiEndpoint, method, data) {
   xhttp.setRequestHeader('Authorization', 'Token ' + sessionToken);
   xhttp.setRequestHeader('Content-Type', 'application/json');
   xhttp.send(JSON.stringify(data));
-  return JSON.parse(xhttp.responseText);
+  if (xhttp.status === 404) {
+    return false;
+  } else {
+    return JSON.parse(xhttp.responseText);
+  }
 }
 
 // Gets origin URL
@@ -951,7 +955,7 @@ function createVideo(video, viewStyle) {
   // create video item div from template
   const videoId = video.youtube_id;
   // const mediaUrl = video.media_url;
-  const thumbUrl = '/cache/' + video.vid_thumb_url;
+  // const thumbUrl = '/cache/' + video.vid_thumb_url;
   const videoTitle = video.title;
   const videoPublished = video.published;
   const videoDuration = video.player.duration_str;
@@ -968,7 +972,7 @@ function createVideo(video, viewStyle) {
     <a href="#player" data-id="${videoId}" onclick="createPlayer(this)">
         <div class="video-thumb-wrap ${viewStyle}">
             <div class="video-thumb">
-                <img src="${thumbUrl}" alt="video-thumb">
+                <img src="${video.vid_thumb_url}" alt="video-thumb">
             </div>
             <div class="video-play">
                 <img src="/static/img/icon-play.svg" alt="play-icon">
@@ -1154,7 +1158,7 @@ function toggleCommentReplies(button) {
   let commentReplyId = button.getAttribute('data-id');
   let state = document.getElementById(commentReplyId).style.display;
 
-  if (state === 'none' || state === "") {
+  if (state === 'none' || state === '') {
     document.getElementById(commentReplyId).style.display = 'block';
     button.querySelector('#toggle-icon').innerHTML = '-';
   } else {
@@ -1205,6 +1209,35 @@ function createCommentBox(comment, isRoot) {
   commentBox.appendChild(commentMeta);
 
   return commentBox;
+}
+
+function getSimilarVideos(videoId) {
+  let apiEndpoint = '/api/video/' + videoId + '/similar/';
+  let response = apiRequest(apiEndpoint, 'GET');
+  if (!response) {
+    populateEmpty();
+    return;
+  }
+  let allSimilar = response.data;
+  if (allSimilar.length > 0) {
+    populateSimilar(allSimilar);
+  }
+}
+
+function populateSimilar(allSimilar) {
+  let similarBox = document.getElementById('similar-videos');
+  for (let i = 0; i < allSimilar.length; i++) {
+    const similarRaw = allSimilar[i];
+    let similarDiv = createVideo(similarRaw, 'grid');
+    similarBox.appendChild(similarDiv);
+  }
+}
+
+function populateEmpty() {
+  let similarBox = document.getElementById('similar-videos');
+  let emptyMessage = document.createElement('p');
+  emptyMessage.innerText = 'No similar videos found.';
+  similarBox.appendChild(emptyMessage);
 }
 
 // generic
