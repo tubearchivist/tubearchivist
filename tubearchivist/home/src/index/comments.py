@@ -33,7 +33,10 @@ class Comments:
 
         self._send_notification(notify)
         comments_raw, channel_id = self.get_yt_comments()
-        self.format_comments(comments_raw)
+        if comments_raw:
+            self.format_comments(comments_raw)
+        else:
+            self.comments_format = []
 
         self.json_data = {
             "youtube_id": self.youtube_id,
