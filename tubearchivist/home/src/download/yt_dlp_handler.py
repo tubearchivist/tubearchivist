@@ -146,10 +146,21 @@ class DownloadPostProcess:
         if not self.download.config["downloads"]["comment_max"]:
             return
 
-        for video_id in self.download.videos:
+        total_videos = len(self.download.videos)
+        for idx, video_id in enumerate(self.download.videos):
             comment = Comments(video_id, config=self.download.config)
-            comment.build_json()
+            comment.build_json(notify=(idx, total_videos))
             comment.upload_comments()
+
+        key = "message:download"
+        message = {
+            "status": key,
+            "level": "info",
+            "title": "Download and index comments finished",
+            "message": f"added comments for {total_videos} videos",
+        }
+
+        RedisArchivist().set_message(key, message, expire=4)
 
 
 class VideoDownloader:

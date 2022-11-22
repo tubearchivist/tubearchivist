@@ -56,11 +56,11 @@ class YouTubeItem:
             "ta_channel": "channel_active",
             "ta_playlist": "playlist_active",
         }
-        update_path = f"{self.index_name}/_update/{self.youtube_id}"
+        path = f"{self.index_name}/_update/{self.youtube_id}?refresh=true"
         data = {
             "script": f"ctx._source.{key_match.get(self.index_name)} = false"
         }
-        _, _ = ElasticWrap(update_path).post(data)
+        _, _ = ElasticWrap(path).post(data)
 
     def del_in_es(self):
         """delete item from elastic search"""

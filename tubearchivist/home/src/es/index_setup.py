@@ -100,6 +100,7 @@ class ElasticIndex:
 
     def rebuild_index(self):
         """rebuild with new mapping"""
+        self.create_blank(for_backup=True)
         self.reindex("backup")
         self.delete_index(backup=False)
         self.create_blank()
@@ -126,15 +127,19 @@ class ElasticIndex:
 
         _, _ = ElasticWrap(path).delete()
 
-    def create_blank(self):
+    def create_blank(self, for_backup=False):
         """apply new mapping and settings for blank new index"""
+        path = f"ta_{self.index_name}"
+        if for_backup:
+            path = f"{path}_backup"
+
         data = {}
         if self.expected_set:
             data.update({"settings": self.expected_set})
         if self.expected_map:
             data.update({"mappings": {"properties": self.expected_map}})
 
-        _, _ = ElasticWrap(f"ta_{self.index_name}").put(data)
+        _, _ = ElasticWrap(path).put(data)
 
 
 class BackupCallback:
@@ -384,7 +389,9 @@ def backup_all_indexes(reason):
         index_name = index["index_name"]
         print(f"backup: export in progress for {index_name}")
         if not backup_handler.index_exists(index_name):
+            print(f"skip backup for not yet existing index {index_name}")
             continue
+
         backup_handler.backup_index(index_name)
 
     backup_handler.zip_it()

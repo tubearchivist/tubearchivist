@@ -62,10 +62,13 @@ class ApiBaseView(APIView):
             }
         )
 
-    def get_document_list(self, request):
+    def get_document_list(self, request, pagination=True):
         """get a list of results"""
         print(self.search_base)
-        self.initiate_pagination(request)
+
+        if pagination:
+            self.initiate_pagination(request)
+
         es_handler = ElasticWrap(self.search_base)
         response, status_code = es_handler.get(data=self.data)
         self.response["data"] = SearchProcess(response).process()
@@ -74,8 +77,11 @@ class ApiBaseView(APIView):
         else:
             self.status_code = 404
 
-        self.pagination_handler.validate(response["hits"]["total"]["value"])
-        self.response["paginate"] = self.pagination_handler.pagination
+        if pagination:
+            self.pagination_handler.validate(
+                response["hits"]["total"]["value"]
+            )
+            self.response["paginate"] = self.pagination_handler.pagination
 
 
 class VideoApiView(ApiBaseView):
@@ -158,6 +164,30 @@ class VideoCommentView(ApiBaseView):
         # pylint: disable=unused-argument
         self.get_document(video_id)
 
+        return Response(self.response, status=self.status_code)
+
+
+class VideoSimilarView(ApiBaseView):
+    """resolves to /api/video/<video-id>/similar/
+    GET: return max 3 videos similar to this
+    """
+
+    search_base = "ta_video/_search/"
+
+    def get(self, request, video_id):
+        """get similar videos"""
+        self.data = {
+            "size": 6,
+            "query": {
+                "more_like_this": {
+                    "fields": ["tags", "title"],
+                    "like": {"_id": video_id},
+                    "min_term_freq": 1,
+                    "max_query_terms": 25,
+                }
+            },
+        }
+        self.get_document_list(request, pagination=False)
         return Response(self.response, status=self.status_code)
 
 

@@ -783,6 +783,18 @@ video:-webkit-full-screen {
     display: flex;
 }
 
+.video-tag-box {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.video-tag {
+    padding: 5px 10px;
+    margin: 5px;
+    border: 1px solid var(--accent-font-light);
+}
+
 .thumb-icon img,
 .rating-stars img {
     width: 20px;
@@ -826,10 +838,13 @@ video:-webkit-full-screen {
 
 .comment-box {
     padding-bottom: 1rem;
+    overflow: hidden;
 }
 
 .comments-replies {
-    padding-left: 3rem;
+    display: none;
+    padding-left: 1rem;
+    border-left: 1px solid var(--accent-font-light);
     margin-top: 1rem;
 }
 

@@ -37,8 +37,7 @@
                     "type": "text"
                 },
                 "channel_last_refresh": {
-                    "type": "date",
-                    "format": "epoch_second"
+                    "type": "date"
                 },
                 "channel_overwrites": {
                     "properties": {
@@ -120,8 +119,7 @@
                             "type": "text"
                         },
                         "channel_last_refresh": {
-                            "type": "date",
-                            "format": "epoch_second"
+                            "type": "date"
                         },
                         "channel_overwrites": {
                             "properties": {
