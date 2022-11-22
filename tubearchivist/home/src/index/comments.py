@@ -10,6 +10,7 @@ from datetime import datetime
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap
 from home.src.ta.config import AppConfig
+from home.src.ta.ta_redis import RedisArchivist
 
 
 class Comments:
@@ -23,14 +24,14 @@ class Comments:
         self.is_activated = False
         self.comments_format = False
 
-    def build_json(self):
+    def build_json(self, notify=False):
         """build json document for es"""
         print(f"{self.youtube_id}: get comments")
         self.check_config()
-
         if not self.is_activated:
             return
 
+        self._send_notification(notify)
         comments_raw, channel_id = self.get_yt_comments()
         self.format_comments(comments_raw)
 
@@ -47,6 +48,23 @@ class Comments:
             self.config = AppConfig().config
 
         self.is_activated = bool(self.config["downloads"]["comment_max"])
+
+    @staticmethod
+    def _send_notification(notify):
+        """send notification for download post process message"""
+        if not notify:
+            return
+
+        key = "message:download"
+        idx, total_videos = notify
+        message = {
+            "status": key,
+            "level": "info",
+            "title": "Download and index comments",
+            "message": f"Progress: {idx + 1}/{total_videos}",
+        }
+
+        RedisArchivist().set_message(key, message)
 
     def build_yt_obs(self):
         """
