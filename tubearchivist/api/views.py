@@ -43,7 +43,6 @@ class ApiBaseView(APIView):
     def get_document(self, document_id):
         """get single document from es"""
         path = f"{self.search_base}{document_id}"
-        print(path)
         response, status_code = ElasticWrap(path).get()
         try:
             self.response["data"] = SearchProcess(response).process()
@@ -64,8 +63,6 @@ class ApiBaseView(APIView):
 
     def get_document_list(self, request, pagination=True):
         """get a list of results"""
-        print(self.search_base)
-
         if pagination:
             self.initiate_pagination(request)
 
@@ -437,7 +434,6 @@ class DownloadApiListView(ApiBaseView):
     @staticmethod
     def post(request):
         """add list of videos to download queue"""
-        print(f"request meta data: {request.META}")
         data = request.data
         try:
             to_add = data["data"]
@@ -524,10 +520,7 @@ class TaskApiView(ApiBaseView):
 
     def post(self, request):
         """handle post request"""
-
-        data = request.data
-        print(data)
-        response = TaskHandler(data).run_task()
+        response = TaskHandler(request.data).run_task()
 
         return Response(response)
 
@@ -662,6 +655,6 @@ class SearchView(ApiBaseView):
             return Response(
                 {"message": "no search query specified"}, status=400
             )
-        print("searching for: " + search_query)
+
         search_results = SearchForm().multi_search(search_query)
         return Response(search_results)
