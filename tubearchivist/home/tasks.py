@@ -25,7 +25,7 @@ from home.src.index.filesystem import (
     scan_filesystem,
 )
 from home.src.ta.config import AppConfig, ScheduleBuilder
-from home.src.ta.helper import UrlListParser
+from home.src.ta.helper import UrlListParser, clear_dl_cache
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 
 CONFIG = AppConfig().config
@@ -192,11 +192,7 @@ def kill_dl(task_id):
     _ = RedisArchivist().del_message("dl_queue_id")
     RedisQueue().clear()
 
-    # clear cache
-    cache_dir = os.path.join(CONFIG["application"]["cache_dir"], "download")
-    for cached in os.listdir(cache_dir):
-        to_delete = os.path.join(cache_dir, cached)
-        os.remove(to_delete)
+    clear_dl_cache(CONFIG)
 
     # notify
     mess_dict = {

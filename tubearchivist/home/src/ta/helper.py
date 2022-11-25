@@ -3,6 +3,7 @@ Loose collection of helper functions
 - don't import AppConfig class here to avoid circular imports
 """
 
+import os
 import random
 import re
 import string
@@ -115,6 +116,15 @@ def time_parser(timestamp):
 
     hours, minutes, seconds = timestamp.split(":", maxsplit=3)
     return int(hours) * 60 * 60 + int(minutes) * 60 + float(seconds)
+
+
+def clear_dl_cache(config):
+    """clear leftover files from dl cache"""
+    print("clear download cache")
+    cache_dir = os.path.join(config["application"]["cache_dir"], "download")
+    for cached in os.listdir(cache_dir):
+        to_delete = os.path.join(cache_dir, cached)
+        os.remove(to_delete)
 
 
 class UrlListParser:
