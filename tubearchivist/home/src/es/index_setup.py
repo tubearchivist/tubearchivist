@@ -7,6 +7,8 @@ functionality:
 
 from home.src.es.backup import ElasticBackup
 from home.src.es.connect import ElasticWrap
+from home.src.es.snapshot import ElasticSnapshot
+from home.src.ta.config import AppConfig
 from home.src.ta.helper import get_mapping
 
 
@@ -197,5 +199,12 @@ class ElasitIndexWrap:
         if self.backup_run:
             return
 
-        ElasticBackup(reason="update").backup_all_indexes()
+        config = AppConfig().config
+        if config["application"]["enable_snapshot"]:
+            # take snapshot if enabled
+            ElasticSnapshot().take_snapshot_now(wait=True)
+        else:
+            # fallback to json backup
+            ElasticBackup(reason="update").backup_all_indexes()
+
         self.backup_run = True
