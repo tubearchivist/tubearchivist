@@ -3,6 +3,7 @@ Loose collection of helper functions
 - don't import AppConfig class here to avoid circular imports
 """
 
+import json
 import os
 import random
 import re
@@ -125,6 +126,14 @@ def clear_dl_cache(config):
     for cached in os.listdir(cache_dir):
         to_delete = os.path.join(cache_dir, cached)
         os.remove(to_delete)
+
+
+def get_mapping():
+    """read index_mapping.json and get expected mapping and settings"""
+    with open("home/src/es/index_mapping.json", "r", encoding="utf-8") as f:
+        index_config = json.load(f).get("index_config")
+
+    return index_config
 
 
 class UrlListParser:

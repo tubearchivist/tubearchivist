@@ -17,7 +17,8 @@ from home.src.download.subscriptions import (
 )
 from home.src.download.thumbnails import ThumbFilesystem, ThumbValidator
 from home.src.download.yt_dlp_handler import VideoDownloader
-from home.src.es.index_setup import backup_all_indexes, restore_from_backup
+from home.src.es.backup import ElasticBackup
+from home.src.es.index_setup import ElasitIndexWrap
 from home.src.index.channel import YoutubeChannel
 from home.src.index.filesystem import (
     ImportFolderScanner,
@@ -168,7 +169,7 @@ def run_backup(reason="auto"):
     try:
         have_lock = my_lock.acquire(blocking=False)
         if have_lock:
-            backup_all_indexes(reason)
+            ElasticBackup(reason=reason).backup_all_indexes()
         else:
             print("Did not acquire lock for backup task.")
     finally:
@@ -180,7 +181,8 @@ def run_backup(reason="auto"):
 @shared_task
 def run_restore_backup(filename):
     """called from settings page, dump backup to zip file"""
-    restore_from_backup(filename)
+    ElasitIndexWrap().reset()
+    ElasticBackup().restore(filename)
     print("index restore finished")
 
 

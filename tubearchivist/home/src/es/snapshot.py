@@ -8,7 +8,7 @@ from os import environ
 from zoneinfo import ZoneInfo
 
 from home.src.es.connect import ElasticWrap
-from home.src.es.index_setup import get_mapping
+from home.src.ta.helper import get_mapping
 
 
 class ElasticSnapshot:
