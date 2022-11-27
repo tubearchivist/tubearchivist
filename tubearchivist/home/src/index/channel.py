@@ -421,7 +421,8 @@ class YoutubeChannel(YouTubeItem):
                 to_write[key] = False
                 continue
             if value in [0, "0"]:
-                del to_write[key]
+                if key in to_write:
+                    del to_write[key]
                 continue
             if value == "1":
                 to_write[key] = True

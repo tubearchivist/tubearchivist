@@ -16,8 +16,8 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views import View
 from home.src.download.yt_dlp_base import CookieHandler
+from home.src.es.backup import ElasticBackup
 from home.src.es.connect import ElasticWrap
-from home.src.es.index_setup import get_available_backups
 from home.src.es.snapshot import ElasticSnapshot
 from home.src.frontend.api_calls import PostData
 from home.src.frontend.forms import (
@@ -939,7 +939,7 @@ class SettingsView(View):
         config_handler = AppConfig(request.user.id)
         colors = config_handler.colors
 
-        available_backups = get_available_backups()
+        available_backups = ElasticBackup().get_all_backup_files()
         user_form = UserSettingsForm()
         app_form = ApplicationSettingsForm()
         scheduler_form = SchedulerSettingsForm()

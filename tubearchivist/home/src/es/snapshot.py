@@ -5,10 +5,11 @@ functionality:
 
 from datetime import datetime
 from os import environ
+from time import sleep
 from zoneinfo import ZoneInfo
 
 from home.src.es.connect import ElasticWrap
-from home.src.es.index_setup import get_mapping
+from home.src.ta.helper import get_mapping
 
 
 class ElasticSnapshot:
@@ -142,14 +143,41 @@ class ElasticSnapshot:
         print("snapshot: last snapshot is up-to-date")
         return outdated
 
-    def take_snapshot_now(self):
+    def take_snapshot_now(self, wait=False):
         """execute daily snapshot now"""
         path = f"_slm/policy/{self.POLICY}/_execute"
         response, statuscode = ElasticWrap(path).post()
         if statuscode == 200:
             print(f"snapshot: executing now: {response}")
 
+        if wait:
+            self._wait_for_snapshot(response["snapshot_name"])
+
         return response
+
+    def _wait_for_snapshot(self, snapshot_name):
+        """return after snapshot_name completes"""
+        path = f"_snapshot/{self.REPO}/{snapshot_name}"
+
+        while True:
+            # wait for task to be created
+            sleep(1)
+            _, statuscode = ElasticWrap(path).get()
+            if statuscode == 200:
+                break
+
+        while True:
+            # wait for snapshot success
+            response, statuscode = ElasticWrap(path).get()
+            snapshot_state = response["snapshots"][0]["state"]
+            if snapshot_state == "SUCCESS":
+                break
+
+            print(f"snapshot: {snapshot_name} in state {snapshot_state}")
+            print("snapshot: wait to complete")
+            sleep(5)
+
+        print(f"snapshot: completed - {response}")
 
     def get_snapshot_stats(self):
         """get snapshot info for frontend"""

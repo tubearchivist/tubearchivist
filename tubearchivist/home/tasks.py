@@ -17,7 +17,8 @@ from home.src.download.subscriptions import (
 )
 from home.src.download.thumbnails import ThumbFilesystem, ThumbValidator
 from home.src.download.yt_dlp_handler import VideoDownloader
-from home.src.es.index_setup import backup_all_indexes, restore_from_backup
+from home.src.es.backup import ElasticBackup
+from home.src.es.index_setup import ElasitIndexWrap
 from home.src.index.channel import YoutubeChannel
 from home.src.index.filesystem import (
     ImportFolderScanner,
@@ -25,7 +26,7 @@ from home.src.index.filesystem import (
     scan_filesystem,
 )
 from home.src.ta.config import AppConfig, ScheduleBuilder
-from home.src.ta.helper import UrlListParser
+from home.src.ta.helper import UrlListParser, clear_dl_cache
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 
 CONFIG = AppConfig().config
@@ -168,7 +169,7 @@ def run_backup(reason="auto"):
     try:
         have_lock = my_lock.acquire(blocking=False)
         if have_lock:
-            backup_all_indexes(reason)
+            ElasticBackup(reason=reason).backup_all_indexes()
         else:
             print("Did not acquire lock for backup task.")
     finally:
@@ -180,7 +181,8 @@ def run_backup(reason="auto"):
 @shared_task
 def run_restore_backup(filename):
     """called from settings page, dump backup to zip file"""
-    restore_from_backup(filename)
+    ElasitIndexWrap().reset()
+    ElasticBackup().restore(filename)
     print("index restore finished")
 
 
@@ -192,11 +194,7 @@ def kill_dl(task_id):
     _ = RedisArchivist().del_message("dl_queue_id")
     RedisQueue().clear()
 
-    # clear cache
-    cache_dir = os.path.join(CONFIG["application"]["cache_dir"], "download")
-    for cached in os.listdir(cache_dir):
-        to_delete = os.path.join(cache_dir, cached)
-        os.remove(to_delete)
+    clear_dl_cache(CONFIG)
 
     # notify
     mess_dict = {

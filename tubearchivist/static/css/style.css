@@ -841,6 +841,10 @@ video:-webkit-full-screen {
     overflow: hidden;
 }
 
+.comment-box h3 {
+    line-break: anywhere;
+}
+
 .comments-replies {
     display: none;
     padding-left: 1rem;

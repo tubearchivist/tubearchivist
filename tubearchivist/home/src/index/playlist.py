@@ -80,12 +80,12 @@ class YoutubePlaylist(YouTubeItem):
                 downloaded = entry["id"] in self.all_youtube_ids
             else:
                 downloaded = False
-            if not entry["uploader"]:
+            if not entry["channel"]:
                 continue
             to_append = {
                 "youtube_id": entry["id"],
                 "title": entry["title"],
-                "uploader": entry["uploader"],
+                "uploader": entry["channel"],
                 "idx": idx,
                 "downloaded": downloaded,
             }
