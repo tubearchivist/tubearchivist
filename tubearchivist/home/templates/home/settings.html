@@ -77,7 +77,7 @@
                 <ul>
                     <li><span class="settings-current">bestvideo[height<=720]+bestaudio/best[height<=720]</span>: best audio and max video height of 720p.</li>
                     <li><span class="settings-current">bestvideo[height<=1080]+bestaudio/best[height<=1080]</span>: best audio and max video height of 1080p.</li>
-                    <li><span class="settings-current">bestvideo[height<=1080][VCODEC*=avc1]+bestaudio[ACODEC*=mp4a]/mp4</span>: Max 1080p video height with iOS compatible video and audio codecs.</li>
+                    <li><span class="settings-current">bestvideo[height<=1080][vcodec*=avc1]+bestaudio[acodec*=mp4a]/mp4</span>: Max 1080p video height with iOS compatible video and audio codecs.</li>
                     <li><span class="settings-current">0</span>: deactivate and download the best quality possible as decided by yt-dlp.</li>
                 </ul>
                 <i>Make sure your custom format gets merged into a single file. Check out the <a href="https://github.com/yt-dlp/yt-dlp#format-selection" target="_blank">documentation</a> for valid configurations.</i><br>
