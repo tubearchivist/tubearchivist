@@ -13,6 +13,7 @@ Note:
 - [Video List](#video-list-view)
 - [Video Single](#video-item-view)
 - [Video Comments](#video-comment-view)
+- [Video Similar](#video-similar-view)
 - [Video Single Progress](#video-progress-view)
 - [Video Single Sponsorblock](#sponsor-block-view) WIP
 
@@ -81,6 +82,9 @@ Pass page number as a query parameter: `page=2`. Defaults to *0*, `page=1` is re
 
 ## Video Comment View
 /api/video/\<video_id>/comment/  
+
+## Video Similar View
+/api/video/\<video_id>/similar/  
 
 ## Video Progress View
 /api/video/\<video_id>/progress  
