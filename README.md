@@ -211,16 +211,16 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Implement [Apprise](https://github.com/caronc/apprise) for notifications ([#97](https://github.com/tubearchivist/tubearchivist/issues/97))
 - [ ] User created playlists, random and repeat controls ([#108](https://github.com/tubearchivist/tubearchivist/issues/108), [#220](https://github.com/tubearchivist/tubearchivist/issues/220))
 - [ ] Auto play or play next link ([#226](https://github.com/tubearchivist/tubearchivist/issues/226))
-- [ ] Show similar videos on video page
 - [ ] Multi language support
 - [ ] Show total video downloaded vs total videos available in channel
 - [ ] Add statistics of index
 - [ ] Download speed schedule ([#198](https://github.com/tubearchivist/tubearchivist/issues/198))
 - [ ] Auto ignore videos by keyword ([#163](https://github.com/tubearchivist/tubearchivist/issues/163))
 - [ ] Custom searchable notes to videos, channels, playlists ([#144](https://github.com/tubearchivist/tubearchivist/issues/144))
-- [ ] Download video comments
 
 Implemented:
+- [X] Download video comments [2022-11-30]
+- [X] Show similar videos on video page [2022-11-30]
 - [X] Implement complete offline media file import from json file [2022-08-20]
 - [X] Filter and query in search form, search by url query [2022-07-23]
 - [X] Make items in grid row configurable to use more of the screen [2022-06-04]
