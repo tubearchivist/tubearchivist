@@ -63,7 +63,7 @@ There is four additional settings in the "show more settings" area, but don't re
 ![enter image description here](https://i.imgur.com/oLsmwBZ.png))
 It's finally time to set up TubeArchivist!
 
- - `HOST:`This is a list of IP addresses that you will host TA from. Example, 192.168.0.14 is the IP address of my Unraid server. If I was going to access TA from a VPN, or domain name, I'd put those next to my host IP with just a space seperating the different addresses. More information [here.](https://github.com/tubearchivist/tubearchivist#installing-and-updating)
+ - `HOST:`This is a list of IP addresses that you will host TA from. Example, 192.168.0.14 is the IP address of my Unraid server. If I was going to access TA from a VPN, or domain name, I'd put those next to my host IP with just a space separating the different addresses. More information [here.](https://github.com/tubearchivist/tubearchivist#installing-and-updating)
 
 
  - `Port:`Again, make sure that you have no port conflicts on 8000.
