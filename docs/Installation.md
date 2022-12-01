@@ -200,9 +200,9 @@ Once all of the folders have been created, it should have a folder structure wit
 4. Search for the following `images` and download them. Follow the recommended versions for each of the images.
   - `redislabs/rejson`
 ![Synology - Redis Image Search](assets/Synology_0.2.0_Docker-Redis-Search.png)
-  - `tubearchivist/tubearchivist-es`
+  - `bbilly1/tubearchivist-es`
 ![Synology - ElasticSearch Image Search](assets/Synology_0.2.0_Docker-ES-Search.png)
-  - `tubearchivist/tubearchivist`
+  - `bbilly1/tubearchivist`
 ![Synology - TubeArchivist Image Search](assets/Synology_0.2.0_Docker-TA-Search.png)
 
 
