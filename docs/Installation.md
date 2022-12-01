@@ -45,14 +45,14 @@ Tube Archivist, and all if it's dependencies are located in the [community appli
 
 ### Step 1: Install  `TubeArchivist-RedisJSON`
 
-![enter image description here](https://i.imgur.com/iGJZKYd.png))
+![TubeArchivist-RedisJSON](https://i.imgur.com/iGJZKYd.png)
 This is the easiest container to setup of the thee, just make sure that you do not have any port conflicts, and that your `/data` is mounted to the correct path. The other containers will map to the same root directory (/mnt/user/appdata/TubeArchivist).
 
 If you need to install `TubeArchivist-RedisJSON`on a different port, you'll have to follow [these steps](https://github.com/tubearchivist/tubearchivist#redis-on-a-custom-port) later on when installing the `TubeArchivist` container
 
 
 ### Step 2: Install  `TubeArchivist-ES`
-![enter image description here](https://i.imgur.com/RC38b3u.png))
+![TubeArchivist-ES](https://i.imgur.com/RC38b3u.png)
 ElasticSeach is also pretty easy to setup. Again, make sure you have no port conflicts, make sure that you mapped the ElasticSearch Data to the same root directory as `RedisJSON` (/mnt/user/appdata/TubeArchivist), and make sure to change the default password to something more secure. 
 
 There is four additional settings in the "show more settings" area, but don't require any changes.
@@ -60,7 +60,7 @@ There is four additional settings in the "show more settings" area, but don't re
 
 ### Step 3: Install  `TubeArchivist`
 
-![enter image description here](https://i.imgur.com/oLsmwBZ.png))
+![TubeArchivist](https://i.imgur.com/oLsmwBZ.png)
 It's finally time to set up TubeArchivist!
 
  - `HOST:`This is a list of IP addresses that you will host TA from. Example, 192.168.0.14 is the IP address of my Unraid server. If I was going to access TA from a VPN, or domain name, I'd put those next to my host IP with just a space separating the different addresses. More information [here.](https://github.com/tubearchivist/tubearchivist#installing-and-updating)
