@@ -171,6 +171,9 @@ class Comments:
         self.build_json()
         es_comments = self.get_es_comments()
 
+        if not self.comments_format:
+            return
+
         if not self.comments_format and es_comments["comment_comments"]:
             # don't overwrite comments in es
             return
