@@ -285,4 +285,4 @@ Once all of the folders have been created, it should have a folder structure wit
 <!-- This section is a Work In Progress -->
 
 ### From there, you should be able to start up your containers and you're good to go!
-If you're still having trouble, join us on [discord](https://discord.gg/AFwz8nE7BK) and come to the #support channel.
+If you're still having trouble, join us on [discord](https://discord.gg/gkWMk9Qupk) and come to the #support channel.
