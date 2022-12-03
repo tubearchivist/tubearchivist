@@ -39,5 +39,5 @@ You can flip the view by activating **Show Only Ignored Videos**. This will show
 Every video in the ignored list has two buttons:
 - **Forget**: This will delete the item form the ignored list.
 - **Add to Queue**: This will add the ignored video back to the download queue.  
-
-You can delete your download queue from the [Settings](Settings#actions) page.
+ 
+You can delete your download queue from the [Settings](Settings#actions) page.   sdf
