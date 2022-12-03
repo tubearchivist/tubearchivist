@@ -2,8 +2,10 @@
 {% block content %}
 {% load static %}
 {% load humanize %}
-<div class="video-main">
-    <div class="video-modal"><span class="video-modal-text"></span></div>
+<div id="player" class="player-wrapper">
+    <div class="video-main">
+        <div class="video-modal"><span class="video-modal-text"></span></div>
+    </div>
 </div>
 <div class="notifications" id="notifications"></div>
 <div class="sponsorblock" id="sponsorblock">
@@ -69,15 +71,24 @@
                     <p class="thumb-icon"><img class="dislike" src="{% static 'img/icon-thumb.svg' %}" alt="thumbs-down">: {{ video.stats.dislike_count|intcomma }}</p>
                 {% endif %}
                 {% if video.stats.average_rating %}
-                    <p class="rating-stars">Rating:
+                    <div class="rating-stars">
                         {% for star in video.stats.average_rating %}
                             <img src="/static/img/icon-star-{{ star }}.svg" alt="{{ star }}">
                         {% endfor %}
-                    </p>
+                    </div>
                 {% endif %}
             </div>
         </div>
     </div>
+    {% if video.tags %}
+        <div class="description-box">
+            <div class="video-tag-box">
+                {% for tag in video.tags %}
+                    <span class="video-tag">{{ tag }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
     {% if video.description %}
         <div class="description-box">
             <p id="text-expand" class="description-text">
@@ -122,6 +133,20 @@
                 </div>
             </div>
         {% endfor %}
+    {% endif %}
+    <div class="description-box">
+        <h3>Similar Videos</h3>
+        <div class="video-list grid grid-3" id="similar-videos">
+        </div>
+        <script>getSimilarVideos('{{ video.youtube_id }}')</script>
+    </div>
+    {% if video.comment_count %}
+        <div class="comments-section">
+            <h3>Comments: {{video.comment_count}}</h3>
+            <div id="comments-list" class="comments-list">
+            </div>
+        </div>
+        <script>getComments('{{ video.youtube_id }}')</script>
     {% endif %}
 </div>
 <script>

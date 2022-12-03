@@ -5,9 +5,10 @@ import sys
 
 from django.apps import AppConfig
 from home.src.es.connect import ElasticWrap
-from home.src.es.index_setup import index_check
+from home.src.es.index_setup import ElasitIndexWrap
 from home.src.es.snapshot import ElasticSnapshot
 from home.src.ta.config import AppConfig as ArchivistConfig
+from home.src.ta.helper import clear_dl_cache
 from home.src.ta.ta_redis import RedisArchivist
 
 
@@ -27,10 +28,11 @@ class StartupCheck:
         print("run startup checks")
         self.es_version_check()
         self.release_lock()
-        index_check()
         self.sync_redis_state()
         self.set_redis_conf()
+        ElasitIndexWrap().setup()
         self.make_folders()
+        clear_dl_cache(self.config_handler.config)
         self.snapshot_check()
         self.set_has_run()
 

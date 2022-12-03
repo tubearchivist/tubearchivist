@@ -61,11 +61,11 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 - [Tube Archivist Metrics](https://github.com/tubearchivist/tubearchivist-metrics) to create statistics in Prometheus/OpenMetrics format.
 
 ## Installing and updating
-There's dedicated user-contributed install steps under [docs/Installation.md](./docs/Installation.md) for Unraid, Truenas and Synology which you can use instead of this section if you happen to be using one of those. Otherwise, continue on.
+There's dedicated user-contributed install steps under [docs/Installation.md](./docs/Installation.md) for podman, Unraid, Truenas and Synology which you can use instead of this section if you happen to be using one of those. Otherwise, continue on.
 
 For minimal system requirements, the Tube Archivist stack needs around 2GB of available memory for a small testing setup and around 4GB of available memory for a mid to large sized installation.  
 
-Note for arm64 hosts: The Tube Archivist container is multi arch, so is Elasticsearch. RedisJSON doesn't offer arm builds, but you can use the image `bbilly1/rejson` (an unofficial rebuild for arm64) instead of [the official one](https://github.com/tubearchivist/tubearchivist/blob/4af12aee15620e330adf3624c984c3acf6d0ac8b/docker-compose.yml#L27).
+Note for arm64 hosts: The Tube Archivist container is multi arch, so is Elasticsearch. RedisJSON doesn't offer arm builds, but you can use the image `bbilly1/rejson`, an unofficial rebuild for arm64.
 
 This project requires docker. Ensure it is installed and running on your system.
 
@@ -211,16 +211,16 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Implement [Apprise](https://github.com/caronc/apprise) for notifications ([#97](https://github.com/tubearchivist/tubearchivist/issues/97))
 - [ ] User created playlists, random and repeat controls ([#108](https://github.com/tubearchivist/tubearchivist/issues/108), [#220](https://github.com/tubearchivist/tubearchivist/issues/220))
 - [ ] Auto play or play next link ([#226](https://github.com/tubearchivist/tubearchivist/issues/226))
-- [ ] Show similar videos on video page
 - [ ] Multi language support
 - [ ] Show total video downloaded vs total videos available in channel
 - [ ] Add statistics of index
 - [ ] Download speed schedule ([#198](https://github.com/tubearchivist/tubearchivist/issues/198))
 - [ ] Auto ignore videos by keyword ([#163](https://github.com/tubearchivist/tubearchivist/issues/163))
 - [ ] Custom searchable notes to videos, channels, playlists ([#144](https://github.com/tubearchivist/tubearchivist/issues/144))
-- [ ] Download video comments
 
 Implemented:
+- [X] Download video comments [2022-11-30]
+- [X] Show similar videos on video page [2022-11-30]
 - [X] Implement complete offline media file import from json file [2022-08-20]
 - [X] Filter and query in search form, search by url query [2022-07-23]
 - [X] Make items in grid row configurable to use more of the screen [2022-06-04]

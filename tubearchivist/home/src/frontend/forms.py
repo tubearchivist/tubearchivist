@@ -92,6 +92,12 @@ class ApplicationSettingsForm(forms.Form):
         ("1", "enable subtitle index"),
     ]
 
+    COMMENT_SORT_CHOICES = [
+        ("", "-- change comments sort settings --"),
+        ("top", "sort comments by top"),
+        ("new", "sort comments by new"),
+    ]
+
     COOKIE_IMPORT_CHOICES = [
         ("", "-- change cookie settings"),
         ("0", "disable cookie"),
@@ -119,6 +125,10 @@ class ApplicationSettingsForm(forms.Form):
     )
     downloads_subtitle_index = forms.ChoiceField(
         widget=forms.Select, choices=SUBTITLE_INDEX_CHOICES, required=False
+    )
+    downloads_comment_max = forms.CharField(required=False)
+    downloads_comment_sort = forms.ChoiceField(
+        widget=forms.Select, choices=COMMENT_SORT_CHOICES, required=False
     )
     downloads_cookie_import = forms.ChoiceField(
         widget=forms.Select, choices=COOKIE_IMPORT_CHOICES, required=False

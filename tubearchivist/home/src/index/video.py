@@ -11,6 +11,7 @@ import requests
 from django.conf import settings
 from home.src.es.connect import ElasticWrap
 from home.src.index import channel as ta_channel
+from home.src.index import comments as ta_comments
 from home.src.index import playlist as ta_playlist
 from home.src.index.generic import YouTubeItem
 from home.src.index.subtitle import YoutubeSubtitle
@@ -302,6 +303,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         self.del_in_playlists()
         self.del_in_es()
         self.delete_subtitles()
+        self.delete_comments()
 
     def del_in_playlists(self):
         """remove downloaded in playlist"""
@@ -325,6 +327,13 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         """delete indexed subtitles"""
         print(f"{self.youtube_id}: delete subtitles")
         YoutubeSubtitle(self).delete(subtitles=subtitles)
+
+    def delete_comments(self):
+        """delete comments from es"""
+        comments = ta_comments.Comments(self.youtube_id, config=self.config)
+        comments.check_config()
+        if comments.is_activated:
+            comments.delete_comments()
 
     def _get_ryd_stats(self):
         """get optional stats from returnyoutubedislikeapi.com"""

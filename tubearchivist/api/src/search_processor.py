@@ -48,6 +48,8 @@ class SearchProcess:
             processed = self._process_playlist(result["_source"])
         if index == "ta_download":
             processed = self._process_download(result["_source"])
+        if index == "ta_comment":
+            processed = self._process_comment(result["_source"])
 
         return processed
 
@@ -123,3 +125,17 @@ class SearchProcess:
             }
         )
         return dict(sorted(download_dict.items()))
+
+    def _process_comment(self, comment_dict):
+        """run on all comments, create reply thread"""
+        all_comments = comment_dict["comment_comments"]
+        processed_comments = []
+
+        for comment in all_comments:
+            if comment["comment_parent"] == "root":
+                comment.update({"comment_replies": []})
+                processed_comments.append(comment)
+            else:
+                processed_comments[-1]["comment_replies"].append(comment)
+
+        return processed_comments

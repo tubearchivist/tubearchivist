@@ -32,6 +32,15 @@ Additional settings passed to yt-dlp.
 - **Source Settings**: User created subtitles are provided from the uploader and are usually the video script. Auto generated is from YouTube, quality varies, particularly for auto translated tracks.
 - **Index Settings**: Enabling subtitle indexing will add the lines to Elasticsearch and will make subtitles searchable. This will increase the index size and is not recommended on low-end hardware.
 
+## Comments
+- **Download and index comments**: Set your configuration for downloading and indexing comments. This takes the same values as documented in the `max_comments` section for the youtube extractor of [yt-dlp](https://github.com/yt-dlp/yt-dlp#youtube). Add without space between the four different fields: *max-comments,max-parents,max-replies,max-replies-per-thread*. Example:
+  - `all,100,all,30`: Get 100 max-parents and 30 max-replies-per-thread.
+  - `1000,all,all,50`: Get a total of 1000 comments over all, 50 replies per thread.
+- **Comment sort method**: Change sort method between *top* or *new*. The default is *top*, as decided by YouTube.
+- The [Refresh Metadata](#refresh-metadata) background task will get comments from your already archived videos, spreading the requests out over time.  
+
+Archiving comments is slow as only very few comments get returned per request with yt-dlp. Choose your configuration above wisely. Tube Archivist will download comments after the download queue finishes, your videos will be already available while the comments are getting downloaded.
+
 ## Cookie
 Importing your YouTube Cookie into Tube Archivist allows yt-dlp to bypass age restrictions, gives access to private videos and your *watch later* or *liked videos*.
 

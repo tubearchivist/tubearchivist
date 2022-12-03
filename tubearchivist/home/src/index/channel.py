@@ -50,7 +50,7 @@ class ChannelScraper:
         url = f"https://www.youtube.com/channel/{self.channel_id}/about?hl=en"
         cookies = {"CONSENT": "YES+xxxxxxxxxxxxxxxxxxxxxxxxxxx"}
         response = requests.get(
-            url, cookies=cookies, headers=requests_headers()
+            url, cookies=cookies, headers=requests_headers(), timeout=10
         )
         if response.ok:
             channel_page = response.text
@@ -193,6 +193,9 @@ class YoutubeChannel(YouTubeItem):
         if not self.json_data and fallback:
             self._video_fallback(fallback)
 
+        if not self.json_data:
+            return
+
         self.get_channel_art()
 
     def _video_fallback(self, fallback):
@@ -275,6 +278,15 @@ class YoutubeChannel(YouTubeItem):
         }
         _, _ = ElasticWrap("ta_video/_delete_by_query").post(data)
 
+    def delete_es_comments(self):
+        """delete all comments from this channel"""
+        data = {
+            "query": {
+                "term": {"comment_channel_id": {"value": self.youtube_id}}
+            }
+        }
+        _, _ = ElasticWrap("ta_comment/_delete_by_query").post(data)
+
     def delete_playlists(self):
         """delete all indexed playlist from es"""
         all_playlists = self.get_indexed_playlists()
@@ -301,6 +313,7 @@ class YoutubeChannel(YouTubeItem):
         self.delete_playlists()
         print(f"{self.youtube_id}: delete indexed videos")
         self.delete_es_videos()
+        self.delete_es_comments()
         self.del_in_es()
 
     def index_channel_playlists(self):
@@ -408,7 +421,8 @@ class YoutubeChannel(YouTubeItem):
                 to_write[key] = False
                 continue
             if value in [0, "0"]:
-                del to_write[key]
+                if key in to_write:
+                    del to_write[key]
                 continue
             if value == "1":
                 to_write[key] = True

@@ -287,7 +287,7 @@ function resetToken() {
   document.getElementById('text-reveal').replaceWith(message);
 }
 
-// restore from snapshot 
+// restore from snapshot
 function restoreSnapshot(snapshotId) {
   console.log('restore ' + snapshotId);
   let apiEndpoint = '/api/snapshot/' + snapshotId + '/';
@@ -793,7 +793,11 @@ function apiRequest(apiEndpoint, method, data) {
   xhttp.setRequestHeader('Authorization', 'Token ' + sessionToken);
   xhttp.setRequestHeader('Content-Type', 'application/json');
   xhttp.send(JSON.stringify(data));
-  return JSON.parse(xhttp.responseText);
+  if (xhttp.status === 404) {
+    return false;
+  } else {
+    return JSON.parse(xhttp.responseText);
+  }
 }
 
 // Gets origin URL
@@ -951,7 +955,7 @@ function createVideo(video, viewStyle) {
   // create video item div from template
   const videoId = video.youtube_id;
   // const mediaUrl = video.media_url;
-  const thumbUrl = '/cache/' + video.vid_thumb_url;
+  // const thumbUrl = '/cache/' + video.vid_thumb_url;
   const videoTitle = video.title;
   const videoPublished = video.published;
   const videoDuration = video.player.duration_str;
@@ -968,7 +972,7 @@ function createVideo(video, viewStyle) {
     <a href="#player" data-id="${videoId}" onclick="createPlayer(this)">
         <div class="video-thumb-wrap ${viewStyle}">
             <div class="video-thumb">
-                <img src="${thumbUrl}" alt="video-thumb">
+                <img src="${video.vid_thumb_url}" alt="video-thumb">
             </div>
             <div class="video-play">
                 <img src="/static/img/icon-play.svg" alt="play-icon">
@@ -1102,6 +1106,138 @@ function createFulltext(fullText) {
   fullTextDiv.setAttribute('class', 'video-item list');
   fullTextDiv.innerHTML = markup;
   return fullTextDiv;
+}
+
+function getComments(videoId) {
+  let apiEndpoint = '/api/video/' + videoId + '/comment/';
+  let response = apiRequest(apiEndpoint, 'GET');
+  let allComments = response.data;
+
+  writeComments(allComments);
+}
+
+function writeComments(allComments) {
+  let commentsListBox = document.getElementById('comments-list');
+  for (let i = 0; i < allComments.length; i++) {
+    const rootComment = allComments[i];
+
+    let commentBox = createCommentBox(rootComment, true);
+
+    // add replies to commentBox
+    if (rootComment.comment_replies) {
+      let commentReplyBox = document.createElement('div');
+      commentReplyBox.setAttribute('class', 'comments-replies');
+      commentReplyBox.setAttribute('id', rootComment.comment_id + '-replies');
+      let totalReplies = rootComment.comment_replies.length;
+      if (totalReplies > 0) {
+        let replyButton = createReplyButton(rootComment.comment_id + '-replies', totalReplies);
+        commentBox.appendChild(replyButton);
+      }
+      for (let j = 0; j < totalReplies; j++) {
+        const commentReply = rootComment.comment_replies[j];
+        let commentReplyDiv = createCommentBox(commentReply, false);
+        commentReplyBox.appendChild(commentReplyDiv);
+      }
+      if (totalReplies > 0) {
+        commentBox.appendChild(commentReplyBox);
+      }
+    }
+    commentsListBox.appendChild(commentBox);
+  }
+}
+
+function createReplyButton(replyId, totalReplies) {
+  let replyButton = document.createElement('button');
+  replyButton.innerHTML = `<span id="toggle-icon">+</span> ${totalReplies} replies`;
+  replyButton.setAttribute('data-id', replyId);
+  replyButton.setAttribute('onclick', 'toggleCommentReplies(this)');
+  return replyButton;
+}
+
+function toggleCommentReplies(button) {
+  let commentReplyId = button.getAttribute('data-id');
+  let state = document.getElementById(commentReplyId).style.display;
+
+  if (state === 'none' || state === '') {
+    document.getElementById(commentReplyId).style.display = 'block';
+    button.querySelector('#toggle-icon').innerHTML = '-';
+  } else {
+    document.getElementById(commentReplyId).style.display = 'none';
+    button.querySelector('#toggle-icon').innerHTML = '+';
+  }
+}
+
+function createCommentBox(comment, isRoot) {
+  let commentBox = document.createElement('div');
+  commentBox.setAttribute('class', 'comment-box');
+
+  let commentClass;
+  if (isRoot) {
+    commentClass = 'root-comment';
+  } else {
+    commentClass = 'reply-comment';
+  }
+
+  commentBox.classList.add = commentClass;
+
+  let commentAuthor = document.createElement('h3');
+  commentAuthor.innerText = comment.comment_author;
+  if (comment.comment_author_is_uploader) {
+    commentAuthor.setAttribute('class', 'comment-highlight');
+  }
+  commentBox.appendChild(commentAuthor);
+
+  let commentText = document.createElement('p');
+  commentText.innerText = comment.comment_text;
+  commentBox.appendChild(commentText);
+
+  const spacer = '<span class="space-carrot">|</span>';
+  let commentMeta = document.createElement('div');
+  commentMeta.setAttribute('class', 'comment-meta');
+
+  commentMeta.innerHTML = `<span>${comment.comment_time_text}</span>`;
+
+  if (comment.comment_likecount > 0) {
+    let numberFormatted = formatNumbers(comment.comment_likecount);
+    commentMeta.innerHTML += `${spacer}<span class="thumb-icon"><img src="/static/img/icon-thumb.svg"> ${numberFormatted}</span>`;
+  }
+
+  if (comment.comment_is_favorited) {
+    commentMeta.innerHTML += `${spacer}<span class="comment-like"><img src="/static/img/icon-heart.svg"></span>`;
+  }
+
+  commentBox.appendChild(commentMeta);
+
+  return commentBox;
+}
+
+function getSimilarVideos(videoId) {
+  let apiEndpoint = '/api/video/' + videoId + '/similar/';
+  let response = apiRequest(apiEndpoint, 'GET');
+  if (!response) {
+    populateEmpty();
+    return;
+  }
+  let allSimilar = response.data;
+  if (allSimilar.length > 0) {
+    populateSimilar(allSimilar);
+  }
+}
+
+function populateSimilar(allSimilar) {
+  let similarBox = document.getElementById('similar-videos');
+  for (let i = 0; i < allSimilar.length; i++) {
+    const similarRaw = allSimilar[i];
+    let similarDiv = createVideo(similarRaw, 'grid');
+    similarBox.appendChild(similarDiv);
+  }
+}
+
+function populateEmpty() {
+  let similarBox = document.getElementById('similar-videos');
+  let emptyMessage = document.createElement('p');
+  emptyMessage.innerText = 'No similar videos found.';
+  similarBox.appendChild(emptyMessage);
 }
 
 // generic

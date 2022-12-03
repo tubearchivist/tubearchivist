@@ -41,6 +41,10 @@ class YoutubePlaylist(YouTubeItem):
 
         if scrape or not self.json_data:
             self.get_from_youtube()
+            if not self.youtube_meta:
+                self.json_data = False
+                return
+
             self.process_youtube_meta()
             self.get_entries()
             self.json_data["playlist_entries"] = self.all_members
@@ -76,12 +80,12 @@ class YoutubePlaylist(YouTubeItem):
                 downloaded = entry["id"] in self.all_youtube_ids
             else:
                 downloaded = False
-            if not entry["uploader"]:
+            if not entry["channel"]:
                 continue
             to_append = {
                 "youtube_id": entry["id"],
                 "title": entry["title"],
-                "uploader": entry["uploader"],
+                "uploader": entry["channel"],
                 "idx": idx,
                 "downloaded": downloaded,
             }
