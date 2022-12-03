@@ -91,7 +91,7 @@ It's finally time to set up TubeArchivist!
  - `Time Zone:` This is an important step for your scheduler, to find your timezone, use a site like [TimeZoneConverter](http://www.timezoneconverter.com/cgi-bin/findzone.tzc) 
 
 ### From there, you should be able to start up your containers and you're good to go!
-If you're still having trouble, join us on [discord](https://discord.gg/AFwz8nE7BK) and come to the #support channel.
+If you're still having trouble, join us on [discord](https://discord.gg/gkWMk9Qupk) and come to the #support channel.
 
 <br />
 <br />
