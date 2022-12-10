@@ -184,7 +184,7 @@ class VideoDownloader:
         """setup download queue in redis loop until no more items"""
         self._setup_queue()
 
-        queue = RedisQueue()
+        queue = RedisQueue(queue_name="dl_queue")
 
         limit_queue = self.config["downloads"]["limit_count"]
         if limit_queue:
@@ -275,7 +275,7 @@ class VideoDownloader:
             RedisArchivist().set_message(self.MSG, mess_dict, expire=True)
             return
 
-        RedisQueue().add_list(to_add)
+        RedisQueue(queue_name="dl_queue").add_list(to_add)
 
     def _progress_hook(self, response):
         """process the progress_hooks from yt_dlp"""

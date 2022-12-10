@@ -99,7 +99,7 @@ def download_pending():
 @shared_task
 def download_single(youtube_id):
     """start download single video now"""
-    queue = RedisQueue()
+    queue = RedisQueue(queue_name="dl_queue")
     queue.add_priority(youtube_id)
     print("Added to queue with priority: " + youtube_id)
     # start queue if needed
@@ -192,7 +192,7 @@ def kill_dl(task_id):
         app.control.revoke(task_id, terminate=True)
 
     _ = RedisArchivist().del_message("dl_queue_id")
-    RedisQueue().clear()
+    RedisQueue(queue_name="dl_queue").clear()
 
     clear_dl_cache(CONFIG)
 

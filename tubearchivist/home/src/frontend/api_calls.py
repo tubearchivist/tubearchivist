@@ -123,7 +123,7 @@ class PostData:
         print(f"{video_id}: ignore video from download queue")
         PendingInteract(video_id=video_id, status="ignore").update_status()
         # also clear from redis queue
-        RedisQueue().clear_item(video_id)
+        RedisQueue(queue_name="dl_queue").clear_item(video_id)
         return {"success": True}
 
     @staticmethod
@@ -141,7 +141,7 @@ class PostData:
         to_execute = self.exec_val
         if to_execute == "stop":
             print("stopping download queue")
-            RedisQueue().clear()
+            RedisQueue(queue_name="dl_queue").clear()
         elif to_execute == "kill":
             task_id = RedisArchivist().get_message("dl_queue_id")
             if not isinstance(task_id, str):

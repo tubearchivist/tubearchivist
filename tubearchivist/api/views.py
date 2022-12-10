@@ -382,7 +382,7 @@ class DownloadApiView(ApiBaseView):
 
         print(f"{video_id}: change status to {item_status}")
         PendingInteract(video_id=video_id, status=item_status).update_status()
-        RedisQueue().clear_item(video_id)
+        RedisQueue(queue_name="dl_queue").clear_item(video_id)
 
         return Response(request.data)
 

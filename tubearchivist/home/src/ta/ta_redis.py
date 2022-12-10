@@ -102,11 +102,11 @@ class RedisArchivist(RedisBase):
 
 
 class RedisQueue(RedisBase):
-    """dynamically interact with the download queue in redis"""
+    """dynamically interact with queues in redis"""
 
-    def __init__(self):
+    def __init__(self, queue_name):
         super().__init__()
-        self.key = self.NAME_SPACE + "dl_queue"
+        self.key = f"{self.NAME_SPACE}{queue_name}"
 
     def get_all(self):
         """return all elements in list"""
