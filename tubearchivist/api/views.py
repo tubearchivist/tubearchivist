@@ -12,7 +12,7 @@ from home.src.index.video import SponsorBlock
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import UrlListParser
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
-from home.tasks import extrac_dl, subscribe_to
+from home.tasks import check_reindex, extrac_dl, subscribe_to
 from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
@@ -587,6 +587,26 @@ class SnapshotApiView(ApiBaseView):
             return Response(message, status=400)
 
         return Response(response)
+
+
+class RefreshView(ApiBaseView):
+    """resolves to /api/refresh/
+    GET: get refresh progress
+    POST: start a manual refresh task
+    """
+
+    def get(self, request):
+        """handle get request"""
+        # pylint: disable=unused-argument
+        return Response({"status": False})
+
+    def post(self, request):
+        """handle post request"""
+        data = request.data
+        extract_videos = bool(request.GET.get("extract_videos", False))
+        check_reindex.delay(data=data, extract_videos=extract_videos)
+
+        return Response(data)
 
 
 class CookieView(ApiBaseView):

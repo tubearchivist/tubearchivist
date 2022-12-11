@@ -38,6 +38,7 @@ Note:
 **Additional**
 - [Login](#login-view)
 - [Task](#task-view) WIP
+- [Refresh](#refresh-view)
 - [Cookie](#cookie-view)
 - [Search](#search-view)
 - [Ping](#ping-view)
@@ -306,6 +307,20 @@ List of valid task names:
 - **download_pending**: Start the download queue
 - **rescan_pending**: Rescan your subscriptions
 
+## Refresh View
+GET /api/refresh/  
+POST /api/refresh/  
+Parameter:
+- extract_videos: to refresh all videos for channels/playlists, default False
+
+Manually start a refresh task: post list of *videos*, *channels*, *playlists*
+```json
+{
+    "videos": ["video1", "video2", "video3"],
+    "channels": ["channel1", "channel2", "channel3"],
+    "playlists": ["playlist1", "playlist2"]
+}
+```
 
 ## Cookie View
 Check your youtube cookie settings, *status* turns to `true` if cookie has been validated.  
