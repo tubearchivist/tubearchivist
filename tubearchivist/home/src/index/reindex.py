@@ -13,7 +13,7 @@ from home.src.download.queue import PendingList
 from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import CookieHandler
 from home.src.download.yt_dlp_handler import VideoDownloader
-from home.src.es.connect import ElasticWrap
+from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.channel import YoutubeChannel
 from home.src.index.comments import Comments
 from home.src.index.playlist import YoutubePlaylist
@@ -28,18 +28,21 @@ class ReindexBase:
     REINDEX_CONFIG = [
         {
             "index_name": "ta_video",
+            "index_type": "videos",
             "queue_name": "reindex:ta_video",
             "active_key": "active",
             "refresh_key": "vid_last_refresh",
         },
         {
             "index_name": "ta_channel",
+            "index_type": "channels",
             "queue_name": "reindex:ta_channel",
             "active_key": "channel_active",
             "refresh_key": "channel_last_refresh",
         },
         {
             "index_name": "ta_playlist",
+            "index_type": "playlists",
             "queue_name": "reindex:ta_playlist",
             "active_key": "playlist_active",
             "refresh_key": "playlist_last_refresh",
@@ -113,6 +116,93 @@ class ReindexOutdated(ReindexBase):
 
         all_ids = [i["_id"] for i in response["hits"]["hits"]]
         return all_ids
+
+
+class ReindexManual(ReindexBase):
+    """
+    manually add ids to reindex queue from API
+    data_example = {
+        "videos": ["video1", "video2", "video3"],
+        "channels": ["channel1", "channel2", "channel3"],
+        "playlists": ["playlist1", "playlist2"],
+    }
+    extract_videos to also reindex all videos of channel/playlist
+    """
+
+    def __init__(self, extract_videos=False):
+        super().__init__()
+        self.extract_videos = extract_videos
+        self.data = False
+
+    def extract_data(self, data):
+        """process data"""
+        self.data = data
+        for key, values in self.data.items():
+            reindex_config = self._get_reindex_config(key)
+            self.process_index(reindex_config, values)
+
+    def _get_reindex_config(self, index_type):
+        """get reindex config for index"""
+
+        for reindex_config in self.REINDEX_CONFIG:
+            if reindex_config["index_type"] == index_type:
+                return reindex_config
+
+        print(f"reindex type {index_type} not valid")
+        raise ValueError
+
+    def process_index(self, index_config, values):
+        """process values per index"""
+        index_name = index_config["index_name"]
+        if index_name == "ta_video":
+            self._add_videos(values)
+        elif index_name == "ta_channel":
+            self._add_channels(values)
+        elif index_name == "ta_playlist":
+            self._add_playlists(values)
+
+    def _add_videos(self, values):
+        """add list of videos to reindex queue"""
+        if not values:
+            return
+
+        RedisQueue("reindex:ta_video").add_list(values)
+
+    def _add_channels(self, values):
+        """add list of channels to reindex queue"""
+        RedisQueue("reindex:ta_channel").add_list(values)
+
+        if self.extract_videos:
+            for channel_id in values:
+                all_videos = self._get_channel_videos(channel_id)
+                self._add_videos(all_videos)
+
+    def _add_playlists(self, values):
+        """add list of playlists to reindex queue"""
+        RedisQueue("reindex:ta_playlist").add_list(values)
+
+        if self.extract_videos:
+            for playlist_id in values:
+                all_videos = self._get_playlist_videos(playlist_id)
+                self._add_videos(all_videos)
+
+    def _get_channel_videos(self, channel_id):
+        """get all videos from channel"""
+        data = {
+            "query": {"term": {"channel.channel_id": {"value": channel_id}}},
+            "_source": ["youtube_id"],
+        }
+        all_results = IndexPaginate("ta_video", data).get_results()
+        return [i["youtube_id"] for i in all_results]
+
+    def _get_playlist_videos(self, playlist_id):
+        """get all videos from playlist"""
+        data = {
+            "query": {"term": {"playlist.keyword": {"value": playlist_id}}},
+            "_source": ["youtube_id"],
+        }
+        all_results = IndexPaginate("ta_video", data).get_results()
+        return [i["youtube_id"] for i in all_results]
 
 
 class Reindex(ReindexBase):
