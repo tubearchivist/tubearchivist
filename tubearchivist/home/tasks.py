@@ -20,11 +20,8 @@ from home.src.download.yt_dlp_handler import VideoDownloader
 from home.src.es.backup import ElasticBackup
 from home.src.es.index_setup import ElasitIndexWrap
 from home.src.index.channel import YoutubeChannel
-from home.src.index.filesystem import (
-    ImportFolderScanner,
-    reindex_old_documents,
-    scan_filesystem,
-)
+from home.src.index.filesystem import ImportFolderScanner, scan_filesystem
+from home.src.index.reindex import reindex_outdated
 from home.src.ta.config import AppConfig, ScheduleBuilder
 from home.src.ta.helper import UrlListParser, clear_dl_cache
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
@@ -138,7 +135,7 @@ def extrac_dl(youtube_ids):
 @shared_task(name="check_reindex")
 def check_reindex():
     """run the reindex main command"""
-    reindex_old_documents()
+    reindex_outdated()
 
 
 @shared_task
