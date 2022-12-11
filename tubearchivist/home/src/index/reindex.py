@@ -351,12 +351,6 @@ class Reindex(ReindexBase):
         return valid
 
 
-def reindex_outdated():
-    """reindex all outdated"""
-    ReindexOutdated().add_outdated()
-    Reindex().reindex_all()
-
-
 class ChannelUrlFixer:
     """fix not matching channel names in reindex"""
 
