@@ -125,8 +125,7 @@ class IndexPaginate:
     def validate_data(self):
         """add pit and size to data"""
         if "sort" not in self.data.keys():
-            print(self.data)
-            raise ValueError("missing sort key in data")
+            self.data.update({"sort": [{"_doc": {"order": "desc"}}]})
 
         self.data["size"] = self.size or self.DEFAULT_SIZE
         self.data["pit"] = {"id": self.pit_id, "keep_alive": "10m"}
