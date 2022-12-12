@@ -137,10 +137,23 @@ def check_reindex(data=False, extract_videos=False):
     """run the reindex main command"""
     if data:
         ReindexManual(extract_videos=extract_videos).extract_data(data)
-    else:
-        ReindexOutdated().add_outdated()
 
-    Reindex().reindex_all()
+    have_lock = False
+    reindex_lock = RedisArchivist().get_lock("reindex")
+
+    try:
+        have_lock = reindex_lock.acquire(blocking=False)
+        if have_lock:
+            if not data:
+                ReindexOutdated().add_outdated()
+
+            Reindex().reindex_all()
+        else:
+            print("Did not acquire reindex lock.")
+
+    finally:
+        if have_lock:
+            reindex_lock.release()
 
 
 @shared_task

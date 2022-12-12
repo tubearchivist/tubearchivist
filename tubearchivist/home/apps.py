@@ -77,6 +77,7 @@ class StartupCheck:
             "downloading",
             "dl_queue",
             "dl_queue_id",
+            "reindex",
             "rescan",
             "run_backup",
         ]
