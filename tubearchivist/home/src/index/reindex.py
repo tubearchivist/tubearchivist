@@ -25,29 +25,26 @@ from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 class ReindexBase:
     """base config class for reindex task"""
 
-    REINDEX_CONFIG = [
-        {
+    REINDEX_CONFIG = {
+        "video": {
             "index_name": "ta_video",
-            "index_type": "videos",
             "queue_name": "reindex:ta_video",
             "active_key": "active",
             "refresh_key": "vid_last_refresh",
         },
-        {
+        "channel": {
             "index_name": "ta_channel",
-            "index_type": "channels",
             "queue_name": "reindex:ta_channel",
             "active_key": "channel_active",
             "refresh_key": "channel_last_refresh",
         },
-        {
+        "playlist": {
             "index_name": "ta_playlist",
-            "index_type": "playlists",
             "queue_name": "reindex:ta_playlist",
             "active_key": "playlist_active",
             "refresh_key": "playlist_last_refresh",
         },
-    ]
+    }
 
     MULTIPLY = 1.2
 
@@ -72,7 +69,7 @@ class ReindexOutdated(ReindexBase):
 
     def add_outdated(self):
         """add outdated documents"""
-        for reindex_config in self.REINDEX_CONFIG:
+        for reindex_config in self.REINDEX_CONFIG.values():
             total_hits = self._get_total_hits(reindex_config)
             daily_should = self._get_daily_should(total_hits)
             all_ids = self._get_outdated_ids(reindex_config, daily_should)
@@ -122,9 +119,9 @@ class ReindexManual(ReindexBase):
     """
     manually add ids to reindex queue from API
     data_example = {
-        "videos": ["video1", "video2", "video3"],
-        "channels": ["channel1", "channel2", "channel3"],
-        "playlists": ["playlist1", "playlist2"],
+        "video": ["video1", "video2", "video3"],
+        "channel": ["channel1", "channel2", "channel3"],
+        "playlist": ["playlist1", "playlist2"],
     }
     extract_videos to also reindex all videos of channel/playlist
     """
@@ -138,18 +135,12 @@ class ReindexManual(ReindexBase):
         """process data"""
         self.data = data
         for key, values in self.data.items():
-            reindex_config = self._get_reindex_config(key)
+            reindex_config = self.REINDEX_CONFIG.get(key)
+            if not reindex_config:
+                print(f"reindex type {key} not valid")
+                raise ValueError
+
             self.process_index(reindex_config, values)
-
-    def _get_reindex_config(self, index_type):
-        """get reindex config for index"""
-
-        for reindex_config in self.REINDEX_CONFIG:
-            if reindex_config["index_type"] == index_type:
-                return reindex_config
-
-        print(f"reindex type {index_type} not valid")
-        raise ValueError
 
     def process_index(self, index_config, values):
         """process values per index"""
@@ -218,7 +209,7 @@ class Reindex(ReindexBase):
             print("[reindex] cookie invalid, exiting...")
             return
 
-        for index_config in self.REINDEX_CONFIG:
+        for index_config in self.REINDEX_CONFIG.values():
             if not RedisQueue(index_config["queue_name"]).has_item():
                 continue
 

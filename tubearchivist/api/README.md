@@ -313,12 +313,12 @@ POST /api/refresh/
 Parameter:
 - extract_videos: to refresh all videos for channels/playlists, default False
 
-Manually start a refresh task: post list of *videos*, *channels*, *playlists*
+Manually start a refresh task: post list of *video*, *channel*, *playlist* IDs.
 ```json
 {
-    "videos": ["video1", "video2", "video3"],
-    "channels": ["channel1", "channel2", "channel3"],
-    "playlists": ["playlist1", "playlist2"]
+    "video": ["video1", "video2", "video3"],
+    "channel": ["channel1", "channel2", "channel3"],
+    "playlist": ["playlist1", "playlist2"]
 }
 ```
 
