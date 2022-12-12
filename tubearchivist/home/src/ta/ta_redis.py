@@ -114,6 +114,11 @@ class RedisQueue(RedisBase):
         all_elements = [i.decode() for i in result]
         return all_elements
 
+    def contains(self, element):
+        """check if element is in list"""
+        result = self.conn.execute_command("LPOS", self.key, element)
+        return result is not None
+
     def add_list(self, to_add):
         """add list to queue"""
         self.conn.execute_command("RPUSH", self.key, *to_add)
