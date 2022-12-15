@@ -1160,10 +1160,10 @@ function toggleCommentReplies(button) {
 
   if (state === 'none' || state === '') {
     document.getElementById(commentReplyId).style.display = 'block';
-    button.querySelector('#toggle-icon').innerHTML = '-';
+    button.querySelector('#toggle-icon').innerHTML = '▲';
   } else {
     document.getElementById(commentReplyId).style.display = 'none';
-    button.querySelector('#toggle-icon').innerHTML = '+';
+    button.querySelector('#toggle-icon').innerHTML = '▼';
   }
 }
 
