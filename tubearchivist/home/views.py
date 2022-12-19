@@ -35,6 +35,7 @@ from home.src.frontend.searching import SearchHandler
 from home.src.index.channel import YoutubeChannel, channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
+from home.src.index.reindex import ReindexProgress
 from home.src.ta.config import AppConfig, ScheduleBuilder
 from home.src.ta.helper import UrlListParser, time_parser
 from home.src.ta.ta_redis import RedisArchivist
@@ -569,17 +570,18 @@ class ChannelIdAboutView(ChannelIdBaseView):
         self.initiate_vars(request)
         self.channel_has_pending(channel_id)
 
-        path = f"ta_channel/_doc/{channel_id}"
-        response, _ = ElasticWrap(path).get()
-
+        response, _ = ElasticWrap(f"ta_channel/_doc/{channel_id}").get()
         channel_info = SearchProcess(response).process()
-        channel_name = channel_info["channel_name"]
+        reindex = ReindexProgress(
+            request_type="channel", request_id=channel_id
+        ).get_progress()
 
         self.context.update(
             {
-                "title": "Channel: About " + channel_name,
+                "title": "Channel: About " + channel_info["channel_name"],
                 "channel_info": channel_info,
                 "channel_overwrite_form": ChannelOverwriteForm,
+                "reindex": reindex.get("state"),
             }
         )
 
@@ -706,12 +708,17 @@ class PlaylistIdView(ArchivistResultsView):
         self._update_view_data(playlist_id, playlist_info)
         self.find_results()
         self.match_progress()
+        reindex = ReindexProgress(
+            request_type="playlist", request_id=playlist_id
+        ).get_progress()
+
         self.context.update(
             {
                 "title": "Playlist: " + playlist_name,
                 "playlist_info": playlist_info,
                 "playlist_name": playlist_name,
                 "channel_info": channel_info,
+                "reindex": reindex.get("state"),
             }
         )
         return render(request, "home/playlist_id.html", self.context)
@@ -844,11 +851,8 @@ class VideoView(View):
     def get(self, request, video_id):
         """get single video"""
         config_handler = AppConfig(request.user.id)
-        position = time_parser(request.GET.get("t"))
-        path = f"ta_video/_doc/{video_id}"
-        look_up = SearchHandler(path, config=False)
-        video_hit = look_up.get_data()
-        video_data = video_hit[0]["source"]
+        look_up = SearchHandler(f"ta_video/_doc/{video_id}", config=False)
+        video_data = look_up.get_data()[0]["source"]
         try:
             rating = video_data["stats"]["average_rating"]
             video_data["stats"]["average_rating"] = self.star_creator(rating)
@@ -861,16 +865,20 @@ class VideoView(View):
         else:
             playlist_nav = False
 
-        video_title = video_data["title"]
+        reindex = ReindexProgress(
+            request_type="video", request_id=video_id
+        ).get_progress()
+
         context = {
             "video": video_data,
             "playlist_nav": playlist_nav,
-            "title": video_title,
+            "title": video_data.get("title"),
             "colors": config_handler.colors,
             "cast": config_handler.config["application"]["enable_cast"],
             "version": settings.TA_VERSION,
             "config": config_handler.config,
-            "position": position,
+            "position": time_parser(request.GET.get("t")),
+            "reindex": reindex.get("state"),
         }
         return render(request, "home/video.html", context)
 
