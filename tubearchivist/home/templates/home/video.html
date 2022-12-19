@@ -149,13 +149,17 @@
         </div>
         <script>getSimilarVideos('{{ video.youtube_id }}')</script>
     </div>
-    {% if video.comment_count %}
-        <div class="comments-section">
-            <h3>Comments: {{video.comment_count}}</h3>
-            <div id="comments-list" class="comments-list">
-            </div>
+    {% if video.comment_count == 0 %}
+    <div class="comments-section">
+        <span>Video has no comments</span>
+    </div>
+    {% elif video.comment_count %}
+    <div class="comments-section">
+        <h3>Comments: {{video.comment_count}}</h3>
+        <div id="comments-list" class="comments-list">
         </div>
         <script>getComments('{{ video.youtube_id }}')</script>
+    </div>
     {% endif %}
 </div>
 <script>
