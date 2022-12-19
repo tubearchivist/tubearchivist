@@ -68,12 +68,6 @@ class ApplicationSettingsForm(forms.Form):
         ("1", "enable sponsorblock integration"),
     ]
 
-    CAST_CHOICES = [
-        ("", "-- change Cast integration --"),
-        ("0", "disable Cast"),
-        ("1", "enable Cast"),
-    ]
-
     SNAPSHOT_CHOICES = [
         ("", "-- change snapshot settings --"),
         ("0", "disable system snapshots"),
@@ -138,9 +132,6 @@ class ApplicationSettingsForm(forms.Form):
     )
     downloads_integrate_sponsorblock = forms.ChoiceField(
         widget=forms.Select, choices=SP_CHOICES, required=False
-    )
-    application_enable_cast = forms.ChoiceField(
-        widget=forms.Select, choices=CAST_CHOICES, required=False
     )
     application_enable_snapshot = forms.ChoiceField(
         widget=forms.Select, choices=SNAPSHOT_CHOICES, required=False
