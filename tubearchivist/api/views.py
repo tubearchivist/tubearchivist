@@ -8,6 +8,7 @@ from home.src.es.connect import ElasticWrap
 from home.src.es.snapshot import ElasticSnapshot
 from home.src.frontend.searching import SearchForm
 from home.src.index.generic import Pagination
+from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import UrlListParser
@@ -597,8 +598,20 @@ class RefreshView(ApiBaseView):
 
     def get(self, request):
         """handle get request"""
-        # pylint: disable=unused-argument
-        return Response({"status": False})
+        request_type = request.GET.get("type")
+        request_id = request.GET.get("id")
+
+        if request_id and not request_type:
+            return Response({"status": "Bad Request"}, status=400)
+
+        try:
+            progress = ReindexProgress(
+                request_type=request_type, request_id=request_id
+            ).get_progress()
+        except ValueError:
+            return Response({"status": "Bad Request"}, status=400)
+
+        return Response(progress)
 
     def post(self, request):
         """handle post request"""

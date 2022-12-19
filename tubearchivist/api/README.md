@@ -309,6 +309,38 @@ List of valid task names:
 
 ## Refresh View
 GET /api/refresh/  
+parameters:
+- **type**: one of *video*, *channel*, *playlist*, optional
+- **id**: item id, optional
+
+without specifying type: return total for all queued items:
+```json
+{
+    "total_queued": 2,
+    "type": "all",
+    "state": "running"
+}
+```
+
+specify type: return total items queue of this type:
+```json
+{
+    "total_queued": 2,
+    "type": "video",
+    "state": "running"
+}
+```
+
+specify type *and* id to get state of item in queue:
+```json
+{
+    "total_queued": 2,
+    "type": "video",
+    "state": "in_queue",
+    "id": "video-id"
+}
+```
+
 POST /api/refresh/  
 Parameter:
 - extract_videos: to refresh all videos for channels/playlists, default False
