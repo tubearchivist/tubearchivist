@@ -38,6 +38,7 @@ Note:
 **Additional**
 - [Login](#login-view)
 - [Task](#task-view) WIP
+- [Refresh](#refresh-view)
 - [Cookie](#cookie-view)
 - [Search](#search-view)
 - [Ping](#ping-view)
@@ -306,6 +307,52 @@ List of valid task names:
 - **download_pending**: Start the download queue
 - **rescan_pending**: Rescan your subscriptions
 
+## Refresh View
+GET /api/refresh/  
+parameters:
+- **type**: one of *video*, *channel*, *playlist*, optional
+- **id**: item id, optional
+
+without specifying type: return total for all queued items:
+```json
+{
+    "total_queued": 2,
+    "type": "all",
+    "state": "running"
+}
+```
+
+specify type: return total items queue of this type:
+```json
+{
+    "total_queued": 2,
+    "type": "video",
+    "state": "running"
+}
+```
+
+specify type *and* id to get state of item in queue:
+```json
+{
+    "total_queued": 2,
+    "type": "video",
+    "state": "in_queue",
+    "id": "video-id"
+}
+```
+
+POST /api/refresh/  
+Parameter:
+- extract_videos: to refresh all videos for channels/playlists, default False
+
+Manually start a refresh task: post list of *video*, *channel*, *playlist* IDs.
+```json
+{
+    "video": ["video1", "video2", "video3"],
+    "channel": ["channel1", "channel2", "channel3"],
+    "playlist": ["playlist1", "playlist2"]
+}
+```
 
 ## Cookie View
 Check your youtube cookie settings, *status* turns to `true` if cookie has been validated.  

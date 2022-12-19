@@ -14,11 +14,9 @@ import subprocess
 from home.src.download.queue import PendingList
 from home.src.download.thumbnails import ThumbManager
 from home.src.es.connect import ElasticWrap
-from home.src.index.reindex import Reindex
 from home.src.index.video import YoutubeVideo, index_new_video
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import clean_string, ignore_filelist
-from home.src.ta.ta_redis import RedisArchivist
 from PIL import Image, ImageFile
 from yt_dlp.utils import ISO639Utils
 
@@ -606,11 +604,3 @@ def scan_filesystem():
         for missing_vid in filesystem_handler.to_index:
             youtube_id = missing_vid[2]
             index_new_video(youtube_id)
-
-
-def reindex_old_documents():
-    """daily refresh of old documents"""
-    handler = Reindex()
-    handler.check_outdated()
-    handler.reindex()
-    RedisArchivist().set_message("last_reindex", handler.now)

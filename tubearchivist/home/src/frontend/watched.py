@@ -14,7 +14,7 @@ class WatchState:
 
     def __init__(self, youtube_id):
         self.youtube_id = youtube_id
-        self.stamp = int(datetime.now().strftime("%s"))
+        self.stamp = int(datetime.now().timestamp())
 
     def mark_as_watched(self):
         """update es with new watched value"""

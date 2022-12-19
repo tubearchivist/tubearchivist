@@ -20,11 +20,8 @@ from home.src.download.yt_dlp_handler import VideoDownloader
 from home.src.es.backup import ElasticBackup
 from home.src.es.index_setup import ElasitIndexWrap
 from home.src.index.channel import YoutubeChannel
-from home.src.index.filesystem import (
-    ImportFolderScanner,
-    reindex_old_documents,
-    scan_filesystem,
-)
+from home.src.index.filesystem import ImportFolderScanner, scan_filesystem
+from home.src.index.reindex import Reindex, ReindexManual, ReindexOutdated
 from home.src.ta.config import AppConfig, ScheduleBuilder
 from home.src.ta.helper import UrlListParser, clear_dl_cache
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
@@ -99,7 +96,7 @@ def download_pending():
 @shared_task
 def download_single(youtube_id):
     """start download single video now"""
-    queue = RedisQueue()
+    queue = RedisQueue(queue_name="dl_queue")
     queue.add_priority(youtube_id)
     print("Added to queue with priority: " + youtube_id)
     # start queue if needed
@@ -136,9 +133,27 @@ def extrac_dl(youtube_ids):
 
 
 @shared_task(name="check_reindex")
-def check_reindex():
+def check_reindex(data=False, extract_videos=False):
     """run the reindex main command"""
-    reindex_old_documents()
+    if data:
+        ReindexManual(extract_videos=extract_videos).extract_data(data)
+
+    have_lock = False
+    reindex_lock = RedisArchivist().get_lock("reindex")
+
+    try:
+        have_lock = reindex_lock.acquire(blocking=False)
+        if have_lock:
+            if not data:
+                ReindexOutdated().add_outdated()
+
+            Reindex().reindex_all()
+        else:
+            print("Did not acquire reindex lock.")
+
+    finally:
+        if have_lock:
+            reindex_lock.release()
 
 
 @shared_task
@@ -192,7 +207,7 @@ def kill_dl(task_id):
         app.control.revoke(task_id, terminate=True)
 
     _ = RedisArchivist().del_message("dl_queue_id")
-    RedisQueue().clear()
+    RedisQueue(queue_name="dl_queue").clear()
 
     clear_dl_cache(CONFIG)
 

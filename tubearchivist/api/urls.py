@@ -12,6 +12,7 @@ from api.views import (
     PlaylistApiListView,
     PlaylistApiVideoView,
     PlaylistApiView,
+    RefreshView,
     SearchView,
     SnapshotApiListView,
     SnapshotApiView,
@@ -97,6 +98,11 @@ urlpatterns = [
         "download/<slug:video_id>/",
         DownloadApiView.as_view(),
         name="api-download",
+    ),
+    path(
+        "refresh/",
+        RefreshView.as_view(),
+        name="api-refresh",
     ),
     path(
         "task/",

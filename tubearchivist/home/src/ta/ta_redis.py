@@ -102,17 +102,25 @@ class RedisArchivist(RedisBase):
 
 
 class RedisQueue(RedisBase):
-    """dynamically interact with the download queue in redis"""
+    """dynamically interact with queues in redis"""
 
-    def __init__(self):
+    def __init__(self, queue_name):
         super().__init__()
-        self.key = self.NAME_SPACE + "dl_queue"
+        self.key = f"{self.NAME_SPACE}{queue_name}"
 
     def get_all(self):
         """return all elements in list"""
         result = self.conn.execute_command("LRANGE", self.key, 0, -1)
         all_elements = [i.decode() for i in result]
         return all_elements
+
+    def in_queue(self, element):
+        """check if element is in list"""
+        result = self.conn.execute_command("LPOS", self.key, element)
+        if result is not None:
+            return "in_queue"
+
+        return False
 
     def add_list(self, to_add):
         """add list to queue"""

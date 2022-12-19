@@ -135,7 +135,7 @@ class ElasticSnapshot:
             return True
 
         last_stamp = snap_dicts[0]["end_stamp"]
-        now = int(datetime.now().strftime("%s"))
+        now = int(datetime.now().timestamp())
         outdated = (now - last_stamp) / 60 / 60 > 24
         if outdated:
             print("snapshot: is outdated, create new now")

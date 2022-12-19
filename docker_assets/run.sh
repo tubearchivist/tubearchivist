@@ -25,6 +25,11 @@ if [[ -n "$TA_UWSGI_PORT" ]]; then
     sed -i "s/8080/$TA_UWSGI_PORT/g" /app/uwsgi.ini
 fi
 
+# disable auth on static files for cast support
+if [[ -n "$ENABLE_CAST" ]]; then
+    sed -i "/auth_request/d" /etc/nginx/sites-available/default
+fi
+
 # wait for elasticsearch
 counter=0
 until curl -u "$ELASTIC_USER":"$ELASTIC_PASSWORD" "$ES_URL" -fs; do

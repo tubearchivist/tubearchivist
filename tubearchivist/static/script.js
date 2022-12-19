@@ -147,6 +147,24 @@ function toggleCheckbox(checkbox) {
   }, 500);
 }
 
+// start reindex task
+function reindex(button) {
+  let apiEndpoint = '/api/refresh/';
+  if (button.getAttribute('data-extract-videos')) {
+    apiEndpoint += '?extract_videos=true';
+  }
+  let type = button.getAttribute('data-type');
+  let id = button.getAttribute('data-id');
+
+  let data = {};
+  data[type] = [id];
+
+  apiRequest(apiEndpoint, 'POST', data);
+  let message = document.createElement('p');
+  message.innerText = 'Reindex scheduled';
+  document.getElementById('reindex-button').replaceWith(message);
+}
+
 // download page buttons
 function rescanPending() {
   let payload = JSON.stringify({ rescan_pending: true });

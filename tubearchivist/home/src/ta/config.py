@@ -47,18 +47,6 @@ class AppConfig:
     @staticmethod
     def get_config_env():
         """read environment application variables"""
-        host_uid_env = os.environ.get("HOST_UID")
-        if host_uid_env:
-            host_uid = int(host_uid_env)
-        else:
-            host_uid = False
-
-        host_gid_env = os.environ.get("HOST_GID")
-        if host_gid_env:
-            host_gid = int(host_gid_env)
-        else:
-            host_gid = False
-
         es_pass = os.environ.get("ELASTIC_PASSWORD")
         es_user = os.environ.get("ELASTIC_USER", default="elastic")
 
@@ -66,8 +54,9 @@ class AppConfig:
             "REDIS_HOST": os.environ.get("REDIS_HOST"),
             "es_url": os.environ.get("ES_URL"),
             "es_auth": (es_user, es_pass),
-            "HOST_UID": host_uid,
-            "HOST_GID": host_gid,
+            "HOST_UID": int(os.environ.get("HOST_UID", False)),
+            "HOST_GID": int(os.environ.get("HOST_GID", False)),
+            "enable_cast": bool(os.environ.get("ENABLE_CAST")),
         }
 
         return application

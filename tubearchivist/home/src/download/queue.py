@@ -270,7 +270,7 @@ class PendingList(PendingIndex):
             "channel_id": vid["channel_id"],
             "duration": duration_str,
             "published": published,
-            "timestamp": int(datetime.now().strftime("%s")),
+            "timestamp": int(datetime.now().timestamp()),
         }
         if self.all_channels:
             youtube_details.update(

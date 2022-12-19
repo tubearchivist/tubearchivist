@@ -8,11 +8,12 @@ from home.src.es.connect import ElasticWrap
 from home.src.es.snapshot import ElasticSnapshot
 from home.src.frontend.searching import SearchForm
 from home.src.index.generic import Pagination
+from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import UrlListParser
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
-from home.tasks import extrac_dl, subscribe_to
+from home.tasks import check_reindex, extrac_dl, subscribe_to
 from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
@@ -382,7 +383,7 @@ class DownloadApiView(ApiBaseView):
 
         print(f"{video_id}: change status to {item_status}")
         PendingInteract(video_id=video_id, status=item_status).update_status()
-        RedisQueue().clear_item(video_id)
+        RedisQueue(queue_name="dl_queue").clear_item(video_id)
 
         return Response(request.data)
 
@@ -587,6 +588,38 @@ class SnapshotApiView(ApiBaseView):
             return Response(message, status=400)
 
         return Response(response)
+
+
+class RefreshView(ApiBaseView):
+    """resolves to /api/refresh/
+    GET: get refresh progress
+    POST: start a manual refresh task
+    """
+
+    def get(self, request):
+        """handle get request"""
+        request_type = request.GET.get("type")
+        request_id = request.GET.get("id")
+
+        if request_id and not request_type:
+            return Response({"status": "Bad Request"}, status=400)
+
+        try:
+            progress = ReindexProgress(
+                request_type=request_type, request_id=request_id
+            ).get_progress()
+        except ValueError:
+            return Response({"status": "Bad Request"}, status=400)
+
+        return Response(progress)
+
+    def post(self, request):
+        """handle post request"""
+        data = request.data
+        extract_videos = bool(request.GET.get("extract_videos", False))
+        check_reindex.delay(data=data, extract_videos=extract_videos)
+
+        return Response(data)
 
 
 class CookieView(ApiBaseView):
