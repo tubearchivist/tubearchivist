@@ -150,7 +150,8 @@ class DownloadPostProcess:
         for idx, video_id in enumerate(self.download.videos):
             comment = Comments(video_id, config=self.download.config)
             comment.build_json(notify=(idx, total_videos))
-            comment.upload_comments()
+            if comment.json_data:
+                comment.upload_comments()
 
         key = "message:download"
         message = {
