@@ -40,7 +40,7 @@ class Comments:
 
         self.json_data = {
             "youtube_id": self.youtube_id,
-            "comment_last_refresh": int(datetime.now().strftime("%s")),
+            "comment_last_refresh": int(datetime.now().timestamp()),
             "comment_channel_id": channel_id,
             "comment_comments": self.comments_format,
         }

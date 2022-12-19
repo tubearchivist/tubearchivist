@@ -50,7 +50,7 @@ class ReindexBase:
 
     def __init__(self):
         self.config = AppConfig().config
-        self.now = int(datetime.now().strftime("%s"))
+        self.now = int(datetime.now().timestamp())
 
     def populate(self, all_ids, reindex_config):
         """add all to reindex ids to redis queue"""

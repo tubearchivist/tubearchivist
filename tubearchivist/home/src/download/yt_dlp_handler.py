@@ -28,7 +28,7 @@ class DownloadPostProcess:
 
     def __init__(self, download):
         self.download = download
-        self.now = int(datetime.now().strftime("%s"))
+        self.now = int(datetime.now().timestamp())
         self.pending = False
 
     def run(self):

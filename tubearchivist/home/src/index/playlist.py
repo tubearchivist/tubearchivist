@@ -66,7 +66,7 @@ class YoutubePlaylist(YouTubeItem):
             "playlist_channel_id": self.youtube_meta["channel_id"],
             "playlist_thumbnail": playlist_thumbnail,
             "playlist_description": self.youtube_meta["description"] or False,
-            "playlist_last_refresh": int(datetime.now().strftime("%s")),
+            "playlist_last_refresh": int(datetime.now().timestamp()),
         }
 
     def get_entries(self, playlistend=False):

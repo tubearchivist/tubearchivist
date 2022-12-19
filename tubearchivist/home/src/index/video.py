@@ -28,7 +28,7 @@ class SponsorBlock:
     def __init__(self, user_id=False):
         self.user_id = user_id
         self.user_agent = f"{settings.TA_UPSTREAM} {settings.TA_VERSION}"
-        self.last_refresh = int(datetime.now().strftime("%s"))
+        self.last_refresh = int(datetime.now().timestamp())
 
     def get_sb_id(self):
         """get sponsorblock userid or generate if needed"""
@@ -180,7 +180,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         upload_date = self.youtube_meta["upload_date"]
         upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
         published = upload_date_time.strftime("%Y-%m-%d")
-        last_refresh = int(datetime.now().strftime("%s"))
+        last_refresh = int(datetime.now().timestamp())
         # base64_blur = ThumbManager().get_base64_blur(self.youtube_id)
         base64_blur = False
         # build json_data basics
