@@ -36,7 +36,7 @@ from home.src.index.channel import YoutubeChannel, channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress
-from home.src.ta.config import AppConfig, ScheduleBuilder
+from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.helper import UrlListParser, time_parser
 from home.src.ta.ta_redis import RedisArchivist
 from home.tasks import extrac_dl, index_channel_playlists, subscribe_to
@@ -138,6 +138,7 @@ class ArchivistViewConfig(View):
             "show_ignored_only": self._get_show_ignore_only(),
             "show_subed_only": self._get_show_subed_only(),
             "version": settings.TA_VERSION,
+            "ta_update": ReleaseVersion().get_update(),
         }
 
 
@@ -266,6 +267,7 @@ class MinView(View):
         return {
             "colors": AppConfig(request.user.id).colors,
             "version": settings.TA_VERSION,
+            "ta_update": ReleaseVersion().get_update(),
         }
 
 

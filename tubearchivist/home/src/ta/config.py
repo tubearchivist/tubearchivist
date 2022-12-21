@@ -326,10 +326,18 @@ class ReleaseVersion:
 
     def is_updated(self):
         """check if update happened in the mean time"""
-        message = RedisArchivist().get_message(self.NEW_KEY)
-        if not message.get("status"):
+        message = self.get_update()
+        if not message:
             return
 
         if self._parse_version(message.get("version")) == self.local_version:
             print(f"[{self.local_version}]: update completed")
             RedisArchivist().del_message(self.NEW_KEY)
+
+    def get_update(self):
+        """return new version dict if available"""
+        message = RedisArchivist().get_message(self.NEW_KEY)
+        if not message.get("status"):
+            return False
+
+        return message
