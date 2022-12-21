@@ -257,6 +257,18 @@ class ArchivistResultsView(ArchivistViewConfig):
         self.context["pagination"] = self.pagination_handler.pagination
 
 
+class MinView(View):
+    """to inherit from for minimal config vars"""
+
+    @staticmethod
+    def get_min_context(request):
+        """build minimal vars for context"""
+        return {
+            "colors": AppConfig(request.user.id).colors,
+            "version": settings.TA_VERSION,
+        }
+
+
 class HomeView(ArchivistResultsView):
     """resolves to /
     handle home page and video search post functionality
@@ -298,20 +310,23 @@ class HomeView(ArchivistResultsView):
             self.data["query"] = query
 
 
-class LoginView(View):
+class LoginView(MinView):
     """resolves to /login/
     Greeting and login page
     """
 
     SEC_IN_DAY = 60 * 60 * 24
 
-    @staticmethod
-    def get(request):
+    def get(self, request):
         """handle get requests"""
-        failed = bool(request.GET.get("failed"))
-        colors = AppConfig(request.user.id).colors
-        form = CustomAuthForm()
-        context = {"colors": colors, "form": form, "form_error": failed}
+        context = self.get_min_context(request)
+        context.update(
+            {
+                "form": CustomAuthForm(),
+                "form_error": bool(request.GET.get("failed")),
+            }
+        )
+
         return render(request, "home/login.html", context)
 
     def post(self, request):
@@ -333,19 +348,15 @@ class LoginView(View):
         return redirect("/login?failed=true")
 
 
-class AboutView(View):
+class AboutView(MinView):
     """resolves to /about/
     show helpful how to information
     """
 
-    @staticmethod
-    def get(request):
+    def get(self, request):
         """handle http get"""
-        context = {
-            "title": "About",
-            "colors": AppConfig(request.user.id).colors,
-            "version": settings.TA_VERSION,
-        }
+        context = self.get_min_context(request)
+        context.update({"title": "About"})
         return render(request, "home/about.html", context)
 
 
@@ -843,7 +854,7 @@ class PlaylistView(ArchivistResultsView):
         return redirect("playlist")
 
 
-class VideoView(View):
+class VideoView(MinView):
     """resolves to /video/<video-id>/
     display details about a single video
     """
@@ -869,17 +880,18 @@ class VideoView(View):
             request_type="video", request_id=video_id
         ).get_progress()
 
-        context = {
-            "video": video_data,
-            "playlist_nav": playlist_nav,
-            "title": video_data.get("title"),
-            "colors": config_handler.colors,
-            "cast": config_handler.config["application"]["enable_cast"],
-            "version": settings.TA_VERSION,
-            "config": config_handler.config,
-            "position": time_parser(request.GET.get("t")),
-            "reindex": reindex.get("state"),
-        }
+        context = self.get_min_context(request)
+        context.update(
+            {
+                "video": video_data,
+                "playlist_nav": playlist_nav,
+                "title": video_data.get("title"),
+                "cast": config_handler.config["application"]["enable_cast"],
+                "config": config_handler.config,
+                "position": time_parser(request.GET.get("t")),
+                "reindex": reindex.get("state"),
+            }
+        )
         return render(request, "home/video.html", context)
 
     @staticmethod
@@ -936,7 +948,7 @@ class SearchView(ArchivistResultsView):
         return render(request, "home/search.html", self.context)
 
 
-class SettingsView(View):
+class SettingsView(MinView):
     """resolves to /settings/
     handle the settings page, display current settings,
     take post request from the form to update settings
@@ -944,28 +956,19 @@ class SettingsView(View):
 
     def get(self, request):
         """read and display current settings"""
-        config_handler = AppConfig(request.user.id)
-        colors = config_handler.colors
-
-        available_backups = ElasticBackup().get_all_backup_files()
-        user_form = UserSettingsForm()
-        app_form = ApplicationSettingsForm()
-        scheduler_form = SchedulerSettingsForm()
-        snapshots = ElasticSnapshot().get_snapshot_stats()
-        token = self.get_token(request)
-
-        context = {
-            "title": "Settings",
-            "config": config_handler.config,
-            "api_token": token,
-            "colors": colors,
-            "available_backups": available_backups,
-            "user_form": user_form,
-            "app_form": app_form,
-            "scheduler_form": scheduler_form,
-            "snapshots": snapshots,
-            "version": settings.TA_VERSION,
-        }
+        context = self.get_min_context(request)
+        context.update(
+            {
+                "title": "Settings",
+                "config": AppConfig(request.user.id).config,
+                "api_token": self.get_token(request),
+                "available_backups": ElasticBackup().get_all_backup_files(),
+                "user_form": UserSettingsForm(),
+                "app_form": ApplicationSettingsForm(),
+                "scheduler_form": SchedulerSettingsForm(),
+                "snapshots": ElasticSnapshot().get_snapshot_stats(),
+            }
+        )
 
         return render(request, "home/settings.html", context)
 
