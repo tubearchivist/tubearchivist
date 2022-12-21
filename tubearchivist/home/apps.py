@@ -8,6 +8,7 @@ from home.src.es.connect import ElasticWrap
 from home.src.es.index_setup import ElasitIndexWrap
 from home.src.es.snapshot import ElasticSnapshot
 from home.src.ta.config import AppConfig as ArchivistConfig
+from home.src.ta.config import ReleaseVersion
 from home.src.ta.helper import clear_dl_cache
 from home.src.ta.ta_redis import RedisArchivist
 
@@ -34,6 +35,7 @@ class StartupCheck:
         self.make_folders()
         clear_dl_cache(self.config_handler.config)
         self.snapshot_check()
+        self.ta_version_check()
         self.set_has_run()
 
     def get_has_run(self):
@@ -119,6 +121,10 @@ class StartupCheck:
             sys.exit(1)
 
         print("elasticsearch version check passed")
+
+    def ta_version_check(self):
+        """remove key if updated now"""
+        ReleaseVersion().is_updated()
 
 
 class HomeConfig(AppConfig):

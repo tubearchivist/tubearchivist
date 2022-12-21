@@ -8,7 +8,9 @@ import json
 import os
 import re
 
+import requests
 from celery.schedules import crontab
+from django.conf import settings
 from home.src.ta.ta_redis import RedisArchivist
 
 
@@ -268,3 +270,66 @@ class ScheduleBuilder:
             schedule_dict.update(to_add)
 
         return schedule_dict
+
+
+class ReleaseVersion:
+    """compare local version with remote version"""
+
+    REMOTE_URL = "https://www.tubearchivist.com/api/release/latest/"
+    NEW_KEY = "versioncheck:new"
+
+    def __init__(self):
+        self.local_version = self._parse_version(settings.TA_VERSION)
+        self.is_unstable = settings.TA_VERSION.endswith("-unstable")
+        self.remote_version = False
+        self.is_breaking = False
+        self.response = False
+
+    def check(self):
+        """check version"""
+        print(f"[{self.local_version}]: look for updates")
+        self.get_remote_version()
+        new_version, is_breaking = self._has_update()
+        if new_version:
+            message = {
+                "status": True,
+                "version": new_version,
+                "is_breaking": is_breaking,
+            }
+            RedisArchivist().set_message(self.NEW_KEY, message)
+            print(f"[{self.local_version}]: found new version {new_version}")
+
+    def get_remote_version(self):
+        """read version from remote"""
+        self.response = requests.get(self.REMOTE_URL, timeout=20).json()
+        remote_version_str = self.response["release_version"]
+        self.remote_version = self._parse_version(remote_version_str)
+        self.is_breaking = self.response["breaking_changes"]
+
+    def _has_update(self):
+        """check if there is an update"""
+        for idx, number in enumerate(self.local_version):
+            is_newer = self.remote_version[idx] > number
+            if is_newer:
+                return self.response["release_version"], self.is_breaking
+
+        if self.is_unstable and self.local_version == self.remote_version:
+            return self.response["release_version"], self.is_breaking
+
+        return False, False
+
+    @staticmethod
+    def _parse_version(version):
+        """return version parts"""
+        clean = version.rstrip("-unstable").lstrip("v")
+        return tuple((int(i) for i in clean.split(".")))
+
+    def is_updated(self):
+        """check if update happened in the mean time"""
+        message = RedisArchivist().get_message(self.NEW_KEY)
+        if not message.get("status"):
+            return
+
+        if self._parse_version(message.get("version")) == self.local_version:
+            print(f"[{self.local_version}]: update completed")
+            RedisArchivist().del_message(self.NEW_KEY)

@@ -49,6 +49,7 @@
         "check_reindex_days": 90,
         "thumbnail_check": {"minute": "0", "hour": "17", "day_of_week": "*"},
         "run_backup": {"minute": "0", "hour": "8", "day_of_week": "0"},
-        "run_backup_rotate": 5
+        "run_backup_rotate": 5,
+        "version_check": {"minute": "0", "hour": "11", "day_of_week": "*"}
     }
 }
