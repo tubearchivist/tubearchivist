@@ -62,7 +62,6 @@ class PostData:
             "show_subed_only": self._show_subed_only,
             "dlnow": self._dlnow,
             "show_ignored_only": self._show_ignored_only,
-            "addSingle": self._add_single,
             "deleteQueue": self._delete_queue,
             "manual-import": self._manual_import,
             "re-embed": self._re_embed,
@@ -211,13 +210,6 @@ class PostData:
         value = {"status": show_value}
         print(f"Filter download view ignored only: {show_value}")
         RedisArchivist().set_message(key, value)
-        return {"success": True}
-
-    def _add_single(self):
-        """add single youtube_id to download queue"""
-        video_id = self.exec_val
-        print(f"{video_id}: add single vid to download queue")
-        PendingInteract(video_id=video_id, status="pending").update_status()
         return {"success": True}
 
     def _delete_queue(self):

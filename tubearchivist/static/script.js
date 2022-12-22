@@ -210,8 +210,8 @@ function forgetIgnore(button) {
 
 function addSingle(button) {
   let youtube_id = button.getAttribute('data-id');
-  let payload = JSON.stringify({ addSingle: youtube_id });
-  sendPost(payload);
+  let apiEndpoint = '/api/download/' + youtube_id + '/';
+  apiRequest(apiEndpoint, 'POST', {status: 'pending'})
   document.getElementById('dl-' + youtube_id).remove();
   setTimeout(function () {
     checkMessages();
