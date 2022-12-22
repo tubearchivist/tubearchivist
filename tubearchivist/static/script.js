@@ -186,8 +186,8 @@ function dlPending() {
 
 function toIgnore(button) {
   let youtube_id = button.getAttribute('data-id');
-  let payload = JSON.stringify({ ignore: youtube_id });
-  sendPost(payload);
+  let apiEndpoint = '/api/download/' + youtube_id + '/';
+  apiRequest(apiEndpoint, 'POST', {status: 'ignore'});
   document.getElementById('dl-' + youtube_id).remove();
 }
 

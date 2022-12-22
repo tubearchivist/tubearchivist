@@ -404,7 +404,7 @@ class DownloadApiView(ApiBaseView):
 
     def post(self, request, video_id):
         """post to video to change status"""
-        item_status = request.data["status"]
+        item_status = request.data.get("status")
         if item_status not in self.valid_status:
             message = f"{video_id}: invalid status {item_status}"
             print(message)

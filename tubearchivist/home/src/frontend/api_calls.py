@@ -53,7 +53,6 @@ class PostData:
             "change_view": self._change_view,
             "change_grid": self._change_grid,
             "rescan_pending": self._rescan_pending,
-            "ignore": self._ignore,
             "dl_pending": self._dl_pending,
             "queue": self._queue_handler,
             "unsubscribe": self._unsubscribe,
@@ -110,15 +109,6 @@ class PostData:
         """look for new items in subscribed channels"""
         print("rescan subscribed channels")
         update_subscribed.delay()
-        return {"success": True}
-
-    def _ignore(self):
-        """ignore from download queue"""
-        video_id = self.exec_val
-        print(f"{video_id}: ignore video from download queue")
-        PendingInteract(video_id=video_id, status="ignore").update_status()
-        # also clear from redis queue
-        RedisQueue(queue_name="dl_queue").clear_item(video_id)
         return {"success": True}
 
     @staticmethod
