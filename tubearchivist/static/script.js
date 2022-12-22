@@ -203,8 +203,8 @@ function downloadNow(button) {
 
 function forgetIgnore(button) {
   let youtube_id = button.getAttribute('data-id');
-  let payload = JSON.stringify({ forgetIgnore: youtube_id });
-  sendPost(payload);
+  let apiEndpoint = '/api/download/' + youtube_id + '/';
+  apiRequest(apiEndpoint, "DELETE");
   document.getElementById('dl-' + youtube_id).remove();
 }
 

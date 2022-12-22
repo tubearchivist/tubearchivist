@@ -64,7 +64,6 @@ class PostData:
             "show_subed_only": self._show_subed_only,
             "dlnow": self._dlnow,
             "show_ignored_only": self._show_ignored_only,
-            "forgetIgnore": self._forget_ignore,
             "addSingle": self._add_single,
             "deleteQueue": self._delete_queue,
             "manual-import": self._manual_import,
@@ -224,13 +223,6 @@ class PostData:
         value = {"status": show_value}
         print(f"Filter download view ignored only: {show_value}")
         RedisArchivist().set_message(key, value)
-        return {"success": True}
-
-    def _forget_ignore(self):
-        """delete from ta_download index"""
-        video_id = self.exec_val
-        print(f"{video_id}: forget from download")
-        PendingInteract(video_id=video_id).delete_item()
         return {"success": True}
 
     def _add_single(self):
