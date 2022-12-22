@@ -156,6 +156,7 @@ class ScheduleBuilder:
         "check_reindex": "0 12 *",
         "thumbnail_check": "0 17 *",
         "run_backup": "0 18 0",
+        "version_check": "0 11 *",
     }
     CONFIG = ["check_reindex_days", "run_backup_rotate"]
     MSG = "message:setting"
