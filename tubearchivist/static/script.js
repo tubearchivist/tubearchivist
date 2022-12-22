@@ -344,8 +344,8 @@ function deleteVideo(button) {
 
 function deleteChannel(button) {
   let to_delete = button.getAttribute('data-id');
-  let payload = JSON.stringify({ 'delete-channel': to_delete });
-  sendPost(payload);
+  let apiEndpoint = '/api/channel/' + to_delete + '/';
+  apiRequest(apiEndpoint, 'DELETE');
   setTimeout(function () {
     window.location.replace('/channel/');
   }, 1000);

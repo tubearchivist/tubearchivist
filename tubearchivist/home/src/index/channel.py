@@ -298,6 +298,9 @@ class YoutubeChannel(YouTubeItem):
         """delete channel and all videos"""
         print(f"{self.youtube_id}: delete channel")
         self.get_from_es()
+        if not self.json_data:
+            raise FileNotFoundError
+
         folder_path = self.get_folder_path()
         print(f"{self.youtube_id}: delete all media files")
         try:

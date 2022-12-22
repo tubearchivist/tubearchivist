@@ -165,7 +165,9 @@ POST /api/channel/
 ```
 
 ## Channel Item View
-/api/channel/\<channel_id>/
+GET: /api/channel/\<channel_id>/  
+DELETE: /api/channel/\<channel_id>/
+- Will delete channel with all it's videos
 
 ## Channel Videos View
 /api/channel/\<channel_id>/video/
