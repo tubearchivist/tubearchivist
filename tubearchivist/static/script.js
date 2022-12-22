@@ -204,7 +204,7 @@ function downloadNow(button) {
 function forgetIgnore(button) {
   let youtube_id = button.getAttribute('data-id');
   let apiEndpoint = '/api/download/' + youtube_id + '/';
-  apiRequest(apiEndpoint, "DELETE");
+  apiRequest(apiEndpoint, 'DELETE');
   document.getElementById('dl-' + youtube_id).remove();
 }
 
@@ -220,8 +220,8 @@ function addSingle(button) {
 
 function deleteQueue(button) {
   let to_delete = button.getAttribute('data-id');
-  let payload = JSON.stringify({ deleteQueue: to_delete });
-  sendPost(payload);
+  let apiEndpoint = '/api/download/?filter=' + to_delete;
+  apiRequest(apiEndpoint, 'DELETE');
   // clear button
   let message = document.createElement('p');
   message.innerText = 'deleting download queue: ' + to_delete;

@@ -4,7 +4,6 @@ Functionality:
 - called via user input
 """
 
-from home.src.download.queue import PendingInteract
 from home.src.download.subscriptions import (
     ChannelSubscription,
     PlaylistSubscription,
@@ -62,7 +61,6 @@ class PostData:
             "show_subed_only": self._show_subed_only,
             "dlnow": self._dlnow,
             "show_ignored_only": self._show_ignored_only,
-            "deleteQueue": self._delete_queue,
             "manual-import": self._manual_import,
             "re-embed": self._re_embed,
             "db-backup": self._db_backup,
@@ -210,13 +208,6 @@ class PostData:
         value = {"status": show_value}
         print(f"Filter download view ignored only: {show_value}")
         RedisArchivist().set_message(key, value)
-        return {"success": True}
-
-    def _delete_queue(self):
-        """delete download queue"""
-        status = self.exec_val
-        print("deleting from download queue: " + status)
-        PendingInteract(status=status).delete_by_status()
         return {"success": True}
 
     @staticmethod
