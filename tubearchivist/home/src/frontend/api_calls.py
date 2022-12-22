@@ -12,7 +12,6 @@ from home.src.download.subscriptions import (
 from home.src.frontend.watched import WatchState
 from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
-from home.src.index.video import YoutubeVideo
 from home.src.ta.helper import UrlListParser
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 from home.tasks import (
@@ -73,7 +72,6 @@ class PostData:
             "db-backup": self._db_backup,
             "db-restore": self._db_restore,
             "fs-rescan": self._fs_rescan,
-            "delete-video": self._delete_video,
             "delete-channel": self._delete_channel,
             "delete-playlist": self._delete_playlist,
             "find-playlists": self._find_playlists,
@@ -282,12 +280,6 @@ class PostData:
         """start file system rescan task"""
         print("start filesystem scan")
         rescan_filesystem.delay()
-        return {"success": True}
-
-    def _delete_video(self):
-        """delete media file, metadata and thumb"""
-        youtube_id = self.exec_val
-        YoutubeVideo(youtube_id).delete_media_file()
         return {"success": True}
 
     def _delete_channel(self):

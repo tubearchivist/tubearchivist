@@ -334,8 +334,8 @@ function deleteConfirm() {
 function deleteVideo(button) {
   let to_delete = button.getAttribute('data-id');
   let to_redirect = button.getAttribute('data-redirect');
-  let payload = JSON.stringify({ 'delete-video': to_delete });
-  sendPost(payload);
+  let apiEndpoint = '/api/video/' + to_delete + '/';
+  apiRequest(apiEndpoint, 'DELETE');
   setTimeout(function () {
     let redirect = '/channel/' + to_redirect;
     window.location.replace(redirect);

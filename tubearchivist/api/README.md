@@ -79,7 +79,8 @@ Pass page number as a query parameter: `page=2`. Defaults to *0*, `page=1` is re
 /api/video/
 
 ## Video Item View
-/api/video/\<video_id>/
+GET: /api/video/\<video_id>/  
+DELETE: /api/video/\<video_id>/
 
 ## Video Comment View
 /api/video/\<video_id>/comment/  

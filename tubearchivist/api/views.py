@@ -9,7 +9,7 @@ from home.src.es.snapshot import ElasticSnapshot
 from home.src.frontend.searching import SearchForm
 from home.src.index.generic import Pagination
 from home.src.index.reindex import ReindexProgress
-from home.src.index.video import SponsorBlock
+from home.src.index.video import SponsorBlock, YoutubeVideo
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import UrlListParser
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
@@ -94,6 +94,20 @@ class VideoApiView(ApiBaseView):
         """get request"""
         self.get_document(video_id)
         return Response(self.response, status=self.status_code)
+
+    def delete(self, request, video_id):
+        # pylint: disable=unused-argument
+        """delete single video"""
+        message = {"video": video_id}
+        try:
+            YoutubeVideo(video_id).delete_media_file()
+            status_code = 200
+            message.update({"state": "delete"})
+        except FileNotFoundError:
+            status_code = 404
+            message.update({"state": "not found"})
+
+        return Response(message, status=status_code)
 
 
 class VideoApiListView(ApiBaseView):
