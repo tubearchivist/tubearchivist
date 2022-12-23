@@ -143,7 +143,7 @@ class DownloadPostProcess:
 
     def get_comments(self):
         """get comments from youtube"""
-        CommentList(self.download.videos).index(send_notifications=True)
+        CommentList(self.download.videos).index(notify=True)
 
 
 class VideoDownloader:

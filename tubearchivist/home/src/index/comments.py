@@ -146,6 +146,7 @@ class Comments:
         if not self.is_activated:
             return
 
+        print(f"{self.youtube_id}: upload comments")
         _, _ = ElasticWrap(self.es_path).put(self.json_data)
 
         vid_path = f"ta_video/_update/{self.youtube_id}"
