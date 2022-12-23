@@ -24,14 +24,13 @@ function updateVideoWatchStatus(input1, videoCurrentWatchStatus) {
   removeProgressBar(videoId);
 
   let watchStatusIndicator, payload;
+  let apiEndpoint = '/api/watched/'
   if (videoCurrentWatchStatus === 'watched') {
     watchStatusIndicator = createWatchStatusIndicator(videoId, 'unwatched');
-    payload = JSON.stringify({ un_watched: videoId });
-    sendPost(payload);
+    apiRequest(apiEndpoint, 'POST', {id: videoId, "is_watched": false})
   } else if (videoCurrentWatchStatus === 'unwatched') {
     watchStatusIndicator = createWatchStatusIndicator(videoId, 'watched');
-    payload = JSON.stringify({ watched: videoId });
-    sendPost(payload);
+    apiRequest(apiEndpoint, 'POST', {id: videoId, "is_watched": true})
   }
 
   let watchButtons = document.getElementsByClassName('watch-button');
@@ -76,9 +75,10 @@ function removeProgressBar(videoId) {
 
 function isWatchedButton(button) {
   let youtube_id = button.getAttribute('data-id');
-  let payload = JSON.stringify({ watched: youtube_id });
+  let apiEndpoint = '/api/watched/';
+  let data = {id: youtube_id, is_watched: true}
   button.remove();
-  sendPost(payload);
+  apiRequest(apiEndpoint, 'POST', data);
   setTimeout(function () {
     location.reload();
   }, 1000);

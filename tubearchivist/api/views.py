@@ -7,6 +7,7 @@ from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.connect import ElasticWrap
 from home.src.es.snapshot import ElasticSnapshot
 from home.src.frontend.searching import SearchForm
+from home.src.frontend.watched import WatchState
 from home.src.index.channel import YoutubeChannel
 from home.src.index.generic import Pagination
 from home.src.index.reindex import ReindexProgress
@@ -701,6 +702,24 @@ class CookieView(ApiBaseView):
 
         message = {"cookie_import": "done", "cookie_validated": validated}
         return Response(message)
+
+
+class WatchedView(ApiBaseView):
+    """resolves to /api/watched/
+    POST: change watched state of video, channel or playlist
+    """
+
+    def post(self, request):
+        """change watched state"""
+        youtube_id = request.data.get("id")
+        is_watched = request.data.get("is_watched")
+
+        if not youtube_id or is_watched is None:
+            message = {"message": "missing id or is_watched"}
+            return Response(message, status=400)
+
+        WatchState(youtube_id, is_watched).change()
+        return Response({"message": "success"}, status=200)
 
 
 class SearchView(ApiBaseView):

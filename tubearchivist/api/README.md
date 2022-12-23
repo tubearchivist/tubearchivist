@@ -41,6 +41,7 @@ Note:
 - [Refresh](#refresh-view)
 - [Cookie](#cookie-view)
 - [Search](#search-view)
+- [Watched](#watched-view)
 - [Ping](#ping-view)
 
 ## Authentication
@@ -403,6 +404,19 @@ Or returns status code 400 on failure:
 GET /api/search/?query=\<query>
 
 Returns search results from your query.
+
+## Watched View
+POST /api/watched/  
+
+Change watched state, where the `id` can be a single video, or channel/playlist to change all videos belonging to that channel/playlist.
+
+```json
+{
+    "id": "xxxxxxx",
+    "is_watched": True
+}
+```
+
 
 ## Ping View
 Validate your connection with the API  

@@ -74,12 +74,12 @@ class PostData:
 
     def _watched(self):
         """mark as watched"""
-        WatchState(self.exec_val).mark_as_watched()
+        WatchState(self.exec_val, is_watched=True).change()
         return {"success": True}
 
     def _un_watched(self):
         """mark as unwatched"""
-        WatchState(self.exec_val).mark_as_unwatched()
+        WatchState(self.exec_val, is_watched=False).change()
         return {"success": True}
 
     def _change_view(self):
