@@ -23,14 +23,14 @@ function updateVideoWatchStatus(input1, videoCurrentWatchStatus) {
   postVideoProgress(videoId, 0); // Reset video progress on watched/unwatched;
   removeProgressBar(videoId);
 
-  let watchStatusIndicator, payload;
-  let apiEndpoint = '/api/watched/'
+  let watchStatusIndicator;
+  let apiEndpoint = '/api/watched/';
   if (videoCurrentWatchStatus === 'watched') {
     watchStatusIndicator = createWatchStatusIndicator(videoId, 'unwatched');
-    apiRequest(apiEndpoint, 'POST', {id: videoId, "is_watched": false})
+    apiRequest(apiEndpoint, 'POST', { id: videoId, is_watched: false });
   } else if (videoCurrentWatchStatus === 'unwatched') {
     watchStatusIndicator = createWatchStatusIndicator(videoId, 'watched');
-    apiRequest(apiEndpoint, 'POST', {id: videoId, "is_watched": true})
+    apiRequest(apiEndpoint, 'POST', { id: videoId, is_watched: true });
   }
 
   let watchButtons = document.getElementsByClassName('watch-button');
@@ -76,7 +76,7 @@ function removeProgressBar(videoId) {
 function isWatchedButton(button) {
   let youtube_id = button.getAttribute('data-id');
   let apiEndpoint = '/api/watched/';
-  let data = {id: youtube_id, is_watched: true}
+  let data = { id: youtube_id, is_watched: true };
   button.remove();
   apiRequest(apiEndpoint, 'POST', data);
   setTimeout(function () {
@@ -187,7 +187,7 @@ function dlPending() {
 function toIgnore(button) {
   let youtube_id = button.getAttribute('data-id');
   let apiEndpoint = '/api/download/' + youtube_id + '/';
-  apiRequest(apiEndpoint, 'POST', {status: 'ignore'});
+  apiRequest(apiEndpoint, 'POST', { status: 'ignore' });
   document.getElementById('dl-' + youtube_id).remove();
 }
 
@@ -211,7 +211,7 @@ function forgetIgnore(button) {
 function addSingle(button) {
   let youtube_id = button.getAttribute('data-id');
   let apiEndpoint = '/api/download/' + youtube_id + '/';
-  apiRequest(apiEndpoint, 'POST', {status: 'pending'})
+  apiRequest(apiEndpoint, 'POST', { status: 'pending' });
   document.getElementById('dl-' + youtube_id).remove();
   setTimeout(function () {
     checkMessages();

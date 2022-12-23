@@ -8,7 +8,6 @@ from home.src.download.subscriptions import (
     ChannelSubscription,
     PlaylistSubscription,
 )
-from home.src.frontend.watched import WatchState
 from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.helper import UrlListParser
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
@@ -47,8 +46,6 @@ class PostData:
     def exec_map(self):
         """map dict key and return function to execute"""
         exec_map = {
-            "watched": self._watched,
-            "un_watched": self._un_watched,
             "change_view": self._change_view,
             "change_grid": self._change_grid,
             "rescan_pending": self._rescan_pending,
@@ -71,16 +68,6 @@ class PostData:
         }
 
         return exec_map[self.to_exec]
-
-    def _watched(self):
-        """mark as watched"""
-        WatchState(self.exec_val, is_watched=True).change()
-        return {"success": True}
-
-    def _un_watched(self):
-        """mark as unwatched"""
-        WatchState(self.exec_val, is_watched=False).change()
-        return {"success": True}
 
     def _change_view(self):
         """process view changes in home, channel, and downloads"""
