@@ -41,6 +41,7 @@ Note:
 - [Refresh](#refresh-view)
 - [Cookie](#cookie-view)
 - [Search](#search-view)
+- [Watched](#watched-view)
 - [Ping](#ping-view)
 
 ## Authentication
@@ -79,7 +80,8 @@ Pass page number as a query parameter: `page=2`. Defaults to *0*, `page=1` is re
 /api/video/
 
 ## Video Item View
-/api/video/\<video_id>/
+GET: /api/video/\<video_id>/  
+DELETE: /api/video/\<video_id>/
 
 ## Video Comment View
 /api/video/\<video_id>/comment/  
@@ -88,12 +90,12 @@ Pass page number as a query parameter: `page=2`. Defaults to *0*, `page=1` is re
 /api/video/\<video_id>/similar/  
 
 ## Video Progress View
-/api/video/\<video_id>/progress  
+/api/video/\<video_id>/progress/  
 
 Progress is stored for each user.
 
 ### Get last player position of a video
-GET /api/video/\<video_id>/progress
+GET /api/video/\<video_id>/progress/
 ```json
 {
     "youtube_id": "<video_id>",
@@ -103,7 +105,7 @@ GET /api/video/\<video_id>/progress
 ```
 
 ### Post player position of video
-POST /api/video/\<video_id>/progress
+POST /api/video/\<video_id>/progress/
 ```json
 {
     "position": 100
@@ -111,7 +113,7 @@ POST /api/video/\<video_id>/progress
 ```
 
 ### Delete player position of video
-DELETE /api/video/\<video_id>/progress  
+DELETE /api/video/\<video_id>/progress/  
 
 
 ## Sponsor Block View
@@ -164,7 +166,9 @@ POST /api/channel/
 ```
 
 ## Channel Item View
-/api/channel/\<channel_id>/
+GET: /api/channel/\<channel_id>/  
+DELETE: /api/channel/\<channel_id>/
+- Will delete channel with all it's videos
 
 ## Channel Videos View
 /api/channel/\<channel_id>/video/
@@ -264,7 +268,7 @@ Remove this snapshot from index
 
 ## Login View
 Return token and user ID for username and password:  
-POST /api/login
+POST /api/login/
 ```json
 {
     "username": "tubearchivist",
@@ -401,9 +405,22 @@ GET /api/search/?query=\<query>
 
 Returns search results from your query.
 
+## Watched View
+POST /api/watched/  
+
+Change watched state, where the `id` can be a single video, or channel/playlist to change all videos belonging to that channel/playlist.
+
+```json
+{
+    "id": "xxxxxxx",
+    "is_watched": True
+}
+```
+
+
 ## Ping View
 Validate your connection with the API  
-GET /api/ping
+GET /api/ping/
 
 When valid returns message with user id: 
 ```json

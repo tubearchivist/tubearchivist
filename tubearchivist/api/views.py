@@ -7,9 +7,11 @@ from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.connect import ElasticWrap
 from home.src.es.snapshot import ElasticSnapshot
 from home.src.frontend.searching import SearchForm
+from home.src.frontend.watched import WatchState
+from home.src.index.channel import YoutubeChannel
 from home.src.index.generic import Pagination
 from home.src.index.reindex import ReindexProgress
-from home.src.index.video import SponsorBlock
+from home.src.index.video import SponsorBlock, YoutubeVideo
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import UrlListParser
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
@@ -94,6 +96,20 @@ class VideoApiView(ApiBaseView):
         """get request"""
         self.get_document(video_id)
         return Response(self.response, status=self.status_code)
+
+    def delete(self, request, video_id):
+        # pylint: disable=unused-argument
+        """delete single video"""
+        message = {"video": video_id}
+        try:
+            YoutubeVideo(video_id).delete_media_file()
+            status_code = 200
+            message.update({"state": "delete"})
+        except FileNotFoundError:
+            status_code = 404
+            message.update({"state": "not found"})
+
+        return Response(message, status=status_code)
 
 
 class VideoApiListView(ApiBaseView):
@@ -251,6 +267,20 @@ class ChannelApiView(ApiBaseView):
         self.get_document(channel_id)
         return Response(self.response, status=self.status_code)
 
+    def delete(self, request, channel_id):
+        # pylint: disable=unused-argument
+        """delete channel"""
+        message = {"channel": channel_id}
+        try:
+            YoutubeChannel(channel_id).delete_channel()
+            status_code = 200
+            message.update({"state": "delete"})
+        except FileNotFoundError:
+            status_code = 404
+            message.update({"state": "not found"})
+
+        return Response(message, status=status_code)
+
 
 class ChannelApiListView(ApiBaseView):
     """resolves to /api/channel/
@@ -375,7 +405,7 @@ class DownloadApiView(ApiBaseView):
 
     def post(self, request, video_id):
         """post to video to change status"""
-        item_status = request.data["status"]
+        item_status = request.data.get("status")
         if item_status not in self.valid_status:
             message = f"{video_id}: invalid status {item_status}"
             print(message)
@@ -672,6 +702,24 @@ class CookieView(ApiBaseView):
 
         message = {"cookie_import": "done", "cookie_validated": validated}
         return Response(message)
+
+
+class WatchedView(ApiBaseView):
+    """resolves to /api/watched/
+    POST: change watched state of video, channel or playlist
+    """
+
+    def post(self, request):
+        """change watched state"""
+        youtube_id = request.data.get("id")
+        is_watched = request.data.get("is_watched")
+
+        if not youtube_id or is_watched is None:
+            message = {"message": "missing id or is_watched"}
+            return Response(message, status=400)
+
+        WatchState(youtube_id, is_watched).change()
+        return Response({"message": "success"}, status=200)
 
 
 class SearchView(ApiBaseView):

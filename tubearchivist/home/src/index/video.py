@@ -292,6 +292,9 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         """delete video file, meta data"""
         print(f"{self.youtube_id}: delete video")
         self.get_from_es()
+        if not self.json_data:
+            raise FileNotFoundError
+
         video_base = self.app_conf["videos"]
         media_url = self.json_data.get("media_url")
         file_path = os.path.join(video_base, media_url)

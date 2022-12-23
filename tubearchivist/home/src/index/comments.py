@@ -14,7 +14,7 @@ from home.src.ta.ta_redis import RedisArchivist
 
 
 class Comments:
-    """hold all comments functionality"""
+    """interact with comments per video"""
 
     def __init__(self, youtube_id, config=False):
         self.youtube_id = youtube_id
@@ -146,6 +146,7 @@ class Comments:
         if not self.is_activated:
             return
 
+        print(f"{self.youtube_id}: upload comments")
         _, _ = ElasticWrap(self.es_path).put(self.json_data)
 
         vid_path = f"ta_video/_update/{self.youtube_id}"
@@ -187,3 +188,40 @@ class Comments:
 
         self.delete_comments()
         self.upload_comments()
+
+
+class CommentList:
+    """interact with comments in group"""
+
+    def __init__(self, video_ids):
+        self.video_ids = video_ids
+        self.config = AppConfig().config
+
+    def index(self, notify=False):
+        """index group of videos"""
+        if not self.config["downloads"].get("comment_max"):
+            return
+
+        total_videos = len(self.video_ids)
+        for idx, video_id in enumerate(self.video_ids):
+            comment = Comments(video_id, config=self.config)
+            if notify:
+                notify = (idx, total_videos)
+            comment.build_json(notify=notify)
+            if comment.json_data:
+                comment.upload_comments()
+
+        if notify:
+            self.notify_final(total_videos)
+
+    @staticmethod
+    def notify_final(total_videos):
+        """send final notification"""
+        key = "message:download"
+        message = {
+            "status": key,
+            "level": "info",
+            "title": "Download and index comments finished",
+            "message": f"added comments for {total_videos} videos",
+        }
+        RedisArchivist().set_message(key, message, expire=4)

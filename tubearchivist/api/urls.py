@@ -23,6 +23,7 @@ from api.views import (
     VideoProgressView,
     VideoSimilarView,
     VideoSponsorView,
+    WatchedView,
 )
 from django.urls import path
 
@@ -123,6 +124,11 @@ urlpatterns = [
         "cookie/",
         CookieView.as_view(),
         name="api-cookie",
+    ),
+    path(
+        "watched/",
+        WatchedView.as_view(),
+        name="api-watched",
     ),
     path(
         "search/",

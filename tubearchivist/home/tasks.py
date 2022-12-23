@@ -22,7 +22,7 @@ from home.src.es.index_setup import ElasitIndexWrap
 from home.src.index.channel import YoutubeChannel
 from home.src.index.filesystem import ImportFolderScanner, scan_filesystem
 from home.src.index.reindex import Reindex, ReindexManual, ReindexOutdated
-from home.src.ta.config import AppConfig, ScheduleBuilder
+from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.helper import UrlListParser, clear_dl_cache
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 
@@ -290,9 +290,15 @@ def index_channel_playlists(channel_id):
     channel.index_channel_playlists()
 
 
+@shared_task(name="version_check")
+def version_check():
+    """check for new updates"""
+    ReleaseVersion().check()
+
+
 try:
     app.conf.beat_schedule = ScheduleBuilder().build_schedule()
 except KeyError:
-    # update path from v0.0.8 to v0.0.9 to load new defaults
+    # update path to load new defaults
     StartupCheck().sync_redis_state()
     app.conf.beat_schedule = ScheduleBuilder().build_schedule()

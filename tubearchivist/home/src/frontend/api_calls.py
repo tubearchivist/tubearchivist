@@ -4,15 +4,11 @@ Functionality:
 - called via user input
 """
 
-from home.src.download.queue import PendingInteract
 from home.src.download.subscriptions import (
     ChannelSubscription,
     PlaylistSubscription,
 )
-from home.src.frontend.watched import WatchState
-from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
-from home.src.index.video import YoutubeVideo
 from home.src.ta.helper import UrlListParser
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 from home.tasks import (
@@ -50,12 +46,9 @@ class PostData:
     def exec_map(self):
         """map dict key and return function to execute"""
         exec_map = {
-            "watched": self._watched,
-            "un_watched": self._un_watched,
             "change_view": self._change_view,
             "change_grid": self._change_grid,
             "rescan_pending": self._rescan_pending,
-            "ignore": self._ignore,
             "dl_pending": self._dl_pending,
             "queue": self._queue_handler,
             "unsubscribe": self._unsubscribe,
@@ -65,31 +58,16 @@ class PostData:
             "show_subed_only": self._show_subed_only,
             "dlnow": self._dlnow,
             "show_ignored_only": self._show_ignored_only,
-            "forgetIgnore": self._forget_ignore,
-            "addSingle": self._add_single,
-            "deleteQueue": self._delete_queue,
             "manual-import": self._manual_import,
             "re-embed": self._re_embed,
             "db-backup": self._db_backup,
             "db-restore": self._db_restore,
             "fs-rescan": self._fs_rescan,
-            "delete-video": self._delete_video,
-            "delete-channel": self._delete_channel,
             "delete-playlist": self._delete_playlist,
             "find-playlists": self._find_playlists,
         }
 
         return exec_map[self.to_exec]
-
-    def _watched(self):
-        """mark as watched"""
-        WatchState(self.exec_val).mark_as_watched()
-        return {"success": True}
-
-    def _un_watched(self):
-        """mark as unwatched"""
-        WatchState(self.exec_val).mark_as_unwatched()
-        return {"success": True}
 
     def _change_view(self):
         """process view changes in home, channel, and downloads"""
@@ -115,15 +93,6 @@ class PostData:
         """look for new items in subscribed channels"""
         print("rescan subscribed channels")
         update_subscribed.delay()
-        return {"success": True}
-
-    def _ignore(self):
-        """ignore from download queue"""
-        video_id = self.exec_val
-        print(f"{video_id}: ignore video from download queue")
-        PendingInteract(video_id=video_id, status="ignore").update_status()
-        # also clear from redis queue
-        RedisQueue(queue_name="dl_queue").clear_item(video_id)
         return {"success": True}
 
     @staticmethod
@@ -228,27 +197,6 @@ class PostData:
         RedisArchivist().set_message(key, value)
         return {"success": True}
 
-    def _forget_ignore(self):
-        """delete from ta_download index"""
-        video_id = self.exec_val
-        print(f"{video_id}: forget from download")
-        PendingInteract(video_id=video_id).delete_item()
-        return {"success": True}
-
-    def _add_single(self):
-        """add single youtube_id to download queue"""
-        video_id = self.exec_val
-        print(f"{video_id}: add single vid to download queue")
-        PendingInteract(video_id=video_id, status="pending").update_status()
-        return {"success": True}
-
-    def _delete_queue(self):
-        """delete download queue"""
-        status = self.exec_val
-        print("deleting from download queue: " + status)
-        PendingInteract(status=status).delete_by_status()
-        return {"success": True}
-
     @staticmethod
     def _manual_import():
         """run manual import from settings page"""
@@ -282,18 +230,6 @@ class PostData:
         """start file system rescan task"""
         print("start filesystem scan")
         rescan_filesystem.delay()
-        return {"success": True}
-
-    def _delete_video(self):
-        """delete media file, metadata and thumb"""
-        youtube_id = self.exec_val
-        YoutubeVideo(youtube_id).delete_media_file()
-        return {"success": True}
-
-    def _delete_channel(self):
-        """delete channel and all matching videos"""
-        channel_id = self.exec_val
-        YoutubeChannel(channel_id).delete_channel()
         return {"success": True}
 
     def _delete_playlist(self):

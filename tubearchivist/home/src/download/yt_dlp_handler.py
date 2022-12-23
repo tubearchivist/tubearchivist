@@ -15,7 +15,7 @@ from home.src.download.subscriptions import PlaylistSubscription
 from home.src.download.yt_dlp_base import CookieHandler, YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.channel import YoutubeChannel
-from home.src.index.comments import Comments
+from home.src.index.comments import CommentList
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video import YoutubeVideo, index_new_video
 from home.src.ta.config import AppConfig
@@ -143,25 +143,7 @@ class DownloadPostProcess:
 
     def get_comments(self):
         """get comments from youtube"""
-        if not self.download.config["downloads"]["comment_max"]:
-            return
-
-        total_videos = len(self.download.videos)
-        for idx, video_id in enumerate(self.download.videos):
-            comment = Comments(video_id, config=self.download.config)
-            comment.build_json(notify=(idx, total_videos))
-            if comment.json_data:
-                comment.upload_comments()
-
-        key = "message:download"
-        message = {
-            "status": key,
-            "level": "info",
-            "title": "Download and index comments finished",
-            "message": f"added comments for {total_videos} videos",
-        }
-
-        RedisArchivist().set_message(key, message, expire=4)
+        CommentList(self.download.videos).index(notify=True)
 
 
 class VideoDownloader:
