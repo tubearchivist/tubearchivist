@@ -89,12 +89,12 @@ DELETE: /api/video/\<video_id>/
 /api/video/\<video_id>/similar/  
 
 ## Video Progress View
-/api/video/\<video_id>/progress  
+/api/video/\<video_id>/progress/  
 
 Progress is stored for each user.
 
 ### Get last player position of a video
-GET /api/video/\<video_id>/progress
+GET /api/video/\<video_id>/progress/
 ```json
 {
     "youtube_id": "<video_id>",
@@ -104,7 +104,7 @@ GET /api/video/\<video_id>/progress
 ```
 
 ### Post player position of video
-POST /api/video/\<video_id>/progress
+POST /api/video/\<video_id>/progress/
 ```json
 {
     "position": 100
@@ -112,7 +112,7 @@ POST /api/video/\<video_id>/progress
 ```
 
 ### Delete player position of video
-DELETE /api/video/\<video_id>/progress  
+DELETE /api/video/\<video_id>/progress/  
 
 
 ## Sponsor Block View
@@ -267,7 +267,7 @@ Remove this snapshot from index
 
 ## Login View
 Return token and user ID for username and password:  
-POST /api/login
+POST /api/login/
 ```json
 {
     "username": "tubearchivist",
@@ -406,7 +406,7 @@ Returns search results from your query.
 
 ## Ping View
 Validate your connection with the API  
-GET /api/ping
+GET /api/ping/
 
 When valid returns message with user id: 
 ```json
