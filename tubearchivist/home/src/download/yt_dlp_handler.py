@@ -6,6 +6,7 @@ functionality:
 - move to archive
 """
 
+import json
 import os
 import shutil
 from datetime import datetime
@@ -18,6 +19,7 @@ from home.src.index.channel import YoutubeChannel
 from home.src.index.comments import Comments
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video import YoutubeVideo, index_new_video
+from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import clean_string, ignore_filelist
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
@@ -191,9 +193,20 @@ class VideoDownloader:
             queue.trim(limit_queue - 1)
 
         while True:
-            youtube_id = queue.get_next()
-            if not youtube_id:
+            youtube_data = queue.get_next()
+            if not youtube_data:
                 break
+
+            try:
+                youtube_data = json.loads(youtube_data)
+            except json.JSONDecodeError as e:  # This many not be necessary
+                continue
+
+            youtube_id = youtube_data.get('youtube_id')
+
+            tmp_vid_type = youtube_data.get('vid_type', VideoTypeEnum.VIDEO.value)
+            video_type = VideoTypeEnum(tmp_vid_type)
+            print(f"Downloading type: {video_type}")
 
             success = self._dl_single_vid(youtube_id)
             if not success:
@@ -208,7 +221,7 @@ class VideoDownloader:
             RedisArchivist().set_message(self.MSG, mess_dict, expire=60)
 
             vid_dict = index_new_video(
-                youtube_id, video_overwrites=self.video_overwrites
+                youtube_id, video_overwrites=self.video_overwrites, video_type=video_type
             )
             self.channels.add(vid_dict["channel"]["channel_id"])
             self.videos.add(vid_dict["youtube_id"])
@@ -262,7 +275,14 @@ class VideoDownloader:
         RedisArchivist().set_message(self.MSG, mess_dict, expire=True)
         pending = PendingList()
         pending.get_download()
-        to_add = [i["youtube_id"] for i in pending.all_pending]
+        to_add = [
+            json.dumps({
+                'youtube_id': i["youtube_id"],
+                # Using .value in default val to match what would be decoded when parsing json if not set
+                'vid_type': i.get('vid_type', VideoTypeEnum.VIDEO.value),
+            })
+            for i in pending.all_pending
+        ]
         if not to_add:
             # there is nothing pending
             print("download queue is empty")

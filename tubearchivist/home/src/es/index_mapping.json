@@ -178,6 +178,12 @@
                 "youtube_id": {
                     "type": "keyword"
                 },
+                "vid_type": {
+                    "type": "keyword"
+                },
+                "was_live": {
+                    "type": "boolean"
+                },
                 "published": {
                     "type": "date"
                 },
@@ -323,6 +329,9 @@
                     "type": "keyword"
                 },
                 "youtube_id": {
+                    "type": "keyword"
+                },
+                "vid_type": {
                     "type": "keyword"
                 }
             },

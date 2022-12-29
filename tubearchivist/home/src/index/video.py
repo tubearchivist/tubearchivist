@@ -15,6 +15,7 @@ from home.src.index import comments as ta_comments
 from home.src.index import playlist as ta_playlist
 from home.src.index.generic import YouTubeItem
 from home.src.index.subtitle import YoutubeSubtitle
+from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.helper import DurationConverter, clean_string, randomizor
 from home.src.ta.ta_redis import RedisArchivist
 from ryd_client import ryd_client
@@ -129,10 +130,11 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     index_name = "ta_video"
     yt_base = "https://www.youtube.com/watch?v="
 
-    def __init__(self, youtube_id, video_overwrites=False):
+    def __init__(self, youtube_id, video_overwrites=False, video_type=VideoTypeEnum.VIDEO):
         super().__init__(youtube_id)
         self.channel_id = False
         self.video_overwrites = video_overwrites
+        self.video_type = video_type
         self.es_path = f"{self.index_name}/_doc/{youtube_id}"
         self.offline_import = False
 
@@ -195,6 +197,8 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             "vid_last_refresh": last_refresh,
             "date_downloaded": last_refresh,
             "youtube_id": self.youtube_id,
+            "was_live": self.youtube_meta.get("was_live", False),
+            "vid_type": self.video_type.value,  # Using .value to make json encodable
             "active": True,
         }
 
@@ -399,9 +403,9 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         _, _ = ElasticWrap(path).post(data=data)
 
 
-def index_new_video(youtube_id, video_overwrites=False):
+def index_new_video(youtube_id, video_overwrites=False, video_type=VideoTypeEnum.VIDEO):
     """combined classes to create new video in index"""
-    video = YoutubeVideo(youtube_id, video_overwrites=video_overwrites)
+    video = YoutubeVideo(youtube_id, video_overwrites=video_overwrites, video_type=video_type)
     video.build_json()
     if not video.json_data:
         raise ValueError("failed to get metadata for " + youtube_id)

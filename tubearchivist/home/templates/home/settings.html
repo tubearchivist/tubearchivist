@@ -38,6 +38,16 @@
                 <i>Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max recommended 50.</i><br>
                 {{ app_form.subscriptions_channel_size }}
             </div>
+            <div class="settings-item">
+                <p>YouTube Live page size: <span class="settings-current">{{ config.subscriptions.live_channel_size }}</span></p>
+                <i>Live Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max recommended 50, 0 to disable.</i><br>
+                {{ app_form.subscriptions_live_channel_size }}
+            </div>
+            <div class="settings-item">
+                <p>YouTube Shorts page size: <span class="settings-current">{{ config.subscriptions.shorts_channel_size }}</span></p>
+                <i>Shorts Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max recommended 50, 0 to disable.</i><br>
+                {{ app_form.subscriptions_shorts_channel_size }}
+            </div>
         </div>
         <div class="settings-group">
             <h2 id="downloads">Downloads</h2>

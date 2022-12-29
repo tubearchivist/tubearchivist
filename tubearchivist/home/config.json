@@ -14,7 +14,9 @@
     "subscriptions": {
         "auto_search": false,
         "auto_download": false,
-        "channel_size": 50
+        "channel_size": 50,
+        "channel_live_size": 0,
+        "channel_shorts_size": 0
     },
     "downloads": {
         "limit_count": false,

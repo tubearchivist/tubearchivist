@@ -10,6 +10,8 @@ from home.views import (
     ChannelIdPlaylistView,
     ChannelIdView,
     ChannelView,
+    ChannelIdLiveView,
+    ChannelIdShortsView,
     DownloadView,
     HomeView,
     LoginView,
@@ -43,6 +45,16 @@ urlpatterns = [
         "channel/<slug:channel_id>/",
         login_required(ChannelIdView.as_view()),
         name="channel_id",
+    ),
+    path(
+        "channel/<slug:channel_id>/live/",
+        login_required(ChannelIdLiveView.as_view()),
+        name="channel_id_live",
+    ),
+    path(
+        "channel/<slug:channel_id>/shorts/",
+        login_required(ChannelIdShortsView.as_view()),
+        name="channel_id_shorts",
     ),
     path(
         "channel/<slug:channel_id>/about/",

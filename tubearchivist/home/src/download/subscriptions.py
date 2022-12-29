@@ -10,6 +10,7 @@ from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import IndexPaginate
 from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
+from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
 from home.src.ta.ta_redis import RedisArchivist
 
@@ -37,19 +38,28 @@ class ChannelSubscription:
 
     def get_last_youtube_videos(self, channel_id, limit=True):
         """get a list of last videos from channel"""
-        obs = {
-            "skip_download": True,
-            "extract_flat": True,
-        }
-        if limit:
-            obs["playlistend"] = self.config["subscriptions"]["channel_size"]
 
-        url = f"https://www.youtube.com/channel/{channel_id}/videos"
-        channel = YtWrap(obs, self.config).extract(url)
-        if not channel:
-            return False
+        queries = [
+            (VideoTypeEnum.VIDEO, "videos", self.config["subscriptions"]["channel_size"]),
+            (VideoTypeEnum.LIVE, "streams", self.config["subscriptions"]["live_channel_size"]),
+            (VideoTypeEnum.SHORT, "shorts", self.config["subscriptions"]["shorts_channel_size"]),
+        ]
 
-        last_videos = [(i["id"], i["title"]) for i in channel["entries"]]
+        last_videos = []
+
+        for vid_type, url, limit_amount in queries:
+            obs = {
+                "skip_download": True,
+                "extract_flat": True,
+            }
+            if limit:
+                obs["playlistend"] = limit_amount
+
+            channel = YtWrap(obs, self.config).extract(f"https://www.youtube.com/channel/{channel_id}/{url}")
+            if not channel:
+                continue
+            last_videos.extend([(i["id"], i["title"], vid_type) for i in channel["entries"]])
+
         return last_videos
 
     def find_missing(self):
@@ -67,9 +77,9 @@ class ChannelSubscription:
             last_videos = self.get_last_youtube_videos(channel_id)
 
             if last_videos:
-                for video in last_videos:
-                    if video[0] not in pending.to_skip:
-                        missing_videos.append(video[0])
+                for video_id, title, vid_type in last_videos:
+                    if video_id not in pending.to_skip:
+                        missing_videos.append((video_id, vid_type))
             # notify
             message = {
                 "status": "message:rescan",
