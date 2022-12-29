@@ -15,8 +15,8 @@
         "auto_search": false,
         "auto_download": false,
         "channel_size": 50,
-        "channel_live_size": 0,
-        "channel_shorts_size": 0
+        "live_channel_size": 0,
+        "shorts_channel_size": 0
     },
     "downloads": {
         "limit_count": false,
