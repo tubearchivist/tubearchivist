@@ -36,7 +36,8 @@ from home.src.index.channel import YoutubeChannel, channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video_constants import VideoTypeEnum
-from home.src.ta.config import AppConfig, ScheduleBuilder
+from home.src.index.reindex import ReindexProgress
+from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.helper import UrlListParser, time_parser
 from home.src.ta.ta_redis import RedisArchivist
 from home.tasks import extrac_dl, index_channel_playlists, subscribe_to
@@ -138,6 +139,7 @@ class ArchivistViewConfig(View):
             "show_ignored_only": self._get_show_ignore_only(),
             "show_subed_only": self._get_show_subed_only(),
             "version": settings.TA_VERSION,
+            "ta_update": ReleaseVersion().get_update(),
         }
 
 
@@ -257,6 +259,19 @@ class ArchivistResultsView(ArchivistViewConfig):
         self.context["pagination"] = self.pagination_handler.pagination
 
 
+class MinView(View):
+    """to inherit from for minimal config vars"""
+
+    @staticmethod
+    def get_min_context(request):
+        """build minimal vars for context"""
+        return {
+            "colors": AppConfig(request.user.id).colors,
+            "version": settings.TA_VERSION,
+            "ta_update": ReleaseVersion().get_update(),
+        }
+
+
 class HomeView(ArchivistResultsView):
     """resolves to /
     handle home page and video search post functionality
@@ -298,20 +313,23 @@ class HomeView(ArchivistResultsView):
             self.data["query"] = query
 
 
-class LoginView(View):
+class LoginView(MinView):
     """resolves to /login/
     Greeting and login page
     """
 
     SEC_IN_DAY = 60 * 60 * 24
 
-    @staticmethod
-    def get(request):
+    def get(self, request):
         """handle get requests"""
-        failed = bool(request.GET.get("failed"))
-        colors = AppConfig(request.user.id).colors
-        form = CustomAuthForm()
-        context = {"colors": colors, "form": form, "form_error": failed}
+        context = self.get_min_context(request)
+        context.update(
+            {
+                "form": CustomAuthForm(),
+                "form_error": bool(request.GET.get("failed")),
+            }
+        )
+
         return render(request, "home/login.html", context)
 
     def post(self, request):
@@ -333,19 +351,15 @@ class LoginView(View):
         return redirect("/login?failed=true")
 
 
-class AboutView(View):
+class AboutView(MinView):
     """resolves to /about/
     show helpful how to information
     """
 
-    @staticmethod
-    def get(request):
+    def get(self, request):
         """handle http get"""
-        context = {
-            "title": "About",
-            "colors": AppConfig(request.user.id).colors,
-            "version": settings.TA_VERSION,
-        }
+        context = self.get_min_context(request)
+        context.update({"title": "About"})
         return render(request, "home/about.html", context)
 
 
@@ -617,17 +631,18 @@ class ChannelIdAboutView(ChannelIdBaseView):
         self.initiate_vars(request)
         self.channel_has_pending(channel_id)
 
-        path = f"ta_channel/_doc/{channel_id}"
-        response, _ = ElasticWrap(path).get()
-
+        response, _ = ElasticWrap(f"ta_channel/_doc/{channel_id}").get()
         channel_info = SearchProcess(response).process()
-        channel_name = channel_info["channel_name"]
+        reindex = ReindexProgress(
+            request_type="channel", request_id=channel_id
+        ).get_progress()
 
         self.context.update(
             {
-                "title": "Channel: About " + channel_name,
+                "title": "Channel: About " + channel_info["channel_name"],
                 "channel_info": channel_info,
                 "channel_overwrite_form": ChannelOverwriteForm,
+                "reindex": reindex.get("state"),
             }
         )
 
@@ -754,12 +769,17 @@ class PlaylistIdView(ArchivistResultsView):
         self._update_view_data(playlist_id, playlist_info)
         self.find_results()
         self.match_progress()
+        reindex = ReindexProgress(
+            request_type="playlist", request_id=playlist_id
+        ).get_progress()
+
         self.context.update(
             {
                 "title": "Playlist: " + playlist_name,
                 "playlist_info": playlist_info,
                 "playlist_name": playlist_name,
                 "channel_info": channel_info,
+                "reindex": reindex.get("state"),
             }
         )
         return render(request, "home/playlist_id.html", self.context)
@@ -884,7 +904,7 @@ class PlaylistView(ArchivistResultsView):
         return redirect("playlist")
 
 
-class VideoView(View):
+class VideoView(MinView):
     """resolves to /video/<video-id>/
     display details about a single video
     """
@@ -892,11 +912,8 @@ class VideoView(View):
     def get(self, request, video_id):
         """get single video"""
         config_handler = AppConfig(request.user.id)
-        position = time_parser(request.GET.get("t"))
-        path = f"ta_video/_doc/{video_id}"
-        look_up = SearchHandler(path, config=False)
-        video_hit = look_up.get_data()
-        video_data = video_hit[0]["source"]
+        look_up = SearchHandler(f"ta_video/_doc/{video_id}", config=False)
+        video_data = look_up.get_data()[0]["source"]
         try:
             rating = video_data["stats"]["average_rating"]
             video_data["stats"]["average_rating"] = self.star_creator(rating)
@@ -909,17 +926,22 @@ class VideoView(View):
         else:
             playlist_nav = False
 
-        video_title = video_data["title"]
-        context = {
-            "video": video_data,
-            "playlist_nav": playlist_nav,
-            "title": video_title,
-            "colors": config_handler.colors,
-            "cast": config_handler.config["application"]["enable_cast"],
-            "version": settings.TA_VERSION,
-            "config": config_handler.config,
-            "position": position,
-        }
+        reindex = ReindexProgress(
+            request_type="video", request_id=video_id
+        ).get_progress()
+
+        context = self.get_min_context(request)
+        context.update(
+            {
+                "video": video_data,
+                "playlist_nav": playlist_nav,
+                "title": video_data.get("title"),
+                "cast": config_handler.config["application"]["enable_cast"],
+                "config": config_handler.config,
+                "position": time_parser(request.GET.get("t")),
+                "reindex": reindex.get("state"),
+            }
+        )
         return render(request, "home/video.html", context)
 
     @staticmethod
@@ -976,7 +998,7 @@ class SearchView(ArchivistResultsView):
         return render(request, "home/search.html", self.context)
 
 
-class SettingsView(View):
+class SettingsView(MinView):
     """resolves to /settings/
     handle the settings page, display current settings,
     take post request from the form to update settings
@@ -984,28 +1006,19 @@ class SettingsView(View):
 
     def get(self, request):
         """read and display current settings"""
-        config_handler = AppConfig(request.user.id)
-        colors = config_handler.colors
-
-        available_backups = ElasticBackup().get_all_backup_files()
-        user_form = UserSettingsForm()
-        app_form = ApplicationSettingsForm()
-        scheduler_form = SchedulerSettingsForm()
-        snapshots = ElasticSnapshot().get_snapshot_stats()
-        token = self.get_token(request)
-
-        context = {
-            "title": "Settings",
-            "config": config_handler.config,
-            "api_token": token,
-            "colors": colors,
-            "available_backups": available_backups,
-            "user_form": user_form,
-            "app_form": app_form,
-            "scheduler_form": scheduler_form,
-            "snapshots": snapshots,
-            "version": settings.TA_VERSION,
-        }
+        context = self.get_min_context(request)
+        context.update(
+            {
+                "title": "Settings",
+                "config": AppConfig(request.user.id).config,
+                "api_token": self.get_token(request),
+                "available_backups": ElasticBackup().get_all_backup_files(),
+                "user_form": UserSettingsForm(),
+                "app_form": ApplicationSettingsForm(),
+                "scheduler_form": SchedulerSettingsForm(),
+                "snapshots": ElasticSnapshot().get_snapshot_stats(),
+            }
+        )
 
         return render(request, "home/settings.html", context)
 

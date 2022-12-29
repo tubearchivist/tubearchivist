@@ -88,7 +88,7 @@ class ChannelScraper:
         # build and return dict
         self.json_data = {
             "channel_active": True,
-            "channel_last_refresh": int(datetime.now().strftime("%s")),
+            "channel_last_refresh": int(datetime.now().timestamp()),
             "channel_subs": self._get_channel_subs(main_tab),
             "channel_name": main_tab["title"],
             "channel_banner_url": self._get_thumbnails(main_tab, "banner"),
@@ -203,7 +203,7 @@ class YoutubeChannel(YouTubeItem):
         print(f"{self.youtube_id}: fallback to video metadata")
         self.json_data = {
             "channel_active": False,
-            "channel_last_refresh": int(datetime.now().strftime("%s")),
+            "channel_last_refresh": int(datetime.now().timestamp()),
             "channel_subs": fallback.get("channel_follower_count", 0),
             "channel_name": fallback["uploader"],
             "channel_banner_url": False,
@@ -298,6 +298,9 @@ class YoutubeChannel(YouTubeItem):
         """delete channel and all videos"""
         print(f"{self.youtube_id}: delete channel")
         self.get_from_es()
+        if not self.json_data:
+            raise FileNotFoundError
+
         folder_path = self.get_folder_path()
         print(f"{self.youtube_id}: delete all media files")
         try:

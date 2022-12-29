@@ -285,7 +285,7 @@ class SubtitleParser:
             "title": video.json_data.get("title"),
             "subtitle_channel": channel.get("channel_name"),
             "subtitle_channel_id": channel.get("channel_id"),
-            "subtitle_last_refresh": int(datetime.now().strftime("%s")),
+            "subtitle_last_refresh": int(datetime.now().timestamp()),
             "subtitle_lang": self.lang,
             "subtitle_source": source,
         }

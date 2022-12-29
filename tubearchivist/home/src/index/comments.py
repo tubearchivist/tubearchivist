@@ -14,7 +14,7 @@ from home.src.ta.ta_redis import RedisArchivist
 
 
 class Comments:
-    """hold all comments functionality"""
+    """interact with comments per video"""
 
     def __init__(self, youtube_id, config=False):
         self.youtube_id = youtube_id
@@ -33,14 +33,14 @@ class Comments:
 
         self._send_notification(notify)
         comments_raw, channel_id = self.get_yt_comments()
-        if comments_raw:
-            self.format_comments(comments_raw)
-        else:
-            self.comments_format = []
+        if not comments_raw and not channel_id:
+            return
+
+        self.format_comments(comments_raw)
 
         self.json_data = {
             "youtube_id": self.youtube_id,
-            "comment_last_refresh": int(datetime.now().strftime("%s")),
+            "comment_last_refresh": int(datetime.now().timestamp()),
             "comment_channel_id": channel_id,
             "comment_comments": self.comments_format,
         }
@@ -96,6 +96,9 @@ class Comments:
         """get comments from youtube"""
         yt_obs = self.build_yt_obs()
         info_json = YtWrap(yt_obs).extract(self.youtube_id)
+        if not info_json:
+            return False, False
+
         comments_raw = info_json.get("comments")
         channel_id = info_json.get("channel_id")
         return comments_raw, channel_id
@@ -104,9 +107,10 @@ class Comments:
         """process comments to match format"""
         comments = []
 
-        for comment in comments_raw:
-            cleaned_comment = self.clean_comment(comment)
-            comments.append(cleaned_comment)
+        if comments_raw:
+            for comment in comments_raw:
+                cleaned_comment = self.clean_comment(comment)
+                comments.append(cleaned_comment)
 
         self.comments_format = comments
 
@@ -142,6 +146,7 @@ class Comments:
         if not self.is_activated:
             return
 
+        print(f"{self.youtube_id}: upload comments")
         _, _ = ElasticWrap(self.es_path).put(self.json_data)
 
         vid_path = f"ta_video/_update/{self.youtube_id}"
@@ -169,6 +174,9 @@ class Comments:
             return
 
         self.build_json()
+        if not self.json_data:
+            return
+
         es_comments = self.get_es_comments()
 
         if not self.comments_format:
@@ -180,3 +188,40 @@ class Comments:
 
         self.delete_comments()
         self.upload_comments()
+
+
+class CommentList:
+    """interact with comments in group"""
+
+    def __init__(self, video_ids):
+        self.video_ids = video_ids
+        self.config = AppConfig().config
+
+    def index(self, notify=False):
+        """index group of videos"""
+        if not self.config["downloads"].get("comment_max"):
+            return
+
+        total_videos = len(self.video_ids)
+        for idx, video_id in enumerate(self.video_ids):
+            comment = Comments(video_id, config=self.config)
+            if notify:
+                notify = (idx, total_videos)
+            comment.build_json(notify=notify)
+            if comment.json_data:
+                comment.upload_comments()
+
+        if notify:
+            self.notify_final(total_videos)
+
+    @staticmethod
+    def notify_final(total_videos):
+        """send final notification"""
+        key = "message:download"
+        message = {
+            "status": key,
+            "level": "info",
+            "title": "Download and index comments finished",
+            "message": f"added comments for {total_videos} videos",
+        }
+        RedisArchivist().set_message(key, message, expire=4)

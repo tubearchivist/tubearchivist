@@ -23,15 +23,14 @@ function updateVideoWatchStatus(input1, videoCurrentWatchStatus) {
   postVideoProgress(videoId, 0); // Reset video progress on watched/unwatched;
   removeProgressBar(videoId);
 
-  let watchStatusIndicator, payload;
+  let watchStatusIndicator;
+  let apiEndpoint = '/api/watched/';
   if (videoCurrentWatchStatus === 'watched') {
     watchStatusIndicator = createWatchStatusIndicator(videoId, 'unwatched');
-    payload = JSON.stringify({ un_watched: videoId });
-    sendPost(payload);
+    apiRequest(apiEndpoint, 'POST', { id: videoId, is_watched: false });
   } else if (videoCurrentWatchStatus === 'unwatched') {
     watchStatusIndicator = createWatchStatusIndicator(videoId, 'watched');
-    payload = JSON.stringify({ watched: videoId });
-    sendPost(payload);
+    apiRequest(apiEndpoint, 'POST', { id: videoId, is_watched: true });
   }
 
   let watchButtons = document.getElementsByClassName('watch-button');
@@ -76,9 +75,10 @@ function removeProgressBar(videoId) {
 
 function isWatchedButton(button) {
   let youtube_id = button.getAttribute('data-id');
-  let payload = JSON.stringify({ watched: youtube_id });
+  let apiEndpoint = '/api/watched/';
+  let data = { id: youtube_id, is_watched: true };
   button.remove();
-  sendPost(payload);
+  apiRequest(apiEndpoint, 'POST', data);
   setTimeout(function () {
     location.reload();
   }, 1000);
@@ -147,6 +147,24 @@ function toggleCheckbox(checkbox) {
   }, 500);
 }
 
+// start reindex task
+function reindex(button) {
+  let apiEndpoint = '/api/refresh/';
+  if (button.getAttribute('data-extract-videos')) {
+    apiEndpoint += '?extract_videos=true';
+  }
+  let type = button.getAttribute('data-type');
+  let id = button.getAttribute('data-id');
+
+  let data = {};
+  data[type] = [id];
+
+  apiRequest(apiEndpoint, 'POST', data);
+  let message = document.createElement('p');
+  message.innerText = 'Reindex scheduled';
+  document.getElementById('reindex-button').replaceWith(message);
+}
+
 // download page buttons
 function rescanPending() {
   let payload = JSON.stringify({ rescan_pending: true });
@@ -168,8 +186,8 @@ function dlPending() {
 
 function toIgnore(button) {
   let youtube_id = button.getAttribute('data-id');
-  let payload = JSON.stringify({ ignore: youtube_id });
-  sendPost(payload);
+  let apiEndpoint = '/api/download/' + youtube_id + '/';
+  apiRequest(apiEndpoint, 'POST', { status: 'ignore' });
   document.getElementById('dl-' + youtube_id).remove();
 }
 
@@ -185,15 +203,15 @@ function downloadNow(button) {
 
 function forgetIgnore(button) {
   let youtube_id = button.getAttribute('data-id');
-  let payload = JSON.stringify({ forgetIgnore: youtube_id });
-  sendPost(payload);
+  let apiEndpoint = '/api/download/' + youtube_id + '/';
+  apiRequest(apiEndpoint, 'DELETE');
   document.getElementById('dl-' + youtube_id).remove();
 }
 
 function addSingle(button) {
   let youtube_id = button.getAttribute('data-id');
-  let payload = JSON.stringify({ addSingle: youtube_id });
-  sendPost(payload);
+  let apiEndpoint = '/api/download/' + youtube_id + '/';
+  apiRequest(apiEndpoint, 'POST', { status: 'pending' });
   document.getElementById('dl-' + youtube_id).remove();
   setTimeout(function () {
     checkMessages();
@@ -202,8 +220,8 @@ function addSingle(button) {
 
 function deleteQueue(button) {
   let to_delete = button.getAttribute('data-id');
-  let payload = JSON.stringify({ deleteQueue: to_delete });
-  sendPost(payload);
+  let apiEndpoint = '/api/download/?filter=' + to_delete;
+  apiRequest(apiEndpoint, 'DELETE');
   // clear button
   let message = document.createElement('p');
   message.innerText = 'deleting download queue: ' + to_delete;
@@ -316,8 +334,8 @@ function deleteConfirm() {
 function deleteVideo(button) {
   let to_delete = button.getAttribute('data-id');
   let to_redirect = button.getAttribute('data-redirect');
-  let payload = JSON.stringify({ 'delete-video': to_delete });
-  sendPost(payload);
+  let apiEndpoint = '/api/video/' + to_delete + '/';
+  apiRequest(apiEndpoint, 'DELETE');
   setTimeout(function () {
     let redirect = '/channel/' + to_redirect;
     window.location.replace(redirect);
@@ -326,8 +344,8 @@ function deleteVideo(button) {
 
 function deleteChannel(button) {
   let to_delete = button.getAttribute('data-id');
-  let payload = JSON.stringify({ 'delete-channel': to_delete });
-  sendPost(payload);
+  let apiEndpoint = '/api/channel/' + to_delete + '/';
+  apiRequest(apiEndpoint, 'DELETE');
   setTimeout(function () {
     window.location.replace('/channel/');
   }, 1000);

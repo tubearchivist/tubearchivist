@@ -151,7 +151,7 @@ class CookieHandler:
         now = datetime.now()
         message = {
             "status": response,
-            "validated": int(now.strftime("%s")),
+            "validated": int(now.timestamp()),
             "validated_str": now.strftime("%Y-%m-%d %H:%M"),
         }
         RedisArchivist().set_message("cookie:valid", message)

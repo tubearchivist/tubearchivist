@@ -119,6 +119,10 @@ button:hover {
     color: var(--main-bg);
 }
 
+.button-box {
+    padding: 5px 0;
+}
+
 .unsubscribe {
     background-color: var(--accent-font-light);
 }

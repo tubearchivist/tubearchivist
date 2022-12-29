@@ -272,7 +272,7 @@ class PendingList(PendingIndex):
             "channel_id": vid["channel_id"],
             "duration": duration_str,
             "published": published,
-            "timestamp": int(datetime.now().strftime("%s")),
+            "timestamp": int(datetime.now().timestamp()),
             "vid_type": vid_type.value,  # Pulling enum value out so it is serializable
         }
         if self.all_channels:
