@@ -73,20 +73,14 @@ class SponsorBlock:
 
     def _get_sponsor_dict(self, all_segments):
         """format and process response"""
-        has_unlocked = False
-        cleaned_segments = []
-        for segment in all_segments:
-            if not segment["locked"]:
-                has_unlocked = True
-            del segment["userID"]
-            del segment["description"]
-            cleaned_segments.append(segment)
+        _ = [i.pop("description", None) for i in all_segments]
+        has_unlocked = not any(i.get("locked") for i in all_segments)
 
         sponsor_dict = {
             "last_refresh": self.last_refresh,
             "has_unlocked": has_unlocked,
             "is_enabled": True,
-            "segments": cleaned_segments,
+            "segments": all_segments,
         }
         return sponsor_dict
 
