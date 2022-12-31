@@ -181,9 +181,6 @@
                 "vid_type": {
                     "type": "keyword"
                 },
-                "was_live": {
-                    "type": "boolean"
-                },
                 "published": {
                     "type": "date"
                 },
