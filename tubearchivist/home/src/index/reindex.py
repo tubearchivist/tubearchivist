@@ -246,7 +246,7 @@ class Reindex(ReindexBase):
         try:
             self._reindex_single_video_call(youtube_id)
         except FileNotFoundError:
-            ChannelUrlFixer(youtube_id, self.config)
+            ChannelUrlFixer(youtube_id, self.config).run()
             self._reindex_single_video_call(youtube_id)
 
     def _reindex_single_video_call(self, youtube_id):
