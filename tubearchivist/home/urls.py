@@ -7,11 +7,11 @@ from django.urls import path
 from home.views import (
     AboutView,
     ChannelIdAboutView,
+    ChannelIdLiveView,
     ChannelIdPlaylistView,
+    ChannelIdShortsView,
     ChannelIdView,
     ChannelView,
-    ChannelIdLiveView,
-    ChannelIdShortsView,
     DownloadView,
     HomeView,
     LoginView,

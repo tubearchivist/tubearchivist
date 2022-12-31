@@ -202,7 +202,8 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             "vid_last_refresh": last_refresh,
             "date_downloaded": last_refresh,
             "youtube_id": self.youtube_id,
-            "vid_type": self.video_type.value,  # Using .value to make json encodable
+            # Using .value to make json encodable
+            "vid_type": self.video_type.value,
             "active": True,
         }
 

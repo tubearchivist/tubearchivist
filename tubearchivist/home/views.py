@@ -35,8 +35,8 @@ from home.src.frontend.searching import SearchHandler
 from home.src.index.channel import YoutubeChannel, channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
-from home.src.index.video_constants import VideoTypeEnum
 from home.src.index.reindex import ReindexProgress
+from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.helper import UrlListParser, time_parser
 from home.src.ta.ta_redis import RedisArchivist
@@ -550,7 +550,8 @@ class ChannelIdView(ChannelIdBaseView):
                 vid_type_terms.append(t.value)
             else:
                 print(
-                    f"Invalid value passed into video_types on ChannelIdView: {t}"
+                    "Invalid value passed into video_types on "
+                    + f"ChannelIdView: {t}"
                 )
         self.data["query"] = {
             "bool": {

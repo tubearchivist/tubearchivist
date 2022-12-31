@@ -189,7 +189,8 @@ class PendingList(PendingIndex):
         video_results = playlist.json_data.get("playlist_entries")
         youtube_ids = [i["youtube_id"] for i in video_results]
         for video_id in youtube_ids:
-            # FIXME: This will need to be adjusted to support Live/Shorts from playlists
+            # FIXME: This will need to be adjusted to support Live/Shorts
+            #  from playlists
             self._add_video(video_id, VideoTypeEnum.VIDEO)
 
     def add_to_pending(self, status="pending"):
@@ -273,7 +274,8 @@ class PendingList(PendingIndex):
             "duration": duration_str,
             "published": published,
             "timestamp": int(datetime.now().timestamp()),
-            "vid_type": vid_type.value,  # Pulling enum value out so it is serializable
+            # Pulling enum value out so it is serializable
+            "vid_type": vid_type.value,
         }
         if self.all_channels:
             youtube_details.update(

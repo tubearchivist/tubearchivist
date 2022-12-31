@@ -182,7 +182,7 @@ class VideoDownloader:
 
             try:
                 youtube_data = json.loads(youtube_data)
-            except json.JSONDecodeError as e:  # This many not be necessary
+            except json.JSONDecodeError:  # This many not be necessary
                 continue
 
             youtube_id = youtube_data.get("youtube_id")
@@ -266,7 +266,8 @@ class VideoDownloader:
             json.dumps(
                 {
                     "youtube_id": i["youtube_id"],
-                    # Using .value in default val to match what would be decoded when parsing json if not set
+                    # Using .value in default val to match what would be
+                    # decoded when parsing json if not set
                     "vid_type": i.get("vid_type", VideoTypeEnum.VIDEO.value),
                 }
             )
