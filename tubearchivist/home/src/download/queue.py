@@ -179,7 +179,7 @@ class PendingList(PendingIndex):
         video_results = ChannelSubscription().get_last_youtube_videos(
             url, limit=False
         )
-        for video_id, title, vid_type in video_results:
+        for video_id, _, vid_type in video_results:
             self._add_video(video_id, vid_type)
 
     def _parse_playlist(self, url):

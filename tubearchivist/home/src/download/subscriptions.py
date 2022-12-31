@@ -93,7 +93,7 @@ class ChannelSubscription:
             last_videos = self.get_last_youtube_videos(channel_id)
 
             if last_videos:
-                for video_id, title, vid_type in last_videos:
+                for video_id, _, vid_type in last_videos:
                     if video_id not in pending.to_skip:
                         missing_videos.append((video_id, vid_type))
             # notify
