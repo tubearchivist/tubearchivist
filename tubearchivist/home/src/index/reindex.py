@@ -205,7 +205,7 @@ class Reindex(ReindexBase):
 
     def reindex_all(self):
         """reindex all in queue"""
-        if self.cookie_invalid():
+        if not self.cookie_is_valid():
             print("[reindex] cookie invalid, exiting...")
             return
 
@@ -333,8 +333,8 @@ class Reindex(ReindexBase):
         handler.get_indexed()
         self.all_indexed_ids = [i["youtube_id"] for i in handler.all_videos]
 
-    def cookie_invalid(self):
-        """return true if cookie is enabled and invalid"""
+    def cookie_is_valid(self):
+        """return true if cookie is enabled and valid"""
         if not self.config["downloads"]["cookie_import"]:
             return False
 
