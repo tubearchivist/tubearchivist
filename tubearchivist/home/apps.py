@@ -36,6 +36,7 @@ class StartupCheck:
         clear_dl_cache(self.config_handler.config)
         self.snapshot_check()
         self.ta_version_check()
+        self.es_set_vid_type()
         self.set_has_run()
 
     def get_has_run(self):
@@ -125,6 +126,17 @@ class StartupCheck:
     def ta_version_check(self):
         """remove key if updated now"""
         ReleaseVersion().is_updated()
+
+    def es_set_vid_type(self):
+        """update path 0.3.0 to 0.3.1, set default vid_type to video"""
+        data = {
+            "query": {
+                "bool": {"must_not": [{"exists": {"field": "vid_type"}}]}
+            },
+            "script": {"source": "ctx._source['vid_type'] = 'video'"},
+        }
+        response, _ = ElasticWrap("ta_video/_update_by_query").post(data=data)
+        print(f"ta_video vid_type index update ran: {response}")
 
 
 class HomeConfig(AppConfig):

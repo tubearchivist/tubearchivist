@@ -3,7 +3,7 @@ Functionality:
 - all views for home app
 - holds base classes to inherit from
 """
-
+import enum
 import json
 import urllib.parse
 from time import sleep
@@ -514,7 +514,7 @@ class ChannelIdView(ChannelIdBaseView):
 
     view_origin = "home"
     es_search = "ta_video/_search"
-    video_types = [VideoTypeEnum.VIDEO, None]
+    video_types = [VideoTypeEnum.VIDEO]
 
     def get(self, request, channel_id):
         """get request"""
@@ -545,41 +545,16 @@ class ChannelIdView(ChannelIdBaseView):
     def _update_view_data(self, channel_id):
         """update view specific data dict"""
         vid_type_terms = []
-        include_vid_type_field_missing = False
         for t in self.video_types:
-            if not t:
-                include_vid_type_field_missing = True
-                vid_type_terms.append("")  # Adding in empty string here just to cover if field exists but not set
-            else:
+            if t and isinstance(t, enum.Enum):
                 vid_type_terms.append(t.value)
-        if include_vid_type_field_missing:
-            vid_type_query = {
-                "bool": {
-                    "should": [
-                        {
-                            "bool": {
-                                "must_not": {
-                                    "exists": {
-                                        "field": "vid_type"
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            "terms": {
-                                "vid_type": vid_type_terms
-                            }
-                        }
-                    ]
-                }
-            }
-        else:
-            vid_type_query = {"terms": {"vid_type": vid_type_terms}}
+            else:
+                print(f"Invalid value passed into video_types on ChannelIdView: {t}")
         self.data["query"] = {
             "bool": {
                 "must": [
                     {"term": {"channel.channel_id": {"value": channel_id}}},
-                    vid_type_query
+                    {"terms": {"vid_type": vid_type_terms}}
                 ]
             }
         }
@@ -804,9 +779,9 @@ class PlaylistIdView(ArchivistResultsView):
             for i in playlist_info["playlist_entries"]
         }
         script = (
-            "if(params.scores.containsKey(doc['youtube_id'].value)) "
-            + "{return params.scores[doc['youtube_id'].value];} "
-            + "return 100000;"
+                "if(params.scores.containsKey(doc['youtube_id'].value)) "
+                + "{return params.scores[doc['youtube_id'].value];} "
+                + "return 100000;"
         )
         self.data.update(
             {
