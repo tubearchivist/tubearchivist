@@ -130,7 +130,12 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     index_name = "ta_video"
     yt_base = "https://www.youtube.com/watch?v="
 
-    def __init__(self, youtube_id, video_overwrites=False, video_type=VideoTypeEnum.VIDEO):
+    def __init__(
+        self,
+        youtube_id,
+        video_overwrites=False,
+        video_type=VideoTypeEnum.VIDEO,
+    ):
         super().__init__(youtube_id)
         self.channel_id = False
         self.video_overwrites = video_overwrites
@@ -405,9 +410,13 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         _, _ = ElasticWrap(path).post(data=data)
 
 
-def index_new_video(youtube_id, video_overwrites=False, video_type=VideoTypeEnum.VIDEO):
+def index_new_video(
+    youtube_id, video_overwrites=False, video_type=VideoTypeEnum.VIDEO
+):
     """combined classes to create new video in index"""
-    video = YoutubeVideo(youtube_id, video_overwrites=video_overwrites, video_type=video_type)
+    video = YoutubeVideo(
+        youtube_id, video_overwrites=video_overwrites, video_type=video_type
+    )
     video.build_json()
     if not video.json_data:
         raise ValueError("failed to get metadata for " + youtube_id)

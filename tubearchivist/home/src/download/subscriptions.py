@@ -40,9 +40,21 @@ class ChannelSubscription:
         """get a list of last videos from channel"""
 
         queries = [
-            (VideoTypeEnum.VIDEO, "videos", self.config["subscriptions"]["channel_size"]),
-            (VideoTypeEnum.LIVE, "streams", self.config["subscriptions"]["live_channel_size"]),
-            (VideoTypeEnum.SHORT, "shorts", self.config["subscriptions"]["shorts_channel_size"]),
+            (
+                VideoTypeEnum.VIDEO,
+                "videos",
+                self.config["subscriptions"]["channel_size"],
+            ),
+            (
+                VideoTypeEnum.LIVE,
+                "streams",
+                self.config["subscriptions"]["live_channel_size"],
+            ),
+            (
+                VideoTypeEnum.SHORT,
+                "shorts",
+                self.config["subscriptions"]["shorts_channel_size"],
+            ),
         ]
 
         last_videos = []
@@ -55,10 +67,14 @@ class ChannelSubscription:
             if limit:
                 obs["playlistend"] = limit_amount
 
-            channel = YtWrap(obs, self.config).extract(f"https://www.youtube.com/channel/{channel_id}/{url}")
+            channel = YtWrap(obs, self.config).extract(
+                f"https://www.youtube.com/channel/{channel_id}/{url}"
+            )
             if not channel:
                 continue
-            last_videos.extend([(i["id"], i["title"], vid_type) for i in channel["entries"]])
+            last_videos.extend(
+                [(i["id"], i["title"], vid_type) for i in channel["entries"]]
+            )
 
         return last_videos
 

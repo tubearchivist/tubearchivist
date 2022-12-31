@@ -549,12 +549,14 @@ class ChannelIdView(ChannelIdBaseView):
             if t and isinstance(t, enum.Enum):
                 vid_type_terms.append(t.value)
             else:
-                print(f"Invalid value passed into video_types on ChannelIdView: {t}")
+                print(
+                    f"Invalid value passed into video_types on ChannelIdView: {t}"
+                )
         self.data["query"] = {
             "bool": {
                 "must": [
                     {"term": {"channel.channel_id": {"value": channel_id}}},
-                    {"terms": {"vid_type": vid_type_terms}}
+                    {"terms": {"vid_type": vid_type_terms}},
                 ]
             }
         }
@@ -584,6 +586,7 @@ class ChannelIdLiveView(ChannelIdView):
     """resolves to /channel/<channel-id>/live/
     display single channel page from channel_id
     """
+
     video_types = [VideoTypeEnum.LIVE]
 
 
@@ -591,6 +594,7 @@ class ChannelIdShortsView(ChannelIdView):
     """resolves to /channel/<channel-id>/shorts/
     display single channel page from channel_id
     """
+
     video_types = [VideoTypeEnum.SHORT]
 
 
@@ -779,9 +783,9 @@ class PlaylistIdView(ArchivistResultsView):
             for i in playlist_info["playlist_entries"]
         }
         script = (
-                "if(params.scores.containsKey(doc['youtube_id'].value)) "
-                + "{return params.scores[doc['youtube_id'].value];} "
-                + "return 100000;"
+            "if(params.scores.containsKey(doc['youtube_id'].value)) "
+            + "{return params.scores[doc['youtube_id'].value];} "
+            + "return 100000;"
         )
         self.data.update(
             {

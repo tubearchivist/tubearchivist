@@ -185,9 +185,11 @@ class VideoDownloader:
             except json.JSONDecodeError as e:  # This many not be necessary
                 continue
 
-            youtube_id = youtube_data.get('youtube_id')
+            youtube_id = youtube_data.get("youtube_id")
 
-            tmp_vid_type = youtube_data.get('vid_type', VideoTypeEnum.VIDEO.value)
+            tmp_vid_type = youtube_data.get(
+                "vid_type", VideoTypeEnum.VIDEO.value
+            )
             video_type = VideoTypeEnum(tmp_vid_type)
             print(f"Downloading type: {video_type}")
 
@@ -204,7 +206,9 @@ class VideoDownloader:
             RedisArchivist().set_message(self.MSG, mess_dict, expire=60)
 
             vid_dict = index_new_video(
-                youtube_id, video_overwrites=self.video_overwrites, video_type=video_type
+                youtube_id,
+                video_overwrites=self.video_overwrites,
+                video_type=video_type,
             )
             self.channels.add(vid_dict["channel"]["channel_id"])
             self.videos.add(vid_dict["youtube_id"])
@@ -259,11 +263,13 @@ class VideoDownloader:
         pending = PendingList()
         pending.get_download()
         to_add = [
-            json.dumps({
-                'youtube_id': i["youtube_id"],
-                # Using .value in default val to match what would be decoded when parsing json if not set
-                'vid_type': i.get('vid_type', VideoTypeEnum.VIDEO.value),
-            })
+            json.dumps(
+                {
+                    "youtube_id": i["youtube_id"],
+                    # Using .value in default val to match what would be decoded when parsing json if not set
+                    "vid_type": i.get("vid_type", VideoTypeEnum.VIDEO.value),
+                }
+            )
             for i in pending.all_pending
         ]
         if not to_add:
