@@ -462,7 +462,7 @@ video:-webkit-full-screen {
     overflow: hidden;
 }
 
-.video-item:hover .video-thumb div {
+.video-item:hover .video-tags {
     opacity: 1;
 }
 
@@ -486,7 +486,7 @@ video:-webkit-full-screen {
     position: relative;
 }
 
-.video-thumb div {
+.video-tags {
     position: absolute;
     top: 5px;
     left: 0;
