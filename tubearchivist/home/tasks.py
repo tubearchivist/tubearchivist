@@ -22,6 +22,7 @@ from home.src.es.index_setup import ElasitIndexWrap
 from home.src.index.channel import YoutubeChannel
 from home.src.index.filesystem import ImportFolderScanner, scan_filesystem
 from home.src.index.reindex import Reindex, ReindexManual, ReindexOutdated
+from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.helper import UrlListParser, clear_dl_cache
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
@@ -58,10 +59,22 @@ def update_subscribed():
             missing_from_channels = channel_handler.find_missing()
             playlist_handler = PlaylistSubscription()
             missing_from_playlists = playlist_handler.find_missing()
-            missing = missing_from_channels + missing_from_playlists
-            if missing:
-                youtube_ids = [{"type": "video", "url": i} for i in missing]
-                pending_handler = PendingList(youtube_ids=youtube_ids)
+            if missing_from_channels or missing_from_playlists:
+                channel_videos = [
+                    {"type": "video", "vid_type": vid_type, "url": vid_id}
+                    for vid_id, vid_type in missing_from_channels
+                ]
+                playlist_videos = [
+                    {
+                        "type": "video",
+                        "vid_type": VideoTypeEnum.VIDEO,
+                        "url": i,
+                    }
+                    for i in missing_from_playlists
+                ]
+                pending_handler = PendingList(
+                    youtube_ids=channel_videos + playlist_videos
+                )
                 pending_handler.parse_url_list()
                 pending_handler.add_to_pending()
 

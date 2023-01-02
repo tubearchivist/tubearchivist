@@ -15,6 +15,7 @@ from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.playlist import YoutubePlaylist
+from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import DurationConverter
 from home.src.ta.ta_redis import RedisArchivist
@@ -156,7 +157,8 @@ class PendingList(PendingIndex):
     def _process_entry(self, entry):
         """process single entry from url list"""
         if entry["type"] == "video":
-            self._add_video(entry["url"])
+            vid_type = entry.get("vid_type", VideoTypeEnum.VIDEO)
+            self._add_video(entry["url"], vid_type)
         elif entry["type"] == "channel":
             self._parse_channel(entry["url"])
         elif entry["type"] == "playlist":
@@ -165,10 +167,10 @@ class PendingList(PendingIndex):
         else:
             raise ValueError(f"invalid url_type: {entry}")
 
-    def _add_video(self, url):
+    def _add_video(self, url, vid_type=VideoTypeEnum.VIDEO):
         """add video to list"""
         if url not in self.missing_videos and url not in self.to_skip:
-            self.missing_videos.append(url)
+            self.missing_videos.append((url, vid_type))
         else:
             print(f"{url}: skipped adding already indexed video to download.")
 
@@ -177,9 +179,8 @@ class PendingList(PendingIndex):
         video_results = ChannelSubscription().get_last_youtube_videos(
             url, limit=False
         )
-        youtube_ids = [i[0] for i in video_results]
-        for video_id in youtube_ids:
-            self._add_video(video_id)
+        for video_id, _, vid_type in video_results:
+            self._add_video(video_id, vid_type)
 
     def _parse_playlist(self, url):
         """add all videos of playlist to list"""
@@ -188,16 +189,18 @@ class PendingList(PendingIndex):
         video_results = playlist.json_data.get("playlist_entries")
         youtube_ids = [i["youtube_id"] for i in video_results]
         for video_id in youtube_ids:
-            self._add_video(video_id)
+            # FIXME: This will need to be adjusted to support Live/Shorts
+            #  from playlists
+            self._add_video(video_id, VideoTypeEnum.VIDEO)
 
     def add_to_pending(self, status="pending"):
         """add missing videos to pending list"""
         self.get_channels()
         bulk_list = []
 
-        for idx, youtube_id in enumerate(self.missing_videos):
-            print(f"{youtube_id}: add to download queue")
-            video_details = self.get_youtube_details(youtube_id)
+        for idx, (youtube_id, vid_type) in enumerate(self.missing_videos):
+            print(f"{youtube_id} ({vid_type}): add to download queue")
+            video_details = self.get_youtube_details(youtube_id, vid_type)
             if not video_details:
                 continue
 
@@ -235,7 +238,7 @@ class PendingList(PendingIndex):
         if idx + 1 % 25 == 0:
             print("adding to queue progress: " + progress)
 
-    def get_youtube_details(self, youtube_id):
+    def get_youtube_details(self, youtube_id, vid_type=VideoTypeEnum.VIDEO):
         """get details from youtubedl for single pending video"""
         vid = YtWrap(self.yt_obs, self.config).extract(youtube_id)
         if not vid:
@@ -249,9 +252,9 @@ class PendingList(PendingIndex):
         if vid["live_status"] in ["is_upcoming", "is_live"]:
             return False
 
-        return self._parse_youtube_details(vid)
+        return self._parse_youtube_details(vid, vid_type)
 
-    def _parse_youtube_details(self, vid):
+    def _parse_youtube_details(self, vid, vid_type=VideoTypeEnum.VIDEO):
         """parse response"""
         vid_id = vid.get("id")
         duration_str = DurationConverter.get_str(vid["duration"])
@@ -271,6 +274,8 @@ class PendingList(PendingIndex):
             "duration": duration_str,
             "published": published,
             "timestamp": int(datetime.now().timestamp()),
+            # Pulling enum value out so it is serializable
+            "vid_type": vid_type.value,
         }
         if self.all_channels:
             youtube_details.update(

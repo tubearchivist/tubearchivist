@@ -8,6 +8,8 @@
     </div>
     <div class="info-box-item channel-nav">
         <a href="{% url 'channel_id' channel_info.channel_id %}"><h3>Videos</h3></a>
+        <a href="{% url 'channel_id_live' channel_info.channel_id %}"><h3>Live</h3></a>
+        <a href="{% url 'channel_id_shorts' channel_info.channel_id %}"><h3>Shorts</h3></a>
         <a href="{% url 'channel_id_playlist' channel_info.channel_id %}"><h3>Playlists</h3></a>
         <a href="{% url 'channel_id_about' channel_info.channel_id %}"><h3>About</h3></a>
         {% if has_pending %}
