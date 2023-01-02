@@ -96,7 +96,7 @@
                                 <button data-id="{{ video.source.youtube_id }}" onclick="addSingle(this)">Add to queue</button>
                             {% else %}
                                 <button data-id="{{ video.source.youtube_id }}" onclick="toIgnore(this)">Ignore</button>
-                                <button id="{{ video.source.youtube_id }}" data-id="{{ video.source.youtube_id }}" onclick="downloadNow(this)">Download now</button>
+                                <button id="{{ video.source.youtube_id }}" data-id="{{ video.source.youtube_id }}" data-type="{{ video.source.vid_type }}" onclick="downloadNow(this)">Download now</button>
                             {% endif %}
                         </div>
                     </div>
