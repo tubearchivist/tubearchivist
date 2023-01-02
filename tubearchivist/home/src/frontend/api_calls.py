@@ -13,7 +13,6 @@ from home.src.ta.helper import UrlListParser
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 from home.tasks import (
     download_pending,
-    download_single,
     index_channel_playlists,
     kill_dl,
     re_sync_thumbs,
@@ -56,7 +55,6 @@ class PostData:
             "sort_order": self._sort_order,
             "hide_watched": self._hide_watched,
             "show_subed_only": self._show_subed_only,
-            "dlnow": self._dlnow,
             "show_ignored_only": self._show_ignored_only,
             "manual-import": self._manual_import,
             "re-embed": self._re_embed,
@@ -176,16 +174,6 @@ class PostData:
         message = {"status": bool(int(self.exec_val))}
         print(f"toggle {key}: {message}")
         RedisArchivist().set_message(key, message)
-        return {"success": True}
-
-    def _dlnow(self):
-        """start downloading single vid now"""
-        youtube_id = self.exec_val
-        print(f"{youtube_id}: downloading now")
-        running = download_single.delay(youtube_id=youtube_id)
-        task_id = running.id
-        print("set task id: " + task_id)
-        RedisArchivist().set_message("dl_queue_id", task_id)
         return {"success": True}
 
     def _show_ignored_only(self):

@@ -6,6 +6,7 @@ Functionality:
   because tasks are initiated at application start
 """
 
+import json
 import os
 
 from celery import Celery, shared_task
@@ -107,11 +108,15 @@ def download_pending():
 
 
 @shared_task
-def download_single(youtube_id):
+def download_single(pending_video):
     """start download single video now"""
     queue = RedisQueue(queue_name="dl_queue")
-    queue.add_priority(youtube_id)
-    print("Added to queue with priority: " + youtube_id)
+    to_add = {
+        "youtube_id": pending_video["youtube_id"],
+        "vid_type": pending_video["vid_type"],
+    }
+    queue.add_priority(json.dumps(to_add))
+    print(f"Added to queue with priority: {to_add}")
     # start queue if needed
     have_lock = False
     my_lock = RedisArchivist().get_lock("downloading")

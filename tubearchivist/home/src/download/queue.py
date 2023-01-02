@@ -117,6 +117,12 @@ class PendingInteract:
         path = f"ta_download/_update/{self.video_id}"
         _, _ = ElasticWrap(path).post(data=data)
 
+    def get_item(self):
+        """return pending item dict"""
+        path = f"ta_download/_doc/{self.video_id}"
+        response, status_code = ElasticWrap(path).get()
+        return response["_source"], status_code
+
 
 class PendingList(PendingIndex):
     """manage the pending videos list"""
