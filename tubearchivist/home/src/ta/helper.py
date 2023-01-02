@@ -13,6 +13,7 @@ import unicodedata
 from datetime import datetime
 from urllib.parse import parse_qs, urlparse
 
+import requests
 from home.src.download.yt_dlp_base import YtWrap
 
 
@@ -134,6 +135,16 @@ def get_mapping():
         index_config = json.load(f).get("index_config")
 
     return index_config
+
+
+def is_short(youtube_id):
+    """check if youtube_id is a shorts video, bot not it it's not a shorts"""
+    shorts_url = f"https://www.youtube.com/shorts/{youtube_id}"
+    response = requests.head(
+        shorts_url, headers=requests_headers(), timeout=10
+    )
+
+    return response.status_code == 200
 
 
 class UrlListParser:
