@@ -3,7 +3,7 @@ Functionality:
 - all views for home app
 - holds base classes to inherit from
 """
-
+import enum
 import json
 import urllib.parse
 from time import sleep
@@ -36,6 +36,7 @@ from home.src.index.channel import YoutubeChannel, channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress
+from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.helper import UrlListParser, time_parser
 from home.src.ta.ta_redis import RedisArchivist
@@ -513,6 +514,7 @@ class ChannelIdView(ChannelIdBaseView):
 
     view_origin = "home"
     es_search = "ta_video/_search"
+    video_types = [VideoTypeEnum.VIDEO]
 
     def get(self, request, channel_id):
         """get request"""
@@ -542,10 +544,20 @@ class ChannelIdView(ChannelIdBaseView):
 
     def _update_view_data(self, channel_id):
         """update view specific data dict"""
+        vid_type_terms = []
+        for t in self.video_types:
+            if t and isinstance(t, enum.Enum):
+                vid_type_terms.append(t.value)
+            else:
+                print(
+                    "Invalid value passed into video_types on "
+                    + f"ChannelIdView: {t}"
+                )
         self.data["query"] = {
             "bool": {
                 "must": [
-                    {"term": {"channel.channel_id": {"value": channel_id}}}
+                    {"term": {"channel.channel_id": {"value": channel_id}}},
+                    {"terms": {"vid_type": vid_type_terms}},
                 ]
             }
         }
@@ -569,6 +581,22 @@ class ChannelIdView(ChannelIdBaseView):
 
         sleep(1)
         return redirect("channel_id", channel_id, permanent=True)
+
+
+class ChannelIdLiveView(ChannelIdView):
+    """resolves to /channel/<channel-id>/live/
+    display single channel page from channel_id
+    """
+
+    video_types = [VideoTypeEnum.LIVE]
+
+
+class ChannelIdShortsView(ChannelIdView):
+    """resolves to /channel/<channel-id>/shorts/
+    display single channel page from channel_id
+    """
+
+    video_types = [VideoTypeEnum.SHORT]
 
 
 class ChannelIdAboutView(ChannelIdBaseView):
