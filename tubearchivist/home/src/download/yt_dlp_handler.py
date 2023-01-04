@@ -104,7 +104,7 @@ class DownloadPostProcess:
                 continue
 
             # validate from local
-            playlists = channel.get_indexed_playlists()
+            playlists = channel.get_indexed_playlists(active_only=True)
             all_channel_playlist = [i["playlist_id"] for i in playlists]
             self._validate_channel_playlist(all_channel_playlist, id_c)
 
@@ -117,6 +117,7 @@ class DownloadPostProcess:
             playlist.build_json(scrape=True)
             if not playlist.json_data:
                 playlist.deactivate()
+                continue
 
             playlist.add_vids_to_playlist()
             playlist.upload_to_es()
