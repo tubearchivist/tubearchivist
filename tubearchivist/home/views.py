@@ -38,8 +38,9 @@ from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
-from home.src.ta.helper import UrlListParser, time_parser
+from home.src.ta.helper import time_parser
 from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.urlparser import Parser
 from home.tasks import extrac_dl, index_channel_playlists, subscribe_to
 from rest_framework.authtoken.models import Token
 
@@ -456,7 +457,7 @@ class DownloadView(ArchivistResultsView):
             url_str = request.POST.get("vid_url")
             print(url_str)
             try:
-                youtube_ids = UrlListParser(url_str).process_list()
+                youtube_ids = Parser(url_str).parse()
             except ValueError:
                 # failed to process
                 key = "message:add"

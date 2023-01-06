@@ -163,7 +163,7 @@ class PendingList(PendingIndex):
     def _process_entry(self, entry):
         """process single entry from url list"""
         if entry["type"] == "video":
-            vid_type = entry.get("vid_type", VideoTypeEnum.VIDEOS)
+            vid_type = self._get_vid_type(entry)
             self._add_video(entry["url"], vid_type)
         elif entry["type"] == "channel":
             self._parse_channel(entry["url"])
@@ -172,6 +172,15 @@ class PendingList(PendingIndex):
             PlaylistSubscription().process_url_str([entry], subscribed=False)
         else:
             raise ValueError(f"invalid url_type: {entry}")
+
+    @staticmethod
+    def _get_vid_type(entry):
+        """add vid type enum if available"""
+        vid_type_str = entry.get("vid_type")
+        if not vid_type_str:
+            return VideoTypeEnum.VIDEOS
+
+        return VideoTypeEnum(vid_type_str)
 
     def _add_video(self, url, vid_type=VideoTypeEnum.VIDEOS):
         """add video to list"""

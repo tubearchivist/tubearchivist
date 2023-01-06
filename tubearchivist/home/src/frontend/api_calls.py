@@ -9,8 +9,8 @@ from home.src.download.subscriptions import (
     PlaylistSubscription,
 )
 from home.src.index.playlist import YoutubePlaylist
-from home.src.ta.helper import UrlListParser
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
+from home.src.ta.urlparser import Parser
 from home.tasks import (
     download_pending,
     index_channel_playlists,
@@ -123,7 +123,7 @@ class PostData:
         """unsubscribe from channels or playlists"""
         id_unsub = self.exec_val
         print(f"{id_unsub}: unsubscribe")
-        to_unsub_list = UrlListParser(id_unsub).process_list()
+        to_unsub_list = Parser(id_unsub).parse()
         for to_unsub in to_unsub_list:
             unsub_type = to_unsub["type"]
             unsub_id = to_unsub["url"]

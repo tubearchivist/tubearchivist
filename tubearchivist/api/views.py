@@ -13,8 +13,8 @@ from home.src.index.generic import Pagination
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock, YoutubeVideo
 from home.src.ta.config import AppConfig
-from home.src.ta.helper import UrlListParser
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
+from home.src.ta.urlparser import Parser
 from home.tasks import check_reindex, download_single, extrac_dl, subscribe_to
 from rest_framework.authentication import (
     SessionAuthentication,
@@ -484,7 +484,7 @@ class DownloadApiListView(ApiBaseView):
         pending = [i["youtube_id"] for i in to_add if i["status"] == "pending"]
         url_str = " ".join(pending)
         try:
-            youtube_ids = UrlListParser(url_str).process_list()
+            youtube_ids = Parser(url_str).parse()
         except ValueError:
             message = f"failed to parse: {url_str}"
             print(message)
