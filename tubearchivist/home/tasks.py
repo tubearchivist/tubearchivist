@@ -68,7 +68,7 @@ def update_subscribed():
                 playlist_videos = [
                     {
                         "type": "video",
-                        "vid_type": VideoTypeEnum.VIDEO,
+                        "vid_type": VideoTypeEnum.VIDEOS,
                         "url": i,
                     }
                     for i in missing_from_playlists

@@ -6,7 +6,7 @@ import enum
 class VideoTypeEnum(enum.Enum):
     """all vid_type fields"""
 
-    VIDEO = "video"
-    LIVE = "live"
-    SHORT = "short"
+    VIDEOS = "videos"
+    STREAMS = "streams"
+    SHORTS = "shorts"
     UNKNOWN = "unknown"

@@ -41,18 +41,18 @@ class ChannelSubscription:
 
         queries = [
             (
-                VideoTypeEnum.VIDEO,
-                "videos",
+                VideoTypeEnum.VIDEOS,
+                VideoTypeEnum.VIDEOS.value,
                 self.config["subscriptions"]["channel_size"],
             ),
             (
-                VideoTypeEnum.LIVE,
-                "streams",
+                VideoTypeEnum.STREAMS,
+                VideoTypeEnum.STREAMS.value,
                 self.config["subscriptions"]["live_channel_size"],
             ),
             (
-                VideoTypeEnum.SHORT,
-                "shorts",
+                VideoTypeEnum.SHORTS,
+                VideoTypeEnum.SHORTS.value,
                 self.config["subscriptions"]["shorts_channel_size"],
             ),
         ]

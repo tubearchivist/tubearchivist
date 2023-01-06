@@ -134,7 +134,7 @@ class StartupCheck:
             "query": {
                 "bool": {"must_not": [{"exists": {"field": "vid_type"}}]}
             },
-            "script": {"source": "ctx._source['vid_type'] = 'video'"},
+            "script": {"source": "ctx._source['vid_type'] = 'videos'"},
         }
 
         for index_name in index_list:

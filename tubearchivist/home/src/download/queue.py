@@ -163,7 +163,7 @@ class PendingList(PendingIndex):
     def _process_entry(self, entry):
         """process single entry from url list"""
         if entry["type"] == "video":
-            vid_type = entry.get("vid_type", VideoTypeEnum.VIDEO)
+            vid_type = entry.get("vid_type", VideoTypeEnum.VIDEOS)
             self._add_video(entry["url"], vid_type)
         elif entry["type"] == "channel":
             self._parse_channel(entry["url"])
@@ -173,7 +173,7 @@ class PendingList(PendingIndex):
         else:
             raise ValueError(f"invalid url_type: {entry}")
 
-    def _add_video(self, url, vid_type=VideoTypeEnum.VIDEO):
+    def _add_video(self, url, vid_type=VideoTypeEnum.VIDEOS):
         """add video to list"""
         if url not in self.missing_videos and url not in self.to_skip:
             self.missing_videos.append((url, vid_type))
@@ -197,7 +197,7 @@ class PendingList(PendingIndex):
         for video_id in youtube_ids:
             # FIXME: This will need to be adjusted to support Live/Shorts
             #  from playlists
-            self._add_video(video_id, VideoTypeEnum.VIDEO)
+            self._add_video(video_id, VideoTypeEnum.VIDEOS)
 
     def add_to_pending(self, status="pending"):
         """add missing videos to pending list"""
@@ -244,7 +244,7 @@ class PendingList(PendingIndex):
         if idx + 1 % 25 == 0:
             print("adding to queue progress: " + progress)
 
-    def get_youtube_details(self, youtube_id, vid_type=VideoTypeEnum.VIDEO):
+    def get_youtube_details(self, youtube_id, vid_type=VideoTypeEnum.VIDEOS):
         """get details from youtubedl for single pending video"""
         vid = YtWrap(self.yt_obs, self.config).extract(youtube_id)
         if not vid:
@@ -260,7 +260,7 @@ class PendingList(PendingIndex):
 
         return self._parse_youtube_details(vid, vid_type)
 
-    def _parse_youtube_details(self, vid, vid_type=VideoTypeEnum.VIDEO):
+    def _parse_youtube_details(self, vid, vid_type=VideoTypeEnum.VIDEOS):
         """parse response"""
         vid_id = vid.get("id")
         duration_str = DurationConverter.get_str(vid["duration"])

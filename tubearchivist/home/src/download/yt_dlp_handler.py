@@ -189,7 +189,7 @@ class VideoDownloader:
             youtube_id = youtube_data.get("youtube_id")
 
             tmp_vid_type = youtube_data.get(
-                "vid_type", VideoTypeEnum.VIDEO.value
+                "vid_type", VideoTypeEnum.VIDEOS.value
             )
             video_type = VideoTypeEnum(tmp_vid_type)
             print(f"Downloading type: {video_type}")
@@ -269,7 +269,7 @@ class VideoDownloader:
                     "youtube_id": i["youtube_id"],
                     # Using .value in default val to match what would be
                     # decoded when parsing json if not set
-                    "vid_type": i.get("vid_type", VideoTypeEnum.VIDEO.value),
+                    "vid_type": i.get("vid_type", VideoTypeEnum.VIDEOS.value),
                 }
             )
             for i in pending.all_pending

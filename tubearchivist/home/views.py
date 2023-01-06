@@ -514,7 +514,7 @@ class ChannelIdView(ChannelIdBaseView):
 
     view_origin = "home"
     es_search = "ta_video/_search"
-    video_types = [VideoTypeEnum.VIDEO]
+    video_types = [VideoTypeEnum.VIDEOS]
 
     def get(self, request, channel_id):
         """get request"""
@@ -584,11 +584,11 @@ class ChannelIdView(ChannelIdBaseView):
 
 
 class ChannelIdLiveView(ChannelIdView):
-    """resolves to /channel/<channel-id>/live/
+    """resolves to /channel/<channel-id>/streams/
     display single channel page from channel_id
     """
 
-    video_types = [VideoTypeEnum.LIVE]
+    video_types = [VideoTypeEnum.STREAMS]
 
 
 class ChannelIdShortsView(ChannelIdView):
@@ -596,7 +596,7 @@ class ChannelIdShortsView(ChannelIdView):
     display single channel page from channel_id
     """
 
-    video_types = [VideoTypeEnum.SHORT]
+    video_types = [VideoTypeEnum.SHORTS]
 
 
 class ChannelIdAboutView(ChannelIdBaseView):
