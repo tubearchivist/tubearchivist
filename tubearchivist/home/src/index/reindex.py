@@ -100,7 +100,7 @@ class ReindexOutdated(ReindexBase):
         refresh_key = reindex_config["refresh_key"]
         now_lte = self.now - self.interval * 24 * 60 * 60
         must_list = [
-            {"match": {"active": True}},
+            {"match": {reindex_config["active_key"]: True}},
             {"range": {refresh_key: {"lte": now_lte}}},
         ]
         data = {
