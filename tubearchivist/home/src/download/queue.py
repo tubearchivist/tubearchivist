@@ -267,6 +267,9 @@ class PendingList(PendingIndex):
         if vid["live_status"] in ["is_upcoming", "is_live"]:
             return False
 
+        if vid["live_status"] == "was_live":
+            vid_type = VideoTypeEnum.STREAMS
+
         return self._parse_youtube_details(vid, vid_type)
 
     def _parse_youtube_details(self, vid, vid_type=VideoTypeEnum.VIDEOS):
