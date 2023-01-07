@@ -135,7 +135,7 @@ def get_mapping():
     return index_config
 
 
-def is_short(youtube_id):
+def is_shorts(youtube_id):
     """check if youtube_id is a shorts video, bot not it it's not a shorts"""
     shorts_url = f"https://www.youtube.com/shorts/{youtube_id}"
     response = requests.head(

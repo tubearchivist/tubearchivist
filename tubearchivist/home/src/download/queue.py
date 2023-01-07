@@ -17,7 +17,7 @@ from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
-from home.src.ta.helper import DurationConverter
+from home.src.ta.helper import DurationConverter, is_shorts
 from home.src.ta.ta_redis import RedisArchivist
 
 
@@ -204,9 +204,8 @@ class PendingList(PendingIndex):
         video_results = playlist.json_data.get("playlist_entries")
         youtube_ids = [i["youtube_id"] for i in video_results]
         for video_id in youtube_ids:
-            # FIXME: This will need to be adjusted to support Live/Shorts
-            #  from playlists
-            self._add_video(video_id, VideoTypeEnum.VIDEOS)
+            # match vid_type later
+            self._add_video(video_id, VideoTypeEnum.UNKNOWN)
 
     def add_to_pending(self, status="pending"):
         """add missing videos to pending list"""
@@ -269,8 +268,24 @@ class PendingList(PendingIndex):
 
         if vid["live_status"] == "was_live":
             vid_type = VideoTypeEnum.STREAMS
+        else:
+            if self._check_shorts(vid):
+                vid_type = VideoTypeEnum.SHORTS
 
         return self._parse_youtube_details(vid, vid_type)
+
+    @staticmethod
+    def _check_shorts(vid):
+        """check if vid is shorts video"""
+        if vid["width"] > vid["height"]:
+            return False
+
+        duration = vid.get("duration")
+        if duration and isinstance(duration, int):
+            if duration > 60:
+                return False
+
+        return is_shorts(vid["id"])
 
     def _parse_youtube_details(self, vid, vid_type=VideoTypeEnum.VIDEOS):
         """parse response"""
