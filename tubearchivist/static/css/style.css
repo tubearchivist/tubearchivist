@@ -649,6 +649,7 @@ video:-webkit-full-screen {
 
 .info-box-item {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     padding: 15px;
     background-color: var(--highlight-bg);

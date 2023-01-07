@@ -489,6 +489,13 @@ class ChannelIdBaseView(ArchivistResultsView):
 
         return channel_info
 
+    def channel_pages(self, channel_id):
+        """get additional context for channel pages"""
+        self.channel_has_pending(channel_id)
+        self.channel_has_streams(channel_id)
+        self.channel_has_shorts(channel_id)
+        self.channel_has_playlist(channel_id)
+
     def channel_has_pending(self, channel_id):
         """check if channel has pending videos in queue"""
         path = "ta_download/_search"
@@ -502,10 +509,52 @@ class ChannelIdBaseView(ArchivistResultsView):
                     ]
                 }
             },
+            "_source": False,
         }
         response, _ = ElasticWrap(path).get(data=data)
 
         self.context.update({"has_pending": bool(response["hits"]["hits"])})
+
+    def channel_has_streams(self, channel_id):
+        """check if channel has streams videos"""
+        data = self.get_type_data("streams", channel_id)
+        response, _ = ElasticWrap("ta_video/_search").get(data=data)
+
+        self.context.update({"has_streams": bool(response["hits"]["hits"])})
+
+    def channel_has_shorts(self, channel_id):
+        """check if channel has shorts videos"""
+        data = self.get_type_data("shorts", channel_id)
+        response, _ = ElasticWrap("ta_video/_search").get(data=data)
+
+        self.context.update({"has_shorts": bool(response["hits"]["hits"])})
+
+    @staticmethod
+    def get_type_data(vid_type, channel):
+        """build data query for vid_type"""
+        return {
+            "size": 1,
+            "query": {
+                "bool": {
+                    "must": [
+                        {"term": {"vid_type": {"value": vid_type}}},
+                        {"term": {"channel.channel_id": {"value": channel}}},
+                    ]
+                }
+            },
+            "_source": False,
+        }
+
+    def channel_has_playlist(self, channel_id):
+        """check if channel has any playlist indexed"""
+        path = "ta_playlist/_search"
+        data = {
+            "size": 1,
+            "query": {"term": {"playlist_channel_id": {"value": channel_id}}},
+            "_source": False,
+        }
+        response, _ = ElasticWrap(path).get(data=data)
+        self.context.update({"has_playlists": bool(response["hits"]["hits"])})
 
 
 class ChannelIdView(ChannelIdBaseView):
@@ -523,7 +572,7 @@ class ChannelIdView(ChannelIdBaseView):
         self._update_view_data(channel_id)
         self.find_results()
         self.match_progress()
-        self.channel_has_pending(channel_id)
+        self.channel_pages(channel_id)
 
         if self.context["results"]:
             channel_info = self.context["results"][0]["source"]["channel"]
@@ -610,7 +659,7 @@ class ChannelIdAboutView(ChannelIdBaseView):
     def get(self, request, channel_id):
         """handle get request"""
         self.initiate_vars(request)
-        self.channel_has_pending(channel_id)
+        self.channel_pages(channel_id)
 
         response, _ = ElasticWrap(f"ta_channel/_doc/{channel_id}").get()
         channel_info = SearchProcess(response).process()
@@ -658,7 +707,7 @@ class ChannelIdPlaylistView(ChannelIdBaseView):
         self.initiate_vars(request)
         self._update_view_data(channel_id)
         self.find_results()
-        self.channel_has_pending(channel_id)
+        self.channel_pages(channel_id)
 
         channel_info = self.get_channel_meta(channel_id)
         channel_name = channel_info["channel_name"]
