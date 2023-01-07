@@ -162,11 +162,11 @@ class PendingList(PendingIndex):
 
     def _process_entry(self, entry):
         """process single entry from url list"""
+        vid_type = self._get_vid_type(entry)
         if entry["type"] == "video":
-            vid_type = self._get_vid_type(entry)
             self._add_video(entry["url"], vid_type)
         elif entry["type"] == "channel":
-            self._parse_channel(entry["url"])
+            self._parse_channel(entry["url"], vid_type)
         elif entry["type"] == "playlist":
             self._parse_playlist(entry["url"])
             PlaylistSubscription().process_url_str([entry], subscribed=False)
@@ -178,21 +178,21 @@ class PendingList(PendingIndex):
         """add vid type enum if available"""
         vid_type_str = entry.get("vid_type")
         if not vid_type_str:
-            return VideoTypeEnum.VIDEOS
+            return VideoTypeEnum.UNKNOWN
 
         return VideoTypeEnum(vid_type_str)
 
-    def _add_video(self, url, vid_type=VideoTypeEnum.VIDEOS):
+    def _add_video(self, url, vid_type):
         """add video to list"""
         if url not in self.missing_videos and url not in self.to_skip:
             self.missing_videos.append((url, vid_type))
         else:
             print(f"{url}: skipped adding already indexed video to download.")
 
-    def _parse_channel(self, url):
+    def _parse_channel(self, url, vid_type):
         """add all videos of channel to list"""
         video_results = ChannelSubscription().get_last_youtube_videos(
-            url, limit=False
+            url, limit=False, query_filter=vid_type
         )
         for video_id, _, vid_type in video_results:
             self._add_video(video_id, vid_type)
