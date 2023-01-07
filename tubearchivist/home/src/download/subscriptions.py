@@ -36,30 +36,15 @@ class ChannelSubscription:
 
         return all_channels
 
-    def get_last_youtube_videos(self, channel_id, limit=True):
+    def get_last_youtube_videos(
+        self, channel_id, limit=True, query_filter=VideoTypeEnum.UNKNOWN
+    ):
         """get a list of last videos from channel"""
-
-        queries = [
-            (
-                VideoTypeEnum.VIDEO,
-                "videos",
-                self.config["subscriptions"]["channel_size"],
-            ),
-            (
-                VideoTypeEnum.LIVE,
-                "streams",
-                self.config["subscriptions"]["live_channel_size"],
-            ),
-            (
-                VideoTypeEnum.SHORT,
-                "shorts",
-                self.config["subscriptions"]["shorts_channel_size"],
-            ),
-        ]
+        queries = self._build_queries(query_filter, limit)
 
         last_videos = []
 
-        for vid_type, url, limit_amount in queries:
+        for vid_type, limit_amount in queries:
             obs = {
                 "skip_download": True,
                 "extract_flat": True,
@@ -67,8 +52,9 @@ class ChannelSubscription:
             if limit:
                 obs["playlistend"] = limit_amount
 
+            path = vid_type.value
             channel = YtWrap(obs, self.config).extract(
-                f"https://www.youtube.com/channel/{channel_id}/{url}"
+                f"https://www.youtube.com/channel/{channel_id}/{path}"
             )
             if not channel:
                 continue
@@ -77,6 +63,36 @@ class ChannelSubscription:
             )
 
         return last_videos
+
+    def _build_queries(self, query_filter, limit):
+        """build query list for vid_type"""
+        limit_map = {
+            "videos": self.config["subscriptions"]["channel_size"],
+            "streams": self.config["subscriptions"]["live_channel_size"],
+            "shorts": self.config["subscriptions"]["shorts_channel_size"],
+        }
+
+        queries = []
+
+        if query_filter and query_filter.value != "unknown":
+            if limit:
+                query_limit = limit_map.get(query_filter.value)
+            else:
+                query_limit = False
+
+            queries.append((query_filter, query_limit))
+
+            return queries
+
+        for query_item, default_limit in limit_map.items():
+            if limit:
+                query_limit = default_limit
+            else:
+                query_limit = False
+
+            queries.append((VideoTypeEnum(query_item), query_limit))
+
+        return queries
 
     def find_missing(self):
         """add missing videos from subscribed channels to pending"""

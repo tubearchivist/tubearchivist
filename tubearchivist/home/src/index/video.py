@@ -128,7 +128,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         self,
         youtube_id,
         video_overwrites=False,
-        video_type=VideoTypeEnum.VIDEO,
+        video_type=VideoTypeEnum.VIDEOS,
     ):
         super().__init__(youtube_id)
         self.channel_id = False
@@ -406,7 +406,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
 
 def index_new_video(
-    youtube_id, video_overwrites=False, video_type=VideoTypeEnum.VIDEO
+    youtube_id, video_overwrites=False, video_type=VideoTypeEnum.VIDEOS
 ):
     """combined classes to create new video in index"""
     video = YoutubeVideo(

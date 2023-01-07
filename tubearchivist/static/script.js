@@ -193,8 +193,8 @@ function toIgnore(button) {
 
 function downloadNow(button) {
   let youtube_id = button.getAttribute('data-id');
-  let payload = JSON.stringify({ dlnow: youtube_id });
-  sendPost(payload);
+  let apiEndpoint = '/api/download/' + youtube_id + '/';
+  apiRequest(apiEndpoint, 'POST', { status: 'priority' });
   document.getElementById(youtube_id).remove();
   setTimeout(function () {
     checkMessages();

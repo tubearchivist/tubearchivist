@@ -6,6 +6,7 @@ Functionality:
   because tasks are initiated at application start
 """
 
+import json
 import os
 
 from celery import Celery, shared_task
@@ -24,8 +25,9 @@ from home.src.index.filesystem import ImportFolderScanner, scan_filesystem
 from home.src.index.reindex import Reindex, ReindexManual, ReindexOutdated
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
-from home.src.ta.helper import UrlListParser, clear_dl_cache
+from home.src.ta.helper import clear_dl_cache
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
+from home.src.ta.urlparser import Parser
 
 CONFIG = AppConfig().config
 REDIS_HOST = os.environ.get("REDIS_HOST")
@@ -67,7 +69,7 @@ def update_subscribed():
                 playlist_videos = [
                     {
                         "type": "video",
-                        "vid_type": VideoTypeEnum.VIDEO,
+                        "vid_type": VideoTypeEnum.VIDEOS,
                         "url": i,
                     }
                     for i in missing_from_playlists
@@ -107,11 +109,15 @@ def download_pending():
 
 
 @shared_task
-def download_single(youtube_id):
+def download_single(pending_video):
     """start download single video now"""
     queue = RedisQueue(queue_name="dl_queue")
-    queue.add_priority(youtube_id)
-    print("Added to queue with priority: " + youtube_id)
+    to_add = {
+        "youtube_id": pending_video["youtube_id"],
+        "vid_type": pending_video["vid_type"],
+    }
+    queue.add_priority(json.dumps(to_add))
+    print(f"Added to queue with priority: {to_add}")
     # start queue if needed
     have_lock = False
     my_lock = RedisArchivist().get_lock("downloading")
@@ -256,9 +262,8 @@ def re_sync_thumbs():
 @shared_task
 def subscribe_to(url_str):
     """take a list of urls to subscribe to"""
-    to_subscribe_list = UrlListParser(url_str).process_list()
-    counter = 1
-    for item in to_subscribe_list:
+    to_subscribe_list = Parser(url_str).parse()
+    for idx, item in enumerate(to_subscribe_list):
         to_sub_id = item["url"]
         if item["type"] == "playlist":
             PlaylistSubscription().process_url_str([item])
@@ -281,10 +286,9 @@ def subscribe_to(url_str):
             "status": key,
             "level": "info",
             "title": "Subscribing to Channels",
-            "message": f"Processing {counter} of {len(to_subscribe_list)}",
+            "message": f"Processing {idx + 1} of {len(to_subscribe_list)}",
         }
         RedisArchivist().set_message(key, message=message, expire=True)
-        counter = counter + 1
 
 
 @shared_task

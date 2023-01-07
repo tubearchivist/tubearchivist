@@ -462,7 +462,7 @@ video:-webkit-full-screen {
     overflow: hidden;
 }
 
-.video-item:hover .video-thumb span {
+.video-item:hover .video-tags {
     opacity: 1;
 }
 
@@ -486,14 +486,18 @@ video:-webkit-full-screen {
     position: relative;
 }
 
-.video-thumb span {
+.video-tags {
     position: absolute;
     top: 5px;
-    left: 5px;
-    background-color: var(--accent-font-light);
+    left: 0;
     padding: 5px;
     opacity: 0;
     transition: 300ms ease-in-out;
+}
+
+.video-tags span {
+    background-color: var(--accent-font-light);
+    padding: 5px;
 }
 
 .video-play img {
@@ -645,6 +649,7 @@ video:-webkit-full-screen {
 
 .info-box-item {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     padding: 15px;
     background-color: var(--highlight-bg);

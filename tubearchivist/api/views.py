@@ -13,9 +13,9 @@ from home.src.index.generic import Pagination
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock, YoutubeVideo
 from home.src.ta.config import AppConfig
-from home.src.ta.helper import UrlListParser
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
-from home.tasks import check_reindex, extrac_dl, subscribe_to
+from home.src.ta.urlparser import Parser
+from home.tasks import check_reindex, download_single, extrac_dl, subscribe_to
 from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
@@ -395,7 +395,7 @@ class DownloadApiView(ApiBaseView):
     """
 
     search_base = "ta_download/_doc/"
-    valid_status = ["pending", "ignore"]
+    valid_status = ["pending", "ignore", "priority"]
 
     def get(self, request, video_id):
         # pylint: disable=unused-argument
@@ -411,9 +411,17 @@ class DownloadApiView(ApiBaseView):
             print(message)
             return Response({"message": message}, status=400)
 
+        pending_video, status_code = PendingInteract(video_id).get_item()
+        if status_code == 404:
+            message = f"{video_id}: item not found {status_code}"
+            return Response({"message": message}, status=404)
+
         print(f"{video_id}: change status to {item_status}")
-        PendingInteract(video_id=video_id, status=item_status).update_status()
-        RedisQueue(queue_name="dl_queue").clear_item(video_id)
+        if item_status == "priority":
+            download_single.delay(pending_video)
+        else:
+            PendingInteract(video_id, item_status).update_status()
+            RedisQueue(queue_name="dl_queue").clear_item(video_id)
 
         return Response(request.data)
 
@@ -476,7 +484,7 @@ class DownloadApiListView(ApiBaseView):
         pending = [i["youtube_id"] for i in to_add if i["status"] == "pending"]
         url_str = " ".join(pending)
         try:
-            youtube_ids = UrlListParser(url_str).process_list()
+            youtube_ids = Parser(url_str).parse()
         except ValueError:
             message = f"failed to parse: {url_str}"
             print(message)

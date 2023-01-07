@@ -1,7 +1,12 @@
+"""video constants"""
+
 import enum
 
 
 class VideoTypeEnum(enum.Enum):
-    VIDEO = "video"
-    LIVE = "live"
-    SHORT = "short"
+    """all vid_type fields"""
+
+    VIDEOS = "videos"
+    STREAMS = "streams"
+    SHORTS = "shorts"
+    UNKNOWN = "unknown"

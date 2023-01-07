@@ -11,9 +11,8 @@ import string
 import subprocess
 import unicodedata
 from datetime import datetime
-from urllib.parse import parse_qs, urlparse
 
-from home.src.download.yt_dlp_base import YtWrap
+import requests
 
 
 def clean_string(file_name):
@@ -136,104 +135,14 @@ def get_mapping():
     return index_config
 
 
-class UrlListParser:
-    """take a multi line string and detect valid youtube ids"""
+def is_shorts(youtube_id):
+    """check if youtube_id is a shorts video, bot not it it's not a shorts"""
+    shorts_url = f"https://www.youtube.com/shorts/{youtube_id}"
+    response = requests.head(
+        shorts_url, headers=requests_headers(), timeout=10
+    )
 
-    def __init__(self, url_str):
-        self.url_list = [i.strip() for i in url_str.split()]
-
-    def process_list(self):
-        """loop through the list"""
-        youtube_ids = []
-        for url in self.url_list:
-            parsed = urlparse(url)
-            print(f"processing: {url}")
-            print(parsed)
-            if not parsed.netloc:
-                # is not a url
-                id_type = self.find_valid_id(url)
-                youtube_id = url
-            elif "youtube.com" not in url and "youtu.be" not in url:
-                raise ValueError(f"{url} is not a youtube link")
-            elif parsed.path:
-                # is a url
-                youtube_id, id_type = self.detect_from_url(parsed)
-            else:
-                # not detected
-                raise ValueError(f"failed to detect {url}")
-
-            youtube_ids.append({"url": youtube_id, "type": id_type})
-
-        return youtube_ids
-
-    def detect_from_url(self, parsed):
-        """detect from parsed url"""
-        if parsed.netloc == "youtu.be":
-            # shortened
-            youtube_id = parsed.path.strip("/")
-            _ = self.find_valid_id(youtube_id)
-            return youtube_id, "video"
-
-        if parsed.query:
-            # detect from query string
-            query_parsed = parse_qs(parsed.query)
-            if "v" in query_parsed:
-                youtube_id = query_parsed["v"][0]
-                _ = self.find_valid_id(youtube_id)
-                return youtube_id, "video"
-
-            if "list" in query_parsed:
-                youtube_id = query_parsed["list"][0]
-                return youtube_id, "playlist"
-
-        if parsed.path.startswith("/channel/"):
-            # channel id in url
-            youtube_id = parsed.path.split("/")[2]
-            _ = self.find_valid_id(youtube_id)
-            return youtube_id, "channel"
-
-        # detect channel with yt_dlp
-        youtube_id = self.extract_channel_name(parsed.geturl())
-        return youtube_id, "channel"
-
-    @staticmethod
-    def find_valid_id(id_str):
-        """detect valid id from length of string"""
-        str_len = len(id_str)
-        if str_len == 11:
-            id_type = "video"
-        elif str_len == 24:
-            id_type = "channel"
-        elif str_len in [34, 18] or id_str in ["LL", "WL"]:
-            id_type = "playlist"
-        else:
-            # unable to parse
-            raise ValueError("not a valid id_str: " + id_str)
-
-        return id_type
-
-    @staticmethod
-    def extract_channel_name(url):
-        """find channel id from channel name with yt-dlp help"""
-        obs_request = {
-            "skip_download": True,
-            "extract_flat": True,
-            "playlistend": 0,
-        }
-        url_info = YtWrap(obs_request).extract(url)
-        channel_id = url_info.get("channel_id", False)
-        if channel_id:
-            return channel_id
-
-        url = url_info.get("url", False)
-        if url:
-            # handle old channel name redirect with url path split
-            channel_id = urlparse(url).path.strip("/").split("/")[1]
-
-            return channel_id
-
-        print(f"failed to extract channel id from {url}")
-        raise ValueError
+    return response.status_code == 200
 
 
 class DurationConverter:

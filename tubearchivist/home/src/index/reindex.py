@@ -100,7 +100,7 @@ class ReindexOutdated(ReindexBase):
         refresh_key = reindex_config["refresh_key"]
         now_lte = self.now - self.interval * 24 * 60 * 60
         must_list = [
-            {"match": {"active": True}},
+            {"match": {reindex_config["active_key"]: True}},
             {"range": {refresh_key: {"lte": now_lte}}},
         ]
         data = {
@@ -205,7 +205,7 @@ class Reindex(ReindexBase):
 
     def reindex_all(self):
         """reindex all in queue"""
-        if self.cookie_invalid():
+        if not self.cookie_is_valid():
             print("[reindex] cookie invalid, exiting...")
             return
 
@@ -246,7 +246,7 @@ class Reindex(ReindexBase):
         try:
             self._reindex_single_video_call(youtube_id)
         except FileNotFoundError:
-            ChannelUrlFixer(youtube_id, self.config)
+            ChannelUrlFixer(youtube_id, self.config).run()
             self._reindex_single_video_call(youtube_id)
 
     def _reindex_single_video_call(self, youtube_id):
@@ -333,8 +333,8 @@ class Reindex(ReindexBase):
         handler.get_indexed()
         self.all_indexed_ids = [i["youtube_id"] for i in handler.all_videos]
 
-    def cookie_invalid(self):
-        """return true if cookie is enabled and invalid"""
+    def cookie_is_valid(self):
+        """return true if cookie is enabled and valid"""
         if not self.config["downloads"]["cookie_import"]:
             return False
 

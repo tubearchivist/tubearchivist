@@ -47,7 +47,7 @@ urlpatterns = [
         name="channel_id",
     ),
     path(
-        "channel/<slug:channel_id>/live/",
+        "channel/<slug:channel_id>/streams/",
         login_required(ChannelIdLiveView.as_view()),
         name="channel_id_live",
     ),

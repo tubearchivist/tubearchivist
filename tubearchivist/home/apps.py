@@ -129,14 +129,18 @@ class StartupCheck:
 
     def es_set_vid_type(self):
         """update path 0.3.0 to 0.3.1, set default vid_type to video"""
+        index_list = ["ta_video", "ta_download"]
         data = {
             "query": {
                 "bool": {"must_not": [{"exists": {"field": "vid_type"}}]}
             },
-            "script": {"source": "ctx._source['vid_type'] = 'video'"},
+            "script": {"source": "ctx._source['vid_type'] = 'videos'"},
         }
-        response, _ = ElasticWrap("ta_video/_update_by_query").post(data=data)
-        print(f"ta_video vid_type index update ran: {response}")
+
+        for index_name in index_list:
+            path = f"{index_name}/_update_by_query"
+            response, _ = ElasticWrap(path).post(data=data)
+            print(f"{index_name} vid_type index update ran: {response}")
 
 
 class HomeConfig(AppConfig):

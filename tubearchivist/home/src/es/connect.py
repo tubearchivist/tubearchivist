@@ -34,9 +34,11 @@ class ElasticWrap:
     def get(self, data=False):
         """get data from es"""
         if data:
-            response = requests.get(self.url, json=data, auth=self.auth)
+            response = requests.get(
+                self.url, json=data, auth=self.auth, timeout=10
+            )
         else:
-            response = requests.get(self.url, auth=self.auth)
+            response = requests.get(self.url, auth=self.auth, timeout=10)
         if not response.ok:
             print(response.text)
 
@@ -53,10 +55,16 @@ class ElasticWrap:
 
         if data:
             response = requests.post(
-                self.url, data=payload, headers=headers, auth=self.auth
+                self.url,
+                data=payload,
+                headers=headers,
+                auth=self.auth,
+                timeout=10,
             )
         else:
-            response = requests.post(self.url, headers=headers, auth=self.auth)
+            response = requests.post(
+                self.url, headers=headers, auth=self.auth, timeout=10
+            )
 
         if not response.ok:
             print(response.text)
@@ -67,7 +75,9 @@ class ElasticWrap:
         """put data to es"""
         if refresh:
             self.url = f"{self.url}/?refresh=true"
-        response = requests.put(f"{self.url}", json=data, auth=self.auth)
+        response = requests.put(
+            f"{self.url}", json=data, auth=self.auth, timeout=10
+        )
         if not response.ok:
             print(response.text)
             print(data)
@@ -80,9 +90,11 @@ class ElasticWrap:
         if refresh:
             self.url = f"{self.url}/?refresh=true"
         if data:
-            response = requests.delete(self.url, json=data, auth=self.auth)
+            response = requests.delete(
+                self.url, json=data, auth=self.auth, timeout=10
+            )
         else:
-            response = requests.delete(self.url, auth=self.auth)
+            response = requests.delete(self.url, auth=self.auth, timeout=10)
 
         if not response.ok:
             print(response.text)

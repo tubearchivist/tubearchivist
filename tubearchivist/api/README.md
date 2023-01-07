@@ -221,6 +221,13 @@ Add to queue previously ignored video:
 }
 ```
 
+Download existing video now:
+```json
+{
+    "status": "priority"
+}
+```
+
 DELETE /api/download/\<video_id>/  
 Forget or delete from download queue
 
