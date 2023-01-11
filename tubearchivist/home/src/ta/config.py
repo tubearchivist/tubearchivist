@@ -7,6 +7,7 @@ Functionality:
 import json
 import os
 import re
+from random import randint
 
 import requests
 from celery.schedules import crontab
@@ -117,6 +118,15 @@ class AppConfig:
         self.config["application"]["colors"] = colors
         return colors
 
+    @staticmethod
+    def _build_rand_daily():
+        """build random daily schedule per installation"""
+        return {
+            "minute": randint(0, 59),
+            "hour": randint(0, 23),
+            "day_of_week": "*",
+        }
+
     def load_new_defaults(self):
         """check config.json for missing defaults"""
         default_config = self.get_config_file()
@@ -140,6 +150,9 @@ class AppConfig:
             # missing nested values
             for sub_key, sub_value in value.items():
                 if sub_key not in redis_config[key].keys():
+                    if sub_value == "rand-d":
+                        sub_value = self._build_rand_daily()
+
                     redis_config[key].update({sub_key: sub_value})
                     needs_update = True
 
@@ -256,19 +269,18 @@ class ScheduleBuilder:
             if not item_conf:
                 continue
 
-            minute = item_conf["minute"]
-            hour = item_conf["hour"]
-            day_of_week = item_conf["day_of_week"]
-            schedule_name = f"schedule_{schedule_item}"
-            to_add = {
-                schedule_name: {
-                    "task": schedule_item,
-                    "schedule": crontab(
-                        minute=minute, hour=hour, day_of_week=day_of_week
-                    ),
+            schedule_dict.update(
+                {
+                    f"schedule_{schedule_item}": {
+                        "task": schedule_item,
+                        "schedule": crontab(
+                            minute=item_conf["minute"],
+                            hour=item_conf["hour"],
+                            day_of_week=item_conf["day_of_week"],
+                        ),
+                    }
                 }
-            }
-            schedule_dict.update(to_add)
+            )
 
         return schedule_dict
 
