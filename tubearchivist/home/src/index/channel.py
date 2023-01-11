@@ -381,6 +381,17 @@ class YoutubeChannel(YouTubeItem):
 
         return all_youtube_ids
 
+    def get_channel_videos(self):
+        """get all videos from channel"""
+        data = {
+            "query": {
+                "term": {"channel.channel_id": {"value": self.youtube_id}}
+            },
+            "_source": ["youtube_id", "vid_type"],
+        }
+        all_videos = IndexPaginate("ta_video", data).get_results()
+        return all_videos
+
     def get_all_playlists(self):
         """get all playlists owned by this channel"""
         url = (

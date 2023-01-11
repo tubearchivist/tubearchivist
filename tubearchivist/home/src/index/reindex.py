@@ -4,12 +4,14 @@ functionality:
 - index and update in es
 """
 
+import json
 import os
 import shutil
 from datetime import datetime
 from time import sleep
 
 from home.src.download.queue import PendingList
+from home.src.download.subscriptions import ChannelSubscription
 from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import CookieHandler
 from home.src.download.yt_dlp_handler import VideoDownloader
@@ -307,6 +309,8 @@ class Reindex(ReindexBase):
         channel.upload_to_es()
         channel.sync_to_videos()
 
+        ChannelFullScan(channel_id).scan()
+
     def _reindex_single_playlist(self, playlist_id):
         """refresh playlist data"""
         self._get_all_videos()
@@ -473,3 +477,74 @@ class ChannelUrlFixer:
         shutil.move(video_path_is, new_path, copy_function=shutil.copyfile)
         VideoDownloader().move_to_archive(self.video.json_data)
         self.video.update_media_url()
+
+
+class ChannelFullScan:
+    """
+    update from v0.3.0 to v0.3.1
+    full scan of channel to fix vid_type mismatch
+    """
+
+    def __init__(self, channel_id):
+        self.channel_id = channel_id
+        self.to_update = False
+
+    def scan(self):
+        """match local with remote"""
+        print(f"{self.channel_id}: start full scan")
+        all_local_videos = self._get_all_local()
+        all_remote_videos = self._get_all_remote()
+        self.to_update = []
+        for video in all_local_videos:
+            video_id = video["youtube_id"]
+            remote_match = [i for i in all_remote_videos if i[0] == video_id]
+            if not remote_match:
+                print(f"{video_id}: no remote match found")
+                continue
+
+            expected_type = remote_match[0][-1].value
+            if video["vid_type"] != expected_type:
+                self.to_update.append(
+                    {
+                        "video_id": video_id,
+                        "vid_type": expected_type,
+                    }
+                )
+
+        self.update()
+
+    def _get_all_remote(self):
+        """get all channel videos"""
+        sub = ChannelSubscription()
+        all_remote_videos = sub.get_last_youtube_videos(
+            self.channel_id, limit=False
+        )
+
+        return all_remote_videos
+
+    def _get_all_local(self):
+        """get all local indexed channel_videos"""
+        channel = YoutubeChannel(self.channel_id)
+        all_local_videos = channel.get_channel_videos()
+
+        return all_local_videos
+
+    def update(self):
+        """build bulk query for updates"""
+        if not self.to_update:
+            print(f"{self.channel_id}: nothing to update")
+            return
+
+        print(f"{self.channel_id}: fixing {len(self.to_update)} videos")
+        bulk_list = []
+        for video in self.to_update:
+            action = {
+                "update": {"_id": video.get("video_id"), "_index": "ta_video"}
+            }
+            source = {"doc": {"vid_type": video.get("vid_type")}}
+            bulk_list.append(json.dumps(action))
+            bulk_list.append(json.dumps(source))
+        # add last newline
+        bulk_list.append("\n")
+        data = "\n".join(bulk_list)
+        _, _ = ElasticWrap("_bulk").post(data=data, ndjson=True)
