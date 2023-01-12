@@ -128,11 +128,23 @@ class StartupCheck:
         ReleaseVersion().is_updated()
 
     def es_set_vid_type(self):
-        """update path 0.3.0 to 0.3.1, set default vid_type to video"""
+        """
+        update path 0.3.0 to 0.3.1, set default vid_type to video
+        fix unidentified vids in unstable
+        """
         index_list = ["ta_video", "ta_download"]
         data = {
             "query": {
-                "bool": {"must_not": [{"exists": {"field": "vid_type"}}]}
+                "bool": {
+                    "should": [
+                        {
+                            "bool": {
+                                "must_not": [{"exists": {"field": "vid_type"}}]
+                            }
+                        },
+                        {"term": {"vid_type": {"value": "unknown"}}},
+                    ]
+                }
             },
             "script": {"source": "ctx._source['vid_type'] = 'videos'"},
         }
