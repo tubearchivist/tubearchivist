@@ -271,6 +271,8 @@ class PendingList(PendingIndex):
         else:
             if self._check_shorts(vid):
                 vid_type = VideoTypeEnum.SHORTS
+            else:
+                vid_type = VideoTypeEnum.VIDEOS
 
         return self._parse_youtube_details(vid, vid_type)
 
