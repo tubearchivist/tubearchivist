@@ -12,6 +12,8 @@ Switch between the easy on the eyes dark theme and the burning bright theme.
 ## Subscriptions
 Settings related to the channel management.
 - **Channel Page Size**: Defines how many pages will get analyzed by **Tube Archivist** each time you click on *Rescan Subscriptions*. The default page size used by yt-dlp is **50**, that's also the recommended value to set here. Any value higher will slow down the rescan process, for example if you set the value to 51, that means yt-dlp will have to go through 2 pages of results instead of 1 and by that doubling the time that process takes.
+- **Live Page Size**: Same as above, but for channel live streams.
+- **Shorts page Size**: Same as above, but for shorts videos.
 
 ## Downloads
 Settings related to the download process.
@@ -72,14 +74,6 @@ All third party integrations of TubeArchivist will **always** be *opt in*.
 - **API**: Your access token for the Tube Archivist API.
 - **returnyoutubedislike.com**: This will get return dislikes and average ratings for each video by integrating with the API from [returnyoutubedislike.com](https://www.returnyoutubedislike.com/).
 - **SponsorBlock**: Using [SponsorBlock](https://sponsor.ajay.app/) to get and skip sponsored content. If a video doesn't have timestamps, or has unlocked timestamps, use the browser addon to contribute to this excellent project. Can also be activated and deactivated as a per [channel overwrite](Settings#channel-customize).
-- **Cast**: Enabling the cast integration in the settings page will load an additional JS library from **Google**.  
-*NOTE*: This feature is currently broken due to an authentication issue, see #331.
-Requirements:
-    - HTTPS: To use the cast integration HTTPS needs to be enabled, which can be done using a reverse proxy. This is a requirement by Google as communication to the cast device is required to be encrypted, but the content itself is not.
-    - Supported Browser:A supported browser is required for this integration such as Google Chrome. Other browsers, especially Chromium-based browsers, may support casting by enabling it in the settings.
-    - Subtitles: Subtitles are supported however they do not work out of the box and require additional configuration. Due to requirements by Google, to use subtitles you need additional headers which will need to be configured in your reverse proxy. See this [page](https://developers.google.com/cast/docs/web_sender/advanced#cors_requirements) for the specific requirements.  
-    You need the following headers: Content-Type, Accept-Encoding, and Range. Note that the last two headers, Accept-Encoding and Range, are additional headers that you may not have needed previously.  
-    Wildcards "*" cannot be used for the Access-Control-Allow-Origin header. If the page has protected media content, it must use a domain instead of a wildcard.
 
 ## Snapshots
 System snapshots will automatically make daily snapshots of the Elasticsearch index. The task will start at 12pm your local time. Snapshots are deduplicated, meaning that each snapshot will only have to backup changes since the last snapshot. The initial snapshot may be slow, but subsequent runs will be much faster. There is also a cleanup function implemented, that will remove snapshots older than 30 days.

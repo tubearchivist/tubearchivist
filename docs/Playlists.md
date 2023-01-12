@@ -19,5 +19,7 @@ You can search your indexed playlists by clicking on the search icon <img src="a
 Each playlist will get a dedicated playlist detail page accessible at `/playlist/<playlist-id>/` of your Tube Archivist. This page shows all the videos you have downloaded from this playlist.
 
 - If you are subscribed to the playlist, an Unsubscribe button will show, else the Subscribe button will show.
-- The Mark as Watched button will mark all videos of this playlist as watched.
+- The **Mark as Watched** button will mark all videos of this playlist as watched.
+- The button **Reindex** will reindex the playlist metadata.
+- The button **Reindex Videos** will reindex all videos from this playlist.
 - The **Delete Playlist** button will give you the option to delete just the *metadata* which won't delete any media files or *delete all* which will delete metadata plus all videos belonging to this playlist.
