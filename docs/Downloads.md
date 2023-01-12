@@ -35,6 +35,7 @@ The **Add to Download Queue** icon <img src="assets/icon-add.png?raw=true" alt="
   - Videos only: *https://www.youtube.com/@IBRACORP/videos*
   - Shorts only: *https://www.youtube.com/@IBRACORP/shorts*
   - Streams only: *https://www.youtube.com/@IBRACORP/streams*
+  - Every other channel sub page will default to download all, for example *https://www.youtube.com/@IBRACORP/featured* will download videos and shorts and streams.
 
 ### Playlist
 - Add a playlist ID or URL to add every available video in the list to the download queue, for example *https://www.youtube.com/playlist?list=PL96C35uN7xGLLeET0dOWaKHkAlPsrkcha* or *PL96C35uN7xGLLeET0dOWaKHkAlPsrkcha*. 
