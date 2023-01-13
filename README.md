@@ -181,7 +181,7 @@ To apply the change permanently depends on your host operating system:
 - On any other platform look up in the documentation on how to pass kernel parameters.
 
 ### Permissions for elasticsearch
-If you see a message similar to `failed to obtain node locks, tried [/usr/share/elasticsearch/data]` and `maybe these locations are not writable` when initially starting elasticsearch, that probably means the container is not allowed to write files to the volume.  
+If you see a message similar to `Unable to access 'path.repo' (/usr/share/elasticsearch/data/snapshot)` or `failed to obtain node locks, tried [/usr/share/elasticsearch/data]` and `maybe these locations are not writable` when initially starting elasticsearch, that probably means the container is not allowed to write files to the volume.  
 To fix that issue, shutdown the container and on your host machine run:
 ```
 chown 1000:0 -R /path/to/mount/point
