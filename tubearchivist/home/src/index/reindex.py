@@ -340,7 +340,8 @@ class Reindex(ReindexBase):
     def cookie_is_valid(self):
         """return true if cookie is enabled and valid"""
         if not self.config["downloads"]["cookie_import"]:
-            return False
+            # is not activated, continue reindex
+            return True
 
         valid = CookieHandler(self.config).validate()
         return valid
