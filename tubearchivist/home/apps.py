@@ -27,6 +27,7 @@ class StartupCheck:
     def run(self):
         """run all startup checks"""
         print("run startup checks")
+        self.set_lock()
         self.es_version_check()
         self.release_lock()
         self.sync_redis_state()
@@ -37,14 +38,19 @@ class StartupCheck:
         self.snapshot_check()
         self.ta_version_check()
         self.es_set_vid_type()
-        self.set_has_run()
+        self.expire_lock()
 
     def get_has_run(self):
         """validate if check has already executed"""
         return self.redis_con.get_message("startup_check")
 
-    def set_has_run(self):
+    def set_lock(self):
+        """set lock to avoid executing once per thread"""
+        self.redis_con.set_message("startup_check", message={"status": True})
+
+    def expire_lock(self):
         """startup checks run"""
+        print("startup checks completed")
         message = {"status": True}
         self.redis_con.set_message("startup_check", message, expire=120)
 
@@ -75,7 +81,6 @@ class StartupCheck:
     def release_lock(self):
         """make sure there are no leftover locks set in redis"""
         all_locks = [
-            "startup_check",
             "manual_import",
             "downloading",
             "dl_queue",
