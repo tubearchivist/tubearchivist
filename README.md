@@ -108,6 +108,7 @@ The main Python application that displays and serves your video collection, buil
   - Change the environment variables `TA_USERNAME` and `TA_PASSWORD` to create the initial credentials. 
   - `ELASTIC_PASSWORD` is for the password for Elasticsearch. The environment variable `ELASTIC_USER` is optional, should you want to change the username from the default *elastic*.
   - For the scheduler to know what time it is, set your timezone with the `TZ` environment variable, defaults to *UTC*.
+  - Set the environment variable `ENABLE_CAST=True` to send videos to your cast device, [read more](#enable-cast).
 
 ### Port collisions
 If you have a collision on port `8000`, best solution is to use dockers *HOST_PORT* and *CONTAINER_PORT* distinction: To for example change the interface to port 9000 use `9000:8000` in your docker-compose file.  
@@ -135,6 +136,18 @@ You can configure LDAP with the following environment variables:
 
 When LDAP authentication is enabled, django passwords (e.g. the password defined in TA_PASSWORD), will not allow you to login, only the LDAP server is used.
 
+### Enable Cast
+As Cast doesn't support authentication, enabling this functionality will make your static files like artwork and media files accessible by guessing the links. That's read only access, the application itself is still protected.
+
+Enabling this integration will embed an additional third party JS library from **Google**.  
+
+**Requirements**:
+- HTTPS: To use the cast integration HTTPS needs to be enabled, which can be done using a reverse proxy. This is a requirement by Google as communication to the cast device is required to be encrypted, but the content itself is not.
+- Supported Browser: A supported browser is required for this integration such as Google Chrome. Other browsers, especially Chromium-based browsers, may support casting by enabling it in the settings.
+- Subtitles: Subtitles are supported however they do not work out of the box and require additional configuration. Due to requirements by Google, to use subtitles you need additional headers which will need to be configured in your reverse proxy. See this [page](https://developers.google.com/cast/docs/web_sender/advanced#cors_requirements) for the specific requirements.  
+You need the following headers: Content-Type, Accept-Encoding, and Range. Note that the last two headers, Accept-Encoding and Range, are additional headers that you may not have needed previously.  
+Wildcards "*" can not be used for the Access-Control-Allow-Origin header. If the page has protected media content, it must use a domain instead of a wildcard.
+
 ### Elasticsearch
 **Note**: Tube Archivist depends on Elasticsearch 8. 
 
@@ -158,7 +171,7 @@ For some architectures it might be required to run Redis JSON on a nonstandard p
 - Additionally set the following value to the *archivist-redis* service: `command: --port 6380 --loadmodule /usr/lib/redis/modules/rejson.so`
 
 ### Updating Tube Archivist
-You will see the current version number of **Tube Archivist** in the footer of the interface so you can compare it with the latest release to make sure you are running the *latest and greatest*.  
+You will see the current version number of **Tube Archivist** in the footer of the interface. There is a daily version check task querying tubearchivist.com, notifying you of any new releases in the footer. To take advantage of the latest fixes and improvements, make sure you are running the *latest and greatest*.  
 * There can be breaking changes between updates, particularly as the application grows, new environment variables or settings might be required for you to set in the your docker-compose file. *Always* check the **release notes**: Any breaking changes will be marked there.  
 * All testing and development is done with the Elasticsearch version number as mentioned in the provided *docker-compose.yml* file. This will be updated when a new release of Elasticsearch is available. Running an older version of Elasticsearch is most likely not going to result in any issues, but it's still recommended to run the same version as mentioned. Use `bbilly1/tubearchivist-es` to automatically get the recommended version.
 

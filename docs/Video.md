@@ -3,7 +3,9 @@ Every video downloaded gets a dedicated page accessible at `/video/<video-id>/` 
 
 Clicking on the channel name or the channel icon will bring you to the dedicated channel detail [page](Channels#channel-detail).
 
-The button **Delete Video** will delete that video including the media file.
+- The button **Reindex** will reindex the metadata of this video.
+- The button **Download File** will download the media file in the browser.
+- The button **Delete Video** will delete that video including the media file.
 
 If available, a tag cloud will show, representing the tags set by the uploader.
 
