@@ -3,6 +3,7 @@ functionality:
 - wrapper around requests to call elastic search
 - reusable search_after to extract total index
 """
+# pylint: disable=missing-timeout
 
 import json
 
@@ -55,16 +56,10 @@ class ElasticWrap:
 
         if data:
             response = requests.post(
-                self.url,
-                data=payload,
-                headers=headers,
-                auth=self.auth,
-                timeout=10,
+                self.url, data=payload, headers=headers, auth=self.auth
             )
         else:
-            response = requests.post(
-                self.url, headers=headers, auth=self.auth, timeout=10
-            )
+            response = requests.post(self.url, headers=headers, auth=self.auth)
 
         if not response.ok:
             print(response.text)
@@ -75,9 +70,7 @@ class ElasticWrap:
         """put data to es"""
         if refresh:
             self.url = f"{self.url}/?refresh=true"
-        response = requests.put(
-            f"{self.url}", json=data, auth=self.auth, timeout=10
-        )
+        response = requests.put(f"{self.url}", json=data, auth=self.auth)
         if not response.ok:
             print(response.text)
             print(data)
@@ -90,11 +83,9 @@ class ElasticWrap:
         if refresh:
             self.url = f"{self.url}/?refresh=true"
         if data:
-            response = requests.delete(
-                self.url, json=data, auth=self.auth, timeout=10
-            )
+            response = requests.delete(self.url, json=data, auth=self.auth)
         else:
-            response = requests.delete(self.url, auth=self.auth, timeout=10)
+            response = requests.delete(self.url, auth=self.auth)
 
         if not response.ok:
             print(response.text)
