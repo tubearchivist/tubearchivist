@@ -10,7 +10,7 @@ Switch between the easy on the eyes dark theme and the burning bright theme.
 - **Page Size**: Defines how many results get displayed on a given page. Same value goes for all archive views.
 
 ## Subscriptions
-Settings related to the channel management.
+Settings related to the channel management. Disable shorts or streams by setting their page size to 0 (zero).
 - **Channel Page Size**: Defines how many pages will get analyzed by **Tube Archivist** each time you click on *Rescan Subscriptions*. The default page size used by yt-dlp is **50**, that's also the recommended value to set here. Any value higher will slow down the rescan process, for example if you set the value to 51, that means yt-dlp will have to go through 2 pages of results instead of 1 and by that doubling the time that process takes.
 - **Live Page Size**: Same as above, but for channel live streams.
 - **Shorts page Size**: Same as above, but for shorts videos.
