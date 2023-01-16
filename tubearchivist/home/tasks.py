@@ -313,9 +313,6 @@ def version_check():
     ReleaseVersion().check()
 
 
-try:
-    app.conf.beat_schedule = ScheduleBuilder().build_schedule()
-except KeyError:
-    # update path to load new defaults
-    StartupCheck().sync_redis_state()
-    app.conf.beat_schedule = ScheduleBuilder().build_schedule()
+# load new defaults then start the schedule here
+StartupCheck().sync_redis_state()
+app.conf.beat_schedule = ScheduleBuilder().build_schedule()

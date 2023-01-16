@@ -135,6 +135,7 @@ class AppConfig:
         # check for customizations
         if not redis_config:
             config = self.get_config()
+            config["scheduler"]["version_check"] = self._build_rand_daily()
             RedisArchivist().set_message("config", config)
             return
 
