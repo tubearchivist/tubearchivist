@@ -301,7 +301,7 @@ def index_channel_playlists(channel_id):
         "status": key,
         "level": "info",
         "title": "Looking for playlists",
-        "message": f'Scanning channel "{channel.youtube_id}" in progress',
+        "message": f"{channel_id}: Channel scan in progress",
     }
     RedisArchivist().set_message(key, mess_dict, expire=True)
     channel.index_channel_playlists()
