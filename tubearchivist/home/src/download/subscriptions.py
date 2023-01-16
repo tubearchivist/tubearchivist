@@ -85,6 +85,10 @@ class ChannelSubscription:
             return queries
 
         for query_item, default_limit in limit_map.items():
+            if not default_limit:
+                # is deactivated in config
+                continue
+
             if limit:
                 query_limit = default_limit
             else:

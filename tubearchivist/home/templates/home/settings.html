@@ -33,6 +33,7 @@
         {% csrf_token %}
         <div class="settings-group">
             <h2 id="subscriptions">Subscriptions</h2>
+            <p>Disable shorts or streams by setting their page size to 0 (zero).</p>
             <div class="settings-item">
                 <p>YouTube page size: <span class="settings-current">{{ config.subscriptions.channel_size }}</span></p>
                 <i>Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max recommended 50.</i><br>
@@ -40,12 +41,12 @@
             </div>
             <div class="settings-item">
                 <p>YouTube Live page size: <span class="settings-current">{{ config.subscriptions.live_channel_size }}</span></p>
-                <i>Live Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max recommended 50, 0 to disable.</i><br>
+                <i>Live Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max recommended 50.</i><br>
                 {{ app_form.subscriptions_live_channel_size }}
             </div>
             <div class="settings-item">
                 <p>YouTube Shorts page size: <span class="settings-current">{{ config.subscriptions.shorts_channel_size }}</span></p>
-                <i>Shorts Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max recommended 50, 0 to disable.</i><br>
+                <i>Shorts Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max recommended 50.</i><br>
                 {{ app_form.subscriptions_shorts_channel_size }}
             </div>
         </div>

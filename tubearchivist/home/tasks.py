@@ -301,7 +301,7 @@ def index_channel_playlists(channel_id):
         "status": key,
         "level": "info",
         "title": "Looking for playlists",
-        "message": f'Scanning channel "{channel.youtube_id}" in progress',
+        "message": f"{channel_id}: Channel scan in progress",
     }
     RedisArchivist().set_message(key, mess_dict, expire=True)
     channel.index_channel_playlists()
@@ -313,9 +313,6 @@ def version_check():
     ReleaseVersion().check()
 
 
-try:
-    app.conf.beat_schedule = ScheduleBuilder().build_schedule()
-except KeyError:
-    # update path to load new defaults
-    StartupCheck().sync_redis_state()
-    app.conf.beat_schedule = ScheduleBuilder().build_schedule()
+# load new defaults then start the schedule here
+StartupCheck().sync_redis_state()
+app.conf.beat_schedule = ScheduleBuilder().build_schedule()
