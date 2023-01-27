@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to help improve this project!
+        Thanks for taking the time to help improve this project! This project is currently only taking new feature requests from contributors who want to make a PR with their ideas. The backlog of planned features outlined in the roadmap or the open issues here will keep us busy for the foreseeable future.
 
   - type: checkboxes
     id: already
@@ -33,5 +33,5 @@ body:
       label: Your help is needed!
       description: This project is ambitious as it is, please contribute.
       options:
-        - label: Yes I can help with this feature request!
-          required: false
+        - label: Yes I will work on this in the next few days or weeks.
+          required: true
