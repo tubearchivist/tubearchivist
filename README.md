@@ -229,7 +229,7 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Show total video downloaded vs total videos available in channel
 - [ ] Add statistics of index
 - [ ] Download speed schedule ([#198](https://github.com/tubearchivist/tubearchivist/issues/198))
-- [ ] Auto ignore videos by keyword ([#163](https://github.com/tubearchivist/tubearchivist/issues/163))
+- [ ] Download or Ignore videos by keyword ([#163](https://github.com/tubearchivist/tubearchivist/issues/163))
 - [ ] Custom searchable notes to videos, channels, playlists ([#144](https://github.com/tubearchivist/tubearchivist/issues/144))
 
 Implemented:
