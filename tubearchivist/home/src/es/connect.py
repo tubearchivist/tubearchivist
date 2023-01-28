@@ -32,15 +32,15 @@ class ElasticWrap:
         self.auth = self.config["application"]["es_auth"]
         self.url = f"{es_url}/{self.path}"
 
-    def get(self, data=False):
+    def get(self, data=False, timeout=10, print_error=True):
         """get data from es"""
         if data:
             response = requests.get(
-                self.url, json=data, auth=self.auth, timeout=10
+                self.url, json=data, auth=self.auth, timeout=timeout
             )
         else:
-            response = requests.get(self.url, auth=self.auth, timeout=10)
-        if not response.ok:
+            response = requests.get(self.url, auth=self.auth, timeout=timeout)
+        if print_error and not response.ok:
             print(response.text)
 
         return response.json(), response.status_code
