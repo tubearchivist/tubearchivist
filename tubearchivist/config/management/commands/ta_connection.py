@@ -75,7 +75,7 @@ class Command(BaseCommand):
         self.stdout.write("[3] connect to Elastic Search")
         total = self.TIMEOUT // 5
         for i in range(total):
-            sleep(2)
+            sleep(5)
             self.stdout.write(f"    ... waiting for ES [{i}/{total}]")
             try:
                 _, status_code = ElasticWrap("/").get(
