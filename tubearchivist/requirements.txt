@@ -1,4 +1,4 @@
-beautifulsoup4==4.11.1
+beautifulsoup4==4.11.2
 celery==5.2.7
 Django==4.1.5
 django-auth-ldap==4.1.0
