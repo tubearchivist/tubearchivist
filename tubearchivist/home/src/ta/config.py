@@ -265,6 +265,7 @@ class ScheduleBuilder:
 
     def build_schedule(self):
         """build schedule dict as expected by app.conf.beat_schedule"""
+        AppConfig().load_new_defaults()
         schedule_dict = {}
 
         for schedule_item in self.SCHEDULES:

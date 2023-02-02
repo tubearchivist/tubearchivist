@@ -312,5 +312,5 @@ def version_check():
     ReleaseVersion().check()
 
 
-# start the schedule here
+# start schedule here
 app.conf.beat_schedule = ScheduleBuilder().build_schedule()
