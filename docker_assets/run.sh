@@ -4,7 +4,6 @@
 set -e
 
 # django setup
-python manage.py makemigrations
 python manage.py migrate
 
 if [[ -z "$DJANGO_DEBUG" ]]; then
