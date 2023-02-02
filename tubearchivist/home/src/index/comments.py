@@ -80,7 +80,6 @@ class Comments:
 
         yt_obs = {
             "skip_download": True,
-            "quiet": False,
             "getcomments": True,
             "extractor_args": {
                 "youtube": {
