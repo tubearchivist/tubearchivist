@@ -6,6 +6,7 @@ set -e
 # check environment
 python manage.py ta_envcheck
 python manage.py ta_connection
+python manage.py ta_startup
 
 # start python application
 python manage.py makemigrations
