@@ -10,7 +10,6 @@ import json
 import os
 
 from celery import Celery, shared_task
-from home.apps import StartupCheck
 from home.src.download.queue import PendingList
 from home.src.download.subscriptions import (
     ChannelSubscription,
@@ -313,6 +312,5 @@ def version_check():
     ReleaseVersion().check()
 
 
-# load new defaults then start the schedule here
-StartupCheck().sync_redis_state()
+# start the schedule here
 app.conf.beat_schedule = ScheduleBuilder().build_schedule()
