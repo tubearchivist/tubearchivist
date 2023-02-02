@@ -228,7 +228,7 @@ def kill_dl(task_id):
     _ = RedisArchivist().del_message("dl_queue_id")
     RedisQueue(queue_name="dl_queue").clear()
 
-    clear_dl_cache(CONFIG)
+    _ = clear_dl_cache(CONFIG)
 
     # notify
     mess_dict = {

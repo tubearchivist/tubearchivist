@@ -122,9 +122,12 @@ def clear_dl_cache(config):
     """clear leftover files from dl cache"""
     print("clear download cache")
     cache_dir = os.path.join(config["application"]["cache_dir"], "download")
-    for cached in os.listdir(cache_dir):
+    leftover_files = os.listdir(cache_dir)
+    for cached in leftover_files:
         to_delete = os.path.join(cache_dir, cached)
         os.remove(to_delete)
+
+    return len(leftover_files)
 
 
 def get_mapping():
