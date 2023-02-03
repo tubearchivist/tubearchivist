@@ -143,7 +143,6 @@ class ElasticBackup:
         backup_dir = os.path.join(self.cache_dir, "backup")
 
         for json_f in zip_content:
-
             file_name = os.path.join(backup_dir, json_f)
 
             if not json_f.startswith("es_") or not json_f.endswith(".json"):
