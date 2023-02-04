@@ -159,6 +159,12 @@ Stores video meta data and makes everything searchable. Also keeps track of the 
 
 Follow the [documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html) for additional installation details.
 
+### Elasticsearch on a custom port
+Should you need to change the port for Elasticsearch to for example *9500*, follow these steps:
+- Set the environment variable `http.port=9500` to the ES container
+- Change the *expose* value for the ES container to match your port number
+- For the Tube Archivist container, change the *ES_URL* environment variable, e.g. `ES_URL=http://archivist-es:9500`
+
 ### Redis JSON
 Functions as a cache and temporary link between the application and the file system. Used to store and display messages and configuration variables.
   - Needs to be accessible over the default port `6379`
