@@ -112,9 +112,10 @@ def download_pending():
 def download_single(pending_video):
     """start download single video now"""
     queue = RedisQueue(queue_name="dl_queue")
+
     to_add = {
         "youtube_id": pending_video["youtube_id"],
-        "vid_type": VideoTypeEnum.VIDEOS.value,
+        "vid_type": pending_video.get("vid_type", VideoTypeEnum.VIDEOS.value),
     }
     queue.add_priority(json.dumps(to_add))
     print(f"Added to queue with priority: {to_add}")
