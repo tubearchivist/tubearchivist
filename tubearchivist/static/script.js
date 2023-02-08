@@ -870,8 +870,9 @@ function searchMulti(query) {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(function () {
     if (query.length > 0) {
-      if (searchHttpRequest)
+      if (searchHttpRequest) {
         searchHttpRequest.abort();
+      }
       searchHttpRequest = new XMLHttpRequest();
       searchHttpRequest.onreadystatechange = function () {
         if (searchHttpRequest.readyState === 4) {
@@ -889,10 +890,8 @@ function searchMulti(query) {
         searchHttpRequest = null;
       }
       // show the placeholder container and hide the results container
-      for (const element of document.getElementsByClassName('multi-search-results'))
-        element.style.display = 'none';
-      for (const element of document.getElementsByClassName('multi-search-results-placeholder'))
-        element.style.display = 'block';
+      document.getElementById('multi-search-results').style.display = 'none';
+      document.getElementById('multi-search-results-placeholder').style.display = 'block';
     }
   }, 500);
 }
@@ -904,10 +903,8 @@ function getViewDefaults(view) {
 
 function populateMultiSearchResults(allResults, queryType) {
   // show the results container and hide the placeholder container
-  for (const element of document.getElementsByClassName('multi-search-results'))
-    element.style.display = 'block';
-  for (const element of document.getElementsByClassName('multi-search-results-placeholder'))
-    element.style.display = 'none';
+  document.getElementById('multi-search-results').style.display = 'block';
+  document.getElementById('multi-search-results-placeholder').style.display = 'none';
   // videos
   let defaultVideo = getViewDefaults('home');
   let allVideos = allResults.video_results;

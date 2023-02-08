@@ -8,7 +8,7 @@
     <div class="multi-search-box">
         {{ search_form }}
     </div>
-    <div class="multi-search-results" style="display: none;">
+    <div id="multi-search-results" style="display: none;">
         <div class="multi-search-result">
             <h2>Video Results</h2>
             <div id="video-results" class="video-list {{ all_styles.home }} {% if all_styles.home == "grid" %}grid-{{ grid_items }}{% endif %}">
@@ -34,7 +34,7 @@
             </div>
         </div>
     </div>
-    <div class="multi-search-results-placeholder" style="display: block;">
+    <div id="multi-search-results-placeholder" style="display: block;">
         <div>
             <h2>Example queries</h2>
             <ul>
