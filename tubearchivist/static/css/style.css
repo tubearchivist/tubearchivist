@@ -892,8 +892,16 @@ video:-webkit-full-screen {
     width: 100%;
 }
 
-.multi-search-result {
+.multi-search-result, .multi-search-results-placeholder {
     padding: 1rem 0;
+}
+
+.multi-search-results tt {
+    background-color: lightblue;
+}
+
+.multi-search-results tt.value {
+    background-color: lightsteelblue;
 }
 
 /* channel overview page */
