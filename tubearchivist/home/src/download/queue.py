@@ -264,6 +264,7 @@ class PendingList(PendingIndex):
             return False
         # stop if video is streaming live now
         if vid["live_status"] in ["is_upcoming", "is_live"]:
+            print(f"{youtube_id}: skip is_upcoming or is_live")
             return False
 
         if vid["live_status"] == "was_live":
