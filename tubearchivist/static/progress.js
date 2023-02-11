@@ -28,16 +28,12 @@ function checkMessages() {
 // get messages for page on timer
 function getMessages(dataOrigin) {
   fetch('/progress/')
-    .then(response => {
-      return response.json();
-    })
+    .then(response => response.json())
     .then(responseData => {
-      let messages = buildMessage(responseData, dataOrigin);
+      const messages = buildMessage(responseData, dataOrigin);
       if (messages.length > 0) {
         // restart itself
-        setTimeout(function () {
-          getMessages(dataOrigin);
-        }, 3000);
+        setTimeout(() => getMessages(dataOrigin), 500);
       }
     });
 }
