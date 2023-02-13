@@ -43,7 +43,11 @@ class ThumbManagerBase:
                 response = requests.get(url, stream=True, timeout=5)
                 if response.ok:
                     try:
-                        return Image.open(response.raw)
+                        img = Image.open(response.raw)
+                        if isinstance(img, Image.Image):
+                            return img
+                        return self.get_fallback()
+
                     except UnidentifiedImageError:
                         print(f"failed to open thumbnail: {url}")
                         return self.get_fallback()
