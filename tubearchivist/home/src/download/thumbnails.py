@@ -63,6 +63,7 @@ class ThumbManagerBase:
 
     def get_fallback(self):
         """get fallback thumbnail if not available"""
+        print(f"{self.item_id}: failed to extract thumbnail, use fallback")
         if self.fallback:
             img_raw = Image.open(self.fallback)
             return img_raw
