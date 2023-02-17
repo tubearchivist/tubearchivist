@@ -24,7 +24,7 @@ services:
       - archivist-es
       - archivist-redis
   archivist-redis:
-    image: redislabs/rejson                 # for arm64 use bbilly1/rejson
+    image: redis/redis-stack-server
     container_name: archivist-redis
     restart: unless-stopped
     expose:
