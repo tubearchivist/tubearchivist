@@ -123,6 +123,26 @@ class PendingInteract:
         response, status_code = ElasticWrap(path).get()
         return response["_source"], status_code
 
+    def get_channel(self):
+        """
+        get channel metadata from queue to not depend on channel to be indexed
+        """
+        data = {
+            "size": 1,
+            "query": {"term": {"channel_id": {"value": self.youtube_id}}},
+        }
+        response, _ = ElasticWrap("ta_download/_search").get(data=data)
+        hits = response["hits"]["hits"]
+        if not hits:
+            channel_name = "NA"
+        else:
+            channel_name = hits[0]["_source"].get("channel_name", "NA")
+
+        return {
+            "channel_id": self.youtube_id,
+            "channel_name": channel_name,
+        }
+
 
 class PendingList(PendingIndex):
     """manage the pending videos list"""
