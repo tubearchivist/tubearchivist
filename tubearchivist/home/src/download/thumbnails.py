@@ -43,8 +43,12 @@ class ThumbManagerBase:
                 response = requests.get(url, stream=True, timeout=5)
                 if response.ok:
                     try:
-                        return Image.open(response.raw)
-                    except UnidentifiedImageError:
+                        img = Image.open(response.raw)
+                        if isinstance(img, Image.Image):
+                            return img
+                        return self.get_fallback()
+
+                    except (UnidentifiedImageError, OSError):
                         print(f"failed to open thumbnail: {url}")
                         return self.get_fallback()
 
@@ -59,6 +63,7 @@ class ThumbManagerBase:
 
     def get_fallback(self):
         """get fallback thumbnail if not available"""
+        print(f"{self.item_id}: failed to extract thumbnail, use fallback")
         if self.fallback:
             img_raw = Image.open(self.fallback)
             return img_raw

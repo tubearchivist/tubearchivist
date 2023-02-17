@@ -109,12 +109,20 @@ class Comments:
         if comments_raw:
             for comment in comments_raw:
                 cleaned_comment = self.clean_comment(comment)
+                if not cleaned_comment:
+                    continue
+
                 comments.append(cleaned_comment)
 
         self.comments_format = comments
 
     def clean_comment(self, comment):
         """parse metadata from comment for indexing"""
+        if not comment.get("text"):
+            # comment text can be empty
+            print(f"{self.youtube_id}: Failed to extract text, {comment}")
+            return False
+
         time_text_datetime = datetime.utcfromtimestamp(comment["timestamp"])
 
         if time_text_datetime.hour == 0 and time_text_datetime.minute == 0:

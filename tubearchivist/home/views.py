@@ -15,6 +15,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views import View
+from home.src.download.queue import PendingInteract
 from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.backup import ElasticBackup
 from home.src.es.connect import ElasticWrap
@@ -32,7 +33,7 @@ from home.src.frontend.forms import (
     UserSettingsForm,
 )
 from home.src.frontend.searching import SearchHandler
-from home.src.index.channel import YoutubeChannel, channel_overwrites
+from home.src.index.channel import channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress
@@ -375,13 +376,13 @@ class DownloadView(ArchivistResultsView):
     def get(self, request):
         """handle get request"""
         self.initiate_vars(request)
-        self._update_view_data(request)
+        filter_view = self._update_view_data(request)
         self.find_results()
         self.context.update(
             {
                 "title": "Downloads",
                 "add_form": AddToQueueForm(),
-                "channel_agg_list": self._get_channel_agg(),
+                "channel_agg_list": self._get_channel_agg(filter_view),
             }
         )
         return render(request, "home/downloads.html", self.context)
@@ -401,12 +402,11 @@ class DownloadView(ArchivistResultsView):
                 {"term": {"channel_id": {"value": channel_filter}}}
             )
 
-            channel = YoutubeChannel(channel_filter)
-            channel.get_from_es()
+            channel = PendingInteract(channel_filter).get_channel()
             self.context.update(
                 {
-                    "channel_filter_id": channel_filter,
-                    "channel_filter_name": channel.json_data["channel_name"],
+                    "channel_filter_id": channel.get("channel_id"),
+                    "channel_filter_name": channel.get("channel_name"),
                 }
             )
 
@@ -417,11 +417,13 @@ class DownloadView(ArchivistResultsView):
             }
         )
 
-    def _get_channel_agg(self):
+        return filter_view
+
+    def _get_channel_agg(self, filter_view):
         """get pending channel with count"""
         data = {
             "size": 0,
-            "query": {"term": {"status": {"value": "pending"}}},
+            "query": {"term": {"status": {"value": filter_view}}},
             "aggs": {
                 "channel_downloads": {
                     "multi_terms": {

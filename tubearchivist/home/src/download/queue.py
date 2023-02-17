@@ -96,13 +96,13 @@ class PendingIndex:
 class PendingInteract:
     """interact with items in download queue"""
 
-    def __init__(self, video_id=False, status=False):
-        self.video_id = video_id
+    def __init__(self, youtube_id=False, status=False):
+        self.youtube_id = youtube_id
         self.status = status
 
     def delete_item(self):
         """delete single item from pending"""
-        path = f"ta_download/_doc/{self.video_id}"
+        path = f"ta_download/_doc/{self.youtube_id}"
         _, _ = ElasticWrap(path).delete(refresh=True)
 
     def delete_by_status(self):
@@ -114,14 +114,34 @@ class PendingInteract:
     def update_status(self):
         """update status field of pending item"""
         data = {"doc": {"status": self.status}}
-        path = f"ta_download/_update/{self.video_id}"
+        path = f"ta_download/_update/{self.youtube_id}"
         _, _ = ElasticWrap(path).post(data=data)
 
     def get_item(self):
         """return pending item dict"""
-        path = f"ta_download/_doc/{self.video_id}"
+        path = f"ta_download/_doc/{self.youtube_id}"
         response, status_code = ElasticWrap(path).get()
         return response["_source"], status_code
+
+    def get_channel(self):
+        """
+        get channel metadata from queue to not depend on channel to be indexed
+        """
+        data = {
+            "size": 1,
+            "query": {"term": {"channel_id": {"value": self.youtube_id}}},
+        }
+        response, _ = ElasticWrap("ta_download/_search").get(data=data)
+        hits = response["hits"]["hits"]
+        if not hits:
+            channel_name = "NA"
+        else:
+            channel_name = hits[0]["_source"].get("channel_name", "NA")
+
+        return {
+            "channel_id": self.youtube_id,
+            "channel_name": channel_name,
+        }
 
 
 class PendingList(PendingIndex):
@@ -264,6 +284,7 @@ class PendingList(PendingIndex):
             return False
         # stop if video is streaming live now
         if vid["live_status"] in ["is_upcoming", "is_live"]:
+            print(f"{youtube_id}: skip is_upcoming or is_live")
             return False
 
         if vid["live_status"] == "was_live":

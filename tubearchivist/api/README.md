@@ -155,6 +155,9 @@ Timestamps either *int* or *float*, end time can't be before start time.
 ## Channel List View
 /api/channel/
 
+Parameter:
+- filter: subscribed
+
 ### Subscribe to a list of channels
 POST /api/channel/
 ```json

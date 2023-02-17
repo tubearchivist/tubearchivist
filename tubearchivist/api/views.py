@@ -289,13 +289,26 @@ class ChannelApiListView(ApiBaseView):
     """
 
     search_base = "ta_channel/_search/"
+    valid_filter = ["subscribed"]
 
     def get(self, request):
         """get request"""
-        self.get_document_list(request)
         self.data.update(
             {"sort": [{"channel_name.keyword": {"order": "asc"}}]}
         )
+
+        query_filter = request.GET.get("filter", False)
+        must_list = []
+        if query_filter:
+            if query_filter not in self.valid_filter:
+                message = f"invalid url query filder: {query_filter}"
+                print(message)
+                return Response({"message": message}, status=400)
+
+            must_list.append({"term": {"channel_subscribed": {"value": True}}})
+
+        self.data["query"] = {"bool": {"must": must_list}}
+        self.get_document_list(request)
 
         return Response(self.response)
 
@@ -430,7 +443,7 @@ class DownloadApiView(ApiBaseView):
         # pylint: disable=unused-argument
         """delete single video from queue"""
         print(f"{video_id}: delete from queue")
-        PendingInteract(video_id=video_id).delete_item()
+        PendingInteract(video_id).delete_item()
 
         return Response({"success": True})
 
