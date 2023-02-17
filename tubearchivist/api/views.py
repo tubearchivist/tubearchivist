@@ -443,7 +443,7 @@ class DownloadApiView(ApiBaseView):
         # pylint: disable=unused-argument
         """delete single video from queue"""
         print(f"{video_id}: delete from queue")
-        PendingInteract(video_id=video_id).delete_item()
+        PendingInteract(video_id).delete_item()
 
         return Response({"success": True})
 

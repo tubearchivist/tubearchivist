@@ -96,13 +96,13 @@ class PendingIndex:
 class PendingInteract:
     """interact with items in download queue"""
 
-    def __init__(self, video_id=False, status=False):
-        self.video_id = video_id
+    def __init__(self, youtube_id=False, status=False):
+        self.youtube_id = youtube_id
         self.status = status
 
     def delete_item(self):
         """delete single item from pending"""
-        path = f"ta_download/_doc/{self.video_id}"
+        path = f"ta_download/_doc/{self.youtube_id}"
         _, _ = ElasticWrap(path).delete(refresh=True)
 
     def delete_by_status(self):
@@ -114,12 +114,12 @@ class PendingInteract:
     def update_status(self):
         """update status field of pending item"""
         data = {"doc": {"status": self.status}}
-        path = f"ta_download/_update/{self.video_id}"
+        path = f"ta_download/_update/{self.youtube_id}"
         _, _ = ElasticWrap(path).post(data=data)
 
     def get_item(self):
         """return pending item dict"""
-        path = f"ta_download/_doc/{self.video_id}"
+        path = f"ta_download/_doc/{self.youtube_id}"
         response, status_code = ElasticWrap(path).get()
         return response["_source"], status_code
 
