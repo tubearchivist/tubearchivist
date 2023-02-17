@@ -376,13 +376,13 @@ class DownloadView(ArchivistResultsView):
     def get(self, request):
         """handle get request"""
         self.initiate_vars(request)
-        self._update_view_data(request)
+        filter_view = self._update_view_data(request)
         self.find_results()
         self.context.update(
             {
                 "title": "Downloads",
                 "add_form": AddToQueueForm(),
-                "channel_agg_list": self._get_channel_agg(),
+                "channel_agg_list": self._get_channel_agg(filter_view),
             }
         )
         return render(request, "home/downloads.html", self.context)
@@ -417,11 +417,13 @@ class DownloadView(ArchivistResultsView):
             }
         )
 
-    def _get_channel_agg(self):
+        return filter_view
+
+    def _get_channel_agg(self, filter_view):
         """get pending channel with count"""
         data = {
             "size": 0,
-            "query": {"term": {"status": {"value": "pending"}}},
+            "query": {"term": {"status": {"value": filter_view}}},
             "aggs": {
                 "channel_downloads": {
                     "multi_terms": {
