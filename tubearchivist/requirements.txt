@@ -1,6 +1,6 @@
 beautifulsoup4==4.11.2
 celery==5.2.7
-Django==4.1.6
+Django==4.1.7
 django-auth-ldap==4.1.0
 django-cors-headers==3.13.0
 djangorestframework==3.14.0
