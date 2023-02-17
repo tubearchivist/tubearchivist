@@ -1,5 +1,5 @@
 # Video Page
-Every video downloaded gets a dedicated page accessible at `/video/<video-id>/` of your Tube Archivist.
+Every video downloaded gets a dedicated page accessible at `/video/<video-id>/` of your Tube Archivist. Throughout the interface, click on a video title to access the video page.
 
 Clicking on the channel name or the channel icon will bring you to the dedicated channel detail [page](Channels#channel-detail).
 
