@@ -48,7 +48,7 @@ class ThumbManagerBase:
                             return img
                         return self.get_fallback()
 
-                    except UnidentifiedImageError:
+                    except (UnidentifiedImageError, OSError):
                         print(f"failed to open thumbnail: {url}")
                         return self.get_fallback()
 
