@@ -168,4 +168,4 @@ class Command(BaseCommand):
                 message = f"    🗙 {index_name} vid_type update failed"
                 self.stdout.write(self.style.ERROR(message))
                 self.stdout.write(response)
-                CommandError(message)
+                raise CommandError(message)
