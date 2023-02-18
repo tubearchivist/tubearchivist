@@ -286,8 +286,9 @@
             </div>
         </div>
         <div class="settings-group">
-            <h2>Index backup</h2>
+            <h2>ZIP file index backup</h2>
             <div class="settings-item">
+                <p><i>Zip file backups are very slow for large archives and consistency is not guaranteed, use snapshots instead. Make sure no other tasks are running when creating a Zip file backup.</i></p>
                 <p>Current index backup schedule: <span class="settings-current">
                     {% if config.scheduler.run_backup %}
                         {% for key, value in config.scheduler.run_backup.items %}
@@ -332,8 +333,9 @@
         </div>
     </div>
     <div class="settings-group">
-        <h2>Backup database</h2>
+        <h2>ZIP file index backup</h2>
         <p>Export your database to a zip file stored at <span class="settings-current">cache/backup</span>.</p>
+        <p><i>Zip file backups are very slow for large archives and consistency is not guaranteed, use snapshots instead. Make sure no other tasks are running when creating a Zip file backup.</i></p>
         <div id="db-backup">
             <button onclick="dbBackup()">Start backup</button>
         </div>

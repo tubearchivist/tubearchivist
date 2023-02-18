@@ -66,9 +66,9 @@ There's dedicated user-contributed install steps under [docs/Installation.md](./
 
 For minimal system requirements, the Tube Archivist stack needs around 2GB of available memory for a small testing setup and around 4GB of available memory for a mid to large sized installation. Minimal with dual core with 4 threads, better quad core plus.  
 
-Note for arm64 hosts: The Tube Archivist container is multi arch, so is Elasticsearch. RedisJSON doesn't offer arm builds, but you can use the image `bbilly1/rejson`, an unofficial rebuild for arm64.
-
 This project requires docker. Ensure it is installed and running on your system.
+
+Note for **arm64**: Tube Archivist is a multi arch container, same for redis. For Elasitc Search use the official image for arm64 support. Other architectures are not supported.
 
 Save the [docker-compose.yml](./docker-compose.yml) file from this reposity somewhere permanent on your system, keeping it named `docker-compose.yml`. You'll need to refer to it whenever starting this application.
 
@@ -152,6 +152,8 @@ Wildcards "*" can not be used for the Access-Control-Allow-Origin header. If the
 **Note**: Tube Archivist depends on Elasticsearch 8. 
 
 Use `bbilly1/tubearchivist-es` to automatically get the recommended version, or use the official image with the version tag in the docker-compose file.
+
+Use official Elastic Search for **arm64**.  
 
 Stores video meta data and makes everything searchable. Also keeps track of the download queue.
   - Needs to be accessible over the default port `9200`

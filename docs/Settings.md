@@ -121,8 +121,8 @@ The field **Refresh older than x days** takes a number where TubeArchivist will 
 ## Thumbnail check
 This will check if all expected thumbnails are there and will delete any artwork without matching video.
 
-## Index backup
-Create a zip file of the metadata and select **Max auto backups to keep** to automatically delete old backups created from this task.
+## ZIP file index backup
+Create a zip file of the metadata and select **Max auto backups to keep** to automatically delete old backups created from this task. For data consistency, make sure there aren't any other tasks running that will change the index during the backup process. This is very slow, particularly for large archives. Use snapshots instead. 
 
 
 # Actions
@@ -166,8 +166,8 @@ If the video you are trying to import is not available on YouTube any more, **Tu
 ## Embed thumbnails into media file
 This will write or overwrite all thumbnails in the media file using the downloaded thumbnail. This is only necessary if you didn't download the files with the option *Embed Thumbnail* enabled or want to make sure all media files get the newest thumbnail. Follow the docker-compose logs to monitor progress.
 
-## Backup Database
-This will backup your metadata into a zip file. The file will get stored at *cache/backup* and will contain the necessary files to restore the Elasticsearch index formatted **nd-json** files.  
+## ZIP file index backup
+This will backup your metadata into a zip file. The file will get stored at *cache/backup* and will contain the necessary files to restore the Elasticsearch index formatted **nd-json** files. For data consistency, make sure there aren't any other tasks running that will change the index during the backup process. This is very slow, particularly for large archives.  
 
 BE AWARE: This will **not** backup any media files, just the metadata from the Elasticsearch.
 
