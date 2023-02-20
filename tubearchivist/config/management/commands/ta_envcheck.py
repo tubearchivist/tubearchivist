@@ -113,7 +113,8 @@ class Command(BaseCommand):
             return
 
         regex = re.compile(r"listen [0-9]{1,5}")
-        changed = file_overwrite(NGINX, regex, overwrite)
+        to_overwrite = f"listen {overwrite}"
+        changed = file_overwrite(NGINX, regex, to_overwrite)
         if changed:
             message = f"    ✓ TA_PORT changed to {overwrite}"
         else:
