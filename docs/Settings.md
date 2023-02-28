@@ -185,6 +185,7 @@ This function will go through all your media files and looks at the whole index 
 - Should the filename not match with the indexed media url, this will rename the video files correctly and update the index with the new link.
 - When you delete media files from the filesystem outside of the Tube Archivist interface, this will delete leftover metadata from the index.
 - When you have media files that are not indexed yet, this will grab the metadata from YouTube like it was a newly downloaded video. This can be useful when restoring from an older backup file with missing metadata but already downloaded mediafiles. NOTE: This only works if the media files are named in the same convention as Tube Archivist does, particularly the YouTube ID needs to be at the same index in the filename, alternatively see above for *Manual Media Files Import*.
--This will also check all of your thumbnails and download any that are missing.
+- The task will stop, when adding a video fails, for example if the video is no longer available on YouTube.
+- This will also check all of your thumbnails and download any that are missing.
 
 BE AWARE: There is no undo.
