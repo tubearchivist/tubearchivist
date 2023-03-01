@@ -214,8 +214,6 @@ elif [[ $1 == "test" ]]; then
     sync_test "$2"
 elif [[ $1 == "validate" ]]; then
     validate "$2"
-elif [[ $1 == "versioncheck" ]]; then
-    python version_check.py
 elif [[ $1 == "docker" ]]; then
     sync_docker
 elif [[ $1 == "unstable" ]]; then
@@ -223,7 +221,7 @@ elif [[ $1 == "unstable" ]]; then
 elif [[ $1 == "es" ]]; then
     sync_latest_es
 else
-    echo "valid options are: blackhole | test | validate | versioncheck | docker | unstable | es"
+    echo "valid options are: blackhole | test | validate | docker | unstable | es"
 fi
 
 
