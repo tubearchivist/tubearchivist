@@ -259,6 +259,7 @@ class Reindex(ReindexBase):
         video.get_from_es()
         player = video.json_data["player"]
         date_downloaded = video.json_data["date_downloaded"]
+        media_url = video.json_data["media_url"]
         channel_dict = video.json_data["channel"]
         playlist = video.json_data.get("playlist")
         subtitles = video.json_data.get("subtitles")
@@ -280,6 +281,8 @@ class Reindex(ReindexBase):
             video.json_data["playlist"] = playlist
 
         video.upload_to_es()
+        if media_url != video.json_data["media_url"]:
+            self._rename_media_file(media_url, video.json_data["media_url"])
 
         thumb_handler = ThumbManager(youtube_id)
         thumb_handler.delete_video_thumb()
@@ -288,6 +291,14 @@ class Reindex(ReindexBase):
         Comments(youtube_id, config=self.config).reindex_comments()
 
         return
+
+    def _rename_media_file(self, media_url_is, media_url_should):
+        """handle title change"""
+        print(f"[reindex] fix media_url {media_url_is} to {media_url_should}")
+        videos = self.config["application"]["videos"]
+        old_path = os.path.join(videos, media_url_is)
+        new_path = os.path.join(videos, media_url_should)
+        os.rename(old_path, new_path)
 
     @staticmethod
     def _reindex_single_channel(channel_id):
