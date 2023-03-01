@@ -156,3 +156,28 @@ class RedisQueue(RedisBase):
         """check if queue as at least one pending item"""
         result = self.conn.execute_command("LRANGE", self.key, 0, 0)
         return bool(result)
+
+
+class TaskRedis(RedisBase):
+    """interact with redis tasks"""
+
+    BASE = "celery-task-meta-"
+    EXPIRE = 60 * 60 * 24
+
+    def get_all(self):
+        """return all tasks"""
+        all_keys = self.conn.execute_command("KEYS", f"{self.BASE}*")
+        return [i.decode().replace(self.BASE, "") for i in all_keys]
+
+    def get_single(self, task_id):
+        """return content of single task"""
+        result = self.conn.execute_command("GET", self.BASE + task_id).decode()
+        return json.loads(result)
+
+    def set_key(self, task_id, message, expire=False):
+        """set value for lock, initial or update"""
+        key = f"{self.BASE}{task_id}"
+        self.conn.execute_command("SET", key, json.dumps(message))
+
+        if expire:
+            self.conn.execute_command("EXPIRE", key, self.EXPIRE)
