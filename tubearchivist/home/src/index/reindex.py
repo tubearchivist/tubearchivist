@@ -257,12 +257,7 @@ class Reindex(ReindexBase):
 
         # read current state
         video.get_from_es()
-        player = video.json_data["player"]
-        date_downloaded = video.json_data["date_downloaded"]
-        media_url = video.json_data["media_url"]
-        channel_dict = video.json_data["channel"]
-        playlist = video.json_data.get("playlist")
-        subtitles = video.json_data.get("subtitles")
+        es_meta = video.json_data.copy()
 
         # get new
         video.build_json()
@@ -270,19 +265,21 @@ class Reindex(ReindexBase):
             video.deactivate()
             return
 
-        video.delete_subtitles(subtitles=subtitles)
+        video.delete_subtitles(subtitles=es_meta.get("subtitles"))
         video.check_subtitles()
 
         # add back
-        video.json_data["player"] = player
-        video.json_data["date_downloaded"] = date_downloaded
-        video.json_data["channel"] = channel_dict
-        if playlist:
-            video.json_data["playlist"] = playlist
+        video.json_data["player"] = es_meta.get("player")
+        video.json_data["date_downloaded"] = es_meta.get("date_downloaded")
+        video.json_data["channel"] = es_meta.get("channel")
+        if es_meta.get("playlist"):
+            video.json_data["playlist"] = es_meta.get("playlist")
 
         video.upload_to_es()
-        if media_url != video.json_data["media_url"]:
-            self._rename_media_file(media_url, video.json_data["media_url"])
+        if es_meta.get("media_url") != video.json_data["media_url"]:
+            self._rename_media_file(
+                es_meta.get("media_url"), video.json_data["media_url"]
+            )
 
         thumb_handler = ThumbManager(youtube_id)
         thumb_handler.delete_video_thumb()
