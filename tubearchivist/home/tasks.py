@@ -33,7 +33,12 @@ REDIS_HOST = os.environ.get("REDIS_HOST")
 REDIS_PORT = os.environ.get("REDIS_PORT") or 6379
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-app = Celery("tasks", broker=f"redis://{REDIS_HOST}:{REDIS_PORT}")
+app = Celery(
+    "tasks",
+    broker=f"redis://{REDIS_HOST}:{REDIS_PORT}",
+    backend=f"redis://{REDIS_HOST}:{REDIS_PORT}",
+    result_extended=True,
+)
 app.config_from_object("django.conf:settings", namespace="ta:")
 app.autodiscover_tasks()
 app.conf.timezone = os.environ.get("TZ") or "UTC"
@@ -107,7 +112,7 @@ def download_pending():
             my_lock.release()
 
 
-@shared_task
+@shared_task(name="download_single")
 def download_single(pending_video):
     """start download single video now"""
     queue = RedisQueue(queue_name="dl_queue")
@@ -143,7 +148,7 @@ def download_single(pending_video):
             my_lock.release()
 
 
-@shared_task
+@shared_task(name="extract_download")
 def extrac_dl(youtube_ids):
     """parse list passed and add to pending"""
     pending_handler = PendingList(youtube_ids=youtube_ids)
@@ -175,7 +180,7 @@ def check_reindex(data=False, extract_videos=False):
             reindex_lock.release()
 
 
-@shared_task
+@shared_task(name="manual_import")
 def run_manual_import():
     """called from settings page, to go through import folder"""
     print("starting media file import")
@@ -212,7 +217,7 @@ def run_backup(reason="auto"):
             print("backup finished")
 
 
-@shared_task
+@shared_task(name="restore_backup")
 def run_restore_backup(filename):
     """called from settings page, dump backup to zip file"""
     ElasitIndexWrap().reset()
@@ -220,6 +225,7 @@ def run_restore_backup(filename):
     print("index restore finished")
 
 
+@shared_task(name="kill_download")
 def kill_dl(task_id):
     """kill download worker task by ID"""
     if task_id:
@@ -240,7 +246,7 @@ def kill_dl(task_id):
     RedisArchivist().set_message("message:download", mess_dict, expire=True)
 
 
-@shared_task
+@shared_task(name="rescan_filesystem")
 def rescan_filesystem():
     """check the media folder for mismatches"""
     scan_filesystem()
@@ -253,13 +259,13 @@ def thumbnail_check():
     ThumbValidator().download_missing()
 
 
-@shared_task
+@shared_task(name="resync_thumbs")
 def re_sync_thumbs():
     """sync thumbnails to mediafiles"""
     ThumbFilesystem().sync()
 
 
-@shared_task
+@shared_task(name="subscribe_to")
 def subscribe_to(url_str):
     """take a list of urls to subscribe to"""
     to_subscribe_list = Parser(url_str).parse()
@@ -291,7 +297,7 @@ def subscribe_to(url_str):
         RedisArchivist().set_message(key, message=message, expire=True)
 
 
-@shared_task
+@shared_task(name="index_playlists")
 def index_channel_playlists(channel_id):
     """add all playlists of channel to index"""
     channel = YoutubeChannel(channel_id)
