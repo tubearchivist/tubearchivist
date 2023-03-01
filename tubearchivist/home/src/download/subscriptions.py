@@ -265,3 +265,61 @@ class PlaylistSubscription:
                     missing_videos.append(youtube_id)
 
         return missing_videos
+
+
+class SubscriptionScanner:
+    """add missing videos to queue"""
+
+    def __init__(self):
+        self.missing_videos = False
+
+    def scan(self):
+        """scan channels and playlists"""
+        self.missing_videos = []
+        self._notify()
+        self._scan_channels()
+        self._scan_playlists()
+        if not self.missing_videos:
+            return
+
+        self.add_to_pending()
+
+    def _notify(self):
+        """set redis notification"""
+        message = {
+            "status": "message:rescan",
+            "level": "info",
+            "title": "Rescanning channels and playlists.",
+            "message": "Looking for new videos.",
+        }
+        RedisArchivist().set_message("message:rescan", message, expire=True)
+
+    def _scan_channels(self):
+        """get missing from channels"""
+        channel_handler = ChannelSubscription()
+        missing = channel_handler.find_missing()
+        if not missing:
+            return
+
+        for vid_id, vid_type in missing:
+            self.missing_videos.append(
+                {"type": "video", "vid_type": vid_type, "url": vid_id}
+            )
+
+    def _scan_playlists(self):
+        """get missing from playlists"""
+        playlist_handler = PlaylistSubscription()
+        missing = playlist_handler.find_missing()
+        if not missing:
+            return
+
+        for i in missing:
+            self.missing_videos.append(
+                {"type": "video", "vid_type": VideoTypeEnum.VIDEOS, "url": i}
+            )
+
+    def add_to_pending(self):
+        """add missing videos to pending queue"""
+        pending_handler = queue.PendingList(youtube_ids=self.missing_videos)
+        pending_handler.parse_url_list()
+        pending_handler.add_to_pending()
