@@ -128,8 +128,9 @@ class RedisQueue(RedisBase):
 
     def add_priority(self, to_add):
         """add single video to front of queue"""
-        self.clear_item(to_add)
-        self.conn.execute_command("LPUSH", self.key, to_add)
+        item = json.dumps(to_add)
+        self.clear_item(item)
+        self.conn.execute_command("LPUSH", self.key, item)
 
     def get_next(self):
         """return next element in the queue, False if none"""

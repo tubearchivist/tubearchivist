@@ -15,7 +15,7 @@ from home.src.index.video import SponsorBlock, YoutubeVideo
 from home.src.ta.config import AppConfig
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 from home.src.ta.urlparser import Parser
-from home.tasks import check_reindex, download_single, extrac_dl, subscribe_to
+from home.tasks import check_reindex, download_pending, extrac_dl, subscribe_to
 from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
@@ -424,14 +424,15 @@ class DownloadApiView(ApiBaseView):
             print(message)
             return Response({"message": message}, status=400)
 
-        pending_video, status_code = PendingInteract(video_id).get_item()
+        _, status_code = PendingInteract(video_id).get_item()
         if status_code == 404:
             message = f"{video_id}: item not found {status_code}"
             return Response({"message": message}, status=404)
 
         print(f"{video_id}: change status to {item_status}")
         if item_status == "priority":
-            download_single.delay(pending_video)
+            PendingInteract(youtube_id=video_id).prioritize()
+            download_pending.delay(from_queue=False)
         else:
             PendingInteract(video_id, item_status).update_status()
             RedisQueue(queue_name="dl_queue").clear_item(video_id)

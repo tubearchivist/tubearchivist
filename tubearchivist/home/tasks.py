@@ -6,7 +6,6 @@ Functionality:
   because tasks are initiated at application start
 """
 
-import json
 import os
 
 from celery import Celery, shared_task
@@ -22,7 +21,6 @@ from home.src.es.index_setup import ElasitIndexWrap
 from home.src.index.channel import YoutubeChannel
 from home.src.index.filesystem import ImportFolderScanner, scan_filesystem
 from home.src.index.reindex import Reindex, ReindexManual, ReindexOutdated
-from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.helper import clear_dl_cache
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
@@ -64,7 +62,7 @@ def update_subscribed(self):
 
 
 @shared_task(name="download_pending", bind=True)
-def download_pending(self):
+def download_pending(self, from_queue=True):
     """download latest pending videos"""
     manager = TaskManager()
     if manager.is_pending(self):
@@ -73,44 +71,9 @@ def download_pending(self):
 
     manager.init(self)
     downloader = VideoDownloader()
-    downloader.add_pending()
+    if from_queue:
+        downloader.add_pending()
     downloader.run_queue()
-
-
-@shared_task(name="download_single")
-def download_single(pending_video):
-    """start download single video now"""
-    queue = RedisQueue(queue_name="dl_queue")
-
-    to_add = {
-        "youtube_id": pending_video["youtube_id"],
-        "vid_type": pending_video.get("vid_type", VideoTypeEnum.VIDEOS.value),
-    }
-    queue.add_priority(json.dumps(to_add))
-    print(f"Added to queue with priority: {to_add}")
-    # start queue if needed
-    have_lock = False
-    my_lock = RedisArchivist().get_lock("downloading")
-
-    try:
-        have_lock = my_lock.acquire(blocking=False)
-        if have_lock:
-            key = "message:download"
-            mess_dict = {
-                "status": key,
-                "level": "info",
-                "title": "Download single video",
-                "message": "processing",
-            }
-            RedisArchivist().set_message(key, mess_dict, expire=True)
-            VideoDownloader().run_queue()
-        else:
-            print("Download queue already running.")
-
-    finally:
-        # release if only single run
-        if have_lock and not queue.get_next():
-            my_lock.release()
 
 
 @shared_task(name="extract_download")

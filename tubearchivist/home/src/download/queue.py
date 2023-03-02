@@ -18,7 +18,7 @@ from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import DurationConverter, is_shorts
-from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 
 
 class PendingIndex:
@@ -116,6 +116,16 @@ class PendingInteract:
         data = {"doc": {"status": self.status}}
         path = f"ta_download/_update/{self.youtube_id}"
         _, _ = ElasticWrap(path).post(data=data)
+
+    def prioritize(self):
+        """prioritize pending item in redis queue"""
+        pending_video, _ = self.get_item()
+        vid_type = pending_video.get("vid_type", VideoTypeEnum.VIDEOS.value)
+        to_add = {
+            "youtube_id": pending_video["youtube_id"],
+            "vid_type": vid_type,
+        }
+        RedisQueue(queue_name="dl_queue").add_priority(to_add)
 
     def get_item(self):
         """return pending item dict"""
