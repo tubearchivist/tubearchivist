@@ -9,7 +9,7 @@
 </div>
 
 ## Table of contents:
-* [Wiki](https://github.com/tubearchivist/tubearchivist/wiki) with [FAQ](https://github.com/tubearchivist/tubearchivist/wiki/FAQ)
+* Docs: [Wiki](https://github.com/tubearchivist/tubearchivist/wiki), [FAQ](https://github.com/tubearchivist/tubearchivist/wiki/FAQ) and [API](https://github.com/tubearchivist/tubearchivist/tree/master/tubearchivist/api)
 * [Core functionality](#core-functionality)
 * [Screenshots](#screenshots)
 * [Problem Tube Archivist tries to solve](#problem-tube-archivist-tries-to-solve)

@@ -2,8 +2,9 @@
 Documentation of available API endpoints.  
 
 Note:  
-- This is very early stages and will change!
-- Check the commit history to see if a documented feature is already in your release
+- This has changed in the past and will change again while building out additional integrations and functionality.
+- All changes to the API are marked with a `[API]` keyword for easy searching, for example search for [commits](https://github.com/tubearchivist/tubearchivist/search?o=desc&q=%5Bapi%5D&s=committer-date&type=commits). You'll find the same in the [release notes](https://github.com/tubearchivist/tubearchivist/releases).
+- Check the commit history and release notes to see if a documented feature is already in your release.
 
 ## Table of contents
 - [Authentication](#authentication)
