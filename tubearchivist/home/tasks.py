@@ -123,65 +123,50 @@ def extrac_dl(youtube_ids):
     pending_handler.add_to_pending()
 
 
-@shared_task(name="check_reindex")
-def check_reindex(data=False, extract_videos=False):
+@shared_task(bind=True, name="check_reindex")
+def check_reindex(self, data=False, extract_videos=False):
     """run the reindex main command"""
     if data:
+        # started from frontend through API
+        print(f"[task][{self.name}] reindex {data}")
         ReindexManual(extract_videos=extract_videos).extract_data(data)
 
-    have_lock = False
-    reindex_lock = RedisArchivist().get_lock("reindex")
+    manager = TaskManager()
+    if manager.is_pending(self):
+        print(f"[task][{self.name}] reindex queue is already running")
+        return
 
-    try:
-        have_lock = reindex_lock.acquire(blocking=False)
-        if have_lock:
-            if not data:
-                ReindexOutdated().add_outdated()
+    manager.init(self)
+    if not data:
+        # started from scheduler
+        print(f"[task][{self.name}] reindex outdated documents")
+        ReindexOutdated().add_outdated()
 
-            Reindex().reindex_all()
-        else:
-            print("Did not acquire reindex lock.")
-
-    finally:
-        if have_lock:
-            reindex_lock.release()
+    Reindex().reindex_all()
 
 
-@shared_task(name="manual_import")
-def run_manual_import():
+@shared_task(bind=True, name="manual_import")
+def run_manual_import(self):
     """called from settings page, to go through import folder"""
-    print("starting media file import")
-    have_lock = False
-    my_lock = RedisArchivist().get_lock("manual_import")
+    manager = TaskManager()
+    if manager.is_pending(self):
+        print(f"[task][{self.name}] manual import is already running")
+        return
 
-    try:
-        have_lock = my_lock.acquire(blocking=False)
-        if have_lock:
-            ImportFolderScanner().scan()
-        else:
-            print("Did not acquire lock form import.")
-
-    finally:
-        if have_lock:
-            my_lock.release()
+    manager.init(self)
+    ImportFolderScanner().scan()
 
 
-@shared_task(name="run_backup")
-def run_backup(reason="auto"):
+@shared_task(bind=True, name="run_backup")
+def run_backup(self, reason="auto"):
     """called from settings page, dump backup to zip file"""
-    have_lock = False
-    my_lock = RedisArchivist().get_lock("run_backup")
+    manager = TaskManager()
+    if manager.is_pending(self):
+        print(f"[task][{self.name}] backup is already running")
+        return
 
-    try:
-        have_lock = my_lock.acquire(blocking=False)
-        if have_lock:
-            ElasticBackup(reason=reason).backup_all_indexes()
-        else:
-            print("Did not acquire lock for backup task.")
-    finally:
-        if have_lock:
-            my_lock.release()
-            print("backup finished")
+    manager.init(self)
+    ElasticBackup(reason=reason).backup_all_indexes()
 
 
 @shared_task(name="restore_backup")
