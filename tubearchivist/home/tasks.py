@@ -12,8 +12,7 @@ import os
 from celery import Celery, shared_task
 from home.src.download.queue import PendingList
 from home.src.download.subscriptions import (
-    ChannelSubscription,
-    PlaylistSubscription,
+    SubscriptionHandler,
     SubscriptionScanner,
 )
 from home.src.download.thumbnails import ThumbFilesystem, ThumbValidator
@@ -28,7 +27,6 @@ from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.helper import clear_dl_cache
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 from home.src.ta.task_manager import TaskManager
-from home.src.ta.urlparser import Parser
 
 CONFIG = AppConfig().config
 REDIS_HOST = os.environ.get("REDIS_HOST")
@@ -244,33 +242,7 @@ def re_sync_thumbs(self):
 @shared_task(name="subscribe_to")
 def subscribe_to(url_str):
     """take a list of urls to subscribe to"""
-    to_subscribe_list = Parser(url_str).parse()
-    for idx, item in enumerate(to_subscribe_list):
-        to_sub_id = item["url"]
-        if item["type"] == "playlist":
-            PlaylistSubscription().process_url_str([item])
-            continue
-
-        if item["type"] == "video":
-            vid_details = PendingList().get_youtube_details(to_sub_id)
-            channel_id_sub = vid_details["channel_id"]
-        elif item["type"] == "channel":
-            channel_id_sub = to_sub_id
-        else:
-            raise ValueError("failed to subscribe to: " + to_sub_id)
-
-        ChannelSubscription().change_subscribe(
-            channel_id_sub, channel_subscribed=True
-        )
-        # notify for channels
-        key = "message:subchannel"
-        message = {
-            "status": key,
-            "level": "info",
-            "title": "Subscribing to Channels",
-            "message": f"Processing {idx + 1} of {len(to_subscribe_list)}",
-        }
-        RedisArchivist().set_message(key, message=message, expire=True)
+    SubscriptionHandler(url_str).subscribe()
 
 
 @shared_task(name="index_playlists")

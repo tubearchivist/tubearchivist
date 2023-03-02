@@ -13,6 +13,7 @@ from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
 from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.urlparser import Parser
 
 
 class ChannelSubscription:
@@ -323,3 +324,53 @@ class SubscriptionScanner:
         pending_handler = queue.PendingList(youtube_ids=self.missing_videos)
         pending_handler.parse_url_list()
         pending_handler.add_to_pending()
+
+
+class SubscriptionHandler:
+    """subscribe to channels and playlists from url_str"""
+
+    def __init__(self, url_str):
+        self.url_str = url_str
+        self.to_subscribe = False
+
+    def subscribe(self):
+        """subscribe to url_str items"""
+        self.to_subscribe = Parser(self.url_str).parse()
+
+        for idx, item in enumerate(self.to_subscribe):
+            self.subscribe_type(item)
+            self._notify(idx)
+
+    def subscribe_type(self, item):
+        """process single item"""
+        if item["type"] == "playlist":
+            PlaylistSubscription().process_url_str([item])
+            return
+
+        if item["type"] == "video":
+            # extract channel id from video
+            vid = queue.PendingList().get_youtube_details(item["url"])
+            channel_id = vid["channel_id"]
+        elif item["type"] == "channel":
+            channel_id = item["url"]
+        else:
+            raise ValueError("failed to subscribe to: " + item["url"])
+
+        self._subscribe(channel_id)
+
+    def _subscribe(self, channel_id):
+        """subscribe to channel"""
+        ChannelSubscription().change_subscribe(
+            channel_id, channel_subscribed=True
+        )
+
+    def _notify(self, idx):
+        """send notification message to redis"""
+        key = "message:subchannel"
+        message = {
+            "status": key,
+            "level": "info",
+            "title": "Subscribing",
+            "message": f"Processing {idx + 1} of {len(self.to_subscribe)}",
+        }
+        RedisArchivist().set_message(key, message=message, expire=True)
