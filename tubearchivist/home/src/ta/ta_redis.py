@@ -182,3 +182,13 @@ class TaskRedis(RedisBase):
 
         if expire:
             self.conn.execute_command("EXPIRE", key, self.EXPIRE)
+
+    def del_task(self, task_id):
+        """delete task result by id"""
+        self.conn.execute_command("DEL", f"{self.BASE}{task_id}")
+
+    def del_all(self):
+        """delete all task results"""
+        all_tasks = self.get_all()
+        for task_id in all_tasks:
+            self.del_task(task_id)

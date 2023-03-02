@@ -17,7 +17,9 @@ class TaskManager:
         if not all_keys:
             return False
 
-        return [handler.get_single(i) for i in all_keys]
+        all_results = [handler.get_single(i) for i in all_keys]
+
+        return sorted(all_results, key=lambda d: d["date_done"])
 
     def get_tasks_by_name(self, task_name):
         """get all tasks by name"""
@@ -40,6 +42,7 @@ class TaskManager:
             "status": "PENDING",
             "result": None,
             "traceback": None,
+            "date_done": False,
             "name": task.name,
             "task_id": task.request.id,
         }
