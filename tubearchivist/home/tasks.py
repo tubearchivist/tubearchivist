@@ -169,9 +169,15 @@ def run_backup(self, reason="auto"):
     ElasticBackup(reason=reason).backup_all_indexes()
 
 
-@shared_task(name="restore_backup")
-def run_restore_backup(filename):
+@shared_task(bind=True, name="restore_backup")
+def run_restore_backup(self, filename):
     """called from settings page, dump backup to zip file"""
+    manager = TaskManager()
+    if manager.is_pending(self):
+        print(f"[task][{self.name}] restore is already running")
+        return
+
+    manager.init(self)
     ElasitIndexWrap().reset()
     ElasticBackup().restore(filename)
     print("index restore finished")
@@ -198,22 +204,40 @@ def kill_dl(task_id):
     RedisArchivist().set_message("message:download", mess_dict, expire=True)
 
 
-@shared_task(name="rescan_filesystem")
-def rescan_filesystem():
+@shared_task(bind=True, name="rescan_filesystem")
+def rescan_filesystem(self):
     """check the media folder for mismatches"""
+    manager = TaskManager()
+    if manager.is_pending(self):
+        print(f"[task][{self.name}] filesystem rescan already running")
+        return
+
+    manager.init(self)
     scan_filesystem()
     ThumbValidator().download_missing()
 
 
-@shared_task(name="thumbnail_check")
-def thumbnail_check():
+@shared_task(bind=True, name="thumbnail_check")
+def thumbnail_check(self):
     """validate thumbnails"""
+    manager = TaskManager()
+    if manager.is_pending(self):
+        print(f"[task][{self.name}] thumbnail check is already running")
+        return
+
+    manager.init(self)
     ThumbValidator().download_missing()
 
 
-@shared_task(name="resync_thumbs")
-def re_sync_thumbs():
+@shared_task(bind=True, name="resync_thumbs")
+def re_sync_thumbs(self):
     """sync thumbnails to mediafiles"""
+    manager = TaskManager()
+    if manager.is_pending(self):
+        print(f"[task][{self.name}] thumb re-embed is already running")
+        return
+
+    manager.init(self)
     ThumbFilesystem().sync()
 
 
