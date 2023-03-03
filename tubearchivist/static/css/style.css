@@ -896,12 +896,17 @@ video:-webkit-full-screen {
     padding: 1rem 0;
 }
 
-#multi-search-results tt {
-    background-color: lightblue;
+#multi-search-results-placeholder span {
+    font-family: monospace;
+    background-color: var(--accent-font-dark);
 }
 
-#multi-search-results tt.value {
-    background-color: lightsteelblue;
+#multi-search-results-placeholder span.value {
+    background-color: var(--accent-font-light);
+}
+
+#multi-search-results-placeholder ul {
+    margin-top: 10px;
 }
 
 /* channel overview page */
