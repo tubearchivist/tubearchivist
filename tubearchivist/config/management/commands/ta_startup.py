@@ -4,8 +4,8 @@ Functionality:
 - Apply migrations
 """
 
-from time import sleep
 import os
+from time import sleep
 
 from django.core.management.base import BaseCommand, CommandError
 from home.src.es.connect import ElasticWrap
