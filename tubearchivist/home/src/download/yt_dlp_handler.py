@@ -260,7 +260,7 @@ class VideoDownloader:
             "title": "Looking for videos to download",
             "message": "Scanning your download queue.",
         }
-        RedisArchivist().set_message(self.MSG, mess_dict, expire=True)
+        RedisArchivist().set_message(self.MSG, mess_dict)
         pending = PendingList()
         pending.get_download()
         to_add = [
