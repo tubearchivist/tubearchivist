@@ -898,11 +898,12 @@ video:-webkit-full-screen {
 
 #multi-search-results-placeholder span {
     font-family: monospace;
-    background-color: var(--accent-font-dark);
+    color: var(--accent-font-dark);
+    background-color: var(--highlight-bg);
 }
 
 #multi-search-results-placeholder span.value {
-    background-color: var(--accent-font-light);
+    color: var(--accent-font-light);
 }
 
 #multi-search-results-placeholder ul {
