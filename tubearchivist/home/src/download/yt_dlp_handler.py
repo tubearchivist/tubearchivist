@@ -293,8 +293,11 @@ class VideoDownloader:
         title = "Downloading: " + response["info_dict"]["title"]
 
         try:
+            size = response.get("_total_bytes_str")
+            if size.strip() == "N/A":
+                size = response.get("_total_bytes_estimate_str", "N/A")
+
             percent = response["_percent_str"]
-            size = response["_total_bytes_str"]
             speed = response["_speed_str"]
             eta = response["_eta_str"]
             message = f"{percent} of {size} at {speed} - time left: {eta}"
