@@ -318,7 +318,6 @@ class VideoDownloader:
     def _build_obs_basic(self):
         """initial obs"""
         self.obs = {
-            "default_search": "ytsearch",
             "merge_output_format": "mp4",
             "outtmpl": (
                 self.config["application"]["cache_dir"]
@@ -326,13 +325,9 @@ class VideoDownloader:
             ),
             "progress_hooks": [self._progress_hook],
             "noprogress": True,
-            "quiet": True,
             "continuedl": True,
-            "retries": 3,
             "writethumbnail": False,
             "noplaylist": True,
-            "check_formats": "selected",
-            "socket_timeout": 3,
         }
 
     def _build_obs_user(self):

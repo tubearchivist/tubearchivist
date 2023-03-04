@@ -148,13 +148,9 @@ class PendingList(PendingIndex):
     """manage the pending videos list"""
 
     yt_obs = {
-        "default_search": "ytsearch",
-        "quiet": True,
-        "check_formats": "selected",
         "noplaylist": True,
         "writethumbnail": True,
         "simulate": True,
-        "socket_timeout": 3,
     }
 
     def __init__(self, youtube_ids=False):
