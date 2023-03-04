@@ -192,7 +192,7 @@ class VideoDownloader:
                 "vid_type", VideoTypeEnum.VIDEOS.value
             )
             video_type = VideoTypeEnum(tmp_vid_type)
-            print(f"Downloading type: {video_type}")
+            print(f"{youtube_id}: Downloading type: {video_type}")
 
             success = self._dl_single_vid(youtube_id)
             if not success:
@@ -204,7 +204,7 @@ class VideoDownloader:
                 "title": "Indexing....",
                 "message": "Add video metadata to index.",
             }
-            RedisArchivist().set_message(self.MSG, mess_dict, expire=60)
+            RedisArchivist().set_message(self.MSG, mess_dict, expire=120)
 
             vid_dict = index_new_video(
                 youtube_id,
@@ -223,8 +223,10 @@ class VideoDownloader:
 
             if queue.has_item():
                 message = "Continue with next video."
+                expire = False
             else:
                 message = "Download queue is finished."
+                expire = 10
 
             self.move_to_archive(vid_dict)
             mess_dict = {
@@ -233,7 +235,7 @@ class VideoDownloader:
                 "title": "Completed",
                 "message": message,
             }
-            RedisArchivist().set_message(self.MSG, mess_dict, expire=10)
+            RedisArchivist().set_message(self.MSG, mess_dict, expire=expire)
             self._delete_from_pending(youtube_id)
 
         # post processing
