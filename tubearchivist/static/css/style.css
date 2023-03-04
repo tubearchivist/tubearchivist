@@ -892,8 +892,22 @@ video:-webkit-full-screen {
     width: 100%;
 }
 
-.multi-search-result {
+.multi-search-result, #multi-search-results-placeholder {
     padding: 1rem 0;
+}
+
+#multi-search-results-placeholder span {
+    font-family: monospace;
+    color: var(--accent-font-dark);
+    background-color: var(--highlight-bg);
+}
+
+#multi-search-results-placeholder span.value {
+    color: var(--accent-font-light);
+}
+
+#multi-search-results-placeholder ul {
+    margin-top: 10px;
 }
 
 /* channel overview page */
