@@ -7,6 +7,8 @@ services:
     image: bbilly1/tubearchivist
     ports:
       - 8000:8000
+    networks:
+      tubearchivist-net
     volumes:
       - media:/youtube
       - cache:/cache
@@ -27,8 +29,8 @@ services:
     image: redis/redis-stack-server
     container_name: archivist-redis
     restart: unless-stopped
-    expose:
-      - "6379"
+    networks:
+      tubearchivist-net
     volumes:
       - redis:/data
     depends_on:
@@ -37,6 +39,8 @@ services:
     image: bbilly1/tubearchivist-es         # only for amd64, or use official es 8.6.2
     container_name: archivist-es
     restart: unless-stopped
+    networks:
+      tubearchivist-net
     environment:
       - "ELASTIC_PASSWORD=verysecret"       # matching Elasticsearch password
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
@@ -49,11 +53,12 @@ services:
         hard: -1
     volumes:
       - es:/usr/share/elasticsearch/data    # check for permission error when using bind mount, see readme
-    expose:
-      - "9200"
 
 volumes:
   media:
   cache:
   redis:
   es:
+
+networks:
+  tubearchivist-net:
