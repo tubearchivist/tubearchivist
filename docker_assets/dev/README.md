@@ -11,7 +11,7 @@ use vscode remote explorer and attach to `tubearchivist`
 ## in new vscode window attached to container
 - Menu -> Run -> Add Configuration
 - Django
-- add argument `"0.0.0.0:8000" as shown below
+- add argument `"0.0.0.0:8000"` to `.vscode/launch.json` as shown below
 
 ```
 {
