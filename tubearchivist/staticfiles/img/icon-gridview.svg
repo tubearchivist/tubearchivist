@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="2000"
+   height="2000"
+   viewBox="0 0 529.16666 529.16735"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   sodipodi:docname="Gridview.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.35729063"
+     inkscape:cx="901.7564"
+     inkscape:cy="1021.9111"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1">
+    <sodipodi:guide
+       position="247.25932,291.92959"
+       orientation="1,0"
+       id="guide853"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="337.22901,167.98535"
+       orientation="0,1"
+       id="guide855"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="266.76325,305.4565"
+       orientation="0,1"
+       id="guide857"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="257.79774,279.50371"
+       orientation="0,1"
+       id="guide861"
+       inkscape:locked="false" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,232.16736)">
+    <g
+       id="g873"
+       transform="matrix(1.3431799,0,0,1.3431799,-84.854433,26.13855)"
+       style="stroke:none">
+      <rect
+         ry="7.445024"
+         rx="7.445024"
+         y="-121.39048"
+         x="79.903137"
+         height="113.24854"
+         width="167.35619"
+         id="rect815"
+         style="opacity:1;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.56300002;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:1.12600005, 0.56300002999999998;stroke-dashoffset:0;stroke-opacity:0.22508042;paint-order:markers fill stroke" />
+      <rect
+         ry="7.445024"
+         rx="7.445024"
+         y="-121.7837"
+         x="273.05484"
+         height="113.24854"
+         width="167.35619"
+         id="rect815-4"
+         style="opacity:1;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.56300002;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:1.12600006, 0.56300004000000003;stroke-dashoffset:0;stroke-opacity:0.22508042;paint-order:markers fill stroke" />
+      <rect
+         ry="7.445024"
+         rx="7.445024"
+         y="17.882772"
+         x="79.903137"
+         height="113.24854"
+         width="167.35619"
+         id="rect815-2"
+         style="opacity:1;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.56300002;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:1.12600006, 0.56300004000000003;stroke-dashoffset:0;stroke-opacity:0.22508042;paint-order:markers fill stroke" />
+      <rect
+         ry="7.445024"
+         rx="7.445024"
+         y="17.453594"
+         x="273.05484"
+         height="113.24854"
+         width="167.35619"
+         id="rect815-7"
+         style="opacity:1;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.56300002;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:1.12600006, 0.56300004000000003;stroke-dashoffset:0;stroke-opacity:0.22508042;paint-order:markers fill stroke" />
+    </g>
+  </g>
+</svg>

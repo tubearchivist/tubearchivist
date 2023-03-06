@@ -1146,11 +1146,6 @@ def process(request):
     if request.method == "POST":
         current_user = request.user.id
         post_dict = json.loads(request.body.decode())
-        if post_dict.get("reset-token"):
-            print("revoke API token")
-            request.user.auth_token.delete()
-            return JsonResponse({"success": True})
-
         post_handler = PostData(post_dict, current_user)
         if post_handler.to_exec:
             task_result = post_handler.run_task()

@@ -24,6 +24,7 @@ from api.views import (
     VideoSimilarView,
     VideoSponsorView,
     WatchedView,
+    TokenView,
 )
 from django.urls import path
 
@@ -134,5 +135,10 @@ urlpatterns = [
         "search/",
         SearchView.as_view(),
         name="api-search",
+    ),
+    path(
+        "token/",
+        TokenView.as_view(),
+        name="api-token",
     ),
 ]

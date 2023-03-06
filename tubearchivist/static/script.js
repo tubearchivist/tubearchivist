@@ -298,11 +298,15 @@ function fsRescan() {
 }
 
 function resetToken() {
-  let payload = JSON.stringify({ 'reset-token': true });
-  sendPost(payload);
-  let message = document.createElement('p');
-  message.innerText = 'Token revoked';
-  document.getElementById('text-reveal').replaceWith(message);
+  let apiEndpoint = '/api/token/';
+  let result = apiRequest(apiEndpoint, 'DELETE');
+  if (result && result.success) {
+    let message = document.createElement('p');
+    message.innerText = 'Token revoked';
+    document.getElementById('text-reveal').replaceWith(message);
+  } else {
+    console.error('unable to revoke token');
+  }
 }
 
 // restore from snapshot

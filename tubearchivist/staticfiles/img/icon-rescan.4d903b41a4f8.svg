@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="500"
+   height="500"
+   viewBox="0 0 132.29197 132.29167"
+   version="1.1"
+   id="svg1303"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   sodipodi:docname="Rescan Subscriptions.svg">
+  <defs
+     id="defs1297" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.85859018"
+     inkscape:cx="125.63373"
+     inkscape:cy="156.7016"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata1300">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-164.70764)">
+    <path
+       style="opacity:1;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers fill stroke"
+       d="M 240.35352 18.810547 L 240.35352 29.246094 A 221.29301 221.29301 0 0 0 64.912109 129.45898 L 95.701172 150.14453 A 184.02261 184.02261 0 0 1 240.35352 66.369141 L 240.35352 87.705078 L 270.18359 70.480469 L 300.01562 53.257812 L 270.18359 36.035156 L 240.35352 18.810547 z M 312.28516 37.798828 L 301.08398 73.353516 A 184.02261 184.02261 0 0 1 422.6875 187.33594 L 406.34375 192.03125 L 431.13281 215.94922 L 455.92188 239.86719 L 464.24219 206.44141 L 472.56055 173.01367 L 458.55078 177.03711 A 221.29301 221.29301 0 0 0 312.28516 37.798828 z M 73.375 144.88281 L 48.585938 168.80078 L 23.796875 192.71875 L 35.617188 196.11328 A 221.29301 221.29301 0 0 0 28.707031 250 A 221.29301 221.29301 0 0 0 77.992188 388.9375 L 107.99805 366.83789 A 184.02261 184.02261 0 0 1 65.976562 250 A 184.02261 184.02261 0 0 1 71.474609 206.41211 L 90.013672 211.73633 L 81.693359 178.30859 L 73.375 144.88281 z M 433.95312 248.4375 A 184.02261 184.02261 0 0 1 434.02344 250 A 184.02261 184.02261 0 0 1 367.40625 391.49219 L 358.92773 380.14844 L 345.34375 411.80469 L 331.75977 443.45898 L 365.9668 439.39648 L 400.17188 435.33203 L 389.71484 421.33984 A 221.29301 221.29301 0 0 0 471.29297 250 A 221.29301 221.29301 0 0 0 471.23047 248.77539 L 433.95312 248.4375 z M 94.9375 385.80273 L 108.97852 417.25781 L 123.02148 448.71289 L 131.60156 436.87891 A 221.29301 221.29301 0 0 0 250 471.29297 A 221.29301 221.29301 0 0 0 328.64648 456.57227 L 315.99023 421.74805 A 184.02261 184.02261 0 0 1 250 434.02344 A 184.02261 184.02261 0 0 1 153.63867 406.48047 L 163.45898 392.93555 L 129.19727 389.36914 L 94.9375 385.80273 z "
+       transform="matrix(0.26458394,0,0,0.26458394,0,164.70749)"
+       id="path826" />
+  </g>
+</svg>
