@@ -34,4 +34,4 @@ use vscode remote explorer and attach to `tubearchivist`
 ```
 - Menu -> Run -> Start Debugging
 
-Now you are running with a dev environment where you can connect to the app at http://localhost:8000 with debugging and volume mapped source code.
+Now you are running with a dev environment where you can connect to the app at http://localhost:8000 with debugging and volume mapped source code and hot reloading for changes to django python code.
