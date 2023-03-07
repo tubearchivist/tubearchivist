@@ -5,6 +5,7 @@ Functionality:
 """
 
 import os
+from time import sleep
 
 from django.core.management.base import BaseCommand, CommandError
 from home.src.es.connect import ElasticWrap
@@ -151,6 +152,12 @@ class Command(BaseCommand):
         for index_name in index_list:
             path = f"{index_name}/_update_by_query"
             response, status_code = ElasticWrap(path).post(data=data)
+            if status_code == 503:
+                message = f"    🗙 {index_name} retry failed migration."
+                self.stdout.write(self.style.ERROR(message))
+                sleep(10)
+                response, status_code = ElasticWrap(path).post(data=data)
+
             if status_code == 200:
                 updated = response.get("updated", 0)
                 if not updated:

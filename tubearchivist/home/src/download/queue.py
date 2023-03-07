@@ -158,13 +158,9 @@ class PendingList(PendingIndex):
     """manage the pending videos list"""
 
     yt_obs = {
-        "default_search": "ytsearch",
-        "quiet": True,
-        "check_formats": "selected",
         "noplaylist": True,
         "writethumbnail": True,
         "simulate": True,
-        "socket_timeout": 3,
     }
 
     def __init__(self, youtube_ids=False):
@@ -244,6 +240,7 @@ class PendingList(PendingIndex):
 
         for idx, (youtube_id, vid_type) in enumerate(self.missing_videos):
             print(f"{youtube_id} ({vid_type}): add to download queue")
+            self._notify_add(idx)
             video_details = self.get_youtube_details(youtube_id, vid_type)
             if not video_details:
                 continue
@@ -255,8 +252,6 @@ class PendingList(PendingIndex):
 
             url = video_details["vid_thumb_url"]
             ThumbManager(youtube_id).download_video_thumb(url)
-
-            self._notify_add(idx)
 
         if bulk_list:
             # add last newline

@@ -52,16 +52,11 @@ Cookies are used to store your session and contain your access token to your goo
 ### Auto import
 Easiest way to import your cookie is to use the **Tube Archivist Companion** [browser extension](https://github.com/tubearchivist/browser-extension) for Firefox and Chrome.
 
-### Alternative Manual Export your cookie
-- Install **Cookies.txt** addon for [chrome](https://chrome.google.com/webstore/detail/get-cookiestxt/bgaddhkoddajcdgocldbbfleckgcbcid) or [firefox](https://addons.mozilla.org/firefox/addon/cookies-txt).
-- Visit YouTube and login with whichever YouTube account you wish to use to generate the cookies.
-- Click on the extension icon in the toolbar - it will drop down showing the active cookies for YT.
-- Click Export to export the cookies, filename is by default *cookies.google.txt*.
+### Manual import
+Alternatively you can also manually import your cookie into Tube Archivist. Export your cookie as a *Netscape* formatted text file, name it *cookies.google.txt* and put it into the *cache/import* folder. After that you can enable the option on the settings page and your cookie file will get imported.
 
-### Alternative Manual Import your cookie
-Place the file *cookies.google.txt* into the *cache/import* folder of Tube Archivist and enable the cookie import. Once you click on *Update Application Configurations* to save your changes, your cookie will get imported and stored internally.
-
-Once imported, a **Validate Cookie File** button will show, where you can confirm if your cookie is working or not.
+- There are various tools out there that allow you to export cookies from your browser. This project doesn't make any specific recommendations.
+- Once imported, a **Validate Cookie File** button will show, where you can confirm if your cookie is working or not.
 
 ### Use your cookie
 Once imported, additionally to the advantages above, your [Watch Later](https://www.youtube.com/playlist?list=WL) and [Liked Videos](https://www.youtube.com/playlist?list=LL) become a regular playlist you can download and subscribe to as any other [playlist](Playlists).

@@ -192,7 +192,7 @@ class VideoDownloader:
                 "vid_type", VideoTypeEnum.VIDEOS.value
             )
             video_type = VideoTypeEnum(tmp_vid_type)
-            print(f"Downloading type: {video_type}")
+            print(f"{youtube_id}: Downloading type: {video_type}")
 
             success = self._dl_single_vid(youtube_id)
             if not success:
@@ -204,7 +204,7 @@ class VideoDownloader:
                 "title": "Indexing....",
                 "message": "Add video metadata to index.",
             }
-            RedisArchivist().set_message(self.MSG, mess_dict, expire=60)
+            RedisArchivist().set_message(self.MSG, mess_dict, expire=120)
 
             vid_dict = index_new_video(
                 youtube_id,
@@ -223,8 +223,10 @@ class VideoDownloader:
 
             if queue.has_item():
                 message = "Continue with next video."
+                expire = False
             else:
                 message = "Download queue is finished."
+                expire = 10
 
             self.move_to_archive(vid_dict)
             mess_dict = {
@@ -233,7 +235,7 @@ class VideoDownloader:
                 "title": "Completed",
                 "message": message,
             }
-            RedisArchivist().set_message(self.MSG, mess_dict, expire=10)
+            RedisArchivist().set_message(self.MSG, mess_dict, expire=expire)
             self._delete_from_pending(youtube_id)
 
         # post processing
@@ -260,7 +262,7 @@ class VideoDownloader:
             "title": "Looking for videos to download",
             "message": "Scanning your download queue.",
         }
-        RedisArchivist().set_message(self.MSG, mess_dict, expire=True)
+        RedisArchivist().set_message(self.MSG, mess_dict)
         pending = PendingList()
         pending.get_download()
         to_add = [
@@ -293,8 +295,11 @@ class VideoDownloader:
         title = "Downloading: " + response["info_dict"]["title"]
 
         try:
+            size = response.get("_total_bytes_str")
+            if size.strip() == "N/A":
+                size = response.get("_total_bytes_estimate_str", "N/A")
+
             percent = response["_percent_str"]
-            size = response["_total_bytes_str"]
             speed = response["_speed_str"]
             eta = response["_eta_str"]
             message = f"{percent} of {size} at {speed} - time left: {eta}"
@@ -318,7 +323,6 @@ class VideoDownloader:
     def _build_obs_basic(self):
         """initial obs"""
         self.obs = {
-            "default_search": "ytsearch",
             "merge_output_format": "mp4",
             "outtmpl": (
                 self.config["application"]["cache_dir"]
@@ -326,13 +330,9 @@ class VideoDownloader:
             ),
             "progress_hooks": [self._progress_hook],
             "noprogress": True,
-            "quiet": True,
             "continuedl": True,
-            "retries": 3,
             "writethumbnail": False,
             "noplaylist": True,
-            "check_formats": "selected",
-            "socket_timeout": 3,
         }
 
     def _build_obs_user(self):

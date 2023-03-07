@@ -865,21 +865,33 @@ function setProgressBar(videoId, currentTime, duration) {
 
 // multi search form
 let searchTimeout = null;
+let searchHttpRequest = null;
 function searchMulti(query) {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(function () {
-    if (query.length > 1) {
-      let http = new XMLHttpRequest();
-      http.onreadystatechange = function () {
-        if (http.readyState === 4) {
-          let response = JSON.parse(http.response);
+    if (query.length > 0) {
+      if (searchHttpRequest) {
+        searchHttpRequest.abort();
+      }
+      searchHttpRequest = new XMLHttpRequest();
+      searchHttpRequest.onreadystatechange = function () {
+        if (searchHttpRequest.readyState === 4) {
+          const response = JSON.parse(searchHttpRequest.response);
           populateMultiSearchResults(response.results, response.queryType);
         }
       };
-      http.open('GET', `/api/search/?query=${query}`, true);
-      http.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-      http.setRequestHeader('Content-type', 'application/json');
-      http.send();
+      searchHttpRequest.open('GET', `/api/search/?query=${query}`, true);
+      searchHttpRequest.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+      searchHttpRequest.setRequestHeader('Content-type', 'application/json');
+      searchHttpRequest.send();
+    } else {
+      if (searchHttpRequest) {
+        searchHttpRequest.abort();
+        searchHttpRequest = null;
+      }
+      // show the placeholder container and hide the results container
+      document.getElementById('multi-search-results').style.display = 'none';
+      document.getElementById('multi-search-results-placeholder').style.display = 'block';
     }
   }, 500);
 }
@@ -890,6 +902,9 @@ function getViewDefaults(view) {
 }
 
 function populateMultiSearchResults(allResults, queryType) {
+  // show the results container and hide the placeholder container
+  document.getElementById('multi-search-results').style.display = 'block';
+  document.getElementById('multi-search-results-placeholder').style.display = 'none';
   // videos
   let defaultVideo = getViewDefaults('home');
   let allVideos = allResults.video_results;

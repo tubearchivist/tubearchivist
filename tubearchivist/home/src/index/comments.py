@@ -210,6 +210,9 @@ class CommentList:
             return
 
         total_videos = len(self.video_ids)
+        if notify:
+            self._notify(f"add comments for {total_videos} videos", False)
+
         for idx, video_id in enumerate(self.video_ids):
             comment = Comments(video_id, config=self.config)
             if notify:
@@ -219,16 +222,16 @@ class CommentList:
                 comment.upload_comments()
 
         if notify:
-            self.notify_final(total_videos)
+            self._notify(f"added comments for {total_videos} videos", 5)
 
     @staticmethod
-    def notify_final(total_videos):
-        """send final notification"""
+    def _notify(message, expire):
+        """send notification"""
         key = "message:download"
         message = {
             "status": key,
             "level": "info",
             "title": "Download and index comments finished",
-            "message": f"added comments for {total_videos} videos",
+            "message": message,
         }
-        RedisArchivist().set_message(key, message, expire=4)
+        RedisArchivist().set_message(key, message, expire=expire)
