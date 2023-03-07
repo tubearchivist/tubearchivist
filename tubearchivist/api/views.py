@@ -761,6 +761,7 @@ class SearchView(ApiBaseView):
         search_results = SearchForm().multi_search(search_query)
         return Response(search_results)
 
+
 class TokenView(ApiBaseView):
     """resolves to /api/token/
     DELETE: revoke the token
