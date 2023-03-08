@@ -36,6 +36,14 @@ class TaskManager:
         tasks = self.get_tasks_by_name(task.name)
         return bool([i for i in tasks if i.get("status") == "PENDING"])
 
+    def get_pending(self, task_name):
+        """get all pending tasks of task_name"""
+        tasks = self.get_tasks_by_name(task_name)
+        if not tasks:
+            return False
+
+        return [i for i in tasks if i.get("status") == "PENDING"]
+
     def init(self, task):
         """pass task object from bind task to set initial pending message"""
         message = {
@@ -47,3 +55,35 @@ class TaskManager:
             "task_id": task.request.id,
         }
         TaskRedis().set_key(task.request.id, message)
+
+
+class TaskCommand:
+    """send command pending task"""
+
+    def __init__(self, command="STOP"):
+        self.command = command
+
+    def by_id(self, task_id):
+        """run command on single task id"""
+        self._set_command(task_id)
+
+    def by_name(self, task_name):
+        """run command on all tasks by name"""
+        pending = TaskManager().get_pending(task_name)
+        if not pending:
+            return
+
+        for task in pending:
+            self._set_command(task.get("task_id"))
+
+    def _set_command(self, task_id):
+        """stop single task by id"""
+        TaskRedis().set_command(task_id, self.command)
+        if self.command == "KILL":
+            self._kill(task_id)
+
+    def _kill(self, task_id):
+        """kill task by id"""
+        from home.tasks import app as CeleryApp
+
+        CeleryApp.control.revoke(task_id, terminate=True)

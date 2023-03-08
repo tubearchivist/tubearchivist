@@ -164,6 +164,7 @@ class TaskRedis(RedisBase):
 
     BASE = "celery-task-meta-"
     EXPIRE = 60 * 60 * 24
+    COMMANDS = ["STOP", "KILL"]
 
     def get_all(self):
         """return all tasks"""
@@ -182,6 +183,16 @@ class TaskRedis(RedisBase):
 
         if expire:
             self.conn.execute_command("EXPIRE", key, self.EXPIRE)
+
+    def set_command(self, task_id, command):
+        """set task command"""
+        if command not in self.COMMANDS:
+            print(f"{command} not in valid commands {self.COMMANDS}")
+            raise ValueError
+
+        message = self.get_single(task_id)
+        message.update({"command": command})
+        self.set_key(task_id, message)
 
     def del_task(self, task_id):
         """delete task result by id"""
