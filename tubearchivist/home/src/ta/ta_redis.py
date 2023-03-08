@@ -173,8 +173,11 @@ class TaskRedis(RedisBase):
 
     def get_single(self, task_id):
         """return content of single task"""
-        result = self.conn.execute_command("GET", self.BASE + task_id).decode()
-        return json.loads(result)
+        result = self.conn.execute_command("GET", self.BASE + task_id)
+        if not result:
+            return False
+
+        return json.loads(result.decode())
 
     def set_key(self, task_id, message, expire=False):
         """set value for lock, initial or update"""
@@ -191,6 +194,10 @@ class TaskRedis(RedisBase):
             raise ValueError
 
         message = self.get_single(task_id)
+        if not message:
+            print(f"{task_id} not found")
+            raise KeyError
+
         message.update({"command": command})
         self.set_key(task_id, message)
 
