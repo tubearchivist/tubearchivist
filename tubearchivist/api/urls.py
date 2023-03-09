@@ -17,6 +17,7 @@ from api.views import (
     SnapshotApiListView,
     SnapshotApiView,
     TaskApiView,
+    TokenView,
     VideoApiListView,
     VideoApiView,
     VideoCommentView,
@@ -24,7 +25,6 @@ from api.views import (
     VideoSimilarView,
     VideoSponsorView,
     WatchedView,
-    TokenView,
 )
 from django.urls import path
 
