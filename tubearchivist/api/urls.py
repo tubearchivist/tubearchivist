@@ -17,6 +17,7 @@ from api.views import (
     SnapshotApiListView,
     SnapshotApiView,
     TaskApiView,
+    TokenView,
     VideoApiListView,
     VideoApiView,
     VideoCommentView,
@@ -134,5 +135,10 @@ urlpatterns = [
         "search/",
         SearchView.as_view(),
         name="api-search",
+    ),
+    path(
+        "token/",
+        TokenView.as_view(),
+        name="api-token",
     ),
 ]

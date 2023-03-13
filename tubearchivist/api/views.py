@@ -760,3 +760,15 @@ class SearchView(ApiBaseView):
 
         search_results = SearchForm().multi_search(search_query)
         return Response(search_results)
+
+
+class TokenView(ApiBaseView):
+    """resolves to /api/token/
+    DELETE: revoke the token
+    """
+
+    @staticmethod
+    def delete(request):
+        print("revoke API token")
+        request.user.auth_token.delete()
+        return Response({"success": True})
