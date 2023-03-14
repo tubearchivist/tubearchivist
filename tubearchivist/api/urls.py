@@ -8,6 +8,7 @@ from api.views import (
     DownloadApiListView,
     DownloadApiView,
     LoginApiView,
+    NotificationView,
     PingView,
     PlaylistApiListView,
     PlaylistApiVideoView,
@@ -134,5 +135,10 @@ urlpatterns = [
         "search/",
         SearchView.as_view(),
         name="api-search",
+    ),
+    path(
+        "notification/",
+        NotificationView.as_view(),
+        name="api-notification",
     ),
 ]

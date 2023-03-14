@@ -761,3 +761,21 @@ class SearchView(ApiBaseView):
 
         search_results = SearchForm().multi_search(search_query)
         return Response(search_results)
+
+
+class NotificationView(ApiBaseView):
+    """resolves to /api/notification/
+    GET: returns a list of notifications
+    filter query to filter messages by group
+    """
+
+    valid_filters = ["download", "settings", "channel"]
+
+    def get(self, request):
+        """get all notifications"""
+        query = "message"
+        filter_by = request.GET.get("filter", None)
+        if filter_by in self.valid_filters:
+            query = f"{query}:{filter_by}"
+
+        return Response(RedisArchivist().list_items(query))
