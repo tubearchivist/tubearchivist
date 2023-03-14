@@ -34,6 +34,9 @@ class TaskManager:
     def is_pending(self, task):
         """check if task_name is pending, pass task object"""
         tasks = self.get_tasks_by_name(task.name)
+        if not tasks:
+            return False
+
         return bool([i for i in tasks if i.get("status") == "PENDING"])
 
     def get_pending(self, task_name):
