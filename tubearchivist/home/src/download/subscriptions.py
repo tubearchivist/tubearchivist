@@ -19,8 +19,9 @@ from home.src.ta.urlparser import Parser
 class ChannelSubscription:
     """manage the list of channels subscribed"""
 
-    def __init__(self):
+    def __init__(self, task=False):
         self.config = AppConfig().config
+        self.task = task
 
     @staticmethod
     def get_channels(subscribed_only=True):
@@ -102,12 +103,16 @@ class ChannelSubscription:
     def find_missing(self):
         """add missing videos from subscribed channels to pending"""
         all_channels = self.get_channels()
+        if not all_channels:
+            return False
+
         pending = queue.PendingList()
         pending.get_download()
         pending.get_indexed()
 
         missing_videos = []
 
+        total = len(all_channels)
         for idx, channel in enumerate(all_channels):
             channel_id = channel["channel_id"]
             print(f"{channel_id}: find missing videos.")
@@ -117,20 +122,13 @@ class ChannelSubscription:
                 for video_id, _, vid_type in last_videos:
                     if video_id not in pending.to_skip:
                         missing_videos.append((video_id, vid_type))
-            # notify
-            message = {
-                "status": "message:rescan",
-                "level": "info",
-                "title": "Scanning channels: Looking for new videos.",
-                "message": f"Progress: {idx + 1}/{len(all_channels)}",
-            }
-            if idx + 1 == len(all_channels):
-                expire = 4
-            else:
-                expire = True
 
-            RedisArchivist().set_message(
-                "message:rescan", message=message, expire=expire
+            if not self.task:
+                continue
+
+            self.task.send_progress(
+                message_lines=[f"Scanning Channel {idx + 1}/{total}"],
+                progress=(idx + 1) / total,
             )
 
         return missing_videos
@@ -148,8 +146,9 @@ class ChannelSubscription:
 class PlaylistSubscription:
     """manage the playlist download functionality"""
 
-    def __init__(self):
+    def __init__(self, task=False):
         self.config = AppConfig().config
+        self.task = task
 
     @staticmethod
     def get_playlists(subscribed_only=True):
@@ -233,14 +232,18 @@ class PlaylistSubscription:
     def find_missing(self):
         """find videos in subscribed playlists not downloaded yet"""
         all_playlists = [i["playlist_id"] for i in self.get_playlists()]
+        if not all_playlists:
+            return False
+
         to_ignore = self.get_to_ignore()
 
         missing_videos = []
+        total = len(all_playlists)
         for idx, playlist_id in enumerate(all_playlists):
             size_limit = self.config["subscriptions"]["channel_size"]
             playlist = YoutubePlaylist(playlist_id)
-            playlist.update_playlist()
-            if not playlist:
+            is_active = playlist.update_playlist()
+            if not is_active:
                 playlist.deactivate()
                 continue
 
@@ -250,20 +253,18 @@ class PlaylistSubscription:
 
             all_missing = [i for i in playlist_entries if not i["downloaded"]]
 
-            message = {
-                "status": "message:rescan",
-                "level": "info",
-                "title": "Scanning playlists: Looking for new videos.",
-                "message": f"Progress: {idx + 1}/{len(all_playlists)}",
-            }
-            RedisArchivist().set_message(
-                "message:rescan", message=message, expire=True
-            )
-
             for video in all_missing:
                 youtube_id = video["youtube_id"]
                 if youtube_id not in to_ignore:
                     missing_videos.append(youtube_id)
+
+            if not self.task:
+                continue
+
+            self.task.send_progress(
+                message_lines=[f"Scanning Playlists {idx + 1}/{total}"],
+                progress=(idx + 1) / total,
+            )
 
         return missing_videos
 
@@ -271,7 +272,8 @@ class PlaylistSubscription:
 class SubscriptionScanner:
     """add missing videos to queue"""
 
-    def __init__(self):
+    def __init__(self, task=False):
+        self.task = task
         self.missing_videos = False
 
     def scan(self):
@@ -287,17 +289,11 @@ class SubscriptionScanner:
 
     def _notify(self):
         """set redis notification"""
-        message = {
-            "status": "message:rescan",
-            "level": "info",
-            "title": "Rescanning channels and playlists.",
-            "message": "Looking for new videos.",
-        }
-        RedisArchivist().set_message("message:rescan", message, expire=True)
+        self.task.send_progress(["Rescanning channels and playlists."])
 
     def _scan_channels(self):
         """get missing from channels"""
-        channel_handler = ChannelSubscription()
+        channel_handler = ChannelSubscription(task=self.task)
         missing = channel_handler.find_missing()
         if not missing:
             return
@@ -309,7 +305,7 @@ class SubscriptionScanner:
 
     def _scan_playlists(self):
         """get missing from playlists"""
-        playlist_handler = PlaylistSubscription()
+        playlist_handler = PlaylistSubscription(task=self.task)
         missing = playlist_handler.find_missing()
         if not missing:
             return

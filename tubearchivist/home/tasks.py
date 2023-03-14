@@ -103,23 +103,32 @@ class BaseTask(Task):
     def on_success(self, retval, task_id, args, kwargs):
         """callback task completed successfully"""
         print(f"{task_id} success callback")
-        message, key = self._build_message(task_id)
-        message.update({"message": "Task completed successfully"})
+        message, key = self._build_message()
+        message.update({"messages": ["Task completed successfully"]})
         RedisArchivist().set_message(key, message, expire=5)
 
     def before_start(self, task_id, args, kwargs):
         """callback before initiating task"""
         print(f"{self.name} create callback")
-        message, key = self._build_message(task_id)
-        message.update({"message": "New task received."})
+        message, key = self._build_message()
+        message.update({"messages": ["New task received."]})
         RedisArchivist().set_message(key, message)
 
-    def print_progress(self, task_id, progress):
-        """print progress"""
-        print(f"{task_id}: {progress}")
+    def send_progress(self, message_lines, progress=False):
+        """send progress message"""
+        print(f"{self.request.id}: {progress}")
+        message, key = self._build_message()
+        message.update(
+            {
+                "messages": message_lines,
+                "progress": progress,
+            }
+        )
+        RedisArchivist().set_message(key, message)
 
-    def _build_message(self, task_id, level="info"):
+    def _build_message(self, level="info"):
         """build message dict"""
+        task_id = self.request.id
         config = self.TASK_CONFIG.get(self.name)
         message = {
             "status": config.get("group"),
@@ -131,7 +140,7 @@ class BaseTask(Task):
         return message, key
 
 
-@shared_task(name="update_subscribed", bind=True)
+@shared_task(name="update_subscribed", bind=True, base=BaseTask)
 def update_subscribed(self):
     """look for missing videos and add to pending"""
     manager = TaskManager()
@@ -147,7 +156,7 @@ def update_subscribed(self):
         return
 
     manager.init(self)
-    SubscriptionScanner().scan()
+    SubscriptionScanner(task=self).scan()
 
 
 @shared_task(name="download_pending", bind=True)
