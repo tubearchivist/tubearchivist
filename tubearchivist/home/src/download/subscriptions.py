@@ -46,7 +46,7 @@ class ChannelSubscription:
 
         last_videos = []
 
-        for vid_type, limit_amount in queries:
+        for vid_type_enum, limit_amount in queries:
             obs = {
                 "skip_download": True,
                 "extract_flat": True,
@@ -54,9 +54,9 @@ class ChannelSubscription:
             if limit:
                 obs["playlistend"] = limit_amount
 
-            path = vid_type.value
+            vid_type = vid_type_enum.value
             channel = YtWrap(obs, self.config).extract(
-                f"https://www.youtube.com/channel/{channel_id}/{path}"
+                f"https://www.youtube.com/channel/{channel_id}/{vid_type}"
             )
             if not channel:
                 continue
@@ -278,20 +278,16 @@ class SubscriptionScanner:
 
     def scan(self):
         """scan channels and playlists"""
+        if self.task:
+            self.task.send_progress(["Rescanning channels and playlists."])
+
         self.missing_videos = []
-        self._notify()
-        self._scan_channels()
-        self._scan_playlists()
-        if not self.missing_videos:
-            return
+        self.scan_channels()
+        self.scan_playlists()
 
-        self.add_to_pending()
+        return self.missing_videos
 
-    def _notify(self):
-        """set redis notification"""
-        self.task.send_progress(["Rescanning channels and playlists."])
-
-    def _scan_channels(self):
+    def scan_channels(self):
         """get missing from channels"""
         channel_handler = ChannelSubscription(task=self.task)
         missing = channel_handler.find_missing()
@@ -303,7 +299,7 @@ class SubscriptionScanner:
                 {"type": "video", "vid_type": vid_type, "url": vid_id}
             )
 
-    def _scan_playlists(self):
+    def scan_playlists(self):
         """get missing from playlists"""
         playlist_handler = PlaylistSubscription(task=self.task)
         missing = playlist_handler.find_missing()
@@ -312,14 +308,12 @@ class SubscriptionScanner:
 
         for i in missing:
             self.missing_videos.append(
-                {"type": "video", "vid_type": VideoTypeEnum.VIDEOS, "url": i}
+                {
+                    "type": "video",
+                    "vid_type": VideoTypeEnum.VIDEOS.value,
+                    "url": i,
+                }
             )
-
-    def add_to_pending(self):
-        """add missing videos to pending queue"""
-        pending_handler = queue.PendingList(youtube_ids=self.missing_videos)
-        pending_handler.parse_url_list()
-        pending_handler.add_to_pending()
 
 
 class SubscriptionHandler:

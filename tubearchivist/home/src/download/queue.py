@@ -18,7 +18,7 @@ from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import DurationConverter, is_shorts
-from home.src.ta.ta_redis import RedisArchivist, RedisQueue
+from home.src.ta.ta_redis import RedisQueue
 
 
 class PendingIndex:
@@ -163,10 +163,11 @@ class PendingList(PendingIndex):
         "simulate": True,
     }
 
-    def __init__(self, youtube_ids=False):
+    def __init__(self, youtube_ids=False, task=False):
         super().__init__()
         self.config = AppConfig().config
         self.youtube_ids = youtube_ids
+        self.task = task
         self.to_skip = False
         self.missing_videos = False
 
@@ -175,16 +176,16 @@ class PendingList(PendingIndex):
         self.missing_videos = []
         self.get_download()
         self.get_indexed()
-        for entry in self.youtube_ids:
-            # notify
-            mess_dict = {
-                "status": "message:add",
-                "level": "info",
-                "title": "Adding to download queue.",
-                "message": "Extracting lists",
-            }
-            RedisArchivist().set_message("message:add", mess_dict, expire=True)
+        total = len(self.youtube_ids)
+        for idx, entry in enumerate(self.youtube_ids):
             self._process_entry(entry)
+            if not self.task:
+                continue
+
+            self.task.send_progress(
+                message_lines=[f"Extracting items {idx + 1}/{total}"],
+                progress=(idx + 1) / total,
+            )
 
     def _process_entry(self, entry):
         """process single entry from url list"""
@@ -238,9 +239,10 @@ class PendingList(PendingIndex):
         self.get_channels()
         bulk_list = []
 
+        total = len(self.missing_videos)
         for idx, (youtube_id, vid_type) in enumerate(self.missing_videos):
-            print(f"{youtube_id} ({vid_type}): add to download queue")
-            self._notify_add(idx)
+            print(f"{youtube_id}: [{idx + 1}/{total}]: add to queue")
+            self._notify_add(idx, total)
             video_details = self.get_youtube_details(youtube_id, vid_type)
             if not video_details:
                 continue
@@ -253,29 +255,34 @@ class PendingList(PendingIndex):
             url = video_details["vid_thumb_url"]
             ThumbManager(youtube_id).download_video_thumb(url)
 
-        if bulk_list:
-            # add last newline
-            bulk_list.append("\n")
-            query_str = "\n".join(bulk_list)
-            _, _ = ElasticWrap("_bulk").post(query_str, ndjson=True)
+            if len(bulk_list) >= 20:
+                self._ingest_bulk(bulk_list)
+                bulk_list = []
 
-    def _notify_add(self, idx):
+        self._ingest_bulk(bulk_list)
+
+    def _ingest_bulk(self, bulk_list):
+        """add items to queue in bulk"""
+        if not bulk_list:
+            return
+
+        # add last newline
+        bulk_list.append("\n")
+        query_str = "\n".join(bulk_list)
+        _, _ = ElasticWrap("_bulk").post(query_str, ndjson=True)
+
+    def _notify_add(self, idx, total):
         """send notification for adding videos to download queue"""
-        progress = f"{idx + 1}/{len(self.missing_videos)}"
-        mess_dict = {
-            "status": "message:add",
-            "level": "info",
-            "title": "Adding new videos to download queue.",
-            "message": "Progress: " + progress,
-        }
-        if idx + 1 == len(self.missing_videos):
-            expire = 4
-        else:
-            expire = True
+        if not self.task:
+            return
 
-        RedisArchivist().set_message("message:add", mess_dict, expire=expire)
-        if idx + 1 % 25 == 0:
-            print("adding to queue progress: " + progress)
+        self.task.send_progress(
+            message_lines=[
+                "Adding new videos to download queue.",
+                f"Extracting items {idx + 1}/{total}",
+            ],
+            progress=(idx + 1) / total,
+        )
 
     def get_youtube_details(self, youtube_id, vid_type=VideoTypeEnum.VIDEOS):
         """get details from youtubedl for single pending video"""
