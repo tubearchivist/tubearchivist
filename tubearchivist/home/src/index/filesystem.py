@@ -178,11 +178,15 @@ class ImportFolderScanner:
         "subtitle": [".vtt"],
     }
 
-    def __init__(self):
+    def __init__(self, task=False):
+        self.task = task
         self.to_import = False
 
     def scan(self):
         """scan and match media files"""
+        if self.task:
+            self.task.send_progress(["Scanning your import folder."])
+
         all_files = self.get_all_files()
         self.match_files(all_files)
         self.process_videos()
@@ -261,10 +265,13 @@ class ImportFolderScanner:
 
     def process_videos(self):
         """loop through all videos"""
-        for current_video in self.to_import:
+        for idx, current_video in enumerate(self.to_import):
             if not current_video["media"]:
                 print(f"{current_video}: no matching media file found.")
                 raise ValueError
+
+            if self.task:
+                self._notify(idx, current_video)
 
             self._detect_youtube_id(current_video)
             self._dump_thumb(current_video)
@@ -274,6 +281,19 @@ class ImportFolderScanner:
             print(f"manual import: {current_video}")
 
             ManualImport(current_video, self.CONFIG).run()
+
+    def _notify(self, idx, current_video):
+        """send notification back to task"""
+        filename = os.path.split(current_video["media"])[-1]
+        if len(filename) > 50:
+            filename = filename[:50] + "..."
+
+        message = [
+            f"Import queue processing video {idx + 1}/{len(self.to_import)}",
+            filename,
+        ]
+        progress = (idx + 1) / len(self.to_import)
+        self.task.send_progress(message, progress=progress)
 
     def _detect_youtube_id(self, current_video):
         """find video id from filename or json"""
