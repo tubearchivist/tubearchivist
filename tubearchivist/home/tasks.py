@@ -63,7 +63,7 @@ class BaseTask(Task):
             "group": "message:download:subscribe",
         },
         "check_reindex": {
-            "title": "Reindex old documents",
+            "title": "Reindex Documents",
             "group": "message:settings:reindex",
         },
         "manual_import": {
@@ -187,12 +187,13 @@ def extrac_dl(self, youtube_ids):
     pending_handler.add_to_pending()
 
 
-@shared_task(bind=True, name="check_reindex")
+@shared_task(bind=True, name="check_reindex", base=BaseTask)
 def check_reindex(self, data=False, extract_videos=False):
     """run the reindex main command"""
     if data:
         # started from frontend through API
         print(f"[task][{self.name}] reindex {data}")
+        self.send_progress("Add items to the reindex Queue.")
         ReindexManual(extract_videos=extract_videos).extract_data(data)
 
     manager = TaskManager()
@@ -204,9 +205,10 @@ def check_reindex(self, data=False, extract_videos=False):
     if not data:
         # started from scheduler
         print(f"[task][{self.name}] reindex outdated documents")
+        self.send_progress("Add outdated documents to the reindex Queue.")
         ReindexOutdated().add_outdated()
 
-    Reindex().reindex_all()
+    Reindex(task=self).reindex_all()
 
 
 @shared_task(bind=True, name="manual_import")

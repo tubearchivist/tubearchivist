@@ -114,6 +114,10 @@ class RedisQueue(RedisBase):
         all_elements = [i.decode() for i in result]
         return all_elements
 
+    def length(self):
+        """return total elements in list"""
+        return self.conn.execute_command("LLEN", self.key)
+
     def in_queue(self, element):
         """check if element is in list"""
         result = self.conn.execute_command("LPOS", self.key, element)
