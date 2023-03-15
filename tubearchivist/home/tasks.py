@@ -114,9 +114,8 @@ class BaseTask(Task):
         message.update({"messages": ["New task received."]})
         RedisArchivist().set_message(key, message)
 
-    def send_progress(self, message_lines, progress=False):
+    def send_progress(self, message_lines, progress=False, title=False):
         """send progress message"""
-        print(f"{self.request.id}: {progress}")
         message, key = self._build_message()
         message.update(
             {
@@ -124,6 +123,9 @@ class BaseTask(Task):
                 "progress": progress,
             }
         )
+        if title:
+            message["title"] = title
+
         RedisArchivist().set_message(key, message)
 
     def _build_message(self, level="info"):
@@ -162,7 +164,7 @@ def update_subscribed(self):
         extrac_dl.delay(missing_videos)
 
 
-@shared_task(name="download_pending", bind=True)
+@shared_task(name="download_pending", bind=True, base=BaseTask)
 def download_pending(self, from_queue=True):
     """download latest pending videos"""
     manager = TaskManager()
@@ -171,7 +173,7 @@ def download_pending(self, from_queue=True):
         return
 
     manager.init(self)
-    downloader = VideoDownloader()
+    downloader = VideoDownloader(task=self)
     if from_queue:
         downloader.add_pending()
     downloader.run_queue()
