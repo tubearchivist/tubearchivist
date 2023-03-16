@@ -19,7 +19,7 @@ from home.src.download.yt_dlp_handler import VideoDownloader
 from home.src.es.backup import ElasticBackup
 from home.src.es.index_setup import ElasitIndexWrap
 from home.src.index.channel import YoutubeChannel
-from home.src.index.filesystem import scan_filesystem
+from home.src.index.filesystem import Filesystem
 from home.src.index.manual import ImportFolderScanner
 from home.src.index.reindex import Reindex, ReindexManual, ReindexOutdated
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
@@ -272,7 +272,7 @@ def kill_dl(task_id):
     RedisArchivist().set_message("message:download", mess_dict, expire=True)
 
 
-@shared_task(bind=True, name="rescan_filesystem")
+@shared_task(bind=True, name="rescan_filesystem", base=BaseTask)
 def rescan_filesystem(self):
     """check the media folder for mismatches"""
     manager = TaskManager()
@@ -281,7 +281,7 @@ def rescan_filesystem(self):
         return
 
     manager.init(self)
-    scan_filesystem()
+    Filesystem(task=self).process()
     ThumbValidator().download_missing()
 
 

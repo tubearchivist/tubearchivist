@@ -19,21 +19,25 @@ from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
-class FilesystemScanner:
-    """handle scanning and fixing from filesystem"""
+class ScannerBase:
+    """scan the filesystem base class"""
 
     CONFIG = AppConfig().config
     VIDEOS = CONFIG["application"]["videos"]
 
     def __init__(self):
-        self.all_downloaded = self.get_all_downloaded()
-        self.all_indexed = self.get_all_indexed()
-        self.mismatch = None
-        self.to_rename = None
-        self.to_index = None
-        self.to_delete = None
+        self.to_index = False
+        self.to_delete = False
+        self.mismatch = False
+        self.to_rename = False
 
-    def get_all_downloaded(self):
+    def scan(self):
+        """entry point, scan and compare"""
+        all_downloaded = self._get_all_downloaded()
+        all_indexed = self._get_all_indexed()
+        self.list_comarison(all_downloaded, all_indexed)
+
+    def _get_all_downloaded(self):
         """get a list of all video files downloaded"""
         channels = os.listdir(self.VIDEOS)
         all_channels = ignore_filelist(channels)
@@ -51,7 +55,7 @@ class FilesystemScanner:
         return all_downloaded
 
     @staticmethod
-    def get_all_indexed():
+    def _get_all_indexed():
         """get a list of all indexed videos"""
         index_handler = PendingList()
         index_handler.get_download()
@@ -66,64 +70,77 @@ class FilesystemScanner:
             all_indexed.append((youtube_id, media_url, published, title))
         return all_indexed
 
-    def list_comarison(self):
+    def list_comarison(self, all_downloaded, all_indexed):
         """compare the lists to figure out what to do"""
-        self.find_unindexed()
-        self.find_missing()
-        self.find_bad_media_url()
+        self._find_unindexed(all_downloaded, all_indexed)
+        self._find_missing(all_downloaded, all_indexed)
+        self._find_bad_media_url(all_downloaded, all_indexed)
 
-    def find_unindexed(self):
+    def _find_unindexed(self, all_downloaded, all_indexed):
         """find video files without a matching document indexed"""
-        all_indexed_ids = [i[0] for i in self.all_indexed]
-        to_index = []
-        for downloaded in self.all_downloaded:
+        all_indexed_ids = [i[0] for i in all_indexed]
+        self.to_index = []
+        for downloaded in all_downloaded:
             if downloaded[2] not in all_indexed_ids:
-                to_index.append(downloaded)
+                self.to_index.append(downloaded)
 
-        self.to_index = to_index
-
-    def find_missing(self):
+    def _find_missing(self, all_downloaded, all_indexed):
         """find indexed videos without matching media file"""
-        all_downloaded_ids = [i[2] for i in self.all_downloaded]
-        to_delete = []
-        for video in self.all_indexed:
+        all_downloaded_ids = [i[2] for i in all_downloaded]
+        self.to_delete = []
+        for video in all_indexed:
             youtube_id = video[0]
             if youtube_id not in all_downloaded_ids:
-                to_delete.append(video)
+                self.to_delete.append(video)
 
-        self.to_delete = to_delete
-
-    def find_bad_media_url(self):
+    def _find_bad_media_url(self, all_downloaded, all_indexed):
         """rename media files not matching the indexed title"""
-        to_fix = []
-        to_rename = []
-        for downloaded in self.all_downloaded:
+        self.mismatch = []
+        self.to_rename = []
+
+        for downloaded in all_downloaded:
             channel, filename, downloaded_id = downloaded
             # find in indexed
-            for indexed in self.all_indexed:
+            for indexed in all_indexed:
                 indexed_id, media_url, published, title = indexed
                 if indexed_id == downloaded_id:
                     # found it
-                    title_c = clean_string(title)
                     pub = published.replace("-", "")
-                    expected_filename = f"{pub}_{indexed_id}_{title_c}.mp4"
-                    new_url = os.path.join(channel, expected_filename)
-                    if expected_filename != filename:
+                    expected = f"{pub}_{indexed_id}_{clean_string(title)}.mp4"
+                    new_url = os.path.join(channel, expected)
+                    if expected != filename:
                         # file to rename
-                        to_rename.append(
-                            (channel, filename, expected_filename)
-                        )
+                        self.to_rename.append((channel, filename, expected))
                     if media_url != new_url:
                         # media_url to update in es
-                        to_fix.append((indexed_id, new_url))
+                        self.mismatch.append((indexed_id, new_url))
 
                     break
 
-        self.mismatch = to_fix
-        self.to_rename = to_rename
+
+class Filesystem(ScannerBase):
+    """handle scanning and fixing from filesystem"""
+
+    def __init__(self, task=False):
+        super().__init__()
+        self.task = task
+
+    def process(self):
+        """entry point"""
+        self.task.send_progress(["Scanning your archive and index."])
+        self.scan()
+        self.rename_files()
+        self.send_mismatch_bulk()
+        self.delete_from_index()
+        self.add_missing()
 
     def rename_files(self):
         """rename media files as identified by find_bad_media_url"""
+        if not self.to_rename:
+            return
+
+        total = len(self.to_rename)
+        self.task.send_progress([f"Rename {total} media files."])
         for bad_filename in self.to_rename:
             channel, filename, expected_filename = bad_filename
             print(f"renaming [{filename}] to [{expected_filename}]")
@@ -133,6 +150,11 @@ class FilesystemScanner:
 
     def send_mismatch_bulk(self):
         """build bulk update"""
+        if not self.mismatch:
+            return
+
+        total = len(self.mismatch)
+        self.task.send_progress([f"Fix media urls for {total} files"])
         bulk_list = []
         for video_mismatch in self.mismatch:
             youtube_id, media_url = video_mismatch
@@ -148,30 +170,32 @@ class FilesystemScanner:
 
     def delete_from_index(self):
         """find indexed but deleted mediafile"""
+        if not self.to_delete:
+            return
+
+        total = len(self.to_delete)
+        self.task.send_progress([f"Clean up {total} items from index."])
         for indexed in self.to_delete:
             youtube_id = indexed[0]
             print(f"deleting {youtube_id} from index")
             path = f"ta_video/_doc/{youtube_id}"
             _, _ = ElasticWrap(path).delete()
 
+    def add_missing(self):
+        """add missing videos to index"""
+        video_ids = [i[2] for i in self.to_index]
+        if not video_ids:
+            return
 
-def scan_filesystem():
-    """grouped function to delete and update index"""
-    filesystem_handler = FilesystemScanner()
-    filesystem_handler.list_comarison()
-    if filesystem_handler.to_rename:
-        print("renaming files")
-        filesystem_handler.rename_files()
-    if filesystem_handler.mismatch:
-        print("fixing media urls in index")
-        filesystem_handler.send_mismatch_bulk()
-    if filesystem_handler.to_delete:
-        print("delete metadata from index")
-        filesystem_handler.delete_from_index()
-    if filesystem_handler.to_index:
-        print("index new videos")
-        video_ids = [i[2] for i in filesystem_handler.to_index]
-        for youtube_id in video_ids:
+        total = len(video_ids)
+        for idx, youtube_id in enumerate(video_ids):
+            if self.task:
+                self.task.send_progress(
+                    message_lines=[
+                        f"Index missing video {youtube_id}, {idx}/{total}"
+                    ],
+                    progress=(idx + 1) / total,
+                )
             index_new_video(youtube_id)
 
-        CommentList(video_ids).index()
+        CommentList(video_ids, task=self.task).index()
