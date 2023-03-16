@@ -282,10 +282,10 @@ def rescan_filesystem(self):
 
     manager.init(self)
     Filesystem(task=self).process()
-    ThumbValidator().download_missing()
+    ThumbValidator(task=self).validate()
 
 
-@shared_task(bind=True, name="thumbnail_check")
+@shared_task(bind=True, name="thumbnail_check", base=BaseTask)
 def thumbnail_check(self):
     """validate thumbnails"""
     manager = TaskManager()
@@ -294,7 +294,7 @@ def thumbnail_check(self):
         return
 
     manager.init(self)
-    ThumbValidator().download_missing()
+    ThumbValidator(task=self).validate()
 
 
 @shared_task(bind=True, name="resync_thumbs")

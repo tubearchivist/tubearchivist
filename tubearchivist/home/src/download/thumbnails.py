@@ -11,7 +11,7 @@ from time import sleep
 
 import requests
 from home.src.download import queue  # partial import
-from home.src.es.connect import IndexPaginate
+from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.ta.config import AppConfig
 from mutagen.mp4 import MP4, MP4Cover
 from PIL import Image, ImageFile, ImageFilter, UnidentifiedImageError
@@ -272,49 +272,59 @@ class ValidatorCallback:
 class ThumbValidator:
     """validate thumbnails"""
 
-    def download_missing(self):
-        """download all missing artwork"""
-        self.download_missing_videos()
-        self.download_missing_channels()
-        self.download_missing_playlists()
-
-    def download_missing_videos(self):
-        """get all missing video thumbnails"""
-        data = {
-            "query": {"term": {"active": {"value": True}}},
-            "sort": [{"youtube_id": {"order": "asc"}}],
-            "_source": ["vid_thumb_url", "youtube_id"],
-        }
-        paginate = IndexPaginate(
-            "ta_video", data, size=5000, callback=ValidatorCallback
-        )
-        _ = paginate.get_results()
-
-    def download_missing_channels(self):
-        """get all missing channel thumbnails"""
-        data = {
-            "query": {"term": {"channel_active": {"value": True}}},
-            "sort": [{"channel_id": {"order": "asc"}}],
-            "_source": {
-                "excludes": ["channel_description", "channel_overwrites"]
+    INDEX = [
+        {
+            "data": {
+                "query": {"term": {"active": {"value": True}}},
+                "_source": ["vid_thumb_url", "youtube_id"],
             },
-        }
-        paginate = IndexPaginate(
-            "ta_channel", data, callback=ValidatorCallback
-        )
-        _ = paginate.get_results()
+            "name": "ta_video",
+        },
+        {
+            "data": {
+                "query": {"term": {"channel_active": {"value": True}}},
+                "_source": {
+                    "excludes": ["channel_description", "channel_overwrites"]
+                },
+            },
+            "name": "ta_channel",
+        },
+        {
+            "data": {
+                "query": {"term": {"playlist_active": {"value": True}}},
+                "_source": ["playlist_id", "playlist_thumbnail"],
+            },
+            "name": "ta_playlist",
+        },
+    ]
 
-    def download_missing_playlists(self):
-        """get all missing playlist artwork"""
-        data = {
-            "query": {"term": {"playlist_active": {"value": True}}},
-            "sort": [{"playlist_id": {"order": "asc"}}],
-            "_source": ["playlist_id", "playlist_thumbnail"],
-        }
-        paginate = IndexPaginate(
-            "ta_playlist", data, callback=ValidatorCallback
-        )
-        _ = paginate.get_results()
+    def __init__(self, task):
+        self.task = task
+
+    def validate(self):
+        """validate all indexes"""
+        for index in self.INDEX:
+            total = self._get_total(index["name"])
+            if not total:
+                continue
+
+            paginate = IndexPaginate(
+                index_name=index["name"],
+                data=index["data"],
+                size=1000,
+                callback=ValidatorCallback,
+                task=self.task,
+                total=total,
+            )
+            _ = paginate.get_results()
+
+    @staticmethod
+    def _get_total(index_name):
+        """get total documents in index"""
+        path = f"{index_name}/_count"
+        response, _ = ElasticWrap(path).get()
+
+        return response.get("count")
 
 
 class ThumbFilesystem:
