@@ -223,7 +223,7 @@ def run_manual_import(self):
     ImportFolderScanner(task=self).scan()
 
 
-@shared_task(bind=True, name="run_backup")
+@shared_task(bind=True, name="run_backup", base=BaseTask)
 def run_backup(self, reason="auto"):
     """called from settings page, dump backup to zip file"""
     manager = TaskManager()
@@ -232,10 +232,10 @@ def run_backup(self, reason="auto"):
         return
 
     manager.init(self)
-    ElasticBackup(reason=reason).backup_all_indexes()
+    ElasticBackup(reason=reason, task=self).backup_all_indexes()
 
 
-@shared_task(bind=True, name="restore_backup")
+@shared_task(bind=True, name="restore_backup", base=BaseTask)
 def run_restore_backup(self, filename):
     """called from settings page, dump backup to zip file"""
     manager = TaskManager()
@@ -244,8 +244,9 @@ def run_restore_backup(self, filename):
         return
 
     manager.init(self)
+    self.send_progress(["Reset your Index"])
     ElasitIndexWrap().reset()
-    ElasticBackup().restore(filename)
+    ElasticBackup(task=self).restore(filename)
     print("index restore finished")
 
 
