@@ -19,7 +19,8 @@ from home.src.download.yt_dlp_handler import VideoDownloader
 from home.src.es.backup import ElasticBackup
 from home.src.es.index_setup import ElasitIndexWrap
 from home.src.index.channel import YoutubeChannel
-from home.src.index.filesystem import ImportFolderScanner, scan_filesystem
+from home.src.index.filesystem import scan_filesystem
+from home.src.index.manual import ImportFolderScanner
 from home.src.index.reindex import Reindex, ReindexManual, ReindexOutdated
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.helper import clear_dl_cache
