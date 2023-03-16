@@ -152,7 +152,7 @@ class IndexPaginate:
             if self.kwargs.get("callback"):
                 self.kwargs.get("callback")(all_hits, self.index_name).run()
 
-            if counter % 10 == 0 and self.kwargs.get("task"):
+            if self.kwargs.get("task"):
                 print(f"{self.index_name}: processing page {counter}")
                 self._notify(len(all_results))
 
@@ -167,12 +167,9 @@ class IndexPaginate:
         """send notification on task"""
         total = self.kwargs.get("total")
         progress = (processed + 1) / total
-        message = f"Processing {self.index_name} {processed}/{total}"
-        print(message)
-        self.kwargs.get("task").send_progress(
-            message_lines=[message],
-            progress=progress,
-        )
+        index_clean = self.index_name.lstrip("ta_").title()
+        message = [f"Processing {index_clean}s {processed}/{total}"]
+        self.kwargs.get("task").send_progress(message, progress=progress)
 
     def clean_pit(self):
         """delete pit from elastic search"""

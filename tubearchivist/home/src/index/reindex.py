@@ -248,7 +248,7 @@ class Reindex(ReindexBase):
         """send notification back to task"""
         remaining = RedisQueue(index_config["queue_name"]).length()
         idx = total - remaining
-        message = [f"Reindexing {name[0].upper()}{name[1:]}s {idx}/{total}"]
+        message = [f"Reindexing {name[0].title()}s {idx}/{total}"]
         progress = idx / total
         self.task.send_progress(message, progress=progress)
 
