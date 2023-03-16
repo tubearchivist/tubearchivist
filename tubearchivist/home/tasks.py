@@ -297,7 +297,7 @@ def thumbnail_check(self):
     ThumbValidator(task=self).validate()
 
 
-@shared_task(bind=True, name="resync_thumbs")
+@shared_task(bind=True, name="resync_thumbs", base=BaseTask)
 def re_sync_thumbs(self):
     """sync thumbnails to mediafiles"""
     manager = TaskManager()
@@ -306,7 +306,7 @@ def re_sync_thumbs(self):
         return
 
     manager.init(self)
-    ThumbFilesystem().sync()
+    ThumbFilesystem(task=self).embed()
 
 
 @shared_task(name="subscribe_to")
