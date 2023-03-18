@@ -332,7 +332,9 @@ class YoutubeChannel(YouTubeItem):
         all_youtube_ids = self.get_all_video_ids()
         total = len(self.all_playlists)
         for idx, playlist in enumerate(self.all_playlists):
-            self._notify_single_playlist(idx, total)
+            if self.task:
+                self._notify_single_playlist(idx, total)
+
             self._index_single_playlist(playlist, all_youtube_ids)
             print("add playlist: " + playlist[1])
 
