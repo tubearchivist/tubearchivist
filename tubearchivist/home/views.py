@@ -619,21 +619,6 @@ class ChannelIdView(ChannelIdBaseView):
             to_append = {"term": {"player.watched": {"value": False}}}
             self.data["query"]["bool"]["must"].append(to_append)
 
-    @staticmethod
-    def post(request, channel_id):
-        """handle post request"""
-        print(f"handle post from {channel_id}")
-        channel_overwrite_form = ChannelOverwriteForm(request.POST)
-        if channel_overwrite_form.is_valid():
-            overwrites = channel_overwrite_form.cleaned_data
-            print(f"{channel_id}: set overwrites {overwrites}")
-            channel_overwrites(channel_id, overwrites=overwrites)
-            if overwrites.get("index_playlists") == "1":
-                index_channel_playlists.delay(channel_id)
-
-        sleep(1)
-        return redirect("channel_id", channel_id, permanent=True)
-
 
 class ChannelIdLiveView(ChannelIdView):
     """resolves to /channel/<channel-id>/streams/

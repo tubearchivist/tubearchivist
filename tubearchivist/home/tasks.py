@@ -315,19 +315,10 @@ def subscribe_to(url_str):
     SubscriptionHandler(url_str).subscribe()
 
 
-@shared_task(name="index_playlists")
-def index_channel_playlists(channel_id):
+@shared_task(bind=True, name="index_playlists", base=BaseTask)
+def index_channel_playlists(self, channel_id):
     """add all playlists of channel to index"""
-    channel = YoutubeChannel(channel_id)
-    # notify
-    key = "message:playlistscan"
-    mess_dict = {
-        "status": key,
-        "level": "info",
-        "title": "Looking for playlists",
-        "message": f"{channel_id}: Channel scan in progress",
-    }
-    RedisArchivist().set_message(key, mess_dict, expire=True)
+    channel = YoutubeChannel(channel_id, task=self)
     channel.index_channel_playlists()
 
 

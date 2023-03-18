@@ -13,7 +13,6 @@ from home.src.ta.ta_redis import RedisArchivist, RedisQueue
 from home.src.ta.urlparser import Parser
 from home.tasks import (
     download_pending,
-    index_channel_playlists,
     kill_dl,
     re_sync_thumbs,
     rescan_filesystem,
@@ -62,7 +61,6 @@ class PostData:
             "db-restore": self._db_restore,
             "fs-rescan": self._fs_rescan,
             "delete-playlist": self._delete_playlist,
-            "find-playlists": self._find_playlists,
         }
 
         return exec_map[self.to_exec]
@@ -231,10 +229,4 @@ class PostData:
         elif playlist_action == "all":
             YoutubePlaylist(playlist_id).delete_videos_playlist()
 
-        return {"success": True}
-
-    def _find_playlists(self):
-        """add all playlists of a channel"""
-        channel_id = self.exec_val
-        index_channel_playlists.delay(channel_id)
         return {"success": True}
