@@ -45,7 +45,7 @@ Tube Archivist, and all if it's dependencies are located in the [community appli
 
 ### Step 1: Install  `TubeArchivist-RedisJSON`
 
-![TubeArchivist-RedisJSON](https://i.imgur.com/iGJZKYd.png)
+![TubeArchivist-RedisJSON](https://i.imgur.com/ZKc8pSK.png)
 This is the easiest container to setup of the thee, just make sure that you do not have any port conflicts, and that your `/data` is mounted to the correct path. The other containers will map to the same root directory (/mnt/user/appdata/TubeArchivist).
 
 If you need to install `TubeArchivist-RedisJSON`on a different port, you'll have to follow [these steps](https://github.com/tubearchivist/tubearchivist#redis-on-a-custom-port) later on when installing the `TubeArchivist` container
@@ -61,6 +61,7 @@ There is four additional settings in the "show more settings" area, but don't re
 ### Step 3: Install  `TubeArchivist`
 
 ![TubeArchivist](https://i.imgur.com/oLsmwBZ.png)
+
 It's finally time to set up TubeArchivist!
 
  - `HOST:`This is a list of IP addresses that you will host TA from. Example, 192.168.0.14 is the IP address of my Unraid server. If I was going to access TA from a VPN, or domain name, I'd put those next to my host IP with just a space separating the different addresses. More information [here.](https://github.com/tubearchivist/tubearchivist#installing-and-updating)
