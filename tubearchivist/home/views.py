@@ -754,14 +754,6 @@ class ChannelView(ArchivistResultsView):
         """handle http post requests"""
         subscribe_form = SubscribeToChannelForm(data=request.POST)
         if subscribe_form.is_valid():
-            key = "message:subchannel"
-            message = {
-                "status": key,
-                "level": "info",
-                "title": "Subscribing to Channels",
-                "message": "Parsing form data",
-            }
-            RedisArchivist().set_message(key, message=message, expire=True)
             url_str = request.POST.get("subscribe")
             print(url_str)
             subscribe_to.delay(url_str)
@@ -907,14 +899,6 @@ class PlaylistView(ArchivistResultsView):
         if subscribe_form.is_valid():
             url_str = request.POST.get("subscribe")
             print(url_str)
-            key = "message:subplaylist"
-            message = {
-                "status": key,
-                "level": "info",
-                "title": "Subscribing to Playlists",
-                "message": "Parsing form data",
-            }
-            RedisArchivist().set_message(key, message=message, expire=True)
             subscribe_to.delay(url_str)
 
         sleep(1)

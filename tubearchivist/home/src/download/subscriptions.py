@@ -319,17 +319,23 @@ class SubscriptionScanner:
 class SubscriptionHandler:
     """subscribe to channels and playlists from url_str"""
 
-    def __init__(self, url_str):
+    def __init__(self, url_str, task=False):
         self.url_str = url_str
+        self.task = task
         self.to_subscribe = False
 
     def subscribe(self):
         """subscribe to url_str items"""
+        if self.task:
+            self.task.send_progress(["Processing form content."])
         self.to_subscribe = Parser(self.url_str).parse()
 
+        total = len(self.to_subscribe)
         for idx, item in enumerate(self.to_subscribe):
+            if self.task:
+                self._notify(idx, item, total)
+
             self.subscribe_type(item)
-            self._notify(idx)
 
     def subscribe_type(self, item):
         """process single item"""
@@ -354,13 +360,11 @@ class SubscriptionHandler:
             channel_id, channel_subscribed=True
         )
 
-    def _notify(self, idx):
+    def _notify(self, idx, item, total):
         """send notification message to redis"""
-        key = "message:subchannel"
-        message = {
-            "status": key,
-            "level": "info",
-            "title": "Subscribing",
-            "message": f"Processing {idx + 1} of {len(self.to_subscribe)}",
-        }
-        RedisArchivist().set_message(key, message=message, expire=True)
+        subscribe_type = item["type"].title()
+        message_lines = [
+            f"Subscribe to {subscribe_type}",
+            f"Progress: {idx + 1}/{total}",
+        ]
+        self.task.send_progress(message_lines, progress=(idx + 1) / total)

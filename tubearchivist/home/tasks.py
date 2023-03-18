@@ -309,10 +309,10 @@ def re_sync_thumbs(self):
     ThumbFilesystem(task=self).embed()
 
 
-@shared_task(name="subscribe_to")
-def subscribe_to(url_str):
+@shared_task(bind=True, name="subscribe_to", base=BaseTask)
+def subscribe_to(self, url_str):
     """take a list of urls to subscribe to"""
-    SubscriptionHandler(url_str).subscribe()
+    SubscriptionHandler(url_str, task=self).subscribe()
 
 
 @shared_task(bind=True, name="index_playlists", base=BaseTask)
