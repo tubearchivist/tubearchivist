@@ -45,7 +45,7 @@ Tube Archivist, and all if it's dependencies are located in the [community appli
 
 ### Step 1: Install  `TubeArchivist-RedisJSON`
 
-![TubeArchivist-RedisJSON](https://i.imgur.com/iGJZKYd.png)
+![TubeArchivist-RedisJSON](https://i.imgur.com/ZKc8pSK.png)
 This is the easiest container to setup of the thee, just make sure that you do not have any port conflicts, and that your `/data` is mounted to the correct path. The other containers will map to the same root directory (/mnt/user/appdata/TubeArchivist).
 
 If you need to install `TubeArchivist-RedisJSON`on a different port, you'll have to follow [these steps](https://github.com/tubearchivist/tubearchivist#redis-on-a-custom-port) later on when installing the `TubeArchivist` container
