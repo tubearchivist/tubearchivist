@@ -49,51 +49,51 @@ class BaseTask(Task):
     TASK_CONFIG = {
         "update_subscribed": {
             "title": "Rescan your Subscriptions",
-            "group": "message:download:scan",
+            "group": "download:scan",
         },
         "download_pending": {
             "title": "Downloading",
-            "group": "message:download:run",
+            "group": "download:run",
         },
         "extract_download": {
             "title": "Add to download queue",
-            "group": "message:download:add",
-        },
-        "subscribe_to": {
-            "title": "Add Subscription",
-            "group": "message:download:subscribe",
+            "group": "download:add",
         },
         "check_reindex": {
             "title": "Reindex Documents",
-            "group": "message:settings:reindex",
+            "group": "reindex:run",
         },
         "manual_import": {
             "title": "Manual video import",
-            "group": "message:settings:import",
+            "group": "setting:import",
         },
         "run_backup": {
             "title": "Index Backup",
-            "group": "message:settings:backup",
+            "group": "setting:backup",
         },
         "restore_backup": {
             "title": "Restore Backup",
-            "group": "message:settings:restore",
+            "group": "setting:restore",
         },
         "rescan_filesystem": {
             "title": "Rescan your Filesystem",
-            "group": "message:settings:filesystemscan",
+            "group": "setting:filesystemscan",
         },
         "thumbnail_check": {
             "title": "Check your Thumbnails",
-            "group": "message:settings:thumbnailcheck",
+            "group": "setting:thumbnailcheck",
         },
         "resync_thumbs": {
             "title": "Sync Thumbnails to Media Files",
-            "group": "message:settings:thumbnailsync",
+            "group": "setting:thumbnailsync",
         },
         "index_playlists": {
             "title": "Index Channel Playlist",
-            "group": "message:channel:indexplaylist",
+            "group": "channel:indexplaylist",
+        },
+        "subscribe_to": {
+            "title": "Add Subscription",
+            "group": "subscription:add",
         },
     }
 
@@ -139,7 +139,7 @@ class BaseTask(Task):
             "level": level,
             "id": task_id,
         }
-        key = f"{config.get('group')}:{task_id.split('-')[0]}"
+        key = f"message:{config.get('group')}:{task_id.split('-')[0]}"
         return message, key
 
 
