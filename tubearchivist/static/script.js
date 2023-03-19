@@ -250,6 +250,10 @@ function manualImport() {
   let toReplace = document.getElementById('manual-import');
   toReplace.innerHTML = '';
   toReplace.appendChild(message);
+  setTimeout(function () {
+    location.replace('#notifications');
+    checkMessages();
+  }, 200);
 }
 
 function reEmbed() {
@@ -261,6 +265,10 @@ function reEmbed() {
   let toReplace = document.getElementById('re-embed');
   toReplace.innerHTML = '';
   toReplace.appendChild(message);
+  setTimeout(function () {
+    location.replace('#notifications');
+    checkMessages();
+  }, 200);
 }
 
 function dbBackup() {
@@ -272,6 +280,10 @@ function dbBackup() {
   let toReplace = document.getElementById('db-backup');
   toReplace.innerHTML = '';
   toReplace.appendChild(message);
+  setTimeout(function () {
+    location.replace('#notifications');
+    checkMessages();
+  }, 200);
 }
 
 function dbRestore(button) {
@@ -284,6 +296,10 @@ function dbRestore(button) {
   let toReplace = document.getElementById(fileName);
   toReplace.innerHTML = '';
   toReplace.appendChild(message);
+  setTimeout(function () {
+    location.replace('#notifications');
+    checkMessages();
+  }, 200);
 }
 
 function fsRescan() {
@@ -295,6 +311,10 @@ function fsRescan() {
   let toReplace = document.getElementById('fs-rescan');
   toReplace.innerHTML = '';
   toReplace.appendChild(message);
+  setTimeout(function () {
+    location.replace('#notifications');
+    checkMessages();
+  }, 200);
 }
 
 function resetToken() {
