@@ -1100,16 +1100,6 @@ class SettingsView(MinView):
         RedisArchivist().set_message(key, message=message, expire=True)
 
 
-def progress(request):
-    # pylint: disable=unused-argument
-    """resolves to /progress/
-    return list of messages for frontend
-    """
-    all_messages = RedisArchivist().get_progress()
-    json_data = {"messages": all_messages}
-    return JsonResponse(json_data)
-
-
 def process(request):
     """handle all the buttons calls via POST ajax"""
     if request.method == "POST":
