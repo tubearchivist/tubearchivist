@@ -31,7 +31,7 @@ function getMessages(dataOrigin) {
 function buildMessage(responseData, dataOrigin) {
   // filter relevant messages
   let messages = responseData.filter(function (value) {
-    return value.status.startsWith(dataOrigin);
+    return value.group.startsWith(dataOrigin);
   }, dataOrigin);
   let notificationDiv = document.getElementById('notifications');
   let nots = notificationDiv.childElementCount;
@@ -44,11 +44,22 @@ function buildMessage(responseData, dataOrigin) {
     messageBox.classList.add(messageData['level'], 'notification');
     messageBox.innerHTML = `
     <h3>${messageData.title}</h3>
-    <p>${messageData.messages.join('<br>')}</p>
-    <div class="notification-progress-bar" style="width: ${progress}%";></div>`;
+    <p>${messageData.messages.join('<br>')}</p>`
+    let taskControlIcons = document.createElement('div');
+    taskControlIcons.classList = 'task-control-icons';
+    if ('api-stop' in messageData) {
+      taskControlIcons.appendChild(buildStopIcon(messageData.id));
+    }
+    if ('api-kill' in messageData) {
+      taskControlIcons.appendChild(buildKillIcon(messageData.id));
+    }
+    if (taskControlIcons.hasChildNodes()) {
+      messageBox.appendChild(taskControlIcons);
+    }
+    messageBox.innerHTML = `${messageBox.innerHTML}<div class="notification-progress-bar" style="width: ${progress}%";></div>`;
     notificationDiv.appendChild(messageBox);
-    if (messageData.status.startsWith('download:')) {
-      animateIcons(messageData.status);
+    if (messageData.group.startsWith('download:')) {
+      animateIcons(messageData.group);
     }
   }
   if (nots > 0 && messages.length === 0) {
@@ -58,10 +69,10 @@ function buildMessage(responseData, dataOrigin) {
   return messages;
 }
 
-function animateIcons(status) {
+function animateIcons(group) {
   let rescanIcon = document.getElementById('rescan-icon');
   let dlIcon = document.getElementById('download-icon');
-  switch (status) {
+  switch (group) {
     case 'download:scan':
       if (rescanIcon && !rescanIcon.classList.contains('rotate-img')) {
         animate('rescan-icon', 'rotate-img');
@@ -77,4 +88,26 @@ function animateIcons(status) {
     default:
       break;
   }
+}
+
+function buildStopIcon(taskId) {
+  let stopIcon = document.createElement('img');
+  stopIcon.setAttribute('id', 'stop-icon');
+  stopIcon.setAttribute('data', taskId);
+  stopIcon.setAttribute('title', 'Stop Task');
+  stopIcon.setAttribute('src', '/static/img/icon-stop.svg');
+  stopIcon.setAttribute('alt', 'stop icon');
+  stopIcon.setAttribute('onclick', 'stopTask(this)');
+  return stopIcon
+}
+
+function buildKillIcon(taskId) {
+  let killIcon = document.createElement('img');
+  killIcon.setAttribute('id', 'kill-icon');
+  stopIcon.setAttribute('data', taskId);
+  killIcon.setAttribute('title', 'Kill Task');
+  killIcon.setAttribute('src', '/static/img/icon-close.svg');
+  killIcon.setAttribute('alt', 'kill icon');
+  killIcon.setAttribute('onclick', 'killTask(this)');
+  return killIcon
 }

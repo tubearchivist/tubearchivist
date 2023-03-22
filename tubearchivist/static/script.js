@@ -228,15 +228,17 @@ function deleteQueue(button) {
   document.getElementById(button.id).replaceWith(message);
 }
 
-function stopQueue() {
-  let payload = JSON.stringify({ queue: 'stop' });
-  sendPost(payload);
+function stopTask(icon) {
+  let taskId = icon.getAttribute('data');
+  let apiEndpoint = `/api/task-id/${taskId}/`;
+  apiRequest(apiEndpoint, 'POST', { command: 'stop'});
   document.getElementById('stop-icon').remove();
 }
 
-function killQueue() {
-  let payload = JSON.stringify({ queue: 'kill' });
-  sendPost(payload);
+function killTask(icon) {
+  let taskId = icon.getAttribute('data');
+  let apiEndpoint = `/api/task-id/${taskId}/`;
+  apiRequest(apiEndpoint, 'POST', { command: 'kill'});
   document.getElementById('kill-icon').remove();
 }
 
