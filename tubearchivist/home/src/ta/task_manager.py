@@ -40,6 +40,13 @@ class TaskManager:
 
         return bool([i for i in tasks if i.get("status") == "PENDING"])
 
+    def is_stopped(self, task_id):
+        """check if task_id has received STOP command"""
+        task = self.get_task(task_id)
+        print(task)
+
+        return task.get("command") == "STOP"
+
     def get_pending(self, task_name):
         """get all pending tasks of task_name"""
         tasks = self.get_tasks_by_name(task_name)

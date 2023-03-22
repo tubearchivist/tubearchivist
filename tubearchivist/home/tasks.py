@@ -53,6 +53,7 @@ class BaseTask(Task):
             "title": "Rescan your Subscriptions",
             "group": "download:scan",
             "api-start": True,
+            "api-stop": True,
         },
         "download_pending": {
             "title": "Downloading",
@@ -145,6 +146,10 @@ class BaseTask(Task):
         message.update({"level": level, "id": task_id})
         key = f"message:{message.get('group')}:{task_id.split('-')[0]}"
         return message, key
+
+    def is_stopped(self):
+        """check if task is stopped"""
+        return TaskManager().is_stopped(self.request.id)
 
 
 @shared_task(name="update_subscribed", bind=True, base=BaseTask)
