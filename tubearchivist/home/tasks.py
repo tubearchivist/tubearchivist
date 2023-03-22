@@ -46,14 +46,18 @@ app.conf.timezone = os.environ.get("TZ") or "UTC"
 class BaseTask(Task):
     """base class to inherit each class from"""
 
+    # pylint: disable=abstract-method
+
     TASK_CONFIG = {
         "update_subscribed": {
             "title": "Rescan your Subscriptions",
             "group": "download:scan",
+            "api-start": True,
         },
         "download_pending": {
             "title": "Downloading",
             "group": "download:run",
+            "api-start": True,
         },
         "extract_download": {
             "title": "Add to download queue",
@@ -66,10 +70,12 @@ class BaseTask(Task):
         "manual_import": {
             "title": "Manual video import",
             "group": "setting:import",
+            "api-start": True,
         },
         "run_backup": {
             "title": "Index Backup",
             "group": "setting:backup",
+            "api-start": True,
         },
         "restore_backup": {
             "title": "Restore Backup",
@@ -78,14 +84,17 @@ class BaseTask(Task):
         "rescan_filesystem": {
             "title": "Rescan your Filesystem",
             "group": "setting:filesystemscan",
+            "api-start": True,
         },
         "thumbnail_check": {
             "title": "Check your Thumbnails",
             "group": "setting:thumbnailcheck",
+            "api-start": True,
         },
         "resync_thumbs": {
             "title": "Sync Thumbnails to Media Files",
             "group": "setting:thumbnailsync",
+            "api-start": True,
         },
         "index_playlists": {
             "title": "Index Channel Playlist",
@@ -132,14 +141,9 @@ class BaseTask(Task):
     def _build_message(self, level="info"):
         """build message dict"""
         task_id = self.request.id
-        config = self.TASK_CONFIG.get(self.name)
-        message = {
-            "status": config.get("group"),
-            "title": config.get("title"),
-            "level": level,
-            "id": task_id,
-        }
-        key = f"message:{config.get('group')}:{task_id.split('-')[0]}"
+        message = self.TASK_CONFIG.get(self.name)
+        message.update({"level": level, "id": task_id})
+        key = f"message:{message.get('group')}:{task_id.split('-')[0]}"
         return message, key
 
 

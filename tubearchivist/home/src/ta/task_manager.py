@@ -4,6 +4,7 @@ functionality:
 - handle threads and locks
 """
 
+from home import tasks as ta_tasks
 from home.src.ta.ta_redis import TaskRedis
 
 
@@ -61,32 +62,32 @@ class TaskManager:
 
 
 class TaskCommand:
-    """send command pending task"""
+    """run commands on task"""
 
-    def __init__(self, command="STOP"):
-        self.command = command
+    def start(self, task_name):
+        """start task by task_name, only pass task that don't take args"""
+        task = ta_tasks.app.tasks.get(task_name).delay()
+        message = {
+            "task_id": task.id,
+            "status": task.status,
+            "task_name": task.name,
+        }
 
-    def by_id(self, task_id):
-        """run command on single task id"""
-        self._set_command(task_id)
+        return message
 
-    def by_name(self, task_name):
-        """run command on all tasks by name"""
-        pending = TaskManager().get_pending(task_name)
-        if not pending:
-            return
+    def stop(self, task_id):
+        """
+        send stop signal to task_id,
+        needs to be implemented in task to take effect
+        """
+        handler = TaskRedis()
 
-        for task in pending:
-            self._set_command(task.get("task_id"))
+        task = handler.get_single(task_id)
+        if not task["name"] in ta_tasks.BaseTask.TASK_CONFIG:
+            raise ValueError
 
-    def _set_command(self, task_id):
-        """stop single task by id"""
-        TaskRedis().set_command(task_id, self.command)
-        if self.command == "KILL":
-            self._kill(task_id)
+        handler.set_command(task_id, "STOP")
 
-    def _kill(self, task_id):
-        """kill task by id"""
-        from home.tasks import app as CeleryApp
-
-        CeleryApp.control.revoke(task_id, terminate=True)
+    def kill(self, task_id):
+        """send kill signal to task_id"""
+        ta_tasks.app.control.revoke(task_id, terminate=True)

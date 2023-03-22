@@ -82,11 +82,6 @@ urlpatterns = [
         name="api-refresh",
     ),
     path(
-        "task/",
-        views.TaskApiView.as_view(),
-        name="api-task",
-    ),
-    path(
         "snapshot/",
         views.SnapshotApiListView.as_view(),
         name="api-snapshot-list",
@@ -95,6 +90,21 @@ urlpatterns = [
         "snapshot/<slug:snapshot_id>/",
         views.SnapshotApiView.as_view(),
         name="api-snapshot",
+    ),
+    path(
+        "task-name/",
+        views.TaskListView.as_view(),
+        name="api-task-list",
+    ),
+    path(
+        "task-name/<slug:task_name>/",
+        views.TaskNameListView.as_view(),
+        name="api-task-name-list",
+    ),
+    path(
+        "task-id/<slug:task_id>/",
+        views.TaskIDView.as_view(),
+        name="api-task-id",
     ),
     path(
         "cookie/",
