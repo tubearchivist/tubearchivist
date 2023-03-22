@@ -44,7 +44,7 @@ function buildMessage(responseData, dataOrigin) {
     messageBox.classList.add(messageData['level'], 'notification');
     messageBox.innerHTML = `
     <h3>${messageData.title}</h3>
-    <p>${messageData.messages.join('<br>')}</p>`
+    <p>${messageData.messages.join('<br>')}</p>`;
     let taskControlIcons = document.createElement('div');
     taskControlIcons.classList = 'task-control-icons';
     if ('api-stop' in messageData) {
@@ -98,16 +98,16 @@ function buildStopIcon(taskId) {
   stopIcon.setAttribute('src', '/static/img/icon-stop.svg');
   stopIcon.setAttribute('alt', 'stop icon');
   stopIcon.setAttribute('onclick', 'stopTask(this)');
-  return stopIcon
+  return stopIcon;
 }
 
 function buildKillIcon(taskId) {
   let killIcon = document.createElement('img');
   killIcon.setAttribute('id', 'kill-icon');
-  stopIcon.setAttribute('data', taskId);
+  killIcon.setAttribute('data', taskId);
   killIcon.setAttribute('title', 'Kill Task');
   killIcon.setAttribute('src', '/static/img/icon-close.svg');
   killIcon.setAttribute('alt', 'kill icon');
   killIcon.setAttribute('onclick', 'killTask(this)');
-  return killIcon
+  return killIcon;
 }
