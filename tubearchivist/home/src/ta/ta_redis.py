@@ -57,18 +57,23 @@ class RedisArchivist(RedisBase):
 
         return json_str
 
-    def list_items(self, query):
-        """list all matches"""
+    def list_keys(self, query):
+        """return all key matches"""
         reply = self.conn.execute_command(
             "KEYS", self.NAME_SPACE + query + "*"
         )
-        all_matches = [i.decode().lstrip(self.NAME_SPACE) for i in reply]
-        all_results = []
-        for match in all_matches:
-            json_str = self.get_message(match)
-            all_results.append(json_str)
+        if not reply:
+            return False
 
-        return all_results
+        return [i.decode().lstrip(self.NAME_SPACE) for i in reply]
+
+    def list_items(self, query):
+        """list all matches"""
+        all_matches = self.list_keys(query)
+        if not all_matches:
+            return []
+
+        return [self.get_message(i) for i in all_matches]
 
     def del_message(self, key):
         """delete key from redis"""
@@ -114,6 +119,10 @@ class RedisQueue(RedisBase):
         all_elements = [i.decode() for i in result]
         return all_elements
 
+    def length(self):
+        """return total elements in list"""
+        return self.conn.execute_command("LLEN", self.key)
+
     def in_queue(self, element):
         """check if element is in list"""
         result = self.conn.execute_command("LPOS", self.key, element)
@@ -128,8 +137,9 @@ class RedisQueue(RedisBase):
 
     def add_priority(self, to_add):
         """add single video to front of queue"""
-        self.clear_item(to_add)
-        self.conn.execute_command("LPUSH", self.key, to_add)
+        item = json.dumps(to_add)
+        self.clear_item(item)
+        self.conn.execute_command("LPUSH", self.key, item)
 
     def get_next(self):
         """return next element in the queue, False if none"""
@@ -156,3 +166,56 @@ class RedisQueue(RedisBase):
         """check if queue as at least one pending item"""
         result = self.conn.execute_command("LRANGE", self.key, 0, 0)
         return bool(result)
+
+
+class TaskRedis(RedisBase):
+    """interact with redis tasks"""
+
+    BASE = "celery-task-meta-"
+    EXPIRE = 60 * 60 * 24
+    COMMANDS = ["STOP", "KILL"]
+
+    def get_all(self):
+        """return all tasks"""
+        all_keys = self.conn.execute_command("KEYS", f"{self.BASE}*")
+        return [i.decode().replace(self.BASE, "") for i in all_keys]
+
+    def get_single(self, task_id):
+        """return content of single task"""
+        result = self.conn.execute_command("GET", self.BASE + task_id)
+        if not result:
+            return False
+
+        return json.loads(result.decode())
+
+    def set_key(self, task_id, message, expire=False):
+        """set value for lock, initial or update"""
+        key = f"{self.BASE}{task_id}"
+        self.conn.execute_command("SET", key, json.dumps(message))
+
+        if expire:
+            self.conn.execute_command("EXPIRE", key, self.EXPIRE)
+
+    def set_command(self, task_id, command):
+        """set task command"""
+        if command not in self.COMMANDS:
+            print(f"{command} not in valid commands {self.COMMANDS}")
+            raise ValueError
+
+        message = self.get_single(task_id)
+        if not message:
+            print(f"{task_id} not found")
+            raise KeyError
+
+        message.update({"command": command})
+        self.set_key(task_id, message)
+
+    def del_task(self, task_id):
+        """delete task result by id"""
+        self.conn.execute_command("DEL", f"{self.BASE}{task_id}")
+
+    def del_all(self):
+        """delete all task results"""
+        all_tasks = self.get_all()
+        for task_id in all_tasks:
+            self.del_task(task_id)

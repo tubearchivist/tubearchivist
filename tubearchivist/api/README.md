@@ -2,8 +2,9 @@
 Documentation of available API endpoints.  
 
 Note:  
-- This is very early stages and will change!
-- Check the commit history to see if a documented feature is already in your release
+- This has changed in the past and will change again while building out additional integrations and functionality.
+- All changes to the API are marked with a `[API]` keyword for easy searching, for example search for [commits](https://github.com/tubearchivist/tubearchivist/search?o=desc&q=%5Bapi%5D&s=committer-date&type=commits). You'll find the same in the [release notes](https://github.com/tubearchivist/tubearchivist/releases).
+- Check the commit history and release notes to see if a documented feature is already in your release.
 
 ## Table of contents
 - [Authentication](#authentication)
@@ -35,9 +36,13 @@ Note:
 - [Snapshot List](#snapshot-list-view)
 - [Snapshot Single](#snapshot-item-view)
 
+**Task management**
+- [Task Name List](#task-name-list-view)
+- [Task Name Single](#task-name-item-view)
+- [Task ID](#task-id-view)
+
 **Additional**
 - [Login](#login-view)
-- [Task](#task-view) WIP
 - [Refresh](#refresh-view)
 - [Cookie](#cookie-view)
 - [Search](#search-view)
@@ -251,7 +256,7 @@ POST /api/snapshot/
 Create new snapshot now, will return immediately, task will run async in the background, will return snapshot name: 
 ```json
 {
-    "snapshot_name": "ta_daily_<random-id>
+    "snapshot_name": "ta_daily_<random-id>"
 }
 ```
 
@@ -260,7 +265,7 @@ GET /api/snapshot/\<snapshot-id>/
 Return metadata of a single snapshot
 ```json
 {
-    "id": "ta_daily_<random-id>,
+    "id": "ta_daily_<random-id>",
     "state": "SUCCESS",
     "es_version": "0.0.0",
     "start_date": "date_str",
@@ -275,6 +280,29 @@ Restore this snapshot
 
 DELETE /api/snapshot/\<snapshot-id>/  
 Remove this snapshot from index
+
+## Task Name List View
+GET /api/task-name/  
+Return all task results
+
+## Task Name Item View
+GET /api/task-name/\<task-name>/  
+Return all ask results by task name
+
+POST /api/task-name/\<task-name>/  
+Start a new task by task name, only tasks without arguments can be started like that, see `home.tasks.BaseTask.TASK_CONFIG` for more info.
+
+## Task ID view
+GET /api/task-id/\<task-id>/  
+Return task status by task ID
+
+POST /api/task-id/\<task-id>/
+```json
+{
+    "command": "stop|kill"
+}
+```
+Send command to a task, valid commands: `stop` and `kill`.
 
 ## Login View
 Return token and user ID for username and password:  
@@ -293,33 +321,6 @@ after successful login returns
     "user_id": 1
 }
 ```
-
-## Task View
-GET /api/task/
-POST /api/task/
-
-Check if there is an ongoing task:
-GET /api/task/
-
-Returns:
-```json
-{
-    "rescan": false,
-    "downloading": false
-}
-```
-
-Start a background task  
-POST /api/task/
-```json
-{
-    "run": "task_name"
-}
-```
-
-List of valid task names:
-- **download_pending**: Start the download queue
-- **rescan_pending**: Rescan your subscriptions
 
 ## Refresh View
 GET /api/refresh/  
