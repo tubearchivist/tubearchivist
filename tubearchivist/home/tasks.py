@@ -263,27 +263,6 @@ def run_restore_backup(self, filename):
     print("index restore finished")
 
 
-@shared_task(name="kill_download")
-def kill_dl(task_id):
-    """kill download worker task by ID"""
-    if task_id:
-        app.control.revoke(task_id, terminate=True)
-
-    _ = RedisArchivist().del_message("dl_queue_id")
-    RedisQueue(queue_name="dl_queue").clear()
-
-    _ = clear_dl_cache(CONFIG)
-
-    # notify
-    mess_dict = {
-        "status": "message:download",
-        "level": "error",
-        "title": "Canceling download process",
-        "message": "Canceling download queue now.",
-    }
-    RedisArchivist().set_message("message:download", mess_dict, expire=True)
-
-
 @shared_task(bind=True, name="rescan_filesystem", base=BaseTask)
 def rescan_filesystem(self):
     """check the media folder for mismatches"""
