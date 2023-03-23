@@ -71,7 +71,7 @@ class RedisArchivist(RedisBase):
         """list all matches"""
         all_matches = self.list_keys(query)
         if not all_matches:
-            return False
+            return []
 
         return [self.get_message(i) for i in all_matches]
 
