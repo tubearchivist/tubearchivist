@@ -43,7 +43,6 @@ class TaskManager:
     def is_stopped(self, task_id):
         """check if task_id has received STOP command"""
         task = self.get_task(task_id)
-        print(task)
 
         return task.get("command") == "STOP"
 

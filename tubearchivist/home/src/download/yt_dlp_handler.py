@@ -174,7 +174,7 @@ class VideoDownloader:
 
         while True:
             youtube_data = queue.get_next()
-            if not youtube_data:
+            if self.task.is_stopped() or not youtube_data:
                 break
 
             youtube_data = json.loads(youtube_data)

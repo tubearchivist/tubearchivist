@@ -59,6 +59,7 @@ class BaseTask(Task):
             "title": "Downloading",
             "group": "download:run",
             "api-start": True,
+            "api-stop": True,
         },
         "extract_download": {
             "title": "Add to download queue",
