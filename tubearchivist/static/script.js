@@ -167,18 +167,18 @@ function reindex(button) {
 
 // download page buttons
 function rescanPending() {
-  let payload = JSON.stringify({ rescan_pending: true });
+  let apiEndpoint = '/api/task-name/update_subscribed/';
+  apiRequest(apiEndpoint, 'POST');
   animate('rescan-icon', 'rotate-img');
-  sendPost(payload);
   setTimeout(function () {
     checkMessages();
   }, 500);
 }
 
 function dlPending() {
-  let payload = JSON.stringify({ dl_pending: true });
+  let apiEndpoint = '/api/task-name/download_pending/';
+  apiRequest(apiEndpoint, 'POST');
   animate('download-icon', 'bounce-img');
-  sendPost(payload);
   setTimeout(function () {
     checkMessages();
   }, 500);
@@ -244,8 +244,8 @@ function killTask(icon) {
 
 // settings page buttons
 function manualImport() {
-  let payload = JSON.stringify({ 'manual-import': true });
-  sendPost(payload);
+  let apiEndpoint = '/api/task-name/manual_import/';
+  apiRequest(apiEndpoint, 'POST');
   // clear button
   let message = document.createElement('p');
   message.innerText = 'processing import';
@@ -259,8 +259,8 @@ function manualImport() {
 }
 
 function reEmbed() {
-  let payload = JSON.stringify({ 're-embed': true });
-  sendPost(payload);
+  let apiEndpoint = '/api/task-name/resync_thumbs/';
+  apiRequest(apiEndpoint, 'POST');
   // clear button
   let message = document.createElement('p');
   message.innerText = 'processing thumbnails';
@@ -274,8 +274,8 @@ function reEmbed() {
 }
 
 function dbBackup() {
-  let payload = JSON.stringify({ 'db-backup': true });
-  sendPost(payload);
+  let apiEndpoint = '/api/task-name/run_backup/';
+  apiRequest(apiEndpoint, 'POST');
   // clear button
   let message = document.createElement('p');
   message.innerText = 'backing up archive';
@@ -305,8 +305,8 @@ function dbRestore(button) {
 }
 
 function fsRescan() {
-  let payload = JSON.stringify({ 'fs-rescan': true });
-  sendPost(payload);
+  let apiEndpoint = '/api/task-name/rescan_filesystem/';
+  apiRequest(apiEndpoint, 'POST');
   // clear button
   let message = document.createElement('p');
   message.innerText = 'File system scan in progress';

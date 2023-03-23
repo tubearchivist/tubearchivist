@@ -23,8 +23,7 @@ from home.src.index.filesystem import Filesystem
 from home.src.index.manual import ImportFolderScanner
 from home.src.index.reindex import Reindex, ReindexManual, ReindexOutdated
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
-from home.src.ta.helper import clear_dl_cache
-from home.src.ta.ta_redis import RedisArchivist, RedisQueue
+from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskManager
 
 CONFIG = AppConfig().config
