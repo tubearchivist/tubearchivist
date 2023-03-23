@@ -67,6 +67,17 @@ class TaskManager:
         }
         TaskRedis().set_key(task.request.id, message)
 
+    def fail_pending(self):
+        """
+        mark all pending as failed,
+        run at startup to recover from hard reset
+        """
+        all_results = self.get_all_results()
+        for result in all_results:
+            if result.get("status") == "PENDING":
+                result["status"] = "FAILED"
+                TaskRedis().set_key(result["task_id"], result, expire=True)
+
 
 class TaskCommand:
     """run commands on task"""

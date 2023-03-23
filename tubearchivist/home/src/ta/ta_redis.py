@@ -57,18 +57,23 @@ class RedisArchivist(RedisBase):
 
         return json_str
 
-    def list_items(self, query):
-        """list all matches"""
+    def list_keys(self, query):
+        """return all key matches"""
         reply = self.conn.execute_command(
             "KEYS", self.NAME_SPACE + query + "*"
         )
-        all_matches = [i.decode().lstrip(self.NAME_SPACE) for i in reply]
-        all_results = []
-        for match in all_matches:
-            json_str = self.get_message(match)
-            all_results.append(json_str)
+        if not reply:
+            return False
 
-        return all_results
+        return [i.decode().lstrip(self.NAME_SPACE) for i in reply]
+
+    def list_items(self, query):
+        """list all matches"""
+        all_matches = self.list_keys(query)
+        if not all_matches:
+            return False
+
+        return [self.get_message(i) for i in all_matches]
 
     def del_message(self, key):
         """delete key from redis"""
