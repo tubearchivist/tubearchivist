@@ -161,6 +161,7 @@ class PendingList(PendingIndex):
         "noplaylist": True,
         "writethumbnail": True,
         "simulate": True,
+        "check_formats": None,
     }
 
     def __init__(self, youtube_ids=False, task=False):
