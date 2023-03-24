@@ -33,40 +33,54 @@ function buildMessage(responseData, dataOrigin) {
   let messages = responseData.filter(function (value) {
     return value.group.startsWith(dataOrigin);
   }, dataOrigin);
-  let notificationDiv = document.getElementById('notifications');
-  let nots = notificationDiv.childElementCount;
-  notificationDiv.innerHTML = '';
+  let notifications = document.getElementById('notifications');
+  let currentNotifications = notifications.childElementCount;
 
   for (let i = 0; i < messages.length; i++) {
     const messageData = messages[i];
-    let messageBox = document.createElement('div');
-    let progress = messageData?.progress * 100 || 0;
-    messageBox.classList.add(messageData['level'], 'notification');
-    messageBox.innerHTML = `
-    <h3>${messageData.title}</h3>
-    <p>${messageData.messages.join('<br>')}</p>`;
-    let taskControlIcons = document.createElement('div');
-    taskControlIcons.classList = 'task-control-icons';
-    if ('api-stop' in messageData) {
-      taskControlIcons.appendChild(buildStopIcon(messageData.id));
+    if (!document.getElementById(messageData.id)) {
+      let messageBox = buildPlainBox(messageData);
+      notifications.appendChild(messageBox);
     }
-    if ('api-kill' in messageData) {
-      taskControlIcons.appendChild(buildKillIcon(messageData.id));
-    }
-    if (taskControlIcons.hasChildNodes()) {
-      messageBox.appendChild(taskControlIcons);
-    }
-    messageBox.innerHTML = `${messageBox.innerHTML}<div class="notification-progress-bar" style="width: ${progress}%";></div>`;
-    notificationDiv.appendChild(messageBox);
+    updateMessageBox(messageData);
     if (messageData.group.startsWith('download:')) {
       animateIcons(messageData.group);
     }
   }
-  if (nots > 0 && messages.length === 0) {
+  clearNotifications(responseData);
+  if (currentNotifications > 0 && messages.length === 0) {
     location.reload();
   }
-
   return messages;
+}
+
+function buildPlainBox(messageData) {
+  let messageBox = document.createElement('div');
+  messageBox.classList.add(messageData.level, 'notification');
+  messageBox.id = messageData.id;
+  messageBox.innerHTML = `
+  <h3></h3>
+  <p></p>
+  <div class="task-control-icons"></div>
+  <div class="notification-progress-bar"></div>`;
+  return messageBox;
+}
+
+function updateMessageBox(messageData) {
+  let messageBox = document.getElementById(messageData.id);
+  let children = messageBox.children;
+  children[0].textContent = messageData.title;
+  children[1].innerHTML = messageData.messages.join('<br>');
+  if (
+    !messageBox.querySelector('#stop-icon') &&
+    messageData['api-stop'] &&
+    messageData.command !== 'STOP'
+  ) {
+    children[2].appendChild(buildStopIcon(messageData.id));
+  }
+  if (messageData.progress) {
+    children[3].style.width = `${messageData.progress * 100 || 0}%`;
+  }
 }
 
 function animateIcons(group) {
@@ -110,4 +124,15 @@ function buildKillIcon(taskId) {
   killIcon.setAttribute('alt', 'kill icon');
   killIcon.setAttribute('onclick', 'killTask(this)');
   return killIcon;
+}
+
+function clearNotifications(responseData) {
+  let allIds = Array.from(responseData, x => x.id);
+  let allBoxes = document.getElementsByClassName('notification');
+  for (let i = 0; i < allBoxes.length; i++) {
+    const notificationBox = allBoxes[i];
+    if (!allIds.includes(notificationBox.id)) {
+      notificationBox.remove();
+    }
+  }
 }

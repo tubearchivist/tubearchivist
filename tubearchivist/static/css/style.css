@@ -1025,7 +1025,6 @@ video:-webkit-full-screen {
 .task-control-icons {
     display: flex;
     justify-content: center;
-    padding-bottom: 10px;
 }
 
 .task-control-icons img {

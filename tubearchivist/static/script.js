@@ -232,14 +232,14 @@ function stopTask(icon) {
   let taskId = icon.getAttribute('data');
   let apiEndpoint = `/api/task-id/${taskId}/`;
   apiRequest(apiEndpoint, 'POST', { command: 'stop' });
-  document.getElementById('stop-icon').remove();
+  icon.remove();
 }
 
 function killTask(icon) {
   let taskId = icon.getAttribute('data');
   let apiEndpoint = `/api/task-id/${taskId}/`;
   apiRequest(apiEndpoint, 'POST', { command: 'kill' });
-  document.getElementById('kill-icon').remove();
+  icon.remove();
 }
 
 // settings page buttons
