@@ -103,6 +103,7 @@ class Parser:
     def _extract_channel_name(url):
         """find channel id from channel name with yt-dlp help"""
         obs_request = {
+            "check_formats": None,
             "skip_download": True,
             "extract_flat": True,
             "playlistend": 0,

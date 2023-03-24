@@ -60,6 +60,7 @@ class Comments:
         comment_sort = self.config["downloads"]["comment_sort"]
 
         yt_obs = {
+            "check_formats": None,
             "skip_download": True,
             "getcomments": True,
             "extractor_args": {
