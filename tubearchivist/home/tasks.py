@@ -147,6 +147,10 @@ class BaseTask(Task):
         task_id = self.request.id
         message = self.TASK_CONFIG.get(self.name)
         message.update({"level": level, "id": task_id})
+        task_result = TaskManager().get_task(task_id)
+        if task_result:
+            message.update({"command": task_result.get("command", False)})
+
         key = f"message:{message.get('group')}:{task_id.split('-')[0]}"
         return message, key
 
