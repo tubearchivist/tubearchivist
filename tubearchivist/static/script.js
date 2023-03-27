@@ -1458,19 +1458,11 @@ function doShortcut(e) {
       break;
     }
     case 'ArrowLeft': {
-      if (targetName === 'video') {
-        // hitting arrows while the video is focused will use the built-in skip
-        break;
-      }
       showModal('- 5 seconds', 500);
       player.currentTime -= 5;
       break;
     }
     case 'ArrowRight': {
-      if (targetName === 'video') {
-        // hitting space while the video is focused will use the built-in skip
-        break;
-      }
       showModal('+ 5 seconds', 500);
       player.currentTime += 5;
       break;
