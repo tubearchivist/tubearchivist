@@ -8,6 +8,8 @@
 <a href="https://www.tubearchivist.com/discord" target="_blank"><img src="https://tiles.tilefy.me/t/tubearchivist-discord.png" alt="tubearchivist-discord" title="TA Discord Server Members" height="50" width="190"/></a>
 </div>
 
+![home screenshot](assets/tube-archivist-screenshot-home.png?raw=true "Tube Archivist Home")
+
 ## Table of contents:
 * [Wiki](https://github.com/tubearchivist/tubearchivist/wiki) with [FAQ](https://github.com/tubearchivist/tubearchivist/wiki/FAQ)
 * [Core functionality](#core-functionality)
@@ -31,24 +33,9 @@
 * Play videos
 * Keep track of viewed and unviewed videos
 
-## Tube Archivist on YouTube
-[![ibracorp-youtube-video-thumb](assets/tube-archivist-ibracorp-O8H8Z01c0Ys.jpg)](https://www.youtube.com/watch?v=O8H8Z01c0Ys)
 
-## Screenshots
-![home screenshot](assets/tube-archivist-screenshot-home.png?raw=true "Tube Archivist Home")  
-*Home Page*
-
-![channels screenshot](assets/tube-archivist-screenshot-channels.png?raw=true "Tube Archivist Channels")  
-*All Channels*
-
-![single channel screenshot](assets/tube-archivist-screenshot-single-channel.png?raw=true "Tube Archivist Single Channel")  
-*Single Channel*
-
-![video page screenshot](assets/tube-archivist-screenshot-video.png?raw=true "Tube Archivist Video Page")  
-*Video Page*
-
-![video page screenshot](assets/tube-archivist-screenshot-download.png?raw=true "Tube Archivist Video Page")  
-*Downloads Page*
+## Showcase
+To see more examples of the software in use, check out [Showcase](SHOWCASE.MD)
   
 ## Problem Tube Archivist tries to solve
 Once your YouTube video collection grows, it becomes hard to search and find a specific video. That's where Tube Archivist comes in: By indexing your video collection with metadata from YouTube, you can organize, search and enjoy your archived YouTube videos without hassle offline through a convenient web interface.
