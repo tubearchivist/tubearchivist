@@ -242,6 +242,9 @@ class PendingList(PendingIndex):
 
         total = len(self.missing_videos)
         for idx, (youtube_id, vid_type) in enumerate(self.missing_videos):
+            if self.task and self.task.is_stopped():
+                break
+
             print(f"{youtube_id}: [{idx + 1}/{total}]: add to queue")
             self._notify_add(idx, total)
             video_details = self.get_youtube_details(youtube_id, vid_type)

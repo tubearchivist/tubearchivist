@@ -206,5 +206,4 @@ class CommentList:
         """send notification on task"""
         message = [f"Add comments for new videos {idx + 1}/{total_videos}"]
         progress = (idx + 1) / total_videos
-        title = "Index Comments"
-        self.task.send_progress(message, progress=progress, title=title)
+        self.task.send_progress(message, progress=progress)

@@ -63,6 +63,7 @@ class BaseTask(Task):
         "extract_download": {
             "title": "Add to download queue",
             "group": "download:add",
+            "api-stop": True,
         },
         "check_reindex": {
             "title": "Reindex Documents",
@@ -195,6 +196,7 @@ def download_pending(self, from_queue=True):
 @shared_task(name="extract_download", bind=True, base=BaseTask)
 def extrac_dl(self, youtube_ids):
     """parse list passed and add to pending"""
+    TaskManager().init(self)
     pending_handler = PendingList(youtube_ids=youtube_ids, task=self)
     pending_handler.parse_url_list()
     pending_handler.add_to_pending()

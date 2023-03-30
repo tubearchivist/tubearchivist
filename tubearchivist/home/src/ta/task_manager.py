@@ -72,6 +72,9 @@ class TaskManager:
         run at startup to recover from hard reset
         """
         all_results = self.get_all_results()
+        if not all_results:
+            return
+
         for result in all_results:
             if result.get("status") == "PENDING":
                 result["status"] = "FAILED"
