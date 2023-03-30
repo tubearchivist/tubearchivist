@@ -127,13 +127,14 @@ class ChannelSubscription:
                 continue
 
             if self.task:
+                if self.task.is_stopped():
+                    self.task.send_progress(["Received Stop signal."])
+                    break
+
                 self.task.send_progress(
                     message_lines=[f"Scanning Channel {idx + 1}/{total}"],
                     progress=(idx + 1) / total,
                 )
-                if self.task.is_stopped():
-                    self.task.send_progress(["Received Stop signal."])
-                    break
 
         return missing_videos
 
@@ -291,7 +292,8 @@ class SubscriptionScanner:
 
         self.missing_videos = []
         self.scan_channels()
-        self.scan_playlists()
+        if self.task and not self.task.is_stopped():
+            self.scan_playlists()
 
         return self.missing_videos
 

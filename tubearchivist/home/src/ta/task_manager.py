@@ -5,7 +5,7 @@ functionality:
 """
 
 from home import tasks as ta_tasks
-from home.src.ta.ta_redis import TaskRedis
+from home.src.ta.ta_redis import RedisArchivist, TaskRedis
 
 
 class TaskManager:
@@ -92,11 +92,12 @@ class TaskCommand:
 
         return message
 
-    def stop(self, task_id):
+    def stop(self, task_id, message_key):
         """
         send stop signal to task_id,
         needs to be implemented in task to take effect
         """
+        print(f"[task][{task_id}]: received STOP signal.")
         handler = TaskRedis()
 
         task = handler.get_single(task_id)
@@ -104,7 +105,9 @@ class TaskCommand:
             raise ValueError
 
         handler.set_command(task_id, "STOP")
+        RedisArchivist().set_message(message_key, "STOP", path=".command")
 
     def kill(self, task_id):
         """send kill signal to task_id"""
+        print(f"[task][{task_id}]: received KILL signal.")
         ta_tasks.app.control.revoke(task_id, terminate=True)
