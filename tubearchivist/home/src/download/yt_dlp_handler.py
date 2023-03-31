@@ -150,8 +150,6 @@ class VideoDownloader:
     if not initiated with list, take from queue
     """
 
-    MSG = "message:download"
-
     def __init__(self, youtube_id_list=False, task=False):
         self.obs = False
         self.video_overwrites = False
@@ -165,7 +163,6 @@ class VideoDownloader:
     def run_queue(self):
         """setup download queue in redis loop until no more items"""
         self._setup_queue()
-
         queue = RedisQueue(queue_name="dl_queue")
 
         limit_queue = self.config["downloads"]["limit_count"]
@@ -175,6 +172,7 @@ class VideoDownloader:
         while True:
             youtube_data = queue.get_next()
             if self.task.is_stopped() or not youtube_data:
+                queue.clear()
                 break
 
             youtube_data = json.loads(youtube_data)
