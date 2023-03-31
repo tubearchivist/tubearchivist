@@ -60,7 +60,7 @@ TubeArchivist:
 | TA_PASSWORD | Initial password when logging into TA | Required |
 | ELASTIC_PASSWORD | Password for ElasticSearch | Required |
 | REDIS_HOST | Hostname for Redis | Required |
-| TZ | Timezone. Change this to your current Timezone (like "America/Los_Angeles) | Required |
+| TZ | Timezone. Change this to your current Timezone (like "America/Los_Angeles") | Required |
 | TA_PORT | Port TA runs on | Optional |
 | TA_UWSGI_PORT | Configure TA to use LDAP Authentication | Optional |
 | ES_URL | URL That ElasticSearch runs on | Optional |
