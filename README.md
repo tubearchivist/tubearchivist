@@ -31,14 +31,13 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 * Keep track of viewed and unviewed videos
 
 
-## Showcase
-To see more examples of the software in use, check out [Showcase](SHOWCASE.MD)
   
 ## Resources
 - [Discord](https://www.tubearchivist.com/discord): Connect with us on our Discord server.
 - [r/TubeArchivist](https://www.reddit.com/r/TubeArchivist/): Join our Subreddit.
 - [Browser Extension](https://github.com/tubearchivist/browser-extension) Tube Archivist Companion, for [Firefox](https://addons.mozilla.org/addon/tubearchivist-companion/) and [Chrome](https://chrome.google.com/webstore/detail/tubearchivist-companion/jjnkmicfnfojkkgobdfeieblocadmcie)
 - [Tube Archivist Metrics](https://github.com/tubearchivist/tubearchivist-metrics) to create statistics in Prometheus/OpenMetrics format.  
+- [Showcase](SHOWCASE.MD) To see more screenshots and Youtube videos showing off TubeArchvist.
 
 
 ## Installing and updating
