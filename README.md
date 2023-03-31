@@ -17,6 +17,8 @@
 * [Installing and updating](#installing-and-updating)
 * [Getting Started](#getting-started)
 * [Known limitations](#known-limitations)
+* [Port Collisions](#port-collisions)
+* [Common Errors](#common-errors)
 * [Roadmap](#roadmap)
 * [Donate](#donate)
 
@@ -102,6 +104,11 @@ bestvideo[vcodec*=avc1]+bestaudio[acodec*=mp4a]/mp4
 - Video files created by Tube Archivist need to be playable in your browser of choice. Not every codec is compatible with every browser and might require some testing with format selection. 
 - Every limitation of **yt-dlp** will also be present in Tube Archivist. If **yt-dlp** can't download or extract a video for any reason, Tube Archivist won't be able to either.
 - There is currently no flexibility in naming of the media files.
+
+### Port Collisions  
+If you have a collision on port `8000`, best solution is to use dockers *HOST_PORT* and *CONTAINER_PORT* distinction: To for example change the interface to port 9000 use `9000:8000` in your docker-compose file.  
+
+For more information on port collisions, check the docs.
 
 ## Common Errors  
 Here is a list of common errors and their solutions.  
