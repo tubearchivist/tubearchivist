@@ -9,9 +9,9 @@ If you notice something is not working as expected, check to see if it has been 
 If it has not yet been disclosed, go ahead and create an issue.  
 If the issue doesn't move forward due to a lack of response, I assume it's solved and will close it after some time to keep the list fresh. 
 
-## Wiki
+## Documentation
 
-The wiki is where all user functions are documented in detail. These pages are mirrored into the **docs** folder of the repo. This allows for pull requests and all other features like regular code. Make any changes there, and I'll sync them with the wiki tab.
+The documentation available at [docs.tubearchivist.com](https://docs.tubearchivist.com/), is build from [tubearchivist/docs](https://github.com/tubearchivist/docs). The Readme has additional instructions on how to make changes.
 
 ## Development Environment
 
