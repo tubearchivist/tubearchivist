@@ -15,7 +15,7 @@ body:
       options:
         - label: I'm running the latest version of Tube Archivist and have read the [release notes](https://github.com/tubearchivist/tubearchivist/releases/latest).
           required: true
-        - label: I have read through the [wiki](https://github.com/tubearchivist/tubearchivist/wiki) and the [readme](https://github.com/tubearchivist/tubearchivist#installing-and-updating), particularly the [common errors](https://github.com/tubearchivist/tubearchivist#common-errors) section.
+        - label: I have read through the [docs](https://docs.tubearchivist.com/) and the [readme](https://github.com/tubearchivist/tubearchivist#installing-and-updating), particularly the [common errors](https://github.com/tubearchivist/tubearchivist#common-errors) section.
           required: true
 
   - type: input

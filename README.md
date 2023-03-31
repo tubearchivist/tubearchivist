@@ -11,7 +11,7 @@
 ![home screenshot](assets/tube-archivist-screenshot-home.png?raw=true "Tube Archivist Home")
 
 ## Table of contents:
-* Docs: [Wiki](https://github.com/tubearchivist/tubearchivist/wiki), [FAQ](https://github.com/tubearchivist/tubearchivist/wiki/FAQ) and [API](https://github.com/tubearchivist/tubearchivist/tree/master/tubearchivist/api)
+* [Docs](https://docs.tubearchivist.com/) with [FAQ](https://docs.tubearchivist.com/faq/), [API endpoints](https://github.com/tubearchivist/tubearchivist/tree/master/tubearchivist/api)
 * [Core functionality](#core-functionality)
 * [Resources](#resources)
 * [Installing](#installing)
