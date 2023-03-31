@@ -78,7 +78,7 @@ Archivist-ES
 
 
 
-To actually start TubeArchvist, `cd` into the directory where the `docker-compose.yml` file is located and run `docker compose up --detach` in terminal. The first time you do this it will download the appropriate images, which can take a minute.
+To start, `cd` into the directory where the `docker-compose.yml` file is located and run `docker compose up --detach` in terminal. The first time you do this it will download the appropriate images, which can take a minute.
 
 You can follow the logs with `docker compose logs -f`. Once it's ready it will print something like `celery@1234567890ab ready`. At this point you should be able to go to `http://your-host:8000` and log in with the `TA_USER`/`TA_PASSWORD` credentials.
 
