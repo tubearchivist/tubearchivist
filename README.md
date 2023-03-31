@@ -50,14 +50,35 @@ This project requires docker. Ensure it is installed and running on your system.
 
 If you are using Podman, Unraid, TrueNAS, and Synology, visit [https://docs.tubearchivist.com](https://docs.tubearchivist.com) for more dedicated instructions for those systems. Otherwise, continue on.
 
-To get up and running quickly, here are the configuration options that you will need to set to start TubeArchivist:  
-| Configuration Option | Value |
-| ----------- | ----------- |
-| tubearchivist/environment/TA_HOST | Change to the IP/Domain Name of the machine you are running on |
-| tubearchivist/environment/TA_PASSWORD | Set your initial password when logging in |
-| tubearchivist/environment/TZ | Set your timezone. Format is "America/New_York" |
-| tubearchivist/environment/ELASTIC_PASSWORD | Set the password for ElasticSearch |
-| archivist-es/environment/ELASTIC_PASSWORD | Match the ElasticSearch password set above |  
+Here are the configuration options that you will need to set to start TubeArchivist:  
+
+TubeArchivist:  
+| Configuration Option | Value | State |
+| ----------- | ----------- | ----------- |
+| tubearchivist/environment/TA_HOST | Change to the IP/Domain Name of the machine you are running on | Required |
+| tubearchivist/environment/TA_USERNAME | Initial username when logging into TA | Required |
+| tubearchivist/environment/TA_PASSWORD | Initial password when logging into TA | Required |
+| tubearchivist/environment/ELASTIC_PASSWORD | Password for ElasticSearch | Required |
+| tubearchivist/environment/REDIS_HOST | Hostname for Redis | Required |
+| tubearchivist/environment/TZ | Timezone. Change this to your current Timezone (like "America/Los_Angeles) | Required |
+| tubearchivist/environment/TA_PORT | Port TA runs on | Optional |
+| tubearchivist/environment/TA_UWSGI_PORT | Configure TA to use LDAP Authentication | Optional |
+| tubearchivist/environment/ES_URL | URL That ElasticSearch runs on | Optional |
+| tubearchivist/environment/HOST_GID | Allow TA to own the video files instead of container user | Optional |
+| tubearchivist/environment/HOST_UID | Allow TA to own the video files instead of container user | Optional |
+| tubearchivist/environment/ELASTIC_USER | Change the default ElasticSearch user | Optional |
+| tubearchivist/environment/REDIS_PORT | Port that Redis runs on | Optional |
+| tubearchivist/environment/TA_LDAP | Configure TA to use LDAP Authentication | Read more |
+| tubearchivist/environment/ENABLE_CAST | Enable casting support | Read more |
+| tubearchivist/environment/DJANGO_DEBUG | Debugs Djanjo frontend (Debug use only) | Read more |
+
+Archivist-ES  
+| Configuration Option | Value | State |
+| ----------- | ----------- | ----------- |
+| archivist-es/environment/ELASTIC_PASSWORD | Must be the same as `tubearchivist/environment/ELASTIC_PASSWORD` | Required |
+| tubearchivist/environment/http.port | Change the port ElasticSearch runs on | Optional |
+
+
 
 
 
