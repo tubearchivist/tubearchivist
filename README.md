@@ -186,7 +186,8 @@ Second best way to support the development is to provide for caffeinated beverag
 * [ko-fi.com](https://ko-fi.com/bbilly1) for an alternative platform
 
 ## Notable mentions
-This is a selection of places where this project has been featured on reddit, in the news, blogs or any other online media. Sorted by newest on the top.
+This is a selection of places where this project has been featured on reddit, in the news, blogs or any other online media, newest on top.
+* **noted.lol**: Dev Debrief, An Interview With the Developer of Tube Archivist, [2023-03-30] [[link](https://noted.lol/dev-debrief-tube-archivist/)]
 * **console.substack.com**: Interview With Simon of Tube Archivist, [2023-01-29] [[link](https://console.substack.com/p/console-142#%C2%A7interview-with-simon-of-tube-archivist)]
 * **reddit.com**: Tube Archivist v0.3.0 - Now Archiving Comments, [2022-12-02] [[link](https://www.reddit.com/r/selfhosted/comments/zaonzp/tube_archivist_v030_now_archiving_comments/)]
 * **reddit.com**: Tube Archivist v0.2 - Now with Full Text Search, [2022-07-24] [[link](https://www.reddit.com/r/selfhosted/comments/w6jfa1/tube_archivist_v02_now_with_full_text_search/)]
