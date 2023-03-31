@@ -13,8 +13,7 @@
 ## Table of contents:
 * [Wiki](https://github.com/tubearchivist/tubearchivist/wiki) with [FAQ](https://github.com/tubearchivist/tubearchivist/wiki/FAQ)
 * [Core functionality](#core-functionality)
-* [Connect](#connect)
-* [Extended Universe](#extended-universe)
+* [Resources](#resources)
 * [Installing and updating](#installing-and-updating)
 * [Getting Started](#getting-started)
 * [Known limitations](#known-limitations)
@@ -35,11 +34,9 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 ## Showcase
 To see more examples of the software in use, check out [Showcase](SHOWCASE.MD)
   
-## Connect
+## Resources
 - [Discord](https://www.tubearchivist.com/discord): Connect with us on our Discord server.
 - [r/TubeArchivist](https://www.reddit.com/r/TubeArchivist/): Join our Subreddit.
-
-## Extended Universe
 - [Browser Extension](https://github.com/tubearchivist/browser-extension) Tube Archivist Companion, for [Firefox](https://addons.mozilla.org/addon/tubearchivist-companion/) and [Chrome](https://chrome.google.com/webstore/detail/tubearchivist-companion/jjnkmicfnfojkkgobdfeieblocadmcie)
 - [Tube Archivist Metrics](https://github.com/tubearchivist/tubearchivist-metrics) to create statistics in Prometheus/OpenMetrics format.  
 
