@@ -87,7 +87,7 @@ function validate {
     echo "running black"
     black --exclude "migrations/*" --diff --color --check -l 79 "$check_path"
     echo "running codespell"
-    codespell --skip="./.git,./package.json,./package-lock.json,./node_modules" "$check_path"
+    codespell --skip="./.git,./package.json,./package-lock.json,./node_modules,./.mypy_cache" "$check_path"
     echo "running flake8"
     flake8 "$check_path" --exclude "migrations" --count --max-complexity=10 \
         --max-line-length=79 --show-source --statistics

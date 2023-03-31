@@ -10,8 +10,7 @@ from io import BytesIO
 from time import sleep
 
 import requests
-from home.src.download import queue  # partial import
-from home.src.es.connect import IndexPaginate
+from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.ta.config import AppConfig
 from mutagen.mp4 import MP4, MP4Cover
 from PIL import Image, ImageFile, ImageFilter, UnidentifiedImageError
@@ -272,102 +271,121 @@ class ValidatorCallback:
 class ThumbValidator:
     """validate thumbnails"""
 
-    def download_missing(self):
-        """download all missing artwork"""
-        self.download_missing_videos()
-        self.download_missing_channels()
-        self.download_missing_playlists()
-
-    def download_missing_videos(self):
-        """get all missing video thumbnails"""
-        data = {
-            "query": {"term": {"active": {"value": True}}},
-            "sort": [{"youtube_id": {"order": "asc"}}],
-            "_source": ["vid_thumb_url", "youtube_id"],
-        }
-        paginate = IndexPaginate(
-            "ta_video", data, size=5000, callback=ValidatorCallback
-        )
-        _ = paginate.get_results()
-
-    def download_missing_channels(self):
-        """get all missing channel thumbnails"""
-        data = {
-            "query": {"term": {"channel_active": {"value": True}}},
-            "sort": [{"channel_id": {"order": "asc"}}],
-            "_source": {
-                "excludes": ["channel_description", "channel_overwrites"]
+    INDEX = [
+        {
+            "data": {
+                "query": {"term": {"active": {"value": True}}},
+                "_source": ["vid_thumb_url", "youtube_id"],
             },
-        }
-        paginate = IndexPaginate(
-            "ta_channel", data, callback=ValidatorCallback
-        )
-        _ = paginate.get_results()
+            "name": "ta_video",
+        },
+        {
+            "data": {
+                "query": {"term": {"channel_active": {"value": True}}},
+                "_source": {
+                    "excludes": ["channel_description", "channel_overwrites"]
+                },
+            },
+            "name": "ta_channel",
+        },
+        {
+            "data": {
+                "query": {"term": {"playlist_active": {"value": True}}},
+                "_source": ["playlist_id", "playlist_thumbnail"],
+            },
+            "name": "ta_playlist",
+        },
+    ]
 
-    def download_missing_playlists(self):
-        """get all missing playlist artwork"""
-        data = {
-            "query": {"term": {"playlist_active": {"value": True}}},
-            "sort": [{"playlist_id": {"order": "asc"}}],
-            "_source": ["playlist_id", "playlist_thumbnail"],
-        }
-        paginate = IndexPaginate(
-            "ta_playlist", data, callback=ValidatorCallback
-        )
-        _ = paginate.get_results()
+    def __init__(self, task):
+        self.task = task
+
+    def validate(self):
+        """validate all indexes"""
+        for index in self.INDEX:
+            total = self._get_total(index["name"])
+            if not total:
+                continue
+
+            paginate = IndexPaginate(
+                index_name=index["name"],
+                data=index["data"],
+                size=1000,
+                callback=ValidatorCallback,
+                task=self.task,
+                total=total,
+            )
+            _ = paginate.get_results()
+
+    @staticmethod
+    def _get_total(index_name):
+        """get total documents in index"""
+        path = f"{index_name}/_count"
+        response, _ = ElasticWrap(path).get()
+
+        return response.get("count")
 
 
 class ThumbFilesystem:
-    """filesystem tasks for thumbnails"""
+    """sync thumbnail files to media files"""
+
+    INDEX_NAME = "ta_video"
+
+    def __init__(self, task=False):
+        self.task = task
+
+    def embed(self):
+        """entry point"""
+        data = {
+            "query": {"match_all": {}},
+            "_source": ["media_url", "youtube_id"],
+        }
+        paginate = IndexPaginate(
+            index_name=self.INDEX_NAME,
+            data=data,
+            callback=EmbedCallback,
+            task=self.task,
+            total=self._get_total(),
+        )
+        _ = paginate.get_results()
+
+    def _get_total(self):
+        """get total documents in index"""
+        path = f"{self.INDEX_NAME}/_count"
+        response, _ = ElasticWrap(path).get()
+
+        return response.get("count")
+
+
+class EmbedCallback:
+    """callback class to embed thumbnails"""
 
     CONFIG = AppConfig().config
     CACHE_DIR = CONFIG["application"]["cache_dir"]
     MEDIA_DIR = CONFIG["application"]["videos"]
-    VIDEO_DIR = os.path.join(CACHE_DIR, "videos")
+    FORMAT = MP4Cover.FORMAT_JPEG
 
-    def sync(self):
-        """embed thumbnails to mediafiles"""
-        video_list = self.get_thumb_list()
-        self._embed_thumbs(video_list)
+    def __init__(self, source, index_name):
+        self.source = source
+        self.index_name = index_name
 
-    def get_thumb_list(self):
-        """get list of mediafiles and matching thumbnails"""
-        pending = queue.PendingList()
-        pending.get_download()
-        pending.get_indexed()
-
-        video_list = []
-        for video in pending.all_videos:
-            video_id = video["youtube_id"]
-            media_url = os.path.join(self.MEDIA_DIR, video["media_url"])
+    def run(self):
+        """run embed"""
+        for video in self.source:
+            video_id = video["_source"]["youtube_id"]
+            media_url = os.path.join(
+                self.MEDIA_DIR, video["_source"]["media_url"]
+            )
             thumb_path = os.path.join(
                 self.CACHE_DIR, ThumbManager(video_id).vid_thumb_path()
             )
-            video_list.append(
-                {
-                    "media_url": media_url,
-                    "thumb_path": thumb_path,
-                }
-            )
+            if os.path.exists(thumb_path):
+                self.embed(media_url, thumb_path)
 
-        return video_list
+    def embed(self, media_url, thumb_path):
+        """embed thumb in single media file"""
+        video = MP4(media_url)
+        with open(thumb_path, "rb") as f:
+            video["covr"] = [MP4Cover(f.read(), imageformat=self.FORMAT)]
 
-    @staticmethod
-    def _embed_thumbs(video_list):
-        """rewrite the thumbnail into media file"""
-
-        counter = 1
-        for video in video_list:
-            # loop through all videos
-            media_url = video["media_url"]
-            thumb_path = video["thumb_path"]
-
-            mutagen_vid = MP4(media_url)
-            with open(thumb_path, "rb") as f:
-                mutagen_vid["covr"] = [
-                    MP4Cover(f.read(), imageformat=MP4Cover.FORMAT_JPEG)
-                ]
-            mutagen_vid.save()
-            if counter % 50 == 0:
-                print(f"thumbnail write progress {counter}/{len(video_list)}")
-            counter = counter + 1
+        video.save()

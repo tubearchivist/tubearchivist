@@ -5,16 +5,9 @@
 
 'use strict';
 
-checkMessages();
+/* globals apiRequest animate */
 
-// page map to notification status
-const messageTypes = {
-  download: ['message:download', 'message:add', 'message:rescan', 'message:playlistscan'],
-  channel: ['message:subchannel'],
-  channel_id: ['message:playlistscan'],
-  playlist: ['message:subplaylist'],
-  setting: ['message:setting'],
-};
+checkMessages();
 
 // start to look for messages
 function checkMessages() {
@@ -25,82 +18,121 @@ function checkMessages() {
   }
 }
 
-// get messages for page on timer
 function getMessages(dataOrigin) {
-  fetch('/progress/')
-    .then(response => response.json())
-    .then(responseData => {
-      const messages = buildMessage(responseData, dataOrigin);
-      if (messages.length > 0) {
-        // restart itself
-        setTimeout(() => getMessages(dataOrigin), 500);
-      }
-    });
+  let apiEndpoint = '/api/notification/';
+  let responseData = apiRequest(apiEndpoint, 'GET');
+  let messages = buildMessage(responseData, dataOrigin);
+  if (messages.length > 0) {
+    // restart itself
+    setTimeout(() => getMessages(dataOrigin), 500);
+  }
 }
 
-// make div for all messages, return relevant
 function buildMessage(responseData, dataOrigin) {
-  // filter relevan messages
-  let allMessages = responseData['messages'];
-  let messages = allMessages.filter(function (value) {
-    return messageTypes[dataOrigin].includes(value['status']);
+  // filter relevant messages
+  let messages = responseData.filter(function (value) {
+    return value.group.startsWith(dataOrigin);
   }, dataOrigin);
-  // build divs
-  let notificationDiv = document.getElementById('notifications');
-  let nots = notificationDiv.childElementCount;
-  notificationDiv.innerHTML = '';
+  let notifications = document.getElementById('notifications');
+  let currentNotifications = notifications.childElementCount;
+
   for (let i = 0; i < messages.length; i++) {
-    let messageData = messages[i];
-    let messageStatus = messageData['status'];
-    let messageBox = document.createElement('div');
-    let title = document.createElement('h3');
-    title.innerHTML = messageData['title'];
-    let message = document.createElement('p');
-    message.innerHTML = messageData['message'];
-    messageBox.appendChild(title);
-    messageBox.appendChild(message);
-    messageBox.classList.add(messageData['level'], 'notification');
-    notificationDiv.appendChild(messageBox);
-    if (messageStatus === 'message:download') {
-      checkDownloadIcons();
+    const messageData = messages[i];
+    if (!document.getElementById(messageData.id)) {
+      let messageBox = buildPlainBox(messageData);
+      notifications.appendChild(messageBox);
+    }
+    updateMessageBox(messageData);
+    if (messageData.group.startsWith('download:')) {
+      animateIcons(messageData.group);
     }
   }
-  // reload page when no more notifications
-  if (nots > 0 && messages.length === 0) {
+  clearNotifications(responseData);
+  if (currentNotifications > 0 && messages.length === 0) {
     location.reload();
   }
   return messages;
 }
 
-// check if download icons are needed
-function checkDownloadIcons() {
-  let iconBox = document.getElementById('downloadControl');
-  if (iconBox.childElementCount === 0) {
-    let downloadIcons = buildDownloadIcons();
-    iconBox.appendChild(downloadIcons);
+function buildPlainBox(messageData) {
+  let messageBox = document.createElement('div');
+  messageBox.classList.add(messageData.level, 'notification');
+  messageBox.id = messageData.id;
+  messageBox.innerHTML = `
+  <h3></h3>
+  <p></p>
+  <div class="task-control-icons"></div>
+  <div class="notification-progress-bar"></div>`;
+  return messageBox;
+}
+
+function updateMessageBox(messageData) {
+  let messageBox = document.getElementById(messageData.id);
+  let children = messageBox.children;
+  children[0].textContent = messageData.title;
+  children[1].innerHTML = messageData.messages.join('<br>');
+  if (
+    !messageBox.querySelector('#stop-icon') &&
+    messageData['api-stop'] &&
+    messageData.command !== 'STOP'
+  ) {
+    children[2].appendChild(buildStopIcon(messageData.id));
+  }
+  if (messageData.progress) {
+    children[3].style.width = `${messageData.progress * 100 || 0}%`;
   }
 }
 
-// add dl control icons
-function buildDownloadIcons() {
-  let downloadIcons = document.createElement('div');
-  downloadIcons.classList = 'dl-control-icons';
-  // stop icon
+function animateIcons(group) {
+  let rescanIcon = document.getElementById('rescan-icon');
+  let dlIcon = document.getElementById('download-icon');
+  switch (group) {
+    case 'download:scan':
+      if (rescanIcon && !rescanIcon.classList.contains('rotate-img')) {
+        animate('rescan-icon', 'rotate-img');
+      }
+      break;
+
+    case 'download:run':
+      if (dlIcon && !dlIcon.classList.contains('bounce-img')) {
+        animate('download-icon', 'bounce-img');
+      }
+      break;
+
+    default:
+      break;
+  }
+}
+
+function buildStopIcon(taskId) {
   let stopIcon = document.createElement('img');
   stopIcon.setAttribute('id', 'stop-icon');
-  stopIcon.setAttribute('title', 'Stop Download Queue');
+  stopIcon.setAttribute('data', taskId);
+  stopIcon.setAttribute('title', 'Stop Task');
   stopIcon.setAttribute('src', '/static/img/icon-stop.svg');
   stopIcon.setAttribute('alt', 'stop icon');
-  stopIcon.setAttribute('onclick', 'stopQueue()');
-  // kill icon
+  stopIcon.setAttribute('onclick', 'stopTask(this)');
+  return stopIcon;
+}
+
+function buildKillIcon(taskId) {
   let killIcon = document.createElement('img');
   killIcon.setAttribute('id', 'kill-icon');
-  killIcon.setAttribute('title', 'Kill Download Queue');
+  killIcon.setAttribute('data', taskId);
+  killIcon.setAttribute('title', 'Kill Task');
   killIcon.setAttribute('src', '/static/img/icon-close.svg');
   killIcon.setAttribute('alt', 'kill icon');
-  killIcon.setAttribute('onclick', 'killQueue()');
-  // stich together
-  downloadIcons.appendChild(stopIcon);
-  downloadIcons.appendChild(killIcon);
-  return downloadIcons;
+  killIcon.setAttribute('onclick', 'killTask(this)');
+  return killIcon;
+}
+
+function clearNotifications(responseData) {
+  let allIds = Array.from(responseData, x => x.id);
+  let allBoxes = document.getElementsByClassName('notification');
+  for (let i = 0; i < allBoxes.length; i++) {
+    const notificationBox = allBoxes[i];
+    if (!allIds.includes(notificationBox.id)) {
+      notificationBox.remove();
+    }
+  }
 }

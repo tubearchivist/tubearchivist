@@ -395,6 +395,10 @@ button:hover {
     position: relative; /* needed for modal */
 }
 
+#notifications {
+    position: relative;
+}
+
 .notifications {
     text-align: center;
     width: 80%;
@@ -473,7 +477,8 @@ video:-webkit-full-screen {
     align-items: center;
 }
 
-.video-progress-bar {
+.video-progress-bar,
+.notification-progress-bar {
     position: absolute;
     background-color: var(--accent-font-dark);
     height: 7px;
@@ -1017,13 +1022,12 @@ video:-webkit-full-screen {
     cursor: pointer;
 }
 
-.dl-control-icons {
+.task-control-icons {
     display: flex;
     justify-content: center;
-    padding-bottom: 10px;
 }
 
-.dl-control-icons img {
+.task-control-icons img {
     width: 30px;
     cursor: pointer;
     margin: 5px;
@@ -1044,6 +1048,7 @@ video:-webkit-full-screen {
 
 /* status message */
 .notification {
+    position: relative;
     background-color: var(--highlight-bg);
     text-align: center;
     padding: 30px 0 15px 0;

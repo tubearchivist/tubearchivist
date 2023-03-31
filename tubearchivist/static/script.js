@@ -167,18 +167,18 @@ function reindex(button) {
 
 // download page buttons
 function rescanPending() {
-  let payload = JSON.stringify({ rescan_pending: true });
+  let apiEndpoint = '/api/task-name/update_subscribed/';
+  apiRequest(apiEndpoint, 'POST');
   animate('rescan-icon', 'rotate-img');
-  sendPost(payload);
   setTimeout(function () {
     checkMessages();
   }, 500);
 }
 
 function dlPending() {
-  let payload = JSON.stringify({ dl_pending: true });
+  let apiEndpoint = '/api/task-name/download_pending/';
+  apiRequest(apiEndpoint, 'POST');
   animate('download-icon', 'bounce-img');
-  sendPost(payload);
   setTimeout(function () {
     checkMessages();
   }, 500);
@@ -228,50 +228,64 @@ function deleteQueue(button) {
   document.getElementById(button.id).replaceWith(message);
 }
 
-function stopQueue() {
-  let payload = JSON.stringify({ queue: 'stop' });
-  sendPost(payload);
-  document.getElementById('stop-icon').remove();
+function stopTask(icon) {
+  let taskId = icon.getAttribute('data');
+  let apiEndpoint = `/api/task-id/${taskId}/`;
+  apiRequest(apiEndpoint, 'POST', { command: 'stop' });
+  icon.remove();
 }
 
-function killQueue() {
-  let payload = JSON.stringify({ queue: 'kill' });
-  sendPost(payload);
-  document.getElementById('kill-icon').remove();
+function killTask(icon) {
+  let taskId = icon.getAttribute('data');
+  let apiEndpoint = `/api/task-id/${taskId}/`;
+  apiRequest(apiEndpoint, 'POST', { command: 'kill' });
+  icon.remove();
 }
 
 // settings page buttons
 function manualImport() {
-  let payload = JSON.stringify({ 'manual-import': true });
-  sendPost(payload);
+  let apiEndpoint = '/api/task-name/manual_import/';
+  apiRequest(apiEndpoint, 'POST');
   // clear button
   let message = document.createElement('p');
   message.innerText = 'processing import';
   let toReplace = document.getElementById('manual-import');
   toReplace.innerHTML = '';
   toReplace.appendChild(message);
+  setTimeout(function () {
+    location.replace('#notifications');
+    checkMessages();
+  }, 200);
 }
 
 function reEmbed() {
-  let payload = JSON.stringify({ 're-embed': true });
-  sendPost(payload);
+  let apiEndpoint = '/api/task-name/resync_thumbs/';
+  apiRequest(apiEndpoint, 'POST');
   // clear button
   let message = document.createElement('p');
   message.innerText = 'processing thumbnails';
   let toReplace = document.getElementById('re-embed');
   toReplace.innerHTML = '';
   toReplace.appendChild(message);
+  setTimeout(function () {
+    location.replace('#notifications');
+    checkMessages();
+  }, 200);
 }
 
 function dbBackup() {
-  let payload = JSON.stringify({ 'db-backup': true });
-  sendPost(payload);
+  let apiEndpoint = '/api/task-name/run_backup/';
+  apiRequest(apiEndpoint, 'POST');
   // clear button
   let message = document.createElement('p');
   message.innerText = 'backing up archive';
   let toReplace = document.getElementById('db-backup');
   toReplace.innerHTML = '';
   toReplace.appendChild(message);
+  setTimeout(function () {
+    location.replace('#notifications');
+    checkMessages();
+  }, 200);
 }
 
 function dbRestore(button) {
@@ -284,25 +298,37 @@ function dbRestore(button) {
   let toReplace = document.getElementById(fileName);
   toReplace.innerHTML = '';
   toReplace.appendChild(message);
+  setTimeout(function () {
+    location.replace('#notifications');
+    checkMessages();
+  }, 200);
 }
 
 function fsRescan() {
-  let payload = JSON.stringify({ 'fs-rescan': true });
-  sendPost(payload);
+  let apiEndpoint = '/api/task-name/rescan_filesystem/';
+  apiRequest(apiEndpoint, 'POST');
   // clear button
   let message = document.createElement('p');
   message.innerText = 'File system scan in progress';
   let toReplace = document.getElementById('fs-rescan');
   toReplace.innerHTML = '';
   toReplace.appendChild(message);
+  setTimeout(function () {
+    location.replace('#notifications');
+    checkMessages();
+  }, 200);
 }
 
 function resetToken() {
-  let payload = JSON.stringify({ 'reset-token': true });
-  sendPost(payload);
-  let message = document.createElement('p');
-  message.innerText = 'Token revoked';
-  document.getElementById('text-reveal').replaceWith(message);
+  let apiEndpoint = '/api/token/';
+  let result = apiRequest(apiEndpoint, 'DELETE');
+  if (result && result.success) {
+    let message = document.createElement('p');
+    message.innerText = 'Token revoked';
+    document.getElementById('text-reveal').replaceWith(message);
+  } else {
+    console.error('unable to revoke token');
+  }
 }
 
 // restore from snapshot

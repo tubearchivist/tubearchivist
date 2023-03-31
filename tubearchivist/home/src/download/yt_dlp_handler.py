@@ -22,7 +22,7 @@ from home.src.index.video import YoutubeVideo, index_new_video
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import clean_string, ignore_filelist
-from home.src.ta.ta_redis import RedisArchivist, RedisQueue
+from home.src.ta.ta_redis import RedisQueue
 
 
 class DownloadPostProcess:
@@ -96,7 +96,7 @@ class DownloadPostProcess:
     def validate_playlists(self):
         """look for playlist needing to update"""
         for id_c, channel_id in enumerate(self.download.channels):
-            channel = YoutubeChannel(channel_id)
+            channel = YoutubeChannel(channel_id, task=self.download.task)
             overwrites = self.pending.channel_overwrites.get(channel_id, False)
             if overwrites and overwrites.get("index_playlists"):
                 # validate from remote
@@ -125,28 +125,23 @@ class DownloadPostProcess:
 
     def _notify_playlist_progress(self, all_channel_playlist, id_c, id_p):
         """notify to UI"""
-        title = (
-            "Processing playlists for channels: "
-            + f"{id_c + 1}/{len(self.download.channels)}"
-        )
-        message = f"Progress: {id_p + 1}/{len(all_channel_playlist)}"
-        key = "message:download"
-        mess_dict = {
-            "status": key,
-            "level": "info",
-            "title": title,
-            "message": message,
-        }
-        if id_p + 1 == len(all_channel_playlist):
-            expire = 4
-        else:
-            expire = True
+        if not self.download.task:
+            return
 
-        RedisArchivist().set_message(key, mess_dict, expire=expire)
+        total_channel = len(self.download.channels)
+        total_playlist = len(all_channel_playlist)
+
+        message = [f"Validate Playlists {id_p + 1}/{total_playlist}"]
+        title = f"Post Processing Channels: {id_c + 1}/{total_channel}"
+        progress = (id_c + 1) / total_channel
+
+        self.download.task.send_progress(
+            message, progress=progress, title=title
+        )
 
     def get_comments(self):
         """get comments from youtube"""
-        CommentList(self.download.videos).index(notify=True)
+        CommentList(self.download.videos, task=self.download.task).index()
 
 
 class VideoDownloader:
@@ -155,12 +150,11 @@ class VideoDownloader:
     if not initiated with list, take from queue
     """
 
-    MSG = "message:download"
-
-    def __init__(self, youtube_id_list=False):
+    def __init__(self, youtube_id_list=False, task=False):
         self.obs = False
         self.video_overwrites = False
         self.youtube_id_list = youtube_id_list
+        self.task = task
         self.config = AppConfig().config
         self._build_obs()
         self.channels = set()
@@ -169,7 +163,6 @@ class VideoDownloader:
     def run_queue(self):
         """setup download queue in redis loop until no more items"""
         self._setup_queue()
-
         queue = RedisQueue(queue_name="dl_queue")
 
         limit_queue = self.config["downloads"]["limit_count"]
@@ -178,14 +171,11 @@ class VideoDownloader:
 
         while True:
             youtube_data = queue.get_next()
-            if not youtube_data:
+            if self.task.is_stopped() or not youtube_data:
+                queue.clear()
                 break
 
-            try:
-                youtube_data = json.loads(youtube_data)
-            except json.JSONDecodeError:  # This many not be necessary
-                continue
-
+            youtube_data = json.loads(youtube_data)
             youtube_id = youtube_data.get("youtube_id")
 
             tmp_vid_type = youtube_data.get(
@@ -198,13 +188,8 @@ class VideoDownloader:
             if not success:
                 continue
 
-            mess_dict = {
-                "status": self.MSG,
-                "level": "info",
-                "title": "Indexing....",
-                "message": "Add video metadata to index.",
-            }
-            RedisArchivist().set_message(self.MSG, mess_dict, expire=120)
+            if self.task:
+                self.task.send_progress(["Add video metadata to index."])
 
             vid_dict = index_new_video(
                 youtube_id,
@@ -213,29 +198,20 @@ class VideoDownloader:
             )
             self.channels.add(vid_dict["channel"]["channel_id"])
             self.videos.add(vid_dict["youtube_id"])
-            mess_dict = {
-                "status": self.MSG,
-                "level": "info",
-                "title": "Moving....",
-                "message": "Moving downloaded file to storage folder",
-            }
-            RedisArchivist().set_message(self.MSG, mess_dict)
+
+            if self.task:
+                self.task.send_progress(["Move downloaded file to archive."])
+
+            self.move_to_archive(vid_dict)
 
             if queue.has_item():
                 message = "Continue with next video."
-                expire = False
             else:
                 message = "Download queue is finished."
-                expire = 10
 
-            self.move_to_archive(vid_dict)
-            mess_dict = {
-                "status": self.MSG,
-                "level": "info",
-                "title": "Completed",
-                "message": message,
-            }
-            RedisArchivist().set_message(self.MSG, mess_dict, expire=expire)
+            if self.task:
+                self.task.send_progress([message])
+
             self._delete_from_pending(youtube_id)
 
         # post processing
@@ -256,13 +232,9 @@ class VideoDownloader:
 
     def add_pending(self):
         """add pending videos to download queue"""
-        mess_dict = {
-            "status": self.MSG,
-            "level": "info",
-            "title": "Looking for videos to download",
-            "message": "Scanning your download queue.",
-        }
-        RedisArchivist().set_message(self.MSG, mess_dict)
+        if self.task:
+            self.task.send_progress(["Scanning your download queue."])
+
         pending = PendingList()
         pending.get_download()
         to_add = [
@@ -279,40 +251,32 @@ class VideoDownloader:
         if not to_add:
             # there is nothing pending
             print("download queue is empty")
-            mess_dict = {
-                "status": self.MSG,
-                "level": "error",
-                "title": "Download queue is empty",
-                "message": "Add some videos to the queue first.",
-            }
-            RedisArchivist().set_message(self.MSG, mess_dict, expire=True)
+            if self.task:
+                self.task.send_progress(["Download queue is empty."])
+
             return
 
         RedisQueue(queue_name="dl_queue").add_list(to_add)
 
     def _progress_hook(self, response):
         """process the progress_hooks from yt_dlp"""
-        title = "Downloading: " + response["info_dict"]["title"]
-
+        progress = False
         try:
             size = response.get("_total_bytes_str")
             if size.strip() == "N/A":
                 size = response.get("_total_bytes_estimate_str", "N/A")
 
             percent = response["_percent_str"]
+            progress = float(percent.strip("%")) / 100
             speed = response["_speed_str"]
             eta = response["_eta_str"]
             message = f"{percent} of {size} at {speed} - time left: {eta}"
         except KeyError:
             message = "processing"
 
-        mess_dict = {
-            "status": self.MSG,
-            "level": "info",
-            "title": title,
-            "message": message,
-        }
-        RedisArchivist().set_message(self.MSG, mess_dict, expire=True)
+        if self.task:
+            title = response["info_dict"]["title"]
+            self.task.send_progress([title, message], progress=progress)
 
     def _build_obs(self):
         """collection to build all obs passed to yt-dlp"""

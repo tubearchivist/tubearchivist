@@ -43,7 +43,6 @@ class Command(BaseCommand):
         self.stdout.write("[1] connect to Redis")
         redis_conn = RedisArchivist().conn
         for _ in range(5):
-            sleep(2)
             try:
                 pong = redis_conn.execute_command("PING")
                 if pong:
@@ -54,10 +53,12 @@ class Command(BaseCommand):
 
             except Exception:  # pylint: disable=broad-except
                 self.stdout.write("    ... retry Redis connection")
+                sleep(2)
 
         message = "    🗙 Redis connection failed"
         self.stdout.write(self.style.ERROR(f"{message}"))
         RedisArchivist().exec("PING")
+        sleep(60)
         raise CommandError(message)
 
     def _redis_config_set(self):
@@ -75,13 +76,13 @@ class Command(BaseCommand):
         self.stdout.write("[3] connect to Elastic Search")
         total = self.TIMEOUT // 5
         for i in range(total):
-            sleep(5)
             self.stdout.write(f"    ... waiting for ES [{i}/{total}]")
             try:
                 _, status_code = ElasticWrap("/").get(
                     timeout=1, print_error=False
                 )
             except requests.exceptions.ConnectionError:
+                sleep(5)
                 continue
 
             if status_code and status_code == 200:
@@ -98,6 +99,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.ERROR(f"{message}"))
         self.stdout.write(f"    error message: {response}")
         self.stdout.write(f"    status code: {status_code}")
+        sleep(60)
         raise CommandError(message)
 
     def _es_version_check(self):
@@ -118,6 +120,7 @@ class Command(BaseCommand):
             + f"Expected {self.MIN_MAJOR}.{self.MIN_MINOR} but got {version}"
         )
         self.stdout.write(self.style.ERROR(f"{message}"))
+        sleep(60)
         raise CommandError(message)
 
     def _es_path_check(self):
@@ -137,4 +140,5 @@ class Command(BaseCommand):
                 + "    path.repo=/usr/share/elasticsearch/data/snapshot"
             )
             self.stdout.write(self.style.ERROR(f"{message}"))
+            sleep(60)
             raise CommandError(message)

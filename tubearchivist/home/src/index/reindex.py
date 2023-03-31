@@ -21,7 +21,7 @@ from home.src.index.comments import Comments
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video import YoutubeVideo
 from home.src.ta.config import AppConfig
-from home.src.ta.ta_redis import RedisArchivist, RedisQueue
+from home.src.ta.ta_redis import RedisQueue
 
 
 class ReindexBase:
@@ -201,8 +201,9 @@ class ReindexManual(ReindexBase):
 class Reindex(ReindexBase):
     """reindex all documents from redis queue"""
 
-    def __init__(self):
+    def __init__(self, task=False):
         super().__init__()
+        self.task = task
         self.all_indexed_ids = False
 
     def reindex_all(self):
@@ -211,22 +212,22 @@ class Reindex(ReindexBase):
             print("[reindex] cookie invalid, exiting...")
             return
 
-        for index_config in self.REINDEX_CONFIG.values():
+        for name, index_config in self.REINDEX_CONFIG.items():
             if not RedisQueue(index_config["queue_name"]).has_item():
                 continue
 
+            total = RedisQueue(index_config["queue_name"]).length()
             while True:
-                has_next = self.reindex_index(index_config)
+                has_next = self.reindex_index(name, index_config, total)
                 if not has_next:
                     break
 
-        RedisArchivist().set_message("last_reindex", self.now)
-
-    def reindex_index(self, index_config):
+    def reindex_index(self, name, index_config, total):
         """reindex all of a single index"""
         reindex = self.get_reindex_map(index_config["index_name"])
         youtube_id = RedisQueue(index_config["queue_name"]).get_next()
         if youtube_id:
+            self._notify(name, index_config, total)
             reindex(youtube_id)
             sleep_interval = self.config["downloads"].get("sleep_interval", 0)
             sleep(sleep_interval)
@@ -242,6 +243,14 @@ class Reindex(ReindexBase):
         }
 
         return def_map.get(index_name)
+
+    def _notify(self, name, index_config, total):
+        """send notification back to task"""
+        remaining = RedisQueue(index_config["queue_name"]).length()
+        idx = total - remaining
+        message = [f"Reindexing {name.title()}s {idx}/{total}"]
+        progress = idx / total
+        self.task.send_progress(message, progress=progress)
 
     def _reindex_single_video(self, youtube_id):
         """wrapper to handle channel name changes"""
@@ -511,7 +520,7 @@ class ChannelFullScan:
                 print(f"{video_id}: no remote match found")
                 continue
 
-            expected_type = remote_match[0][-1].value
+            expected_type = remote_match[0][-1]
             if video["vid_type"] != expected_type:
                 self.to_update.append(
                     {

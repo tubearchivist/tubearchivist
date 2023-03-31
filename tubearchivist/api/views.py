@@ -1,7 +1,6 @@
 """all API views"""
 
 from api.src.search_processor import SearchProcess
-from api.src.task_processor import TaskHandler
 from home.src.download.queue import PendingInteract
 from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.connect import ElasticWrap
@@ -14,8 +13,15 @@ from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock, YoutubeVideo
 from home.src.ta.config import AppConfig
 from home.src.ta.ta_redis import RedisArchivist, RedisQueue
+from home.src.ta.task_manager import TaskCommand, TaskManager
 from home.src.ta.urlparser import Parser
-from home.tasks import check_reindex, download_single, extrac_dl, subscribe_to
+from home.tasks import (
+    BaseTask,
+    check_reindex,
+    download_pending,
+    extrac_dl,
+    subscribe_to,
+)
 from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
@@ -424,14 +430,15 @@ class DownloadApiView(ApiBaseView):
             print(message)
             return Response({"message": message}, status=400)
 
-        pending_video, status_code = PendingInteract(video_id).get_item()
+        _, status_code = PendingInteract(video_id).get_item()
         if status_code == 404:
             message = f"{video_id}: item not found {status_code}"
             return Response({"message": message}, status=404)
 
         print(f"{video_id}: change status to {item_status}")
         if item_status == "priority":
-            download_single.delay(pending_video)
+            PendingInteract(youtube_id=video_id).prioritize()
+            download_pending.delay(from_queue=False)
         else:
             PendingInteract(video_id, item_status).update_status()
             RedisQueue(queue_name="dl_queue").clear_item(video_id)
@@ -554,29 +561,6 @@ class LoginApiView(ObtainAuthToken):
         return Response({"token": token.key, "user_id": user.pk})
 
 
-class TaskApiView(ApiBaseView):
-    """resolves to /api/task/
-    GET: check if ongoing background task
-    POST: start a new background task
-    """
-
-    @staticmethod
-    def get(request):
-        """handle get request"""
-        # pylint: disable=unused-argument
-        response = {"rescan": False, "downloading": False}
-        for key in response.keys():
-            response[key] = RedisArchivist().is_locked(key)
-
-        return Response(response)
-
-    def post(self, request):
-        """handle post request"""
-        response = TaskHandler(request.data).run_task()
-
-        return Response(response)
-
-
 class SnapshotApiListView(ApiBaseView):
     """resolves to /api/snapshot/
     GET: returns snashot config plus list of existing snapshots
@@ -639,6 +623,108 @@ class SnapshotApiView(ApiBaseView):
             return Response(message, status=400)
 
         return Response(response)
+
+
+class TaskListView(ApiBaseView):
+    """resolves to /api/task-name/
+    GET: return a list of all stored task results
+    """
+
+    def get(self, request):
+        """handle get request"""
+        # pylint: disable=unused-argument
+        all_results = TaskManager().get_all_results()
+
+        return Response(all_results)
+
+
+class TaskNameListView(ApiBaseView):
+    """resolves to /api/task-name/<task-name>/
+    GET: return a list of stored results of task
+    POST: start new background process
+    """
+
+    def get(self, request, task_name):
+        """handle get request"""
+        # pylint: disable=unused-argument
+        if task_name not in BaseTask.TASK_CONFIG:
+            message = {"message": "invalid task name"}
+            return Response(message, status=404)
+
+        all_results = TaskManager().get_tasks_by_name(task_name)
+
+        return Response(all_results)
+
+    def post(self, request, task_name):
+        """
+        handle post request
+        404 for invalid task_name
+        400 if task can't be started here without argument
+        """
+        # pylint: disable=unused-argument
+        task_config = BaseTask.TASK_CONFIG.get(task_name)
+        if not task_config:
+            message = {"message": "invalid task name"}
+            return Response(message, status=404)
+
+        if not task_config.get("api-start"):
+            message = {"message": "can not start task through this endpoint"}
+            return Response(message, status=400)
+
+        message = TaskCommand().start(task_name)
+
+        return Response({"message": message})
+
+
+class TaskIDView(ApiBaseView):
+    """resolves to /api/task-id/<task-id>/
+    GET: return details of task id
+    """
+
+    valid_commands = ["stop", "kill"]
+
+    def get(self, request, task_id):
+        """handle get request"""
+        # pylint: disable=unused-argument
+        task_result = TaskManager().get_task(task_id)
+        if not task_result:
+            message = {"message": "task id not found"}
+            return Response(message, status=404)
+
+        return Response(task_result)
+
+    def post(self, request, task_id):
+        """post command to task"""
+        command = request.data.get("command")
+        if not command or command not in self.valid_commands:
+            message = {"message": "no valid command found"}
+            return Response(message, status=400)
+
+        task_result = TaskManager().get_task(task_id)
+        if not task_result:
+            message = {"message": "task id not found"}
+            return Response(message, status=404)
+
+        task_conf = BaseTask.TASK_CONFIG.get(task_result.get("name"))
+        if command == "stop":
+            if not task_conf.get("api-stop"):
+                message = {"message": "task can not be stopped"}
+                return Response(message, status=400)
+
+            message_key = self._build_message_key(task_conf, task_id)
+            TaskCommand().stop(task_id, message_key)
+        if command == "kill":
+            if not task_conf.get("api-stop"):
+                message = {"message": "task can not be killed"}
+                return Response(message, status=400)
+
+            TaskCommand().kill(task_id)
+
+        return Response({"message": "command sent"})
+
+    def _build_message_key(self, task_conf, task_id):
+        """build message key to forward command to notification"""
+        return f"message:{task_conf.get('group')}:{task_id.split('-')[0]}"
 
 
 class RefreshView(ApiBaseView):
@@ -760,3 +846,33 @@ class SearchView(ApiBaseView):
 
         search_results = SearchForm().multi_search(search_query)
         return Response(search_results)
+
+
+class TokenView(ApiBaseView):
+    """resolves to /api/token/
+    DELETE: revoke the token
+    """
+
+    @staticmethod
+    def delete(request):
+        print("revoke API token")
+        request.user.auth_token.delete()
+        return Response({"success": True})
+
+
+class NotificationView(ApiBaseView):
+    """resolves to /api/notification/
+    GET: returns a list of notifications
+    filter query to filter messages by group
+    """
+
+    valid_filters = ["download", "settings", "channel"]
+
+    def get(self, request):
+        """get all notifications"""
+        query = "message"
+        filter_by = request.GET.get("filter", None)
+        if filter_by in self.valid_filters:
+            query = f"{query}:{filter_by}"
+
+        return Response(RedisArchivist().list_items(query))

@@ -13,13 +13,15 @@ from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
 from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.urlparser import Parser
 
 
 class ChannelSubscription:
     """manage the list of channels subscribed"""
 
-    def __init__(self):
+    def __init__(self, task=False):
         self.config = AppConfig().config
+        self.task = task
 
     @staticmethod
     def get_channels(subscribed_only=True):
@@ -44,7 +46,7 @@ class ChannelSubscription:
 
         last_videos = []
 
-        for vid_type, limit_amount in queries:
+        for vid_type_enum, limit_amount in queries:
             obs = {
                 "skip_download": True,
                 "extract_flat": True,
@@ -52,9 +54,9 @@ class ChannelSubscription:
             if limit:
                 obs["playlistend"] = limit_amount
 
-            path = vid_type.value
+            vid_type = vid_type_enum.value
             channel = YtWrap(obs, self.config).extract(
-                f"https://www.youtube.com/channel/{channel_id}/{path}"
+                f"https://www.youtube.com/channel/{channel_id}/{vid_type}"
             )
             if not channel:
                 continue
@@ -101,12 +103,16 @@ class ChannelSubscription:
     def find_missing(self):
         """add missing videos from subscribed channels to pending"""
         all_channels = self.get_channels()
+        if not all_channels:
+            return False
+
         pending = queue.PendingList()
         pending.get_download()
         pending.get_indexed()
 
         missing_videos = []
 
+        total = len(all_channels)
         for idx, channel in enumerate(all_channels):
             channel_id = channel["channel_id"]
             print(f"{channel_id}: find missing videos.")
@@ -116,21 +122,19 @@ class ChannelSubscription:
                 for video_id, _, vid_type in last_videos:
                     if video_id not in pending.to_skip:
                         missing_videos.append((video_id, vid_type))
-            # notify
-            message = {
-                "status": "message:rescan",
-                "level": "info",
-                "title": "Scanning channels: Looking for new videos.",
-                "message": f"Progress: {idx + 1}/{len(all_channels)}",
-            }
-            if idx + 1 == len(all_channels):
-                expire = 4
-            else:
-                expire = True
 
-            RedisArchivist().set_message(
-                "message:rescan", message=message, expire=expire
-            )
+            if not self.task:
+                continue
+
+            if self.task:
+                if self.task.is_stopped():
+                    self.task.send_progress(["Received Stop signal."])
+                    break
+
+                self.task.send_progress(
+                    message_lines=[f"Scanning Channel {idx + 1}/{total}"],
+                    progress=(idx + 1) / total,
+                )
 
         return missing_videos
 
@@ -147,8 +151,9 @@ class ChannelSubscription:
 class PlaylistSubscription:
     """manage the playlist download functionality"""
 
-    def __init__(self):
+    def __init__(self, task=False):
         self.config = AppConfig().config
+        self.task = task
 
     @staticmethod
     def get_playlists(subscribed_only=True):
@@ -232,14 +237,18 @@ class PlaylistSubscription:
     def find_missing(self):
         """find videos in subscribed playlists not downloaded yet"""
         all_playlists = [i["playlist_id"] for i in self.get_playlists()]
+        if not all_playlists:
+            return False
+
         to_ignore = self.get_to_ignore()
 
         missing_videos = []
+        total = len(all_playlists)
         for idx, playlist_id in enumerate(all_playlists):
             size_limit = self.config["subscriptions"]["channel_size"]
             playlist = YoutubePlaylist(playlist_id)
-            playlist.update_playlist()
-            if not playlist:
+            is_active = playlist.update_playlist()
+            if not is_active:
                 playlist.deactivate()
                 continue
 
@@ -249,19 +258,123 @@ class PlaylistSubscription:
 
             all_missing = [i for i in playlist_entries if not i["downloaded"]]
 
-            message = {
-                "status": "message:rescan",
-                "level": "info",
-                "title": "Scanning playlists: Looking for new videos.",
-                "message": f"Progress: {idx + 1}/{len(all_playlists)}",
-            }
-            RedisArchivist().set_message(
-                "message:rescan", message=message, expire=True
-            )
-
             for video in all_missing:
                 youtube_id = video["youtube_id"]
                 if youtube_id not in to_ignore:
                     missing_videos.append(youtube_id)
 
+            if not self.task:
+                continue
+
+            if self.task:
+                self.task.send_progress(
+                    message_lines=[f"Scanning Playlists {idx + 1}/{total}"],
+                    progress=(idx + 1) / total,
+                )
+                if self.task.is_stopped():
+                    self.task.send_progress(["Received Stop signal."])
+                    break
+
         return missing_videos
+
+
+class SubscriptionScanner:
+    """add missing videos to queue"""
+
+    def __init__(self, task=False):
+        self.task = task
+        self.missing_videos = False
+
+    def scan(self):
+        """scan channels and playlists"""
+        if self.task:
+            self.task.send_progress(["Rescanning channels and playlists."])
+
+        self.missing_videos = []
+        self.scan_channels()
+        if self.task and not self.task.is_stopped():
+            self.scan_playlists()
+
+        return self.missing_videos
+
+    def scan_channels(self):
+        """get missing from channels"""
+        channel_handler = ChannelSubscription(task=self.task)
+        missing = channel_handler.find_missing()
+        if not missing:
+            return
+
+        for vid_id, vid_type in missing:
+            self.missing_videos.append(
+                {"type": "video", "vid_type": vid_type, "url": vid_id}
+            )
+
+    def scan_playlists(self):
+        """get missing from playlists"""
+        playlist_handler = PlaylistSubscription(task=self.task)
+        missing = playlist_handler.find_missing()
+        if not missing:
+            return
+
+        for i in missing:
+            self.missing_videos.append(
+                {
+                    "type": "video",
+                    "vid_type": VideoTypeEnum.VIDEOS.value,
+                    "url": i,
+                }
+            )
+
+
+class SubscriptionHandler:
+    """subscribe to channels and playlists from url_str"""
+
+    def __init__(self, url_str, task=False):
+        self.url_str = url_str
+        self.task = task
+        self.to_subscribe = False
+
+    def subscribe(self):
+        """subscribe to url_str items"""
+        if self.task:
+            self.task.send_progress(["Processing form content."])
+        self.to_subscribe = Parser(self.url_str).parse()
+
+        total = len(self.to_subscribe)
+        for idx, item in enumerate(self.to_subscribe):
+            if self.task:
+                self._notify(idx, item, total)
+
+            self.subscribe_type(item)
+
+    def subscribe_type(self, item):
+        """process single item"""
+        if item["type"] == "playlist":
+            PlaylistSubscription().process_url_str([item])
+            return
+
+        if item["type"] == "video":
+            # extract channel id from video
+            vid = queue.PendingList().get_youtube_details(item["url"])
+            channel_id = vid["channel_id"]
+        elif item["type"] == "channel":
+            channel_id = item["url"]
+        else:
+            raise ValueError("failed to subscribe to: " + item["url"])
+
+        self._subscribe(channel_id)
+
+    def _subscribe(self, channel_id):
+        """subscribe to channel"""
+        ChannelSubscription().change_subscribe(
+            channel_id, channel_subscribed=True
+        )
+
+    def _notify(self, idx, item, total):
+        """send notification message to redis"""
+        subscribe_type = item["type"].title()
+        message_lines = [
+            f"Subscribe to {subscribe_type}",
+            f"Progress: {idx + 1}/{total}",
+        ]
+        self.task.send_progress(message_lines, progress=(idx + 1) / total)

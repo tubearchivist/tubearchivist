@@ -619,21 +619,6 @@ class ChannelIdView(ChannelIdBaseView):
             to_append = {"term": {"player.watched": {"value": False}}}
             self.data["query"]["bool"]["must"].append(to_append)
 
-    @staticmethod
-    def post(request, channel_id):
-        """handle post request"""
-        print(f"handle post from {channel_id}")
-        channel_overwrite_form = ChannelOverwriteForm(request.POST)
-        if channel_overwrite_form.is_valid():
-            overwrites = channel_overwrite_form.cleaned_data
-            print(f"{channel_id}: set overwrites {overwrites}")
-            channel_overwrites(channel_id, overwrites=overwrites)
-            if overwrites.get("index_playlists") == "1":
-                index_channel_playlists.delay(channel_id)
-
-        sleep(1)
-        return redirect("channel_id", channel_id, permanent=True)
-
 
 class ChannelIdLiveView(ChannelIdView):
     """resolves to /channel/<channel-id>/streams/
@@ -769,14 +754,6 @@ class ChannelView(ArchivistResultsView):
         """handle http post requests"""
         subscribe_form = SubscribeToChannelForm(data=request.POST)
         if subscribe_form.is_valid():
-            key = "message:subchannel"
-            message = {
-                "status": key,
-                "level": "info",
-                "title": "Subscribing to Channels",
-                "message": "Parsing form data",
-            }
-            RedisArchivist().set_message(key, message=message, expire=True)
             url_str = request.POST.get("subscribe")
             print(url_str)
             subscribe_to.delay(url_str)
@@ -922,14 +899,6 @@ class PlaylistView(ArchivistResultsView):
         if subscribe_form.is_valid():
             url_str = request.POST.get("subscribe")
             print(url_str)
-            key = "message:subplaylist"
-            message = {
-                "status": key,
-                "level": "info",
-                "title": "Subscribing to Playlists",
-                "message": "Parsing form data",
-            }
-            RedisArchivist().set_message(key, message=message, expire=True)
             subscribe_to.delay(url_str)
 
         sleep(1)
@@ -1131,26 +1100,11 @@ class SettingsView(MinView):
         RedisArchivist().set_message(key, message=message, expire=True)
 
 
-def progress(request):
-    # pylint: disable=unused-argument
-    """resolves to /progress/
-    return list of messages for frontend
-    """
-    all_messages = RedisArchivist().get_progress()
-    json_data = {"messages": all_messages}
-    return JsonResponse(json_data)
-
-
 def process(request):
     """handle all the buttons calls via POST ajax"""
     if request.method == "POST":
         current_user = request.user.id
         post_dict = json.loads(request.body.decode())
-        if post_dict.get("reset-token"):
-            print("revoke API token")
-            request.user.auth_token.delete()
-            return JsonResponse({"success": True})
-
         post_handler = PostData(post_dict, current_user)
         if post_handler.to_exec:
             task_result = post_handler.run_task()

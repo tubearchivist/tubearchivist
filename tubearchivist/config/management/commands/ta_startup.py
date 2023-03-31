@@ -14,6 +14,7 @@ from home.src.es.snapshot import ElasticSnapshot
 from home.src.ta.config import AppConfig, ReleaseVersion
 from home.src.ta.helper import clear_dl_cache
 from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.task_manager import TaskManager
 
 TOPIC = """
 
@@ -35,6 +36,7 @@ class Command(BaseCommand):
         self._sync_redis_state()
         self._make_folders()
         self._release_locks()
+        self._clear_tasks()
         self._clear_dl_cache()
         self._version_check()
         self._mig_index_setup()
@@ -96,9 +98,23 @@ class Command(BaseCommand):
         if not has_changed:
             self.stdout.write(self.style.SUCCESS("    no locks found"))
 
+    def _clear_tasks(self):
+        """clear tasks and messages"""
+        self.stdout.write("[4] clear task leftovers")
+        TaskManager().fail_pending()
+        redis_con = RedisArchivist()
+        to_delete = redis_con.list_keys("message:")
+        if to_delete:
+            for key in to_delete:
+                redis_con.del_message(key)
+
+            self.stdout.write(
+                self.style.SUCCESS(f"    ✓ cleared {len(to_delete)} messages")
+            )
+
     def _clear_dl_cache(self):
         """clear leftover files from dl cache"""
-        self.stdout.write("[4] clear leftover files from dl cache")
+        self.stdout.write("[5] clear leftover files from dl cache")
         config = AppConfig().config
         leftover_files = clear_dl_cache(config)
         if leftover_files:
@@ -110,7 +126,7 @@ class Command(BaseCommand):
 
     def _version_check(self):
         """remove new release key if updated now"""
-        self.stdout.write("[5] check for first run after update")
+        self.stdout.write("[6] check for first run after update")
         new_version = ReleaseVersion().is_updated()
         if new_version:
             self.stdout.write(
@@ -175,4 +191,5 @@ class Command(BaseCommand):
                 message = f"    🗙 {index_name} vid_type update failed"
                 self.stdout.write(self.style.ERROR(message))
                 self.stdout.write(response)
+                sleep(60)
                 raise CommandError(message)

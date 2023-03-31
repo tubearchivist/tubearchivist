@@ -18,7 +18,6 @@ from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.generic import YouTubeItem
 from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.helper import clean_string, requests_headers
-from home.src.ta.ta_redis import RedisArchivist
 
 
 class ChannelScraper:
@@ -167,12 +166,12 @@ class YoutubeChannel(YouTubeItem):
     es_path = False
     index_name = "ta_channel"
     yt_base = "https://www.youtube.com/channel/"
-    msg = "message:playlistscan"
 
-    def __init__(self, youtube_id):
+    def __init__(self, youtube_id, task=False):
         super().__init__(youtube_id)
         self.es_path = f"{self.index_name}/_doc/{youtube_id}"
         self.all_playlists = False
+        self.task = task
 
     def build_json(self, upload=False, fallback=False):
         """get from es or from youtube"""
@@ -324,34 +323,29 @@ class YoutubeChannel(YouTubeItem):
         print(f"{self.youtube_id}: index all playlists")
         self.get_from_es()
         channel_name = self.json_data["channel_name"]
-        mess_dict = {
-            "status": self.msg,
-            "level": "info",
-            "title": "Looking for playlists",
-            "message": f"{channel_name}: Scanning channel in progress",
-        }
-        RedisArchivist().set_message(self.msg, mess_dict, expire=True)
+        self.task.send_progress([f"{channel_name}: Looking for Playlists"])
         self.get_all_playlists()
         if not self.all_playlists:
             print(f"{self.youtube_id}: no playlists found.")
             return
 
         all_youtube_ids = self.get_all_video_ids()
+        total = len(self.all_playlists)
         for idx, playlist in enumerate(self.all_playlists):
-            self._notify_single_playlist(idx, playlist)
-            self._index_single_playlist(playlist, all_youtube_ids)
+            if self.task:
+                self._notify_single_playlist(idx, total)
 
-    def _notify_single_playlist(self, idx, playlist):
+            self._index_single_playlist(playlist, all_youtube_ids)
+            print("add playlist: " + playlist[1])
+
+    def _notify_single_playlist(self, idx, total):
         """send notification"""
         channel_name = self.json_data["channel_name"]
-        mess_dict = {
-            "status": self.msg,
-            "level": "info",
-            "title": f"{channel_name}: Scanning channel for playlists",
-            "message": f"Progress: {idx + 1}/{len(self.all_playlists)}",
-        }
-        RedisArchivist().set_message(self.msg, mess_dict, expire=True)
-        print("add playlist: " + playlist[1])
+        message = [
+            f"{channel_name}: Scanning channel for playlists",
+            f"Progress: {idx + 1}/{total}",
+        ]
+        self.task.send_progress(message, progress=(idx + 1) / total)
 
     @staticmethod
     def _index_single_playlist(playlist, all_youtube_ids):

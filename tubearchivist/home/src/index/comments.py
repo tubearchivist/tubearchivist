@@ -10,7 +10,6 @@ from datetime import datetime
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap
 from home.src.ta.config import AppConfig
-from home.src.ta.ta_redis import RedisArchivist
 
 
 class Comments:
@@ -24,14 +23,13 @@ class Comments:
         self.is_activated = False
         self.comments_format = False
 
-    def build_json(self, notify=False):
+    def build_json(self):
         """build json document for es"""
         print(f"{self.youtube_id}: get comments")
         self.check_config()
         if not self.is_activated:
             return
 
-        self._send_notification(notify)
         comments_raw, channel_id = self.get_yt_comments()
         if not comments_raw and not channel_id:
             return
@@ -52,23 +50,6 @@ class Comments:
 
         self.is_activated = bool(self.config["downloads"]["comment_max"])
 
-    @staticmethod
-    def _send_notification(notify):
-        """send notification for download post process message"""
-        if not notify:
-            return
-
-        key = "message:download"
-        idx, total_videos = notify
-        message = {
-            "status": key,
-            "level": "info",
-            "title": "Download and index comments",
-            "message": f"Progress: {idx + 1}/{total_videos}",
-        }
-
-        RedisArchivist().set_message(key, message)
-
     def build_yt_obs(self):
         """
         get extractor config
@@ -79,6 +60,7 @@ class Comments:
         comment_sort = self.config["downloads"]["comment_sort"]
 
         yt_obs = {
+            "check_formats": None,
             "skip_download": True,
             "getcomments": True,
             "extractor_args": {
@@ -200,38 +182,28 @@ class Comments:
 class CommentList:
     """interact with comments in group"""
 
-    def __init__(self, video_ids):
+    def __init__(self, video_ids, task=False):
         self.video_ids = video_ids
+        self.task = task
         self.config = AppConfig().config
 
-    def index(self, notify=False):
-        """index group of videos"""
+    def index(self):
+        """index comments for list, init with task object to notify"""
         if not self.config["downloads"].get("comment_max"):
             return
 
         total_videos = len(self.video_ids)
-        if notify:
-            self._notify(f"add comments for {total_videos} videos", False)
+        for idx, youtube_id in enumerate(self.video_ids):
+            if self.task:
+                self.notify(idx, total_videos)
 
-        for idx, video_id in enumerate(self.video_ids):
-            comment = Comments(video_id, config=self.config)
-            if notify:
-                notify = (idx, total_videos)
-            comment.build_json(notify=notify)
+            comment = Comments(youtube_id, config=self.config)
+            comment.build_json()
             if comment.json_data:
                 comment.upload_comments()
 
-        if notify:
-            self._notify(f"added comments for {total_videos} videos", 5)
-
-    @staticmethod
-    def _notify(message, expire):
-        """send notification"""
-        key = "message:download"
-        message = {
-            "status": key,
-            "level": "info",
-            "title": "Download and index comments finished",
-            "message": message,
-        }
-        RedisArchivist().set_message(key, message, expire=expire)
+    def notify(self, idx, total_videos):
+        """send notification on task"""
+        message = [f"Add comments for new videos {idx + 1}/{total_videos}"]
+        progress = (idx + 1) / total_videos
+        self.task.send_progress(message, progress=progress)
