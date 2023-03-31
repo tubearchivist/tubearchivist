@@ -55,28 +55,28 @@ Here are the configuration options that you will need to set to start TubeArchiv
 TubeArchivist:  
 | Configuration Option | Value | State |
 | ----------- | ----------- | ----------- |
-| tubearchivist/environment/TA_HOST | Change to the IP/Domain Name of the machine you are running on | Required |
-| tubearchivist/environment/TA_USERNAME | Initial username when logging into TA | Required |
-| tubearchivist/environment/TA_PASSWORD | Initial password when logging into TA | Required |
-| tubearchivist/environment/ELASTIC_PASSWORD | Password for ElasticSearch | Required |
-| tubearchivist/environment/REDIS_HOST | Hostname for Redis | Required |
-| tubearchivist/environment/TZ | Timezone. Change this to your current Timezone (like "America/Los_Angeles) | Required |
-| tubearchivist/environment/TA_PORT | Port TA runs on | Optional |
-| tubearchivist/environment/TA_UWSGI_PORT | Configure TA to use LDAP Authentication | Optional |
-| tubearchivist/environment/ES_URL | URL That ElasticSearch runs on | Optional |
-| tubearchivist/environment/HOST_GID | Allow TA to own the video files instead of container user | Optional |
-| tubearchivist/environment/HOST_UID | Allow TA to own the video files instead of container user | Optional |
-| tubearchivist/environment/ELASTIC_USER | Change the default ElasticSearch user | Optional |
-| tubearchivist/environment/REDIS_PORT | Port that Redis runs on | Optional |
-| tubearchivist/environment/TA_LDAP | Configure TA to use LDAP Authentication | Read more |
-| tubearchivist/environment/ENABLE_CAST | Enable casting support | Read more |
-| tubearchivist/environment/DJANGO_DEBUG | Debugs Djanjo frontend (Debug use only) | Read more |
+| TA_HOST | Change to the IP/Domain Name of the machine you are running on | Required |
+| TA_USERNAME | Initial username when logging into TA | Required |
+| TA_PASSWORD | Initial password when logging into TA | Required |
+| ELASTIC_PASSWORD | Password for ElasticSearch | Required |
+| REDIS_HOST | Hostname for Redis | Required |
+| TZ | Timezone. Change this to your current Timezone (like "America/Los_Angeles) | Required |
+| TA_PORT | Port TA runs on | Optional |
+| TA_UWSGI_PORT | Configure TA to use LDAP Authentication | Optional |
+| ES_URL | URL That ElasticSearch runs on | Optional |
+| HOST_GID | Allow TA to own the video files instead of container user | Optional |
+| HOST_UID | Allow TA to own the video files instead of container user | Optional |
+| ELASTIC_USER | Change the default ElasticSearch user | Optional |
+| REDIS_PORT | Port that Redis runs on | Optional |
+| TA_LDAP | Configure TA to use LDAP Authentication | Read more |
+| ENABLE_CAST | Enable casting support | Read more |
+| DJANGO_DEBUG | Debugs Djanjo frontend (Debug use only) | Read more |
 
 Archivist-ES  
 | Configuration Option | Value | State |
 | ----------- | ----------- | ----------- |
-| archivist-es/environment/ELASTIC_PASSWORD | Must be the same as `tubearchivist/environment/ELASTIC_PASSWORD` | Required |
-| tubearchivist/environment/http.port | Change the port ElasticSearch runs on | Optional |
+| ELASTIC_PASSWORD | Must be the same as `tubearchivist/environment/ELASTIC_PASSWORD` | Required |
+| http.port | Change the port ElasticSearch runs on | Optional |
 
 
 
