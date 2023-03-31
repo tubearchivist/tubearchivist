@@ -1402,7 +1402,8 @@ function recordTextTrackChanges() {
 }
 
 // keyboard shortcuts for the video player
-document.addEventListener('keydown', doShortcut);
+// need useCapture so we can prevent events from reaching the player
+document.addEventListener('keydown', doShortcut, true);
 
 let modalHideTimeout = -1;
 function showModal(html, duration) {
@@ -1458,19 +1459,13 @@ function doShortcut(e) {
       break;
     }
     case 'ArrowLeft': {
-      if (targetName === 'video') {
-        // hitting arrows while the video is focused will use the built-in skip
-        break;
-      }
+      e.preventDefault();
       showModal('- 5 seconds', 500);
       player.currentTime -= 5;
       break;
     }
     case 'ArrowRight': {
-      if (targetName === 'video') {
-        // hitting space while the video is focused will use the built-in skip
-        break;
-      }
+      e.preventDefault();
       showModal('+ 5 seconds', 500);
       player.currentTime += 5;
       break;
@@ -1493,10 +1488,6 @@ function doShortcut(e) {
       break;
     }
     case ' ': {
-      if (targetName === 'video') {
-        // hitting space while the video is focused will toggle it anyway
-        break;
-      }
       e.preventDefault();
       if (player.paused) {
         player.play();
