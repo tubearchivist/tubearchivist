@@ -14,7 +14,7 @@
 * Docs: [Wiki](https://github.com/tubearchivist/tubearchivist/wiki), [FAQ](https://github.com/tubearchivist/tubearchivist/wiki/FAQ) and [API](https://github.com/tubearchivist/tubearchivist/tree/master/tubearchivist/api)
 * [Core functionality](#core-functionality)
 * [Resources](#resources)
-* [Installing and updating](#installing-and-updating)
+* [Installing](#installing)
 * [Getting Started](#getting-started)
 * [Known limitations](#known-limitations)
 * [Port Collisions](#port-collisions)
@@ -31,8 +31,6 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 * Index and make videos searchable
 * Play videos
 * Keep track of viewed and unviewed videos
-
-
   
 ## Resources
 - [Discord](https://www.tubearchivist.com/discord): Connect with us on our Discord server.
@@ -41,53 +39,51 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 - [Tube Archivist Metrics](https://github.com/tubearchivist/tubearchivist-metrics) to create statistics in Prometheus/OpenMetrics format.  
 - [Showcase](SHOWCASE.MD) To see more screenshots and Youtube videos showing off TubeArchvist.
 
-
-## Installing and updating
+## Installing
 For minimal system requirements, the Tube Archivist stack needs around 2GB of available memory for a small testing setup and around 4GB of available memory for a mid to large sized installation. Minimal with dual core with 4 threads, better quad core plus. 
 This project requires docker. Ensure it is installed and running on your system.  
 
-If you are using Podman, Unraid, TrueNAS, and Synology, visit [https://docs.tubearchivist.com](https://docs.tubearchivist.com) for more dedicated instructions for those systems. Otherwise, continue on.
+The documentation has additional user provided instructions for [Unraid](https://docs.tubearchivist.com/installation/unraid/), [Synology](https://docs.tubearchivist.com/installation/synology/), [Podman](https://docs.tubearchivist.com/installation/podman/) and [True NAS](https://docs.tubearchivist.com/installation/truenas-scale/).
 
-Here are the configuration options that you will need to set to start TubeArchivist:  
+The instructions here should get you up and running quickly, for Docker beginners and full explanation about each environment variable, see the [docs](https://docs.tubearchivist.com/installation/docker-compose/).
 
-TubeArchivist:  
-| Configuration Option | Value | State |
+Take a look at the example [docker-compose.yml](https://github.com/tubearchivist/tubearchivist/blob/master/docker-compose.yml) and configure the required environment variables.
+
+**TubeArchivist**:  
+| Environment Var | Value |  |
 | ----------- | ----------- | ----------- |
-| TA_HOST | Change to the IP/Domain Name of the machine you are running on | Required |
+| TA_HOST | Server IP or hostname, without port, without protocol | Required |
 | TA_USERNAME | Initial username when logging into TA | Required |
 | TA_PASSWORD | Initial password when logging into TA | Required |
 | ELASTIC_PASSWORD | Password for ElasticSearch | Required |
 | REDIS_HOST | Hostname for Redis | Required |
-| TZ | Timezone. Change this to your current Timezone (like "America/Los_Angeles") | Required |
-| TA_PORT | Port TA runs on | Optional |
-| TA_UWSGI_PORT | Configure TA to use LDAP Authentication | Optional |
+| TZ | Set your timezone for the scheduler | Required |
+| TA_PORT | Overwrite Nginx port | Optional |
+| TA_UWSGI_PORT | Overwrite container internal uwsgi port | Optional |
 | ES_URL | URL That ElasticSearch runs on | Optional |
 | HOST_GID | Allow TA to own the video files instead of container user | Optional |
 | HOST_UID | Allow TA to own the video files instead of container user | Optional |
 | ELASTIC_USER | Change the default ElasticSearch user | Optional |
 | REDIS_PORT | Port that Redis runs on | Optional |
-| TA_LDAP | Configure TA to use LDAP Authentication | Read more |
-| ENABLE_CAST | Enable casting support | Read more |
-| DJANGO_DEBUG | Debugs Djanjo frontend (Debug use only) | Read more |
+| TA_LDAP | Configure TA to use LDAP Authentication | [Read more](https://docs.tubearchivist.com/configuration/ldap/) |
+| ENABLE_CAST | Enable casting support | [Read more](https://docs.tubearchivist.com/configuration/cast/) |
+| DJANGO_DEBUG | Return additional error messages, for debug only |  |
 
-Archivist-ES  
-| Configuration Option | Value | State |
+**ElasticSearch**  
+| Environment Var | Value | State |
 | ----------- | ----------- | ----------- |
-| ELASTIC_PASSWORD | Must be the same as `tubearchivist/environment/ELASTIC_PASSWORD` | Required |
+| ELASTIC_PASSWORD | Matching password `ELASTIC_PASSWORD` from TubeArchivist | Required |
 | http.port | Change the port ElasticSearch runs on | Optional |
 
 
+## Update
+Always use the *latest* (the default) or a named semantic version tag for the docker images. The *unstable* tags are only for your testing environment, there might not be an update path for these testing builds. 
 
+You will see the current version number of **Tube Archivist** in the footer of the interface. There is a daily version check task querying tubearchivist.com, notifying you of any new releases in the footer. To take advantage of the latest fixes and improvements, make sure you are running the *latest and greatest*.  
 
-
-To start, `cd` into the directory where the `docker-compose.yml` file is located and run `docker compose up --detach` in terminal. The first time you do this it will download the appropriate images, which can take a minute.
-
-You can follow the logs with `docker compose logs -f`. Once it's ready it will print something like `celery@1234567890ab ready`. At this point you should be able to go to `http://your-host:8000` and log in with the `TA_USER`/`TA_PASSWORD` credentials.
-
-You can bring the application down by running `docker compose down` in the same directory.
-Always use the *latest* (the default) or a named semantic version tag for the docker images, unless if you are doing development.
-
-If you want more advanced options, or more detailed instructions on how to set up the containers, you can visit [https://docs.tubearchivist.com/installation/docker](https://docs.tubearchivist.com/installation/docker) or [https://github.com/tubearchivist/docs/tree/master/mkdocs/docs](https://github.com/tubearchivist/docs/tree/master/mkdocs/docs). 
+  - This project is tested for updates between one or two releases maximum. Further updates back may or may not be supported and you might have to reset your index and configurations to update. Ideally apply new updates at least once per month.  
+  - There can be breaking changes between updates, particularly as the application grows, new environment variables or settings might be required for you to set in the your docker-compose file. *Always* check the **release notes**: Any breaking changes will be marked there.  
+  - All testing and development is done with the Elasticsearch version number as mentioned in the provided *docker-compose.yml* file. This will be updated when a new release of Elasticsearch is available. Running an older version of Elasticsearch is most likely not going to result in any issues, but it's still recommended to run the same version as mentioned. Use `bbilly1/tubearchivist-es` to automatically get the recommended version.   
 
 ## Getting Started
 1. Go through the **settings** page and look at the available options. Particularly set *Download Format* to your desired video quality before downloading. **Tube Archivist** downloads the best available quality by default. To support iOS or MacOS and some other browsers a compatible format must be specified. For example:
@@ -99,11 +95,6 @@ bestvideo[vcodec*=avc1]+bestaudio[acodec*=mp4a]/mp4
 4. Click on *Start download* and let **Tube Archivist** to it's thing. 
 5. Enjoy your archived collection!
 
-
-## Known limitations
-- Video files created by Tube Archivist need to be playable in your browser of choice. Not every codec is compatible with every browser and might require some testing with format selection. 
-- Every limitation of **yt-dlp** will also be present in Tube Archivist. If **yt-dlp** can't download or extract a video for any reason, Tube Archivist won't be able to either.
-- There is currently no flexibility in naming of the media files.
 
 ### Port Collisions  
 If you have a collision on port `8000`, best solution is to use dockers *HOST_PORT* and *CONTAINER_PORT* distinction: To for example change the interface to port 9000 use `9000:8000` in your docker-compose file.  
@@ -140,6 +131,11 @@ This will match the permissions with the **UID** and **GID** of elasticsearch pr
 The Elasticsearch index will turn to ***read only*** if the disk usage of the container goes above 95% until the usage drops below 90% again, you will see error messages like `disk usage exceeded flood-stage watermark`.  
 
 Similar to that, TubeArchivist will become all sorts of messed up when running out of disk space. There are some error messages in the logs when that happens, but it's best to make sure to have enough disk space before starting to download.
+
+## Known limitations
+- Video files created by Tube Archivist need to be playable in your browser of choice. Not every codec is compatible with every browser and might require some testing with format selection. 
+- Every limitation of **yt-dlp** will also be present in Tube Archivist. If **yt-dlp** can't download or extract a video for any reason, Tube Archivist won't be able to either.
+- There is currently no flexibility in naming of the media files.
 
 ## Roadmap
 We have come far, nonetheless we are not short of ideas on how to improve and extend this project. Issues waiting for you to be tackled in no particular order:
