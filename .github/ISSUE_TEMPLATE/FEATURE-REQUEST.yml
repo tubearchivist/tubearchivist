@@ -1,21 +1,19 @@
 name: Feature Request
-description: I want to work on a new feature.
+description: I have an idea for a great addition to this project
 title: "[Feature Request]: "
 
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to help improve this project! This project is currently only taking new feature requests from contributors who want to make a PR with their ideas. The backlog of planned features outlined in the roadmap or the open issues here will keep us busy for the foreseeable future.
+        Thanks for taking the time to help improve this project! This project is *very* selective with accepting new feature requests. Please read the [how to open an issue](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#how-to-open-an-issue) guide carefully before continuing.
 
   - type: checkboxes
     id: already
     attributes:
-      label: Already implemented?
+      label: "I've read the documentation"
       options:
-        - label: I have read through the [docs](https://docs.tubearchivist.com/).
-          required: true
-        - label: I understand the [scope](https://docs.tubearchivist.com/faq/) of this project and am aware of the [known limitations](https://github.com/tubearchivist/tubearchivist#known-limitations) and my idea is not already on the [roadmap](https://github.com/tubearchivist/tubearchivist#roadmap).
+        - label: I have read the [how to open an issue](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#how-to-open-an-issue) guide, particularly the [feature request](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#feature-request) section.
           required: true
 
   - type: textarea
@@ -34,4 +32,3 @@ body:
       description: This project is ambitious as it is, please contribute.
       options:
         - label: Yes I will work on this in the next few days or weeks.
-          required: true

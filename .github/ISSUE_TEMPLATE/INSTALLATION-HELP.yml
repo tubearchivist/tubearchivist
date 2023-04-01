@@ -13,9 +13,7 @@ body:
     attributes:
       label: Installation instructions
       options:
-        - label: I have read and understand the [installation instructions](https://github.com/tubearchivist/tubearchivist#installing-and-updating).
-          required: true
-        - label: My issue is not described in the [common errors](https://github.com/tubearchivist/tubearchivist#common-errors) section.
+        - label: I have read the [how to open an issue](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#how-to-open-an-issue) guide, particularly the [installation help](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#installation-help) section.
           required: true
 
   - type: input
