@@ -3,13 +3,13 @@
 Welcome, and thanks for showing interest in improving Tube Archivist!  
 
 ## Table of Content
-- How to open an issue
-  - Bug Report
-  - Feature Request
-  - Installation Help
-- How to make a Pull Request
-- Improve to the Documentation
-- Development Environment
+- [How to open an issue](#how-to-open-an-issue)
+  - [Bug Report](#bug-report)
+  - [Feature Request](#feature-request)
+  - [Installation Help](#installation-help)
+- [How to make a Pull Request](#how-to-make-a-pull-request)
+- [Improve to the Documentation](#improve-to-the-documentation)
+- [Development Environment](#development-environment)
 ---
 
 ## How to open an issue
