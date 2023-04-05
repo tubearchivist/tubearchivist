@@ -64,7 +64,7 @@ class SearchProcess:
                 "channel_last_refresh": date_str,
                 "channel_banner_url": f"{art_base}_banner.jpg",
                 "channel_thumb_url": f"{art_base}_thumb.jpg",
-                "channel_tvart_url": False,
+                "channel_tvart_url": f"{art_base}_tvart.jpg",
             }
         )
 

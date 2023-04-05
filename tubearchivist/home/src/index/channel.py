@@ -240,6 +240,7 @@ class YoutubeChannel(YouTubeItem):
         urls = (
             self.json_data["channel_thumb_url"],
             self.json_data["channel_banner_url"],
+            self.json_data["channel_tvart_url"],
         )
         ThumbManager(self.youtube_id, item_type="channel").download(urls)
 

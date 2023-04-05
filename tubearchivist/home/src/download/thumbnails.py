@@ -81,6 +81,9 @@ class ThumbManagerBase:
             "banner": os.path.join(
                 app_root, "static/img/default-channel-banner.jpg"
             ),
+            "art": os.path.join(
+                app_root, "static/img/default-channel-art.jpg"
+            ),
         }
 
         img_raw = Image.open(default_map[self.item_type])
@@ -149,9 +152,10 @@ class ThumbManager(ThumbManagerBase):
 
     def download_channel_art(self, urls, skip_existing=False):
         """pass tuple of channel thumbnails"""
-        channel_thumb, channel_banner = urls
+        channel_thumb, channel_banner, channel_tv = urls
         self._download_channel_thumb(channel_thumb, skip_existing)
         self._download_channel_banner(channel_banner, skip_existing)
+        self._download_channel_tv(channel_tv, skip_existing)
 
     def _download_channel_thumb(self, channel_thumb, skip_existing):
         """download channel thumbnail"""
@@ -179,6 +183,16 @@ class ThumbManager(ThumbManagerBase):
 
         img_raw = self.download_raw(channel_banner)
         img_raw.convert("RGB").save(banner_path)
+
+    def _download_channel_tv(self, channel_tv, skip_existing):
+        """download channel tv art"""
+        art_path = os.path.join(self.CHANNEL_DIR, self.item_id + "_tvart.jpg")
+        self.item_type = "tvart"
+        if skip_existing and os.path.exists(art_path):
+            return
+
+        img_raw = self.download_raw(channel_tv)
+        img_raw.convert("RGB").save(art_path)
 
     def download_playlist_thumb(self, url, skip_existing=False):
         """pass thumbnail url"""
