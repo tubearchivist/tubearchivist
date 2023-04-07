@@ -427,11 +427,16 @@ class ManualImport:
     def _move_to_archive(self, json_data):
         """move identified media file to archive"""
         videos = self.config["application"]["videos"]
+        host_uid = self.config["application"]["HOST_UID"]
+        host_gid = self.config["application"]["HOST_GID"]
 
         channel, file = os.path.split(json_data["media_url"])
         channel_folder = os.path.join(videos, channel)
         if not os.path.exists(channel_folder):
             os.makedirs(channel_folder)
+
+        if host_uid and host_gid:
+            os.chown(channel_folder, host_uid, host_gid)
 
         old_path = self.current_video["media"]
         new_path = os.path.join(channel_folder, file)
