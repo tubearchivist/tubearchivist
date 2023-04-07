@@ -395,8 +395,8 @@ class VideoDownloader:
         new_folder = os.path.join(videos, channel_name)
         if not os.path.exists(new_folder):
             os.makedirs(new_folder)
-            if host_uid and host_gid:
-                os.chown(new_folder, host_uid, host_gid)
+        if host_uid and host_gid:
+            os.chown(new_folder, host_uid, host_gid)
         # find real filename
         cache_dir = self.config["application"]["cache_dir"]
         all_cached = ignore_filelist(os.listdir(cache_dir + "/download/"))
