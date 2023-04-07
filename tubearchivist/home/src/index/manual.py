@@ -12,6 +12,7 @@ import shutil
 import subprocess
 
 from home.src.download.thumbnails import ThumbManager
+from home.src.index.comments import CommentList
 from home.src.index.video import YoutubeVideo
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import ignore_filelist
@@ -140,6 +141,9 @@ class ImportFolderScanner:
             print(f"manual import: {current_video}")
 
             ManualImport(current_video, self.CONFIG).run()
+
+        video_ids = [i["video_id"] for i in self.to_import]
+        CommentList(video_ids, task=self.task).index()
 
     def _notify(self, idx, current_video):
         """send notification back to task"""
@@ -441,6 +445,8 @@ class ManualImport:
         old_path = self.current_video["media"]
         new_path = os.path.join(channel_folder, file)
         shutil.move(old_path, new_path, copy_function=shutil.copyfile)
+        if host_uid and host_gid:
+            os.chown(new_path, host_uid, host_gid)
 
         base_name, _ = os.path.splitext(new_path)
         for old_path in self.current_video["subtitle"]:
