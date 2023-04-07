@@ -81,7 +81,7 @@ class ThumbManagerBase:
             "banner": os.path.join(
                 app_root, "static/img/default-channel-banner.jpg"
             ),
-            "art": os.path.join(
+            "tvart": os.path.join(
                 app_root, "static/img/default-channel-art.jpg"
             ),
         }
