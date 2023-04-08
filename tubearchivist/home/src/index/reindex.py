@@ -49,6 +49,7 @@ class ReindexBase:
     }
 
     MULTIPLY = 1.2
+    DAYS3 = 60 * 60 * 24 * 3
 
     def __init__(self):
         self.config = AppConfig().config
@@ -62,12 +63,33 @@ class ReindexBase:
         RedisQueue(queue_name=reindex_config["queue_name"]).add_list(all_ids)
 
 
-class ReindexOutdated(ReindexBase):
-    """add outdated documents to reindex queue"""
+class ReindexPopulate(ReindexBase):
+    """add outdated and recent documents to reindex queue"""
 
     def __init__(self):
         super().__init__()
         self.interval = self.config["scheduler"]["check_reindex_days"]
+
+    def add_recent(self):
+        """add recent videos to refresh"""
+        gte = datetime.fromtimestamp(self.now - self.DAYS3).date().isoformat()
+        must_list = [
+            {"term": {"active": {"value": True}}},
+            {"range": {"published": {"gte": gte}}},
+        ]
+        data = {
+            "size": 10000,
+            "query": {"bool": {"must": must_list}},
+            "sort": [{"published": {"order": "desc"}}],
+        }
+        response, _ = ElasticWrap("ta_video/_search").get(data=data)
+        hits = response["hits"]["hits"]
+        if not hits:
+            return
+
+        all_ids = [i["_source"]["youtube_id"] for i in hits]
+        reindex_config = self.REINDEX_CONFIG.get("video")
+        self.populate(all_ids, reindex_config)
 
     def add_outdated(self):
         """add outdated documents"""
