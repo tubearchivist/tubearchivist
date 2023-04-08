@@ -31,7 +31,7 @@ function getMessages(dataOrigin) {
 function buildMessage(responseData, dataOrigin) {
   // filter relevant messages
   let messages = responseData.filter(function (value) {
-    return value.group.startsWith(dataOrigin);
+    return dataOrigin.split(' ').includes(value.group.split(':')[0]);
   }, dataOrigin);
   let notifications = document.getElementById('notifications');
   let currentNotifications = notifications.childElementCount;

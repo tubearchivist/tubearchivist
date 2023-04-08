@@ -136,6 +136,9 @@ function reindex(button) {
   let message = document.createElement('p');
   message.innerText = 'Reindex scheduled';
   document.getElementById('reindex-button').replaceWith(message);
+  setTimeout(function () {
+    checkMessages();
+  }, 500);
 }
 
 // download page buttons
