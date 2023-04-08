@@ -22,7 +22,7 @@
             <a href="{% url 'downloads' %}?channel={{ channel_info.channel_id }}"><h3>Downloads</h3></a>
         {% endif %}
     </div>
-    <div id="notifications" data="channel"></div>
+    <div id="notifications" data="channel reindex"></div>
     <div class="view-controls">
         <div class="toggle">
             <span>Show subscribed only:</span>
@@ -66,4 +66,5 @@
         {% endif %}
     </div>
 </div>
+<script type="text/javascript" src="{% static 'progress.js' %}"></script>
 {% endblock content %}

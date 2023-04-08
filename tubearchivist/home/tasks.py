@@ -21,7 +21,7 @@ from home.src.es.index_setup import ElasitIndexWrap
 from home.src.index.channel import YoutubeChannel
 from home.src.index.filesystem import Filesystem
 from home.src.index.manual import ImportFolderScanner
-from home.src.index.reindex import Reindex, ReindexManual, ReindexOutdated
+from home.src.index.reindex import Reindex, ReindexManual, ReindexPopulate
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskManager
@@ -220,9 +220,12 @@ def check_reindex(self, data=False, extract_videos=False):
     manager.init(self)
     if not data:
         # started from scheduler
+        populate = ReindexPopulate()
         print(f"[task][{self.name}] reindex outdated documents")
+        self.send_progress("Add recent documents to the reindex Queue.")
+        populate.add_recent()
         self.send_progress("Add outdated documents to the reindex Queue.")
-        ReindexOutdated().add_outdated()
+        populate.add_outdated()
 
     Reindex(task=self).reindex_all()
 

@@ -115,7 +115,7 @@ class YoutubeSubtitle:
             source = subtitle["source"]
             lang = subtitle.get("lang")
             response = requests.get(
-                subtitle["url"], headers=requests_headers()
+                subtitle["url"], headers=requests_headers(), timeout=30
             )
             if not response.ok:
                 print(f"{self.video.youtube_id}: failed to download subtitle")
@@ -137,13 +137,17 @@ class YoutubeSubtitle:
 
         return indexed
 
-    @staticmethod
-    def _write_subtitle_file(dest_path, subtitle_str):
+    def _write_subtitle_file(self, dest_path, subtitle_str):
         """write subtitle file to disk"""
         # create folder here for first video of channel
         os.makedirs(os.path.split(dest_path)[0], exist_ok=True)
         with open(dest_path, "w", encoding="utf-8") as subfile:
             subfile.write(subtitle_str)
+
+        host_uid = self.video.config["application"]["HOST_UID"]
+        host_gid = self.video.config["application"]["HOST_GID"]
+        if host_uid and host_gid:
+            os.chown(dest_path, host_uid, host_gid)
 
     @staticmethod
     def _index_subtitle(query_str):

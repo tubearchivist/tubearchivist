@@ -81,7 +81,7 @@ class ThumbManagerBase:
             "banner": os.path.join(
                 app_root, "static/img/default-channel-banner.jpg"
             ),
-            "art": os.path.join(
+            "tvart": os.path.join(
                 app_root, "static/img/default-channel-art.jpg"
             ),
         }
@@ -270,6 +270,7 @@ class ValidatorCallback:
             urls = (
                 channel["_source"]["channel_thumb_url"],
                 channel["_source"]["channel_banner_url"],
+                channel["_source"]["channel_tvart_url"],
             )
             handler = ThumbManager(channel["_source"]["channel_id"])
             handler.download_channel_art(urls, skip_existing=True)

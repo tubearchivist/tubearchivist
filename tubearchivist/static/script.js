@@ -55,19 +55,6 @@ function createWatchStatusIndicator(videoId, videoWatchStatus) {
   return watchStatusIndicator;
 }
 
-// function isWatched(youtube_id) {
-//     var payload = JSON.stringify({'watched': youtube_id});
-//     sendPost(payload);
-//     var seenIcon = document.createElement('img');
-//     seenIcon.setAttribute('src', "/static/img/icon-seen.svg");
-//     seenIcon.setAttribute('alt', 'seen-icon');
-//     seenIcon.setAttribute('id', youtube_id);
-//     seenIcon.setAttribute('title', "Mark as unwatched");
-//     seenIcon.setAttribute('onclick', "isUnwatched(this.id)");
-//     seenIcon.classList = 'seen-icon';
-//     document.getElementById(youtube_id).replaceWith(seenIcon);
-// }
-
 // Removes the progress bar when passed a video id
 function removeProgressBar(videoId) {
   setProgressBar(videoId, 0, 1);
@@ -83,20 +70,6 @@ function isWatchedButton(button) {
     location.reload();
   }, 1000);
 }
-
-// function isUnwatched(youtube_id) {
-//     postVideoProgress(youtube_id, 0); // Reset video progress on unwatched;
-//     var payload = JSON.stringify({'un_watched': youtube_id});
-//     sendPost(payload);
-//     var unseenIcon = document.createElement('img');
-//     unseenIcon.setAttribute('src', "/static/img/icon-unseen.svg");
-//     unseenIcon.setAttribute('alt', 'unseen-icon');
-//     unseenIcon.setAttribute('id', youtube_id);
-//     unseenIcon.setAttribute('title', "Mark as watched");
-//     unseenIcon.setAttribute('onclick', "isWatched(this.id)");
-//     unseenIcon.classList = 'unseen-icon';
-//     document.getElementById(youtube_id).replaceWith(unseenIcon);
-// }
 
 function unsubscribe(id_unsub) {
   let payload = JSON.stringify({ unsubscribe: id_unsub });
@@ -163,6 +136,9 @@ function reindex(button) {
   let message = document.createElement('p');
   message.innerText = 'Reindex scheduled';
   document.getElementById('reindex-button').replaceWith(message);
+  setTimeout(function () {
+    checkMessages();
+  }, 500);
 }
 
 // download page buttons
