@@ -166,7 +166,7 @@ class IndexPaginate:
     def _notify(self, processed):
         """send notification on task"""
         total = self.kwargs.get("total")
-        progress = (processed + 1) / total
+        progress = processed / total
         index_clean = self.index_name.lstrip("ta_").title()
         message = [f"Processing {index_clean}s {processed}/{total}"]
         self.kwargs.get("task").send_progress(message, progress=progress)
