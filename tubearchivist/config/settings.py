@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-PW_HASH = hashlib.sha256(environ.get("TA_PASSWORD").encode())
+PW_HASH = hashlib.sha256(environ["TA_PASSWORD"].encode())
 SECRET_KEY = PW_HASH.hexdigest()
 
 # SECURITY WARNING: don't run with debug turned on in production!

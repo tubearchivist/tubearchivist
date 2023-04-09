@@ -156,7 +156,7 @@ def ta_host_parser(ta_host):
     for host in ta_host.split():
         host_clean = host.strip()
         if not host_clean.startswith("http"):
-            host_clean = f"http://{host}"
+            host_clean = f"http://{host_clean}"
 
         parsed = urlparse(host_clean)
         allowed_hosts.append(f"{parsed.hostname}")
