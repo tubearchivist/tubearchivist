@@ -32,6 +32,7 @@ class ElasticBackup:
         if not self.reason:
             raise ValueError("missing backup reason in ElasticBackup")
 
+        self.task.send_progress(["Scanning your index."])
         for index in self.index_config:
             index_name = index["index_name"]
             print(f"backup: export in progress for {index_name}")
@@ -41,6 +42,7 @@ class ElasticBackup:
 
             self.backup_index(index_name)
 
+        self.task.send_progress(["Compress files to zip archive."])
         self.zip_it()
         if self.reason == "auto":
             self.rotate_backup()
