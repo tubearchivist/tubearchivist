@@ -18,6 +18,7 @@ import ldap
 from corsheaders.defaults import default_headers
 from django_auth_ldap.config import LDAPSearch
 from home.src.ta.config import AppConfig
+from home.src.ta.helper import ta_host_parser
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -32,17 +33,7 @@ SECRET_KEY = PW_HASH.hexdigest()
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(environ.get("DJANGO_DEBUG"))
 
-ALLOWED_HOSTS = []
-if environ.get("TA_HOST"):
-    ALLOWED_HOSTS = [i.strip() for i in environ.get("TA_HOST").split()]
-
-CSRF_TRUSTED_ORIGINS = []
-for host in ALLOWED_HOSTS:
-    if host.startswith("http://") or host.startswith("https://"):
-        CSRF_TRUSTED_ORIGINS.append(host)
-    else:
-        CSRF_TRUSTED_ORIGINS.append(f"http://{host}")
-
+ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS = ta_host_parser(environ["TA_HOST"])
 
 # Application definition
 
