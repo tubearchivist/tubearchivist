@@ -26,6 +26,7 @@ function sync_blackhole {
         --exclude "**/cache" \
         --exclude "**/__pycache__/" \
         --exclude "db.sqlite3" \
+        --exclude ".mypy_cache" \
         . -e ssh "$host":tubearchivist
 
     ssh "$host" 'docker build -t bbilly1/tubearchivist --build-arg TARGETPLATFORM="linux/amd64" tubearchivist'
@@ -49,6 +50,7 @@ function sync_test {
         --exclude "**/cache" \
         --exclude "**/__pycache__/" \
         --exclude "db.sqlite3" \
+        --exclude ".mypy_cache" \
         . -e ssh "$host":tubearchivist
 
     # copy default docker-compose file if not exist
