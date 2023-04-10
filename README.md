@@ -52,7 +52,7 @@ Take a look at the example [docker-compose.yml](https://github.com/tubearchivist
 **TubeArchivist**:  
 | Environment Var | Value |  |
 | ----------- | ----------- | ----------- |
-| TA_HOST | Server IP or hostname, without port, without protocol | Required |
+| TA_HOST | Server IP or hostname | Required |
 | TA_USERNAME | Initial username when logging into TA | Required |
 | TA_PASSWORD | Initial password when logging into TA | Required |
 | ELASTIC_PASSWORD | Password for ElasticSearch | Required |
