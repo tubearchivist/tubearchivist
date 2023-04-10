@@ -146,7 +146,7 @@ class BaseTask(Task):
     def _build_message(self, level="info"):
         """build message dict"""
         task_id = self.request.id
-        message = self.TASK_CONFIG.get(self.name)
+        message = self.TASK_CONFIG.get(self.name).copy()
         message.update({"level": level, "id": task_id})
         task_result = TaskManager().get_task(task_id)
         if task_result:

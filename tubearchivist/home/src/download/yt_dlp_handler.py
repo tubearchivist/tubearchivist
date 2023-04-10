@@ -131,13 +131,12 @@ class DownloadPostProcess:
         total_channel = len(self.download.channels)
         total_playlist = len(all_channel_playlist)
 
-        message = [f"Validate Playlists {id_p + 1}/{total_playlist}"]
-        title = f"Post Processing Channels: {id_c + 1}/{total_channel}"
+        message = [
+            f"Post Processing Channels: {id_c}/{total_channel}",
+            f"Validate Playlists {id_p + 1}/{total_playlist}",
+        ]
         progress = (id_c + 1) / total_channel
-
-        self.download.task.send_progress(
-            message, progress=progress, title=title
-        )
+        self.download.task.send_progress(message, progress=progress)
 
     def get_comments(self):
         """get comments from youtube"""
