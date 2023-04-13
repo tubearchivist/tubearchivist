@@ -16,8 +16,9 @@ from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video_constants import VideoTypeEnum
+from home.src.index.video_streams import DurationConverter
 from home.src.ta.config import AppConfig
-from home.src.ta.helper import DurationConverter, is_shorts
+from home.src.ta.helper import is_shorts
 from home.src.ta.ta_redis import RedisQueue
 
 

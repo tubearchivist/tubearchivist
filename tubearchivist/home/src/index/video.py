@@ -16,7 +16,8 @@ from home.src.index import playlist as ta_playlist
 from home.src.index.generic import YouTubeItem
 from home.src.index.subtitle import YoutubeSubtitle
 from home.src.index.video_constants import VideoTypeEnum
-from home.src.ta.helper import DurationConverter, clean_string, randomizor
+from home.src.index.video_streams import DurationConverter
+from home.src.ta.helper import clean_string, randomizor
 from home.src.ta.ta_redis import RedisArchivist
 from ryd_client import ryd_client
 
