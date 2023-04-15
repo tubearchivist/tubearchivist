@@ -56,20 +56,6 @@
                 {% else %}
                     <p>Youtube: Deactivated</p>
                 {% endif %}
-                {% if reindex %}
-                    <p>Reindex scheduled</p>
-                {% else %}
-                    <div id="reindex-button" class="button-box">
-                        <button data-id="{{ video.youtube_id }}" data-type="video" onclick="reindex(this)" title="Reindex {{ video.title }}">Reindex</button>
-                    </div>
-                {% endif %}
-                <div class="button-box">
-                    <a download="" href="/media/{{ video.media_url }}"><button id="download-item">Download File</button></a>
-                    <button onclick="deleteConfirm()" id="delete-item">Delete Video</button>
-                    <div class="delete-confirm" id="delete-button">
-                        <span>Are you sure? </span><button class="danger-button" onclick="deleteVideo(this)" data-id="{{ video.youtube_id }}" data-redirect = "{{ video.channel.channel_id }}">Delete</button> <button onclick="cancelDelete()">Cancel</button>
-                    </div>
-                </div>
             </div>
         </div>
         <div class="info-box-item">
@@ -87,6 +73,34 @@
                     </div>
                 {% endif %}
             </div>
+        </div>
+    </div>
+    <div class="info-box info-box-2">
+        <div class="info-box-item">
+            <div class="button-box">
+                {% if reindex %}
+                    <p>Reindex scheduled</p>
+                {% else %}
+                    <div id="reindex-button" class="button-box">
+                        <button data-id="{{ video.youtube_id }}" data-type="video" onclick="reindex(this)" title="Reindex {{ video.title }}">Reindex</button>
+                    </div>
+                {% endif %}
+                <a download="" href="/media/{{ video.media_url }}"><button id="download-item">Download File</button></a>
+                <button onclick="deleteConfirm()" id="delete-item">Delete Video</button>
+                <div class="delete-confirm" id="delete-button">
+                    <span>Are you sure? </span><button class="danger-button" onclick="deleteVideo(this)" data-id="{{ video.youtube_id }}" data-redirect = "{{ video.channel.channel_id }}">Delete</button> <button onclick="cancelDelete()">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <div class="info-box-item">
+            {% if video.media_size %}
+                <p>File size: {{ video.media_size|filesizeformat }}</p>
+            {% endif %}
+            {% if video.streams %}
+                {% for stream in video.streams %}
+                    <p>{{ stream.type|title }}: {{ stream.codec }} {{ stream.bitrate|filesizeformat }}/s{% if stream.width %} <span class="space-carrot">|</span> {{ stream.width }}x{{ stream.height}}{% endif %}</p>
+                {% endfor %}
+            {% endif %}
         </div>
     </div>
     {% if video.tags %}

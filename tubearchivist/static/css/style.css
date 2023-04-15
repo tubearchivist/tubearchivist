@@ -660,6 +660,10 @@ video:-webkit-full-screen {
     background-color: var(--highlight-bg);
 }
 
+.info-box-item p {
+    width: 100%;
+}
+
 .description-text {
     width: 100%;
 }
