@@ -148,8 +148,8 @@ class ArchivistViewConfig(View):
 class ArchivistResultsView(ArchivistViewConfig):
     """View class to inherit from when searching data in es"""
 
-    view_origin = False
-    es_search = False
+    view_origin = ""
+    es_search = ""
 
     def __init__(self):
         super().__init__(self.view_origin)
@@ -259,6 +259,7 @@ class ArchivistResultsView(ArchivistViewConfig):
         self.pagination_handler.validate(search.max_hits)
         self.context["max_hits"] = search.max_hits
         self.context["pagination"] = self.pagination_handler.pagination
+        self.context["aggs"] = search.aggs
 
 
 class MinView(View):
@@ -612,6 +613,11 @@ class ChannelIdView(ChannelIdBaseView):
                     {"terms": {"vid_type": vid_type_terms}},
                 ]
             }
+        }
+        self.data["aggs"] = {
+            "total_items": {"value_count": {"field": "youtube_id"}},
+            "total_size": {"sum": {"field": "media_size"}},
+            "total_duration": {"sum": {"field": "player.duration"}},
         }
         self.data["sort"].append({"title.keyword": {"order": "asc"}})
 
@@ -982,7 +988,7 @@ class SearchView(ArchivistResultsView):
     """
 
     view_origin = "home"
-    es_search = False
+    es_search = ""
 
     def get(self, request):
         """handle get request"""

@@ -11,6 +11,7 @@ from datetime import datetime
 
 from home.src.download.thumbnails import ThumbManager
 from home.src.es.connect import ElasticWrap
+from home.src.index.video_streams import DurationConverter
 from home.src.ta.config import AppConfig
 
 
@@ -19,6 +20,7 @@ class SearchHandler:
 
     def __init__(self, path, config, data=False):
         self.max_hits = None
+        self.aggs = None
         self.path = path
         self.config = config
         self.data = data
@@ -34,61 +36,21 @@ class SearchHandler:
             # simulate list for single result to reuse rest of class
             return_value = [response]
 
-        # stop if empty
         if not return_value:
             return False
 
-        all_videos = []
-        all_channels = []
         for idx, hit in enumerate(return_value):
             return_value[idx] = self.hit_cleanup(hit)
-            if hit["_index"] == "ta_video":
-                video_dict, channel_dict = self.vid_cache_link(hit)
-                if video_dict not in all_videos:
-                    all_videos.append(video_dict)
-                if channel_dict not in all_channels:
-                    all_channels.append(channel_dict)
-            elif hit["_index"] == "ta_channel":
-                channel_dict = self.channel_cache_link(hit)
-                if channel_dict not in all_channels:
-                    all_channels.append(channel_dict)
+
+        if response.get("aggregations"):
+            self.aggs = response["aggregations"]
+            if "total_duration" in self.aggs:
+                duration_sec = self.aggs["total_duration"]["value"]
+                self.aggs["total_duration"].update(
+                    {"value_str": DurationConverter().get_str(duration_sec)}
+                )
 
         return return_value
-
-    @staticmethod
-    def vid_cache_link(hit):
-        """download thumbnails into cache"""
-        vid_thumb = hit["source"]["vid_thumb_url"]
-        youtube_id = hit["source"]["youtube_id"]
-        channel_id_hit = hit["source"]["channel"]["channel_id"]
-        chan_thumb = hit["source"]["channel"]["channel_thumb_url"]
-        try:
-            chan_banner = hit["source"]["channel"]["channel_banner_url"]
-        except KeyError:
-            chan_banner = False
-        video_dict = {"youtube_id": youtube_id, "vid_thumb": vid_thumb}
-        channel_dict = {
-            "channel_id": channel_id_hit,
-            "chan_thumb": chan_thumb,
-            "chan_banner": chan_banner,
-        }
-        return video_dict, channel_dict
-
-    @staticmethod
-    def channel_cache_link(hit):
-        """build channel thumb links"""
-        channel_id_hit = hit["source"]["channel_id"]
-        chan_thumb = hit["source"]["channel_thumb_url"]
-        try:
-            chan_banner = hit["source"]["channel_banner_url"]
-        except KeyError:
-            chan_banner = False
-        channel_dict = {
-            "channel_id": channel_id_hit,
-            "chan_thumb": chan_thumb,
-            "chan_banner": chan_banner,
-        }
-        return channel_dict
 
     @staticmethod
     def hit_cleanup(hit):

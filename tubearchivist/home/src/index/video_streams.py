@@ -41,9 +41,9 @@ class DurationConverter:
             # failed to extract
             return "NA"
 
-        hours = duration_sec // 3600
-        minutes = (duration_sec - (hours * 3600)) // 60
-        secs = duration_sec - (hours * 3600) - (minutes * 60)
+        hours = int(duration_sec // 3600)
+        minutes = int((duration_sec - (hours * 3600)) // 60)
+        secs = int(duration_sec - (hours * 3600) - (minutes * 60))
 
         duration_str = str()
         if hours:
