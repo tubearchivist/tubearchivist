@@ -44,6 +44,7 @@ class Command(BaseCommand):
         self._mig_snapshot_check()
         self._mig_set_vid_type()
         self._mig_set_streams()
+        self._mig_set_autostart()
 
     def _sync_redis_state(self):
         """make sure redis gets new config.json values"""
@@ -236,3 +237,34 @@ class Command(BaseCommand):
 
             if idx % 100 == 0:
                 self.stdout.write(f"    progress {idx}/{total}")
+
+    def _mig_set_autostart(self):
+        """migration: update from 0.3.5 to 0.3.6 set auto_start to false"""
+        self.stdout.write("[MIGRATION] set default download auto_start")
+        data = {
+            "query": {
+                "bool": {"must_not": [{"exists": {"field": "auto_start"}}]}
+            },
+            "script": {"source": "ctx._source['auto_start'] = false"},
+        }
+        path = "ta_download/_update_by_query"
+        response, status_code = ElasticWrap(path).post(data=data)
+        if status_code == 200:
+            updated = response.get("updated", 0)
+            if not updated:
+                self.stdout.write(
+                    "    no videos needed updating in ta_download"
+                )
+
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"    ✓ {updated} videos updated in ta_download"
+                )
+            )
+            return
+
+        message = "    🗙 ta_download auto_start update failed"
+        self.stdout.write(self.style.ERROR(message))
+        self.stdout.write(response)
+        sleep(60)
+        raise CommandError(message)

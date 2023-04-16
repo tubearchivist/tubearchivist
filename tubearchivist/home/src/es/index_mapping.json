@@ -357,6 +357,9 @@
                 },
                 "vid_type": {
                     "type": "keyword"
+                },
+                "auto_start": {
+                    "type": "boolean"
                 }
             },
             "expected_set": {

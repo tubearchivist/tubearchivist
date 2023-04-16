@@ -171,10 +171,12 @@ def update_subscribed(self):
         return
 
     manager.init(self)
-    missing_videos = SubscriptionScanner(task=self).scan()
+    handler = SubscriptionScanner(task=self)
+    missing_videos = handler.scan()
+    auto_start = handler.auto_start
     if missing_videos:
         print(missing_videos)
-        extrac_dl.delay(missing_videos)
+        extrac_dl.delay(missing_videos, auto_start=auto_start)
 
 
 @shared_task(name="download_pending", bind=True, base=BaseTask)
@@ -194,12 +196,12 @@ def download_pending(self, from_queue=True):
 
 
 @shared_task(name="extract_download", bind=True, base=BaseTask)
-def extrac_dl(self, youtube_ids):
+def extrac_dl(self, youtube_ids, auto_start=False):
     """parse list passed and add to pending"""
     TaskManager().init(self)
     pending_handler = PendingList(youtube_ids=youtube_ids, task=self)
     pending_handler.parse_url_list()
-    pending_handler.add_to_pending()
+    pending_handler.add_to_pending(auto_start=auto_start)
 
 
 @shared_task(bind=True, name="check_reindex", base=BaseTask)

@@ -236,7 +236,7 @@ class PendingList(PendingIndex):
             # match vid_type later
             self._add_video(video_id, VideoTypeEnum.UNKNOWN)
 
-    def add_to_pending(self, status="pending"):
+    def add_to_pending(self, status="pending", auto_start=False):
         """add missing videos to pending list"""
         self.get_channels()
         bulk_list = []
@@ -252,7 +252,13 @@ class PendingList(PendingIndex):
             if not video_details:
                 continue
 
-            video_details["status"] = status
+            video_details.update(
+                {
+                    "status": status,
+                    "auto_start": auto_start,
+                }
+            )
+
             action = {"create": {"_id": youtube_id, "_index": "ta_download"}}
             bulk_list.append(json.dumps(action))
             bulk_list.append(json.dumps(video_details))

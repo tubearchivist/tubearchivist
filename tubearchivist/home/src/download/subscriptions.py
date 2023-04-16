@@ -284,6 +284,7 @@ class SubscriptionScanner:
     def __init__(self, task=False):
         self.task = task
         self.missing_videos = False
+        self.auto_start = AppConfig().config["subscriptions"].get("auto_start")
 
     def scan(self):
         """scan channels and playlists"""
