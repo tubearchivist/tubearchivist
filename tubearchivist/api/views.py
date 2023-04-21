@@ -38,8 +38,8 @@ class ApiBaseView(APIView):
 
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    search_base = False
-    data = False
+    search_base = ""
+    data = ""
 
     def __init__(self):
         super().__init__()
