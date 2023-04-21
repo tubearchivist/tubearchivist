@@ -180,7 +180,7 @@ def update_subscribed(self):
 
 
 @shared_task(name="download_pending", bind=True, base=BaseTask)
-def download_pending(self, from_queue=True):
+def download_pending(self, auto_only=False):
     """download latest pending videos"""
     manager = TaskManager()
     if manager.is_pending(self):
@@ -189,10 +189,7 @@ def download_pending(self, from_queue=True):
         return
 
     manager.init(self)
-    downloader = VideoDownloader(task=self)
-    if from_queue:
-        downloader.add_pending()
-    downloader.run_queue()
+    VideoDownloader(task=self).run_queue(auto_only)
 
 
 @shared_task(name="extract_download", bind=True, base=BaseTask)
