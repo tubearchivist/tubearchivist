@@ -19,7 +19,6 @@ from home.src.index.video_constants import VideoTypeEnum
 from home.src.index.video_streams import DurationConverter
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import is_shorts
-from home.src.ta.ta_redis import RedisQueue
 
 
 class PendingIndex:
@@ -113,20 +112,14 @@ class PendingInteract:
         _, _ = ElasticWrap(path).post(data=data)
 
     def update_status(self):
-        """update status field of pending item"""
-        data = {"doc": {"status": self.status}}
+        """update status of pending item"""
+        if self.status == "priority":
+            data = {"doc": {"status": "pending", "auto_start": True}}
+        else:
+            data = {"doc": {"status": self.status}}
+
         path = f"ta_download/_update/{self.youtube_id}"
         _, _ = ElasticWrap(path).post(data=data)
-
-    def prioritize(self):
-        """prioritize pending item in redis queue"""
-        pending_video, _ = self.get_item()
-        vid_type = pending_video.get("vid_type", VideoTypeEnum.VIDEOS.value)
-        to_add = {
-            "youtube_id": pending_video["youtube_id"],
-            "vid_type": vid_type,
-        }
-        RedisQueue(queue_name="dl_queue").add_priority(to_add)
 
     def get_item(self):
         """return pending item dict"""

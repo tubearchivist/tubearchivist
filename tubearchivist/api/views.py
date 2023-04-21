@@ -12,13 +12,12 @@ from home.src.index.generic import Pagination
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock, YoutubeVideo
 from home.src.ta.config import AppConfig
-from home.src.ta.ta_redis import RedisArchivist, RedisQueue
+from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskCommand, TaskManager
 from home.src.ta.urlparser import Parser
 from home.tasks import (
     BaseTask,
     check_reindex,
-    download_pending,
     extrac_dl,
     subscribe_to,
 )
@@ -436,12 +435,7 @@ class DownloadApiView(ApiBaseView):
             return Response({"message": message}, status=404)
 
         print(f"{video_id}: change status to {item_status}")
-        if item_status == "priority":
-            PendingInteract(youtube_id=video_id).prioritize()
-            download_pending.delay(from_queue=False)
-        else:
-            PendingInteract(video_id, item_status).update_status()
-            RedisQueue(queue_name="dl_queue").clear_item(video_id)
+        PendingInteract(video_id, item_status).update_status()
 
         return Response(request.data)
 
