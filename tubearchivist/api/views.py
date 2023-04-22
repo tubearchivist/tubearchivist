@@ -15,12 +15,7 @@ from home.src.ta.config import AppConfig
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskCommand, TaskManager
 from home.src.ta.urlparser import Parser
-from home.tasks import (
-    BaseTask,
-    check_reindex,
-    extrac_dl,
-    subscribe_to,
-)
+from home.tasks import BaseTask, check_reindex, extrac_dl, subscribe_to
 from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
