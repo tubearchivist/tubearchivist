@@ -25,6 +25,7 @@ from home.src.index.reindex import Reindex, ReindexManual, ReindexPopulate
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskManager
+from home.src.ta.urlparser import Parser
 
 CONFIG = AppConfig().config
 REDIS_HOST = os.environ.get("REDIS_HOST")
@@ -196,7 +197,12 @@ def download_pending(self, auto_only=False):
 def extrac_dl(self, youtube_ids, auto_start=False):
     """parse list passed and add to pending"""
     TaskManager().init(self)
-    pending_handler = PendingList(youtube_ids=youtube_ids, task=self)
+    if isinstance(youtube_ids, str):
+        to_add = Parser(youtube_ids).parse()
+    else:
+        to_add = youtube_ids
+
+    pending_handler = PendingList(youtube_ids=to_add, task=self)
     pending_handler.parse_url_list()
     pending_handler.add_to_pending(auto_start=auto_start)
 

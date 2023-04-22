@@ -20,10 +20,10 @@
             <img id="animate-icon" onclick="showForm()" src="{% static 'img/icon-add.svg' %}" alt="add-icon">
             <p>Add to download queue</p>
             <div class="show-form">
-                <form id='hidden-form' action="/downloads/" method="post">
+                <form id='hidden-form'>
                     {% csrf_token %}
                     {{ add_form }}
-                    <button type="submit">Add to download queue</button>
+                    <button onclick="addToQueue()">Add to download queue</button>
                 </form>
             </div>
         </div>
