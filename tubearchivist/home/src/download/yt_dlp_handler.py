@@ -166,43 +166,39 @@ class VideoDownloader:
                 break
 
             youtube_id = video_data.get("youtube_id")
-            video_type = VideoTypeEnum(video_data["vid_type"])
-            print(f"{youtube_id}: Downloading type: {video_type.value}")
+            print(f"{youtube_id}: Downloading video")
+            self._notify(video_data, "Validate download format")
 
             success = self._dl_single_vid(youtube_id)
             if not success:
                 continue
 
-            if self.task:
-                self.task.send_progress(
-                    [
-                        f"Processing video {youtube_id}",
-                        "Add video metadata to index.",
-                    ]
-                )
+            self._notify(video_data, "Add video metadata to index")
 
             vid_dict = index_new_video(
                 youtube_id,
                 video_overwrites=self.video_overwrites,
-                video_type=video_type,
+                video_type=VideoTypeEnum(video_data["vid_type"]),
             )
             self.channels.add(vid_dict["channel"]["channel_id"])
             self.videos.add(vid_dict["youtube_id"])
 
-            if self.task:
-                self.task.send_progress(
-                    [
-                        f"Processing video {youtube_id}",
-                        "Move downloaded file to archive.",
-                    ]
-                )
-
+            self._notify(video_data, "Move downloaded file to archive")
             self.move_to_archive(vid_dict)
             self._delete_from_pending(youtube_id)
 
         # post processing
         self._add_subscribed_channels()
         DownloadPostProcess(self).run()
+
+    def _notify(self, video_data, message):
+        """send progress notification to task"""
+        if not self.task:
+            return
+
+        typ = VideoTypeEnum(video_data["vid_type"]).value.rstrip("s").title()
+        title = video_data.get("title")
+        self.task.send_progress([f"Processing {typ}: {title}", message])
 
     def _get_next(self, auto_only):
         """get next item in queue"""
@@ -228,6 +224,7 @@ class VideoDownloader:
     def _get_overwrites(self):
         """get channel overwrites"""
         pending = PendingList()
+        pending.get_download()
         pending.get_channels()
         self.video_overwrites = pending.video_overwrites
 
@@ -386,7 +383,7 @@ class VideoDownloader:
     @staticmethod
     def _delete_from_pending(youtube_id):
         """delete downloaded video from pending index if its there"""
-        path = f"ta_download/_doc/{youtube_id}"
+        path = f"ta_download/_doc/{youtube_id}?refresh=true"
         _, _ = ElasticWrap(path).delete()
 
     def _add_subscribed_channels(self):
