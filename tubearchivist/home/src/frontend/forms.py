@@ -107,7 +107,6 @@ class ApplicationSettingsForm(forms.Form):
     subscriptions_shorts_channel_size = forms.IntegerField(
         required=False, min_value=0
     )
-    downloads_limit_count = forms.IntegerField(required=False)
     downloads_limit_speed = forms.IntegerField(required=False)
     downloads_throttledratelimit = forms.IntegerField(required=False)
     downloads_sleep_interval = forms.IntegerField(required=False)

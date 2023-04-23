@@ -19,7 +19,6 @@
         "auto_start": false
     },
     "downloads": {
-        "limit_count": false,
         "limit_speed": false,
         "sleep_interval": 3,
         "autodelete_days": false,
