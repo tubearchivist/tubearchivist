@@ -175,10 +175,7 @@ class PlaylistSubscription:
 
     def process_url_str(self, new_playlists, subscribed=True):
         """process playlist subscribe form url_str"""
-        data = {
-            "query": {"match_all": {}},
-            "sort": [{"published": {"order": "desc"}}],
-        }
+        data = {"query": {"match_all": {}}, "_source": ["youtube_id"]}
         all_indexed = IndexPaginate("ta_video", data).get_results()
         all_youtube_ids = [i["youtube_id"] for i in all_indexed]
 
