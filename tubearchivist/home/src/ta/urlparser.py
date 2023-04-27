@@ -92,7 +92,7 @@ class Parser:
             item_type = "video"
         elif len_id_str == 24:
             item_type = "channel"
-        elif len_id_str in (34, 18):
+        elif len_id_str in (34, 26, 18):
             item_type = "playlist"
         else:
             raise ValueError(f"not a valid id_str: {id_str}")
