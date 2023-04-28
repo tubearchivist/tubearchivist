@@ -24,6 +24,7 @@
         "sleep_interval": 3,
         "autodelete_days": false,
         "format": false,
+        "format_sort": false,
         "add_metadata": false,
         "add_thumbnail": false,
         "subtitle": false,
