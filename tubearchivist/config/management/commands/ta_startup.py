@@ -42,7 +42,6 @@ class Command(BaseCommand):
         self._version_check()
         self._mig_index_setup()
         self._mig_snapshot_check()
-        self._mig_set_vid_type()
         self._mig_set_streams()
         self._mig_set_autostart()
 
@@ -147,55 +146,6 @@ class Command(BaseCommand):
         """migration setup snapshots"""
         self.stdout.write("[MIGRATION] setup snapshots")
         ElasticSnapshot().setup()
-
-    def _mig_set_vid_type(self):
-        """migration: update 0.3.0 to 0.3.1 set vid_type default"""
-        self.stdout.write("[MIGRATION] set default vid_type")
-        index_list = ["ta_video", "ta_download"]
-        data = {
-            "query": {
-                "bool": {
-                    "should": [
-                        {
-                            "bool": {
-                                "must_not": [{"exists": {"field": "vid_type"}}]
-                            }
-                        },
-                        {"term": {"vid_type": {"value": "unknown"}}},
-                    ]
-                }
-            },
-            "script": {"source": "ctx._source['vid_type'] = 'videos'"},
-        }
-
-        for index_name in index_list:
-            path = f"{index_name}/_update_by_query"
-            response, status_code = ElasticWrap(path).post(data=data)
-            if status_code == 503:
-                message = f"    🗙 {index_name} retry failed migration."
-                self.stdout.write(self.style.ERROR(message))
-                sleep(10)
-                response, status_code = ElasticWrap(path).post(data=data)
-
-            if status_code == 200:
-                updated = response.get("updated", 0)
-                if not updated:
-                    self.stdout.write(
-                        f"    no videos needed updating in {index_name}"
-                    )
-                    continue
-
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        f"    ✓ {updated} videos updated in {index_name}"
-                    )
-                )
-            else:
-                message = f"    🗙 {index_name} vid_type update failed"
-                self.stdout.write(self.style.ERROR(message))
-                self.stdout.write(response)
-                sleep(60)
-                raise CommandError(message)
 
     def _mig_set_streams(self):
         """migration: update from 0.3.5 to 0.3.6, set streams and media_size"""
