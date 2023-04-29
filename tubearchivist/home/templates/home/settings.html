@@ -49,6 +49,11 @@
                 <i>Shorts Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max recommended 50.</i><br>
                 {{ app_form.subscriptions_shorts_channel_size }}
             </div>
+            <div class="settings-item">
+                <p>Auto start download from your subscriptions: <span class="settings-current">{{ config.subscriptions.auto_start}}</span></p>
+                <i>Enable this will automatically start and prioritize videos from your subscriptions.</i><br>
+                {{ app_form.subscriptions_auto_start }}
+            </div>
         </div>
         <div class="settings-group">
             <h2 id="downloads">Downloads</h2>

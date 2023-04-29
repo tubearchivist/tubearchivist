@@ -44,6 +44,12 @@ class UserSettingsForm(forms.Form):
 class ApplicationSettingsForm(forms.Form):
     """handle all application settings"""
 
+    AUTOSTART_CHOICES = [
+        ("", "-- change subscription autostart --"),
+        ("0", "disable auto start"),
+        ("1", "enable auto start"),
+    ]
+
     METADATA_CHOICES = [
         ("", "-- change metadata embed --"),
         ("0", "don't embed metadata"),
@@ -106,6 +112,9 @@ class ApplicationSettingsForm(forms.Form):
     )
     subscriptions_shorts_channel_size = forms.IntegerField(
         required=False, min_value=0
+    )
+    subscriptions_auto_start = forms.ChoiceField(
+        widget=forms.Select, choices=AUTOSTART_CHOICES, required=False
     )
     downloads_limit_speed = forms.IntegerField(required=False)
     downloads_throttledratelimit = forms.IntegerField(required=False)
