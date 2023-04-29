@@ -12,7 +12,7 @@ from home.src.index.generic import Pagination
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock, YoutubeVideo
 from home.src.ta.config import AppConfig
-from home.src.ta.ta_redis import RedisArchivist, RedisQueue
+from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskCommand, TaskManager
 from home.src.ta.urlparser import Parser
 from home.tasks import (
@@ -38,8 +38,8 @@ class ApiBaseView(APIView):
 
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    search_base = False
-    data = False
+    search_base = ""
+    data = ""
 
     def __init__(self):
         super().__init__()
@@ -436,12 +436,9 @@ class DownloadApiView(ApiBaseView):
             return Response({"message": message}, status=404)
 
         print(f"{video_id}: change status to {item_status}")
+        PendingInteract(video_id, item_status).update_status()
         if item_status == "priority":
-            PendingInteract(youtube_id=video_id).prioritize()
-            download_pending.delay(from_queue=False)
-        else:
-            PendingInteract(video_id, item_status).update_status()
-            RedisQueue(queue_name="dl_queue").clear_item(video_id)
+            download_pending.delay(auto_only=True)
 
         return Response(request.data)
 
@@ -494,6 +491,7 @@ class DownloadApiListView(ApiBaseView):
     def post(request):
         """add list of videos to download queue"""
         data = request.data
+        auto_start = bool(request.GET.get("autostart"))
         try:
             to_add = data["data"]
         except KeyError:
@@ -510,7 +508,7 @@ class DownloadApiListView(ApiBaseView):
             print(message)
             return Response({"message": message}, status=400)
 
-        extrac_dl.delay(youtube_ids)
+        extrac_dl.delay(youtube_ids, auto_start=auto_start)
 
         return Response(data)
 

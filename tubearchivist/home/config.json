@@ -12,14 +12,13 @@
         "grid_items": 3
     },
     "subscriptions": {
-        "auto_search": false,
         "auto_download": false,
         "channel_size": 50,
         "live_channel_size": 50,
-        "shorts_channel_size": 50
+        "shorts_channel_size": 50,
+        "auto_start": false
     },
     "downloads": {
-        "limit_count": false,
         "limit_speed": false,
         "sleep_interval": 3,
         "autodelete_days": false,

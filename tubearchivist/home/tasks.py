@@ -25,6 +25,7 @@ from home.src.index.reindex import Reindex, ReindexManual, ReindexPopulate
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskManager
+from home.src.ta.urlparser import Parser
 
 CONFIG = AppConfig().config
 REDIS_HOST = os.environ.get("REDIS_HOST")
@@ -171,14 +172,16 @@ def update_subscribed(self):
         return
 
     manager.init(self)
-    missing_videos = SubscriptionScanner(task=self).scan()
+    handler = SubscriptionScanner(task=self)
+    missing_videos = handler.scan()
+    auto_start = handler.auto_start
     if missing_videos:
         print(missing_videos)
-        extrac_dl.delay(missing_videos)
+        extrac_dl.delay(missing_videos, auto_start=auto_start)
 
 
 @shared_task(name="download_pending", bind=True, base=BaseTask)
-def download_pending(self, from_queue=True):
+def download_pending(self, auto_only=False):
     """download latest pending videos"""
     manager = TaskManager()
     if manager.is_pending(self):
@@ -187,19 +190,24 @@ def download_pending(self, from_queue=True):
         return
 
     manager.init(self)
-    downloader = VideoDownloader(task=self)
-    if from_queue:
-        downloader.add_pending()
-    downloader.run_queue()
+    VideoDownloader(task=self).run_queue(auto_only=auto_only)
 
 
 @shared_task(name="extract_download", bind=True, base=BaseTask)
-def extrac_dl(self, youtube_ids):
+def extrac_dl(self, youtube_ids, auto_start=False):
     """parse list passed and add to pending"""
     TaskManager().init(self)
-    pending_handler = PendingList(youtube_ids=youtube_ids, task=self)
+    if isinstance(youtube_ids, str):
+        to_add = Parser(youtube_ids).parse()
+    else:
+        to_add = youtube_ids
+
+    pending_handler = PendingList(youtube_ids=to_add, task=self)
     pending_handler.parse_url_list()
-    pending_handler.add_to_pending()
+    pending_handler.add_to_pending(auto_start=auto_start)
+
+    if auto_start:
+        download_pending.delay(auto_only=True)
 
 
 @shared_task(bind=True, name="check_reindex", base=BaseTask)

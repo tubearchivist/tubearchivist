@@ -53,11 +53,6 @@
         <div class="settings-group">
             <h2 id="downloads">Downloads</h2>
             <div class="settings-item">
-                <p>Current download limit: <span class="settings-current">{{ config.downloads.limit_count }}</span></p>
-                <i>Limit the number of videos getting downloaded on every run. 0 (zero) to deactivate.</i><br>
-                {{ app_form.downloads_limit_count }}
-            </div>
-            <div class="settings-item">
                 <p>Current download speed limit in KB/s: <span class="settings-current">{{ config.downloads.limit_speed }}</span></p>
                 <i>Limit download speed. 0 (zero) to deactivate, e.g. 1000 (1MB/s). Speeds are in KB/s. Setting takes effect on new download jobs or application restart.</i><br>
                 {{ app_form.downloads_limit_speed }}
