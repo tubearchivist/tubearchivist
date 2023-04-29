@@ -369,6 +369,10 @@ button:hover {
     display: none;
 }
 
+#hidden-form button {
+    margin-right: 1rem;
+}
+
 #text-reveal {
     height: 0;
     overflow: hidden;
@@ -658,6 +662,10 @@ video:-webkit-full-screen {
     align-items: center;
     padding: 15px;
     background-color: var(--highlight-bg);
+}
+
+.info-box-item p {
+    width: 100%;
 }
 
 .description-text {

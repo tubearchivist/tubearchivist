@@ -146,6 +146,9 @@
                     "type": "keyword",
                     "index": false
                 },
+                "media_size": {
+                    "type": "long"
+                },
                 "tags": {
                     "type": "text",
                     "analyzer": "english",
@@ -236,6 +239,30 @@
                         "url": {
                             "type": "keyword",
                             "index": false
+                        }
+                    }
+                },
+                "streams": {
+                    "properties": {
+                        "type": {
+                            "type": "keyword",
+                            "index": false
+                        },
+                        "index": {
+                            "type": "short",
+                            "index": false
+                        },
+                        "codec": {
+                            "type": "text"
+                        },
+                        "width": {
+                            "type": "short"
+                        },
+                        "height": {
+                            "type": "short"
+                        },
+                        "bitrate": {
+                            "type": "integer"
                         }
                     }
                 },
@@ -330,6 +357,9 @@
                 },
                 "vid_type": {
                     "type": "keyword"
+                },
+                "auto_start": {
+                    "type": "boolean"
                 }
             },
             "expected_set": {

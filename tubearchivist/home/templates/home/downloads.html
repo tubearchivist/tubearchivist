@@ -20,11 +20,12 @@
             <img id="animate-icon" onclick="showForm()" src="{% static 'img/icon-add.svg' %}" alt="add-icon">
             <p>Add to download queue</p>
             <div class="show-form">
-                <form id='hidden-form' action="/downloads/" method="post">
+                <div id='hidden-form' novalidate>
                     {% csrf_token %}
                     {{ add_form }}
-                    <button type="submit">Add to download queue</button>
-                </form>
+                    <button onclick="addToQueue()">Add to queue</button>
+                    <button onclick="addToQueue(true)">Download now</button>
+                </div>
             </div>
         </div>
     </div>

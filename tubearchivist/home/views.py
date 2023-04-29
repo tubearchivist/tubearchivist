@@ -41,8 +41,7 @@ from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.helper import time_parser
 from home.src.ta.ta_redis import RedisArchivist
-from home.src.ta.urlparser import Parser
-from home.tasks import extrac_dl, index_channel_playlists, subscribe_to
+from home.tasks import index_channel_playlists, subscribe_to
 from rest_framework.authtoken.models import Token
 
 
@@ -148,8 +147,8 @@ class ArchivistViewConfig(View):
 class ArchivistResultsView(ArchivistViewConfig):
     """View class to inherit from when searching data in es"""
 
-    view_origin = False
-    es_search = False
+    view_origin = ""
+    es_search = ""
 
     def __init__(self):
         super().__init__(self.view_origin)
@@ -259,6 +258,7 @@ class ArchivistResultsView(ArchivistViewConfig):
         self.pagination_handler.validate(search.max_hits)
         self.context["max_hits"] = search.max_hits
         self.context["pagination"] = self.pagination_handler.pagination
+        self.context["aggs"] = search.aggs
 
 
 class MinView(View):
@@ -367,7 +367,7 @@ class AboutView(MinView):
 
 class DownloadView(ArchivistResultsView):
     """resolves to /download/
-    takes POST for downloading youtube links
+    handle the download queue
     """
 
     view_origin = "downloads"
@@ -450,34 +450,6 @@ class DownloadView(ArchivistResultsView):
             buckets_sorted.append(bucket)
 
         return buckets_sorted
-
-    @staticmethod
-    def post(request):
-        """handle post requests"""
-        to_queue = AddToQueueForm(data=request.POST)
-        if to_queue.is_valid():
-            url_str = request.POST.get("vid_url")
-            print(url_str)
-            try:
-                youtube_ids = Parser(url_str).parse()
-            except ValueError:
-                # failed to process
-                key = "message:add"
-                print(f"failed to parse: {url_str}")
-                mess_dict = {
-                    "status": key,
-                    "level": "error",
-                    "title": "Failed to extract links.",
-                    "message": "Not a video, channel or playlist ID or URL",
-                }
-                RedisArchivist().set_message(key, mess_dict, expire=True)
-                return redirect("downloads")
-
-            print(youtube_ids)
-            extrac_dl.delay(youtube_ids)
-
-        sleep(2)
-        return redirect("downloads", permanent=True)
 
 
 class ChannelIdBaseView(ArchivistResultsView):
@@ -612,6 +584,11 @@ class ChannelIdView(ChannelIdBaseView):
                     {"terms": {"vid_type": vid_type_terms}},
                 ]
             }
+        }
+        self.data["aggs"] = {
+            "total_items": {"value_count": {"field": "youtube_id"}},
+            "total_size": {"sum": {"field": "media_size"}},
+            "total_duration": {"sum": {"field": "player.duration"}},
         }
         self.data["sort"].append({"title.keyword": {"order": "asc"}})
 
@@ -982,7 +959,7 @@ class SearchView(ArchivistResultsView):
     """
 
     view_origin = "home"
-    es_search = False
+    es_search = ""
 
     def get(self, request):
         """handle get request"""

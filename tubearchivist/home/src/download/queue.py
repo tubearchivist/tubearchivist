@@ -16,9 +16,9 @@ from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video_constants import VideoTypeEnum
+from home.src.index.video_streams import DurationConverter
 from home.src.ta.config import AppConfig
-from home.src.ta.helper import DurationConverter, is_shorts
-from home.src.ta.ta_redis import RedisQueue
+from home.src.ta.helper import is_shorts
 
 
 class PendingIndex:
@@ -112,20 +112,14 @@ class PendingInteract:
         _, _ = ElasticWrap(path).post(data=data)
 
     def update_status(self):
-        """update status field of pending item"""
-        data = {"doc": {"status": self.status}}
-        path = f"ta_download/_update/{self.youtube_id}"
-        _, _ = ElasticWrap(path).post(data=data)
+        """update status of pending item"""
+        if self.status == "priority":
+            data = {"doc": {"status": "pending", "auto_start": True}}
+        else:
+            data = {"doc": {"status": self.status}}
 
-    def prioritize(self):
-        """prioritize pending item in redis queue"""
-        pending_video, _ = self.get_item()
-        vid_type = pending_video.get("vid_type", VideoTypeEnum.VIDEOS.value)
-        to_add = {
-            "youtube_id": pending_video["youtube_id"],
-            "vid_type": vid_type,
-        }
-        RedisQueue(queue_name="dl_queue").add_priority(to_add)
+        path = f"ta_download/_update/{self.youtube_id}/?refresh=true"
+        _, _ = ElasticWrap(path).post(data=data)
 
     def get_item(self):
         """return pending item dict"""
@@ -235,7 +229,7 @@ class PendingList(PendingIndex):
             # match vid_type later
             self._add_video(video_id, VideoTypeEnum.UNKNOWN)
 
-    def add_to_pending(self, status="pending"):
+    def add_to_pending(self, status="pending", auto_start=False):
         """add missing videos to pending list"""
         self.get_channels()
         bulk_list = []
@@ -251,7 +245,13 @@ class PendingList(PendingIndex):
             if not video_details:
                 continue
 
-            video_details["status"] = status
+            video_details.update(
+                {
+                    "status": status,
+                    "auto_start": auto_start,
+                }
+            )
+
             action = {"create": {"_id": youtube_id, "_index": "ta_download"}}
             bulk_list.append(json.dumps(action))
             bulk_list.append(json.dumps(video_details))
@@ -273,7 +273,7 @@ class PendingList(PendingIndex):
         # add last newline
         bulk_list.append("\n")
         query_str = "\n".join(bulk_list)
-        _, _ = ElasticWrap("_bulk").post(query_str, ndjson=True)
+        _, _ = ElasticWrap("_bulk?refresh=true").post(query_str, ndjson=True)
 
     def _notify_add(self, idx, total):
         """send notification for adding videos to download queue"""

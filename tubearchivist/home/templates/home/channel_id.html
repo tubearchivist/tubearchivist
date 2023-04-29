@@ -45,12 +45,10 @@
             </div>
         </div>
         <div class="info-box-item">
-            <div>
-                {% if max_hits %}
-                    <p>Total Videos: {{ max_hits }}</p>
-                    <button title="Mark all videos from {{ channel_info.channel_name }} as watched" type="button" id="watched-button" data-id="{{ channel_info.channel_id }}" onclick="isWatchedButton(this)">Mark as watched</button>
-                {% endif %}
-            </div>
+            {% if aggs %}
+                <p>{{ aggs.total_items.value }} videos <span class="space-carrot">|</span> {{ aggs.total_duration.value_str }} playback <span class="space-carrot">|</span> Total size {{ aggs.total_size.value|filesizeformat }}</p>
+                <button title="Mark all videos from {{ channel_info.channel_name }} as watched" type="button" id="watched-button" data-id="{{ channel_info.channel_id }}" onclick="isWatchedButton(this)">Mark as watched</button>
+            {% endif %}
         </div>
     </div>
 </div>

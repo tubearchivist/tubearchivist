@@ -49,14 +49,14 @@
                 <i>Shorts Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max recommended 50.</i><br>
                 {{ app_form.subscriptions_shorts_channel_size }}
             </div>
+            <div class="settings-item">
+                <p>Auto start download from your subscriptions: <span class="settings-current">{{ config.subscriptions.auto_start}}</span></p>
+                <i>Enable this will automatically start and prioritize videos from your subscriptions.</i><br>
+                {{ app_form.subscriptions_auto_start }}
+            </div>
         </div>
         <div class="settings-group">
             <h2 id="downloads">Downloads</h2>
-            <div class="settings-item">
-                <p>Current download limit: <span class="settings-current">{{ config.downloads.limit_count }}</span></p>
-                <i>Limit the number of videos getting downloaded on every run. 0 (zero) to deactivate.</i><br>
-                {{ app_form.downloads_limit_count }}
-            </div>
             <div class="settings-item">
                 <p>Current download speed limit in KB/s: <span class="settings-current">{{ config.downloads.limit_speed }}</span></p>
                 <i>Limit download speed. 0 (zero) to deactivate, e.g. 1000 (1MB/s). Speeds are in KB/s. Setting takes effect on new download jobs or application restart.</i><br>
@@ -93,6 +93,19 @@
                 </ul>
                 <i>Make sure your custom format gets merged into a single file. Check out the <a href="https://github.com/yt-dlp/yt-dlp#format-selection" target="_blank">documentation</a> for valid configurations.</i><br>
                 {{ app_form.downloads_format }}
+                <br>
+            </div>
+            <div class="settings-item">
+                <p>Force sort order to have precedence over all yt-dlp fields.<br>
+                    Currently: <span class="settings-current">{{ config.downloads.format_sort }}</span>
+                </p>
+                <p>Example configurations:</p>
+                <ul>
+                    <li><span class="settings-current">res,codec:av1</span>: prefer AV1 over all other video codecs.</li>
+                    <li><span class="settings-current">0</span>: deactivate and keep the default as decided by yt-dlp.</li>
+                </ul>
+                <i>Not all codecs are supported by all browsers. The default value ensures best compatibility. Check out the <a href="https://github.com/yt-dlp/yt-dlp#sorting-formats" target="_blank">documentation</a> for valid configurations.</i><br>
+                {{ app_form.downloads_format_sort }}
                 <br>
             </div>
             <div class="settings-item">

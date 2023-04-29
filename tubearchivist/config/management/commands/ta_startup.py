@@ -8,9 +8,10 @@ import os
 from time import sleep
 
 from django.core.management.base import BaseCommand, CommandError
-from home.src.es.connect import ElasticWrap
+from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.es.index_setup import ElasitIndexWrap
 from home.src.es.snapshot import ElasticSnapshot
+from home.src.index.video_streams import MediaStreamExtractor
 from home.src.ta.config import AppConfig, ReleaseVersion
 from home.src.ta.helper import clear_dl_cache
 from home.src.ta.ta_redis import RedisArchivist
@@ -41,7 +42,8 @@ class Command(BaseCommand):
         self._version_check()
         self._mig_index_setup()
         self._mig_snapshot_check()
-        self._mig_set_vid_type()
+        self._mig_set_streams()
+        self._mig_set_autostart()
 
     def _sync_redis_state(self):
         """make sure redis gets new config.json values"""
@@ -145,51 +147,74 @@ class Command(BaseCommand):
         self.stdout.write("[MIGRATION] setup snapshots")
         ElasticSnapshot().setup()
 
-    def _mig_set_vid_type(self):
-        """migration: update 0.3.0 to 0.3.1 set vid_type default"""
-        self.stdout.write("[MIGRATION] set default vid_type")
-        index_list = ["ta_video", "ta_download"]
+    def _mig_set_streams(self):
+        """migration: update from 0.3.5 to 0.3.6, set streams and media_size"""
+        self.stdout.write("[MIGRATION] index streams and media size")
+        videos = AppConfig().config["application"]["videos"]
         data = {
             "query": {
-                "bool": {
-                    "should": [
-                        {
-                            "bool": {
-                                "must_not": [{"exists": {"field": "vid_type"}}]
-                            }
-                        },
-                        {"term": {"vid_type": {"value": "unknown"}}},
-                    ]
-                }
+                "bool": {"must_not": [{"exists": {"field": "streams"}}]}
             },
-            "script": {"source": "ctx._source['vid_type'] = 'videos'"},
+            "_source": ["media_url", "youtube_id"],
         }
+        all_missing = IndexPaginate("ta_video", data).get_results()
+        if not all_missing:
+            self.stdout.write("    no videos need updating")
+            return
 
-        for index_name in index_list:
-            path = f"{index_name}/_update_by_query"
-            response, status_code = ElasticWrap(path).post(data=data)
-            if status_code == 503:
-                message = f"    🗙 {index_name} retry failed migration."
-                self.stdout.write(self.style.ERROR(message))
-                sleep(10)
-                response, status_code = ElasticWrap(path).post(data=data)
+        total = len(all_missing)
+        for idx, missing in enumerate(all_missing):
+            media_url = missing["media_url"]
+            youtube_id = missing["youtube_id"]
+            media_path = os.path.join(videos, media_url)
+            if not os.path.exists(media_path):
+                self.stdout.write(f"    file not found: {media_path}")
+                continue
 
-            if status_code == 200:
-                updated = response.get("updated", 0)
-                if not updated:
-                    self.stdout.write(
-                        f"    no videos needed updating in {index_name}"
-                    )
-                    continue
-
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        f"    ✓ {updated} videos updated in {index_name}"
-                    )
+            media = MediaStreamExtractor(media_path)
+            vid_data = {
+                "doc": {
+                    "streams": media.extract_metadata(),
+                    "media_size": media.get_file_size(),
+                }
+            }
+            path = f"ta_video/_update/{youtube_id}"
+            response, status_code = ElasticWrap(path).post(data=vid_data)
+            if not status_code == 200:
+                self.stdout.errors(
+                    f"    update failed: {path}, {response}, {status_code}"
                 )
-            else:
-                message = f"    🗙 {index_name} vid_type update failed"
-                self.stdout.write(self.style.ERROR(message))
-                self.stdout.write(response)
-                sleep(60)
-                raise CommandError(message)
+
+            if idx % 100 == 0:
+                self.stdout.write(f"    progress {idx}/{total}")
+
+    def _mig_set_autostart(self):
+        """migration: update from 0.3.5 to 0.3.6 set auto_start to false"""
+        self.stdout.write("[MIGRATION] set default download auto_start")
+        data = {
+            "query": {
+                "bool": {"must_not": [{"exists": {"field": "auto_start"}}]}
+            },
+            "script": {"source": "ctx._source['auto_start'] = false"},
+        }
+        path = "ta_download/_update_by_query"
+        response, status_code = ElasticWrap(path).post(data=data)
+        if status_code == 200:
+            updated = response.get("updated", 0)
+            if not updated:
+                self.stdout.write(
+                    "    no videos needed updating in ta_download"
+                )
+                return
+
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"    ✓ {updated} videos updated in ta_download"
+                )
+            )
+
+        message = "    🗙 ta_download auto_start update failed"
+        self.stdout.write(self.style.ERROR(message))
+        self.stdout.write(response)
+        sleep(60)
+        raise CommandError(message)
