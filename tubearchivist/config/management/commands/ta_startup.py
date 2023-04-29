@@ -218,7 +218,7 @@ class Command(BaseCommand):
             youtube_id = missing["youtube_id"]
             media_path = os.path.join(videos, media_url)
             if not os.path.exists(media_path):
-                self.stdout.errors(f"    file not found: {media_path}")
+                self.stdout.write(f"    file not found: {media_path}")
                 continue
 
             media = MediaStreamExtractor(media_path)
@@ -255,13 +255,13 @@ class Command(BaseCommand):
                 self.stdout.write(
                     "    no videos needed updating in ta_download"
                 )
+                return
 
             self.stdout.write(
                 self.style.SUCCESS(
                     f"    ✓ {updated} videos updated in ta_download"
                 )
             )
-            return
 
         message = "    🗙 ta_download auto_start update failed"
         self.stdout.write(self.style.ERROR(message))
