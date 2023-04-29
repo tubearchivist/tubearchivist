@@ -312,6 +312,10 @@ class VideoDownloader:
         """build user customized options"""
         if self.config["downloads"]["format"]:
             self.obs["format"] = self.config["downloads"]["format"]
+        if self.config["downloads"]["format_sort"]:
+            format_sort = self.config["downloads"]["format_sort"]
+            format_sort_list = [i.strip() for i in format_sort.split(",")]
+            self.obs["format_sort"] = format_sort_list
         if self.config["downloads"]["limit_speed"]:
             self.obs["ratelimit"] = (
                 self.config["downloads"]["limit_speed"] * 1024
