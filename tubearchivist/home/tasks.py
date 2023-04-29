@@ -190,7 +190,7 @@ def download_pending(self, auto_only=False):
         return
 
     manager.init(self)
-    VideoDownloader(task=self).run_queue(auto_only)
+    VideoDownloader(task=self).run_queue(auto_only=auto_only)
 
 
 @shared_task(name="extract_download", bind=True, base=BaseTask)
@@ -205,6 +205,9 @@ def extrac_dl(self, youtube_ids, auto_start=False):
     pending_handler = PendingList(youtube_ids=to_add, task=self)
     pending_handler.parse_url_list()
     pending_handler.add_to_pending(auto_start=auto_start)
+
+    if auto_start:
+        download_pending.delay(auto_only=True)
 
 
 @shared_task(bind=True, name="check_reindex", base=BaseTask)

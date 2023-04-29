@@ -483,6 +483,7 @@ class DownloadApiListView(ApiBaseView):
     def post(request):
         """add list of videos to download queue"""
         data = request.data
+        auto_start = bool(request.GET.get("autostart"))
         try:
             to_add = data["data"]
         except KeyError:
@@ -499,7 +500,7 @@ class DownloadApiListView(ApiBaseView):
             print(message)
             return Response({"message": message}, status=400)
 
-        extrac_dl.delay(youtube_ids)
+        extrac_dl.delay(youtube_ids, auto_start=auto_start)
 
         return Response(data)
 
