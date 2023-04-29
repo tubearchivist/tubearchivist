@@ -15,7 +15,13 @@ from home.src.ta.config import AppConfig
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskCommand, TaskManager
 from home.src.ta.urlparser import Parser
-from home.tasks import BaseTask, check_reindex, extrac_dl, subscribe_to
+from home.tasks import (
+    BaseTask,
+    check_reindex,
+    download_pending,
+    extrac_dl,
+    subscribe_to,
+)
 from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
@@ -431,6 +437,8 @@ class DownloadApiView(ApiBaseView):
 
         print(f"{video_id}: change status to {item_status}")
         PendingInteract(video_id, item_status).update_status()
+        if item_status == "priority":
+            download_pending.delay(auto_only=True)
 
         return Response(request.data)
 

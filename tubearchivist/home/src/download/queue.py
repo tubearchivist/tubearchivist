@@ -118,7 +118,7 @@ class PendingInteract:
         else:
             data = {"doc": {"status": self.status}}
 
-        path = f"ta_download/_update/{self.youtube_id}"
+        path = f"ta_download/_update/{self.youtube_id}/?refresh=true"
         _, _ = ElasticWrap(path).post(data=data)
 
     def get_item(self):
