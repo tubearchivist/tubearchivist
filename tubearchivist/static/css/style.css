@@ -369,6 +369,10 @@ button:hover {
     display: none;
 }
 
+#hidden-form button {
+    margin-right: 1rem;
+}
+
 #text-reveal {
     height: 0;
     overflow: hidden;

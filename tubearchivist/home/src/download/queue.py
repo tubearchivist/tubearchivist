@@ -273,7 +273,7 @@ class PendingList(PendingIndex):
         # add last newline
         bulk_list.append("\n")
         query_str = "\n".join(bulk_list)
-        _, _ = ElasticWrap("_bulk").post(query_str, ndjson=True)
+        _, _ = ElasticWrap("_bulk?refresh=true").post(query_str, ndjson=True)
 
     def _notify_add(self, idx, total):
         """send notification for adding videos to download queue"""

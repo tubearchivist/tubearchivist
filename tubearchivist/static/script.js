@@ -160,18 +160,22 @@ function dlPending() {
   }, 500);
 }
 
-function addToQueue() {
+function addToQueue(autostart=false) {
   let textArea = document.getElementById('id_vid_url');
   if (textArea.value === '') {
     return
   }
   let toPost = {data: [{youtube_id: textArea.value, status: 'pending'}]};
   let apiEndpoint = '/api/download/';
+  if (autostart) {
+    apiEndpoint = `${apiEndpoint}?autostart=true`;
+  }
   apiRequest(apiEndpoint, 'POST', toPost);
-  textArea.value = "";
+  textArea.value = '';
   setTimeout(function () {
     checkMessages();
   }, 500);
+  showForm();
 }
 
 function toIgnore(button) {
