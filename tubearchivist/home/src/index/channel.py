@@ -56,13 +56,14 @@ class YoutubeChannel(YouTubeItem):
     def _process_youtube_meta(self):
         """extract relevant fields"""
         self.youtube_meta["thumbnails"].reverse()
+        channel_subs = self.youtube_meta.get("channel_follower_count") or 0
         self.json_data = {
             "channel_active": True,
             "channel_description": self.youtube_meta.get("description", False),
             "channel_id": self.youtube_id,
             "channel_last_refresh": int(datetime.now().timestamp()),
             "channel_name": self.youtube_meta["uploader"],
-            "channel_subs": self.youtube_meta.get("channel_follower_count", 0),
+            "channel_subs": channel_subs,
             "channel_subscribed": False,
             "channel_tags": self._parse_tags(self.youtube_meta.get("tags")),
             "channel_banner_url": self._get_banner_art(),
@@ -96,7 +97,7 @@ class YoutubeChannel(YouTubeItem):
                 return i["url"]
             if not i.get("width"):
                 continue
-            if i["width"] // i["height"] < 2:
+            if i["width"] // i["height"] < 2 and not i["width"] == i["height"]:
                 return i["url"]
 
         return False
@@ -164,6 +165,8 @@ class YoutubeChannel(YouTubeItem):
         # add ingest pipeline
         processors = []
         for field, value in self.json_data.items():
+            if not value:
+                continue
             line = {"set": {"field": "channel." + field, "value": value}}
             processors.append(line)
         data = {"description": self.youtube_id, "processors": processors}
