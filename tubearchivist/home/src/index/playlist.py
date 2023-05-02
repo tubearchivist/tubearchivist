@@ -26,7 +26,6 @@ class YoutubePlaylist(YouTubeItem):
 
     def __init__(self, youtube_id):
         super().__init__(youtube_id)
-        self.es_path = f"{self.index_name}/_doc/{youtube_id}"
         self.all_members = False
         self.nav = False
         self.all_youtube_ids = []
