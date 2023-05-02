@@ -39,6 +39,16 @@
                 "channel_last_refresh": {
                     "type": "date"
                 },
+                "channel_tags": {
+                    "type": "text",
+                    "analyzer": "english",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
                 "channel_overwrites": {
                     "properties": {
                         "download_format": {
@@ -120,6 +130,16 @@
                         },
                         "channel_last_refresh": {
                             "type": "date"
+                        },
+                        "channel_tags": {
+                            "type": "text",
+                            "analyzer": "english",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
                         },
                         "channel_overwrites": {
                             "properties": {
