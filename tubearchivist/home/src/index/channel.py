@@ -165,8 +165,6 @@ class YoutubeChannel(YouTubeItem):
         # add ingest pipeline
         processors = []
         for field, value in self.json_data.items():
-            if not value:
-                continue
             line = {"set": {"field": "channel." + field, "value": value}}
             processors.append(line)
         data = {"description": self.youtube_id, "processors": processors}
