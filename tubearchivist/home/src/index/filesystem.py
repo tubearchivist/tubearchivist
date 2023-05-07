@@ -127,7 +127,8 @@ class Filesystem(ScannerBase):
 
     def process(self):
         """entry point"""
-        self.task.send_progress(["Scanning your archive and index."])
+        if self.task:
+            self.task.send_progress(["Scanning your archive and index."])
         self.scan()
         self.rename_files()
         self.send_mismatch_bulk()
@@ -140,7 +141,8 @@ class Filesystem(ScannerBase):
             return
 
         total = len(self.to_rename)
-        self.task.send_progress([f"Rename {total} media files."])
+        if self.task:
+            self.task.send_progress([f"Rename {total} media files."])
         for bad_filename in self.to_rename:
             channel, filename, expected_filename = bad_filename
             print(f"renaming [{filename}] to [{expected_filename}]")
@@ -154,7 +156,8 @@ class Filesystem(ScannerBase):
             return
 
         total = len(self.mismatch)
-        self.task.send_progress([f"Fix media urls for {total} files"])
+        if self.task:
+            self.task.send_progress([f"Fix media urls for {total} files"])
         bulk_list = []
         for video_mismatch in self.mismatch:
             youtube_id, media_url = video_mismatch
@@ -174,7 +177,8 @@ class Filesystem(ScannerBase):
             return
 
         total = len(self.to_delete)
-        self.task.send_progress([f"Clean up {total} items from index."])
+        if self.task:
+            self.task.send_progress([f"Clean up {total} items from index."])
         for indexed in self.to_delete:
             youtube_id = indexed[0]
             print(f"deleting {youtube_id} from index")
