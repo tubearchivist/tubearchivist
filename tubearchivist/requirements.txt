@@ -1,12 +1,11 @@
-beautifulsoup4==4.12.2
 celery==5.2.7
-Django==4.2
+Django==4.2.1
 django-auth-ldap==4.3.0
 django-cors-headers==3.14.0
 djangorestframework==3.14.0
 Pillow==9.5.0
 redis==4.5.4
-requests==2.29.0
+requests==2.30.0
 ryd-client==0.0.6
 uWSGI==2.0.21
 whitenoise==6.4.0

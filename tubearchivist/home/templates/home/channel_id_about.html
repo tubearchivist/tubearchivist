@@ -81,11 +81,18 @@
             <button onclick="textExpand()" id="text-expand-button">Show more</button>
         </div>
     {% endif %}
-    <div class="description-box">
-        <h2>Customize {{ channel_info.channel_name }}</h2>
-    </div>
+    {% if channel_info.channel_tags %}
+        <div class="description-box">
+            <div class="video-tag-box">
+                {% for tag in channel_info.channel_tags %}
+                    <span class="video-tag">{{ tag }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
     <div id="overwrite-form" class="info-box">
         <div class="info-box-item">
+            <h2>Customize {{ channel_info.channel_name }}</h2>
             <form class="overwrite-form" action="/channel/{{ channel_info.channel_id }}/about/" method="POST">
                 {% csrf_token %}
                 <div class="overwrite-form-item">

@@ -138,7 +138,6 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         self.channel_id = False
         self.video_overwrites = video_overwrites
         self.video_type = video_type
-        self.es_path = f"{self.index_name}/_doc/{youtube_id}"
         self.offline_import = False
 
     def build_json(self, youtube_meta_overwrite=False, media_path=False):

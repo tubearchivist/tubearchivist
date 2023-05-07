@@ -122,6 +122,7 @@ class ApplicationSettingsForm(forms.Form):
     downloads_autodelete_days = forms.IntegerField(required=False)
     downloads_format = forms.CharField(required=False)
     downloads_format_sort = forms.CharField(required=False)
+    downloads_extractor_lang = forms.CharField(required=False)
     downloads_add_metadata = forms.ChoiceField(
         widget=forms.Select, choices=METADATA_CHOICES, required=False
     )
