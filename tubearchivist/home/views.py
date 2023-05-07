@@ -413,7 +413,10 @@ class DownloadView(ArchivistResultsView):
         self.data.update(
             {
                 "query": {"bool": {"must": must_list}},
-                "sort": [{"timestamp": {"order": "asc"}}],
+                "sort": [
+                    {"auto_start": {"order": "desc"}},
+                    {"timestamp": {"order": "asc"}},
+                ],
             }
         )
 
