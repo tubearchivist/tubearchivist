@@ -201,17 +201,17 @@ class Command(BaseCommand):
         response, status_code = ElasticWrap(path).post(data=data)
         if status_code == 200:
             updated = response.get("updated", 0)
-            if not updated:
+            if updated:
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"    ✓ {updated} videos updated in ta_download"
+                    )
+                )
+            else:
                 self.stdout.write(
                     "    no videos needed updating in ta_download"
                 )
-                return
-
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"    ✓ {updated} videos updated in ta_download"
-                )
-            )
+            return
 
         message = "    🗙 ta_download auto_start update failed"
         self.stdout.write(self.style.ERROR(message))
