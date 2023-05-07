@@ -11,6 +11,7 @@ from django.core.management.base import BaseCommand, CommandError
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.es.index_setup import ElasitIndexWrap
 from home.src.es.snapshot import ElasticSnapshot
+from home.src.index.filesystem import Filesystem
 from home.src.index.video_streams import MediaStreamExtractor
 from home.src.ta.config import AppConfig, ReleaseVersion
 from home.src.ta.helper import clear_dl_cache
@@ -162,6 +163,8 @@ class Command(BaseCommand):
             self.stdout.write("    no videos need updating")
             return
 
+        self.stdout.write("    start filesystem rescan")
+        Filesystem().process()
         total = len(all_missing)
         for idx, missing in enumerate(all_missing):
             media_url = missing["media_url"]
@@ -201,17 +204,17 @@ class Command(BaseCommand):
         response, status_code = ElasticWrap(path).post(data=data)
         if status_code == 200:
             updated = response.get("updated", 0)
-            if not updated:
+            if updated:
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"    ✓ {updated} videos updated in ta_download"
+                    )
+                )
+            else:
                 self.stdout.write(
                     "    no videos needed updating in ta_download"
                 )
-                return
-
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"    ✓ {updated} videos updated in ta_download"
-                )
-            )
+            return
 
         message = "    🗙 ta_download auto_start update failed"
         self.stdout.write(self.style.ERROR(message))

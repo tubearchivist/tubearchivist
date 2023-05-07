@@ -81,6 +81,9 @@
                                     <span>queued</span>
                                 {% endif %}
                                 <span>{{ video.source.vid_type }}</span>
+                                {% if video.source.auto_start %}
+                                    <span>auto</span>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

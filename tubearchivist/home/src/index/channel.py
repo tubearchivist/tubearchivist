@@ -47,13 +47,13 @@ class YoutubeChannel(YouTubeItem):
         if not self.youtube_meta and fallback:
             self._video_fallback(fallback)
         else:
-            self._process_youtube_meta()
+            self.process_youtube_meta()
             self.get_channel_art()
 
         if upload:
             self.upload_to_es()
 
-    def _process_youtube_meta(self):
+    def process_youtube_meta(self):
         """extract relevant fields"""
         self.youtube_meta["thumbnails"].reverse()
         channel_subs = self.youtube_meta.get("channel_follower_count") or 0
