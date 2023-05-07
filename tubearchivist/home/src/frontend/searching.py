@@ -391,6 +391,7 @@ class QueryBuilder:
                             "channel_name._2gram^2",
                             "channel_name._3gram^2",
                             "channel_name.search_as_you_type^2",
+                            "channel_tags",
                         ],
                     }
                 }
