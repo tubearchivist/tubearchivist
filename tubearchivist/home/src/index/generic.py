@@ -37,8 +37,14 @@ class YouTubeItem:
     def get_from_youtube(self):
         """use yt-dlp to get meta data from youtube"""
         print(f"{self.youtube_id}: get metadata from youtube")
+        obs_request = self.yt_obs.copy()
+        if self.config["downloads"]["extractor_lang"]:
+            langs = self.config["downloads"]["extractor_lang"]
+            langs_list = [i.strip() for i in langs.split(",")]
+            obs_request["extractor_args"] = {"youtube": {"lang": langs_list}}
+
         url = self.build_yt_url()
-        self.youtube_meta = YtWrap(self.yt_obs, self.config).extract(url)
+        self.youtube_meta = YtWrap(obs_request, self.config).extract(url)
 
     def get_from_es(self):
         """get indexed data from elastic search"""

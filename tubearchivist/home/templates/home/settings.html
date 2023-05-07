@@ -109,6 +109,11 @@
                 <br>
             </div>
             <div class="settings-item">
+                <p>Prefer translated metadata language: <span class="settings-current">{{ config.downloads.extractor_lang }}</span></p>
+                <i>This will change the language this video gets indexed as. That will only be available if the uploader provides translations. Add as two letter ISO language code, check the <a href="https://github.com/yt-dlp/yt-dlp#youtube" target="_blank">documentation</a> which languages are available.</i><br>
+                {{ app_form.downloads_extractor_lang}}
+            </div>
+            <div class="settings-item">
                 <p>Current metadata embed setting: <span class="settings-current">{{ config.downloads.add_metadata }}</span></p>
                 <i>Metadata is not embedded into the downloaded files by default.</i><br>
                 {{ app_form.downloads_add_metadata }}

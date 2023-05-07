@@ -33,6 +33,7 @@
         "comment_sort": "top",
         "cookie_import": false,
         "throttledratelimit": false,
+        "extractor_lang": false,
         "integrate_ryd": false,
         "integrate_sponsorblock": false
     },
