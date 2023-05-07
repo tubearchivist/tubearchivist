@@ -331,23 +331,29 @@ class Reindex(ReindexBase):
     @staticmethod
     def _reindex_single_channel(channel_id):
         """refresh channel data and sync to videos"""
+        # read current state
         channel = YoutubeChannel(channel_id)
         channel.get_from_es()
-        subscribed = channel.json_data["channel_subscribed"]
-        overwrites = channel.json_data.get("channel_overwrites", False)
+        es_meta = channel.json_data.copy()
+
+        # get new
         channel.get_from_youtube()
-        if not channel.json_data:
+        if not channel.youtube_meta:
             channel.deactivate()
             channel.get_from_es()
             channel.sync_to_videos()
             return
 
-        channel.json_data["channel_subscribed"] = subscribed
+        channel.process_youtube_meta()
+        channel.get_channel_art()
+
+        # add back
+        channel.json_data["channel_subscribed"] = es_meta["channel_subscribed"]
+        overwrites = es_meta.get("channel_overwrites")
         if overwrites:
             channel.json_data["channel_overwrites"] = overwrites
-        channel.upload_to_es()
-        channel.sync_to_videos()
 
+        channel.upload_to_es()
         ChannelFullScan(channel_id).scan()
 
     def _reindex_single_playlist(self, playlist_id):
