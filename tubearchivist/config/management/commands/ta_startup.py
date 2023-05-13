@@ -11,7 +11,6 @@ from django.core.management.base import BaseCommand, CommandError
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.es.index_setup import ElasitIndexWrap
 from home.src.es.snapshot import ElasticSnapshot
-from home.src.index.filesystem import Filesystem
 from home.src.index.video_streams import MediaStreamExtractor
 from home.src.ta.config import AppConfig, ReleaseVersion
 from home.src.ta.helper import clear_dl_cache
@@ -164,7 +163,6 @@ class Command(BaseCommand):
             return
 
         self.stdout.write("    start filesystem rescan")
-        Filesystem().process()
         total = len(all_missing)
         for idx, missing in enumerate(all_missing):
             media_url = missing["media_url"]
