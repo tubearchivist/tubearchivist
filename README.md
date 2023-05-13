@@ -9,6 +9,7 @@
 </div>
 
 ![home screenshot](assets/tube-archivist-screenshot-home.png?raw=true "Tube Archivist Home")
+[*more screenshots and video*](SHOWCASE.MD)
 
 ## Table of contents:
 * [Docs](https://docs.tubearchivist.com/) with [FAQ](https://docs.tubearchivist.com/faq/), and API documentation
@@ -25,7 +26,7 @@
 ------------------------
 
 ## Core functionality
-Once your YouTube video collection grows, it becomes hard to search and find a specific video. That's where Tube Archivist comes in: By indexing your video collection with metadata from YouTube, you can organize, search and enjoy your archived YouTube videos without hassle offline through a convenient web interface. THis includes:  
+Once your YouTube video collection grows, it becomes hard to search and find a specific video. That's where Tube Archivist comes in: By indexing your video collection with metadata from YouTube, you can organize, search and enjoy your archived YouTube videos without hassle offline through a convenient web interface. This includes:  
 * Subscribe to your favorite YouTube channels
 * Download Videos using **yt-dlp**
 * Index and make videos searchable
@@ -37,7 +38,6 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 - [r/TubeArchivist](https://www.reddit.com/r/TubeArchivist/): Join our Subreddit.
 - [Browser Extension](https://github.com/tubearchivist/browser-extension) Tube Archivist Companion, for [Firefox](https://addons.mozilla.org/addon/tubearchivist-companion/) and [Chrome](https://chrome.google.com/webstore/detail/tubearchivist-companion/jjnkmicfnfojkkgobdfeieblocadmcie)
 - [Tube Archivist Metrics](https://github.com/tubearchivist/tubearchivist-metrics) to create statistics in Prometheus/OpenMetrics format.  
-- [Showcase](SHOWCASE.MD) To see more screenshots and Youtube videos showing off TubeArchvist.
 
 ## Installing
 For minimal system requirements, the Tube Archivist stack needs around 2GB of available memory for a small testing setup and around 4GB of available memory for a mid to large sized installation. Minimal with dual core with 4 threads, better quad core plus. 
