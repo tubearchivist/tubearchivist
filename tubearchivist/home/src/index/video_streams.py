@@ -122,8 +122,8 @@ class MediaStreamExtractor:
             {
                 "type": "audio",
                 "index": stream["index"],
-                "codec": stream["codec_name"],
-                "bitrate": int(stream["bit_rate"]),
+                "codec": stream.get("codec_name", "undefined"),
+                "bitrate": int(stream.get("bit_rate", 0)),
             }
         )
 
