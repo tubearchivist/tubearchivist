@@ -162,7 +162,6 @@ class Command(BaseCommand):
             self.stdout.write("    no videos need updating")
             return
 
-        self.stdout.write("    start filesystem rescan")
         total = len(all_missing)
         for idx, missing in enumerate(all_missing):
             media_url = missing["media_url"]
