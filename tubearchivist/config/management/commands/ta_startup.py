@@ -169,6 +169,7 @@ class Command(BaseCommand):
             media_path = os.path.join(videos, media_url)
             if not os.path.exists(media_path):
                 self.stdout.write(f"    file not found: {media_path}")
+                self.stdout.write("    run file system rescan to fix")
                 continue
 
             media = MediaStreamExtractor(media_path)
