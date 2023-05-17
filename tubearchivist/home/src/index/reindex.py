@@ -249,7 +249,8 @@ class Reindex(ReindexBase):
         reindex = self.get_reindex_map(index_config["index_name"])
         youtube_id = RedisQueue(index_config["queue_name"]).get_next()
         if youtube_id:
-            self._notify(name, index_config, total)
+            if self.task:
+                self._notify(name, index_config, total)
             reindex(youtube_id)
             sleep_interval = self.config["downloads"].get("sleep_interval", 0)
             sleep(sleep_interval)
