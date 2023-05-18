@@ -20,7 +20,7 @@ from home.src.index.video_streams import (
     DurationConverter,
     MediaStreamExtractor,
 )
-from home.src.ta.helper import clean_string, randomizor
+from home.src.ta.helper import randomizor
 from home.src.ta.ta_redis import RedisArchivist
 from ryd_client import ryd_client
 
@@ -292,19 +292,10 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def add_file_path(self):
         """build media_url for where file will be located"""
-        channel_name = self.json_data["channel"]["channel_name"]
-        clean_channel_name = clean_string(channel_name)
-        if len(clean_channel_name) <= 3:
-            # fall back to channel id
-            clean_channel_name = self.json_data["channel"]["channel_id"]
-
-        timestamp = self.json_data["published"].replace("-", "")
-        youtube_id = self.json_data["youtube_id"]
-        title = self.json_data["title"]
-        clean_title = clean_string(title)
-        filename = f"{timestamp}_{youtube_id}_{clean_title}.mp4"
-        media_url = os.path.join(clean_channel_name, filename)
-        self.json_data["media_url"] = media_url
+        self.json_data["media_url"] = os.path.join(
+            self.json_data["channel"]["channel_id"],
+            self.json_data["youtube_id"] + ".mp4",
+        )
 
     def delete_media_file(self):
         """delete video file, meta data"""
