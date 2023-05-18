@@ -14,7 +14,6 @@ from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.generic import YouTubeItem
 from home.src.index.playlist import YoutubePlaylist
-from home.src.ta.helper import clean_string
 
 
 class YoutubeChannel(YouTubeItem):
@@ -177,12 +176,10 @@ class YoutubeChannel(YouTubeItem):
 
     def get_folder_path(self):
         """get folder where media files get stored"""
-        channel_name = self.json_data["channel_name"]
-        folder_name = clean_string(channel_name)
-        if len(folder_name) <= 3:
-            # fall back to channel id
-            folder_name = self.json_data["channel_id"]
-        folder_path = os.path.join(self.app_conf["videos"], folder_name)
+        folder_path = os.path.join(
+            self.app_conf["videos"],
+            self.json_data["channel_id"],
+        )
         return folder_path
 
     def delete_es_videos(self):
