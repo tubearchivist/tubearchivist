@@ -79,7 +79,8 @@ class ChannelMigration:
 
     def __init__(self, channel):
         self.channel = channel
-        self.videos = AppConfig().config["application"]["videos"]
+        self.config = AppConfig().config
+        self.videos = self.config["application"]["videos"]
         self.bulk_list = []
 
     def migrate(self):
@@ -92,9 +93,13 @@ class ChannelMigration:
 
     def _create_new_folder(self):
         """create new channel id folder"""
+        host_uid = self.config["application"]["HOST_UID"]
+        host_gid = self.config["application"]["HOST_GID"]
         new_path = os.path.join(self.videos, self.channel["channel_id"])
         if not os.path.exists(new_path):
             os.mkdir(new_path)
+            if host_uid and host_gid:
+                os.chown(new_path, host_uid, host_gid)
 
     def get_channel_videos(self):
         """get all videos of channel"""
