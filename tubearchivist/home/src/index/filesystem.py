@@ -50,7 +50,7 @@ class Scanner:
 
         data = {"query": {"match_all": {}}, "_source": ["youtube_id"]}
         response = IndexPaginate("ta_video", data).get_results()
-        return set(i["youtube_id"] for i in response)
+        return {i["youtube_id"] for i in response}
 
     def apply(self):
         """apply all changes"""
