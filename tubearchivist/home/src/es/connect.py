@@ -130,6 +130,9 @@ class IndexPaginate:
         if not self.data:
             self.data = {}
 
+        if "query" not in self.data.keys():
+            self.data.update({"query": {"match_all": {}}})
+
         if "sort" not in self.data.keys():
             self.data.update({"sort": [{"_doc": {"order": "desc"}}]})
 
