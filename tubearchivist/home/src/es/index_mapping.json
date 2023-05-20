@@ -380,6 +380,9 @@
                 },
                 "auto_start": {
                     "type": "boolean"
+                },
+                "message": {
+                    "type": "text"
                 }
             },
             "expected_set": {

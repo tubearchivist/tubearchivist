@@ -48,11 +48,11 @@ class YtWrap:
         with yt_dlp.YoutubeDL(self.obs) as ydl:
             try:
                 ydl.download([url])
-            except yt_dlp.utils.DownloadError:
+            except yt_dlp.utils.DownloadError as err:
                 print(f"{url}: failed to download.")
-                return False
+                return False, str(err)
 
-        return True
+        return True, True
 
     def extract(self, url):
         """make extract request"""

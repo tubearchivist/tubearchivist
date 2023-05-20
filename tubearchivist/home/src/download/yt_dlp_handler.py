@@ -203,12 +203,13 @@ class VideoDownloader:
     def _get_next(self, auto_only):
         """get next item in queue"""
         must_list = [{"term": {"status": {"value": "pending"}}}]
+        must_not_list = [{"exists": {"field": "message"}}]
         if auto_only:
             must_list.append({"term": {"auto_start": {"value": True}}})
 
         data = {
             "size": 1,
-            "query": {"bool": {"must": must_list}},
+            "query": {"bool": {"must": must_list, "must_not": must_not_list}},
             "sort": [
                 {"auto_start": {"order": "desc"}},
                 {"timestamp": {"order": "asc"}},
@@ -344,7 +345,9 @@ class VideoDownloader:
             if youtube_id in file_name:
                 obs["outtmpl"] = os.path.join(dl_cache, file_name)
 
-        success = YtWrap(obs, self.config).download(youtube_id)
+        success, message = YtWrap(obs, self.config).download(youtube_id)
+        if not success:
+            self._handle_error(youtube_id, message)
 
         if self.obs["writethumbnail"]:
             # webp files don't get cleaned up automatically
@@ -355,6 +358,12 @@ class VideoDownloader:
                 os.remove(file_path)
 
         return success
+
+    @staticmethod
+    def _handle_error(youtube_id, message):
+        """store error message"""
+        data = {"doc": {"message": message}}
+        _, _ = ElasticWrap(f"ta_download/_update/{youtube_id}").post(data=data)
 
     def move_to_archive(self, vid_dict):
         """move downloaded video from cache to archive"""
