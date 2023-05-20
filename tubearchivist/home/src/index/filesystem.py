@@ -39,7 +39,7 @@ class Scanner:
         for channel in channels:
             folder = os.path.join(self.VIDEOS, channel)
             files = ignore_filelist(os.listdir(folder))
-            downloaded.update(set(i.split(".")[0] for i in files))
+            downloaded.update({i.split(".")[0] for i in files})
 
         return downloaded
 
