@@ -108,6 +108,9 @@
                                 <button data-id="{{ video.source.youtube_id }}" onclick="toIgnore(this)">Ignore</button>
                                 <button id="{{ video.source.youtube_id }}" data-id="{{ video.source.youtube_id }}" onclick="downloadNow(this)">Download now</button>
                             {% endif %}
+                            {% if video.source.message %}
+                                <button class="danger-button" data-id="{{ video.source.youtube_id }}" onclick="forgetIgnore(this)">Delete</button>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
