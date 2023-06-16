@@ -1,7 +1,7 @@
-celery==5.2.7
-Django==4.2.1
+celery==5.3.0
+Django==4.2.2
 django-auth-ldap==4.3.0
-django-cors-headers==4.0.0
+django-cors-headers==4.1.0
 djangorestframework==3.14.0
 Pillow==9.5.0
 redis==4.5.5
