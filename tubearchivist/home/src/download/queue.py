@@ -114,7 +114,13 @@ class PendingInteract:
     def update_status(self):
         """update status of pending item"""
         if self.status == "priority":
-            data = {"doc": {"status": "pending", "auto_start": True}}
+            data = {
+                "doc": {
+                    "status": "pending",
+                    "auto_start": True,
+                    "message": None,
+                }
+            }
         else:
             data = {"doc": {"status": self.status}}
 

@@ -113,7 +113,7 @@ class BaseTask(Task):
         """callback for task failure"""
         print(f"{task_id} Failed callback")
         message, key = self._build_message(level="error")
-        message.update({"messages": ["Task failed"]})
+        message.update({"messages": [f"Task failed: {exc}"]})
         RedisArchivist().set_message(key, message, expire=20)
 
     def on_success(self, retval, task_id, args, kwargs):

@@ -49,7 +49,10 @@ class YtWrap:
             try:
                 ydl.download([url])
             except yt_dlp.utils.DownloadError as err:
-                print(f"{url}: failed to download.")
+                print(f"{url}: failed to download with message {err}")
+                if "Temporary failure in name resolution" in str(err):
+                    raise ConnectionError("lost the internet, abort!") from err
+
                 return False, str(err)
 
         return True, True
@@ -61,8 +64,17 @@ class YtWrap:
         except cookiejar.LoadError:
             print("cookie file is invalid")
             return False
-        except (yt_dlp.utils.ExtractorError, yt_dlp.utils.DownloadError):
-            print(f"{url}: failed to get info from youtube")
+        except yt_dlp.utils.ExtractorError as err:
+            print(f"{url}: failed to extract with message: {err}, continue...")
+            return False
+        except yt_dlp.utils.DownloadError as err:
+            if "This channel does not have a" in str(err):
+                return False
+
+            print(f"{url}: failed to get info from youtube with message {err}")
+            if "Temporary failure in name resolution" in str(err):
+                raise ConnectionError("lost the internet, abort!") from err
+
             return False
 
         return response
