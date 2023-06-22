@@ -8,6 +8,7 @@ import json
 import os
 import re
 from random import randint
+from time import sleep
 
 import requests
 from celery.schedules import crontab
@@ -67,11 +68,19 @@ class AppConfig:
     @staticmethod
     def get_config_redis():
         """read config json set from redis to overwrite defaults"""
-        config = RedisArchivist().get_message("config")
-        if not list(config.values())[0]:
-            return False
+        for i in range(10):
+            try:
+                config = RedisArchivist().get_message("config")
+                if not list(config.values())[0]:
+                    return False
 
-        return config
+                return config
+
+            except Exception:  # pylint: disable=broad-except
+                print(f"... Redis connection failed, retry [{i}/10]")
+                sleep(3)
+
+        raise ConnectionError("failed to connect to redis")
 
     def update_config(self, form_post):
         """update config values from settings form"""
