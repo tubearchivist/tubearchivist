@@ -52,6 +52,7 @@ class ReindexBase:
     def __init__(self):
         self.config = AppConfig().config
         self.now = int(datetime.now().timestamp())
+        self.total = None
 
     def populate(self, all_ids, reindex_config):
         """add all to reindex ids to redis queue"""
@@ -59,6 +60,7 @@ class ReindexBase:
             return
 
         RedisQueue(queue_name=reindex_config["queue_name"]).add_list(all_ids)
+        self.total = None
 
 
 class ReindexPopulate(ReindexBase):
@@ -236,19 +238,19 @@ class Reindex(ReindexBase):
             if not RedisQueue(index_config["queue_name"]).has_item():
                 continue
 
-            total = RedisQueue(index_config["queue_name"]).length()
+            self.total = RedisQueue(index_config["queue_name"]).length()
             while True:
-                has_next = self.reindex_index(name, index_config, total)
+                has_next = self.reindex_index(name, index_config)
                 if not has_next:
                     break
 
-    def reindex_index(self, name, index_config, total):
+    def reindex_index(self, name, index_config):
         """reindex all of a single index"""
         reindex = self.get_reindex_map(index_config["index_name"])
         youtube_id = RedisQueue(index_config["queue_name"]).get_next()
         if youtube_id:
             if self.task:
-                self._notify(name, index_config, total)
+                self._notify(name, index_config)
             reindex(youtube_id)
             sleep_interval = self.config["downloads"].get("sleep_interval", 0)
             sleep(sleep_interval)
@@ -265,12 +267,15 @@ class Reindex(ReindexBase):
 
         return def_map.get(index_name)
 
-    def _notify(self, name, index_config, total):
+    def _notify(self, name, index_config):
         """send notification back to task"""
+        if self.total is None:
+            self.total = RedisQueue(index_config["queue_name"]).length()
+
         remaining = RedisQueue(index_config["queue_name"]).length()
-        idx = total - remaining
-        message = [f"Reindexing {name.title()}s {idx}/{total}"]
-        progress = idx / total
+        idx = self.total - remaining
+        message = [f"Reindexing {name.title()}s {idx}/{self.total}"]
+        progress = idx / self.total
         self.task.send_progress(message, progress=progress)
 
     def _reindex_single_video(self, youtube_id):
