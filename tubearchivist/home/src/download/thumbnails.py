@@ -270,7 +270,7 @@ class ValidatorCallback:
             urls = (
                 channel["_source"]["channel_thumb_url"],
                 channel["_source"]["channel_banner_url"],
-                channel["_source"]["channel_tvart_url"],
+                channel["_source"].get("channel_tvart_url", False),
             )
             handler = ThumbManager(channel["_source"]["channel_id"])
             handler.download_channel_art(urls, skip_existing=True)
