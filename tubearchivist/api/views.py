@@ -542,7 +542,8 @@ class PingView(ApiBaseView):
             "version": current_version,
         }
         return Response(data)
-    
+
+
 class VersionView(ApiBaseView):
     """resolves to /api/version/
     GET: get the current TA version
@@ -558,6 +559,7 @@ class VersionView(ApiBaseView):
             "version_unstable": is_unstable,
         }
         return Response(data)
+
 
 class LoginApiView(ObtainAuthToken):
     """resolves to /api/login/
