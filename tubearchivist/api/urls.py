@@ -5,6 +5,7 @@ from django.urls import path
 
 urlpatterns = [
     path("ping/", views.PingView.as_view(), name="ping"),
+    path("version/", views.VersionView.as_view(), name="api-ta-version")
     path("login/", views.LoginApiView.as_view(), name="api-login"),
     path(
         "video/",

@@ -11,7 +11,7 @@ from home.src.index.channel import YoutubeChannel
 from home.src.index.generic import Pagination
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock, YoutubeVideo
-from home.src.ta.config import AppConfig
+from home.src.ta.config import AppConfig, ReleaseVersion
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskCommand, TaskManager
 from home.src.ta.urlparser import Parser
@@ -535,9 +535,27 @@ class PingView(ApiBaseView):
     @staticmethod
     def get(request):
         """get pong"""
-        data = {"response": "pong", "user": request.user.id}
+        current_version, _ = ReleaseVersion.get_local_version()
+        data = {
+            "response": "pong", "user": request.user.id,
+            "version": current_version
+        }
         return Response(data)
+    
+class VersionView(ApiBaseView):
+    """resolves to /api/version/
+    GET: get the current TA version
+    """
 
+    @staticmethod
+    def get(request):
+        """get version"""
+        current_version, is_unstable = ReleaseVersion.get_local_version()
+        data = {
+            "user": request.user.id, "version": current_version,
+            "version_unstable": is_unstable
+        }
+        return Response(data)
 
 class LoginApiView(ObtainAuthToken):
     """resolves to /api/login/
