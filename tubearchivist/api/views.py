@@ -537,8 +537,9 @@ class PingView(ApiBaseView):
         """get pong"""
         current_version, _ = ReleaseVersion.get_local_version()
         data = {
-            "response": "pong", "user": request.user.id,
-            "version": current_version
+            "response": "pong",
+            "user": request.user.id,
+            "version": current_version,
         }
         return Response(data)
     
@@ -552,8 +553,9 @@ class VersionView(ApiBaseView):
         """get version"""
         current_version, is_unstable = ReleaseVersion.get_local_version()
         data = {
-            "user": request.user.id, "version": current_version,
-            "version_unstable": is_unstable
+            "user": request.user.id,
+            "version": current_version,
+            "version_unstable": is_unstable,
         }
         return Response(data)
 
