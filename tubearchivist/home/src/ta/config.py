@@ -328,7 +328,7 @@ class ReleaseVersion:
 
     def get_local_version(self):
         """read version from local"""
-        return self.local_version, self.is_unstable
+        return self.local_version
 
     def get_remote_version(self):
         """read version from remote"""
