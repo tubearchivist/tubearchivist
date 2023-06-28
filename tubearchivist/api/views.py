@@ -538,7 +538,7 @@ class PingView(ApiBaseView):
         data = {
             "response": "pong",
             "user": request.user.id,
-            "version": ReleaseVersion.get_local_version(),
+            "version": ReleaseVersion().get_local_version(),
         }
         return Response(data)
 
