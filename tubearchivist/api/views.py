@@ -535,11 +535,10 @@ class PingView(ApiBaseView):
     @staticmethod
     def get(request):
         """get pong"""
-        current_version, _ = ReleaseVersion.get_local_version()
         data = {
             "response": "pong",
             "user": request.user.id,
-            "version": current_version,
+            "version": ReleaseVersion.get_local_version(),
         }
         return Response(data)
 
