@@ -544,23 +544,6 @@ class PingView(ApiBaseView):
         return Response(data)
 
 
-class VersionView(ApiBaseView):
-    """resolves to /api/version/
-    GET: get the current TA version
-    """
-
-    @staticmethod
-    def get(request):
-        """get version"""
-        current_version, is_unstable = ReleaseVersion.get_local_version()
-        data = {
-            "user": request.user.id,
-            "version": current_version,
-            "version_unstable": is_unstable,
-        }
-        return Response(data)
-
-
 class LoginApiView(ObtainAuthToken):
     """resolves to /api/login/
     POST: return token and username after successful login
