@@ -326,6 +326,10 @@ class ReleaseVersion:
             RedisArchivist().set_message(self.NEW_KEY, message)
             print(f"[{self.local_version}]: found new version {new_version}")
 
+    def get_local_version(self):
+        """read version from local"""
+        return self.local_version
+
     def get_remote_version(self):
         """read version from remote"""
         self.response = requests.get(self.REMOTE_URL, timeout=20).json()
