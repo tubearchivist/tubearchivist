@@ -178,6 +178,9 @@ class ChannelMigration:
 
     def delete_old(self, all_videos):
         """delete old folder path if empty"""
+        if not all_videos:
+            return
+
         channel_name = os.path.split(all_videos[0]["media_url"])[0]
         old_path = os.path.join(self.videos, channel_name)
         if os.path.exists(old_path) and not os.listdir(old_path):
