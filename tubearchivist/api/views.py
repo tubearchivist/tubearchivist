@@ -189,7 +189,7 @@ class VideoCommentView(ApiBaseView):
 
 class VideoSimilarView(ApiBaseView):
     """resolves to /api/video/<video-id>/similar/
-    GET: return max 3 videos similar to this
+    GET: return max 6 videos similar to this
     """
 
     search_base = "ta_video/_search/"
