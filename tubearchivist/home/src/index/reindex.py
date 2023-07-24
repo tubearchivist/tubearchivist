@@ -287,7 +287,10 @@ class Reindex(ReindexBase):
         es_meta = video.json_data.copy()
 
         # get new
-        video.build_json()
+        media_url = os.path.join(
+            self.config["application"]["videos"], es_meta["media_url"]
+        )
+        video.build_json(media_path=media_url)
         if not video.youtube_meta:
             video.deactivate()
             return
