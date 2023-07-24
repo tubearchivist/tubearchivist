@@ -6,7 +6,6 @@ functionality:
 
 import json
 import os
-import shutil
 from datetime import datetime
 from time import sleep
 
@@ -14,7 +13,6 @@ from home.src.download.queue import PendingList
 from home.src.download.subscriptions import ChannelSubscription
 from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import CookieHandler
-from home.src.download.yt_dlp_handler import VideoDownloader
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.channel import YoutubeChannel
 from home.src.index.comments import Comments
@@ -54,6 +52,7 @@ class ReindexBase:
     def __init__(self):
         self.config = AppConfig().config
         self.now = int(datetime.now().timestamp())
+        self.total = None
 
     def populate(self, all_ids, reindex_config):
         """add all to reindex ids to redis queue"""
@@ -61,6 +60,7 @@ class ReindexBase:
             return
 
         RedisQueue(queue_name=reindex_config["queue_name"]).add_list(all_ids)
+        self.total = None
 
 
 class ReindexPopulate(ReindexBase):
@@ -238,18 +238,19 @@ class Reindex(ReindexBase):
             if not RedisQueue(index_config["queue_name"]).has_item():
                 continue
 
-            total = RedisQueue(index_config["queue_name"]).length()
+            self.total = RedisQueue(index_config["queue_name"]).length()
             while True:
-                has_next = self.reindex_index(name, index_config, total)
+                has_next = self.reindex_index(name, index_config)
                 if not has_next:
                     break
 
-    def reindex_index(self, name, index_config, total):
+    def reindex_index(self, name, index_config):
         """reindex all of a single index"""
         reindex = self.get_reindex_map(index_config["index_name"])
         youtube_id = RedisQueue(index_config["queue_name"]).get_next()
         if youtube_id:
-            self._notify(name, index_config, total)
+            if self.task:
+                self._notify(name, index_config)
             reindex(youtube_id)
             sleep_interval = self.config["downloads"].get("sleep_interval", 0)
             sleep(sleep_interval)
@@ -266,23 +267,18 @@ class Reindex(ReindexBase):
 
         return def_map.get(index_name)
 
-    def _notify(self, name, index_config, total):
+    def _notify(self, name, index_config):
         """send notification back to task"""
+        if self.total is None:
+            self.total = RedisQueue(index_config["queue_name"]).length()
+
         remaining = RedisQueue(index_config["queue_name"]).length()
-        idx = total - remaining
-        message = [f"Reindexing {name.title()}s {idx}/{total}"]
-        progress = idx / total
+        idx = self.total - remaining
+        message = [f"Reindexing {name.title()}s {idx}/{self.total}"]
+        progress = idx / self.total
         self.task.send_progress(message, progress=progress)
 
     def _reindex_single_video(self, youtube_id):
-        """wrapper to handle channel name changes"""
-        try:
-            self._reindex_single_video_call(youtube_id)
-        except FileNotFoundError:
-            ChannelUrlFixer(youtube_id, self.config).run()
-            self._reindex_single_video_call(youtube_id)
-
-    def _reindex_single_video_call(self, youtube_id):
         """refresh data for single video"""
         video = YoutubeVideo(youtube_id)
 
@@ -291,7 +287,10 @@ class Reindex(ReindexBase):
         es_meta = video.json_data.copy()
 
         # get new
-        video.build_json()
+        media_url = os.path.join(
+            self.config["application"]["videos"], es_meta["media_url"]
+        )
+        video.build_json(media_path=media_url)
         if not video.youtube_meta:
             video.deactivate()
             return
@@ -464,65 +463,6 @@ class ReindexProgress(ReindexBase):
         state_dict.update({"state": state})
 
         return state_dict
-
-
-class ChannelUrlFixer:
-    """fix not matching channel names in reindex"""
-
-    def __init__(self, youtube_id, config):
-        self.youtube_id = youtube_id
-        self.config = config
-        self.video = False
-
-    def run(self):
-        """check and run if needed"""
-        print(f"{self.youtube_id}: failed to build channel path, try to fix.")
-        video_path_is, video_folder_is = self.get_as_is()
-        if not os.path.exists(video_path_is):
-            print(f"giving up reindex, video in video: {self.video.json_data}")
-            raise ValueError
-
-        _, video_folder_should = self.get_as_should()
-
-        if video_folder_is != video_folder_should:
-            self.process(video_path_is)
-        else:
-            print(f"{self.youtube_id}: skip channel url fixer")
-
-    def get_as_is(self):
-        """get video object as is"""
-        self.video = YoutubeVideo(self.youtube_id)
-        self.video.get_from_es()
-        video_path_is = os.path.join(
-            self.config["application"]["videos"],
-            self.video.json_data["media_url"],
-        )
-        video_folder_is = os.path.split(video_path_is)[0]
-
-        return video_path_is, video_folder_is
-
-    def get_as_should(self):
-        """add fresh metadata from remote"""
-        self.video.get_from_youtube()
-        self.video.add_file_path()
-
-        video_path_should = os.path.join(
-            self.config["application"]["videos"],
-            self.video.json_data["media_url"],
-        )
-        video_folder_should = os.path.split(video_path_should)[0]
-        return video_path_should, video_folder_should
-
-    def process(self, video_path_is):
-        """fix filepath"""
-        print(f"{self.youtube_id}: fixing channel rename.")
-        cache_dir = self.config["application"]["cache_dir"]
-        new_path = os.path.join(
-            cache_dir, "download", self.youtube_id + ".mp4"
-        )
-        shutil.move(video_path_is, new_path, copy_function=shutil.copyfile)
-        VideoDownloader().move_to_archive(self.video.json_data)
-        self.video.update_media_url()
 
 
 class ChannelFullScan:

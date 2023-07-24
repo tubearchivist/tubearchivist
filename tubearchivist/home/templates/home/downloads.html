@@ -97,6 +97,9 @@
                             <a href="https://www.youtube.com/watch?v={{ video.source.youtube_id }}" target="_blank"><h3>{{ video.source.title }}</h3></a>
                         </div>
                         <p>Published: {{ video.source.published }} | Duration: {{ video.source.duration }} | {{ video.source.youtube_id }}</p>
+                        {% if video.source.message %}
+                            <p class="danger-zone">{{ video.source.message }}</p>
+                        {% endif %}
                         <div>
                             {% if show_ignored_only %}
                                 <button data-id="{{ video.source.youtube_id }}" onclick="forgetIgnore(this)">Forget</button>
@@ -104,6 +107,9 @@
                             {% else %}
                                 <button data-id="{{ video.source.youtube_id }}" onclick="toIgnore(this)">Ignore</button>
                                 <button id="{{ video.source.youtube_id }}" data-id="{{ video.source.youtube_id }}" onclick="downloadNow(this)">Download now</button>
+                            {% endif %}
+                            {% if video.source.message %}
+                                <button class="danger-button" data-id="{{ video.source.youtube_id }}" onclick="forgetIgnore(this)">Delete</button>
                             {% endif %}
                         </div>
                     </div>

@@ -11,7 +11,7 @@ from home.src.index.channel import YoutubeChannel
 from home.src.index.generic import Pagination
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock, YoutubeVideo
-from home.src.ta.config import AppConfig
+from home.src.ta.config import AppConfig, ReleaseVersion
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskCommand, TaskManager
 from home.src.ta.urlparser import Parser
@@ -189,7 +189,7 @@ class VideoCommentView(ApiBaseView):
 
 class VideoSimilarView(ApiBaseView):
     """resolves to /api/video/<video-id>/similar/
-    GET: return max 3 videos similar to this
+    GET: return max 6 videos similar to this
     """
 
     search_base = "ta_video/_search/"
@@ -535,7 +535,11 @@ class PingView(ApiBaseView):
     @staticmethod
     def get(request):
         """get pong"""
-        data = {"response": "pong", "user": request.user.id}
+        data = {
+            "response": "pong",
+            "user": request.user.id,
+            "version": ReleaseVersion().get_local_version(),
+        }
         return Response(data)
 
 

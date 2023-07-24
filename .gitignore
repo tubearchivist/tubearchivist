@@ -1,5 +1,6 @@
 # python testing cache
 __pycache__
+.venv
 
 # django testing db
 db.sqlite3

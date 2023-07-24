@@ -20,7 +20,7 @@ from home.src.index.video_streams import (
     DurationConverter,
     MediaStreamExtractor,
 )
-from home.src.ta.helper import clean_string, randomizor
+from home.src.ta.helper import randomizor
 from home.src.ta.ta_redis import RedisArchivist
 from ryd_client import ryd_client
 
@@ -231,18 +231,24 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     def build_dl_cache_path(self):
         """find video path in dl cache"""
         cache_dir = self.app_conf["cache_dir"]
-        cache_path = f"{cache_dir}/download/"
-        all_cached = os.listdir(cache_path)
-        for file_cached in all_cached:
-            if self.youtube_id in file_cached:
-                vid_path = os.path.join(cache_path, file_cached)
-                return vid_path
+        video_id = self.json_data["youtube_id"]
+        cache_path = f"{cache_dir}/download/{video_id}.mp4"
+        if os.path.exists(cache_path):
+            return cache_path
+
+        channel_path = os.path.join(
+            self.app_conf["videos"],
+            self.json_data["channel"]["channel_id"],
+            f"{video_id}.mp4",
+        )
+        if os.path.exists(channel_path):
+            return channel_path
 
         raise FileNotFoundError
 
     def add_player(self, media_path=False):
         """add player information for new videos"""
-        vid_path = self._get_vid_path(media_path)
+        vid_path = media_path or self.build_dl_cache_path()
 
         duration_handler = DurationConverter()
         duration = duration_handler.get_sec(vid_path)
@@ -259,7 +265,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def add_streams(self, media_path=False):
         """add stream metadata"""
-        vid_path = self._get_vid_path(media_path)
+        vid_path = media_path or self.build_dl_cache_path()
         media = MediaStreamExtractor(vid_path)
         self.json_data.update(
             {
@@ -268,43 +274,12 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             }
         )
 
-    def _get_vid_path(self, media_path=False):
-        """get path of media file"""
-        if media_path:
-            return media_path
-
-        try:
-            # when indexing from download task
-            vid_path = self.build_dl_cache_path()
-        except FileNotFoundError as err:
-            # when reindexing needs to handle title rename
-            channel = os.path.split(self.json_data["media_url"])[0]
-            channel_dir = os.path.join(self.app_conf["videos"], channel)
-            all_files = os.listdir(channel_dir)
-            for file in all_files:
-                if self.youtube_id in file and file.endswith(".mp4"):
-                    vid_path = os.path.join(channel_dir, file)
-                    break
-            else:
-                raise FileNotFoundError("could not find video file") from err
-
-        return vid_path
-
     def add_file_path(self):
         """build media_url for where file will be located"""
-        channel_name = self.json_data["channel"]["channel_name"]
-        clean_channel_name = clean_string(channel_name)
-        if len(clean_channel_name) <= 3:
-            # fall back to channel id
-            clean_channel_name = self.json_data["channel"]["channel_id"]
-
-        timestamp = self.json_data["published"].replace("-", "")
-        youtube_id = self.json_data["youtube_id"]
-        title = self.json_data["title"]
-        clean_title = clean_string(title)
-        filename = f"{timestamp}_{youtube_id}_{clean_title}.mp4"
-        media_url = os.path.join(clean_channel_name, filename)
-        self.json_data["media_url"] = media_url
+        self.json_data["media_url"] = os.path.join(
+            self.json_data["channel"]["channel_id"],
+            self.json_data["youtube_id"] + ".mp4",
+        )
 
     def delete_media_file(self):
         """delete video file, meta data"""

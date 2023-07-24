@@ -35,24 +35,27 @@ class DurationConverter:
         return duration_sec
 
     @staticmethod
-    def get_str(duration_sec):
+    def get_str(seconds):
         """takes duration in sec and returns clean string"""
-        if not duration_sec:
+        if not seconds:
             # failed to extract
             return "NA"
 
-        hours = int(duration_sec // 3600)
-        minutes = int((duration_sec - (hours * 3600)) // 60)
-        secs = int(duration_sec - (hours * 3600) - (minutes * 60))
+        days = int(seconds // (24 * 3600))
+        hours = int((seconds % (24 * 3600)) // 3600)
+        minutes = int((seconds % 3600) // 60)
+        seconds = int(seconds % 60)
 
         duration_str = str()
+        if days:
+            duration_str = f"{days}d "
         if hours:
-            duration_str = str(hours).zfill(2) + ":"
+            duration_str = duration_str + str(hours).zfill(2) + ":"
         if minutes:
             duration_str = duration_str + str(minutes).zfill(2) + ":"
         else:
             duration_str = duration_str + "00:"
-        duration_str = duration_str + str(secs).zfill(2)
+        duration_str = duration_str + str(seconds).zfill(2)
         return duration_str
 
 

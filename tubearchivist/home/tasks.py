@@ -19,7 +19,7 @@ from home.src.download.yt_dlp_handler import VideoDownloader
 from home.src.es.backup import ElasticBackup
 from home.src.es.index_setup import ElasitIndexWrap
 from home.src.index.channel import YoutubeChannel
-from home.src.index.filesystem import Filesystem
+from home.src.index.filesystem import Scanner
 from home.src.index.manual import ImportFolderScanner
 from home.src.index.reindex import Reindex, ReindexManual, ReindexPopulate
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
@@ -113,7 +113,7 @@ class BaseTask(Task):
         """callback for task failure"""
         print(f"{task_id} Failed callback")
         message, key = self._build_message(level="error")
-        message.update({"messages": ["Task failed"]})
+        message.update({"messages": [f"Task failed: {exc}"]})
         RedisArchivist().set_message(key, message, expire=20)
 
     def on_success(self, retval, task_id, args, kwargs):
@@ -290,7 +290,9 @@ def rescan_filesystem(self):
         return
 
     manager.init(self)
-    Filesystem(task=self).process()
+    handler = Scanner(task=self)
+    handler.scan()
+    handler.apply()
     ThumbValidator(task=self).validate()
 
 

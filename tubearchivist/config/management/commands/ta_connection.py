@@ -86,6 +86,8 @@ class Command(BaseCommand):
                 continue
 
             if status_code and status_code == 200:
+                path = "_cluster/health?wait_for_status=yellow&timeout=30s"
+                _, _ = ElasticWrap(path).get()
                 self.stdout.write(
                     self.style.SUCCESS("    ✓ ES connection established")
                 )
@@ -116,7 +118,7 @@ class Command(BaseCommand):
             return
 
         message = (
-            "    🗙 ES connection failed. "
+            "    🗙 ES version check failed. "
             + f"Expected {self.MIN_MAJOR}.{self.MIN_MINOR} but got {version}"
         )
         self.stdout.write(self.style.ERROR(f"{message}"))

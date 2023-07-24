@@ -120,7 +120,9 @@ class Comments:
             "comment_timestamp": comment["timestamp"],
             "comment_time_text": time_text,
             "comment_likecount": comment["like_count"],
-            "comment_is_favorited": comment["is_favorited"],
+            "comment_is_favorited": comment.get(
+                "is_favorited"
+            ),  # temporary fix for yt-dlp upstream issue 7389
             "comment_author": comment["author"],
             "comment_author_id": comment["author_id"],
             "comment_author_thumbnail": comment["author_thumbnail"],

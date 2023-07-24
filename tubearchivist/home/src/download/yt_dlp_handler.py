@@ -20,7 +20,7 @@ from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video import YoutubeVideo, index_new_video
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
-from home.src.ta.helper import clean_string, ignore_filelist
+from home.src.ta.helper import ignore_filelist
 
 
 class DownloadPostProcess:
@@ -203,12 +203,13 @@ class VideoDownloader:
     def _get_next(self, auto_only):
         """get next item in queue"""
         must_list = [{"term": {"status": {"value": "pending"}}}]
+        must_not_list = [{"exists": {"field": "message"}}]
         if auto_only:
             must_list.append({"term": {"auto_start": {"value": True}}})
 
         data = {
             "size": 1,
-            "query": {"bool": {"must": must_list}},
+            "query": {"bool": {"must": must_list, "must_not": must_not_list}},
             "sort": [
                 {"auto_start": {"order": "desc"}},
                 {"timestamp": {"order": "asc"}},
@@ -344,7 +345,9 @@ class VideoDownloader:
             if youtube_id in file_name:
                 obs["outtmpl"] = os.path.join(dl_cache, file_name)
 
-        success = YtWrap(obs, self.config).download(youtube_id)
+        success, message = YtWrap(obs, self.config).download(youtube_id)
+        if not success:
+            self._handle_error(youtube_id, message)
 
         if self.obs["writethumbnail"]:
             # webp files don't get cleaned up automatically
@@ -356,28 +359,27 @@ class VideoDownloader:
 
         return success
 
+    @staticmethod
+    def _handle_error(youtube_id, message):
+        """store error message"""
+        data = {"doc": {"message": message}}
+        _, _ = ElasticWrap(f"ta_download/_update/{youtube_id}").post(data=data)
+
     def move_to_archive(self, vid_dict):
         """move downloaded video from cache to archive"""
         videos = self.config["application"]["videos"]
         host_uid = self.config["application"]["HOST_UID"]
         host_gid = self.config["application"]["HOST_GID"]
-        channel_name = clean_string(vid_dict["channel"]["channel_name"])
-        if len(channel_name) <= 3:
-            # fall back to channel id
-            channel_name = vid_dict["channel"]["channel_id"]
-        # make archive folder with correct permissions
-        new_folder = os.path.join(videos, channel_name)
-        if not os.path.exists(new_folder):
-            os.makedirs(new_folder)
-        if host_uid and host_gid:
-            os.chown(new_folder, host_uid, host_gid)
-        # find real filename
+        # make folder
+        folder = os.path.join(videos, vid_dict["channel"]["channel_id"])
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+            if host_uid and host_gid:
+                os.chown(folder, host_uid, host_gid)
+        # move media file
+        media_file = vid_dict["youtube_id"] + ".mp4"
         cache_dir = self.config["application"]["cache_dir"]
-        all_cached = ignore_filelist(os.listdir(cache_dir + "/download/"))
-        for file_str in all_cached:
-            if vid_dict["youtube_id"] in file_str:
-                old_file = file_str
-        old_path = os.path.join(cache_dir, "download", old_file)
+        old_path = os.path.join(cache_dir, "download", media_file)
         new_path = os.path.join(videos, vid_dict["media_url"])
         # move media file and fix permission
         shutil.move(old_path, new_path, copy_function=shutil.copyfile)

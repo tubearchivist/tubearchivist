@@ -6,23 +6,11 @@ Loose collection of helper functions
 import json
 import os
 import random
-import re
 import string
-import unicodedata
 from datetime import datetime
 from urllib.parse import urlparse
 
 import requests
-
-
-def clean_string(file_name: str) -> str:
-    """clean string to only asci characters"""
-    whitelist = "-_.() " + string.ascii_letters + string.digits
-    normalized = unicodedata.normalize("NFKD", file_name)
-    ascii_only = normalized.encode("ASCII", "ignore").decode().strip()
-    white_listed: str = "".join(c for c in ascii_only if c in whitelist)
-    cleaned: str = re.sub(r"[ ]{2,}", " ", white_listed)
-    return cleaned
 
 
 def ignore_filelist(filelist: list[str]) -> list[str]:

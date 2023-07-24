@@ -127,6 +127,12 @@ class IndexPaginate:
 
     def validate_data(self):
         """add pit and size to data"""
+        if not self.data:
+            self.data = {}
+
+        if "query" not in self.data.keys():
+            self.data.update({"query": {"match_all": {}}})
+
         if "sort" not in self.data.keys():
             self.data.update({"sort": [{"_doc": {"order": "desc"}}]})
 

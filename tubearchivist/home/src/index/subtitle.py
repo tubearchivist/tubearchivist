@@ -62,7 +62,12 @@ class YoutubeSubtitle:
         if not all_formats:
             return False
 
-        subtitle = [i for i in all_formats if i["ext"] == "json3"][0]
+        subtitle_json3 = [i for i in all_formats if i["ext"] == "json3"]
+        if not subtitle_json3:
+            print(f"{self.video.youtube_id}-{lang}: json3 not processed")
+            return False
+
+        subtitle = subtitle_json3[0]
         subtitle.update(
             {"lang": lang, "source": "auto", "media_url": media_url}
         )
