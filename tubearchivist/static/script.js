@@ -160,12 +160,12 @@ function dlPending() {
   }, 500);
 }
 
-function addToQueue(autostart=false) {
+function addToQueue(autostart = false) {
   let textArea = document.getElementById('id_vid_url');
   if (textArea.value === '') {
-    return
+    return;
   }
-  let toPost = {data: [{youtube_id: textArea.value, status: 'pending'}]};
+  let toPost = { data: [{ youtube_id: textArea.value, status: 'pending' }] };
   let apiEndpoint = '/api/download/';
   if (autostart) {
     apiEndpoint = `${apiEndpoint}?autostart=true`;
