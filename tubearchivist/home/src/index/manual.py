@@ -31,6 +31,7 @@ class ImportFolderScanner:
     CACHE_DIR = CONFIG["application"]["cache_dir"]
     IMPORT_DIR = os.path.join(CACHE_DIR, "import")
 
+    #All extensions should be in lowercase.
     EXT_MAP = {
         "media": [".mp4", ".mkv", ".webm"],
         "metadata": [".json"],
@@ -118,7 +119,7 @@ class ImportFolderScanner:
         """detect metadata type for file"""
 
         for key, value in self.EXT_MAP.items():
-            if ext in value:
+            if ext.lower() in value:
                 return key, file_path
 
         return False, False
