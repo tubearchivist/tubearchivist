@@ -31,7 +31,9 @@ class ImportFolderScanner:
     CACHE_DIR = CONFIG["application"]["cache_dir"]
     IMPORT_DIR = os.path.join(CACHE_DIR, "import")
 
-    #All extensions should be in lowercase.
+    """All extensions should be in lowercase until better handling is in place.
+    Described in Issue #502.
+    """
     EXT_MAP = {
         "media": [".mp4", ".mkv", ".webm"],
         "metadata": [".json"],
