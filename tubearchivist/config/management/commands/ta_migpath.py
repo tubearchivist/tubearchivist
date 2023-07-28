@@ -2,6 +2,7 @@
 
 import json
 import os
+import shutil
 
 from django.core.management.base import BaseCommand
 from home.src.es.connect import ElasticWrap, IndexPaginate
@@ -167,5 +168,8 @@ class FolderMigration:
         all_folders = ignore_filelist(os.listdir(self.videos))
         for folder in all_folders:
             folder_path = os.path.join(self.videos, folder)
+            if not os.path.isdir(folder_path):
+                continue
+
             if not ignore_filelist(os.listdir(folder_path)):
-                os.rmdir(folder_path)
+                shutil.rmtree(folder_path)
