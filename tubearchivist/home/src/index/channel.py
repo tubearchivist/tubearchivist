@@ -92,8 +92,9 @@ class YoutubeChannel(YouTubeItem):
     def _get_tv_art(self):
         """extract tv artwork"""
         for i in self.youtube_meta["thumbnails"]:
-            if i.get("id") == "avatar_uncropped":
+            if i.get("id") == "banner_uncropped":
                 return i["url"]
+        for i in self.youtube_meta["thumbnails"]:
             if not i.get("width"):
                 continue
             if i["width"] // i["height"] < 2 and not i["width"] == i["height"]:
