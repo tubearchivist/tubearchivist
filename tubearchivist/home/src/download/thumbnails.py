@@ -54,7 +54,10 @@ class ThumbManagerBase:
                 if response.status_code == 404:
                     return self.get_fallback()
 
-            except requests.exceptions.RequestException:
+            except (
+                requests.exceptions.RequestException,
+                requests.exceptions.ReadTimeout,
+            ):
                 print(f"{self.item_id}: retry thumbnail download {url}")
                 sleep((i + 1) ** i)
 
