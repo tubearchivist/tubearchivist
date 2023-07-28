@@ -91,7 +91,7 @@ def date_praser(timestamp: int | str) -> str:
     elif isinstance(timestamp, str):
         date_obj = datetime.strptime(timestamp, "%Y-%m-%d")
 
-    return datetime.strftime(date_obj, "%d %b, %Y")
+    return date_obj.date().isoformat()
 
 
 def time_parser(timestamp: str) -> float:
