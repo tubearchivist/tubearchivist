@@ -138,8 +138,14 @@ def is_shorts(youtube_id: str) -> bool:
 
 def ta_host_parser(ta_host: str) -> tuple[list[str], list[str]]:
     """parse ta_host env var for ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS"""
-    allowed_hosts: list[str] = []
-    csrf_trusted_origins: list[str] = []
+    allowed_hosts: list[str] = [
+        "localhost",
+        "tubearchivist",
+    ]
+    csrf_trusted_origins: list[str] = [
+        "http://localhost",
+        "http://tubearchivist",
+    ]
     for host in ta_host.split():
         host_clean = host.strip()
         if not host_clean.startswith("http"):
