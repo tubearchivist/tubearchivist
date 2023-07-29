@@ -23,6 +23,7 @@ from home.src.index.filesystem import Scanner
 from home.src.index.manual import ImportFolderScanner
 from home.src.index.reindex import Reindex, ReindexManual, ReindexPopulate
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
+from home.src.ta.notify import Notifications
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskManager
 from home.src.ta.urlparser import Parser
@@ -130,6 +131,12 @@ class BaseTask(Task):
         message.update({"messages": ["New task received."]})
         RedisArchivist().set_message(key, message)
 
+    def after_return(self, status, retval, task_id, args, kwargs, einfo):
+        """callback after task returns"""
+        print(f"{task_id} return callback")
+        task_title = self.TASK_CONFIG.get(self.name).get("title")
+        Notifications(self.name, task_id, task_title).send()
+
     def send_progress(self, message_lines, progress=False, title=False):
         """send progress message"""
         message, key = self._build_message()
@@ -169,7 +176,7 @@ def update_subscribed(self):
     if manager.is_pending(self):
         print(f"[task][{self.name}] rescan already running")
         self.send_progress("Rescan already in progress.")
-        return
+        return None
 
     manager.init(self)
     handler = SubscriptionScanner(task=self)
@@ -178,6 +185,10 @@ def update_subscribed(self):
     if missing_videos:
         print(missing_videos)
         extrac_dl.delay(missing_videos, auto_start=auto_start)
+        message = f"Found {len(missing_videos)} videos to add to the queue."
+        return message
+
+    return None
 
 
 @shared_task(name="download_pending", bind=True, base=BaseTask)
@@ -187,10 +198,16 @@ def download_pending(self, auto_only=False):
     if manager.is_pending(self):
         print(f"[task][{self.name}] download queue already running")
         self.send_progress("Download Queue is already running.")
-        return
+        return None
 
     manager.init(self)
-    VideoDownloader(task=self).run_queue(auto_only=auto_only)
+    downloader = VideoDownloader(task=self)
+    videos_downloaded = downloader.run_queue(auto_only=auto_only)
+
+    if videos_downloaded:
+        return f"downloaded {len(videos_downloaded)} videos."
+
+    return None
 
 
 @shared_task(name="extract_download", bind=True, base=BaseTask)
@@ -235,7 +252,10 @@ def check_reindex(self, data=False, extract_videos=False):
         self.send_progress("Add outdated documents to the reindex Queue.")
         populate.add_outdated()
 
-    Reindex(task=self).reindex_all()
+    handler = Reindex(task=self)
+    handler.reindex_all()
+
+    return handler.build_message()
 
 
 @shared_task(bind=True, name="manual_import", base=BaseTask)

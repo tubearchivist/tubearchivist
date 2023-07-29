@@ -191,6 +191,8 @@ class VideoDownloader:
         self._add_subscribed_channels()
         DownloadPostProcess(self).run()
 
+        return self.videos
+
     def _notify(self, video_data, message):
         """send progress notification to task"""
         if not self.task:
