@@ -25,6 +25,7 @@ function sync_blackhole {
         --exclude ".gitignore" \
         --exclude "**/cache" \
         --exclude "**/__pycache__/" \
+        --exclude ".venv" \
         --exclude "db.sqlite3" \
         --exclude ".mypy_cache" \
         . -e ssh "$host":tubearchivist
