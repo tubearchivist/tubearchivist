@@ -128,8 +128,8 @@
             <h2 id="format">Subtitles</h2>
             <div class="settings-item">
                 <p>Subtitles download setting: <span class="settings-current">{{ config.downloads.subtitle }}</span><br>
-                <i>Choose which subtitles to download, add comma separated two letter language ISO code,<br>
-                    e.g. <span class="settings-current">en, de</span></i><br>
+                <i>Choose which subtitles to download, add comma separated language codes,<br>
+                    e.g. <span class="settings-current">en, de, zh-Hans</span></i><br>
                 {{ app_form.downloads_subtitle }}</p>
             </div>
             <div class="settings-item">
@@ -250,6 +250,11 @@
                 <p>Periodically rescan your subscriptions:</p>
                 {{ scheduler_form.update_subscribed }}
             </div>
+            <div class="settings-item">
+                <p>Send notification on task completed:</p>
+                <p>Current notification urls: <span class="settings-current">{{ config.scheduler.update_subscribed_notify }}</span></p>
+                {{ scheduler_form.update_subscribed_notify }}
+            </div>
         </div>
         <div class="settings-group">
             <h2>Start download</h2>
@@ -265,6 +270,11 @@
                 </span></p>
                 <p>Automatic video download schedule:</p>
                 {{ scheduler_form.download_pending }}
+            </div>
+            <div class="settings-item">
+                <p>Send notification on task completed:</p>
+                <p>Current notification urls: <span class="settings-current">{{ config.scheduler.download_pending_notify }}</span></p>
+                {{ scheduler_form.download_pending_notify }}
             </div>
         </div>
         <div class="settings-group">
@@ -286,6 +296,11 @@
                 <p>Current refresh for metadata older than x days: <span class="settings-current">{{ config.scheduler.check_reindex_days }}</span></p>
                 <p>Refresh older than x days, recommended 90:</p>
                 {{ scheduler_form.check_reindex_days }}
+            </div>
+            <div class="settings-item">
+                <p>Send notification on task completed:</p>
+                <p>Current notification urls: <span class="settings-current">{{ config.scheduler.check_reindex_notify }}</span></p>
+                {{ scheduler_form.check_reindex_notify }}
             </div>
         </div>
         <div class="settings-group">

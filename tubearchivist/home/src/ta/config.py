@@ -184,6 +184,11 @@ class ScheduleBuilder:
         "version_check": "0 11 *",
     }
     CONFIG = ["check_reindex_days", "run_backup_rotate"]
+    NOTIFY = [
+        "update_subscribed_notify",
+        "download_pending_notify",
+        "check_reindex_notify",
+    ]
     MSG = "message:setting"
 
     def __init__(self):
@@ -213,6 +218,13 @@ class ScheduleBuilder:
                 redis_config["scheduler"][key] = to_write
             if key in self.CONFIG and value:
                 redis_config["scheduler"][key] = int(value)
+            if key in self.NOTIFY and value:
+                if value == "0":
+                    to_write = False
+                else:
+                    to_write = value
+                redis_config["scheduler"][key] = to_write
+
         RedisArchivist().set_message("config", redis_config)
         mess_dict = {
             "status": self.MSG,

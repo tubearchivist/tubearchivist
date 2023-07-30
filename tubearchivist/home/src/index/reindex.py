@@ -227,6 +227,11 @@ class Reindex(ReindexBase):
         super().__init__()
         self.task = task
         self.all_indexed_ids = False
+        self.processed = {
+            "videos": 0,
+            "channels": 0,
+            "playlists": 0,
+        }
 
     def reindex_all(self):
         """reindex all in queue"""
@@ -316,6 +321,7 @@ class Reindex(ReindexBase):
         thumb_handler.download_video_thumb(video.json_data["vid_thumb_url"])
 
         Comments(youtube_id, config=self.config).reindex_comments()
+        self.processed["videos"] += 1
 
         return
 
@@ -327,8 +333,7 @@ class Reindex(ReindexBase):
         new_path = os.path.join(videos, media_url_should)
         os.rename(old_path, new_path)
 
-    @staticmethod
-    def _reindex_single_channel(channel_id):
+    def _reindex_single_channel(self, channel_id):
         """refresh channel data and sync to videos"""
         # read current state
         channel = YoutubeChannel(channel_id)
@@ -354,6 +359,7 @@ class Reindex(ReindexBase):
 
         channel.upload_to_es()
         ChannelFullScan(channel_id).scan()
+        self.processed["channels"] += 1
 
     def _reindex_single_playlist(self, playlist_id):
         """refresh playlist data"""
@@ -369,6 +375,7 @@ class Reindex(ReindexBase):
 
         playlist.json_data["playlist_subscribed"] = subscribed
         playlist.upload_to_es()
+        self.processed["playlists"] += 1
         return
 
     def _get_all_videos(self):
@@ -389,6 +396,18 @@ class Reindex(ReindexBase):
 
         valid = CookieHandler(self.config).validate()
         return valid
+
+    def build_message(self):
+        """build progress message"""
+        message = ""
+        for key, value in self.processed.items():
+            if value:
+                message = message + f"{value} {key}, "
+
+        if message:
+            message = f"reindexed {message.rstrip(', ')}"
+
+        return message
 
 
 class ReindexProgress(ReindexBase):

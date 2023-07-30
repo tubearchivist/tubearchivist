@@ -2,6 +2,7 @@
 
 import json
 import os
+import shutil
 
 from django.core.management.base import BaseCommand
 from home.src.es.connect import ElasticWrap, IndexPaginate
@@ -97,7 +98,8 @@ class FolderMigration:
 
     def migrate_videos(self, to_migrate):
         """migrate all videos of channel"""
-        for video in to_migrate:
+        total = len(to_migrate)
+        for idx, video in enumerate(to_migrate):
             new_media_url = self._move_video_file(video)
             if not new_media_url:
                 continue
@@ -112,6 +114,9 @@ class FolderMigration:
 
             self.bulk_list.append(json.dumps(action))
             self.bulk_list.append(json.dumps(source))
+            if idx % 1000 == 0:
+                print(f"processing migration [{idx}/{total}]")
+                self.send_bulk()
 
     def _move_video_file(self, video):
         """move video file to new location"""
@@ -157,15 +162,21 @@ class FolderMigration:
             return
 
         self.bulk_list.append("\n")
+        path = "_bulk?refresh=true"
         data = "\n".join(self.bulk_list)
-        response, status = ElasticWrap("_bulk").post(data=data, ndjson=True)
+        response, status = ElasticWrap(path).post(data=data, ndjson=True)
         if not status == 200:
             print(response)
+
+        self.bulk_list = []
 
     def delete_old(self):
         """delete old empty folders"""
         all_folders = ignore_filelist(os.listdir(self.videos))
         for folder in all_folders:
             folder_path = os.path.join(self.videos, folder)
+            if not os.path.isdir(folder_path):
+                continue
+
             if not ignore_filelist(os.listdir(folder_path)):
-                os.rmdir(folder_path)
+                shutil.rmtree(folder_path)
