@@ -16,4 +16,4 @@ Video featuring Tube Archivist generously created by [IBRACORP](https://www.yout
 *Video Page*: Stream your video directly from the interface.
 
 ![video page screenshot](assets/tube-archivist-screenshot-download.png?raw=true "Tube Archivist Video Page")  
-*Downloads Page*: Add, control and monitor your download queue.
+*Downloads Page*: Add, control, and monitor your download queue.
