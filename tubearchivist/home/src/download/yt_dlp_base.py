@@ -20,8 +20,9 @@ class YtWrap:
         "default_search": "ytsearch",
         "quiet": True,
         "check_formats": "selected",
-        "socket_timeout": 3,
+        "socket_timeout": 10,
         "extractor_retries": 3,
+        "retries": 10,
     }
 
     def __init__(self, obs_request, config=False):
@@ -47,11 +48,14 @@ class YtWrap:
         with yt_dlp.YoutubeDL(self.obs) as ydl:
             try:
                 ydl.download([url])
-            except yt_dlp.utils.DownloadError:
-                print(f"{url}: failed to download.")
-                return False
+            except yt_dlp.utils.DownloadError as err:
+                print(f"{url}: failed to download with message {err}")
+                if "Temporary failure in name resolution" in str(err):
+                    raise ConnectionError("lost the internet, abort!") from err
 
-        return True
+                return False, str(err)
+
+        return True, True
 
     def extract(self, url):
         """make extract request"""
@@ -60,8 +64,17 @@ class YtWrap:
         except cookiejar.LoadError:
             print("cookie file is invalid")
             return False
-        except (yt_dlp.utils.ExtractorError, yt_dlp.utils.DownloadError):
-            print(f"{url}: failed to get info from youtube")
+        except yt_dlp.utils.ExtractorError as err:
+            print(f"{url}: failed to extract with message: {err}, continue...")
+            return False
+        except yt_dlp.utils.DownloadError as err:
+            if "This channel does not have a" in str(err):
+                return False
+
+            print(f"{url}: failed to get info from youtube with message {err}")
+            if "Temporary failure in name resolution" in str(err):
+                raise ConnectionError("lost the internet, abort!") from err
+
             return False
 
         return response
@@ -151,7 +164,7 @@ class CookieHandler:
         now = datetime.now()
         message = {
             "status": response,
-            "validated": int(now.strftime("%s")),
+            "validated": int(now.timestamp()),
             "validated_str": now.strftime("%Y-%m-%d %H:%M"),
         }
         RedisArchivist().set_message("cookie:valid", message)

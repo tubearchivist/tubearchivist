@@ -7,30 +7,80 @@
     </div>
     <div class="multi-search-box">
         {{ search_form }}
-        <p>Start typing or use <span class="settings-current">video:</span>, <span class="settings-current">channel:</span>, <span class="settings-current">playlist:</span> or <span class="settings-current">full:</span> keywords for advanced queries. <a href="https://github.com/tubearchivist/tubearchivist/wiki/Search" target="_blank">Learn more</a>.</p>
     </div>
-    <div class="multi-search-result">
-        <h2>Video Results</h2>
-        <div id="video-results" class="video-list {{ all_styles.home }} {% if all_styles.home == "grid" %}grid-{{ grid_items }}{% endif %}">
-            <p>No videos found.</p>
+    <div id="multi-search-results" style="display: none;">
+        <div class="multi-search-result">
+            <h2>Video Results</h2>
+            <div id="video-results" class="video-list {{ all_styles.home }} {% if all_styles.home == "grid" %}grid-{{ grid_items }}{% endif %}">
+                <p>No videos found.</p>
+            </div>
+        </div>
+        <div class="multi-search-result">
+            <h2>Channel Results</h2>
+            <div id="channel-results" class="channel-list {{ all_styles.channel }}">
+                <p>No channels found.</p>
+            </div>
+        </div>
+        <div class="multi-search-result">
+            <h2>Playlist Results</h2>
+            <div id="playlist-results" class="playlist-list {{ all_styles.playlist }}">
+                <p>No playlists found.</p>
+            </div>
+        </div>
+        <div class="multi-search-result">
+            <h2>Fulltext Results</h2>
+            <div id="fulltext-results" class="video-list list">
+                <p>No fulltext results found.</p>
+            </div>
         </div>
     </div>
-    <div class="multi-search-result">
-        <h2>Channel Results</h2>
-        <div id="channel-results" class="channel-list {{ all_styles.channel }}">
-            <p>No channels found.</p>
+    <div id="multi-search-results-placeholder" style="display: block;">
+        <div>
+            <h2>Example queries</h2>
+            <ul>
+                <li><span class="value">music video</span> — basic search</li>
+                <li><span>video: active:</span><span class="value">no</span> — all videos deleted from YouTube</li>
+                <li><span>video:</span><span class="value">learn javascript</span><span> channel:</span><span class="value">corey schafer</span><span> active:</span><span class="value">yes</span></li>
+                <li><span>channel:</span><span class="value">linux</span><span> subscribed:</span><span class="value">yes</span></li>
+                <li><span>playlist:</span><span class="value">backend engineering</span><span> active:</span><span class="value">yes</span><span> subscribed:</span><span class="value">yes</span></li>
+            </ul>
         </div>
-    </div>
-    <div class="multi-search-result">
-        <h2>Playlist Results</h2>
-        <div id="playlist-results" class="playlist-list {{ all_styles.playlist }}">
-            <p>No playlists found.</p>
-        </div>
-    </div>
-    <div class="multi-search-result">
-        <h2>Fulltext Results</h2>
-        <div id="fulltext-results" class="video-list list">
-            <p>No fulltext results found.</p>
+        <div>
+            <h2>Keywords cheatsheet</h2>
+            <p>For detailed usage check <a href="https://docs.tubearchivist.com/search/" target="_blank">wiki</a>.</p>
+            <div>
+                <ul>
+                    <li><span>simple:</span> (implied) — search in video titles, channel names and playlist titles</li>
+                    <li>
+                        <span>video:</span> — search in video titles, tags and category field
+                        <ul>
+                            <li><span>channel:</span> — channel name</li>
+                            <li><span>active:</span><span class="value">yes/no</span> — whether the video is still active on YouTube</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <span>channel:</span> — search in channel name and channel description
+                        <ul>
+                            <li><span>subscribed:</span><span class="value">yes/no</span> — whether you are subscribed to the channel</li>
+                            <li><span>active:</span><span class="value">yes/no</span> — whether the video is still active on YouTube</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <span>playlist:</span> — search in channel name and channel description
+                        <ul>
+                            <li><span>subscribed:</span><span class="value">yes/no</span> — whether you are subscribed to the channel</li>
+                            <li><span>active:</span><span class="value">yes/no</span> — whether the video is still active on YouTube</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <span>full:</span> — search in video subtitles
+                        <ul>
+                            <li><span>lang:</span> — subtitles language (use two-letter ISO country code, same as the one from settings page)</li>
+                            <li><span>source:</span><span class="value">auto/user</span> — <i>auto</i> to search though auto-generated subtitles only, or <i>user</i> to search through user-uploaded subtitles only</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>

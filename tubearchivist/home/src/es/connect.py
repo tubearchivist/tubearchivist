@@ -3,6 +3,7 @@ functionality:
 - wrapper around requests to call elastic search
 - reusable search_after to extract total index
 """
+# pylint: disable=missing-timeout
 
 import json
 
@@ -31,13 +32,15 @@ class ElasticWrap:
         self.auth = self.config["application"]["es_auth"]
         self.url = f"{es_url}/{self.path}"
 
-    def get(self, data=False):
+    def get(self, data=False, timeout=10, print_error=True):
         """get data from es"""
         if data:
-            response = requests.get(self.url, json=data, auth=self.auth)
+            response = requests.get(
+                self.url, json=data, auth=self.auth, timeout=timeout
+            )
         else:
-            response = requests.get(self.url, auth=self.auth)
-        if not response.ok:
+            response = requests.get(self.url, auth=self.auth, timeout=timeout)
+        if print_error and not response.ok:
             print(response.text)
 
         return response.json(), response.status_code
@@ -94,8 +97,10 @@ class IndexPaginate:
     """use search_after to go through whole index
     kwargs:
     - size: int, overwrite DEFAULT_SIZE
-    - keep_source: bool, keep _source key from es resutls
-    - callback: obj, Class with run method collback for every loop
+    - keep_source: bool, keep _source key from es results
+    - callback: obj, Class implementing run method callback for every loop
+    - task: task object to send notification
+    - total: int, total items in index for progress message
     """
 
     DEFAULT_SIZE = 500
@@ -104,12 +109,10 @@ class IndexPaginate:
         self.index_name = index_name
         self.data = data
         self.pit_id = False
-        self.size = kwargs.get("size")
-        self.keep_source = kwargs.get("keep_source")
-        self.callback = kwargs.get("callback")
+        self.kwargs = kwargs
 
     def get_results(self):
-        """get all results"""
+        """get all results, add task and total for notifications"""
         self.get_pit()
         self.validate_data()
         all_results = self.run_loop()
@@ -124,11 +127,16 @@ class IndexPaginate:
 
     def validate_data(self):
         """add pit and size to data"""
-        if "sort" not in self.data.keys():
-            print(self.data)
-            raise ValueError("missing sort key in data")
+        if not self.data:
+            self.data = {}
 
-        self.data["size"] = self.size or self.DEFAULT_SIZE
+        if "query" not in self.data.keys():
+            self.data.update({"query": {"match_all": {}}})
+
+        if "sort" not in self.data.keys():
+            self.data.update({"sort": [{"_doc": {"order": "desc"}}]})
+
+        self.data["size"] = self.kwargs.get("size") or self.DEFAULT_SIZE
         self.data["pit"] = {"id": self.pit_id, "keep_alive": "10m"}
 
     def run_loop(self):
@@ -138,30 +146,37 @@ class IndexPaginate:
         while True:
             response, _ = ElasticWrap("_search").get(data=self.data)
             all_hits = response["hits"]["hits"]
-            if all_hits:
-                for hit in all_hits:
-                    if self.keep_source:
-                        source = hit
-                    else:
-                        source = hit["_source"]
-
-                    if not self.callback:
-                        all_results.append(source)
-
-                if self.callback:
-                    self.callback(all_hits, self.index_name).run()
-                    if counter % 10 == 0:
-                        print(f"{self.index_name}: processing page {counter}")
-                    counter = counter + 1
-
-                # update search_after with last hit data
-                self.data["search_after"] = all_hits[-1]["sort"]
-            else:
+            if not all_hits:
                 break
+
+            for hit in all_hits:
+                if self.kwargs.get("keep_source"):
+                    all_results.append(hit)
+                else:
+                    all_results.append(hit["_source"])
+
+            if self.kwargs.get("callback"):
+                self.kwargs.get("callback")(all_hits, self.index_name).run()
+
+            if self.kwargs.get("task"):
+                print(f"{self.index_name}: processing page {counter}")
+                self._notify(len(all_results))
+
+            counter += 1
+
+            # update search_after with last hit data
+            self.data["search_after"] = all_hits[-1]["sort"]
 
         return all_results
 
+    def _notify(self, processed):
+        """send notification on task"""
+        total = self.kwargs.get("total")
+        progress = processed / total
+        index_clean = self.index_name.lstrip("ta_").title()
+        message = [f"Processing {index_clean}s {processed}/{total}"]
+        self.kwargs.get("task").send_progress(message, progress=progress)
+
     def clean_pit(self):
         """delete pit from elastic search"""
-        data = {"id": self.pit_id}
-        ElasticWrap("_pit").delete(data=data)
+        ElasticWrap("_pit").delete(data={"id": self.pit_id})

@@ -1,18 +1,27 @@
 """all API views"""
 
 from api.src.search_processor import SearchProcess
-from api.src.task_processor import TaskHandler
 from home.src.download.queue import PendingInteract
 from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.connect import ElasticWrap
 from home.src.es.snapshot import ElasticSnapshot
 from home.src.frontend.searching import SearchForm
+from home.src.frontend.watched import WatchState
+from home.src.index.channel import YoutubeChannel
 from home.src.index.generic import Pagination
-from home.src.index.video import SponsorBlock
-from home.src.ta.config import AppConfig
-from home.src.ta.helper import UrlListParser
-from home.src.ta.ta_redis import RedisArchivist, RedisQueue
-from home.tasks import extrac_dl, subscribe_to
+from home.src.index.reindex import ReindexProgress
+from home.src.index.video import SponsorBlock, YoutubeVideo
+from home.src.ta.config import AppConfig, ReleaseVersion
+from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.task_manager import TaskCommand, TaskManager
+from home.src.ta.urlparser import Parser
+from home.tasks import (
+    BaseTask,
+    check_reindex,
+    download_pending,
+    extrac_dl,
+    subscribe_to,
+)
 from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
@@ -29,8 +38,8 @@ class ApiBaseView(APIView):
 
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    search_base = False
-    data = False
+    search_base = ""
+    data = ""
 
     def __init__(self):
         super().__init__()
@@ -93,6 +102,20 @@ class VideoApiView(ApiBaseView):
         """get request"""
         self.get_document(video_id)
         return Response(self.response, status=self.status_code)
+
+    def delete(self, request, video_id):
+        # pylint: disable=unused-argument
+        """delete single video"""
+        message = {"video": video_id}
+        try:
+            YoutubeVideo(video_id).delete_media_file()
+            status_code = 200
+            message.update({"state": "delete"})
+        except FileNotFoundError:
+            status_code = 404
+            message.update({"state": "not found"})
+
+        return Response(message, status=status_code)
 
 
 class VideoApiListView(ApiBaseView):
@@ -166,7 +189,7 @@ class VideoCommentView(ApiBaseView):
 
 class VideoSimilarView(ApiBaseView):
     """resolves to /api/video/<video-id>/similar/
-    GET: return max 3 videos similar to this
+    GET: return max 6 videos similar to this
     """
 
     search_base = "ta_video/_search/"
@@ -250,6 +273,20 @@ class ChannelApiView(ApiBaseView):
         self.get_document(channel_id)
         return Response(self.response, status=self.status_code)
 
+    def delete(self, request, channel_id):
+        # pylint: disable=unused-argument
+        """delete channel"""
+        message = {"channel": channel_id}
+        try:
+            YoutubeChannel(channel_id).delete_channel()
+            status_code = 200
+            message.update({"state": "delete"})
+        except FileNotFoundError:
+            status_code = 404
+            message.update({"state": "not found"})
+
+        return Response(message, status=status_code)
+
 
 class ChannelApiListView(ApiBaseView):
     """resolves to /api/channel/
@@ -258,13 +295,26 @@ class ChannelApiListView(ApiBaseView):
     """
 
     search_base = "ta_channel/_search/"
+    valid_filter = ["subscribed"]
 
     def get(self, request):
         """get request"""
-        self.get_document_list(request)
         self.data.update(
             {"sort": [{"channel_name.keyword": {"order": "asc"}}]}
         )
+
+        query_filter = request.GET.get("filter", False)
+        must_list = []
+        if query_filter:
+            if query_filter not in self.valid_filter:
+                message = f"invalid url query filder: {query_filter}"
+                print(message)
+                return Response({"message": message}, status=400)
+
+            must_list.append({"term": {"channel_subscribed": {"value": True}}})
+
+        self.data["query"] = {"bool": {"must": must_list}}
+        self.get_document_list(request)
 
         return Response(self.response)
 
@@ -364,7 +414,7 @@ class DownloadApiView(ApiBaseView):
     """
 
     search_base = "ta_download/_doc/"
-    valid_status = ["pending", "ignore"]
+    valid_status = ["pending", "ignore", "priority"]
 
     def get(self, request, video_id):
         # pylint: disable=unused-argument
@@ -374,15 +424,21 @@ class DownloadApiView(ApiBaseView):
 
     def post(self, request, video_id):
         """post to video to change status"""
-        item_status = request.data["status"]
+        item_status = request.data.get("status")
         if item_status not in self.valid_status:
             message = f"{video_id}: invalid status {item_status}"
             print(message)
             return Response({"message": message}, status=400)
 
+        _, status_code = PendingInteract(video_id).get_item()
+        if status_code == 404:
+            message = f"{video_id}: item not found {status_code}"
+            return Response({"message": message}, status=404)
+
         print(f"{video_id}: change status to {item_status}")
-        PendingInteract(video_id=video_id, status=item_status).update_status()
-        RedisQueue().clear_item(video_id)
+        PendingInteract(video_id, item_status).update_status()
+        if item_status == "priority":
+            download_pending.delay(auto_only=True)
 
         return Response(request.data)
 
@@ -391,7 +447,7 @@ class DownloadApiView(ApiBaseView):
         # pylint: disable=unused-argument
         """delete single video from queue"""
         print(f"{video_id}: delete from queue")
-        PendingInteract(video_id=video_id).delete_item()
+        PendingInteract(video_id).delete_item()
 
         return Response({"success": True})
 
@@ -435,6 +491,7 @@ class DownloadApiListView(ApiBaseView):
     def post(request):
         """add list of videos to download queue"""
         data = request.data
+        auto_start = bool(request.GET.get("autostart"))
         try:
             to_add = data["data"]
         except KeyError:
@@ -445,13 +502,13 @@ class DownloadApiListView(ApiBaseView):
         pending = [i["youtube_id"] for i in to_add if i["status"] == "pending"]
         url_str = " ".join(pending)
         try:
-            youtube_ids = UrlListParser(url_str).process_list()
+            youtube_ids = Parser(url_str).parse()
         except ValueError:
             message = f"failed to parse: {url_str}"
             print(message)
             return Response({"message": message}, status=400)
 
-        extrac_dl.delay(youtube_ids)
+        extrac_dl.delay(youtube_ids, auto_start=auto_start)
 
         return Response(data)
 
@@ -478,7 +535,11 @@ class PingView(ApiBaseView):
     @staticmethod
     def get(request):
         """get pong"""
-        data = {"response": "pong", "user": request.user.id}
+        data = {
+            "response": "pong",
+            "user": request.user.id,
+            "version": ReleaseVersion().get_local_version(),
+        }
         return Response(data)
 
 
@@ -500,29 +561,6 @@ class LoginApiView(ObtainAuthToken):
         print(f"returning token for user with id {user.pk}")
 
         return Response({"token": token.key, "user_id": user.pk})
-
-
-class TaskApiView(ApiBaseView):
-    """resolves to /api/task/
-    GET: check if ongoing background task
-    POST: start a new background task
-    """
-
-    @staticmethod
-    def get(request):
-        """handle get request"""
-        # pylint: disable=unused-argument
-        response = {"rescan": False, "downloading": False}
-        for key in response.keys():
-            response[key] = RedisArchivist().is_locked(key)
-
-        return Response(response)
-
-    def post(self, request):
-        """handle post request"""
-        response = TaskHandler(request.data).run_task()
-
-        return Response(response)
 
 
 class SnapshotApiListView(ApiBaseView):
@@ -589,6 +627,140 @@ class SnapshotApiView(ApiBaseView):
         return Response(response)
 
 
+class TaskListView(ApiBaseView):
+    """resolves to /api/task-name/
+    GET: return a list of all stored task results
+    """
+
+    def get(self, request):
+        """handle get request"""
+        # pylint: disable=unused-argument
+        all_results = TaskManager().get_all_results()
+
+        return Response(all_results)
+
+
+class TaskNameListView(ApiBaseView):
+    """resolves to /api/task-name/<task-name>/
+    GET: return a list of stored results of task
+    POST: start new background process
+    """
+
+    def get(self, request, task_name):
+        """handle get request"""
+        # pylint: disable=unused-argument
+        if task_name not in BaseTask.TASK_CONFIG:
+            message = {"message": "invalid task name"}
+            return Response(message, status=404)
+
+        all_results = TaskManager().get_tasks_by_name(task_name)
+
+        return Response(all_results)
+
+    def post(self, request, task_name):
+        """
+        handle post request
+        404 for invalid task_name
+        400 if task can't be started here without argument
+        """
+        # pylint: disable=unused-argument
+        task_config = BaseTask.TASK_CONFIG.get(task_name)
+        if not task_config:
+            message = {"message": "invalid task name"}
+            return Response(message, status=404)
+
+        if not task_config.get("api-start"):
+            message = {"message": "can not start task through this endpoint"}
+            return Response(message, status=400)
+
+        message = TaskCommand().start(task_name)
+
+        return Response({"message": message})
+
+
+class TaskIDView(ApiBaseView):
+    """resolves to /api/task-id/<task-id>/
+    GET: return details of task id
+    """
+
+    valid_commands = ["stop", "kill"]
+
+    def get(self, request, task_id):
+        """handle get request"""
+        # pylint: disable=unused-argument
+        task_result = TaskManager().get_task(task_id)
+        if not task_result:
+            message = {"message": "task id not found"}
+            return Response(message, status=404)
+
+        return Response(task_result)
+
+    def post(self, request, task_id):
+        """post command to task"""
+        command = request.data.get("command")
+        if not command or command not in self.valid_commands:
+            message = {"message": "no valid command found"}
+            return Response(message, status=400)
+
+        task_result = TaskManager().get_task(task_id)
+        if not task_result:
+            message = {"message": "task id not found"}
+            return Response(message, status=404)
+
+        task_conf = BaseTask.TASK_CONFIG.get(task_result.get("name"))
+        if command == "stop":
+            if not task_conf.get("api-stop"):
+                message = {"message": "task can not be stopped"}
+                return Response(message, status=400)
+
+            message_key = self._build_message_key(task_conf, task_id)
+            TaskCommand().stop(task_id, message_key)
+        if command == "kill":
+            if not task_conf.get("api-stop"):
+                message = {"message": "task can not be killed"}
+                return Response(message, status=400)
+
+            TaskCommand().kill(task_id)
+
+        return Response({"message": "command sent"})
+
+    def _build_message_key(self, task_conf, task_id):
+        """build message key to forward command to notification"""
+        return f"message:{task_conf.get('group')}:{task_id.split('-')[0]}"
+
+
+class RefreshView(ApiBaseView):
+    """resolves to /api/refresh/
+    GET: get refresh progress
+    POST: start a manual refresh task
+    """
+
+    def get(self, request):
+        """handle get request"""
+        request_type = request.GET.get("type")
+        request_id = request.GET.get("id")
+
+        if request_id and not request_type:
+            return Response({"status": "Bad Request"}, status=400)
+
+        try:
+            progress = ReindexProgress(
+                request_type=request_type, request_id=request_id
+            ).get_progress()
+        except ValueError:
+            return Response({"status": "Bad Request"}, status=400)
+
+        return Response(progress)
+
+    def post(self, request):
+        """handle post request"""
+        data = request.data
+        extract_videos = bool(request.GET.get("extract_videos", False))
+        check_reindex.delay(data=data, extract_videos=extract_videos)
+
+        return Response(data)
+
+
 class CookieView(ApiBaseView):
     """resolves to /api/cookie/
     GET: check if cookie is enabled
@@ -641,6 +813,24 @@ class CookieView(ApiBaseView):
         return Response(message)
 
 
+class WatchedView(ApiBaseView):
+    """resolves to /api/watched/
+    POST: change watched state of video, channel or playlist
+    """
+
+    def post(self, request):
+        """change watched state"""
+        youtube_id = request.data.get("id")
+        is_watched = request.data.get("is_watched")
+
+        if not youtube_id or is_watched is None:
+            message = {"message": "missing id or is_watched"}
+            return Response(message, status=400)
+
+        WatchState(youtube_id, is_watched).change()
+        return Response({"message": "success"}, status=200)
+
+
 class SearchView(ApiBaseView):
     """resolves to /api/search/
     GET: run a search with the string in the ?query parameter
@@ -658,3 +848,33 @@ class SearchView(ApiBaseView):
 
         search_results = SearchForm().multi_search(search_query)
         return Response(search_results)
+
+
+class TokenView(ApiBaseView):
+    """resolves to /api/token/
+    DELETE: revoke the token
+    """
+
+    @staticmethod
+    def delete(request):
+        print("revoke API token")
+        request.user.auth_token.delete()
+        return Response({"success": True})
+
+
+class NotificationView(ApiBaseView):
+    """resolves to /api/notification/
+    GET: returns a list of notifications
+    filter query to filter messages by group
+    """
+
+    valid_filters = ["download", "settings", "channel"]
+
+    def get(self, request):
+        """get all notifications"""
+        query = "message"
+        filter_by = request.GET.get("filter", None)
+        if filter_by in self.valid_filters:
+            query = f"{query}:{filter_by}"
+
+        return Response(RedisArchivist().list_items(query))

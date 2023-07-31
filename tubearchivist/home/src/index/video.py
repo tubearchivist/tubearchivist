@@ -15,7 +15,12 @@ from home.src.index import comments as ta_comments
 from home.src.index import playlist as ta_playlist
 from home.src.index.generic import YouTubeItem
 from home.src.index.subtitle import YoutubeSubtitle
-from home.src.ta.helper import DurationConverter, clean_string, randomizor
+from home.src.index.video_constants import VideoTypeEnum
+from home.src.index.video_streams import (
+    DurationConverter,
+    MediaStreamExtractor,
+)
+from home.src.ta.helper import randomizor
 from home.src.ta.ta_redis import RedisArchivist
 from ryd_client import ryd_client
 
@@ -28,7 +33,7 @@ class SponsorBlock:
     def __init__(self, user_id=False):
         self.user_id = user_id
         self.user_agent = f"{settings.TA_UPSTREAM} {settings.TA_VERSION}"
-        self.last_refresh = int(datetime.now().strftime("%s"))
+        self.last_refresh = int(datetime.now().timestamp())
 
     def get_sb_id(self):
         """get sponsorblock userid or generate if needed"""
@@ -73,20 +78,14 @@ class SponsorBlock:
 
     def _get_sponsor_dict(self, all_segments):
         """format and process response"""
-        has_unlocked = False
-        cleaned_segments = []
-        for segment in all_segments:
-            if not segment["locked"]:
-                has_unlocked = True
-            del segment["userID"]
-            del segment["description"]
-            cleaned_segments.append(segment)
+        _ = [i.pop("description", None) for i in all_segments]
+        has_unlocked = not any(i.get("locked") for i in all_segments)
 
         sponsor_dict = {
             "last_refresh": self.last_refresh,
             "has_unlocked": has_unlocked,
             "is_enabled": True,
-            "segments": cleaned_segments,
+            "segments": all_segments,
         }
         return sponsor_dict
 
@@ -129,11 +128,16 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     index_name = "ta_video"
     yt_base = "https://www.youtube.com/watch?v="
 
-    def __init__(self, youtube_id, video_overwrites=False):
+    def __init__(
+        self,
+        youtube_id,
+        video_overwrites=False,
+        video_type=VideoTypeEnum.VIDEOS,
+    ):
         super().__init__(youtube_id)
         self.channel_id = False
         self.video_overwrites = video_overwrites
-        self.es_path = f"{self.index_name}/_doc/{youtube_id}"
+        self.video_type = video_type
         self.offline_import = False
 
     def build_json(self, youtube_meta_overwrite=False, media_path=False):
@@ -151,6 +155,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         self._add_stats()
         self.add_file_path()
         self.add_player(media_path)
+        self.add_streams(media_path)
         if self.config["downloads"]["integrate_ryd"]:
             self._get_ryd_stats()
 
@@ -180,7 +185,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         upload_date = self.youtube_meta["upload_date"]
         upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
         published = upload_date_time.strftime("%Y-%m-%d")
-        last_refresh = int(datetime.now().strftime("%s"))
+        last_refresh = int(datetime.now().timestamp())
         # base64_blur = ThumbManager().get_base64_blur(self.youtube_id)
         base64_blur = False
         # build json_data basics
@@ -195,6 +200,8 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             "vid_last_refresh": last_refresh,
             "date_downloaded": last_refresh,
             "youtube_id": self.youtube_id,
+            # Using .value to make json encodable
+            "vid_type": self.video_type.value,
             "active": True,
         }
 
@@ -224,18 +231,24 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     def build_dl_cache_path(self):
         """find video path in dl cache"""
         cache_dir = self.app_conf["cache_dir"]
-        cache_path = f"{cache_dir}/download/"
-        all_cached = os.listdir(cache_path)
-        for file_cached in all_cached:
-            if self.youtube_id in file_cached:
-                vid_path = os.path.join(cache_path, file_cached)
-                return vid_path
+        video_id = self.json_data["youtube_id"]
+        cache_path = f"{cache_dir}/download/{video_id}.mp4"
+        if os.path.exists(cache_path):
+            return cache_path
+
+        channel_path = os.path.join(
+            self.app_conf["videos"],
+            self.json_data["channel"]["channel_id"],
+            f"{video_id}.mp4",
+        )
+        if os.path.exists(channel_path):
+            return channel_path
 
         raise FileNotFoundError
 
     def add_player(self, media_path=False):
         """add player information for new videos"""
-        vid_path = self._get_vid_path(media_path)
+        vid_path = media_path or self.build_dl_cache_path()
 
         duration_handler = DurationConverter()
         duration = duration_handler.get_sec(vid_path)
@@ -250,48 +263,31 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             }
         )
 
-    def _get_vid_path(self, media_path=False):
-        """get path of media file"""
-        if media_path:
-            return media_path
-
-        try:
-            # when indexing from download task
-            vid_path = self.build_dl_cache_path()
-        except FileNotFoundError as err:
-            # when reindexing needs to handle title rename
-            channel = os.path.split(self.json_data["media_url"])[0]
-            channel_dir = os.path.join(self.app_conf["videos"], channel)
-            all_files = os.listdir(channel_dir)
-            for file in all_files:
-                if self.youtube_id in file and file.endswith(".mp4"):
-                    vid_path = os.path.join(channel_dir, file)
-                    break
-            else:
-                raise FileNotFoundError("could not find video file") from err
-
-        return vid_path
+    def add_streams(self, media_path=False):
+        """add stream metadata"""
+        vid_path = media_path or self.build_dl_cache_path()
+        media = MediaStreamExtractor(vid_path)
+        self.json_data.update(
+            {
+                "streams": media.extract_metadata(),
+                "media_size": media.get_file_size(),
+            }
+        )
 
     def add_file_path(self):
         """build media_url for where file will be located"""
-        channel_name = self.json_data["channel"]["channel_name"]
-        clean_channel_name = clean_string(channel_name)
-        if len(clean_channel_name) <= 3:
-            # fall back to channel id
-            clean_channel_name = self.json_data["channel"]["channel_id"]
-
-        timestamp = self.json_data["published"].replace("-", "")
-        youtube_id = self.json_data["youtube_id"]
-        title = self.json_data["title"]
-        clean_title = clean_string(title)
-        filename = f"{timestamp}_{youtube_id}_{clean_title}.mp4"
-        media_url = os.path.join(clean_channel_name, filename)
-        self.json_data["media_url"] = media_url
+        self.json_data["media_url"] = os.path.join(
+            self.json_data["channel"]["channel_id"],
+            self.json_data["youtube_id"] + ".mp4",
+        )
 
     def delete_media_file(self):
         """delete video file, meta data"""
         print(f"{self.youtube_id}: delete video")
         self.get_from_es()
+        if not self.json_data:
+            raise FileNotFoundError
+
         video_base = self.app_conf["videos"]
         media_url = self.json_data.get("media_url")
         file_path = os.path.join(video_base, media_url)
@@ -399,9 +395,13 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         _, _ = ElasticWrap(path).post(data=data)
 
 
-def index_new_video(youtube_id, video_overwrites=False):
+def index_new_video(
+    youtube_id, video_overwrites=False, video_type=VideoTypeEnum.VIDEOS
+):
     """combined classes to create new video in index"""
-    video = YoutubeVideo(youtube_id, video_overwrites=video_overwrites)
+    video = YoutubeVideo(
+        youtube_id, video_overwrites=video_overwrites, video_type=video_type
+    )
     video.build_json()
     if not video.json_data:
         raise ValueError("failed to get metadata for " + youtube_id)

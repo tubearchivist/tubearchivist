@@ -8,13 +8,21 @@
     </div>
     <div class="info-box-item channel-nav">
         <a href="{% url 'channel_id' channel_info.channel_id %}"><h3>Videos</h3></a>
-        <a href="{% url 'channel_id_playlist' channel_info.channel_id %}"><h3>Playlists</h3></a>
+        {% if has_streams %}
+            <a href="{% url 'channel_id_live' channel_info.channel_id %}"><h3>Streams</h3></a>
+        {% endif %}
+        {% if has_shorts %}
+            <a href="{% url 'channel_id_shorts' channel_info.channel_id %}"><h3>Shorts</h3></a>
+        {% endif %}
+        {% if has_playlists %}
+            <a href="{% url 'channel_id_playlist' channel_info.channel_id %}"><h3>Playlists</h3></a>
+        {% endif %}
         <a href="{% url 'channel_id_about' channel_info.channel_id %}"><h3>About</h3></a>
         {% if has_pending %}
             <a href="{% url 'downloads' %}?channel={{ channel_info.channel_id }}"><h3>Downloads</h3></a>
         {% endif %}
     </div>
-    <div id="notifications" data="channel_id"></div>
+    <div id="notifications" data="channel reindex"></div>
     <div class="info-box info-box-2">
         <div class="info-box-item">
             <div class="round-img">
@@ -37,12 +45,10 @@
             </div>
         </div>
         <div class="info-box-item">
-            <div>
-                {% if max_hits %}
-                    <p>Total Videos: {{ max_hits }}</p>
-                    <button title="Mark all videos from {{ channel_info.channel_name }} as watched" type="button" id="watched-button" data-id="{{ channel_info.channel_id }}" onclick="isWatchedButton(this)">Mark as watched</button>
-                {% endif %}
-            </div>
+            {% if aggs %}
+                <p>{{ aggs.total_items.value }} videos <span class="space-carrot">|</span> {{ aggs.total_duration.value_str }} playback <span class="space-carrot">|</span> Total size {{ aggs.total_size.value|filesizeformat }}</p>
+                <button title="Mark all videos from {{ channel_info.channel_name }} as watched" type="button" id="watched-button" data-id="{{ channel_info.channel_id }}" onclick="isWatchedButton(this)">Mark as watched</button>
+            {% endif %}
         </div>
     </div>
 </div>

@@ -7,8 +7,12 @@ Functionality:
 import json
 import os
 import re
+from random import randint
+from time import sleep
 
+import requests
 from celery.schedules import crontab
+from django.conf import settings
 from home.src.ta.ta_redis import RedisArchivist
 
 
@@ -47,18 +51,6 @@ class AppConfig:
     @staticmethod
     def get_config_env():
         """read environment application variables"""
-        host_uid_env = os.environ.get("HOST_UID")
-        if host_uid_env:
-            host_uid = int(host_uid_env)
-        else:
-            host_uid = False
-
-        host_gid_env = os.environ.get("HOST_GID")
-        if host_gid_env:
-            host_gid = int(host_gid_env)
-        else:
-            host_gid = False
-
         es_pass = os.environ.get("ELASTIC_PASSWORD")
         es_user = os.environ.get("ELASTIC_USER", default="elastic")
 
@@ -66,8 +58,9 @@ class AppConfig:
             "REDIS_HOST": os.environ.get("REDIS_HOST"),
             "es_url": os.environ.get("ES_URL"),
             "es_auth": (es_user, es_pass),
-            "HOST_UID": host_uid,
-            "HOST_GID": host_gid,
+            "HOST_UID": int(os.environ.get("HOST_UID", False)),
+            "HOST_GID": int(os.environ.get("HOST_GID", False)),
+            "enable_cast": bool(os.environ.get("ENABLE_CAST")),
         }
 
         return application
@@ -75,11 +68,19 @@ class AppConfig:
     @staticmethod
     def get_config_redis():
         """read config json set from redis to overwrite defaults"""
-        config = RedisArchivist().get_message("config")
-        if not list(config.values())[0]:
-            return False
+        for i in range(10):
+            try:
+                config = RedisArchivist().get_message("config")
+                if not list(config.values())[0]:
+                    return False
 
-        return config
+                return config
+
+            except Exception:  # pylint: disable=broad-except
+                print(f"... Redis connection failed, retry [{i}/10]")
+                sleep(3)
+
+        raise ConnectionError("failed to connect to redis")
 
     def update_config(self, form_post):
         """update config values from settings form"""
@@ -126,6 +127,15 @@ class AppConfig:
         self.config["application"]["colors"] = colors
         return colors
 
+    @staticmethod
+    def _build_rand_daily():
+        """build random daily schedule per installation"""
+        return {
+            "minute": randint(0, 59),
+            "hour": randint(0, 23),
+            "day_of_week": "*",
+        }
+
     def load_new_defaults(self):
         """check config.json for missing defaults"""
         default_config = self.get_config_file()
@@ -134,8 +144,9 @@ class AppConfig:
         # check for customizations
         if not redis_config:
             config = self.get_config()
+            config["scheduler"]["version_check"] = self._build_rand_daily()
             RedisArchivist().set_message("config", config)
-            return
+            return False
 
         needs_update = False
 
@@ -149,11 +160,16 @@ class AppConfig:
             # missing nested values
             for sub_key, sub_value in value.items():
                 if sub_key not in redis_config[key].keys():
+                    if sub_value == "rand-d":
+                        sub_value = self._build_rand_daily()
+
                     redis_config[key].update({sub_key: sub_value})
                     needs_update = True
 
         if needs_update:
             RedisArchivist().set_message("config", redis_config)
+
+        return needs_update
 
 
 class ScheduleBuilder:
@@ -165,8 +181,14 @@ class ScheduleBuilder:
         "check_reindex": "0 12 *",
         "thumbnail_check": "0 17 *",
         "run_backup": "0 18 0",
+        "version_check": "0 11 *",
     }
     CONFIG = ["check_reindex_days", "run_backup_rotate"]
+    NOTIFY = [
+        "update_subscribed_notify",
+        "download_pending_notify",
+        "check_reindex_notify",
+    ]
     MSG = "message:setting"
 
     def __init__(self):
@@ -196,6 +218,13 @@ class ScheduleBuilder:
                 redis_config["scheduler"][key] = to_write
             if key in self.CONFIG and value:
                 redis_config["scheduler"][key] = int(value)
+            if key in self.NOTIFY and value:
+                if value == "0":
+                    to_write = False
+                else:
+                    to_write = value
+                redis_config["scheduler"][key] = to_write
+
         RedisArchivist().set_message("config", redis_config)
         mess_dict = {
             "status": self.MSG,
@@ -257,6 +286,8 @@ class ScheduleBuilder:
 
     def build_schedule(self):
         """build schedule dict as expected by app.conf.beat_schedule"""
+        AppConfig().load_new_defaults()
+        self.config = AppConfig().config
         schedule_dict = {}
 
         for schedule_item in self.SCHEDULES:
@@ -264,18 +295,94 @@ class ScheduleBuilder:
             if not item_conf:
                 continue
 
-            minute = item_conf["minute"]
-            hour = item_conf["hour"]
-            day_of_week = item_conf["day_of_week"]
-            schedule_name = f"schedule_{schedule_item}"
-            to_add = {
-                schedule_name: {
-                    "task": schedule_item,
-                    "schedule": crontab(
-                        minute=minute, hour=hour, day_of_week=day_of_week
-                    ),
+            schedule_dict.update(
+                {
+                    f"schedule_{schedule_item}": {
+                        "task": schedule_item,
+                        "schedule": crontab(
+                            minute=item_conf["minute"],
+                            hour=item_conf["hour"],
+                            day_of_week=item_conf["day_of_week"],
+                        ),
+                    }
                 }
-            }
-            schedule_dict.update(to_add)
+            )
 
         return schedule_dict
+
+
+class ReleaseVersion:
+    """compare local version with remote version"""
+
+    REMOTE_URL = "https://www.tubearchivist.com/api/release/latest/"
+    NEW_KEY = "versioncheck:new"
+
+    def __init__(self):
+        self.local_version = self._parse_version(settings.TA_VERSION)
+        self.is_unstable = settings.TA_VERSION.endswith("-unstable")
+        self.remote_version = False
+        self.is_breaking = False
+        self.response = False
+
+    def check(self):
+        """check version"""
+        print(f"[{self.local_version}]: look for updates")
+        self.get_remote_version()
+        new_version, is_breaking = self._has_update()
+        if new_version:
+            message = {
+                "status": True,
+                "version": new_version,
+                "is_breaking": is_breaking,
+            }
+            RedisArchivist().set_message(self.NEW_KEY, message)
+            print(f"[{self.local_version}]: found new version {new_version}")
+
+    def get_local_version(self):
+        """read version from local"""
+        return self.local_version
+
+    def get_remote_version(self):
+        """read version from remote"""
+        self.response = requests.get(self.REMOTE_URL, timeout=20).json()
+        remote_version_str = self.response["release_version"]
+        self.remote_version = self._parse_version(remote_version_str)
+        self.is_breaking = self.response["breaking_changes"]
+
+    def _has_update(self):
+        """check if there is an update"""
+        for idx, number in enumerate(self.local_version):
+            is_newer = self.remote_version[idx] > number
+            if is_newer:
+                return self.response["release_version"], self.is_breaking
+
+        if self.is_unstable and self.local_version == self.remote_version:
+            return self.response["release_version"], self.is_breaking
+
+        return False, False
+
+    @staticmethod
+    def _parse_version(version):
+        """return version parts"""
+        clean = version.rstrip("-unstable").lstrip("v")
+        return tuple((int(i) for i in clean.split(".")))
+
+    def is_updated(self):
+        """check if update happened in the mean time"""
+        message = self.get_update()
+        if not message:
+            return False
+
+        if self._parse_version(message.get("version")) == self.local_version:
+            RedisArchivist().del_message(self.NEW_KEY)
+            return settings.TA_VERSION
+
+        return False
+
+    def get_update(self):
+        """return new version dict if available"""
+        message = RedisArchivist().get_message(self.NEW_KEY)
+        if not message.get("status"):
+            return False
+
+        return message

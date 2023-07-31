@@ -3,7 +3,7 @@ Functionality:
 - all views for home app
 - holds base classes to inherit from
 """
-
+import enum
 import json
 import urllib.parse
 from time import sleep
@@ -15,6 +15,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views import View
+from home.src.download.queue import PendingInteract
 from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.backup import ElasticBackup
 from home.src.es.connect import ElasticWrap
@@ -32,13 +33,15 @@ from home.src.frontend.forms import (
     UserSettingsForm,
 )
 from home.src.frontend.searching import SearchHandler
-from home.src.index.channel import YoutubeChannel, channel_overwrites
+from home.src.index.channel import channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
-from home.src.ta.config import AppConfig, ScheduleBuilder
-from home.src.ta.helper import UrlListParser, time_parser
+from home.src.index.reindex import ReindexProgress
+from home.src.index.video_constants import VideoTypeEnum
+from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
+from home.src.ta.helper import time_parser
 from home.src.ta.ta_redis import RedisArchivist
-from home.tasks import extrac_dl, index_channel_playlists, subscribe_to
+from home.tasks import index_channel_playlists, subscribe_to
 from rest_framework.authtoken.models import Token
 
 
@@ -137,14 +140,15 @@ class ArchivistViewConfig(View):
             "show_ignored_only": self._get_show_ignore_only(),
             "show_subed_only": self._get_show_subed_only(),
             "version": settings.TA_VERSION,
+            "ta_update": ReleaseVersion().get_update(),
         }
 
 
 class ArchivistResultsView(ArchivistViewConfig):
     """View class to inherit from when searching data in es"""
 
-    view_origin = False
-    es_search = False
+    view_origin = ""
+    es_search = ""
 
     def __init__(self):
         super().__init__(self.view_origin)
@@ -254,6 +258,20 @@ class ArchivistResultsView(ArchivistViewConfig):
         self.pagination_handler.validate(search.max_hits)
         self.context["max_hits"] = search.max_hits
         self.context["pagination"] = self.pagination_handler.pagination
+        self.context["aggs"] = search.aggs
+
+
+class MinView(View):
+    """to inherit from for minimal config vars"""
+
+    @staticmethod
+    def get_min_context(request):
+        """build minimal vars for context"""
+        return {
+            "colors": AppConfig(request.user.id).colors,
+            "version": settings.TA_VERSION,
+            "ta_update": ReleaseVersion().get_update(),
+        }
 
 
 class HomeView(ArchivistResultsView):
@@ -297,20 +315,23 @@ class HomeView(ArchivistResultsView):
             self.data["query"] = query
 
 
-class LoginView(View):
+class LoginView(MinView):
     """resolves to /login/
     Greeting and login page
     """
 
     SEC_IN_DAY = 60 * 60 * 24
 
-    @staticmethod
-    def get(request):
+    def get(self, request):
         """handle get requests"""
-        failed = bool(request.GET.get("failed"))
-        colors = AppConfig(request.user.id).colors
-        form = CustomAuthForm()
-        context = {"colors": colors, "form": form, "form_error": failed}
+        context = self.get_min_context(request)
+        context.update(
+            {
+                "form": CustomAuthForm(),
+                "form_error": bool(request.GET.get("failed")),
+            }
+        )
+
         return render(request, "home/login.html", context)
 
     def post(self, request):
@@ -332,25 +353,21 @@ class LoginView(View):
         return redirect("/login?failed=true")
 
 
-class AboutView(View):
+class AboutView(MinView):
     """resolves to /about/
     show helpful how to information
     """
 
-    @staticmethod
-    def get(request):
+    def get(self, request):
         """handle http get"""
-        context = {
-            "title": "About",
-            "colors": AppConfig(request.user.id).colors,
-            "version": settings.TA_VERSION,
-        }
+        context = self.get_min_context(request)
+        context.update({"title": "About"})
         return render(request, "home/about.html", context)
 
 
 class DownloadView(ArchivistResultsView):
     """resolves to /download/
-    takes POST for downloading youtube links
+    handle the download queue
     """
 
     view_origin = "downloads"
@@ -359,13 +376,13 @@ class DownloadView(ArchivistResultsView):
     def get(self, request):
         """handle get request"""
         self.initiate_vars(request)
-        self._update_view_data(request)
+        filter_view = self._update_view_data(request)
         self.find_results()
         self.context.update(
             {
                 "title": "Downloads",
                 "add_form": AddToQueueForm(),
-                "channel_agg_list": self._get_channel_agg(),
+                "channel_agg_list": self._get_channel_agg(filter_view),
             }
         )
         return render(request, "home/downloads.html", self.context)
@@ -385,27 +402,31 @@ class DownloadView(ArchivistResultsView):
                 {"term": {"channel_id": {"value": channel_filter}}}
             )
 
-            channel = YoutubeChannel(channel_filter)
-            channel.get_from_es()
+            channel = PendingInteract(channel_filter).get_channel()
             self.context.update(
                 {
-                    "channel_filter_id": channel_filter,
-                    "channel_filter_name": channel.json_data["channel_name"],
+                    "channel_filter_id": channel.get("channel_id"),
+                    "channel_filter_name": channel.get("channel_name"),
                 }
             )
 
         self.data.update(
             {
                 "query": {"bool": {"must": must_list}},
-                "sort": [{"timestamp": {"order": "asc"}}],
+                "sort": [
+                    {"auto_start": {"order": "desc"}},
+                    {"timestamp": {"order": "asc"}},
+                ],
             }
         )
 
-    def _get_channel_agg(self):
+        return filter_view
+
+    def _get_channel_agg(self, filter_view):
         """get pending channel with count"""
         data = {
             "size": 0,
-            "query": {"term": {"status": {"value": "pending"}}},
+            "query": {"term": {"status": {"value": filter_view}}},
             "aggs": {
                 "channel_downloads": {
                     "multi_terms": {
@@ -433,34 +454,6 @@ class DownloadView(ArchivistResultsView):
 
         return buckets_sorted
 
-    @staticmethod
-    def post(request):
-        """handle post requests"""
-        to_queue = AddToQueueForm(data=request.POST)
-        if to_queue.is_valid():
-            url_str = request.POST.get("vid_url")
-            print(url_str)
-            try:
-                youtube_ids = UrlListParser(url_str).process_list()
-            except ValueError:
-                # failed to process
-                key = "message:add"
-                print(f"failed to parse: {url_str}")
-                mess_dict = {
-                    "status": key,
-                    "level": "error",
-                    "title": "Failed to extract links.",
-                    "message": "Not a video, channel or playlist ID or URL",
-                }
-                RedisArchivist().set_message(key, mess_dict, expire=True)
-                return redirect("downloads")
-
-            print(youtube_ids)
-            extrac_dl.delay(youtube_ids)
-
-        sleep(2)
-        return redirect("downloads", permanent=True)
-
 
 class ChannelIdBaseView(ArchivistResultsView):
     """base class for all channel-id views"""
@@ -472,6 +465,13 @@ class ChannelIdBaseView(ArchivistResultsView):
         channel_info = SearchProcess(response).process()
 
         return channel_info
+
+    def channel_pages(self, channel_id):
+        """get additional context for channel pages"""
+        self.channel_has_pending(channel_id)
+        self.channel_has_streams(channel_id)
+        self.channel_has_shorts(channel_id)
+        self.channel_has_playlist(channel_id)
 
     def channel_has_pending(self, channel_id):
         """check if channel has pending videos in queue"""
@@ -486,10 +486,52 @@ class ChannelIdBaseView(ArchivistResultsView):
                     ]
                 }
             },
+            "_source": False,
         }
         response, _ = ElasticWrap(path).get(data=data)
 
         self.context.update({"has_pending": bool(response["hits"]["hits"])})
+
+    def channel_has_streams(self, channel_id):
+        """check if channel has streams videos"""
+        data = self.get_type_data("streams", channel_id)
+        response, _ = ElasticWrap("ta_video/_search").get(data=data)
+
+        self.context.update({"has_streams": bool(response["hits"]["hits"])})
+
+    def channel_has_shorts(self, channel_id):
+        """check if channel has shorts videos"""
+        data = self.get_type_data("shorts", channel_id)
+        response, _ = ElasticWrap("ta_video/_search").get(data=data)
+
+        self.context.update({"has_shorts": bool(response["hits"]["hits"])})
+
+    @staticmethod
+    def get_type_data(vid_type, channel):
+        """build data query for vid_type"""
+        return {
+            "size": 1,
+            "query": {
+                "bool": {
+                    "must": [
+                        {"term": {"vid_type": {"value": vid_type}}},
+                        {"term": {"channel.channel_id": {"value": channel}}},
+                    ]
+                }
+            },
+            "_source": False,
+        }
+
+    def channel_has_playlist(self, channel_id):
+        """check if channel has any playlist indexed"""
+        path = "ta_playlist/_search"
+        data = {
+            "size": 1,
+            "query": {"term": {"playlist_channel_id": {"value": channel_id}}},
+            "_source": False,
+        }
+        response, _ = ElasticWrap(path).get(data=data)
+        self.context.update({"has_playlists": bool(response["hits"]["hits"])})
 
 
 class ChannelIdView(ChannelIdBaseView):
@@ -499,6 +541,7 @@ class ChannelIdView(ChannelIdBaseView):
 
     view_origin = "home"
     es_search = "ta_video/_search"
+    video_types = [VideoTypeEnum.VIDEOS]
 
     def get(self, request, channel_id):
         """get request"""
@@ -506,7 +549,7 @@ class ChannelIdView(ChannelIdBaseView):
         self._update_view_data(channel_id)
         self.find_results()
         self.match_progress()
-        self.channel_has_pending(channel_id)
+        self.channel_pages(channel_id)
 
         if self.context["results"]:
             channel_info = self.context["results"][0]["source"]["channel"]
@@ -528,12 +571,27 @@ class ChannelIdView(ChannelIdBaseView):
 
     def _update_view_data(self, channel_id):
         """update view specific data dict"""
+        vid_type_terms = []
+        for t in self.video_types:
+            if t and isinstance(t, enum.Enum):
+                vid_type_terms.append(t.value)
+            else:
+                print(
+                    "Invalid value passed into video_types on "
+                    + f"ChannelIdView: {t}"
+                )
         self.data["query"] = {
             "bool": {
                 "must": [
-                    {"term": {"channel.channel_id": {"value": channel_id}}}
+                    {"term": {"channel.channel_id": {"value": channel_id}}},
+                    {"terms": {"vid_type": vid_type_terms}},
                 ]
             }
+        }
+        self.data["aggs"] = {
+            "total_items": {"value_count": {"field": "youtube_id"}},
+            "total_size": {"sum": {"field": "media_size"}},
+            "total_duration": {"sum": {"field": "player.duration"}},
         }
         self.data["sort"].append({"title.keyword": {"order": "asc"}})
 
@@ -541,20 +599,21 @@ class ChannelIdView(ChannelIdBaseView):
             to_append = {"term": {"player.watched": {"value": False}}}
             self.data["query"]["bool"]["must"].append(to_append)
 
-    @staticmethod
-    def post(request, channel_id):
-        """handle post request"""
-        print(f"handle post from {channel_id}")
-        channel_overwrite_form = ChannelOverwriteForm(request.POST)
-        if channel_overwrite_form.is_valid():
-            overwrites = channel_overwrite_form.cleaned_data
-            print(f"{channel_id}: set overwrites {overwrites}")
-            channel_overwrites(channel_id, overwrites=overwrites)
-            if overwrites.get("index_playlists") == "1":
-                index_channel_playlists.delay(channel_id)
 
-        sleep(1)
-        return redirect("channel_id", channel_id, permanent=True)
+class ChannelIdLiveView(ChannelIdView):
+    """resolves to /channel/<channel-id>/streams/
+    display single channel page from channel_id
+    """
+
+    video_types = [VideoTypeEnum.STREAMS]
+
+
+class ChannelIdShortsView(ChannelIdView):
+    """resolves to /channel/<channel-id>/shorts/
+    display single channel page from channel_id
+    """
+
+    video_types = [VideoTypeEnum.SHORTS]
 
 
 class ChannelIdAboutView(ChannelIdBaseView):
@@ -567,19 +626,20 @@ class ChannelIdAboutView(ChannelIdBaseView):
     def get(self, request, channel_id):
         """handle get request"""
         self.initiate_vars(request)
-        self.channel_has_pending(channel_id)
+        self.channel_pages(channel_id)
 
-        path = f"ta_channel/_doc/{channel_id}"
-        response, _ = ElasticWrap(path).get()
-
+        response, _ = ElasticWrap(f"ta_channel/_doc/{channel_id}").get()
         channel_info = SearchProcess(response).process()
-        channel_name = channel_info["channel_name"]
+        reindex = ReindexProgress(
+            request_type="channel", request_id=channel_id
+        ).get_progress()
 
         self.context.update(
             {
-                "title": "Channel: About " + channel_name,
+                "title": "Channel: About " + channel_info["channel_name"],
                 "channel_info": channel_info,
                 "channel_overwrite_form": ChannelOverwriteForm,
+                "reindex": reindex.get("state"),
             }
         )
 
@@ -614,7 +674,7 @@ class ChannelIdPlaylistView(ChannelIdBaseView):
         self.initiate_vars(request)
         self._update_view_data(channel_id)
         self.find_results()
-        self.channel_has_pending(channel_id)
+        self.channel_pages(channel_id)
 
         channel_info = self.get_channel_meta(channel_id)
         channel_name = channel_info["channel_name"]
@@ -674,14 +734,6 @@ class ChannelView(ArchivistResultsView):
         """handle http post requests"""
         subscribe_form = SubscribeToChannelForm(data=request.POST)
         if subscribe_form.is_valid():
-            key = "message:subchannel"
-            message = {
-                "status": key,
-                "level": "info",
-                "title": "Subscribing to Channels",
-                "message": "Parsing form data",
-            }
-            RedisArchivist().set_message(key, message=message, expire=True)
             url_str = request.POST.get("subscribe")
             print(url_str)
             subscribe_to.delay(url_str)
@@ -706,12 +758,17 @@ class PlaylistIdView(ArchivistResultsView):
         self._update_view_data(playlist_id, playlist_info)
         self.find_results()
         self.match_progress()
+        reindex = ReindexProgress(
+            request_type="playlist", request_id=playlist_id
+        ).get_progress()
+
         self.context.update(
             {
                 "title": "Playlist: " + playlist_name,
                 "playlist_info": playlist_info,
                 "playlist_name": playlist_name,
                 "channel_info": channel_info,
+                "reindex": reindex.get("state"),
             }
         )
         return render(request, "home/playlist_id.html", self.context)
@@ -822,21 +879,13 @@ class PlaylistView(ArchivistResultsView):
         if subscribe_form.is_valid():
             url_str = request.POST.get("subscribe")
             print(url_str)
-            key = "message:subplaylist"
-            message = {
-                "status": key,
-                "level": "info",
-                "title": "Subscribing to Playlists",
-                "message": "Parsing form data",
-            }
-            RedisArchivist().set_message(key, message=message, expire=True)
             subscribe_to.delay(url_str)
 
         sleep(1)
         return redirect("playlist")
 
 
-class VideoView(View):
+class VideoView(MinView):
     """resolves to /video/<video-id>/
     display details about a single video
     """
@@ -844,11 +893,8 @@ class VideoView(View):
     def get(self, request, video_id):
         """get single video"""
         config_handler = AppConfig(request.user.id)
-        position = time_parser(request.GET.get("t"))
-        path = f"ta_video/_doc/{video_id}"
-        look_up = SearchHandler(path, config=False)
-        video_hit = look_up.get_data()
-        video_data = video_hit[0]["source"]
+        look_up = SearchHandler(f"ta_video/_doc/{video_id}", config=False)
+        video_data = look_up.get_data()[0]["source"]
         try:
             rating = video_data["stats"]["average_rating"]
             video_data["stats"]["average_rating"] = self.star_creator(rating)
@@ -861,17 +907,22 @@ class VideoView(View):
         else:
             playlist_nav = False
 
-        video_title = video_data["title"]
-        context = {
-            "video": video_data,
-            "playlist_nav": playlist_nav,
-            "title": video_title,
-            "colors": config_handler.colors,
-            "cast": config_handler.config["application"]["enable_cast"],
-            "version": settings.TA_VERSION,
-            "config": config_handler.config,
-            "position": position,
-        }
+        reindex = ReindexProgress(
+            request_type="video", request_id=video_id
+        ).get_progress()
+
+        context = self.get_min_context(request)
+        context.update(
+            {
+                "video": video_data,
+                "playlist_nav": playlist_nav,
+                "title": video_data.get("title"),
+                "cast": config_handler.config["application"]["enable_cast"],
+                "config": config_handler.config,
+                "position": time_parser(request.GET.get("t")),
+                "reindex": reindex.get("state"),
+            }
+        )
         return render(request, "home/video.html", context)
 
     @staticmethod
@@ -911,7 +962,7 @@ class SearchView(ArchivistResultsView):
     """
 
     view_origin = "home"
-    es_search = False
+    es_search = ""
 
     def get(self, request):
         """handle get request"""
@@ -928,7 +979,7 @@ class SearchView(ArchivistResultsView):
         return render(request, "home/search.html", self.context)
 
 
-class SettingsView(View):
+class SettingsView(MinView):
     """resolves to /settings/
     handle the settings page, display current settings,
     take post request from the form to update settings
@@ -936,28 +987,19 @@ class SettingsView(View):
 
     def get(self, request):
         """read and display current settings"""
-        config_handler = AppConfig(request.user.id)
-        colors = config_handler.colors
-
-        available_backups = ElasticBackup().get_all_backup_files()
-        user_form = UserSettingsForm()
-        app_form = ApplicationSettingsForm()
-        scheduler_form = SchedulerSettingsForm()
-        snapshots = ElasticSnapshot().get_snapshot_stats()
-        token = self.get_token(request)
-
-        context = {
-            "title": "Settings",
-            "config": config_handler.config,
-            "api_token": token,
-            "colors": colors,
-            "available_backups": available_backups,
-            "user_form": user_form,
-            "app_form": app_form,
-            "scheduler_form": scheduler_form,
-            "snapshots": snapshots,
-            "version": settings.TA_VERSION,
-        }
+        context = self.get_min_context(request)
+        context.update(
+            {
+                "title": "Settings",
+                "config": AppConfig(request.user.id).config,
+                "api_token": self.get_token(request),
+                "available_backups": ElasticBackup().get_all_backup_files(),
+                "user_form": UserSettingsForm(),
+                "app_form": ApplicationSettingsForm(),
+                "scheduler_form": SchedulerSettingsForm(),
+                "snapshots": ElasticSnapshot().get_snapshot_stats(),
+            }
+        )
 
         return render(request, "home/settings.html", context)
 
@@ -1038,26 +1080,11 @@ class SettingsView(View):
         RedisArchivist().set_message(key, message=message, expire=True)
 
 
-def progress(request):
-    # pylint: disable=unused-argument
-    """resolves to /progress/
-    return list of messages for frontend
-    """
-    all_messages = RedisArchivist().get_progress()
-    json_data = {"messages": all_messages}
-    return JsonResponse(json_data)
-
-
 def process(request):
     """handle all the buttons calls via POST ajax"""
     if request.method == "POST":
         current_user = request.user.id
         post_dict = json.loads(request.body.decode())
-        if post_dict.get("reset-token"):
-            print("revoke API token")
-            request.user.auth_token.delete()
-            return JsonResponse({"success": True})
-
         post_handler = PostData(post_dict, current_user)
         if post_handler.to_exec:
             task_result = post_handler.run_task()

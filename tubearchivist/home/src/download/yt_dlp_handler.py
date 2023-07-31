@@ -12,15 +12,15 @@ from datetime import datetime
 
 from home.src.download.queue import PendingList
 from home.src.download.subscriptions import PlaylistSubscription
-from home.src.download.yt_dlp_base import CookieHandler, YtWrap
+from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.channel import YoutubeChannel
-from home.src.index.comments import Comments
+from home.src.index.comments import CommentList
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video import YoutubeVideo, index_new_video
+from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
-from home.src.ta.helper import clean_string, ignore_filelist
-from home.src.ta.ta_redis import RedisArchivist, RedisQueue
+from home.src.ta.helper import ignore_filelist
 
 
 class DownloadPostProcess:
@@ -28,7 +28,7 @@ class DownloadPostProcess:
 
     def __init__(self, download):
         self.download = download
-        self.now = int(datetime.now().strftime("%s"))
+        self.now = int(datetime.now().timestamp())
         self.pending = False
 
     def run(self):
@@ -94,7 +94,7 @@ class DownloadPostProcess:
     def validate_playlists(self):
         """look for playlist needing to update"""
         for id_c, channel_id in enumerate(self.download.channels):
-            channel = YoutubeChannel(channel_id)
+            channel = YoutubeChannel(channel_id, task=self.download.task)
             overwrites = self.pending.channel_overwrites.get(channel_id, False)
             if overwrites and overwrites.get("index_playlists"):
                 # validate from remote
@@ -102,7 +102,7 @@ class DownloadPostProcess:
                 continue
 
             # validate from local
-            playlists = channel.get_indexed_playlists()
+            playlists = channel.get_indexed_playlists(active_only=True)
             all_channel_playlist = [i["playlist_id"] for i in playlists]
             self._validate_channel_playlist(all_channel_playlist, id_c)
 
@@ -115,6 +115,7 @@ class DownloadPostProcess:
             playlist.build_json(scrape=True)
             if not playlist.json_data:
                 playlist.deactivate()
+                continue
 
             playlist.add_vids_to_playlist()
             playlist.upload_to_es()
@@ -122,45 +123,22 @@ class DownloadPostProcess:
 
     def _notify_playlist_progress(self, all_channel_playlist, id_c, id_p):
         """notify to UI"""
-        title = (
-            "Processing playlists for channels: "
-            + f"{id_c + 1}/{len(self.download.channels)}"
-        )
-        message = f"Progress: {id_p + 1}/{len(all_channel_playlist)}"
-        key = "message:download"
-        mess_dict = {
-            "status": key,
-            "level": "info",
-            "title": title,
-            "message": message,
-        }
-        if id_p + 1 == len(all_channel_playlist):
-            expire = 4
-        else:
-            expire = True
+        if not self.download.task:
+            return
 
-        RedisArchivist().set_message(key, mess_dict, expire=expire)
+        total_channel = len(self.download.channels)
+        total_playlist = len(all_channel_playlist)
+
+        message = [
+            f"Post Processing Channels: {id_c}/{total_channel}",
+            f"Validate Playlists {id_p + 1}/{total_playlist}",
+        ]
+        progress = (id_c + 1) / total_channel
+        self.download.task.send_progress(message, progress=progress)
 
     def get_comments(self):
         """get comments from youtube"""
-        if not self.download.config["downloads"]["comment_max"]:
-            return
-
-        total_videos = len(self.download.videos)
-        for idx, video_id in enumerate(self.download.videos):
-            comment = Comments(video_id, config=self.download.config)
-            comment.build_json(notify=(idx, total_videos))
-            comment.upload_comments()
-
-        key = "message:download"
-        message = {
-            "status": key,
-            "level": "info",
-            "title": "Download and index comments finished",
-            "message": f"added comments for {total_videos} videos",
-        }
-
-        RedisArchivist().set_message(key, message, expire=4)
+        CommentList(self.download.videos, task=self.download.task).index()
 
 
 class VideoDownloader:
@@ -169,134 +147,109 @@ class VideoDownloader:
     if not initiated with list, take from queue
     """
 
-    MSG = "message:download"
-
-    def __init__(self, youtube_id_list=False):
+    def __init__(self, youtube_id_list=False, task=False):
         self.obs = False
         self.video_overwrites = False
         self.youtube_id_list = youtube_id_list
+        self.task = task
         self.config = AppConfig().config
         self._build_obs()
         self.channels = set()
         self.videos = set()
 
-    def run_queue(self):
+    def run_queue(self, auto_only=False):
         """setup download queue in redis loop until no more items"""
-        self._setup_queue()
-
-        queue = RedisQueue()
-
-        limit_queue = self.config["downloads"]["limit_count"]
-        if limit_queue:
-            queue.trim(limit_queue - 1)
-
+        self._get_overwrites()
         while True:
-            youtube_id = queue.get_next()
-            if not youtube_id:
+            video_data = self._get_next(auto_only)
+            if self.task.is_stopped() or not video_data:
                 break
+
+            youtube_id = video_data.get("youtube_id")
+            print(f"{youtube_id}: Downloading video")
+            self._notify(video_data, "Validate download format")
 
             success = self._dl_single_vid(youtube_id)
             if not success:
                 continue
 
-            mess_dict = {
-                "status": self.MSG,
-                "level": "info",
-                "title": "Indexing....",
-                "message": "Add video metadata to index.",
-            }
-            RedisArchivist().set_message(self.MSG, mess_dict, expire=60)
+            self._notify(video_data, "Add video metadata to index")
 
             vid_dict = index_new_video(
-                youtube_id, video_overwrites=self.video_overwrites
+                youtube_id,
+                video_overwrites=self.video_overwrites,
+                video_type=VideoTypeEnum(video_data["vid_type"]),
             )
             self.channels.add(vid_dict["channel"]["channel_id"])
             self.videos.add(vid_dict["youtube_id"])
-            mess_dict = {
-                "status": self.MSG,
-                "level": "info",
-                "title": "Moving....",
-                "message": "Moving downloaded file to storage folder",
-            }
-            RedisArchivist().set_message(self.MSG, mess_dict)
 
-            if queue.has_item():
-                message = "Continue with next video."
-            else:
-                message = "Download queue is finished."
-
+            self._notify(video_data, "Move downloaded file to archive")
             self.move_to_archive(vid_dict)
-            mess_dict = {
-                "status": self.MSG,
-                "level": "info",
-                "title": "Completed",
-                "message": message,
-            }
-            RedisArchivist().set_message(self.MSG, mess_dict, expire=10)
             self._delete_from_pending(youtube_id)
 
         # post processing
         self._add_subscribed_channels()
         DownloadPostProcess(self).run()
 
-    def _setup_queue(self):
-        """setup required and validate"""
-        if self.config["downloads"]["cookie_import"]:
-            valid = CookieHandler(self.config).validate()
-            if not valid:
-                return
+        return self.videos
 
+    def _notify(self, video_data, message):
+        """send progress notification to task"""
+        if not self.task:
+            return
+
+        typ = VideoTypeEnum(video_data["vid_type"]).value.rstrip("s").title()
+        title = video_data.get("title")
+        self.task.send_progress([f"Processing {typ}: {title}", message])
+
+    def _get_next(self, auto_only):
+        """get next item in queue"""
+        must_list = [{"term": {"status": {"value": "pending"}}}]
+        must_not_list = [{"exists": {"field": "message"}}]
+        if auto_only:
+            must_list.append({"term": {"auto_start": {"value": True}}})
+
+        data = {
+            "size": 1,
+            "query": {"bool": {"must": must_list, "must_not": must_not_list}},
+            "sort": [
+                {"auto_start": {"order": "desc"}},
+                {"timestamp": {"order": "asc"}},
+            ],
+        }
+        path = "ta_download/_search"
+        response, _ = ElasticWrap(path).get(data=data)
+        if not response["hits"]["hits"]:
+            return False
+
+        return response["hits"]["hits"][0]["_source"]
+
+    def _get_overwrites(self):
+        """get channel overwrites"""
         pending = PendingList()
         pending.get_download()
         pending.get_channels()
         self.video_overwrites = pending.video_overwrites
 
-    def add_pending(self):
-        """add pending videos to download queue"""
-        mess_dict = {
-            "status": self.MSG,
-            "level": "info",
-            "title": "Looking for videos to download",
-            "message": "Scanning your download queue.",
-        }
-        RedisArchivist().set_message(self.MSG, mess_dict, expire=True)
-        pending = PendingList()
-        pending.get_download()
-        to_add = [i["youtube_id"] for i in pending.all_pending]
-        if not to_add:
-            # there is nothing pending
-            print("download queue is empty")
-            mess_dict = {
-                "status": self.MSG,
-                "level": "error",
-                "title": "Download queue is empty",
-                "message": "Add some videos to the queue first.",
-            }
-            RedisArchivist().set_message(self.MSG, mess_dict, expire=True)
-            return
-
-        RedisQueue().add_list(to_add)
-
     def _progress_hook(self, response):
         """process the progress_hooks from yt_dlp"""
-        title = "Downloading: " + response["info_dict"]["title"]
-
+        progress = False
         try:
+            size = response.get("_total_bytes_str")
+            if size.strip() == "N/A":
+                size = response.get("_total_bytes_estimate_str", "N/A")
+
             percent = response["_percent_str"]
-            size = response["_total_bytes_str"]
+            progress = float(percent.strip("%")) / 100
             speed = response["_speed_str"]
             eta = response["_eta_str"]
             message = f"{percent} of {size} at {speed} - time left: {eta}"
         except KeyError:
             message = "processing"
 
-        mess_dict = {
-            "status": self.MSG,
-            "level": "info",
-            "title": title,
-            "message": message,
-        }
-        RedisArchivist().set_message(self.MSG, mess_dict, expire=True)
+        if self.task:
+            title = response["info_dict"]["title"]
+            self.task.send_progress([title, message], progress=progress)
 
     def _build_obs(self):
         """collection to build all obs passed to yt-dlp"""
@@ -307,7 +260,6 @@ class VideoDownloader:
     def _build_obs_basic(self):
         """initial obs"""
         self.obs = {
-            "default_search": "ytsearch",
             "merge_output_format": "mp4",
             "outtmpl": (
                 self.config["application"]["cache_dir"]
@@ -315,19 +267,19 @@ class VideoDownloader:
             ),
             "progress_hooks": [self._progress_hook],
             "noprogress": True,
-            "quiet": True,
             "continuedl": True,
-            "retries": 3,
             "writethumbnail": False,
             "noplaylist": True,
-            "check_formats": "selected",
-            "socket_timeout": 3,
         }
 
     def _build_obs_user(self):
         """build user customized options"""
         if self.config["downloads"]["format"]:
             self.obs["format"] = self.config["downloads"]["format"]
+        if self.config["downloads"]["format_sort"]:
+            format_sort = self.config["downloads"]["format_sort"]
+            format_sort_list = [i.strip() for i in format_sort.split(",")]
+            self.obs["format_sort"] = format_sort_list
         if self.config["downloads"]["limit_speed"]:
             self.obs["ratelimit"] = (
                 self.config["downloads"]["limit_speed"] * 1024
@@ -395,7 +347,9 @@ class VideoDownloader:
             if youtube_id in file_name:
                 obs["outtmpl"] = os.path.join(dl_cache, file_name)
 
-        success = YtWrap(obs, self.config).download(youtube_id)
+        success, message = YtWrap(obs, self.config).download(youtube_id)
+        if not success:
+            self._handle_error(youtube_id, message)
 
         if self.obs["writethumbnail"]:
             # webp files don't get cleaned up automatically
@@ -407,28 +361,27 @@ class VideoDownloader:
 
         return success
 
+    @staticmethod
+    def _handle_error(youtube_id, message):
+        """store error message"""
+        data = {"doc": {"message": message}}
+        _, _ = ElasticWrap(f"ta_download/_update/{youtube_id}").post(data=data)
+
     def move_to_archive(self, vid_dict):
         """move downloaded video from cache to archive"""
         videos = self.config["application"]["videos"]
         host_uid = self.config["application"]["HOST_UID"]
         host_gid = self.config["application"]["HOST_GID"]
-        channel_name = clean_string(vid_dict["channel"]["channel_name"])
-        if len(channel_name) <= 3:
-            # fall back to channel id
-            channel_name = vid_dict["channel"]["channel_id"]
-        # make archive folder with correct permissions
-        new_folder = os.path.join(videos, channel_name)
-        if not os.path.exists(new_folder):
-            os.makedirs(new_folder)
+        # make folder
+        folder = os.path.join(videos, vid_dict["channel"]["channel_id"])
+        if not os.path.exists(folder):
+            os.makedirs(folder)
             if host_uid and host_gid:
-                os.chown(new_folder, host_uid, host_gid)
-        # find real filename
+                os.chown(folder, host_uid, host_gid)
+        # move media file
+        media_file = vid_dict["youtube_id"] + ".mp4"
         cache_dir = self.config["application"]["cache_dir"]
-        all_cached = ignore_filelist(os.listdir(cache_dir + "/download/"))
-        for file_str in all_cached:
-            if vid_dict["youtube_id"] in file_str:
-                old_file = file_str
-        old_path = os.path.join(cache_dir, "download", old_file)
+        old_path = os.path.join(cache_dir, "download", media_file)
         new_path = os.path.join(videos, vid_dict["media_url"])
         # move media file and fix permission
         shutil.move(old_path, new_path, copy_function=shutil.copyfile)
@@ -438,7 +391,7 @@ class VideoDownloader:
     @staticmethod
     def _delete_from_pending(youtube_id):
         """delete downloaded video from pending index if its there"""
-        path = f"ta_download/_doc/{youtube_id}"
+        path = f"ta_download/_doc/{youtube_id}?refresh=true"
         _, _ = ElasticWrap(path).delete()
 
     def _add_subscribed_channels(self):

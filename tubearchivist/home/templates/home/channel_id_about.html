@@ -8,12 +8,21 @@
     </div>
     <div class="info-box-item channel-nav">
         <a href="{% url 'channel_id' channel_info.channel_id %}"><h3>Videos</h3></a>
-        <a href="{% url 'channel_id_playlist' channel_info.channel_id %}"><h3>Playlists</h3></a>
+        {% if has_streams %}
+            <a href="{% url 'channel_id_live' channel_info.channel_id %}"><h3>Streams</h3></a>
+        {% endif %}
+        {% if has_shorts %}
+            <a href="{% url 'channel_id_shorts' channel_info.channel_id %}"><h3>Shorts</h3></a>
+        {% endif %}
+        {% if has_playlists %}
+            <a href="{% url 'channel_id_playlist' channel_info.channel_id %}"><h3>Playlists</h3></a>
+        {% endif %}
         <a href="{% url 'channel_id_about' channel_info.channel_id %}"><h3>About</h3></a>
         {% if has_pending %}
             <a href="{% url 'downloads' %}?channel={{ channel_info.channel_id }}"><h3>Downloads</h3></a>
         {% endif %}
     </div>
+    <div id="notifications" data="channel reindex"></div>
     <div class="info-box info-box-3">
         <div class="info-box-item">
             <div class="round-img">
@@ -47,10 +56,20 @@
                 {% elif channel_info.channel_views > 0 %}
                     <p>Channel views: {{ channel_info.channel_views|intcomma }}</p>
                 {% endif %}
-                <button onclick="deleteConfirm()" id="delete-item">Delete Channel</button>
-                <div class="delete-confirm" id="delete-button">
-                    <span>Delete {{ channel_info.channel_name }} including all videos? </span><button class="danger-button" onclick="deleteChannel(this)" data-id="{{ channel_info.channel_id }}">Delete</button> <button onclick="cancelDelete()">Cancel</button>
+                <div class="button-box">
+                    <button onclick="deleteConfirm()" id="delete-item">Delete Channel</button>
+                    <div class="delete-confirm" id="delete-button">
+                        <span>Delete {{ channel_info.channel_name }} including all videos? </span><button class="danger-button" onclick="deleteChannel(this)" data-id="{{ channel_info.channel_id }}">Delete</button> <button onclick="cancelDelete()">Cancel</button>
+                    </div>
                 </div>
+                {% if reindex %}
+                    <p>Reindex scheduled</p>
+                {% else %}
+                    <div id="reindex-button" class="button-box">
+                        <button data-id="{{ channel_info.channel_id }}" data-type="channel" onclick="reindex(this)" title="Reindex Channel {{ channel_info.channel_name }}">Reindex</button>
+                        <button data-id="{{ channel_info.channel_id }}" data-type="channel" data-extract-videos="true" onclick="reindex(this)" title="Reindex Videos of {{ channel_info.channel_name }}">Reindex Videos</button>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -62,11 +81,18 @@
             <button onclick="textExpand()" id="text-expand-button">Show more</button>
         </div>
     {% endif %}
-    <div class="description-box">
-        <h2>Customize {{ channel_info.channel_name }}</h2>
-    </div>
+    {% if channel_info.channel_tags %}
+        <div class="description-box">
+            <div class="video-tag-box">
+                {% for tag in channel_info.channel_tags %}
+                    <span class="video-tag">{{ tag }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
     <div id="overwrite-form" class="info-box">
         <div class="info-box-item">
+            <h2>Customize {{ channel_info.channel_name }}</h2>
             <form class="overwrite-form" action="/channel/{{ channel_info.channel_id }}/about/" method="POST">
                 {% csrf_token %}
                 <div class="overwrite-form-item">
@@ -112,4 +138,5 @@
         </div>
     </div>
 </div>
+<script type="text/javascript" src="{% static 'progress.js' %}"></script>
 {% endblock content %}

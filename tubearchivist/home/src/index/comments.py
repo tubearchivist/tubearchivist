@@ -10,11 +10,10 @@ from datetime import datetime
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap
 from home.src.ta.config import AppConfig
-from home.src.ta.ta_redis import RedisArchivist
 
 
 class Comments:
-    """hold all comments functionality"""
+    """interact with comments per video"""
 
     def __init__(self, youtube_id, config=False):
         self.youtube_id = youtube_id
@@ -24,23 +23,22 @@ class Comments:
         self.is_activated = False
         self.comments_format = False
 
-    def build_json(self, notify=False):
+    def build_json(self):
         """build json document for es"""
         print(f"{self.youtube_id}: get comments")
         self.check_config()
         if not self.is_activated:
             return
 
-        self._send_notification(notify)
         comments_raw, channel_id = self.get_yt_comments()
-        if comments_raw:
-            self.format_comments(comments_raw)
-        else:
-            self.comments_format = []
+        if not comments_raw and not channel_id:
+            return
+
+        self.format_comments(comments_raw)
 
         self.json_data = {
             "youtube_id": self.youtube_id,
-            "comment_last_refresh": int(datetime.now().strftime("%s")),
+            "comment_last_refresh": int(datetime.now().timestamp()),
             "comment_channel_id": channel_id,
             "comment_comments": self.comments_format,
         }
@@ -52,23 +50,6 @@ class Comments:
 
         self.is_activated = bool(self.config["downloads"]["comment_max"])
 
-    @staticmethod
-    def _send_notification(notify):
-        """send notification for download post process message"""
-        if not notify:
-            return
-
-        key = "message:download"
-        idx, total_videos = notify
-        message = {
-            "status": key,
-            "level": "info",
-            "title": "Download and index comments",
-            "message": f"Progress: {idx + 1}/{total_videos}",
-        }
-
-        RedisArchivist().set_message(key, message)
-
     def build_yt_obs(self):
         """
         get extractor config
@@ -79,8 +60,8 @@ class Comments:
         comment_sort = self.config["downloads"]["comment_sort"]
 
         yt_obs = {
+            "check_formats": None,
             "skip_download": True,
-            "quiet": False,
             "getcomments": True,
             "extractor_args": {
                 "youtube": {
@@ -96,6 +77,9 @@ class Comments:
         """get comments from youtube"""
         yt_obs = self.build_yt_obs()
         info_json = YtWrap(yt_obs).extract(self.youtube_id)
+        if not info_json:
+            return False, False
+
         comments_raw = info_json.get("comments")
         channel_id = info_json.get("channel_id")
         return comments_raw, channel_id
@@ -104,14 +88,23 @@ class Comments:
         """process comments to match format"""
         comments = []
 
-        for comment in comments_raw:
-            cleaned_comment = self.clean_comment(comment)
-            comments.append(cleaned_comment)
+        if comments_raw:
+            for comment in comments_raw:
+                cleaned_comment = self.clean_comment(comment)
+                if not cleaned_comment:
+                    continue
+
+                comments.append(cleaned_comment)
 
         self.comments_format = comments
 
     def clean_comment(self, comment):
         """parse metadata from comment for indexing"""
+        if not comment.get("text"):
+            # comment text can be empty
+            print(f"{self.youtube_id}: Failed to extract text, {comment}")
+            return False
+
         time_text_datetime = datetime.utcfromtimestamp(comment["timestamp"])
 
         if time_text_datetime.hour == 0 and time_text_datetime.minute == 0:
@@ -127,7 +120,9 @@ class Comments:
             "comment_timestamp": comment["timestamp"],
             "comment_time_text": time_text,
             "comment_likecount": comment["like_count"],
-            "comment_is_favorited": comment["is_favorited"],
+            "comment_is_favorited": comment.get(
+                "is_favorited"
+            ),  # temporary fix for yt-dlp upstream issue 7389
             "comment_author": comment["author"],
             "comment_author_id": comment["author_id"],
             "comment_author_thumbnail": comment["author_thumbnail"],
@@ -142,6 +137,7 @@ class Comments:
         if not self.is_activated:
             return
 
+        print(f"{self.youtube_id}: upload comments")
         _, _ = ElasticWrap(self.es_path).put(self.json_data)
 
         vid_path = f"ta_video/_update/{self.youtube_id}"
@@ -169,6 +165,9 @@ class Comments:
             return
 
         self.build_json()
+        if not self.json_data:
+            return
+
         es_comments = self.get_es_comments()
 
         if not self.comments_format:
@@ -180,3 +179,33 @@ class Comments:
 
         self.delete_comments()
         self.upload_comments()
+
+
+class CommentList:
+    """interact with comments in group"""
+
+    def __init__(self, video_ids, task=False):
+        self.video_ids = video_ids
+        self.task = task
+        self.config = AppConfig().config
+
+    def index(self):
+        """index comments for list, init with task object to notify"""
+        if not self.config["downloads"].get("comment_max"):
+            return
+
+        total_videos = len(self.video_ids)
+        for idx, youtube_id in enumerate(self.video_ids):
+            if self.task:
+                self.notify(idx, total_videos)
+
+            comment = Comments(youtube_id, config=self.config)
+            comment.build_json()
+            if comment.json_data:
+                comment.upload_comments()
+
+    def notify(self, idx, total_videos):
+        """send notification on task"""
+        message = [f"Add comments for new videos {idx + 1}/{total_videos}"]
+        progress = (idx + 1) / total_videos
+        self.task.send_progress(message, progress=progress)

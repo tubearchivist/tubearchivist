@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
 <div class="boxed-content">
-    <div id="notifications" data="setting"></div>
+    <div id="notifications" data="setting reindex"></div>
     <div class="title-bar">
         <h1>User Configurations</h1>
     </div>
@@ -33,19 +33,30 @@
         {% csrf_token %}
         <div class="settings-group">
             <h2 id="subscriptions">Subscriptions</h2>
+            <p>Disable shorts or streams by setting their page size to 0 (zero).</p>
             <div class="settings-item">
                 <p>YouTube page size: <span class="settings-current">{{ config.subscriptions.channel_size }}</span></p>
                 <i>Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max recommended 50.</i><br>
                 {{ app_form.subscriptions_channel_size }}
             </div>
+            <div class="settings-item">
+                <p>YouTube Live page size: <span class="settings-current">{{ config.subscriptions.live_channel_size }}</span></p>
+                <i>Live Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max recommended 50.</i><br>
+                {{ app_form.subscriptions_live_channel_size }}
+            </div>
+            <div class="settings-item">
+                <p>YouTube Shorts page size: <span class="settings-current">{{ config.subscriptions.shorts_channel_size }}</span></p>
+                <i>Shorts Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max recommended 50.</i><br>
+                {{ app_form.subscriptions_shorts_channel_size }}
+            </div>
+            <div class="settings-item">
+                <p>Auto start download from your subscriptions: <span class="settings-current">{{ config.subscriptions.auto_start}}</span></p>
+                <i>Enable this will automatically start and prioritize videos from your subscriptions.</i><br>
+                {{ app_form.subscriptions_auto_start }}
+            </div>
         </div>
         <div class="settings-group">
             <h2 id="downloads">Downloads</h2>
-            <div class="settings-item">
-                <p>Current download limit: <span class="settings-current">{{ config.downloads.limit_count }}</span></p>
-                <i>Limit the number of videos getting downloaded on every run. 0 (zero) to deactivate.</i><br>
-                {{ app_form.downloads_limit_count }}
-            </div>
             <div class="settings-item">
                 <p>Current download speed limit in KB/s: <span class="settings-current">{{ config.downloads.limit_speed }}</span></p>
                 <i>Limit download speed. 0 (zero) to deactivate, e.g. 1000 (1MB/s). Speeds are in KB/s. Setting takes effect on new download jobs or application restart.</i><br>
@@ -85,6 +96,24 @@
                 <br>
             </div>
             <div class="settings-item">
+                <p>Force sort order to have precedence over all yt-dlp fields.<br>
+                    Currently: <span class="settings-current">{{ config.downloads.format_sort }}</span>
+                </p>
+                <p>Example configurations:</p>
+                <ul>
+                    <li><span class="settings-current">res,codec:av1</span>: prefer AV1 over all other video codecs.</li>
+                    <li><span class="settings-current">0</span>: deactivate and keep the default as decided by yt-dlp.</li>
+                </ul>
+                <i>Not all codecs are supported by all browsers. The default value ensures best compatibility. Check out the <a href="https://github.com/yt-dlp/yt-dlp#sorting-formats" target="_blank">documentation</a> for valid configurations.</i><br>
+                {{ app_form.downloads_format_sort }}
+                <br>
+            </div>
+            <div class="settings-item">
+                <p>Prefer translated metadata language: <span class="settings-current">{{ config.downloads.extractor_lang }}</span></p>
+                <i>This will change the language this video gets indexed as. That will only be available if the uploader provides translations. Add as two letter ISO language code, check the <a href="https://github.com/yt-dlp/yt-dlp#youtube" target="_blank">documentation</a> which languages are available.</i><br>
+                {{ app_form.downloads_extractor_lang}}
+            </div>
+            <div class="settings-item">
                 <p>Current metadata embed setting: <span class="settings-current">{{ config.downloads.add_metadata }}</span></p>
                 <i>Metadata is not embedded into the downloaded files by default.</i><br>
                 {{ app_form.downloads_add_metadata }}
@@ -99,8 +128,8 @@
             <h2 id="format">Subtitles</h2>
             <div class="settings-item">
                 <p>Subtitles download setting: <span class="settings-current">{{ config.downloads.subtitle }}</span><br>
-                <i>Choose which subtitles to download, add comma separated two letter language ISO code,<br>
-                    e.g. <span class="settings-current">en, de</span></i><br>
+                <i>Choose which subtitles to download, add comma separated language codes,<br>
+                    e.g. <span class="settings-current">en, de, zh-Hans</span></i><br>
                 {{ app_form.downloads_subtitle }}</p>
             </div>
             <div class="settings-item">
@@ -137,7 +166,7 @@
             <div class="settings-item">
                 <p>Import YouTube cookie: <span class="settings-current">{{ config.downloads.cookie_import }}</span><br></p>
                 <p>For automatic cookie import use <b>Tube Archivist Companion</b> <a href="https://github.com/tubearchivist/browser-extension" target="_blank">browser extension</a>.</p> 
-                <i>For manual cookie import, place your cookie file named <span class="settings-current">cookies.google.txt</span> in <span class="settings-current">cache/import</span> before enabling. Instructions in the <a href="https://github.com/tubearchivist/tubearchivist/wiki/Settings" target="_blank">Wiki.</a></i><br>
+                <i>For manual cookie import, place your cookie file named <span class="settings-current">cookies.google.txt</span> in <span class="settings-current">cache/import</span> before enabling. Instructions in the <a href="https://docs.tubearchivist.com/settings/" target="_blank">Wiki.</a></i><br>
                 {{ app_form.downloads_cookie_import }}<br>
                 {% if config.downloads.cookie_import %}
                     <div id="cookieMessage">
@@ -165,17 +194,12 @@
                 <i>Before activating that, make sure you have a scraping sleep interval of at least 3 secs set to avoid ratelimiting issues.</i><br>
                 {{ app_form.downloads_integrate_sponsorblock }}
             </div>
-            <div class="settings-item">
-                <p>Current Cast integration: <span class="settings-current">{{ config.application.enable_cast }}</span></p>
-                <i>Enabling Cast will load an additional JS library from Google. HTTPS and a supported browser are required for this integration.</i><br>
-                {{ app_form.application_enable_cast }}
-            </div>
         </div>
         <div class="settings-group">
             <h2 id="snapshots">Snapshots</h2>
             <div class="settings-item">
                 <p>Current system snapshot: <span class="settings-current">{{ config.application.enable_snapshot }}</span></p>
-                <i>Automatically create daily deduplicated snapshots of the index, stored in Elasticsearch. Read first before activating: <a target="_blank" href="https://github.com/tubearchivist/tubearchivist/wiki/Settings#snapshots">Wiki</a>.</i><br>
+                <i>Automatically create daily deduplicated snapshots of the index, stored in Elasticsearch. Read first before activating: <a target="_blank" href="https://docs.tubearchivist.com/settings/#snapshots">Wiki</a>.</i><br>
                 {{ app_form.application_enable_snapshot }}
             </div>
             <div>
@@ -222,8 +246,14 @@
                         False
                     {% endif %}
                 </span></p>
+                <p>Become a sponsor and join <a href="https://members.tubearchivist.com/" target="_blank">members.tubearchivist.com</a> to get access to <span class="settings-current">real time</span> notifications for new videos uploaded by your favorite channels.</p>
                 <p>Periodically rescan your subscriptions:</p>
                 {{ scheduler_form.update_subscribed }}
+            </div>
+            <div class="settings-item">
+                <p>Send notification on task completed:</p>
+                <p>Current notification urls: <span class="settings-current">{{ config.scheduler.update_subscribed_notify }}</span></p>
+                {{ scheduler_form.update_subscribed_notify }}
             </div>
         </div>
         <div class="settings-group">
@@ -240,6 +270,11 @@
                 </span></p>
                 <p>Automatic video download schedule:</p>
                 {{ scheduler_form.download_pending }}
+            </div>
+            <div class="settings-item">
+                <p>Send notification on task completed:</p>
+                <p>Current notification urls: <span class="settings-current">{{ config.scheduler.download_pending_notify }}</span></p>
+                {{ scheduler_form.download_pending_notify }}
             </div>
         </div>
         <div class="settings-group">
@@ -262,6 +297,11 @@
                 <p>Refresh older than x days, recommended 90:</p>
                 {{ scheduler_form.check_reindex_days }}
             </div>
+            <div class="settings-item">
+                <p>Send notification on task completed:</p>
+                <p>Current notification urls: <span class="settings-current">{{ config.scheduler.check_reindex_notify }}</span></p>
+                {{ scheduler_form.check_reindex_notify }}
+            </div>
         </div>
         <div class="settings-group">
             <h2>Thumbnail check</h2>
@@ -280,8 +320,9 @@
             </div>
         </div>
         <div class="settings-group">
-            <h2>Index backup</h2>
+            <h2>ZIP file index backup</h2>
             <div class="settings-item">
+                <p><i>Zip file backups are very slow for large archives and consistency is not guaranteed, use snapshots instead. Make sure no other tasks are running when creating a Zip file backup.</i></p>
                 <p>Current index backup schedule: <span class="settings-current">
                     {% if config.scheduler.run_backup %}
                         {% for key, value in config.scheduler.run_backup.items %}
@@ -313,7 +354,7 @@
     </div>
     <div class="settings-group">
         <h2>Manual media files import.</h2>
-        <p>Add files to the <span class="settings-current">cache/import</span> folder. Make sure to follow the instructions in the Github <a href="https://github.com/tubearchivist/tubearchivist/wiki/Settings" target="_blank">Wiki</a>.</p>
+        <p>Add files to the <span class="settings-current">cache/import</span> folder. Make sure to follow the instructions in the Github <a href="https://docs.tubearchivist.com/settings/" target="_blank">Wiki</a>.</p>
         <div id="manual-import">
             <button onclick="manualImport()">Start import</button>
         </div>
@@ -326,8 +367,9 @@
         </div>
     </div>
     <div class="settings-group">
-        <h2>Backup database</h2>
+        <h2>ZIP file index backup</h2>
         <p>Export your database to a zip file stored at <span class="settings-current">cache/backup</span>.</p>
+        <p><i>Zip file backups are very slow for large archives and consistency is not guaranteed, use snapshots instead. Make sure no other tasks are running when creating a Zip file backup.</i></p>
         <div id="db-backup">
             <button onclick="dbBackup()">Start backup</button>
         </div>
@@ -358,7 +400,7 @@
     <div class="settings-group">
         <h2>Rescan filesystem</h2>
         <p><span class="danger-zone">Danger Zone</span>: This will delete the metadata of deleted videos from the filesystem.</p>
-        <p>Rescan your media folder looking for missing videos and clean up index. More infos on the Github <a href="https://github.com/tubearchivist/tubearchivist/wiki/Settings" target="_blank">Wiki</a>.</p>
+        <p>Rescan your media folder looking for missing videos and clean up index. More infos on the Github <a href="https://docs.tubearchivist.com/settings/" target="_blank">Wiki</a>.</p>
         <div id="fs-rescan">
             <button onclick="fsRescan()">Rescan filesystem</button>
         </div>

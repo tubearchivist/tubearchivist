@@ -39,6 +39,16 @@
                 "channel_last_refresh": {
                     "type": "date"
                 },
+                "channel_tags": {
+                    "type": "text",
+                    "analyzer": "english",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
                 "channel_overwrites": {
                     "properties": {
                         "download_format": {
@@ -121,6 +131,16 @@
                         "channel_last_refresh": {
                             "type": "date"
                         },
+                        "channel_tags": {
+                            "type": "text",
+                            "analyzer": "english",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        },
                         "channel_overwrites": {
                             "properties": {
                                 "download_format": {
@@ -145,6 +165,9 @@
                 "media_url": {
                     "type": "keyword",
                     "index": false
+                },
+                "media_size": {
+                    "type": "long"
                 },
                 "tags": {
                     "type": "text",
@@ -176,6 +199,9 @@
                     "type": "date"
                 },
                 "youtube_id": {
+                    "type": "keyword"
+                },
+                "vid_type": {
                     "type": "keyword"
                 },
                 "published": {
@@ -233,6 +259,30 @@
                         "url": {
                             "type": "keyword",
                             "index": false
+                        }
+                    }
+                },
+                "streams": {
+                    "properties": {
+                        "type": {
+                            "type": "keyword",
+                            "index": false
+                        },
+                        "index": {
+                            "type": "short",
+                            "index": false
+                        },
+                        "codec": {
+                            "type": "text"
+                        },
+                        "width": {
+                            "type": "short"
+                        },
+                        "height": {
+                            "type": "short"
+                        },
+                        "bitrate": {
+                            "type": "integer"
                         }
                     }
                 },
@@ -324,6 +374,15 @@
                 },
                 "youtube_id": {
                     "type": "keyword"
+                },
+                "vid_type": {
+                    "type": "keyword"
+                },
+                "auto_start": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "text"
                 }
             },
             "expected_set": {

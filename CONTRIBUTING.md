@@ -1,17 +1,97 @@
 ## Contributing to Tube Archivist
 
 Welcome, and thanks for showing interest in improving Tube Archivist!  
-If you haven't already, the best place to start is the README. This will give you an overview on what the project is all about.
 
-## Report a bug
+## Table of Content
+- [How to open an issue](#how-to-open-an-issue)
+  - [Bug Report](#bug-report)
+  - [Feature Request](#feature-request)
+  - [Installation Help](#installation-help)
+- [How to make a Pull Request](#how-to-make-a-pull-request)
+- [Improve to the Documentation](#improve-to-the-documentation)
+- [Development Environment](#development-environment)
+---
 
-If you notice something is not working as expected, check to see if it has been previously reported in the [open issues](https://github.com/tubearchivist/tubearchivist/issues).
-If it has not yet been disclosed, go ahead and create an issue.  
-If the issue doesn't move forward due to a lack of response, I assume it's solved and will close it after some time to keep the list fresh. 
+## How to open an issue
+Please read this carefully before opening any [issue](https://github.com/tubearchivist/tubearchivist/issues) on GitHub.
 
-## Wiki
+**Do**:
+- Do provide details and context, this matters a lot and makes it easier for people to help.
+- Do familiarize yourself with the project first, some questions answer themselves when using the project for some time. Familiarize yourself with the [Readme](https://github.com/tubearchivist/tubearchivist) and the [documentation](https://docs.tubearchivist.com/), this covers a lot of the common questions, particularly the [FAQ](https://docs.tubearchivist.com/faq/).
+- Do respond to questions within a day or two so issues can progress. If the issue doesn't move forward due to a lack of response, we'll assume it's solved and we'll close it after some time to keep the list fresh.
 
-The wiki is where all user functions are documented in detail. These pages are mirrored into the **docs** folder of the repo. This allows for pull requests and all other features like regular code. Make any changes there, and I'll sync them with the wiki tab.
+**Don't**:
+- Don't open *duplicates*, that includes open and closed issues.
+- Don't open an issue for something that's already on the [roadmap](https://github.com/tubearchivist/tubearchivist#roadmap), this needs your help to implement it, not another issue.
+- Don't open an issue for something that's a [known limitation](https://github.com/tubearchivist/tubearchivist#known-limitations). These are *known* by definition and don't need another reminder. Some limitations may be solved in the future, maybe by you?
+- Don't overwrite the *issue template*, they are there for a reason. Overwriting that shows that you don't really care about this project. It shows that you have a misunderstanding how open source collaboration works and just want to push your ideas through. Overwriting the template may result in a ban.
+
+### Bug Report
+Bug reports are highly welcome! This project has improved a lot due to your help by providing feedback when something doesn't work as expected. The developers can't possibly cover all edge cases in an ever changing environment like YouTube and yt-dlp.
+
+Please keep in mind:
+- Docker logs are the easiest way to understand what's happening when something goes wrong, *always* provide the logs upfront.
+- Set the environment variable `DJANGO_DEBUG=True` to Tube Archivist and reproduce the bug for a better log output. Don't forget to remove that variable again after.
+- A bug that can't be reproduced, is difficult or sometimes even impossible to fix. Provide very clear steps *how to reproduce*.
+
+### Feature Request
+This project needs your help to grow further. There is no shortage of ideas, see the open [issues on GH](https://github.com/tubearchivist/tubearchivist/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement) and the [roadmap](https://github.com/tubearchivist/tubearchivist#roadmap), what this project lacks is contributors to implement these ideas.
+
+Existing ideas are easily *multiple years* worth of development effort, at least at current speed. Best and fastest way to implement your feature is to do it yourself, that's why this project is open source after all. This project is *very* selective with accepting new feature requests at this point.  
+
+Good feature requests usually fall into one or more of these categories:
+- You want to work on your own idea within the next few days or weeks.
+- Your idea is beneficial for a wide range of users, not just for you.
+- Your idea extends the current project by building on and improving existing functionality.
+- Your idea is quick and easy to implement, for an experienced as well as for a first time contributor.
+
+Your request is likely going to be rejected if:
+- Your idea requires multiple days worth of development time and is unrealistic to be implemented any time soon.
+- There are already other ways to do what you are trying to do.
+- You are trying to do something that only applies to your platform, your specific workflow or your specific setup.
+- Your idea would fundamentally change how the project works or it wouldn't be able to be implemented with backwards compatibility.
+- Your idea is not a good fit for this project.
+
+### Installation Help
+GitHub is most likely not the best place to ask for installation help. That's inherently individual and one on one.
+1. First step is always, help yourself. Start at the [Readme](https://github.com/tubearchivist/tubearchivist) or the additional platform specific installation pages in the [docs](https://docs.tubearchivist.com/).
+2. If that doesn't answer your question, open a `#support` thread on [Discord](https://www.tubearchivist.com/discord).
+3. Only if that is not an option, open an issue here.
+
+IMPORTANT: When receiving help, contribute back to the community by improving the installation instructions with your newly gained knowledge.
+
+---
+
+## How to make a Pull Request
+
+Thank you for contributing and helping improve this project. This is a quick checklist to help streamline the process:
+
+- For **code changes**, make your PR against the [testing branch](https://github.com/tubearchivist/tubearchivist/tree/testing). That's where all active development happens. This simplifies the later merging into *master*, minimizes any conflicts and usually allows for easy and convenient *fast-forward* merging.
+- For **documentation changes**, make your PR directly against the *master* branch.
+- Show off your progress, even if not yet complete, by creating a [draft](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests#draft-pull-requests) PR first and switch it as *ready* when you are ready.
+- Make sure all your code is linted and formatted correctly, see below. The automatic GH action unfortunately needs to be triggered manually by a maintainer for first time contributors, but will trigger automatically for existing contributors.
+
+### Making changes to the JavaScript
+
+The JavaScript does not require any build step; you just edit the files directly. However, there is config for eslint and prettier (a linter and formatter respectively); their use is recommended but not required. To use them, install `node`, run `npm i` from the root directory of this repository to install dependencies, then run `npm run lint` and `npm run format` to run eslint and prettier respectively.
+
+### Code formatting and linting
+
+To keep things clean and consistent for everybody, there is a github action setup to lint and check the changes. You can test your code locally first if you want. For example if you made changes in the **video** module, run
+
+```shell
+./deploy.sh validate tubearchivist/home/src/index/video.py
+```
+
+to validate your changes. If you omit the path, all the project files will get checked. This is subject to change as the codebase improves.
+
+---
+
+## Improve to the Documentation
+
+The documentation available at [docs.tubearchivist.com](https://docs.tubearchivist.com/) and is build from a separate repo [tubearchivist/docs](https://github.com/tubearchivist/docs). The Readme has additional instructions on how to make changes.
+
+---
 
 ## Development Environment
 
@@ -35,18 +115,18 @@ Make your changes locally and re-run `docker compose up --build`. The `Dockerfil
 
 You may find it nice to run everything inside of a VM, though this is not necessary. There's a `deploy.sh` script which has some helpers for this use case. YMMV, this is what one of the developers does:
 
-- Clone the repo, work on it with your favorite code editor in your local filesystem. *testing* branch is the where all the changes are happening, might be unstable and is WIP.
-- Then I have a VM running standard Ubuntu Server LTS with docker installed. The VM keeps my projects separate and offers convenient snapshot functionality. The VM also offers ways to simulate lowend environments by limiting CPU cores and memory. You can use this [Ansible Docker Ubuntu](https://github.com/bbilly1/ansible-playbooks) playbook to get started quickly. But you could also just run docker on your host system.
+- Clone the repo, work on it with your favorite code editor in your local filesystem. *testing* branch is where all the changes are happening, might be unstable and is WIP.
+- Then I have a VM running standard Ubuntu Server LTS with docker installed. The VM keeps my projects separate and offers convenient snapshot functionality. The VM also offers ways to simulate low end environments by limiting CPU cores and memory. You can use this [Ansible Docker Ubuntu](https://github.com/bbilly1/ansible-playbooks) playbook to get started quickly. But you could also just run docker on your host system.
 - I have my local DNS resolve `tubearchivist.local` to the IP of the VM for convenience. To deploy the latest changes and rebuild the application to the testing VM run:
 ```bash
 ./deploy.sh test
 ```
 - The command above will call the docker build command with `--build-arg INSTALL_DEBUG=1` to install additional useful debug tools.
 - The `test` argument takes another optional argument to build for a specific architecture valid options are: `amd64`, `arm64` and `multi`, default is `amd64`.
-- This `deploy.sh` script is not meant to be universally usable for every possible environment but could serve as an idea on how to automatically rebuild containers to test changes - customize to your liking. 
+- This `deploy.sh` script is not meant to be universally usable for every possible environment but could serve as an idea on how to automatically rebuild containers to test changes - customize to your liking.
 
-## Working with Elasticsearch
-Additionally to the required services as listed in the example docker-compose file, the **Dev Tools** of [Kibana](https://www.elastic.co/guide/en/kibana/current/docker.html) are invaluable for running and testing Elasticsearch queries. 
+### Working with Elasticsearch
+Additionally to the required services as listed in the example docker-compose file, the **Dev Tools** of [Kibana](https://www.elastic.co/guide/en/kibana/current/docker.html) are invaluable for running and testing Elasticsearch queries.
 
 **Quick start**  
 Generate your access token in Elasitcsearch:
@@ -60,41 +140,10 @@ kibana:
   image: docker.elastic.co/kibana/kibana:0.0.0
   container_name: kibana
   environment:
-    - "ELASTICSEARCH_HOSTS=http://archivist-es:9200"
-    - "ELASTICSEARCH_SERVICEACCOUNTTOKEN=<your-token-here>"
+	- "ELASTICSEARCH_HOSTS=http://archivist-es:9200"
+	- "ELASTICSEARCH_SERVICEACCOUNTTOKEN=<your-token-here>"
   ports:
-    - "5601:5601"
+	- "5601:5601"
 ```
 
 If you want to run queries on the Elasticsearch container directly from your host with for example `curl` or something like *postman*, you might want to **publish** the port 9200 instead of just **exposing** it.
-
-## Implementing a new feature
-
-Do you see anything on the roadmap that you would like to take a closer look at but you are not sure, what's the best way to tackle that? Or anything not on there yet you'd like to implement but are not sure how? Reach out on Discord and we'll look into it together.
-
-## Making changes
-
-To fix a bug or implement a feature, fork the repository and make all changes to the testing branch. When ready, create a pull request.
-
-## Making changes to the JavaScript
-
-The JavaScript does not require any build step; you just edit the files directly. However, there is config for eslint and prettier (a linter and formatter respectively); their use is recommended but not required. To use them, install `node`, run `npm i` from the root directory of this repository to install dependencies, then run `npm run lint` and `npm run format` to run eslint and prettier respectively.
-
-## Releases
-
-There are three different docker tags:
-- **latest**: As the name implies is the latest multiarch release for regular usage.
-- **unstable**: Intermediate amd64 builds for quick testing and improved collaboration. Don't mix with a *latest* installation, for your testing environment only. This is untested and WIP and will have breaking changes between commits that might require a reset to resolve. 
-- **semantic versioning**: There will be a handful named version tags that will also have a matching release and tag on github.
-
-If you want to see what's in your container, checkout the matching release tag. A merge to **master** usually means a *latest* or *unstable* release. If you want to preview changes in your testing environment, pull the *unstable* tag or clone the repository and build the docker container with the Dockerfile from the **testing** branch.
-
-## Code formatting and linting
-
-To keep things clean and consistent for everybody, there is a github action setup to lint and check the changes. You can test your code locally first if you want. For example if you made changes in the **video** module, run
-
-```shell
-./deploy.sh validate tubearchivist/home/src/index/video.py
-```
-
-to validate your changes. If you omit the path, all the project files will get checked. This is subject to change as the codebase improves. 

@@ -18,12 +18,13 @@ from home.src.ta.helper import get_mapping, ignore_filelist
 class ElasticBackup:
     """dump index to nd-json files for later bulk import"""
 
-    def __init__(self, reason=False):
+    def __init__(self, reason=False, task=False):
         self.config = AppConfig().config
         self.cache_dir = self.config["application"]["cache_dir"]
         self.timestamp = datetime.now().strftime("%Y%m%d")
         self.index_config = get_mapping()
         self.reason = reason
+        self.task = task
 
     def backup_all_indexes(self):
         """backup all indexes, add reason to init"""
@@ -31,6 +32,8 @@ class ElasticBackup:
         if not self.reason:
             raise ValueError("missing backup reason in ElasticBackup")
 
+        if self.task:
+            self.task.send_progress(["Scanning your index."])
         for index in self.index_config:
             index_name = index["index_name"]
             print(f"backup: export in progress for {index_name}")
@@ -40,21 +43,31 @@ class ElasticBackup:
 
             self.backup_index(index_name)
 
+        if self.task:
+            self.task.send_progress(["Compress files to zip archive."])
         self.zip_it()
         if self.reason == "auto":
             self.rotate_backup()
 
-    @staticmethod
-    def backup_index(index_name):
+    def backup_index(self, index_name):
         """export all documents of a single index"""
-        data = {
-            "query": {"match_all": {}},
-            "sort": [{"_doc": {"order": "desc"}}],
-        }
         paginate = IndexPaginate(
-            f"ta_{index_name}", data, keep_source=True, callback=BackupCallback
+            f"ta_{index_name}",
+            data={"query": {"match_all": {}}},
+            keep_source=True,
+            callback=BackupCallback,
+            task=self.task,
+            total=self._get_total(index_name),
         )
         _ = paginate.get_results()
+
+    @staticmethod
+    def _get_total(index_name):
+        """get total documents in index"""
+        path = f"ta_{index_name}/_count"
+        response, _ = ElasticWrap(path).get()
+
+        return response.get("count")
 
     def zip_it(self):
         """pack it up into single zip file"""
@@ -142,8 +155,8 @@ class ElasticBackup:
         """go through the unpacked files and restore"""
         backup_dir = os.path.join(self.cache_dir, "backup")
 
-        for json_f in zip_content:
-
+        for idx, json_f in enumerate(zip_content):
+            self._notify_restore(idx, json_f, len(zip_content))
             file_name = os.path.join(backup_dir, json_f)
 
             if not json_f.startswith("es_") or not json_f.endswith(".json"):
@@ -153,6 +166,12 @@ class ElasticBackup:
             print("restoring: " + json_f)
             self.post_bulk_restore(file_name)
             os.remove(file_name)
+
+    def _notify_restore(self, idx, json_f, total_files):
+        """notify restore progress"""
+        message = [f"Restore index from json backup file {json_f}."]
+        progress = (idx + 1) / total_files
+        self.task.send_progress(message_lines=message, progress=progress)
 
     @staticmethod
     def index_exists(index_name):

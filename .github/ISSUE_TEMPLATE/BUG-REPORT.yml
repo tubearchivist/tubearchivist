@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to help improve this project!
+        Thanks for taking the time to help improve this project! Please read the [how to open an issue](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#how-to-open-an-issue) guide carefully before continuing.
 
   - type: checkboxes
     id: latest
@@ -15,7 +15,7 @@ body:
       options:
         - label: I'm running the latest version of Tube Archivist and have read the [release notes](https://github.com/tubearchivist/tubearchivist/releases/latest).
           required: true
-        - label: I have read through the [wiki](https://github.com/tubearchivist/tubearchivist/wiki) and the [readme](https://github.com/tubearchivist/tubearchivist#installing-and-updating), particularly the [common errors](https://github.com/tubearchivist/tubearchivist#common-errors) section.
+        - label: I have read the [how to open an issue](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#how-to-open-an-issue) guide, particularly the [bug report](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#bug-report) section.
           required: true
 
   - type: input

@@ -12,16 +12,18 @@
         "grid_items": 3
     },
     "subscriptions": {
-        "auto_search": false,
         "auto_download": false,
-        "channel_size": 50
+        "channel_size": 50,
+        "live_channel_size": 50,
+        "shorts_channel_size": 50,
+        "auto_start": false
     },
     "downloads": {
-        "limit_count": false,
         "limit_speed": false,
         "sleep_interval": 3,
         "autodelete_days": false,
         "format": false,
+        "format_sort": false,
         "add_metadata": false,
         "add_thumbnail": false,
         "subtitle": false,
@@ -31,6 +33,7 @@
         "comment_sort": "top",
         "cookie_import": false,
         "throttledratelimit": false,
+        "extractor_lang": false,
         "integrate_ryd": false,
         "integrate_sponsorblock": false
     },
@@ -40,15 +43,19 @@
         "videos": "/youtube",
         "colors": "dark",
         "enable_cast": false,
-        "enable_snapshot": false
+        "enable_snapshot": true
     },
     "scheduler": {
         "update_subscribed": false,
+        "update_subscribed_notify": false,
         "download_pending": false,
+        "download_pending_notify": false,
         "check_reindex":  {"minute": "0", "hour": "12", "day_of_week": "*"},
+        "check_reindex_notify": false,
         "check_reindex_days": 90,
         "thumbnail_check": {"minute": "0", "hour": "17", "day_of_week": "*"},
-        "run_backup": {"minute": "0", "hour": "8", "day_of_week": "0"},
-        "run_backup_rotate": 5
+        "run_backup": false,
+        "run_backup_rotate": 5,
+        "version_check": "rand-d"
     }
 }

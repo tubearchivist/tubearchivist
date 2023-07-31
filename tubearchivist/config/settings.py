@@ -18,6 +18,7 @@ import ldap
 from corsheaders.defaults import default_headers
 from django_auth_ldap.config import LDAPSearch
 from home.src.ta.config import AppConfig
+from home.src.ta.helper import ta_host_parser
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,21 +27,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-PW_HASH = hashlib.sha256(environ.get("TA_PASSWORD").encode())
+PW_HASH = hashlib.sha256(environ["TA_PASSWORD"].encode())
 SECRET_KEY = PW_HASH.hexdigest()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(environ.get("DJANGO_DEBUG"))
 
-ALLOWED_HOSTS = [i.strip() for i in environ.get("TA_HOST").split()]
-
-CSRF_TRUSTED_ORIGINS = []
-for host in ALLOWED_HOSTS:
-    if host.startswith("http://") or host.startswith("https://"):
-        CSRF_TRUSTED_ORIGINS.append(host)
-    else:
-        CSRF_TRUSTED_ORIGINS.append(f"http://{host}")
-
+ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS = ta_host_parser(environ["TA_HOST"])
 
 # Application definition
 
@@ -58,6 +51,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "api",
+    "config",
 ]
 
 MIDDLEWARE = [
@@ -262,4 +256,4 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 
 # TA application settings
 TA_UPSTREAM = "https://github.com/tubearchivist/tubearchivist"
-TA_VERSION = "v0.3.0"
+TA_VERSION = "v0.3.7-unstable"

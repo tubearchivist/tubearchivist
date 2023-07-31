@@ -44,6 +44,12 @@ class UserSettingsForm(forms.Form):
 class ApplicationSettingsForm(forms.Form):
     """handle all application settings"""
 
+    AUTOSTART_CHOICES = [
+        ("", "-- change subscription autostart --"),
+        ("0", "disable auto start"),
+        ("1", "enable auto start"),
+    ]
+
     METADATA_CHOICES = [
         ("", "-- change metadata embed --"),
         ("0", "don't embed metadata"),
@@ -66,12 +72,6 @@ class ApplicationSettingsForm(forms.Form):
         ("", "-- change sponsorblock integrations"),
         ("0", "disable sponsorblock integration"),
         ("1", "enable sponsorblock integration"),
-    ]
-
-    CAST_CHOICES = [
-        ("", "-- change Cast integration --"),
-        ("0", "disable Cast"),
-        ("1", "enable Cast"),
     ]
 
     SNAPSHOT_CHOICES = [
@@ -107,12 +107,22 @@ class ApplicationSettingsForm(forms.Form):
     subscriptions_channel_size = forms.IntegerField(
         required=False, min_value=1
     )
-    downloads_limit_count = forms.IntegerField(required=False)
+    subscriptions_live_channel_size = forms.IntegerField(
+        required=False, min_value=0
+    )
+    subscriptions_shorts_channel_size = forms.IntegerField(
+        required=False, min_value=0
+    )
+    subscriptions_auto_start = forms.ChoiceField(
+        widget=forms.Select, choices=AUTOSTART_CHOICES, required=False
+    )
     downloads_limit_speed = forms.IntegerField(required=False)
     downloads_throttledratelimit = forms.IntegerField(required=False)
     downloads_sleep_interval = forms.IntegerField(required=False)
     downloads_autodelete_days = forms.IntegerField(required=False)
     downloads_format = forms.CharField(required=False)
+    downloads_format_sort = forms.CharField(required=False)
+    downloads_extractor_lang = forms.CharField(required=False)
     downloads_add_metadata = forms.ChoiceField(
         widget=forms.Select, choices=METADATA_CHOICES, required=False
     )
@@ -139,9 +149,6 @@ class ApplicationSettingsForm(forms.Form):
     downloads_integrate_sponsorblock = forms.ChoiceField(
         widget=forms.Select, choices=SP_CHOICES, required=False
     )
-    application_enable_cast = forms.ChoiceField(
-        widget=forms.Select, choices=CAST_CHOICES, required=False
-    )
     application_enable_snapshot = forms.ChoiceField(
         widget=forms.Select, choices=SNAPSHOT_CHOICES, required=False
     )
@@ -150,9 +157,41 @@ class ApplicationSettingsForm(forms.Form):
 class SchedulerSettingsForm(forms.Form):
     """handle scheduler settings"""
 
+    HELP_TEXT = "Add Apprise notification URLs, one per line"
+
     update_subscribed = forms.CharField(required=False)
+    update_subscribed_notify = forms.CharField(
+        label=False,
+        widget=forms.Textarea(
+            attrs={
+                "rows": 2,
+                "placeholder": HELP_TEXT,
+            }
+        ),
+        required=False,
+    )
     download_pending = forms.CharField(required=False)
+    download_pending_notify = forms.CharField(
+        label=False,
+        widget=forms.Textarea(
+            attrs={
+                "rows": 2,
+                "placeholder": HELP_TEXT,
+            }
+        ),
+        required=False,
+    )
     check_reindex = forms.CharField(required=False)
+    check_reindex_notify = forms.CharField(
+        label=False,
+        widget=forms.Textarea(
+            attrs={
+                "rows": 2,
+                "placeholder": HELP_TEXT,
+            }
+        ),
+        required=False,
+    )
     check_reindex_days = forms.IntegerField(required=False)
     thumbnail_check = forms.CharField(required=False)
     run_backup = forms.CharField(required=False)

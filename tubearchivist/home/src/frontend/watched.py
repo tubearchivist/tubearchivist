@@ -6,101 +6,100 @@ functionality:
 from datetime import datetime
 
 from home.src.es.connect import ElasticWrap
-from home.src.ta.helper import UrlListParser
+from home.src.ta.urlparser import Parser
 
 
 class WatchState:
     """handle watched checkbox for videos and channels"""
 
-    def __init__(self, youtube_id):
+    def __init__(self, youtube_id, is_watched):
         self.youtube_id = youtube_id
-        self.stamp = int(datetime.now().strftime("%s"))
+        self.is_watched = is_watched
+        self.stamp = int(datetime.now().timestamp())
+        self.pipeline = f"_ingest/pipeline/watch_{youtube_id}"
 
-    def mark_as_watched(self):
-        """update es with new watched value"""
-        url_type = self.dedect_type()
+    def change(self):
+        """change watched state of item(s)"""
+        print(f"{self.youtube_id}: change watched state to {self.is_watched}")
+        url_type = self._dedect_type()
         if url_type == "video":
-            self.mark_vid_watched()
-        elif url_type == "channel":
-            self.mark_channel_watched()
-        elif url_type == "playlist":
-            self.mark_playlist_watched()
+            self.change_vid_state()
+            return
 
-        print(f"{self.youtube_id}: marked as watched")
+        self._add_pipeline()
+        path = f"ta_video/_update_by_query?pipeline=watch_{self.youtube_id}"
+        data = self._build_update_data(url_type)
+        _, _ = ElasticWrap(path).post(data)
+        self._delete_pipeline()
 
-    def mark_as_unwatched(self):
-        """revert watched state to false"""
-        url_type = self.dedect_type()
-        if url_type == "video":
-            self.mark_vid_watched(revert=True)
-
-        print(f"{self.youtube_id}: revert as unwatched")
-
-    def dedect_type(self):
+    def _dedect_type(self):
         """find youtube id type"""
-        print(self.youtube_id)
-        url_process = UrlListParser(self.youtube_id).process_list()
+        url_process = Parser(self.youtube_id).parse()
         url_type = url_process[0]["type"]
         return url_type
 
-    def mark_vid_watched(self, revert=False):
-        """change watched status of single video"""
+    def change_vid_state(self):
+        """change watched state of video"""
         path = f"ta_video/_update/{self.youtube_id}"
         data = {
-            "doc": {"player": {"watched": True, "watched_date": self.stamp}}
+            "doc": {
+                "player": {
+                    "watched": self.is_watched,
+                    "watched_date": self.stamp,
+                }
+            }
         }
-        if revert:
-            data["doc"]["player"]["watched"] = False
-
         response, status_code = ElasticWrap(path).post(data=data)
         if status_code != 200:
             print(response)
             raise ValueError("failed to mark video as watched")
 
-    def _get_source(self):
-        """build source line for update_by_query script"""
-        source = [
-            "ctx._source.player['watched'] = true",
-            f"ctx._source.player['watched_date'] = {self.stamp}",
-        ]
-        return "; ".join(source)
+    def _build_update_data(self, url_type):
+        """build update by query data based on url_type"""
+        term_key_map = {
+            "channel": "channel.channel_id",
+            "playlist": "playlist.keyword",
+        }
+        term_key = term_key_map.get(url_type)
 
-    def mark_channel_watched(self):
-        """change watched status of every video in channel"""
-        path = "ta_video/_update_by_query"
-        must_list = [
-            {"term": {"channel.channel_id": {"value": self.youtube_id}}},
-            {"term": {"player.watched": {"value": False}}},
-        ]
-        data = {
-            "query": {"bool": {"must": must_list}},
-            "script": {
-                "source": self._get_source(),
-                "lang": "painless",
-            },
+        return {
+            "query": {
+                "bool": {
+                    "must": [
+                        {"term": {term_key: {"value": self.youtube_id}}},
+                        {
+                            "term": {
+                                "player.watched": {
+                                    "value": not self.is_watched
+                                }
+                            }
+                        },
+                    ],
+                }
+            }
         }
 
-        response, status_code = ElasticWrap(path).post(data=data)
-        if status_code != 200:
-            print(response)
-            raise ValueError("failed mark channel as watched")
-
-    def mark_playlist_watched(self):
-        """change watched state of all videos in playlist"""
-        path = "ta_video/_update_by_query"
-        must_list = [
-            {"term": {"playlist.keyword": {"value": self.youtube_id}}},
-            {"term": {"player.watched": {"value": False}}},
-        ]
+    def _add_pipeline(self):
+        """add ingest pipeline"""
         data = {
-            "query": {"bool": {"must": must_list}},
-            "script": {
-                "source": self._get_source(),
-                "lang": "painless",
-            },
+            "description": f"{self.youtube_id}: watched {self.is_watched}",
+            "processors": [
+                {
+                    "set": {
+                        "field": "player.watched",
+                        "value": self.is_watched,
+                    }
+                },
+                {
+                    "set": {
+                        "field": "player.watched_date",
+                        "value": self.stamp,
+                    }
+                },
+            ],
         }
+        _, _ = ElasticWrap(self.pipeline).put(data)
 
-        response, status_code = ElasticWrap(path).post(data=data)
-        if status_code != 200:
-            print(response)
-            raise ValueError("failed mark playlist as watched")
+    def _delete_pipeline(self):
+        """delete pipeline"""
+        ElasticWrap(self.pipeline).delete()

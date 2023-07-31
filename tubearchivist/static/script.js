@@ -23,15 +23,14 @@ function updateVideoWatchStatus(input1, videoCurrentWatchStatus) {
   postVideoProgress(videoId, 0); // Reset video progress on watched/unwatched;
   removeProgressBar(videoId);
 
-  let watchStatusIndicator, payload;
+  let watchStatusIndicator;
+  let apiEndpoint = '/api/watched/';
   if (videoCurrentWatchStatus === 'watched') {
     watchStatusIndicator = createWatchStatusIndicator(videoId, 'unwatched');
-    payload = JSON.stringify({ un_watched: videoId });
-    sendPost(payload);
+    apiRequest(apiEndpoint, 'POST', { id: videoId, is_watched: false });
   } else if (videoCurrentWatchStatus === 'unwatched') {
     watchStatusIndicator = createWatchStatusIndicator(videoId, 'watched');
-    payload = JSON.stringify({ watched: videoId });
-    sendPost(payload);
+    apiRequest(apiEndpoint, 'POST', { id: videoId, is_watched: true });
   }
 
   let watchButtons = document.getElementsByClassName('watch-button');
@@ -56,19 +55,6 @@ function createWatchStatusIndicator(videoId, videoWatchStatus) {
   return watchStatusIndicator;
 }
 
-// function isWatched(youtube_id) {
-//     var payload = JSON.stringify({'watched': youtube_id});
-//     sendPost(payload);
-//     var seenIcon = document.createElement('img');
-//     seenIcon.setAttribute('src', "/static/img/icon-seen.svg");
-//     seenIcon.setAttribute('alt', 'seen-icon');
-//     seenIcon.setAttribute('id', youtube_id);
-//     seenIcon.setAttribute('title', "Mark as unwatched");
-//     seenIcon.setAttribute('onclick', "isUnwatched(this.id)");
-//     seenIcon.classList = 'seen-icon';
-//     document.getElementById(youtube_id).replaceWith(seenIcon);
-// }
-
 // Removes the progress bar when passed a video id
 function removeProgressBar(videoId) {
   setProgressBar(videoId, 0, 1);
@@ -76,27 +62,14 @@ function removeProgressBar(videoId) {
 
 function isWatchedButton(button) {
   let youtube_id = button.getAttribute('data-id');
-  let payload = JSON.stringify({ watched: youtube_id });
+  let apiEndpoint = '/api/watched/';
+  let data = { id: youtube_id, is_watched: true };
   button.remove();
-  sendPost(payload);
+  apiRequest(apiEndpoint, 'POST', data);
   setTimeout(function () {
     location.reload();
   }, 1000);
 }
-
-// function isUnwatched(youtube_id) {
-//     postVideoProgress(youtube_id, 0); // Reset video progress on unwatched;
-//     var payload = JSON.stringify({'un_watched': youtube_id});
-//     sendPost(payload);
-//     var unseenIcon = document.createElement('img');
-//     unseenIcon.setAttribute('src', "/static/img/icon-unseen.svg");
-//     unseenIcon.setAttribute('alt', 'unseen-icon');
-//     unseenIcon.setAttribute('id', youtube_id);
-//     unseenIcon.setAttribute('title', "Mark as watched");
-//     unseenIcon.setAttribute('onclick', "isWatched(this.id)");
-//     unseenIcon.classList = 'unseen-icon';
-//     document.getElementById(youtube_id).replaceWith(unseenIcon);
-// }
 
 function unsubscribe(id_unsub) {
   let payload = JSON.stringify({ unsubscribe: id_unsub });
@@ -142,41 +115,80 @@ function toggleCheckbox(checkbox) {
   let payload = JSON.stringify(payloadDict);
   sendPost(payload);
   setTimeout(function () {
-    let currPage = window.location.pathname + window.location.search;
+    let currPage = window.location.pathname;
     window.location.replace(currPage);
+  }, 500);
+}
+
+// start reindex task
+function reindex(button) {
+  let apiEndpoint = '/api/refresh/';
+  if (button.getAttribute('data-extract-videos')) {
+    apiEndpoint += '?extract_videos=true';
+  }
+  let type = button.getAttribute('data-type');
+  let id = button.getAttribute('data-id');
+
+  let data = {};
+  data[type] = [id];
+
+  apiRequest(apiEndpoint, 'POST', data);
+  let message = document.createElement('p');
+  message.innerText = 'Reindex scheduled';
+  document.getElementById('reindex-button').replaceWith(message);
+  setTimeout(function () {
+    checkMessages();
   }, 500);
 }
 
 // download page buttons
 function rescanPending() {
-  let payload = JSON.stringify({ rescan_pending: true });
+  let apiEndpoint = '/api/task-name/update_subscribed/';
+  apiRequest(apiEndpoint, 'POST');
   animate('rescan-icon', 'rotate-img');
-  sendPost(payload);
   setTimeout(function () {
     checkMessages();
   }, 500);
 }
 
 function dlPending() {
-  let payload = JSON.stringify({ dl_pending: true });
+  let apiEndpoint = '/api/task-name/download_pending/';
+  apiRequest(apiEndpoint, 'POST');
   animate('download-icon', 'bounce-img');
-  sendPost(payload);
   setTimeout(function () {
     checkMessages();
   }, 500);
 }
 
+function addToQueue(autostart = false) {
+  let textArea = document.getElementById('id_vid_url');
+  if (textArea.value === '') {
+    return;
+  }
+  let toPost = { data: [{ youtube_id: textArea.value, status: 'pending' }] };
+  let apiEndpoint = '/api/download/';
+  if (autostart) {
+    apiEndpoint = `${apiEndpoint}?autostart=true`;
+  }
+  apiRequest(apiEndpoint, 'POST', toPost);
+  textArea.value = '';
+  setTimeout(function () {
+    checkMessages();
+  }, 500);
+  showForm();
+}
+
 function toIgnore(button) {
   let youtube_id = button.getAttribute('data-id');
-  let payload = JSON.stringify({ ignore: youtube_id });
-  sendPost(payload);
+  let apiEndpoint = '/api/download/' + youtube_id + '/';
+  apiRequest(apiEndpoint, 'POST', { status: 'ignore' });
   document.getElementById('dl-' + youtube_id).remove();
 }
 
 function downloadNow(button) {
   let youtube_id = button.getAttribute('data-id');
-  let payload = JSON.stringify({ dlnow: youtube_id });
-  sendPost(payload);
+  let apiEndpoint = '/api/download/' + youtube_id + '/';
+  apiRequest(apiEndpoint, 'POST', { status: 'priority' });
   document.getElementById(youtube_id).remove();
   setTimeout(function () {
     checkMessages();
@@ -185,15 +197,15 @@ function downloadNow(button) {
 
 function forgetIgnore(button) {
   let youtube_id = button.getAttribute('data-id');
-  let payload = JSON.stringify({ forgetIgnore: youtube_id });
-  sendPost(payload);
+  let apiEndpoint = '/api/download/' + youtube_id + '/';
+  apiRequest(apiEndpoint, 'DELETE');
   document.getElementById('dl-' + youtube_id).remove();
 }
 
 function addSingle(button) {
   let youtube_id = button.getAttribute('data-id');
-  let payload = JSON.stringify({ addSingle: youtube_id });
-  sendPost(payload);
+  let apiEndpoint = '/api/download/' + youtube_id + '/';
+  apiRequest(apiEndpoint, 'POST', { status: 'pending' });
   document.getElementById('dl-' + youtube_id).remove();
   setTimeout(function () {
     checkMessages();
@@ -202,58 +214,72 @@ function addSingle(button) {
 
 function deleteQueue(button) {
   let to_delete = button.getAttribute('data-id');
-  let payload = JSON.stringify({ deleteQueue: to_delete });
-  sendPost(payload);
+  let apiEndpoint = '/api/download/?filter=' + to_delete;
+  apiRequest(apiEndpoint, 'DELETE');
   // clear button
   let message = document.createElement('p');
   message.innerText = 'deleting download queue: ' + to_delete;
   document.getElementById(button.id).replaceWith(message);
 }
 
-function stopQueue() {
-  let payload = JSON.stringify({ queue: 'stop' });
-  sendPost(payload);
-  document.getElementById('stop-icon').remove();
+function stopTask(icon) {
+  let taskId = icon.getAttribute('data');
+  let apiEndpoint = `/api/task-id/${taskId}/`;
+  apiRequest(apiEndpoint, 'POST', { command: 'stop' });
+  icon.remove();
 }
 
-function killQueue() {
-  let payload = JSON.stringify({ queue: 'kill' });
-  sendPost(payload);
-  document.getElementById('kill-icon').remove();
+function killTask(icon) {
+  let taskId = icon.getAttribute('data');
+  let apiEndpoint = `/api/task-id/${taskId}/`;
+  apiRequest(apiEndpoint, 'POST', { command: 'kill' });
+  icon.remove();
 }
 
 // settings page buttons
 function manualImport() {
-  let payload = JSON.stringify({ 'manual-import': true });
-  sendPost(payload);
+  let apiEndpoint = '/api/task-name/manual_import/';
+  apiRequest(apiEndpoint, 'POST');
   // clear button
   let message = document.createElement('p');
   message.innerText = 'processing import';
   let toReplace = document.getElementById('manual-import');
   toReplace.innerHTML = '';
   toReplace.appendChild(message);
+  setTimeout(function () {
+    location.replace('#notifications');
+    checkMessages();
+  }, 200);
 }
 
 function reEmbed() {
-  let payload = JSON.stringify({ 're-embed': true });
-  sendPost(payload);
+  let apiEndpoint = '/api/task-name/resync_thumbs/';
+  apiRequest(apiEndpoint, 'POST');
   // clear button
   let message = document.createElement('p');
   message.innerText = 'processing thumbnails';
   let toReplace = document.getElementById('re-embed');
   toReplace.innerHTML = '';
   toReplace.appendChild(message);
+  setTimeout(function () {
+    location.replace('#notifications');
+    checkMessages();
+  }, 200);
 }
 
 function dbBackup() {
-  let payload = JSON.stringify({ 'db-backup': true });
-  sendPost(payload);
+  let apiEndpoint = '/api/task-name/run_backup/';
+  apiRequest(apiEndpoint, 'POST');
   // clear button
   let message = document.createElement('p');
   message.innerText = 'backing up archive';
   let toReplace = document.getElementById('db-backup');
   toReplace.innerHTML = '';
   toReplace.appendChild(message);
+  setTimeout(function () {
+    location.replace('#notifications');
+    checkMessages();
+  }, 200);
 }
 
 function dbRestore(button) {
@@ -266,25 +292,37 @@ function dbRestore(button) {
   let toReplace = document.getElementById(fileName);
   toReplace.innerHTML = '';
   toReplace.appendChild(message);
+  setTimeout(function () {
+    location.replace('#notifications');
+    checkMessages();
+  }, 200);
 }
 
 function fsRescan() {
-  let payload = JSON.stringify({ 'fs-rescan': true });
-  sendPost(payload);
+  let apiEndpoint = '/api/task-name/rescan_filesystem/';
+  apiRequest(apiEndpoint, 'POST');
   // clear button
   let message = document.createElement('p');
   message.innerText = 'File system scan in progress';
   let toReplace = document.getElementById('fs-rescan');
   toReplace.innerHTML = '';
   toReplace.appendChild(message);
+  setTimeout(function () {
+    location.replace('#notifications');
+    checkMessages();
+  }, 200);
 }
 
 function resetToken() {
-  let payload = JSON.stringify({ 'reset-token': true });
-  sendPost(payload);
-  let message = document.createElement('p');
-  message.innerText = 'Token revoked';
-  document.getElementById('text-reveal').replaceWith(message);
+  let apiEndpoint = '/api/token/';
+  let result = apiRequest(apiEndpoint, 'DELETE');
+  if (result && result.success) {
+    let message = document.createElement('p');
+    message.innerText = 'Token revoked';
+    document.getElementById('text-reveal').replaceWith(message);
+  } else {
+    console.error('unable to revoke token');
+  }
 }
 
 // restore from snapshot
@@ -316,8 +354,8 @@ function deleteConfirm() {
 function deleteVideo(button) {
   let to_delete = button.getAttribute('data-id');
   let to_redirect = button.getAttribute('data-redirect');
-  let payload = JSON.stringify({ 'delete-video': to_delete });
-  sendPost(payload);
+  let apiEndpoint = '/api/video/' + to_delete + '/';
+  apiRequest(apiEndpoint, 'DELETE');
   setTimeout(function () {
     let redirect = '/channel/' + to_redirect;
     window.location.replace(redirect);
@@ -326,8 +364,8 @@ function deleteVideo(button) {
 
 function deleteChannel(button) {
   let to_delete = button.getAttribute('data-id');
-  let payload = JSON.stringify({ 'delete-channel': to_delete });
-  sendPost(payload);
+  let apiEndpoint = '/api/channel/' + to_delete + '/';
+  apiRequest(apiEndpoint, 'DELETE');
   setTimeout(function () {
     window.location.replace('/channel/');
   }, 1000);
@@ -847,21 +885,33 @@ function setProgressBar(videoId, currentTime, duration) {
 
 // multi search form
 let searchTimeout = null;
+let searchHttpRequest = null;
 function searchMulti(query) {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(function () {
-    if (query.length > 1) {
-      let http = new XMLHttpRequest();
-      http.onreadystatechange = function () {
-        if (http.readyState === 4) {
-          let response = JSON.parse(http.response);
+    if (query.length > 0) {
+      if (searchHttpRequest) {
+        searchHttpRequest.abort();
+      }
+      searchHttpRequest = new XMLHttpRequest();
+      searchHttpRequest.onreadystatechange = function () {
+        if (searchHttpRequest.readyState === 4) {
+          const response = JSON.parse(searchHttpRequest.response);
           populateMultiSearchResults(response.results, response.queryType);
         }
       };
-      http.open('GET', `/api/search/?query=${query}`, true);
-      http.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-      http.setRequestHeader('Content-type', 'application/json');
-      http.send();
+      searchHttpRequest.open('GET', `/api/search/?query=${query}`, true);
+      searchHttpRequest.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+      searchHttpRequest.setRequestHeader('Content-type', 'application/json');
+      searchHttpRequest.send();
+    } else {
+      if (searchHttpRequest) {
+        searchHttpRequest.abort();
+        searchHttpRequest = null;
+      }
+      // show the placeholder container and hide the results container
+      document.getElementById('multi-search-results').style.display = 'none';
+      document.getElementById('multi-search-results-placeholder').style.display = 'block';
     }
   }, 500);
 }
@@ -872,6 +922,9 @@ function getViewDefaults(view) {
 }
 
 function populateMultiSearchResults(allResults, queryType) {
+  // show the results container and hide the placeholder container
+  document.getElementById('multi-search-results').style.display = 'block';
+  document.getElementById('multi-search-results-placeholder').style.display = 'none';
   // videos
   let defaultVideo = getViewDefaults('home');
   let allVideos = allResults.video_results;
@@ -1369,7 +1422,8 @@ function recordTextTrackChanges() {
 }
 
 // keyboard shortcuts for the video player
-document.addEventListener('keydown', doShortcut);
+// need useCapture so we can prevent events from reaching the player
+document.addEventListener('keydown', doShortcut, true);
 
 let modalHideTimeout = -1;
 function showModal(html, duration) {
@@ -1425,19 +1479,13 @@ function doShortcut(e) {
       break;
     }
     case 'ArrowLeft': {
-      if (targetName === 'video') {
-        // hitting arrows while the video is focused will use the built-in skip
-        break;
-      }
+      e.preventDefault();
       showModal('- 5 seconds', 500);
       player.currentTime -= 5;
       break;
     }
     case 'ArrowRight': {
-      if (targetName === 'video') {
-        // hitting space while the video is focused will use the built-in skip
-        break;
-      }
+      e.preventDefault();
       showModal('+ 5 seconds', 500);
       player.currentTime += 5;
       break;
@@ -1460,10 +1508,6 @@ function doShortcut(e) {
       break;
     }
     case ' ': {
-      if (targetName === 'video') {
-        // hitting space while the video is focused will toggle it anyway
-        break;
-      }
       e.preventDefault();
       if (player.paused) {
         player.play();

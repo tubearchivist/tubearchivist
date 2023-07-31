@@ -15,9 +15,10 @@ from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.playlist import YoutubePlaylist
+from home.src.index.video_constants import VideoTypeEnum
+from home.src.index.video_streams import DurationConverter
 from home.src.ta.config import AppConfig
-from home.src.ta.helper import DurationConverter
-from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.helper import is_shorts
 
 
 class PendingIndex:
@@ -95,13 +96,13 @@ class PendingIndex:
 class PendingInteract:
     """interact with items in download queue"""
 
-    def __init__(self, video_id=False, status=False):
-        self.video_id = video_id
+    def __init__(self, youtube_id=False, status=False):
+        self.youtube_id = youtube_id
         self.status = status
 
     def delete_item(self):
         """delete single item from pending"""
-        path = f"ta_download/_doc/{self.video_id}"
+        path = f"ta_download/_doc/{self.youtube_id}"
         _, _ = ElasticWrap(path).delete(refresh=True)
 
     def delete_by_status(self):
@@ -111,29 +112,63 @@ class PendingInteract:
         _, _ = ElasticWrap(path).post(data=data)
 
     def update_status(self):
-        """update status field of pending item"""
-        data = {"doc": {"status": self.status}}
-        path = f"ta_download/_update/{self.video_id}"
+        """update status of pending item"""
+        if self.status == "priority":
+            data = {
+                "doc": {
+                    "status": "pending",
+                    "auto_start": True,
+                    "message": None,
+                }
+            }
+        else:
+            data = {"doc": {"status": self.status}}
+
+        path = f"ta_download/_update/{self.youtube_id}/?refresh=true"
         _, _ = ElasticWrap(path).post(data=data)
+
+    def get_item(self):
+        """return pending item dict"""
+        path = f"ta_download/_doc/{self.youtube_id}"
+        response, status_code = ElasticWrap(path).get()
+        return response["_source"], status_code
+
+    def get_channel(self):
+        """
+        get channel metadata from queue to not depend on channel to be indexed
+        """
+        data = {
+            "size": 1,
+            "query": {"term": {"channel_id": {"value": self.youtube_id}}},
+        }
+        response, _ = ElasticWrap("ta_download/_search").get(data=data)
+        hits = response["hits"]["hits"]
+        if not hits:
+            channel_name = "NA"
+        else:
+            channel_name = hits[0]["_source"].get("channel_name", "NA")
+
+        return {
+            "channel_id": self.youtube_id,
+            "channel_name": channel_name,
+        }
 
 
 class PendingList(PendingIndex):
     """manage the pending videos list"""
 
     yt_obs = {
-        "default_search": "ytsearch",
-        "quiet": True,
-        "check_formats": "selected",
         "noplaylist": True,
         "writethumbnail": True,
         "simulate": True,
-        "socket_timeout": 3,
+        "check_formats": None,
     }
 
-    def __init__(self, youtube_ids=False):
+    def __init__(self, youtube_ids=False, task=False):
         super().__init__()
         self.config = AppConfig().config
         self.youtube_ids = youtube_ids
+        self.task = task
         self.to_skip = False
         self.missing_videos = False
 
@@ -142,44 +177,53 @@ class PendingList(PendingIndex):
         self.missing_videos = []
         self.get_download()
         self.get_indexed()
-        for entry in self.youtube_ids:
-            # notify
-            mess_dict = {
-                "status": "message:add",
-                "level": "info",
-                "title": "Adding to download queue.",
-                "message": "Extracting lists",
-            }
-            RedisArchivist().set_message("message:add", mess_dict, expire=True)
+        total = len(self.youtube_ids)
+        for idx, entry in enumerate(self.youtube_ids):
             self._process_entry(entry)
+            if not self.task:
+                continue
+
+            self.task.send_progress(
+                message_lines=[f"Extracting items {idx + 1}/{total}"],
+                progress=(idx + 1) / total,
+            )
 
     def _process_entry(self, entry):
         """process single entry from url list"""
+        vid_type = self._get_vid_type(entry)
         if entry["type"] == "video":
-            self._add_video(entry["url"])
+            self._add_video(entry["url"], vid_type)
         elif entry["type"] == "channel":
-            self._parse_channel(entry["url"])
+            self._parse_channel(entry["url"], vid_type)
         elif entry["type"] == "playlist":
             self._parse_playlist(entry["url"])
             PlaylistSubscription().process_url_str([entry], subscribed=False)
         else:
             raise ValueError(f"invalid url_type: {entry}")
 
-    def _add_video(self, url):
+    @staticmethod
+    def _get_vid_type(entry):
+        """add vid type enum if available"""
+        vid_type_str = entry.get("vid_type")
+        if not vid_type_str:
+            return VideoTypeEnum.UNKNOWN
+
+        return VideoTypeEnum(vid_type_str)
+
+    def _add_video(self, url, vid_type):
         """add video to list"""
         if url not in self.missing_videos and url not in self.to_skip:
-            self.missing_videos.append(url)
+            self.missing_videos.append((url, vid_type))
         else:
             print(f"{url}: skipped adding already indexed video to download.")
 
-    def _parse_channel(self, url):
+    def _parse_channel(self, url, vid_type):
         """add all videos of channel to list"""
         video_results = ChannelSubscription().get_last_youtube_videos(
-            url, limit=False
+            url, limit=False, query_filter=vid_type
         )
-        youtube_ids = [i[0] for i in video_results]
-        for video_id in youtube_ids:
-            self._add_video(video_id)
+        for video_id, _, vid_type in video_results:
+            self._add_video(video_id, vid_type)
 
     def _parse_playlist(self, url):
         """add all videos of playlist to list"""
@@ -188,20 +232,32 @@ class PendingList(PendingIndex):
         video_results = playlist.json_data.get("playlist_entries")
         youtube_ids = [i["youtube_id"] for i in video_results]
         for video_id in youtube_ids:
-            self._add_video(video_id)
+            # match vid_type later
+            self._add_video(video_id, VideoTypeEnum.UNKNOWN)
 
-    def add_to_pending(self, status="pending"):
+    def add_to_pending(self, status="pending", auto_start=False):
         """add missing videos to pending list"""
         self.get_channels()
         bulk_list = []
 
-        for idx, youtube_id in enumerate(self.missing_videos):
-            print(f"{youtube_id}: add to download queue")
-            video_details = self.get_youtube_details(youtube_id)
+        total = len(self.missing_videos)
+        for idx, (youtube_id, vid_type) in enumerate(self.missing_videos):
+            if self.task and self.task.is_stopped():
+                break
+
+            print(f"{youtube_id}: [{idx + 1}/{total}]: add to queue")
+            self._notify_add(idx, total)
+            video_details = self.get_youtube_details(youtube_id, vid_type)
             if not video_details:
                 continue
 
-            video_details["status"] = status
+            video_details.update(
+                {
+                    "status": status,
+                    "auto_start": auto_start,
+                }
+            )
+
             action = {"create": {"_id": youtube_id, "_index": "ta_download"}}
             bulk_list.append(json.dumps(action))
             bulk_list.append(json.dumps(video_details))
@@ -209,33 +265,36 @@ class PendingList(PendingIndex):
             url = video_details["vid_thumb_url"]
             ThumbManager(youtube_id).download_video_thumb(url)
 
-            self._notify_add(idx)
+            if len(bulk_list) >= 20:
+                self._ingest_bulk(bulk_list)
+                bulk_list = []
 
-        if bulk_list:
-            # add last newline
-            bulk_list.append("\n")
-            query_str = "\n".join(bulk_list)
-            _, _ = ElasticWrap("_bulk").post(query_str, ndjson=True)
+        self._ingest_bulk(bulk_list)
 
-    def _notify_add(self, idx):
+    def _ingest_bulk(self, bulk_list):
+        """add items to queue in bulk"""
+        if not bulk_list:
+            return
+
+        # add last newline
+        bulk_list.append("\n")
+        query_str = "\n".join(bulk_list)
+        _, _ = ElasticWrap("_bulk?refresh=true").post(query_str, ndjson=True)
+
+    def _notify_add(self, idx, total):
         """send notification for adding videos to download queue"""
-        progress = f"{idx + 1}/{len(self.missing_videos)}"
-        mess_dict = {
-            "status": "message:add",
-            "level": "info",
-            "title": "Adding new videos to download queue.",
-            "message": "Progress: " + progress,
-        }
-        if idx + 1 == len(self.missing_videos):
-            expire = 4
-        else:
-            expire = True
+        if not self.task:
+            return
 
-        RedisArchivist().set_message("message:add", mess_dict, expire=expire)
-        if idx + 1 % 25 == 0:
-            print("adding to queue progress: " + progress)
+        self.task.send_progress(
+            message_lines=[
+                "Adding new videos to download queue.",
+                f"Extracting items {idx + 1}/{total}",
+            ],
+            progress=(idx + 1) / total,
+        )
 
-    def get_youtube_details(self, youtube_id):
+    def get_youtube_details(self, youtube_id, vid_type=VideoTypeEnum.VIDEOS):
         """get details from youtubedl for single pending video"""
         vid = YtWrap(self.yt_obs, self.config).extract(youtube_id)
         if not vid:
@@ -247,11 +306,33 @@ class PendingList(PendingIndex):
             return False
         # stop if video is streaming live now
         if vid["live_status"] in ["is_upcoming", "is_live"]:
+            print(f"{youtube_id}: skip is_upcoming or is_live")
             return False
 
-        return self._parse_youtube_details(vid)
+        if vid["live_status"] == "was_live":
+            vid_type = VideoTypeEnum.STREAMS
+        else:
+            if self._check_shorts(vid):
+                vid_type = VideoTypeEnum.SHORTS
+            else:
+                vid_type = VideoTypeEnum.VIDEOS
 
-    def _parse_youtube_details(self, vid):
+        return self._parse_youtube_details(vid, vid_type)
+
+    @staticmethod
+    def _check_shorts(vid):
+        """check if vid is shorts video"""
+        if vid["width"] > vid["height"]:
+            return False
+
+        duration = vid.get("duration")
+        if duration and isinstance(duration, int):
+            if duration > 60:
+                return False
+
+        return is_shorts(vid["id"])
+
+    def _parse_youtube_details(self, vid, vid_type=VideoTypeEnum.VIDEOS):
         """parse response"""
         vid_id = vid.get("id")
         duration_str = DurationConverter.get_str(vid["duration"])
@@ -270,7 +351,9 @@ class PendingList(PendingIndex):
             "channel_id": vid["channel_id"],
             "duration": duration_str,
             "published": published,
-            "timestamp": int(datetime.now().strftime("%s")),
+            "timestamp": int(datetime.now().timestamp()),
+            # Pulling enum value out so it is serializable
+            "vid_type": vid_type.value,
         }
         if self.all_channels:
             youtube_details.update(

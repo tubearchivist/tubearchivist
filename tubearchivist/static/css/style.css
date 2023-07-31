@@ -119,6 +119,10 @@ button:hover {
     color: var(--main-bg);
 }
 
+.button-box {
+    padding: 5px 0;
+}
+
 .unsubscribe {
     background-color: var(--accent-font-light);
 }
@@ -365,6 +369,10 @@ button:hover {
     display: none;
 }
 
+#hidden-form button {
+    margin-right: 1rem;
+}
+
 #text-reveal {
     height: 0;
     overflow: hidden;
@@ -389,6 +397,10 @@ button:hover {
     align-content: space-evenly;
     height: 100vh;
     position: relative; /* needed for modal */
+}
+
+#notifications {
+    position: relative;
 }
 
 .notifications {
@@ -458,7 +470,7 @@ video:-webkit-full-screen {
     overflow: hidden;
 }
 
-.video-item:hover .video-thumb span {
+.video-item:hover .video-tags {
     opacity: 1;
 }
 
@@ -469,7 +481,8 @@ video:-webkit-full-screen {
     align-items: center;
 }
 
-.video-progress-bar {
+.video-progress-bar,
+.notification-progress-bar {
     position: absolute;
     background-color: var(--accent-font-dark);
     height: 7px;
@@ -482,14 +495,18 @@ video:-webkit-full-screen {
     position: relative;
 }
 
-.video-thumb span {
+.video-tags {
     position: absolute;
     top: 5px;
-    left: 5px;
-    background-color: var(--accent-font-light);
+    left: 0;
     padding: 5px;
     opacity: 0;
     transition: 300ms ease-in-out;
+}
+
+.video-tags span {
+    background-color: var(--accent-font-light);
+    padding: 5px;
 }
 
 .video-play img {
@@ -641,9 +658,14 @@ video:-webkit-full-screen {
 
 .info-box-item {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     padding: 15px;
     background-color: var(--highlight-bg);
+}
+
+.info-box-item p {
+    width: 100%;
 }
 
 .description-text {
@@ -883,8 +905,22 @@ video:-webkit-full-screen {
     width: 100%;
 }
 
-.multi-search-result {
+.multi-search-result, #multi-search-results-placeholder {
     padding: 1rem 0;
+}
+
+#multi-search-results-placeholder span {
+    font-family: monospace;
+    color: var(--accent-font-dark);
+    background-color: var(--highlight-bg);
+}
+
+#multi-search-results-placeholder span.value {
+    color: var(--accent-font-light);
+}
+
+#multi-search-results-placeholder ul {
+    margin-top: 10px;
 }
 
 /* channel overview page */
@@ -994,13 +1030,12 @@ video:-webkit-full-screen {
     cursor: pointer;
 }
 
-.dl-control-icons {
+.task-control-icons {
     display: flex;
     justify-content: center;
-    padding-bottom: 10px;
 }
 
-.dl-control-icons img {
+.task-control-icons img {
     width: 30px;
     cursor: pointer;
     margin: 5px;
@@ -1021,6 +1056,7 @@ video:-webkit-full-screen {
 
 /* status message */
 .notification {
+    position: relative;
     background-color: var(--highlight-bg);
     text-align: center;
     padding: 30px 0 15px 0;
