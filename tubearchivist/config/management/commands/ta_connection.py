@@ -81,7 +81,10 @@ class Command(BaseCommand):
                 _, status_code = ElasticWrap("/").get(
                     timeout=1, print_error=False
                 )
-            except requests.exceptions.ConnectionError:
+            except (
+                requests.exceptions.ConnectionError,
+                requests.exceptions.Timeout,
+            ):
                 sleep(5)
                 continue
 
