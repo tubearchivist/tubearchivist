@@ -3,7 +3,7 @@
 Video featuring Tube Archivist generously created by [IBRACORP](https://www.youtube.com/@IBRACORP).
 
 ## Screenshots
-![home screenshot](assets/tube-archivist-screenshot-home.png?raw=true "Tube Archivist Home")  
+![home screenshot](assets/tube-archivist-home.png?raw=true "Tube Archivist Home")  
 *Home Page*: Your recent videos, continue watching incomplete videos.
 
 ![channels screenshot](assets/tube-archivist-channels.png?raw=true "Tube Archivist Channels")  
