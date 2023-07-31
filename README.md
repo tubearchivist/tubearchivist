@@ -1,4 +1,4 @@
-![Tube Archivist](assets/tube-archivist-banner.jpg?raw=true "Tube Archivist Banner")  
+![Tube Archivist](assets/tube-archivist-front.jpg?raw=true "Tube Archivist Banner")  
 [*more screenshots and video*](SHOWCASE.MD)
 
 <div align="center">
