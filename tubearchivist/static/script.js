@@ -1318,9 +1318,9 @@ function getCookie(c_name) {
 
 // animations
 
-function textReveal() {
-  let textBox = document.getElementById('text-reveal');
-  let button = document.getElementById('text-reveal-button');
+function textReveal(button) {
+  let revealBox = button.parentElement.parentElement;
+  let textBox = revealBox.querySelector('#text-reveal');
   let textBoxHeight = textBox.style.height;
   if (textBoxHeight === 'unset') {
     textBox.style.height = '0px';

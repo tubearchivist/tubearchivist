@@ -178,7 +178,7 @@
         <div class="settings-group">
             <h2 id="integrations">Integrations</h2>
             <div class="settings-item">
-                <p>API token: <button type="button" onclick="textReveal()" id="text-reveal-button">Show</button></p>
+                <p>API token: <button type="button" onclick="textReveal(this)" id="text-reveal-button">Show</button></p>
                 <div id="text-reveal" class="description-text">
                     <p>{{ api_token }}</p>
                     <button class="danger-button" type="button" onclick="resetToken()">Revoke</button>
@@ -252,7 +252,14 @@
             </div>
             <div class="settings-item">
                 <p>Send notification on task completed:</p>
-                <p>Current notification urls: <span class="settings-current">{{ config.scheduler.update_subscribed_notify }}</span></p>
+                {% if config.scheduler.update_subscribed_notify %}
+                    <p><button type="button" onclick="textReveal(this)" id="text-reveal-button">Show</button> stored notification links</p>
+                    <div id="text-reveal" class="description-text">
+                        <p>{{ config.scheduler.update_subscribed_notify|linebreaks }}</p>
+                    </div>
+                {% else %}
+                    <p>Current notification urls: <span class="settings-current">{{ config.scheduler.update_subscribed_notify }}</span></p>
+                {% endif %}
                 {{ scheduler_form.update_subscribed_notify }}
             </div>
         </div>
@@ -273,7 +280,14 @@
             </div>
             <div class="settings-item">
                 <p>Send notification on task completed:</p>
-                <p>Current notification urls: <span class="settings-current">{{ config.scheduler.download_pending_notify }}</span></p>
+                {% if config.scheduler.download_pending_notify %}
+                    <p><button type="button" onclick="textReveal(this)" id="text-reveal-button">Show</button> stored notification links</p>
+                    <div id="text-reveal" class="description-text">
+                        <p>{{ config.scheduler.download_pending_notify|linebreaks }}</p>
+                    </div>
+                {% else %}
+                    <p>Current notification urls: <span class="settings-current">{{ config.scheduler.download_pending_notify }}</span></p>
+                {% endif %}
                 {{ scheduler_form.download_pending_notify }}
             </div>
         </div>
@@ -299,7 +313,14 @@
             </div>
             <div class="settings-item">
                 <p>Send notification on task completed:</p>
-                <p>Current notification urls: <span class="settings-current">{{ config.scheduler.check_reindex_notify }}</span></p>
+                {% if config.scheduler.check_reindex_notify %}
+                    <p><button type="button" onclick="textReveal(this)" id="text-reveal-button">Show</button> stored notification links</p>
+                    <div id="text-reveal" class="description-text">
+                        <p>{{ config.scheduler.check_reindex_notify|linebreaks }}</p>
+                    </div>
+                {% else %}
+                    <p>Current notification urls: <span class="settings-current">{{ config.scheduler.check_reindex_notify }}</span></p>
+                {% endif %}
                 {{ scheduler_form.check_reindex_notify }}
             </div>
         </div>
