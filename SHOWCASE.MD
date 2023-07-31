@@ -3,6 +3,9 @@
 Video featuring Tube Archivist generously created by [IBRACORP](https://www.youtube.com/@IBRACORP).
 
 ## Screenshots
+![login screenshot](assets/tube-archivist-login.png?raw=true "Tube Archivist Login")  
+*Login Page*: Secure way to access your media collection.
+
 ![home screenshot](assets/tube-archivist-home.png?raw=true "Tube Archivist Home")  
 *Home Page*: Your recent videos, continue watching incomplete videos.
 
@@ -17,3 +20,6 @@ Video featuring Tube Archivist generously created by [IBRACORP](https://www.yout
 
 ![video page screenshot](assets/tube-archivist-download.png?raw=true "Tube Archivist Video Page")  
 *Downloads Page*: Add, control, and monitor your download queue.
+
+![search page screenshot](assets/tube-archivist-search.png?raw=true "Tube Archivist Search Page")  
+*Search Page*. Use expressions to quickly search throgh collection.
