@@ -1201,7 +1201,7 @@ function writeComments(allComments) {
 
 function createReplyButton(replyId, totalReplies) {
   let replyButton = document.createElement('button');
-  replyButton.innerHTML = `<span id="toggle-icon">+</span> ${totalReplies} replies`;
+  replyButton.innerHTML = `<span id="toggle-icon">▼</span> ${totalReplies} replies`;
   replyButton.setAttribute('data-id', replyId);
   replyButton.setAttribute('onclick', 'toggleCommentReplies(this)');
   return replyButton;
