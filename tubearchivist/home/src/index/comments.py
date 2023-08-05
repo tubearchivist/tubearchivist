@@ -63,6 +63,7 @@ class Comments:
             "check_formats": None,
             "skip_download": True,
             "getcomments": True,
+            "ignoreerrors": True,
             "extractor_args": {
                 "youtube": {
                     "max_comments": max_comments_list,
@@ -119,14 +120,14 @@ class Comments:
             "comment_text": comment["text"].replace("\xa0", ""),
             "comment_timestamp": comment["timestamp"],
             "comment_time_text": time_text,
-            "comment_likecount": comment["like_count"],
-            "comment_is_favorited": comment.get(
-                "is_favorited"
-            ),  # temporary fix for yt-dlp upstream issue 7389
+            "comment_likecount": comment.get("like_count", None),
+            "comment_is_favorited": comment.get("is_favorited", False),
             "comment_author": comment["author"],
             "comment_author_id": comment["author_id"],
             "comment_author_thumbnail": comment["author_thumbnail"],
-            "comment_author_is_uploader": comment["author_is_uploader"],
+            "comment_author_is_uploader": comment.get(
+                "comment_author_is_uploader", False
+            ),
             "comment_parent": comment["parent"],
         }
 
