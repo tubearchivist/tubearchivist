@@ -132,7 +132,7 @@ Similar to that, TubeArchivist will become all sorts of messed up when running o
 ## Known limitations
 - Video files created by Tube Archivist need to be playable in your browser of choice. Not every codec is compatible with every browser and might require some testing with format selection. 
 - Every limitation of **yt-dlp** will also be present in Tube Archivist. If **yt-dlp** can't download or extract a video for any reason, Tube Archivist won't be able to either.
-- There is currently no flexibility in naming of the media files.
+- There is no flexibility in naming of the media files.
 
 ## Roadmap
 We have come far, nonetheless we are not short of ideas on how to improve and extend this project. Issues waiting for you to be tackled in no particular order:
