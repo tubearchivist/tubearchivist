@@ -134,7 +134,7 @@ class VideoApiListView(ApiBaseView):
 
 
 class VideoProgressView(ApiBaseView):
-    """resolves to /api/video/<video_id>/
+    """resolves to /api/video/<video_id>/progress/
     handle progress status for video
     """
 
