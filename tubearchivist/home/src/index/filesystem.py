@@ -15,26 +15,26 @@ from home.src.ta.helper import ignore_filelist
 class Scanner:
     """scan index and filesystem"""
 
-    VIDEOS = AppConfig().config["application"]["videos"]
+    VIDEOS: str = AppConfig().config["application"]["videos"]
 
-    def __init__(self, task=False):
+    def __init__(self, task=False) -> None:
         self.task = task
-        self.to_delete = False
-        self.to_index = False
+        self.to_delete: set[str] = set()
+        self.to_index: set[str] = set()
 
-    def scan(self):
+    def scan(self) -> None:
         """scan the filesystem"""
-        downloaded = self._get_downloaded()
-        indexed = self._get_indexed()
+        downloaded: set[str] = self._get_downloaded()
+        indexed: set[str] = self._get_indexed()
         self.to_index = downloaded - indexed
         self.to_delete = indexed - downloaded
 
-    def _get_downloaded(self):
+    def _get_downloaded(self) -> set[str]:
         """get downloaded ids"""
         if self.task:
             self.task.send_progress(["Scan your filesystem for videos."])
 
-        downloaded = set()
+        downloaded: set = set()
         channels = ignore_filelist(os.listdir(self.VIDEOS))
         for channel in channels:
             folder = os.path.join(self.VIDEOS, channel)
@@ -43,7 +43,7 @@ class Scanner:
 
         return downloaded
 
-    def _get_indexed(self):
+    def _get_indexed(self) -> set:
         """get all indexed ids"""
         if self.task:
             self.task.send_progress(["Get all videos indexed."])
@@ -52,13 +52,13 @@ class Scanner:
         response = IndexPaginate("ta_video", data).get_results()
         return {i["youtube_id"] for i in response}
 
-    def apply(self):
+    def apply(self) -> None:
         """apply all changes"""
         self.delete()
         self.index()
         self.url_fix()
 
-    def delete(self):
+    def delete(self) -> None:
         """delete videos from index"""
         if not self.to_delete:
             print("nothing to delete")
@@ -72,7 +72,7 @@ class Scanner:
         for youtube_id in self.to_delete:
             YoutubeVideo(youtube_id).delete_media_file()
 
-    def index(self):
+    def index(self) -> None:
         """index new"""
         if not self.to_index:
             print("nothing to index")
@@ -91,7 +91,7 @@ class Scanner:
 
         CommentList(self.to_index, task=self.task).index()
 
-    def url_fix(self):
+    def url_fix(self) -> None:
         """
         update path v0.3.6 to v0.3.7
         fix url not matching channel-videoid pattern
