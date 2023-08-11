@@ -8,6 +8,7 @@ Welcome, and thanks for showing interest in improving Tube Archivist!
   - [Feature Request](#feature-request)
   - [Installation Help](#installation-help)
 - [How to make a Pull Request](#how-to-make-a-pull-request)
+- [Contributions beyond the scope](#contributions-beyond-the-scope)
 - [Improve to the Documentation](#improve-to-the-documentation)
 - [Development Environment](#development-environment)
 ---
@@ -84,6 +85,23 @@ To keep things clean and consistent for everybody, there is a github action setu
 ```
 
 to validate your changes. If you omit the path, all the project files will get checked. This is subject to change as the codebase improves.
+
+---
+
+## Contributions beyond the scope
+
+As you have read the [FAQ](https://docs.tubearchivist.com/faq/) and the [known limitations](https://github.com/tubearchivist/tubearchivist#known-limitations) and have gotten an idea what this project tries to do, there will be some obvious shortcomings that stand out, that have been explicitly excluded from the scope of this project, at least for the time being.
+
+Extending the scope of this project will only be feasible with more [regular contributors](https://github.com/tubearchivist/tubearchivist/graphs/contributors) that are willing to help improve this project in the long run. Contributors that have an overall improvement of the project in mind and not just about implementing this *one* thing.  
+
+Small minor additions, or making a PR for a documented feature request or bug, even if that was and will be your only contribution to this project, are always welcome and is *not* what this is about.
+
+Beyond that, general rules to consider:
+
+- Maintainability is key: It's not just about implementing something and being done with it, it's about maintaining it, fixing bugs as they occur, improving on it and supporting it in the long run.
+- Others can do it better: Some problems have been solved by very talented developers. These things don't need to be reinvented again here in this project.
+- Develop for the 80%: New features and additions *should* be beneficial for 80% of the users. If you are trying to solve your own problem that only applies to you, maybe that would be better to do in your own fork or if possible by a standalone implementation using the API.
+- If all of that sounds too strict for you, as stated above, start becoming a regular contributor to this project.
 
 ---
 
