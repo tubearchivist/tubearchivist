@@ -31,6 +31,8 @@ services:
       - "6379"
     volumes:
       - redis:/data
+    environment:
+      - REDIS_ARGS=--save 60 1              # if at least 1 key is changed - perisist data to volume after 60 seconds
     depends_on:
       - archivist-es
   archivist-es:
