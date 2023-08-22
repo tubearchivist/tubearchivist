@@ -174,6 +174,11 @@ Implemented:
 - [X] Backup and restore [2021-09-22]
 - [X] Scan your file system to index already downloaded videos [2021-09-14]
 
+## User Scripts
+This is a list of useful user scripts, generously created from folks like you to extend this project and its functionality. This is your time to shine, [read this](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#user-scripts) then open a PR to add your script here.
+
+- Example 1
+
 ## Donate
 The best donation to **Tube Archivist** is your time, take a look at the [contribution page](CONTRIBUTING.md) to get started.  
 Second best way to support the development is to provide for caffeinated beverages:

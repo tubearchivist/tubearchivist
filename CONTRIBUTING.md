@@ -9,6 +9,7 @@ Welcome, and thanks for showing interest in improving Tube Archivist!
   - [Installation Help](#installation-help)
 - [How to make a Pull Request](#how-to-make-a-pull-request)
 - [Contributions beyond the scope](#contributions-beyond-the-scope)
+- [User Scripts](#user-scripts)
 - [Improve to the Documentation](#improve-to-the-documentation)
 - [Development Environment](#development-environment)
 ---
@@ -102,6 +103,16 @@ Beyond that, general rules to consider:
 - Others can do it better: Some problems have been solved by very talented developers. These things don't need to be reinvented again here in this project.
 - Develop for the 80%: New features and additions *should* be beneficial for 80% of the users. If you are trying to solve your own problem that only applies to you, maybe that would be better to do in your own fork or if possible by a standalone implementation using the API.
 - If all of that sounds too strict for you, as stated above, start becoming a regular contributor to this project.
+
+---
+
+## User Scripts
+Some of you might have created useful scripts or API integrations around this project. Sharing is caring! Please add a link to your script to the Readme [here](https://github.com/tubearchivist/tubearchivist#user-scripts).
+- Your repo should have a `LICENSE` file with one of the common open source licenses. People are expected to fork, adapt and build upon your great work.
+- Your script should not modify the *official* files of Tube Archivist. E.g. your symlink script should build links *outside* of your `/youtube` folder. Or your fancy script that creates a beautiful artwork gallery should do that *outside* of the `/cache` folder. Modifying the *official* files and folders of TA are probably not supported.
+- On the top of the repo you should have a mention and a link back to the Tube Archivist repo. Clearly state to **not** to open any issues on the main TA repo regarding your script.
+- Example template:
+  - `[<user>/<repo>](https://linktoyourrepo.com)`: A short one line description.
 
 ---
 
