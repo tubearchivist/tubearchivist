@@ -61,7 +61,7 @@ class ThumbManagerBase:
                 print(f"{self.item_id}: retry thumbnail download {url}")
                 sleep((i + 1) ** i)
 
-        return False
+        return self.get_fallback()
 
     def get_fallback(self):
         """get fallback thumbnail if not available"""
