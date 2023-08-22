@@ -189,6 +189,8 @@ Second best way to support the development is to provide for caffeinated beverag
 
 ## Notable mentions
 This is a selection of places where this project has been featured on reddit, in the news, blogs or any other online media, newest on top.
+* **ycombinator**: Tube Archivist on Hackernews front page, [2023-07-16][[link](https://news.ycombinator.com/item?id=36744395)]
+* **linux-community.de**: Tube Archivist bringt Ordnung in die Youtube-Sammlung, [German][2023-05-01][[link](https://www.linux-community.de/ausgaben/linuxuser/2023/05/tube-archivist-bringt-ordnung-in-die-youtube-sammlung/)]
 * **noted.lol**: Dev Debrief, An Interview With the Developer of Tube Archivist, [2023-03-30] [[link](https://noted.lol/dev-debrief-tube-archivist/)]
 * **console.substack.com**: Interview With Simon of Tube Archivist, [2023-01-29] [[link](https://console.substack.com/p/console-142#%C2%A7interview-with-simon-of-tube-archivist)]
 * **reddit.com**: Tube Archivist v0.3.0 - Now Archiving Comments, [2022-12-02] [[link](https://www.reddit.com/r/selfhosted/comments/zaonzp/tube_archivist_v030_now_archiving_comments/)]
