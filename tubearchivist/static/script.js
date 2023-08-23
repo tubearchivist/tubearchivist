@@ -1485,15 +1485,13 @@ function doShortcut(e) {
     }
     case 'f': {
       e.preventDefault();
-      if(document.fullscreenElement === null) {
-        player.requestFullscreen()
-        .catch(e => {
+      if (document.fullscreenElement === null) {
+        player.requestFullscreen().catch(e => {
           console.error(e);
           showModal('Unable to enter fullscreen', 3000);
         });
       } else {
-        document.exitFullscreen()
-        .catch(e => {
+        document.exitFullscreen().catch(e => {
           console.error(e);
           showModal('Unable to exit fullscreen', 3000);
         });
