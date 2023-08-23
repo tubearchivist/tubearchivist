@@ -100,7 +100,7 @@ class AppConfig:
             self.config[config_dict][config_value] = to_write
             updated.append((config_value, to_write))
 
-        RedisArchivist().set_message("config", self.config)
+        RedisArchivist().set_message("config", self.config, save=True)
         return updated
 
     @staticmethod
@@ -112,7 +112,7 @@ class AppConfig:
 
             message = {"status": value}
             redis_key = f"{user_id}:{key}"
-            RedisArchivist().set_message(redis_key, message)
+            RedisArchivist().set_message(redis_key, message, save=True)
 
     def get_colors(self):
         """overwrite config if user has set custom values"""
@@ -225,7 +225,7 @@ class ScheduleBuilder:
                     to_write = value
                 redis_config["scheduler"][key] = to_write
 
-        RedisArchivist().set_message("config", redis_config)
+        RedisArchivist().set_message("config", redis_config, save=True)
         mess_dict = {
             "status": self.MSG,
             "level": "info",

@@ -41,6 +41,7 @@ class RedisArchivist(RedisBase):
         message: dict,
         path: str = ".",
         expire: bool | int = False,
+        save: bool = False,
     ) -> None:
         """write new message to redis"""
         self.conn.execute_command(
@@ -53,6 +54,16 @@ class RedisArchivist(RedisBase):
             else:
                 secs = expire
             self.conn.execute_command("EXPIRE", self.NAME_SPACE + key, secs)
+
+        if save:
+            self.bg_save()
+
+    def bg_save(self) -> None:
+        """save to aof"""
+        try:
+            self.conn.bgsave()
+        except redis.exceptions.ResponseError:
+            pass
 
     def get_message(self, key: str) -> dict:
         """get message dict from redis"""
