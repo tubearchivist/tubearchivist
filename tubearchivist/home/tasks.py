@@ -343,9 +343,12 @@ def re_sync_thumbs(self):
 
 
 @shared_task(bind=True, name="subscribe_to", base=BaseTask)
-def subscribe_to(self, url_str):
-    """take a list of urls to subscribe to"""
-    SubscriptionHandler(url_str, task=self).subscribe()
+def subscribe_to(self, url_str: str, expected_type: str | bool = False):
+    """
+    take a list of urls to subscribe to
+    optionally validate expected_type channel / playlist
+    """
+    SubscriptionHandler(url_str, task=self).subscribe(expected_type)
 
 
 @shared_task(bind=True, name="index_playlists", base=BaseTask)

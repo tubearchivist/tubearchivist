@@ -331,7 +331,7 @@ class ChannelApiListView(ApiBaseView):
 
         pending = [i["channel_id"] for i in to_add if i["channel_subscribed"]]
         url_str = " ".join(pending)
-        subscribe_to.delay(url_str)
+        subscribe_to.delay(url_str, expected_type="channel")
 
         return Response(data)
 

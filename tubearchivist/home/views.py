@@ -736,7 +736,7 @@ class ChannelView(ArchivistResultsView):
         if subscribe_form.is_valid():
             url_str = request.POST.get("subscribe")
             print(url_str)
-            subscribe_to.delay(url_str)
+            subscribe_to.delay(url_str, expected_type="channel")
 
         sleep(1)
         return redirect("channel", permanent=True)
@@ -879,7 +879,7 @@ class PlaylistView(ArchivistResultsView):
         if subscribe_form.is_valid():
             url_str = request.POST.get("subscribe")
             print(url_str)
-            subscribe_to.delay(url_str)
+            subscribe_to.delay(url_str, expected_type="playlist")
 
         sleep(1)
         return redirect("playlist")
