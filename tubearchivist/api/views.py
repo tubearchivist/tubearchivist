@@ -2,6 +2,10 @@
 
 from api.src.search_processor import SearchProcess
 from home.src.download.queue import PendingInteract
+from home.src.download.subscriptions import (
+    ChannelSubscription,
+    PlaylistSubscription,
+)
 from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.connect import ElasticWrap
 from home.src.es.snapshot import ElasticSnapshot
@@ -318,9 +322,8 @@ class ChannelApiListView(ApiBaseView):
 
         return Response(self.response)
 
-    @staticmethod
-    def post(request):
-        """subscribe to list of channels"""
+    def post(self, request):
+        """subscribe/unsubscribe to list of channels"""
         data = request.data
         try:
             to_add = data["data"]
@@ -329,11 +332,27 @@ class ChannelApiListView(ApiBaseView):
             print(message)
             return Response({"message": message}, status=400)
 
-        pending = [i["channel_id"] for i in to_add if i["channel_subscribed"]]
-        url_str = " ".join(pending)
-        subscribe_to.delay(url_str, expected_type="channel")
+        pending = []
+        for channel_item in to_add:
+            channel_id = channel_item["channel_id"]
+            if channel_item["channel_subscribed"]:
+                pending.append(channel_id)
+            else:
+                self._unsubscribe(channel_id)
+
+        if pending:
+            url_str = " ".join(pending)
+            subscribe_to.delay(url_str, expected_type="channel")
 
         return Response(data)
+
+    @staticmethod
+    def _unsubscribe(channel_id: str):
+        """unsubscribe"""
+        print(f"[{channel_id}] unsubscribe from channel")
+        ChannelSubscription().change_subscribe(
+            channel_id, channel_subscribed=False
+        )
 
 
 class ChannelApiVideoView(ApiBaseView):
@@ -372,6 +391,38 @@ class PlaylistApiListView(ApiBaseView):
         )
         self.get_document_list(request)
         return Response(self.response)
+
+    def post(self, request):
+        """subscribe/unsubscribe to list of playlists"""
+        data = request.data
+        try:
+            to_add = data["data"]
+        except KeyError:
+            message = "missing expected data key"
+            print(message)
+            return Response({"message": message}, status=400)
+
+        pending = []
+        for playlist_item in to_add:
+            playlist_id = playlist_item["playlist_id"]
+            if playlist_item["playlist_subscribed"]:
+                pending.append(playlist_id)
+            else:
+                self._unsubscribe(playlist_id)
+
+        if pending:
+            url_str = " ".join(pending)
+            subscribe_to.delay(url_str, expected_type="playlist")
+
+        return Response(data)
+
+    @staticmethod
+    def _unsubscribe(playlist_id: str):
+        """unsubscribe"""
+        print(f"[{playlist_id}] unsubscribe from playlist")
+        PlaylistSubscription().change_subscribe(
+            playlist_id, subscribe_status=False
+        )
 
 
 class PlaylistApiView(ApiBaseView):
