@@ -38,9 +38,9 @@
                     <p>Subscribers: {{ channel_info.channel_subs|intcomma }}</p>
                 {% endif %}
                 {% if channel_info.channel_subscribed %}
-                    <button class="unsubscribe" type="button" id="{{ channel_info.channel_id }}" onclick="unsubscribe(this.id)" title="Unsubscribe from {{ channel_info.channel_name }}">Unsubscribe</button>
+                    <button class="unsubscribe" type="button" data-type="channel" data-subscribe="" data-id="{{ channel_info.channel_id }}" onclick="subscribeStatus(this)" title="Unsubscribe from {{ channel_info.channel_name }}">Unsubscribe</button>
                 {% else %}
-                    <button type="button" id="{{ channel_info.channel_id }}" onclick="subscribe(this.id)" title="Subscribe to {{ channel_info.channel_name }}">Subscribe</button>
+                    <button type="button" data-type="channel" data-subscribe="true" data-id="{{ channel_info.channel_id }}" onclick="subscribeStatus(this)" title="Subscribe to {{ channel_info.channel_name }}">Subscribe</button>
                 {% endif %}
             </div>
         </div>

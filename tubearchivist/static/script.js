@@ -71,20 +71,27 @@ function isWatchedButton(button) {
   }, 1000);
 }
 
-function unsubscribe(id_unsub) {
-  let payload = JSON.stringify({ unsubscribe: id_unsub });
-  sendPost(payload);
+function subscribeStatus(subscribeButton) {
+  let id = subscribeButton.getAttribute('data-id');
+  let type = subscribeButton.getAttribute('data-type');
+  let subscribe = Boolean(subscribeButton.getAttribute('data-subscribe'));
+  let apiEndpoint;
+  let data;
+  if (type === 'channel') {
+    apiEndpoint = '/api/channel/';
+    data = { data: [{ channel_id: id, channel_subscribed: subscribe }] };
+  } else if (type === 'playlist') {
+    apiEndpoint = '/api/playlist/';
+    data = { data: [{ playlist_id: id, playlist_subscribed: subscribe }] };
+  }
+  apiRequest(apiEndpoint, 'POST', data);
   let message = document.createElement('span');
-  message.innerText = 'You are unsubscribed.';
-  document.getElementById(id_unsub).replaceWith(message);
-}
-
-function subscribe(id_sub) {
-  let payload = JSON.stringify({ subscribe: id_sub });
-  sendPost(payload);
-  let message = document.createElement('span');
-  message.innerText = 'You are subscribed.';
-  document.getElementById(id_sub).replaceWith(message);
+  if (subscribe) {
+    message.innerText = 'You are subscribed.';
+  } else {
+    message.innerText = 'You are unsubscribed.';
+  }
+  subscribeButton.replaceWith(message);
 }
 
 function changeView(image) {
@@ -1057,9 +1064,9 @@ function createChannel(channel, viewStyle) {
   const channelLastRefresh = channel.channel_last_refresh;
   let button;
   if (channel.channel_subscribed) {
-    button = `<button class="unsubscribe" type="button" id="${channelId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${channelName}">Unsubscribe</button>`;
+    button = `<button class="unsubscribe" type="button" data-id="${channelId}" data-subscribe="" data-type="channel" onclick="subscribeStatus(this)" title="Unsubscribe from ${channelName}">Unsubscribe</button>`;
   } else {
-    button = `<button type="button" id="${channelId}" onclick="subscribe(this.id)" title="Subscribe to ${channelName}">Subscribe</button>`;
+    button = `<button type="button" data-id="${channelId}" data-subscribe="true" data-type="channel" onclick="subscribeStatus(this)" title="Subscribe to ${channelName}">Subscribe</button>`;
   }
   // build markup
   const markup = `
@@ -1103,9 +1110,9 @@ function createPlaylist(playlist, viewStyle) {
   const playlistLastRefresh = playlist.playlist_last_refresh;
   let button;
   if (playlist.playlist_subscribed) {
-    button = `<button class="unsubscribe" type="button" id="${playlistId}" onclick="unsubscribe(this.id)" title="Unsubscribe from ${playlistName}">Unsubscribe</button>`;
+    button = `<button class="unsubscribe" type="button" data-id="${playlistId}" data-subscribe="" data-type="playlist" onclick="subscribeStatus(this)" title="Unsubscribe from ${playlistName}">Unsubscribe</button>`;
   } else {
-    button = `<button type="button" id="${playlistId}" onclick="subscribe(this.id)" title="Subscribe to ${playlistName}">Subscribe</button>`;
+    button = `<button type="button" data-id="${playlistId}" data-subscribe="true" data-type="playlist" onclick="subscribeStatus(this)" title="Subscribe to ${playlistName}">Subscribe</button>`;
   }
   const markup = `
     <div class="playlist-thumbnail">

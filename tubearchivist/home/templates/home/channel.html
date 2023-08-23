@@ -66,9 +66,9 @@
                             <div>
                                 <p>Last refreshed: {{ channel.source.channel_last_refresh }}</p>
                                 {% if channel.source.channel_subscribed %}
-                                    <button class="unsubscribe" type="button" id="{{ channel.source.channel_id }}" onclick="unsubscribe(this.id)" title="Unsubscribe from {{ channel.source.channel_name }}">Unsubscribe</button>
+                                    <button class="unsubscribe" type="button" data-type="channel" data-subscribe="" data-id="{{ channel.source.channel_id }}" onclick="subscribeStatus(this)" title="Unsubscribe from {{ channel.source.channel_name }}">Unsubscribe</button>
                                 {% else %}
-                                    <button type="button" id="{{ channel.source.channel_id }}" onclick="subscribe(this.id)" title="Subscribe to {{ channel.source.channel_name }}">Subscribe</button>
+                                    <button type="button" data-type="channel" data-subscribe="true" data-id="{{ channel.source.channel_id }}" onclick="subscribeStatus(this)" title="Subscribe to {{ channel.source.channel_name }}">Subscribe</button>
                                 {% endif %}
                             </div>
                         </div>
