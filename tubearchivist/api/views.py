@@ -13,6 +13,7 @@ from home.src.frontend.searching import SearchForm
 from home.src.frontend.watched import WatchState
 from home.src.index.channel import YoutubeChannel
 from home.src.index.generic import Pagination
+from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock, YoutubeVideo
 from home.src.ta.config import AppConfig, ReleaseVersion
@@ -437,6 +438,17 @@ class PlaylistApiView(ApiBaseView):
         """get request"""
         self.get_document(playlist_id)
         return Response(self.response, status=self.status_code)
+
+    def delete(self, request, playlist_id):
+        """delete playlist"""
+        print(f"{playlist_id}: delete playlist")
+        delete_videos = request.GET.get("delete-videos", False)
+        if delete_videos:
+            YoutubePlaylist(playlist_id).delete_videos_playlist()
+        else:
+            YoutubePlaylist(playlist_id).delete_metadata()
+
+        return Response({"success": True})
 
 
 class PlaylistApiVideoView(ApiBaseView):

@@ -4,7 +4,6 @@ Functionality:
 - called via user input
 """
 
-from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.ta_redis import RedisArchivist
 from home.tasks import run_restore_backup
 
@@ -36,7 +35,6 @@ class PostData:
             "show_subed_only": self._show_subed_only,
             "show_ignored_only": self._show_ignored_only,
             "db-restore": self._db_restore,
-            "delete-playlist": self._delete_playlist,
         }
 
         return exec_map[self.to_exec]
@@ -103,17 +101,4 @@ class PostData:
         print("restoring index from backup zip")
         filename = self.exec_val
         run_restore_backup.delay(filename)
-        return {"success": True}
-
-    def _delete_playlist(self):
-        """delete playlist, only metadata or incl all videos"""
-        playlist_dict = self.exec_val
-        playlist_id = playlist_dict["playlist-id"]
-        playlist_action = playlist_dict["playlist-action"]
-        print(f"{playlist_id}: delete playlist {playlist_action}")
-        if playlist_action == "metadata":
-            YoutubePlaylist(playlist_id).delete_metadata()
-        elif playlist_action == "all":
-            YoutubePlaylist(playlist_id).delete_videos_playlist()
-
         return {"success": True}

@@ -40,8 +40,8 @@
                 <button onclick="deleteConfirm()" id="delete-item">Delete Playlist</button>
                 <div class="delete-confirm" id="delete-button">
                     <span>Delete {{ playlist_info.playlist_name }}?</span>
-                    <button onclick="deletePlaylist(this)" data-action="metadata" data-id="{{ playlist_info.playlist_id }}">Delete metadata</button>
-                    <button onclick="deletePlaylist(this)" data-action="all" class="danger-button" data-id="{{ playlist_info.playlist_id }}">Delete all</button><br>
+                    <button onclick="deletePlaylist(this)" data-action="" data-id="{{ playlist_info.playlist_id }}">Delete metadata</button>
+                    <button onclick="deletePlaylist(this)" data-action="delete-videos" class="danger-button" data-id="{{ playlist_info.playlist_id }}">Delete all</button><br>
                     <button onclick="cancelDelete()">Cancel</button>
                 </div>
             </div>

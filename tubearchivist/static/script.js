@@ -381,13 +381,11 @@ function deleteChannel(button) {
 function deletePlaylist(button) {
   let playlist_id = button.getAttribute('data-id');
   let playlist_action = button.getAttribute('data-action');
-  let payload = JSON.stringify({
-    'delete-playlist': {
-      'playlist-id': playlist_id,
-      'playlist-action': playlist_action,
-    },
-  });
-  sendPost(payload);
+  let apiEndpoint = `/api/playlist/${playlist_id}/`;
+  if (playlist_action === 'delete-videos') {
+    apiEndpoint += '?delete-videos=true';
+  }
+  apiRequest(apiEndpoint, 'DELETE');
   setTimeout(function () {
     window.location.replace('/playlist/');
   }, 1000);
