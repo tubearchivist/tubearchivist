@@ -1483,6 +1483,23 @@ function doShortcut(e) {
       player.muted = !player.muted;
       break;
     }
+    case 'f': {
+      e.preventDefault();
+      if(document.fullscreenElement === null) {
+        player.requestFullscreen()
+        .catch(e => {
+          console.error(e);
+          showModal('Unable to enter fullscreen', 3000);
+        });
+      } else {
+        document.exitFullscreen()
+        .catch(e => {
+          console.error(e);
+          showModal('Unable to exit fullscreen', 3000);
+        });
+      }
+      break;
+    }
     case 'ArrowLeft': {
       e.preventDefault();
       showModal('- 5 seconds', 500);
@@ -1527,6 +1544,7 @@ function doShortcut(e) {
                 <table style="margin: auto; background: rgba(0,0,0,.5)"><tbody>
                 <tr><td>Show help</td><td>?</td>
                 <tr><td>Toggle mute</td><td>m</td>
+                <tr><td>Toggle fullscreen</td><td>f</td>
                 <tr><td>Toggle subtitles (if available)</td><td>c</td>
                 <tr><td>Increase speed</td><td>&gt;</td>
                 <tr><td>Decrease speed</td><td>&lt;</td>
