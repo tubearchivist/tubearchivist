@@ -4,14 +4,8 @@ Functionality:
 - called via user input
 """
 
-from home.src.download.subscriptions import (
-    ChannelSubscription,
-    PlaylistSubscription,
-)
-from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.ta_redis import RedisArchivist
-from home.src.ta.urlparser import Parser
-from home.tasks import run_restore_backup, subscribe_to
+from home.tasks import run_restore_backup
 
 
 class PostData:
@@ -36,14 +30,11 @@ class PostData:
         exec_map = {
             "change_view": self._change_view,
             "change_grid": self._change_grid,
-            "unsubscribe": self._unsubscribe,
-            "subscribe": self._subscribe,
             "sort_order": self._sort_order,
             "hide_watched": self._hide_watched,
             "show_subed_only": self._show_subed_only,
             "show_ignored_only": self._show_ignored_only,
             "db-restore": self._db_restore,
-            "delete-playlist": self._delete_playlist,
         }
 
         return exec_map[self.to_exec]
@@ -65,34 +56,6 @@ class PostData:
         key = f"{self.current_user}:grid_items"
         print(f"change grid items: {grid_items}")
         RedisArchivist().set_message(key, {"status": grid_items})
-        return {"success": True}
-
-    def _unsubscribe(self):
-        """unsubscribe from channels or playlists"""
-        id_unsub = self.exec_val
-        print(f"{id_unsub}: unsubscribe")
-        to_unsub_list = Parser(id_unsub).parse()
-        for to_unsub in to_unsub_list:
-            unsub_type = to_unsub["type"]
-            unsub_id = to_unsub["url"]
-            if unsub_type == "playlist":
-                PlaylistSubscription().change_subscribe(
-                    unsub_id, subscribe_status=False
-                )
-            elif unsub_type == "channel":
-                ChannelSubscription().change_subscribe(
-                    unsub_id, channel_subscribed=False
-                )
-            else:
-                raise ValueError("failed to process " + id_unsub)
-
-        return {"success": True}
-
-    def _subscribe(self):
-        """subscribe to channel or playlist, called from js buttons"""
-        id_sub = self.exec_val
-        print(f"{id_sub}: subscribe")
-        subscribe_to.delay(id_sub)
         return {"success": True}
 
     def _sort_order(self):
@@ -138,17 +101,4 @@ class PostData:
         print("restoring index from backup zip")
         filename = self.exec_val
         run_restore_backup.delay(filename)
-        return {"success": True}
-
-    def _delete_playlist(self):
-        """delete playlist, only metadata or incl all videos"""
-        playlist_dict = self.exec_val
-        playlist_id = playlist_dict["playlist-id"]
-        playlist_action = playlist_dict["playlist-action"]
-        print(f"{playlist_id}: delete playlist {playlist_action}")
-        if playlist_action == "metadata":
-            YoutubePlaylist(playlist_id).delete_metadata()
-        elif playlist_action == "all":
-            YoutubePlaylist(playlist_id).delete_videos_playlist()
-
         return {"success": True}

@@ -27,9 +27,9 @@
                 <p>Last refreshed: {{ playlist_info.playlist_last_refresh }}</p>
                 <p>Playlist:
                     {% if playlist_info.playlist_subscribed %}
-                        <button class="unsubscribe" type="button" id="{{ playlist_info.playlist_id }}" onclick="unsubscribe(this.id)" title="Unsubscribe from {{ playlist_info.playlist_name }}">Unsubscribe</button>
+                        <button class="unsubscribe" type="button" data-type="playlist" data-subscribe="" data-id="{{ playlist_info.playlist_id }}" onclick="subscribeStatus(this)" title="Unsubscribe from {{ playlist_info.playlist_name }}">Unsubscribe</button>
                     {% else %}
-                        <button type="button" id="{{ playlist_info.playlist_id }}" onclick="subscribe(this.id)" title="Subscribe to {{ playlist_info.playlist_name }}">Subscribe</button>
+                        <button type="button" data-type="playlist" data-subscribe="true" data-id="{{ playlist_info.playlist_id }}" onclick="subscribeStatus(this)" title="Subscribe to {{ playlist_info.playlist_name }}">Subscribe</button>
                     {% endif %}
                 </p>
                 {% if playlist_info.playlist_active %}
@@ -40,8 +40,8 @@
                 <button onclick="deleteConfirm()" id="delete-item">Delete Playlist</button>
                 <div class="delete-confirm" id="delete-button">
                     <span>Delete {{ playlist_info.playlist_name }}?</span>
-                    <button onclick="deletePlaylist(this)" data-action="metadata" data-id="{{ playlist_info.playlist_id }}">Delete metadata</button>
-                    <button onclick="deletePlaylist(this)" data-action="all" class="danger-button" data-id="{{ playlist_info.playlist_id }}">Delete all</button><br>
+                    <button onclick="deletePlaylist(this)" data-action="" data-id="{{ playlist_info.playlist_id }}">Delete metadata</button>
+                    <button onclick="deletePlaylist(this)" data-action="delete-videos" class="danger-button" data-id="{{ playlist_info.playlist_id }}">Delete all</button><br>
                     <button onclick="cancelDelete()">Cancel</button>
                 </div>
             </div>

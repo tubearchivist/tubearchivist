@@ -15,7 +15,12 @@ import requests
 
 def ignore_filelist(filelist: list[str]) -> list[str]:
     """ignore temp files for os.listdir sanitizer"""
-    to_ignore = ["Icon\r\r", "Temporary Items", "Network Trash Folder"]
+    to_ignore = [
+        "@eaDir",
+        "Icon\r\r",
+        "Network Trash Folder",
+        "Temporary Items",
+    ]
     cleaned: list[str] = []
     for file_name in filelist:
         if file_name.startswith(".") or file_name in to_ignore:
@@ -110,7 +115,7 @@ def clear_dl_cache(config: dict) -> int:
     """clear leftover files from dl cache"""
     print("clear download cache")
     cache_dir = os.path.join(config["application"]["cache_dir"], "download")
-    leftover_files = os.listdir(cache_dir)
+    leftover_files = ignore_filelist(os.listdir(cache_dir))
     for cached in leftover_files:
         to_delete = os.path.join(cache_dir, cached)
         os.remove(to_delete)
