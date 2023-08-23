@@ -34,6 +34,7 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 - [Discord](https://www.tubearchivist.com/discord): Connect with us on our Discord server.
 - [r/TubeArchivist](https://www.reddit.com/r/TubeArchivist/): Join our Subreddit.
 - [Browser Extension](https://github.com/tubearchivist/browser-extension) Tube Archivist Companion, for [Firefox](https://addons.mozilla.org/addon/tubearchivist-companion/) and [Chrome](https://chrome.google.com/webstore/detail/tubearchivist-companion/jjnkmicfnfojkkgobdfeieblocadmcie)
+- [Jellyfin Integration](https://github.com/tubearchivist/tubearchivist-jf): Add your videos to Jellyfin.
 - [Tube Archivist Metrics](https://github.com/tubearchivist/tubearchivist-metrics) to create statistics in Prometheus/OpenMetrics format.  
 
 ## Installing
@@ -174,6 +175,11 @@ Implemented:
 - [X] Backup and restore [2021-09-22]
 - [X] Scan your file system to index already downloaded videos [2021-09-14]
 
+## User Scripts
+This is a list of useful user scripts, generously created from folks like you to extend this project and its functionality. This is your time to shine, [read this](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#user-scripts) then open a PR to add your script here.
+
+- Example 1
+
 ## Donate
 The best donation to **Tube Archivist** is your time, take a look at the [contribution page](CONTRIBUTING.md) to get started.  
 Second best way to support the development is to provide for caffeinated beverages:
@@ -184,6 +190,8 @@ Second best way to support the development is to provide for caffeinated beverag
 
 ## Notable mentions
 This is a selection of places where this project has been featured on reddit, in the news, blogs or any other online media, newest on top.
+* **ycombinator**: Tube Archivist on Hackernews front page, [2023-07-16][[link](https://news.ycombinator.com/item?id=36744395)]
+* **linux-community.de**: Tube Archivist bringt Ordnung in die Youtube-Sammlung, [German][2023-05-01][[link](https://www.linux-community.de/ausgaben/linuxuser/2023/05/tube-archivist-bringt-ordnung-in-die-youtube-sammlung/)]
 * **noted.lol**: Dev Debrief, An Interview With the Developer of Tube Archivist, [2023-03-30] [[link](https://noted.lol/dev-debrief-tube-archivist/)]
 * **console.substack.com**: Interview With Simon of Tube Archivist, [2023-01-29] [[link](https://console.substack.com/p/console-142#%C2%A7interview-with-simon-of-tube-archivist)]
 * **reddit.com**: Tube Archivist v0.3.0 - Now Archiving Comments, [2022-12-02] [[link](https://www.reddit.com/r/selfhosted/comments/zaonzp/tube_archivist_v030_now_archiving_comments/)]
