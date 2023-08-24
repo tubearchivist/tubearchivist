@@ -356,6 +356,36 @@ class ChannelApiListView(ApiBaseView):
         )
 
 
+class ChannelApiSearchView(ApiBaseView):
+    """resolves to /api/channel/search/
+    search for channel
+    """
+
+    search_base = "ta_channel/_doc/"
+
+    def get(self, request):
+        """handle get request, search with s parameter"""
+
+        query = request.GET.get("q")
+        if not query:
+            message = "missing expected q parameter"
+            return Response({"message": message, "data": False}, status=400)
+
+        try:
+            parsed = Parser(query).parse()[0]
+        except (ValueError, IndexError, AttributeError):
+            message = f"channel not found: {query}"
+            return Response({"message": message, "data": False}, status=404)
+
+        if not parsed["type"] == "channel":
+            message = "expected type channel"
+            return Response({"message": message, "data": False}, status=400)
+
+        self.get_document(parsed["url"])
+
+        return Response(self.response, status=self.status_code)
+
+
 class ChannelApiVideoView(ApiBaseView):
     """resolves to /api/channel/<channel-id>/video
     GET: returns a list of videos of channel
