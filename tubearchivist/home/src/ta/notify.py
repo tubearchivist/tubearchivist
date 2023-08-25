@@ -8,12 +8,12 @@ from home.src.ta.task_manager import TaskManager
 class Notifications:
     """notification handler"""
 
-    def __init__(self, name, task_id, task_title):
-        self.name = name
-        self.task_id = task_id
-        self.task_title = task_title
+    def __init__(self, name: str, task_id: str, task_title: str):
+        self.name: str = name
+        self.task_id: str = task_id
+        self.task_title: str = task_title
 
-    def send(self):
+    def send(self) -> None:
         """send notifications"""
         apobj = apprise.Apprise()
         hooks: str | None = self.get_url()
