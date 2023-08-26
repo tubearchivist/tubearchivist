@@ -228,6 +228,10 @@ class VideoSponsorView(ApiBaseView):
         # pylint: disable=unused-argument
 
         self.get_document(video_id)
+        if not self.response.get("data"):
+            message = {"message": "video not found"}
+            return Response(message, status=404)
+
         sponsorblock = self.response["data"].get("sponsorblock")
 
         return Response(sponsorblock)
