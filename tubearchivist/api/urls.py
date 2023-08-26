@@ -42,6 +42,11 @@ urlpatterns = [
         name="api-channel-list",
     ),
     path(
+        "channel/search/",
+        views.ChannelApiSearchView.as_view(),
+        name="api-channel-search",
+    ),
+    path(
         "channel/<slug:channel_id>/",
         views.ChannelApiView.as_view(),
         name="api-channel",

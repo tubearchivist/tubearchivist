@@ -228,6 +228,10 @@ class VideoSponsorView(ApiBaseView):
         # pylint: disable=unused-argument
 
         self.get_document(video_id)
+        if not self.response.get("data"):
+            message = {"message": "video not found"}
+            return Response(message, status=404)
+
         sponsorblock = self.response["data"].get("sponsorblock")
 
         return Response(sponsorblock)
@@ -354,6 +358,36 @@ class ChannelApiListView(ApiBaseView):
         ChannelSubscription().change_subscribe(
             channel_id, channel_subscribed=False
         )
+
+
+class ChannelApiSearchView(ApiBaseView):
+    """resolves to /api/channel/search/
+    search for channel
+    """
+
+    search_base = "ta_channel/_doc/"
+
+    def get(self, request):
+        """handle get request, search with s parameter"""
+
+        query = request.GET.get("q")
+        if not query:
+            message = "missing expected q parameter"
+            return Response({"message": message, "data": False}, status=400)
+
+        try:
+            parsed = Parser(query).parse()[0]
+        except (ValueError, IndexError, AttributeError):
+            message = f"channel not found: {query}"
+            return Response({"message": message, "data": False}, status=404)
+
+        if not parsed["type"] == "channel":
+            message = "expected type channel"
+            return Response({"message": message, "data": False}, status=400)
+
+        self.get_document(parsed["url"])
+
+        return Response(self.response, status=self.status_code)
 
 
 class ChannelApiVideoView(ApiBaseView):
