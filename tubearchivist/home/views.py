@@ -990,18 +990,46 @@ class SettingsView(MinView):
         context = self.get_min_context(request)
         context.update(
             {
-                "title": "Settings",
+                "title": "User Settings",
                 "config": AppConfig(request.user.id).config,
-                "api_token": self.get_token(request),
-                "available_backups": ElasticBackup().get_all_backup_files(),
                 "user_form": UserSettingsForm(),
-                "app_form": ApplicationSettingsForm(),
-                "scheduler_form": SchedulerSettingsForm(),
-                "snapshots": ElasticSnapshot().get_snapshot_stats(),
             }
         )
 
         return render(request, "home/settings.html", context)
+
+    def post(self, request):
+        """handle form post to update settings"""
+        user_form = UserSettingsForm(request.POST)
+        if user_form.is_valid():
+            user_form_post = user_form.cleaned_data
+            if any(user_form_post.values()):
+                AppConfig().set_user_config(user_form_post, request.user.id)
+
+        sleep(1)
+        return redirect("settings", permanent=True)
+
+
+class SettingsApplicationView(MinView):
+    """resolves to /settings/application/
+    handle the settings sub-page for application configuration,
+    display current settings,
+    take post request from the form to update settings
+    """
+
+    def get(self, request):
+        """read and display current application settings"""
+        context = self.get_min_context(request)
+        context.update(
+            {
+                "title": "Application Settings",
+                "config": AppConfig(request.user.id).config,
+                "api_token": self.get_token(request),
+                "app_form": ApplicationSettingsForm(),
+            }
+        )
+
+        return render(request, "home/settings_application.html", context)
 
     @staticmethod
     def get_token(request):
@@ -1012,12 +1040,7 @@ class SettingsView(MinView):
 
     def post(self, request):
         """handle form post to update settings"""
-        user_form = UserSettingsForm(request.POST)
         config_handler = AppConfig()
-        if user_form.is_valid():
-            user_form_post = user_form.cleaned_data
-            if any(user_form_post.values()):
-                config_handler.set_user_config(user_form_post, request.user.id)
 
         app_form = ApplicationSettingsForm(request.POST)
         if app_form.is_valid():
@@ -1027,15 +1050,8 @@ class SettingsView(MinView):
                 updated = config_handler.update_config(app_form_post)
                 self.post_process_updated(updated, config_handler.config)
 
-        scheduler_form = SchedulerSettingsForm(request.POST)
-        if scheduler_form.is_valid():
-            scheduler_form_post = scheduler_form.cleaned_data
-            if any(scheduler_form_post.values()):
-                print(scheduler_form_post)
-                ScheduleBuilder().update_schedule_conf(scheduler_form_post)
-
         sleep(1)
-        return redirect("settings", permanent=True)
+        return redirect("settings_application", permanent=True)
 
     def post_process_updated(self, updated, config):
         """apply changes for config"""
@@ -1078,6 +1094,57 @@ class SettingsView(MinView):
             "message": message_line,
         }
         RedisArchivist().set_message(key, message=message, expire=True)
+
+
+class SettingsSchedulingView(MinView):
+    """resolves to /settings/scheduling/
+    handle the settings sub-page for scheduling settings,
+    display current settings,
+    take post request from the form to update settings
+    """
+
+    def get(self, request):
+        """read and display current settings"""
+        context = self.get_min_context(request)
+        context.update(
+            {
+                "title": "Scheduling Settings",
+                "config": AppConfig(request.user.id).config,
+                "scheduler_form": SchedulerSettingsForm(),
+            }
+        )
+
+        return render(request, "home/settings_scheduling.html", context)
+
+    def post(self, request):
+        """handle form post to update settings"""
+        scheduler_form = SchedulerSettingsForm(request.POST)
+        if scheduler_form.is_valid():
+            scheduler_form_post = scheduler_form.cleaned_data
+            if any(scheduler_form_post.values()):
+                print(scheduler_form_post)
+                ScheduleBuilder().update_schedule_conf(scheduler_form_post)
+
+        sleep(1)
+        return redirect("settings_scheduling", permanent=True)
+
+
+class SettingsActionsView(MinView):
+    """resolves to /settings/actions/
+    handle the settings actions sub-page
+    """
+
+    def get(self, request):
+        """read and display current settings"""
+        context = self.get_min_context(request)
+        context.update(
+            {
+                "title": "Actions",
+                "available_backups": ElasticBackup().get_all_backup_files(),
+            }
+        )
+
+        return render(request, "home/settings_actions.html", context)
 
 
 def process(request):

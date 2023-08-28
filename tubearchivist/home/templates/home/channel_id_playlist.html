@@ -6,7 +6,7 @@
     <div class="channel-banner">
         <a href="{% url 'channel_id' channel_info.channel_id %}"><img src="{{ channel_info.channel_banner_url }}" alt="channel_banner"></a>
     </div>
-    <div class="info-box-item channel-nav">
+    <div class="info-box-item child-page-nav">
         <a href="{% url 'channel_id' channel_info.channel_id %}"><h3>Videos</h3></a>
         {% if has_streams %}
             <a href="{% url 'channel_id_live' channel_info.channel_id %}"><h3>Streams</h3></a>
