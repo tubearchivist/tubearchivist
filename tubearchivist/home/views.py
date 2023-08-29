@@ -981,7 +981,25 @@ class SearchView(ArchivistResultsView):
 
 class SettingsView(MinView):
     """resolves to /settings/
-    handle the settings page, display current settings,
+    handle the settings dashboard
+    """
+
+    def get(self, request):
+        """read and display the dashboard"""
+        context = self.get_min_context(request)
+        context.update(
+            {
+                "title": "Settings Dashboard"
+            }
+        )
+
+        return render(request, "home/settings.html", context)
+
+
+class SettingsUserView(MinView):
+    """resolves to /settings/user/
+    handle the settings sub-page for user settings,
+    display current settings,
     take post request from the form to update settings
     """
 
@@ -996,7 +1014,7 @@ class SettingsView(MinView):
             }
         )
 
-        return render(request, "home/settings.html", context)
+        return render(request, "home/settings_user.html", context)
 
     def post(self, request):
         """handle form post to update settings"""
@@ -1007,7 +1025,7 @@ class SettingsView(MinView):
                 AppConfig().set_user_config(user_form_post, request.user.id)
 
         sleep(1)
-        return redirect("settings", permanent=True)
+        return redirect("settings_user", permanent=True)
 
 
 class SettingsApplicationView(MinView):

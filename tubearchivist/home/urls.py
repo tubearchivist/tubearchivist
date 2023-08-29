@@ -27,6 +27,11 @@ urlpatterns = [
         name="settings",
     ),
     path(
+        "settings/user/",
+        login_required(views.SettingsUserView.as_view()),
+        name="settings_user",
+    ),
+    path(
         "settings/application/",
         login_required(views.SettingsApplicationView.as_view()),
         name="settings_application",
