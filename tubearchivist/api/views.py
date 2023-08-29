@@ -1,5 +1,6 @@
 """all API views"""
 
+from api.src.aggs import Primary, WatchProgress
 from api.src.search_processor import SearchProcess
 from home.src.download.queue import PendingInteract
 from home.src.download.subscriptions import (
@@ -975,3 +976,27 @@ class NotificationView(ApiBaseView):
             query = f"{query}:{filter_by}"
 
         return Response(RedisArchivist().list_items(query))
+
+
+class StatPrimaryView(ApiBaseView):
+    """resolves to /api/stats/primary/
+    GET: return document count
+    """
+
+    def get(self, request):
+        """get stats"""
+        # pylint: disable=unused-argument
+
+        return Response(Primary().process())
+
+
+class StatWatchProgress(ApiBaseView):
+    """resolves to /api/stats/watchprogress/
+    GET: return watch/unwatch progress stats
+    """
+
+    def get(self, request):
+        """handle get request"""
+        # pylint: disable=unused-argument
+
+        return Response(WatchProgress().process())

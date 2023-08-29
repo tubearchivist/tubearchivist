@@ -136,4 +136,14 @@ urlpatterns = [
         views.NotificationView.as_view(),
         name="api-notification",
     ),
+    path(
+        "stats/primary/",
+        views.StatPrimaryView.as_view(),
+        name="api-stats-primary",
+    ),
+    path(
+        "stats/watch/",
+        views.StatWatchProgress.as_view(),
+        name="api-stats-watch",
+    ),
 ]
