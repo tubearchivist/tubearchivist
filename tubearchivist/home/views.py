@@ -987,11 +987,7 @@ class SettingsView(MinView):
     def get(self, request):
         """read and display the dashboard"""
         context = self.get_min_context(request)
-        context.update(
-            {
-                "title": "Settings Dashboard"
-            }
-        )
+        context.update({"title": "Settings Dashboard"})
 
         return render(request, "home/settings.html", context)
 
