@@ -124,3 +124,52 @@ class DownloadHist(AggBase):
         buckets = aggregations[self.name]["buckets"]
 
         return {i.get("key_as_string"): i.get("doc_count") for i in buckets}
+
+
+class BiggestChannel(AggBase):
+    """get channel aggregations"""
+
+    name = "channel_stats"
+    path = "ta_video/_search"
+    data = {
+        "size": 0,
+        "aggs": {
+            name: {
+                "multi_terms": {
+                    "terms": [
+                        {"field": "channel.channel_name.keyword"},
+                        {"field": "channel.channel_id"},
+                    ],
+                    "order": {"doc_count": "desc"},
+                },
+                "aggs": {
+                    "doc_count": {"value_count": {"field": "_index"}},
+                    "duration": {"sum": {"field": "player.duration"}},
+                    "media_size": {"sum": {"field": "media_size"}},
+                },
+            },
+        },
+    }
+    order_choices = ["doc_count", "duration", "media_size"]
+
+    def process(self, order_by=False):
+        """process aggregation"""
+
+        if order_by and order_by in self.order_choices:
+            self.data["aggs"][self.name]["multi_terms"]["order"] = order_by
+
+        aggregations = self.get()
+        buckets = aggregations[self.name]["buckets"]
+
+        response = [
+            {
+                "id": i["key"][1],
+                "name": i["key"][0].title(),
+                "doc_count": i["doc_count"]["value"],
+                "duration": i["duration"]["value"],
+                "media_size": i["media_size"]["value"],
+            }
+            for i in buckets
+        ]
+
+        return response

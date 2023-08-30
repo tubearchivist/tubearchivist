@@ -1,6 +1,6 @@
 """all API views"""
 
-from api.src.aggs import DownloadHist, Primary, WatchProgress
+from api.src.aggs import BiggestChannel, DownloadHist, Primary, WatchProgress
 from api.src.search_processor import SearchProcess
 from home.src.download.queue import PendingInteract
 from home.src.download.subscriptions import (
@@ -1012,3 +1012,22 @@ class StatDownloadHist(ApiBaseView):
         # pylint: disable=unused-argument
 
         return Response(DownloadHist().process())
+
+
+class StatBiggestChannel(ApiBaseView):
+    """resolves to /api/stats/biggestchannels/
+    GET: return biggest channels
+    param: order
+    """
+
+    order_choices = ["doc_count", "duration", "media_size"]
+
+    def get(self, request):
+        """handle get request"""
+
+        order = request.GET.get("order")
+        if order and order not in self.order_choices:
+            message = {"message": f"invalid order parameter {order}"}
+            return Response(message, status=400)
+
+        return Response(BiggestChannel().process())

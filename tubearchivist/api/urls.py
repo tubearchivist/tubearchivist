@@ -151,4 +151,9 @@ urlpatterns = [
         views.StatDownloadHist.as_view(),
         name="api-stats-downloadhist",
     ),
+    path(
+        "stats/biggestchannels/",
+        views.StatBiggestChannel.as_view(),
+        name="api-stats-biggestchannels",
+    ),
 ]
