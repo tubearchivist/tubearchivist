@@ -1040,6 +1040,7 @@ class SettingsApplicationView(MinView):
                 "config": AppConfig(request.user.id).config,
                 "api_token": self.get_token(request),
                 "app_form": ApplicationSettingsForm(),
+                "snapshots": ElasticSnapshot().get_snapshot_stats(),
             }
         )
 
