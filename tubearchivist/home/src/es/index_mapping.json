@@ -37,7 +37,8 @@
                     "type": "text"
                 },
                 "channel_last_refresh": {
-                    "type": "date"
+                    "type": "date",
+                    "format": "epoch_second"
                 },
                 "channel_tags": {
                     "type": "text",
@@ -90,7 +91,8 @@
                     "index": false
                 },
                 "date_downloaded": {
-                    "type": "date"
+                    "type": "date",
+                    "format": "epoch_second"
                 },
                 "channel": {
                     "properties": {
@@ -129,7 +131,8 @@
                             "type": "text"
                         },
                         "channel_last_refresh": {
-                            "type": "date"
+                            "type": "date",
+                            "format": "epoch_second"
                         },
                         "channel_tags": {
                             "type": "text",
@@ -196,7 +199,8 @@
                     }
                 },
                 "vid_last_refresh": {
-                    "type": "date"
+                    "type": "date",
+                    "format": "epoch_second"
                 },
                 "youtube_id": {
                     "type": "keyword"
@@ -289,7 +293,8 @@
                 "sponsorblock": {
                     "properties": {
                         "last_refresh": {
-                            "type": "date"
+                            "type": "date",
+                            "format": "epoch_second"
                         },
                         "has_unlocked": {
                             "type": "boolean"
@@ -341,7 +346,8 @@
             "index_name": "download",
             "expected_map": {
                 "timestamp": {
-                    "type": "date"
+                    "type": "date",
+                    "format": "epoch_second"
                 },
                 "channel_id": {
                     "type": "keyword"
@@ -439,7 +445,8 @@
                     "type": "keyword"
                 },
                 "playlist_last_refresh": {
-                    "type": "date"
+                    "type": "date",
+                    "format": "epoch_second"
                 }
             },
             "expected_set": {
@@ -493,7 +500,8 @@
                     "type": "text"
                 },
                 "subtitle_last_refresh": {
-                    "type": "date"
+                    "type": "date",
+                    "format": "epoch_second"
                 },
                 "subtitle_index": {
                     "type" : "long"
@@ -528,7 +536,8 @@
                     "type": "keyword"
                 },
                 "comment_last_refresh": {
-                    "type": "date"
+                    "type": "date",
+                    "format": "epoch_second"
                 },
                 "comment_channel_id": {
                     "type": "keyword"
@@ -542,7 +551,8 @@
                             "type" : "text"
                         },
                         "comment_timestamp": {
-                            "type": "date"
+                            "type": "date",
+                            "format": "epoch_second"
                         },
                         "comment_time_text": {
                             "type" : "text"
