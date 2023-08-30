@@ -1,6 +1,6 @@
 """all API views"""
 
-from api.src.aggs import Primary, WatchProgress
+from api.src.aggs import DownloadHist, Primary, WatchProgress
 from api.src.search_processor import SearchProcess
 from home.src.download.queue import PendingInteract
 from home.src.download.subscriptions import (
@@ -1000,3 +1000,15 @@ class StatWatchProgress(ApiBaseView):
         # pylint: disable=unused-argument
 
         return Response(WatchProgress().process())
+
+
+class StatDownloadHist(ApiBaseView):
+    """resolves to /api/stats/downloadhist/
+    GET: return download video count histogram for last days
+    """
+
+    def get(self, request):
+        """handle get request"""
+        # pylint: disable=unused-argument
+
+        return Response(DownloadHist().process())

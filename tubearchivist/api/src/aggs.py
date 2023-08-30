@@ -13,8 +13,7 @@ class AggBase:
 
     def get(self):
         """make get call"""
-        data_size = {"size": 0, "aggs": self.data}
-        response, _ = ElasticWrap(self.path).get(data_size)
+        response, _ = ElasticWrap(self.path).get(self.data)
         print(f"[agg][{self.name}] took {response.get('took')} ms to process")
 
         return response.get("aggregations")
@@ -29,7 +28,7 @@ class Primary(AggBase):
 
     name = "primary"
     path = "ta_video,ta_channel,ta_playlist,ta_subtitle,ta_download/_search"
-    data = {name: {"terms": {"field": "_index"}}}
+    data = {"size": 0, "aggs": {name: {"terms": {"field": "_index"}}}}
 
     def process(self):
         """make the call"""
@@ -45,18 +44,21 @@ class WatchProgress(AggBase):
     name = "watch_progress"
     path = "ta_video/_search"
     data = {
-        name: {
-            "terms": {"field": "player.watched"},
-            "aggs": {
-                "watch_docs": {
-                    "filter": {"terms": {"player.watched": [True, False]}},
-                    "aggs": {
-                        "true_count": {"value_count": {"field": "_index"}},
-                        "duration": {"sum": {"field": "player.duration"}},
+        "size": 0,
+        "aggs": {
+            name: {
+                "terms": {"field": "player.watched"},
+                "aggs": {
+                    "watch_docs": {
+                        "filter": {"terms": {"player.watched": [True, False]}},
+                        "aggs": {
+                            "true_count": {"value_count": {"field": "_index"}},
+                            "duration": {"sum": {"field": "player.duration"}},
+                        },
                     },
                 },
             },
-        }
+        },
     }
 
     def process(self):
@@ -91,3 +93,34 @@ class WatchProgress(AggBase):
         }
 
         return bucket_parsed
+
+
+class DownloadHist(AggBase):
+    """get downloads histogram last week"""
+
+    name = "videos_last_week"
+    path = "ta_video/_search"
+    data = {
+        "size": 0,
+        "aggs": {
+            name: {
+                "date_histogram": {
+                    "field": "date_downloaded",
+                    "calendar_interval": "day",
+                    "format": "yyyy-MM-dd",
+                    "order": {"_key": "desc"},
+                },
+                "aggs": {
+                    "total_videos": {"value_count": {"field": "youtube_id"}}
+                },
+            }
+        },
+        "query": {"range": {"date_downloaded": {"gte": "now-6d/d"}}},
+    }
+
+    def process(self):
+        """process query"""
+        aggregations = self.get()
+        buckets = aggregations[self.name]["buckets"]
+
+        return {i.get("key_as_string"): i.get("doc_count") for i in buckets}

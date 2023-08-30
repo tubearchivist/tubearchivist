@@ -146,4 +146,9 @@ urlpatterns = [
         views.StatWatchProgress.as_view(),
         name="api-stats-watch",
     ),
+    path(
+        "stats/downloadhist/",
+        views.StatDownloadHist.as_view(),
+        name="api-stats-downloadhist",
+    ),
 ]
