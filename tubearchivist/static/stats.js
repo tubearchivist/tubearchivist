@@ -70,8 +70,35 @@ function buildDownloadTile(responseData) {
   return tile;
 }
 
+function watchStats() {
+  let apiEndpoint = '/api/stats/watch/';
+  let responseData = apiRequest(apiEndpoint, 'GET');
+  let watchBox = document.getElementById('watchBox');
+
+  for (const property in responseData) {
+    let tile = buildWatchTile(property, responseData[property]);
+    watchBox.appendChild(tile);
+  }
+}
+
+function buildWatchTile(title, watchDetail) {
+  let tile = buildTile(`Total ${title}`);
+  let message = document.createElement('p');
+  message.innerHTML = `
+    ${watchDetail.items} Videos<br>
+    ${watchDetail.duration} Seconds<br>
+    ${watchDetail.duration_str} Playback
+  `;
+  if (watchDetail.progress) {
+    message.innerHTML += `<br>${Number(watchDetail.progress * 100).toFixed(2)}%`;
+  }
+  tile.appendChild(message);
+  return tile;
+}
+
 function buildStats() {
   primaryStats();
+  watchStats();
 }
 
 buildStats();
