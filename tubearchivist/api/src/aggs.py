@@ -31,11 +31,13 @@ class Primary(AggBase):
     data = {
         "size": 0,
         "aggs": {
-            "video_type": {"terms": {"field": "vid_type"}},
-            "video_total": {"value_count": {"field": "media_url"}},
-            "channel_total": {"value_count": {"field": "channel_id"}},
+            "video_type": {
+                "filter": {"exists": {"field": "active"}},
+                "aggs": {"filtered": {"terms": {"field": "vid_type"}}},
+            },
+            "channel_total": {"value_count": {"field": "channel_active"}},
             "channel_sub": {"terms": {"field": "channel_subscribed"}},
-            "playlist_total": {"value_count": {"field": "playlist_id"}},
+            "playlist_total": {"value_count": {"field": "playlist_active"}},
             "playlist_sub": {"terms": {"field": "playlist_subscribed"}},
             "download": {"terms": {"field": "status"}},
         },
@@ -45,11 +47,11 @@ class Primary(AggBase):
         """make the call"""
         aggregations = self.get()
 
-        videos = {"total": aggregations["video_total"].get("value")}
+        videos = {"total": aggregations["video_type"].get("doc_count")}
         videos.update(
             {
                 i.get("key"): i.get("doc_count")
-                for i in aggregations["video_type"]["buckets"]
+                for i in aggregations["video_type"]["filtered"]["buckets"]
             }
         )
         channels = {"total": aggregations["channel_total"].get("value")}

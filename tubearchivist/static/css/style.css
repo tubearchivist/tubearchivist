@@ -643,6 +643,10 @@ video:-webkit-full-screen {
     background-color: var(--highlight-bg);
 }
 
+.info-box-4 {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
 .info-box-3 {
     grid-template-columns: 1fr 1fr 1fr;
 }
