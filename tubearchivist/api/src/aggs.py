@@ -103,6 +103,8 @@ class WatchProgress(AggBase):
                     },
                 },
             },
+            "total_duration": {"sum": {"field": "player.duration"}},
+            "total_vids": {"value_count": {"field": "_index"}},
         },
     }
 
@@ -112,13 +114,24 @@ class WatchProgress(AggBase):
         buckets = aggregations[self.name]["buckets"]
 
         response = {}
+        all_duration = int(aggregations["total_duration"].get("value"))
+        response.update(
+            {
+                "all": {
+                    "duration": all_duration,
+                    "duration_str": DurationConverter().get_str(all_duration),
+                    "items": aggregations["total_vids"].get("value"),
+                }
+            }
+        )
+
         for bucket in buckets:
-            response.update(self._build_bucket(bucket))
+            response.update(self._build_bucket(bucket, all_duration))
 
         return response
 
     @staticmethod
-    def _build_bucket(bucket):
+    def _build_bucket(bucket, all_duration):
         """parse bucket"""
 
         duration = int(bucket["watch_docs"]["duration"]["value"])
@@ -133,6 +146,7 @@ class WatchProgress(AggBase):
             key: {
                 "duration": duration,
                 "duration_str": duration_str,
+                "progress": duration / all_duration if all_duration else 0,
                 "items": items,
             }
         }
