@@ -216,9 +216,7 @@ class ArchivistResultsView(ArchivistViewConfig):
             "query": {"bool": {"should": ids}},
             "sort": [{"published": {"order": "desc"}}],
         }
-        search = SearchHandler(
-            "ta_video/_search", self.default_conf, data=data
-        )
+        search = SearchHandler("ta_video/_search", data=data)
         videos = search.get_data()
         if not videos:
             return False
@@ -236,7 +234,7 @@ class ArchivistResultsView(ArchivistViewConfig):
 
     def single_lookup(self, es_path):
         """retrieve a single item from url"""
-        search = SearchHandler(es_path, config=self.default_conf)
+        search = SearchHandler(es_path)
         result = search.get_data()[0]["source"]
         return result
 
@@ -251,9 +249,7 @@ class ArchivistResultsView(ArchivistViewConfig):
 
     def find_results(self):
         """add results and pagination to context"""
-        search = SearchHandler(
-            self.es_search, config=self.default_conf, data=self.data
-        )
+        search = SearchHandler(self.es_search, data=self.data)
         self.context["results"] = search.get_data()
         self.pagination_handler.validate(search.max_hits)
         self.context["max_hits"] = search.max_hits
@@ -893,7 +889,7 @@ class VideoView(MinView):
     def get(self, request, video_id):
         """get single video"""
         config_handler = AppConfig(request.user.id)
-        look_up = SearchHandler(f"ta_video/_doc/{video_id}", config=False)
+        look_up = SearchHandler(f"ta_video/_doc/{video_id}")
         video_data = look_up.get_data()[0]["source"]
         try:
             rating = video_data["stats"]["average_rating"]
