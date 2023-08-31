@@ -960,15 +960,15 @@ video:-webkit-full-screen {
     transform: translateX(-30%);
 }
 
-.info-box-item.channel-nav {
+.info-box-item.child-page-nav {
     justify-content: center;
 }
 
-.info-box-item.channel-nav a {
+.info-box-item.child-page-nav a {
     padding: 0 1rem;
 }
 
-.info-box-item.channel-nav a:hover {
+.info-box-item.child-page-nav a:hover {
     text-decoration: underline;
 }
 

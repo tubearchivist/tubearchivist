@@ -26,6 +26,26 @@ urlpatterns = [
         login_required(views.SettingsView.as_view()),
         name="settings",
     ),
+    path(
+        "settings/user/",
+        login_required(views.SettingsUserView.as_view()),
+        name="settings_user",
+    ),
+    path(
+        "settings/application/",
+        login_required(views.SettingsApplicationView.as_view()),
+        name="settings_application",
+    ),
+    path(
+        "settings/scheduling/",
+        login_required(views.SettingsSchedulingView.as_view()),
+        name="settings_scheduling",
+    ),
+    path(
+        "settings/actions/",
+        login_required(views.SettingsActionsView.as_view()),
+        name="settings_actions",
+    ),
     path("process/", login_required(views.process), name="process"),
     path(
         "channel/",
