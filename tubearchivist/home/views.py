@@ -1104,9 +1104,11 @@ class SettingsApplicationView(MinView):
         key = "message:setting"
         message = {
             "status": key,
+            "group": "setting:application",
             "level": "error",
             "title": "Cookie import failed",
-            "message": message_line,
+            "messages": [message_line],
+            "id": "0000",
         }
         RedisArchivist().set_message(key, message=message, expire=True)
 

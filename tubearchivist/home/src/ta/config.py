@@ -205,10 +205,11 @@ class ScheduleBuilder:
                 except ValueError:
                     print(f"failed: {key} {value}")
                     mess_dict = {
-                        "status": self.MSG,
+                        "group": "setting:schedule",
                         "level": "error",
                         "title": "Scheduler update failed.",
-                        "message": "Invalid schedule input",
+                        "messages": ["Invalid schedule input"],
+                        "id": "0000",
                     }
                     RedisArchivist().set_message(
                         self.MSG, mess_dict, expire=True
@@ -227,10 +228,11 @@ class ScheduleBuilder:
 
         RedisArchivist().set_message("config", redis_config, save=True)
         mess_dict = {
-            "status": self.MSG,
+            "group": "setting:schedule",
             "level": "info",
             "title": "Scheduler changed.",
-            "message": "Please restart container for changes to take effect",
+            "messages": ["Restart container for changes to take effect"],
+            "id": "0000",
         }
         RedisArchivist().set_message(self.MSG, mess_dict, expire=True)
 

@@ -12,7 +12,6 @@ from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
-from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.urlparser import Parser
 
 
@@ -197,16 +196,13 @@ class PlaylistSubscription:
             thumb = ThumbManager(playlist_id, item_type="playlist")
             thumb.download_playlist_thumb(url)
 
-            # notify
-            message = {
-                "status": "message:subplaylist",
-                "level": "info",
-                "title": "Subscribing to Playlists",
-                "message": f"Processing {idx + 1} of {len(new_playlists)}",
-            }
-            RedisArchivist().set_message(
-                "message:subplaylist", message=message, expire=True
-            )
+            if self.task:
+                self.task.send_progress(
+                    message_lines=[
+                        f"Processing {idx + 1} of {len(new_playlists)}"
+                    ],
+                    progress=(idx + 1) / len(new_playlists),
+                )
 
     @staticmethod
     def channel_validate(channel_id):
