@@ -28,14 +28,57 @@ class Primary(AggBase):
 
     name = "primary"
     path = "ta_video,ta_channel,ta_playlist,ta_subtitle,ta_download/_search"
-    data = {"size": 0, "aggs": {name: {"terms": {"field": "_index"}}}}
+    data = {
+        "size": 0,
+        "aggs": {
+            "video_type": {"terms": {"field": "vid_type"}},
+            "video_total": {"value_count": {"field": "media_url"}},
+            "channel_total": {"value_count": {"field": "channel_id"}},
+            "channel_sub": {"terms": {"field": "channel_subscribed"}},
+            "playlist_total": {"value_count": {"field": "playlist_id"}},
+            "playlist_sub": {"terms": {"field": "playlist_subscribed"}},
+            "download": {"terms": {"field": "status"}},
+        },
+    }
 
     def process(self):
         """make the call"""
         aggregations = self.get()
-        buck = aggregations[self.name]["buckets"]
 
-        return {i.get("key").lstrip("_ta"): i.get("doc_count") for i in buck}
+        videos = {"total": aggregations["video_total"].get("value")}
+        videos.update(
+            {
+                i.get("key"): i.get("doc_count")
+                for i in aggregations["video_type"]["buckets"]
+            }
+        )
+        channels = {"total": aggregations["channel_total"].get("value")}
+        channels.update(
+            {
+                "sub_" + i.get("key_as_string"): i.get("doc_count")
+                for i in aggregations["channel_sub"]["buckets"]
+            }
+        )
+        playlists = {"total": aggregations["playlist_total"].get("value")}
+        playlists.update(
+            {
+                "sub_" + i.get("key_as_string"): i.get("doc_count")
+                for i in aggregations["playlist_sub"]["buckets"]
+            }
+        )
+        downloads = {
+            i.get("key"): i.get("doc_count")
+            for i in aggregations["download"]["buckets"]
+        }
+
+        response = {
+            "videos": videos,
+            "channels": channels,
+            "playlists": playlists,
+            "downloads": downloads,
+        }
+
+        return response
 
 
 class WatchProgress(AggBase):
