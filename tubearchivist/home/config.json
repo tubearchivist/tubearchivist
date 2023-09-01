@@ -12,7 +12,6 @@
         "grid_items": 3
     },
     "subscriptions": {
-        "auto_download": false,
         "channel_size": 50,
         "live_channel_size": 50,
         "shorts_channel_size": 50,
