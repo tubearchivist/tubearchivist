@@ -211,11 +211,8 @@ class BiggestChannel(AggBase):
     }
     order_choices = ["doc_count", "duration", "media_size"]
 
-    def process(self, order_by=False):
-        """process aggregation"""
-
-        if order_by and order_by in self.order_choices:
-            self.data["aggs"][self.name]["multi_terms"]["order"] = order_by
+    def process(self):
+        """process aggregation, order_by validated in the view"""
 
         aggregations = self.get()
         buckets = aggregations[self.name]["buckets"]
@@ -226,6 +223,9 @@ class BiggestChannel(AggBase):
                 "name": i["key"][0].title(),
                 "doc_count": i["doc_count"]["value"],
                 "duration": i["duration"]["value"],
+                "duration_str": DurationConverter().get_str(
+                    i["duration"]["value"]
+                ),
                 "media_size": i["media_size"]["value"],
             }
             for i in buckets

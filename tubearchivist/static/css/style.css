@@ -82,6 +82,7 @@ ul {
 td, th, span, label {
     font-family: Sen-Regular, sans-serif;
     color: var(--main-font);
+    text-align: left;
 }
 
 select, input {
@@ -653,6 +654,10 @@ video:-webkit-full-screen {
 
 .info-box-2 {
     grid-template-columns: 1fr 1fr;
+}
+
+.info-box-1 {
+    grid-template-columns: 1fr;
 }
 
 .info-box img {

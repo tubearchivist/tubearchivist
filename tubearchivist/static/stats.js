@@ -96,9 +96,37 @@ function buildWatchTile(title, watchDetail) {
   return tile;
 }
 
+function biggestChannel() {
+  let apiEndpoint = '/api/stats/biggestchannels/';
+  let responseData = apiRequest(apiEndpoint, 'GET');
+  let tBody = document.getElementById('biggestChannelTable');
+  for (let i = 0; i < responseData.length; i++) {
+    const channelData = responseData[i];
+    let tableRow = buildChannelRow(channelData);
+    tBody.appendChild(tableRow);
+  }
+}
+
+function buildChannelRow(channelData) {
+  let tableRow = document.createElement('tr');
+  tableRow.innerHTML = `
+    <td><a href="/channel/${channelData.id}/">${channelData.name}</a></td>
+    <td>${channelData.doc_count}</td>
+    <td>${channelData.duration_str}</td>
+    <td>${humanFileSize(channelData.media_size)}</td>
+  `;
+  return tableRow;
+}
+
+function humanFileSize(size) {
+  let i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+  return (size / Math.pow(1024, i)).toFixed(1) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+}
+
 function buildStats() {
   primaryStats();
   watchStats();
+  biggestChannel();
 }
 
 buildStats();
