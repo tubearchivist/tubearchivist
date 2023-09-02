@@ -174,7 +174,7 @@ class DownloadHist(AggBase):
                 },
             }
         },
-        "query": {"range": {"date_downloaded": {"gte": "now-6d/d"}}},
+        "query": {"range": {"date_downloaded": {"gte": "now-7d/d"}}},
     }
 
     def process(self):
@@ -182,7 +182,15 @@ class DownloadHist(AggBase):
         aggregations = self.get()
         buckets = aggregations[self.name]["buckets"]
 
-        return {i.get("key_as_string"): i.get("doc_count") for i in buckets}
+        response = [
+            {
+                "date": i.get("key_as_string"),
+                "count": i.get("doc_count"),
+            }
+            for i in buckets
+        ]
+
+        return response
 
 
 class BiggestChannel(AggBase):

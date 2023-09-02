@@ -96,6 +96,25 @@ function buildWatchTile(title, watchDetail) {
   return tile;
 }
 
+function downloadHist() {
+  let apiEndpoint = '/api/stats/downloadhist/';
+  let responseData = apiRequest(apiEndpoint, 'GET');
+  let histBox = document.getElementById('downHistBox');
+  for (let i = 0; i < responseData.length; i++) {
+    const dailyStat = responseData[i];
+    let tile = buildDailyStat(dailyStat);
+    histBox.appendChild(tile);
+  }
+}
+
+function buildDailyStat(dailyStat) {
+  let tile = buildTile(dailyStat.date);
+  let message = document.createElement('p');
+  message.innerText = `new videos: ${dailyStat.count}`;
+  tile.appendChild(message);
+  return tile;
+}
+
 function biggestChannel() {
   let apiEndpoint = '/api/stats/biggestchannels/';
   let responseData = apiRequest(apiEndpoint, 'GET');
@@ -126,6 +145,7 @@ function humanFileSize(size) {
 function buildStats() {
   primaryStats();
   watchStats();
+  downloadHist();
   biggestChannel();
 }
 
