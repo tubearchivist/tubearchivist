@@ -8,6 +8,7 @@ function primaryStats() {
   let apiEndpoint = '/api/stats/primary/';
   let responseData = apiRequest(apiEndpoint, 'GET');
   let primaryBox = document.getElementById('primaryBox');
+  clearLoading(primaryBox);
   let videoTile = buildVideoTile(responseData);
   primaryBox.appendChild(videoTile);
   let channelTile = buildChannelTile(responseData);
@@ -16,6 +17,10 @@ function primaryStats() {
   primaryBox.appendChild(playlistTile);
   let downloadTile = buildDownloadTile(responseData);
   primaryBox.appendChild(downloadTile);
+}
+
+function clearLoading(dashBox) {
+  dashBox.querySelector('#loading').remove();
 }
 
 function buildTile(titleText) {
@@ -74,6 +79,7 @@ function watchStats() {
   let apiEndpoint = '/api/stats/watch/';
   let responseData = apiRequest(apiEndpoint, 'GET');
   let watchBox = document.getElementById('watchBox');
+  clearLoading(watchBox);
 
   for (const property in responseData) {
     let tile = buildWatchTile(property, responseData[property]);
@@ -100,6 +106,7 @@ function downloadHist() {
   let apiEndpoint = '/api/stats/downloadhist/';
   let responseData = apiRequest(apiEndpoint, 'GET');
   let histBox = document.getElementById('downHistBox');
+  clearLoading(histBox);
   if (responseData.length === 0) {
     let tile = buildTile('No recent downloads');
     histBox.appendChild(tile);
@@ -148,11 +155,16 @@ function humanFileSize(size) {
   return (size / Math.pow(1024, i)).toFixed(1) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 }
 
-function buildStats() {
+async function buildStats() {
   primaryStats();
   watchStats();
   downloadHist();
   biggestChannel();
 }
 
-buildStats();
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM content loaded');
+  window.requestAnimationFrame(() => {
+    buildStats();
+  });
+});
