@@ -163,7 +163,6 @@ async function buildStats() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM content loaded');
   window.requestAnimationFrame(() => {
     buildStats();
   });
