@@ -163,6 +163,7 @@ class VideoDownloader:
         while True:
             video_data = self._get_next(auto_only)
             if self.task.is_stopped() or not video_data:
+                self._reset_auto()
                 break
 
             youtube_id = video_data.get("youtube_id")
@@ -405,3 +406,18 @@ class VideoDownloader:
             self.channels.add(channel_id)
 
         return
+
+    def _reset_auto(self):
+        """reset autostart to defaults after queue stop"""
+        path = "ta_download/_update_by_query"
+        data = {
+            "query": {"term": {"auto_start": {"value": True}}},
+            "script": {
+                "source": "ctx._source.auto_start = false",
+                "lang": "painless",
+            },
+        }
+        response, _ = ElasticWrap(path, config=self.config).post(data=data)
+        updated = response.get("updated")
+        if updated:
+            print(f"[download] reset auto start on {updated} videos.")
