@@ -1249,6 +1249,7 @@ video:-webkit-full-screen {
     .playlist-list.grid,
     .info-box-2,
     .info-box-3,
+    .info-box-4,
     .overwrite-form {
         grid-template-columns: 1fr;
     }
@@ -1314,5 +1315,13 @@ video:-webkit-full-screen {
     }
     .playlist-nav-item img {
         width: 100%;
+    }
+    .agg-channel-name {
+        min-width: 50px;
+        width: 100px;
+        max-width: 200px;
+    }
+    .td, th, span, label {
+        text-align: unset;
     }
 }

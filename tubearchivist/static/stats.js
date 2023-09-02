@@ -142,7 +142,7 @@ function biggestChannel() {
 function buildChannelRow(channelData) {
   let tableRow = document.createElement('tr');
   tableRow.innerHTML = `
-    <td><a href="/channel/${channelData.id}/">${channelData.name}</a></td>
+    <td class="agg-channel-name"><a href="/channel/${channelData.id}/">${channelData.name}</a></td>
     <td>${channelData.doc_count}</td>
     <td>${channelData.duration_str}</td>
     <td>${humanFileSize(channelData.media_size)}</td>
