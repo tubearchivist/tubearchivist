@@ -165,14 +165,15 @@ bin/elasticsearch-service-tokens create elastic/kibana kibana
 
 Example docker compose, use same version as for Elasticsearch:
 ```yml
-kibana:
-  image: docker.elastic.co/kibana/kibana:0.0.0
-  container_name: kibana
-  environment:
-	- "ELASTICSEARCH_HOSTS=http://archivist-es:9200"
-	- "ELASTICSEARCH_SERVICEACCOUNTTOKEN=<your-token-here>"
-  ports:
-	- "5601:5601"
+services:
+  kibana:
+    image: docker.elastic.co/kibana/kibana:0.0.0
+    container_name: kibana
+    environment:
+    - "ELASTICSEARCH_HOSTS=http://archivist-es:9200"
+    - "ELASTICSEARCH_SERVICEACCOUNTTOKEN=<your-token-here>"
+    ports:
+    - "5601:5601"
 ```
 
 If you want to run queries on the Elasticsearch container directly from your host with for example `curl` or something like *postman*, you might want to **publish** the port 9200 instead of just **exposing** it.

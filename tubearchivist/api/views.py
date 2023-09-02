@@ -1,5 +1,6 @@
 """all API views"""
 
+from api.src.aggs import BiggestChannel, DownloadHist, Primary, WatchProgress
 from api.src.search_processor import SearchProcess
 from home.src.download.queue import PendingInteract
 from home.src.download.subscriptions import (
@@ -975,3 +976,58 @@ class NotificationView(ApiBaseView):
             query = f"{query}:{filter_by}"
 
         return Response(RedisArchivist().list_items(query))
+
+
+class StatPrimaryView(ApiBaseView):
+    """resolves to /api/stats/primary/
+    GET: return document count
+    """
+
+    def get(self, request):
+        """get stats"""
+        # pylint: disable=unused-argument
+
+        return Response(Primary().process())
+
+
+class StatWatchProgress(ApiBaseView):
+    """resolves to /api/stats/watchprogress/
+    GET: return watch/unwatch progress stats
+    """
+
+    def get(self, request):
+        """handle get request"""
+        # pylint: disable=unused-argument
+
+        return Response(WatchProgress().process())
+
+
+class StatDownloadHist(ApiBaseView):
+    """resolves to /api/stats/downloadhist/
+    GET: return download video count histogram for last days
+    """
+
+    def get(self, request):
+        """handle get request"""
+        # pylint: disable=unused-argument
+
+        return Response(DownloadHist().process())
+
+
+class StatBiggestChannel(ApiBaseView):
+    """resolves to /api/stats/biggestchannels/
+    GET: return biggest channels
+    param: order
+    """
+
+    order_choices = ["doc_count", "duration", "media_size"]
+
+    def get(self, request):
+        """handle get request"""
+
+        order = request.GET.get("order", False)
+        if order and order not in self.order_choices:
+            message = {"message": f"invalid order parameter {order}"}
+            return Response(message, status=400)
+
+        return Response(BiggestChannel().process())
