@@ -17,8 +17,8 @@ from home.src.index.generic import YouTubeItem
 from home.src.index.subtitle import YoutubeSubtitle
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.index.video_streams import MediaStreamExtractor
-from home.src.ta.helper import get_duration_sec, get_duration_str, randomizor
-from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.helper import get_duration_sec, get_duration_str
+from home.src.ta.users import UserConfig
 from ryd_client import ryd_client
 
 
@@ -32,19 +32,12 @@ class SponsorBlock:
         self.user_agent = f"{settings.TA_UPSTREAM} {settings.TA_VERSION}"
         self.last_refresh = int(datetime.now().timestamp())
 
-    def get_sb_id(self):
+    def get_sb_id(self) -> str:
         """get sponsorblock userid or generate if needed"""
         if not self.user_id:
-            print("missing request user id")
-            raise ValueError
+            raise ValueError("missing request user id")
 
-        key = f"{self.user_id}:id_sponsorblock"
-        sb_id = RedisArchivist().get_message(key)
-        if not sb_id["status"]:
-            sb_id = {"status": randomizor(32)}
-            RedisArchivist().set_message(key, sb_id)
-
-        return sb_id
+        return UserConfig(self.user_id).get_sponsorblock_id()
 
     def get_timestamps(self, youtube_id):
         """get timestamps from the API"""
@@ -88,7 +81,7 @@ class SponsorBlock:
 
     def post_timestamps(self, youtube_id, start_time, end_time):
         """post timestamps to api"""
-        user_id = self.get_sb_id().get("status")
+        user_id = self.get_sb_id()
         data = {
             "videoID": youtube_id,
             "startTime": start_time,
@@ -105,7 +98,7 @@ class SponsorBlock:
 
     def vote_on_segment(self, uuid, vote):
         """send vote on existing segment"""
-        user_id = self.get_sb_id().get("status")
+        user_id = self.get_sb_id()
         data = {
             "UUID": uuid,
             "userID": user_id,

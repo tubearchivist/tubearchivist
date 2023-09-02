@@ -1,16 +1,4 @@
 {
-    "archive": {
-        "sort_by": "published",
-        "sort_order": "desc",
-        "page_size": 12
-    },
-    "default_view": {
-        "home": "grid",
-        "channel": "list",
-        "downloads": "list",
-        "playlist": "grid",
-        "grid_items": 3
-    },
     "subscriptions": {
         "channel_size": 50,
         "live_channel_size": 50,
@@ -40,7 +28,6 @@
         "app_root": "/app",
         "cache_dir": "/cache",
         "videos": "/youtube",
-        "colors": "dark",
         "enable_cast": false,
         "enable_snapshot": true
     },

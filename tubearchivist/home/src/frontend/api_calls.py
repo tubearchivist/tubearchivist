@@ -4,7 +4,7 @@ Functionality:
 - called via user input
 """
 
-from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.users import UserConfig
 from home.tasks import run_restore_backup
 
 
@@ -42,9 +42,7 @@ class PostData:
     def _change_view(self):
         """process view changes in home, channel, and downloads"""
         origin, new_view = self.exec_val.split(":")
-        key = f"{self.current_user}:view:{origin}"
-        print(f"change view: {key} to {new_view}")
-        RedisArchivist().set_message(key, {"status": new_view})
+        UserConfig(self.current_user).set_view_style(origin, new_view)
         return {"success": True}
 
     def _change_grid(self):
@@ -52,48 +50,36 @@ class PostData:
         grid_items = int(self.exec_val)
         grid_items = max(grid_items, 3)
         grid_items = min(grid_items, 7)
-
-        key = f"{self.current_user}:grid_items"
-        print(f"change grid items: {grid_items}")
-        RedisArchivist().set_message(key, {"status": grid_items})
+        UserConfig(self.current_user).set_grid_items(grid_items)
         return {"success": True}
 
     def _sort_order(self):
         """change the sort between published to downloaded"""
-        sort_order = {"status": self.exec_val}
         if self.exec_val in ["asc", "desc"]:
-            RedisArchivist().set_message(
-                f"{self.current_user}:sort_order", sort_order
-            )
+            UserConfig(self.current_user).set_sort_order(self.exec_val)
         else:
-            RedisArchivist().set_message(
-                f"{self.current_user}:sort_by", sort_order
-            )
+            UserConfig(self.current_user).set_sort_by(self.exec_val)
         return {"success": True}
 
     def _hide_watched(self):
         """toggle if to show watched vids or not"""
-        key = f"{self.current_user}:hide_watched"
-        message = {"status": bool(int(self.exec_val))}
-        print(f"toggle {key}: {message}")
-        RedisArchivist().set_message(key, message)
+        UserConfig(self.current_user).set_hide_watched(
+            bool(int(self.exec_val))
+        )
         return {"success": True}
 
     def _show_subed_only(self):
         """show or hide subscribed channels only on channels page"""
-        key = f"{self.current_user}:show_subed_only"
-        message = {"status": bool(int(self.exec_val))}
-        print(f"toggle {key}: {message}")
-        RedisArchivist().set_message(key, message)
+        UserConfig(self.current_user).set_show_subed_only(
+            bool(int(self.exec_val))
+        )
         return {"success": True}
 
     def _show_ignored_only(self):
         """switch view on /downloads/ to show ignored only"""
-        show_value = self.exec_val
-        key = f"{self.current_user}:show_ignored_only"
-        value = {"status": show_value}
-        print(f"Filter download view ignored only: {show_value}")
-        RedisArchivist().set_message(key, value)
+        UserConfig(self.current_user).set_show_ignored_only(
+            bool(int(self.exec_val))
+        )
         return {"success": True}
 
     def _db_restore(self):
