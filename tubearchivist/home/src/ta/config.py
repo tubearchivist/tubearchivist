@@ -346,6 +346,7 @@ class ReleaseVersion:
 
     def get_remote_version(self):
         """read version from remote"""
+        sleep(randint(0, 60))
         self.response = requests.get(self.REMOTE_URL, timeout=20).json()
         remote_version_str = self.response["release_version"]
         self.remote_version = self._parse_version(remote_version_str)
