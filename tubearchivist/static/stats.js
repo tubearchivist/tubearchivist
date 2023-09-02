@@ -100,6 +100,12 @@ function downloadHist() {
   let apiEndpoint = '/api/stats/downloadhist/';
   let responseData = apiRequest(apiEndpoint, 'GET');
   let histBox = document.getElementById('downHistBox');
+  if (responseData.length === 0) {
+    let tile = buildTile('No recent downloads');
+    histBox.appendChild(tile);
+    return;
+  }
+
   for (let i = 0; i < responseData.length; i++) {
     const dailyStat = responseData[i];
     let tile = buildDailyStat(dailyStat);
