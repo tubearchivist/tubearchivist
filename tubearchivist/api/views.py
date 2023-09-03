@@ -1025,9 +1025,9 @@ class StatBiggestChannel(ApiBaseView):
     def get(self, request):
         """handle get request"""
 
-        order = request.GET.get("order", False)
+        order = request.GET.get("order", "doc_count")
         if order and order not in self.order_choices:
             message = {"message": f"invalid order parameter {order}"}
             return Response(message, status=400)
 
-        return Response(BiggestChannel().process())
+        return Response(BiggestChannel(order).process())

@@ -196,6 +196,9 @@ class DownloadHist(AggBase):
 class BiggestChannel(AggBase):
     """get channel aggregations"""
 
+    def __init__(self, order):
+        self.data["aggs"][self.name]["multi_terms"]["order"] = { order: "desc" }
+
     name = "channel_stats"
     path = "ta_video/_search"
     data = {
