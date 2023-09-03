@@ -17,8 +17,5 @@ venv/
 # Unneeded graphics
 assets/*
 
-# Unneeded docs
-docs/*
-
 # for local testing only
 testing.sh
