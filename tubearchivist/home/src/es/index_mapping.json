@@ -1,46 +1,10 @@
 {
     "index_config": [
         {
-            "index_name": "users",
+            "index_name": "config",
             "expected_map": {
-                "colors": {
-                    "type": "text"
-                },
-                "page_size": {
-                    "type": "integer"
-                },
-                "sort_by": {
-                    "type": "text"
-                },
-                "sort_order": {
-                    "type": "text"
-                },
-                "view_style_home": {
-                    "type": "text"
-                },
-                "view_style_channel": {
-                    "type": "text"
-                },
-                "view_style_downloads": {
-                    "type": "text"
-                },
-                "view_style_playlist": {
-                    "type": "text"
-                },
-                "grid_items": {
-                    "type": "integer"
-                },
-                "hide_watched": {
-                    "type": "boolean"
-                },
-                "show_ignored_only": {
-                    "type": "boolean"
-                },
-                "show_subed_only": {
-                    "type": "boolean"
-                },
-                "sponsorblock_id": {
-                    "type": "text"
+                "config": {
+                    "type": "object"
                 }
             },
             "expected_set": {

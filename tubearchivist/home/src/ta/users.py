@@ -6,7 +6,6 @@ Functionality:
 
 from home.src.es.connect import ElasticWrap
 from home.src.ta.helper import randomizor
-from home.src.ta.ta_redis import RedisArchivist
 
 
 class UserConfig:
@@ -35,7 +34,7 @@ class UserConfig:
 
     def __init__(self, user_id: str):
         self._user_id: str = user_id
-        self._document_path: str = f"ta_users/_doc/{user_id}"
+        self._document_path: str = f"ta_config/_doc/user_{user_id}"
         self._config: dict[str, any] = self._get_config()
 
     def get_colors(self) -> str:
@@ -111,55 +110,17 @@ class UserConfig:
             # this is for a non logged-in user so use all the defaults
             return {}
 
-        # If config is in ES then default to that
+        # Does this user have configuration stored in ES
         response, status = ElasticWrap(self._document_path).get(
             print_error=False
         )
         if status == 200 and "_source" in response.keys():
-            return response.get("_source")
+            source = response.get("_source")
+            if "config" in source.keys():
+                return source.get("config")
 
-        # Gather config from Redis in the old structure
-        config = {}
-        legacy_conf = RedisArchivist()
-        self._read_legacy_config(legacy_conf, config, "colors", "colors")
-        self._read_legacy_config(legacy_conf, config, "sort_by", "sort_by")
-        self._read_legacy_config(legacy_conf, config, "page_size", "page_size")
-        for view_origin in ["channel", "playlist", "home", "downloads"]:
-            self._read_legacy_config(
-                legacy_conf,
-                config,
-                f"view:{view_origin}",
-                f"view_style_{view_origin}",
-            )
-        self._read_legacy_config(
-            legacy_conf, config, "sort_order", "sort_order"
-        )
-        self._read_legacy_config(
-            legacy_conf, config, "grid_items", "grid_items"
-        )
-        self._read_legacy_config(
-            legacy_conf, config, "hide_watched", "hide_watched"
-        )
-        self._read_legacy_config(
-            legacy_conf, config, "show_ignored_only", "show_ignored_only"
-        )
-        self._read_legacy_config(
-            legacy_conf, config, "show_subed_only", "show_subed_only"
-        )
-
-        return config
-
-    def _read_legacy_config(
-        self,
-        client: RedisArchivist,
-        config: dict[str, any],
-        legacy_key: str,
-        new_key: str,
-    ):
-        key = f"{self._user_id}:{legacy_key}"
-        value = client.get_message(key).get("status")
-        if value:
-            config[new_key] = value
+        # There is no config in ES
+        return {}
 
     def _set_config(self, name: str, value: any):
         if not self._user_id:
@@ -167,6 +128,9 @@ class UserConfig:
 
         old = self._config.get(name)
         self._config[name] = value
-        ElasticWrap(self._document_path).put(self._config)
+
+        es_payload = {"config": self._config}
+        ElasticWrap(self._document_path).put(es_payload)
+
         msg = f"User {self._user_id} property '{name}' change: {old} > {value}"
         print(msg)
