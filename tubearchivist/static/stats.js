@@ -143,9 +143,9 @@ function buildChannelRow(channelData) {
   let tableRow = document.createElement('tr');
   tableRow.innerHTML = `
     <td class="agg-channel-name"><a href="/channel/${channelData.id}/">${channelData.name}</a></td>
-    <td>${channelData.doc_count}</td>
-    <td>${channelData.duration_str}</td>
-    <td>${humanFileSize(channelData.media_size)}</td>
+    <td class="agg-channel-value">${channelData.doc_count}</td>
+    <td class="agg-channel-value">${channelData.duration_str}</td>
+    <td class="agg-channel-value">${humanFileSize(channelData.media_size)}</td>
   `;
   return tableRow;
 }

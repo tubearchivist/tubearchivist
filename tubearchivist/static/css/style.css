@@ -1099,6 +1099,10 @@ video:-webkit-full-screen {
     min-width: 300px;
 }
 
+.settings-item .agg-channel-value {
+    text-align: right;
+}
+
 .danger-zone {
     background-color: var(--highlight-error);
     color: #fff;
