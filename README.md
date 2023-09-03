@@ -140,17 +140,15 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 
 - [ ] User roles
 - [ ] Podcast mode to serve channel as mp3
-- [ ] Implement [PyFilesystem](https://github.com/PyFilesystem/pyfilesystem2) for flexible video storage
 - [ ] User created playlists, random and repeat controls ([#108](https://github.com/tubearchivist/tubearchivist/issues/108), [#220](https://github.com/tubearchivist/tubearchivist/issues/220))
 - [ ] Auto play or play next link ([#226](https://github.com/tubearchivist/tubearchivist/issues/226))
 - [ ] Multi language support
 - [ ] Show total video downloaded vs total videos available in channel
-- [ ] Add statistics of index
-- [ ] Download speed schedule ([#198](https://github.com/tubearchivist/tubearchivist/issues/198))
 - [ ] Download or Ignore videos by keyword ([#163](https://github.com/tubearchivist/tubearchivist/issues/163))
 - [ ] Custom searchable notes to videos, channels, playlists ([#144](https://github.com/tubearchivist/tubearchivist/issues/144))
 
 Implemented:
+- [X] Add statistics of index [2023-09-03]
 - [X] Implement [Apprise](https://github.com/caronc/apprise) for notifications [2023-08-05]
 - [X] Download video comments [2022-11-30]
 - [X] Show similar videos on video page [2022-11-30]
