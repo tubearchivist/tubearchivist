@@ -1147,12 +1147,13 @@ function createFulltext(fullText) {
         </div>
     </a>
     <div class="video-desc list">
+        <div>
+          <a href="/channel/${fullText.subtitle_channel_id}/"><h3>${fullText.subtitle_channel}</h3></a>
+          <a class="video-more" href="/video/${videoId}/?t=${subtitle_start}"><h2>${fullText.title}</h2></a>
+        </div>
         <p>${subtitle_start} - ${subtitle_end}</p>
         <p>${fullText.subtitle_line}</p>
-        <div>
-            <a href="/channel/${fullText.subtitle_channel_id}/"><h3>${fullText.subtitle_channel}</h3></a>
-            <a class="video-more" href="/video/${videoId}/?t=${subtitle_start}"><h2>${fullText.title}</h2></a>
-        </div>
+        <span class="settings-current">Score: ${fullText._score}</span>
     </div>
     `;
   const fullTextDiv = document.createElement('div');

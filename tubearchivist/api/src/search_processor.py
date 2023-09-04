@@ -53,7 +53,12 @@ class SearchProcess:
         if index == "ta_subtitle":
             processed = self._process_subtitle(result)
 
-        processed.update({"_index": index})
+        processed.update(
+            {
+                "_index": index,
+                "_score": round(result.get("_score", 0), 2),
+            }
+        )
 
         return processed
 
