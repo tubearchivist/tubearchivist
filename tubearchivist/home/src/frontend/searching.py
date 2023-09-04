@@ -9,6 +9,7 @@ Functionality:
 import urllib.parse
 from datetime import datetime
 
+from api.src.search_processor import SearchProcess
 from home.src.download.thumbnails import ThumbManager
 from home.src.es.connect import ElasticWrap
 from home.src.ta.config import AppConfig
@@ -114,8 +115,8 @@ class SearchForm:
     def multi_search(self, search_query):
         """searching through index"""
         path, query, query_type = SearchParser(search_query).run()
-        look_up = SearchHandler(path, config=self.CONFIG, data=query)
-        search_results = look_up.get_data()
+        response, _ = ElasticWrap(path).get(data=query)
+        search_results = SearchProcess(response).process()
         all_results = self.build_results(search_results)
 
         return {"results": all_results, "queryType": query_type}
@@ -465,7 +466,6 @@ class QueryBuilder:
 
         query = {
             "size": 30,
-            "_source": {"excludes": "subtitle_line"},
             "query": {"bool": {"must": must_list}},
             "highlight": {
                 "fields": {

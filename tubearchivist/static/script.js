@@ -938,7 +938,7 @@ function populateMultiSearchResults(allResults, queryType) {
   videoBox.parentElement.style.display = 'block';
   if (allVideos.length > 0) {
     for (let index = 0; index < allVideos.length; index++) {
-      const video = allVideos[index].source;
+      const video = allVideos[index];
       const videoDiv = createVideo(video, defaultVideo);
       videoBox.appendChild(videoDiv);
     }
@@ -957,7 +957,7 @@ function populateMultiSearchResults(allResults, queryType) {
   channelBox.parentElement.style.display = 'block';
   if (allChannels.length > 0) {
     for (let index = 0; index < allChannels.length; index++) {
-      const channel = allChannels[index].source;
+      const channel = allChannels[index];
       const channelDiv = createChannel(channel, defaultChannel);
       channelBox.appendChild(channelDiv);
     }
@@ -976,7 +976,7 @@ function populateMultiSearchResults(allResults, queryType) {
   playlistBox.parentElement.style.display = 'block';
   if (allPlaylists.length > 0) {
     for (let index = 0; index < allPlaylists.length; index++) {
-      const playlist = allPlaylists[index].source;
+      const playlist = allPlaylists[index];
       const playlistDiv = createPlaylist(playlist, defaultPlaylist);
       playlistBox.appendChild(playlistDiv);
     }
@@ -995,7 +995,7 @@ function populateMultiSearchResults(allResults, queryType) {
   if (allFullText.length > 0) {
     for (let i = 0; i < allFullText.length; i++) {
       const fullText = allFullText[i];
-      if ('highlight' in fullText) {
+      if ('subtitle_line' in fullText) {
         const fullTextDiv = createFulltext(fullText);
         fullTextBox.appendChild(fullTextDiv);
       }
@@ -1132,19 +1132,14 @@ function createPlaylist(playlist, viewStyle) {
 }
 
 function createFulltext(fullText) {
-  const videoId = fullText.source.youtube_id;
-  const videoTitle = fullText.source.title;
-  const thumbUrl = fullText.source.vid_thumb_url;
-  const channelId = fullText.source.subtitle_channel_id;
-  const channelName = fullText.source.subtitle_channel;
-  const subtitleLine = fullText.highlight.subtitle_line[0];
-  const subtitle_start = fullText.source.subtitle_start.split('.')[0];
-  const subtitle_end = fullText.source.subtitle_end.split('.')[0];
+  const videoId = fullText.youtube_id;
+  const subtitle_start = fullText.subtitle_start.split('.')[0];
+  const subtitle_end = fullText.subtitle_end.split('.')[0];
   const markup = `
     <a href="#player" data-id="${videoId}" data-position="${subtitle_start}" onclick="createPlayer(this)">
         <div class="video-thumb-wrap list">
             <div class="video-thumb">
-                <img src="${thumbUrl}" alt="video-thumb">
+                <img src="${fullText.vid_thumb_url}" alt="video-thumb">
             </div>
             <div class="video-play">
                 <img src="/static/img/icon-play.svg" alt="play-icon">
@@ -1153,10 +1148,10 @@ function createFulltext(fullText) {
     </a>
     <div class="video-desc list">
         <p>${subtitle_start} - ${subtitle_end}</p>
-        <p>${subtitleLine}</p>
+        <p>${fullText.subtitle_line}</p>
         <div>
-            <a href="/channel/${channelId}/"><h3>${channelName}</h3></a>
-            <a class="video-more" href="/video/${videoId}/?t=${subtitle_start}"><h2>${videoTitle}</h2></a>
+            <a href="/channel/${fullText.subtitle_channel_id}/"><h3>${fullText.subtitle_channel}</h3></a>
+            <a class="video-more" href="/video/${videoId}/?t=${subtitle_start}"><h2>${fullText.title}</h2></a>
         </div>
     </div>
     `;

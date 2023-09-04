@@ -39,7 +39,7 @@ class SearchProcess:
     def _process_result(self, result):
         """detect which type of data to process"""
         index = result["_index"]
-        processed = False
+        processed = {}
         if index == "ta_video":
             processed = self._process_video(result["_source"])
         if index == "ta_channel":
@@ -50,6 +50,10 @@ class SearchProcess:
             processed = self._process_download(result["_source"])
         if index == "ta_comment":
             processed = self._process_comment(result["_source"])
+        if index == "ta_subtitle":
+            processed = self._process_subtitle(result)
+
+        processed.update({"_index": index})
 
         return processed
 
@@ -139,3 +143,17 @@ class SearchProcess:
                 processed_comments[-1]["comment_replies"].append(comment)
 
         return processed_comments
+
+    def _process_subtitle(self, result):
+        """take complete result dict to extract highlight"""
+        subtitle_dict = result["_source"]
+        highlight = result.get("highlight")
+        if highlight:
+            # replace lines with the highlighted markdown
+            subtitle_line = highlight.get("subtitle_line")[0]
+            subtitle_dict.update({"subtitle_line": subtitle_line})
+
+        thumb_path = ThumbManager(subtitle_dict["youtube_id"]).vid_thumb_path()
+        subtitle_dict.update({"vid_thumb_url": f"/cache/{thumb_path}"})
+
+        return subtitle_dict
