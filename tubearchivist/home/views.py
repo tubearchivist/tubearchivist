@@ -216,21 +216,20 @@ class ArchivistResultsView(ArchivistViewConfig):
             "query": {"bool": {"should": ids}},
             "sort": [{"published": {"order": "desc"}}],
         }
-        search = SearchHandler(
-            "ta_video/_search", self.default_conf, data=data
-        )
-        videos = search.get_data()
+        response, _ = ElasticWrap("ta_video/_search").get(data)
+        videos = SearchProcess(response).process()
+
         if not videos:
             return False
 
         for video in videos:
-            youtube_id = video["source"]["youtube_id"]
+            youtube_id = video["youtube_id"]
             matched = [i for i in results if i["youtube_id"] == youtube_id]
             played_sec = matched[0]["position"]
-            total = video["source"]["player"]["duration"]
+            total = video["player"]["duration"]
             if not total:
                 total = matched[0].get("position") * 2
-            video["source"]["player"]["progress"] = 100 * (played_sec / total)
+            video["player"]["progress"] = 100 * (played_sec / total)
 
         return videos
 

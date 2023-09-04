@@ -56,7 +56,7 @@ class SearchProcess:
         processed.update(
             {
                 "_index": index,
-                "_score": round(result.get("_score", 0), 2),
+                "_score": round(result.get("_score") or 0, 2),
             }
         )
 
