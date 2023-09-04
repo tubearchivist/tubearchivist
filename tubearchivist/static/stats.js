@@ -128,31 +128,71 @@ function buildDailyStat(dailyStat) {
   return tile;
 }
 
-function biggestChannel() {
-  let apiEndpoint = '/api/stats/biggestchannels/';
-  let responseData = apiRequest(apiEndpoint, 'GET');
-  let tBody = document.getElementById('biggestChannelTable');
+function humanFileSize(size) {
+  let i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+  return (size / Math.pow(1024, i)).toFixed(1) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+}
+
+function buildChannelRow(id, name, value) {
+  let tableRow = document.createElement('tr');
+
+  tableRow.innerHTML = `
+    <td class="agg-channel-name"><a href="/channel/${id}/">${name}</a></td>
+    <td class="agg-channel-right-align">${value}</td>
+  `;
+
+  return tableRow;
+}
+
+function addBiggestChannelByDocCount() {
+  let tBody = document.getElementById('biggestChannelTableVideos');
+
+  let apiEndpoint = '/api/stats/biggestchannels/?order=doc_count';
+  const responseData = apiRequest(apiEndpoint, 'GET');
+
   for (let i = 0; i < responseData.length; i++) {
-    const channelData = responseData[i];
-    let tableRow = buildChannelRow(channelData);
+    const { id, name, doc_count } = responseData[i];
+
+    let tableRow = buildChannelRow(id, name, doc_count);
+
     tBody.appendChild(tableRow);
   }
 }
 
-function buildChannelRow(channelData) {
-  let tableRow = document.createElement('tr');
-  tableRow.innerHTML = `
-    <td class="agg-channel-name"><a href="/channel/${channelData.id}/">${channelData.name}</a></td>
-    <td>${channelData.doc_count}</td>
-    <td>${channelData.duration_str}</td>
-    <td>${humanFileSize(channelData.media_size)}</td>
-  `;
-  return tableRow;
+function addBiggestChannelByDuration() {
+  const tBody = document.getElementById('biggestChannelTableDuration');
+
+  let apiEndpoint = '/api/stats/biggestchannels/?order=duration';
+  const responseData = apiRequest(apiEndpoint, 'GET');
+
+  for (let i = 0; i < responseData.length; i++) {
+    const { id, name, duration_str } = responseData[i];
+
+    let tableRow = buildChannelRow(id, name, duration_str);
+
+    tBody.appendChild(tableRow);
+  }
 }
 
-function humanFileSize(size) {
-  let i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
-  return (size / Math.pow(1024, i)).toFixed(1) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+function addBiggestChannelByMediaSize() {
+  let tBody = document.getElementById('biggestChannelTableMediaSize');
+
+  let apiEndpoint = '/api/stats/biggestchannels/?order=media_size';
+  const responseData = apiRequest(apiEndpoint, 'GET');
+
+  for (let i = 0; i < responseData.length; i++) {
+    const { id, name, media_size } = responseData[i];
+
+    let tableRow = buildChannelRow(id, name, humanFileSize(media_size));
+
+    tBody.appendChild(tableRow);
+  }
+}
+
+function biggestChannel() {
+  addBiggestChannelByDocCount();
+  addBiggestChannelByDuration();
+  addBiggestChannelByMediaSize();
 }
 
 async function buildStats() {
