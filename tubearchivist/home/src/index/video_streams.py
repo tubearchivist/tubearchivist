@@ -5,60 +5,6 @@ import subprocess
 from os import stat
 
 
-class DurationConverter:
-    """
-    using ffmpeg to get and parse duration from filepath
-    """
-
-    @staticmethod
-    def get_sec(file_path):
-        """read duration from file"""
-        duration = subprocess.run(
-            [
-                "ffprobe",
-                "-v",
-                "error",
-                "-show_entries",
-                "format=duration",
-                "-of",
-                "default=noprint_wrappers=1:nokey=1",
-                file_path,
-            ],
-            capture_output=True,
-            check=True,
-        )
-        duration_raw = duration.stdout.decode().strip()
-        if duration_raw == "N/A":
-            return 0
-
-        duration_sec = int(float(duration_raw))
-        return duration_sec
-
-    @staticmethod
-    def get_str(seconds):
-        """takes duration in sec and returns clean string"""
-        if not seconds:
-            # failed to extract
-            return "NA"
-
-        days = int(seconds // (24 * 3600))
-        hours = int((seconds % (24 * 3600)) // 3600)
-        minutes = int((seconds % 3600) // 60)
-        seconds = int(seconds % 60)
-
-        duration_str = str()
-        if days:
-            duration_str = f"{days}d "
-        if hours:
-            duration_str = duration_str + str(hours).zfill(2) + ":"
-        if minutes:
-            duration_str = duration_str + str(minutes).zfill(2) + ":"
-        else:
-            duration_str = duration_str + "00:"
-        duration_str = duration_str + str(seconds).zfill(2)
-        return duration_str
-
-
 class MediaStreamExtractor:
     """extract stream metadata"""
 

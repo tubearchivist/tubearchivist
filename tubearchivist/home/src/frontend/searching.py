@@ -11,8 +11,8 @@ from datetime import datetime
 
 from home.src.download.thumbnails import ThumbManager
 from home.src.es.connect import ElasticWrap
-from home.src.index.video_streams import DurationConverter
 from home.src.ta.config import AppConfig
+from home.src.ta.helper import get_duration_str
 
 
 class SearchHandler:
@@ -45,9 +45,9 @@ class SearchHandler:
         if response.get("aggregations"):
             self.aggs = response["aggregations"]
             if "total_duration" in self.aggs:
-                duration_sec = self.aggs["total_duration"]["value"]
+                duration_sec = int(self.aggs["total_duration"]["value"])
                 self.aggs["total_duration"].update(
-                    {"value_str": DurationConverter().get_str(duration_sec)}
+                    {"value_str": get_duration_str(duration_sec)}
                 )
 
         return return_value

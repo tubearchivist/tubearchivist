@@ -16,11 +16,8 @@ from home.src.index import playlist as ta_playlist
 from home.src.index.generic import YouTubeItem
 from home.src.index.subtitle import YoutubeSubtitle
 from home.src.index.video_constants import VideoTypeEnum
-from home.src.index.video_streams import (
-    DurationConverter,
-    MediaStreamExtractor,
-)
-from home.src.ta.helper import randomizor
+from home.src.index.video_streams import MediaStreamExtractor
+from home.src.ta.helper import get_duration_sec, get_duration_str, randomizor
 from home.src.ta.ta_redis import RedisArchivist
 from ryd_client import ryd_client
 
@@ -249,16 +246,14 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     def add_player(self, media_path=False):
         """add player information for new videos"""
         vid_path = media_path or self.build_dl_cache_path()
+        duration = get_duration_sec(vid_path)
 
-        duration_handler = DurationConverter()
-        duration = duration_handler.get_sec(vid_path)
-        duration_str = duration_handler.get_str(duration)
         self.json_data.update(
             {
                 "player": {
                     "watched": False,
                     "duration": duration,
-                    "duration_str": duration_str,
+                    "duration_str": get_duration_str(duration),
                 }
             }
         )
