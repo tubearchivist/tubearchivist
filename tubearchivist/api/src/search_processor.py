@@ -39,7 +39,7 @@ class SearchProcess:
     def _process_result(self, result):
         """detect which type of data to process"""
         index = result["_index"]
-        processed = {}
+        processed = False
         if index == "ta_video":
             processed = self._process_video(result["_source"])
         if index == "ta_channel":
@@ -53,12 +53,13 @@ class SearchProcess:
         if index == "ta_subtitle":
             processed = self._process_subtitle(result)
 
-        processed.update(
-            {
-                "_index": index,
-                "_score": round(result.get("_score") or 0, 2),
-            }
-        )
+        if isinstance(processed, dict):
+            processed.update(
+                {
+                    "_index": index,
+                    "_score": round(result.get("_score") or 0, 2),
+                }
+            )
 
         return processed
 

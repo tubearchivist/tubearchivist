@@ -892,8 +892,9 @@ class VideoView(MinView):
     def get(self, request, video_id):
         """get single video"""
         config_handler = AppConfig(request.user.id)
-        look_up = SearchHandler(f"ta_video/_doc/{video_id}", config=False)
-        video_data = look_up.get_data()[0]["source"]
+        response, _ = ElasticWrap(f"ta_video/_doc/{video_id}").get()
+        video_data = SearchProcess(response).process()
+
         try:
             rating = video_data["stats"]["average_rating"]
             video_data["stats"]["average_rating"] = self.star_creator(rating)
