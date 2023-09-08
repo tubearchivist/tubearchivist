@@ -100,7 +100,7 @@ class Pagination:
 
     def get_page_size(self):
         """get default or user modified page_size"""
-        return UserConfig(self.request.user.id).get_page_size()
+        return UserConfig(self.request.user.id).get_value("page_size")
 
     def first_guess(self):
         """build first guess before api call"""

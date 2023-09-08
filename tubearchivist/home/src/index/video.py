@@ -17,7 +17,7 @@ from home.src.index.generic import YouTubeItem
 from home.src.index.subtitle import YoutubeSubtitle
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.index.video_streams import MediaStreamExtractor
-from home.src.ta.helper import get_duration_sec, get_duration_str
+from home.src.ta.helper import get_duration_sec, get_duration_str, randomizor
 from home.src.ta.users import UserConfig
 from ryd_client import ryd_client
 
@@ -33,11 +33,17 @@ class SponsorBlock:
         self.last_refresh = int(datetime.now().timestamp())
 
     def get_sb_id(self) -> str:
-        """get sponsorblock userid or generate if needed"""
+        """get sponsorblock for the userid or generate if needed"""
         if not self.user_id:
             raise ValueError("missing request user id")
 
-        return UserConfig(self.user_id).get_sponsorblock_id()
+        user = UserConfig(self.user_id)
+        sb_id = user.get_value("sponsorblock_id")
+        if not sb_id:
+            sb_id = randomizor(32)
+            user.set_value("sponsorblock_id", sb_id)
+
+        return sb_id
 
     def get_timestamps(self, youtube_id):
         """get timestamps from the API"""

@@ -223,7 +223,7 @@ class Command(BaseCommand):
         raise CommandError(message)
 
     def _mig_move_users_to_es(self):  # noqa: C901
-        """migration: update from TBC to TBC move user configuration to ES"""
+        """migration: update from 0.4.1 to 0.5.0 move user config to ES"""
         self.stdout.write("[MIGRATION] move user configuration to ES")
         redis = RedisArchivist()
 
@@ -242,56 +242,62 @@ class Command(BaseCommand):
                 colors_key = f"{user}:colors"
                 colors = redis.get_message(colors_key).get("status")
                 if colors:
-                    new_conf.set_colors(colors)
+                    new_conf.set_value("colors", colors)
                     redis.del_message(colors_key)
 
                 sort_by_key = f"{user}:sort_by"
                 sort_by = redis.get_message(sort_by_key).get("status")
                 if sort_by:
-                    new_conf.set_sort_by(sort_by)
+                    new_conf.set_value("sort_by", sort_by)
                     redis.del_message(sort_by_key)
 
                 page_size_key = f"{user}:page_size"
                 page_size = redis.get_message(page_size_key).get("status")
                 if page_size:
-                    new_conf.set_page_size(page_size)
+                    new_conf.set_value("page_size", page_size)
                     redis.del_message(page_size_key)
 
                 sort_order_key = f"{user}:sort_order"
                 sort_order = redis.get_message(sort_order_key).get("status")
                 if sort_order:
-                    new_conf.set_sort_order(sort_order)
+                    new_conf.set_value("sort_order", sort_order)
                     redis.del_message(sort_order_key)
 
                 grid_items_key = f"{user}:grid_items"
                 grid_items = redis.get_message(grid_items_key).get("status")
                 if grid_items:
-                    new_conf.set_grid_items(grid_items)
+                    new_conf.set_value("grid_items", grid_items)
                     redis.del_message(grid_items_key)
 
                 hide_watch_key = f"{user}:hide_watched"
                 hide_watch = redis.get_message(hide_watch_key).get("status")
                 if hide_watch:
-                    new_conf.set_hide_watched(hide_watch)
+                    new_conf.set_value("hide_watched", hide_watch)
                     redis.del_message(hide_watch_key)
 
                 ignore_only_key = f"{user}:show_ignored_only"
                 ignore_only = redis.get_message(ignore_only_key).get("status")
                 if ignore_only:
-                    new_conf.set_show_ignored_only(ignore_only)
+                    new_conf.set_value("show_ignored_only", ignore_only)
                     redis.del_message(ignore_only_key)
 
                 subed_only_key = f"{user}:show_subed_only"
                 subed_only = redis.get_message(subed_only_key).get("status")
                 if subed_only:
-                    new_conf.set_show_subed_only(subed_only)
+                    new_conf.set_value("show_subed_only", subed_only)
                     redis.del_message(subed_only_key)
+
+                sb_id_key = f"{user}:id_sb_id"
+                sb_id = redis.get_message(sb_id_key).get("status")
+                if sb_id:
+                    new_conf.set_value("sb_id_id", sb_id)
+                    redis.del_message(sb_id_key)
 
                 for view in ["channel", "playlist", "home", "downloads"]:
                     view_key = f"{user}:view:{view}"
                     view_style = redis.get_message(view_key).get("status")
                     if view_style:
-                        new_conf.set_view_style(view, view_style)
+                        new_conf.set_value(f"view_style_{view}", view_style)
                         redis.del_message(view_key)
 
                 self.stdout.write(

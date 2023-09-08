@@ -61,8 +61,8 @@ class ArchivistViewConfig(View):
         """get dict of all view styles for search form"""
         all_styles = {}
         for view_origin in ["channel", "playlist", "home", "downloads"]:
-            all_styles[view_origin] = self.user_conf.get_view_style(
-                view_origin
+            all_styles[view_origin] = self.user_conf.get_value(
+                f"view_style_{view_origin}"
             )
 
         return all_styles
@@ -74,15 +74,17 @@ class ArchivistViewConfig(View):
         self.default_conf = AppConfig().config
 
         self.context = {
-            "colors": self.user_conf.get_colors(),
+            "colors": self.user_conf.get_value("colors"),
             "cast": self.default_conf["application"]["enable_cast"],
-            "sort_by": self.user_conf.get_sort_by(),
-            "sort_order": self.user_conf.get_sort_order(),
-            "view_style": self.user_conf.get_view_style(self.view_origin),
-            "grid_items": self.user_conf.get_grid_items(),
-            "hide_watched": self.user_conf.get_hide_watched(),
-            "show_ignored_only": self.user_conf.get_show_ignored_only(),
-            "show_subed_only": self.user_conf.get_show_subed_only(),
+            "sort_by": self.user_conf.get_value("sort_by"),
+            "sort_order": self.user_conf.get_value("sort_order"),
+            "view_style": self.user_conf.get_value(
+                f"view_style_{self.view_origin}"
+            ),
+            "grid_items": self.user_conf.get_value("grid_items"),
+            "hide_watched": self.user_conf.get_value("hide_watched"),
+            "show_ignored_only": self.user_conf.get_value("show_ignored_only"),
+            "show_subed_only": self.user_conf.get_value("show_subed_only"),
             "version": settings.TA_VERSION,
             "ta_update": ReleaseVersion().get_update(),
         }
@@ -156,7 +158,7 @@ class ArchivistResultsView(ArchivistViewConfig):
         """get all videos in progress"""
         ids = [{"match": {"youtube_id": i.get("youtube_id")}} for i in results]
         data = {
-            "size": UserConfig(self.user_id).get_page_size(),
+            "size": UserConfig(self.user_id).get_value("page_size"),
             "query": {"bool": {"should": ids}},
             "sort": [{"published": {"order": "desc"}}],
         }
@@ -208,7 +210,7 @@ class MinView(View):
     def get_min_context(request):
         """build minimal vars for context"""
         return {
-            "colors": UserConfig(request.user.id).get_colors(),
+            "colors": UserConfig(request.user.id).get_value("colors"),
             "version": settings.TA_VERSION,
             "ta_update": ReleaseVersion().get_update(),
         }
@@ -945,7 +947,9 @@ class SettingsUserView(MinView):
         context.update(
             {
                 "title": "User Settings",
-                "page_size": UserConfig(request.user.id).get_page_size(),
+                "page_size": UserConfig(request.user.id).get_value(
+                    "page_size"
+                ),
                 "user_form": UserSettingsForm(),
             }
         )
@@ -959,9 +963,13 @@ class SettingsUserView(MinView):
         if user_form.is_valid():
             user_form_post = user_form.cleaned_data
             if user_form_post.get("colors"):
-                config_handler.set_colors(user_form_post.get("colors"))
+                config_handler.set_value(
+                    "colors", user_form_post.get("colors")
+                )
             if user_form_post.get("page_size"):
-                config_handler.set_page_size(user_form_post.get("page_size"))
+                config_handler.set_value(
+                    "page_size", user_form_post.get("page_size")
+                )
 
         sleep(1)
         return redirect("settings_user", permanent=True)

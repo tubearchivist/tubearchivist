@@ -1,6 +1,5 @@
 {
-    "index_config": [
-        {
+    "index_config": [{
             "index_name": "config",
             "expected_map": {
                 "config": {
@@ -8,16 +7,6 @@
                 }
             },
             "expected_set": {
-                "analysis": {
-                    "normalizer": {
-                        "to_lower": {
-                            "type": "custom",
-                            "filter": [
-                                "lowercase"
-                            ]
-                        }
-                    }
-                },
                 "number_of_replicas": "0"
             }
         },
@@ -84,7 +73,7 @@
                             "type": "boolean"
                         },
                         "integrate_sponsorblock": {
-                            "type": "boolean"
+                            "type" : "boolean"
                         }
                     }
                 }
@@ -94,9 +83,7 @@
                     "normalizer": {
                         "to_lower": {
                             "type": "custom",
-                            "filter": [
-                                "lowercase"
-                            ]
+                            "filter": ["lowercase"]
                         }
                     }
                 },
@@ -180,7 +167,7 @@
                                     "type": "boolean"
                                 },
                                 "integrate_sponsorblock": {
-                                    "type": "boolean"
+                                    "type" : "boolean"
                                 }
                             }
                         }
@@ -248,19 +235,19 @@
                 "comment_count": {
                     "type": "long"
                 },
-                "stats": {
-                    "properties": {
-                        "average_rating": {
-                            "type": "float"
+                "stats" : {
+                    "properties" : {
+                        "average_rating" : {
+                            "type" : "float"
                         },
-                        "dislike_count": {
-                            "type": "long"
+                        "dislike_count" : {
+                            "type" : "long"
                         },
-                        "like_count": {
-                            "type": "long"
+                        "like_count" : {
+                            "type" : "long"
                         },
-                        "view_count": {
-                            "type": "long"
+                        "view_count" : {
+                            "type" : "long"
                         }
                     }
                 },
@@ -326,28 +313,28 @@
                         "is_enabled": {
                             "type": "boolean"
                         },
-                        "segments": {
-                            "properties": {
-                                "UUID": {
+                        "segments" : {
+                            "properties" : {
+                                "UUID" : {
                                     "type": "keyword"
                                 },
-                                "actionType": {
+                                "actionType" : {
                                     "type": "keyword"
                                 },
-                                "category": {
+                                "category" : {
                                     "type": "keyword"
                                 },
-                                "locked": {
-                                    "type": "short"
+                                "locked" : {
+                                    "type" : "short"
                                 },
-                                "segment": {
-                                    "type": "float"
+                                "segment" : {
+                                    "type" : "float"
                                 },
-                                "videoDuration": {
-                                    "type": "float"
+                                "videoDuration" : {
+                                    "type" : "float"
                                 },
-                                "votes": {
-                                    "type": "long"
+                                "votes" : {
+                                    "type" : "long"
                                 }
                             }
                         }
@@ -359,9 +346,7 @@
                     "normalizer": {
                         "to_lower": {
                             "type": "custom",
-                            "filter": [
-                                "lowercase"
-                            ]
+                            "filter": ["lowercase"]
                         }
                     }
                 },
@@ -422,9 +407,7 @@
                     "normalizer": {
                         "to_lower": {
                             "type": "custom",
-                            "filter": [
-                                "lowercase"
-                            ]
+                            "filter": ["lowercase"]
                         }
                     }
                 },
@@ -482,9 +465,7 @@
                     "normalizer": {
                         "to_lower": {
                             "type": "custom",
-                            "filter": [
-                                "lowercase"
-                            ]
+                            "filter": ["lowercase"]
                         }
                     }
                 },
@@ -534,7 +515,7 @@
                     "format": "epoch_second"
                 },
                 "subtitle_index": {
-                    "type": "long"
+                    "type" : "long"
                 },
                 "subtitle_lang": {
                     "type": "keyword"
@@ -543,7 +524,7 @@
                     "type": "keyword"
                 },
                 "subtitle_line": {
-                    "type": "text",
+                    "type" : "text",
                     "analyzer": "english"
                 }
             },
@@ -552,9 +533,7 @@
                     "normalizer": {
                         "to_lower": {
                             "type": "custom",
-                            "filter": [
-                                "lowercase"
-                            ]
+                            "filter": ["lowercase"]
                         }
                     }
                 },
@@ -580,14 +559,14 @@
                             "type": "keyword"
                         },
                         "comment_text": {
-                            "type": "text"
+                            "type" : "text"
                         },
                         "comment_timestamp": {
                             "type": "date",
                             "format": "epoch_second"
                         },
                         "comment_time_text": {
-                            "type": "text"
+                            "type" : "text"
                         },
                         "comment_likecount": {
                             "type": "long"
@@ -625,9 +604,7 @@
                     "normalizer": {
                         "to_lower": {
                             "type": "custom",
-                            "filter": [
-                                "lowercase"
-                            ]
+                            "filter": ["lowercase"]
                         }
                     }
                 },

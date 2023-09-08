@@ -41,8 +41,8 @@ class PostData:
 
     def _change_view(self):
         """process view changes in home, channel, and downloads"""
-        origin, new_view = self.exec_val.split(":")
-        UserConfig(self.current_user).set_view_style(origin, new_view)
+        view, setting = self.exec_val.split(":")
+        UserConfig(self.current_user).set_value(f"view_style_{view}", setting)
         return {"success": True}
 
     def _change_grid(self):
@@ -50,35 +50,37 @@ class PostData:
         grid_items = int(self.exec_val)
         grid_items = max(grid_items, 3)
         grid_items = min(grid_items, 7)
-        UserConfig(self.current_user).set_grid_items(grid_items)
+        UserConfig(self.current_user).set_value("grid_items", grid_items)
         return {"success": True}
 
     def _sort_order(self):
         """change the sort between published to downloaded"""
         if self.exec_val in ["asc", "desc"]:
-            UserConfig(self.current_user).set_sort_order(self.exec_val)
+            UserConfig(self.current_user).set_value(
+                "sort_order", self.exec_val
+            )
         else:
-            UserConfig(self.current_user).set_sort_by(self.exec_val)
+            UserConfig(self.current_user).set_value("sort_by", self.exec_val)
         return {"success": True}
 
     def _hide_watched(self):
         """toggle if to show watched vids or not"""
-        UserConfig(self.current_user).set_hide_watched(
-            bool(int(self.exec_val))
+        UserConfig(self.current_user).set_value(
+            "hide_watched", bool(int(self.exec_val))
         )
         return {"success": True}
 
     def _show_subed_only(self):
         """show or hide subscribed channels only on channels page"""
-        UserConfig(self.current_user).set_show_subed_only(
-            bool(int(self.exec_val))
+        UserConfig(self.current_user).set_value(
+            "show_subed_only", bool(int(self.exec_val))
         )
         return {"success": True}
 
     def _show_ignored_only(self):
         """switch view on /downloads/ to show ignored only"""
-        UserConfig(self.current_user).set_show_ignored_only(
-            bool(int(self.exec_val))
+        UserConfig(self.current_user).set_value(
+            "show_ignored_only", bool(int(self.exec_val))
         )
         return {"success": True}
 
