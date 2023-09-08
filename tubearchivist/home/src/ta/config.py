@@ -24,7 +24,7 @@ class AppConfig:
 
     def get_config(self):
         """get config from default file or redis if changed"""
-        config = self.get_config_db()
+        config = self.get_config_redis()
         if not config:
             config = self.get_config_file()
 
@@ -56,7 +56,7 @@ class AppConfig:
         return application
 
     @staticmethod
-    def get_config_db():
+    def get_config_redis():
         """read config json set from redis to overwrite defaults"""
         for i in range(10):
             try:
@@ -105,10 +105,10 @@ class AppConfig:
     def load_new_defaults(self):
         """check config.json for missing defaults"""
         default_config = self.get_config_file()
-        db_config = self.get_config_db()
+        redis_config = self.get_config_redis()
 
         # check for customizations
-        if not db_config:
+        if not redis_config:
             config = self.get_config()
             config["scheduler"]["version_check"] = self._build_rand_daily()
             RedisArchivist().set_message("config", config)
@@ -118,22 +118,22 @@ class AppConfig:
 
         for key, value in default_config.items():
             # missing whole main key
-            if key not in db_config:
-                db_config.update({key: value})
+            if key not in redis_config:
+                redis_config.update({key: value})
                 needs_update = True
                 continue
 
             # missing nested values
             for sub_key, sub_value in value.items():
-                if sub_key not in db_config[key].keys():
+                if sub_key not in redis_config[key].keys():
                     if sub_value == "rand-d":
                         sub_value = self._build_rand_daily()
 
-                    db_config[key].update({sub_key: sub_value})
+                    redis_config[key].update({sub_key: sub_value})
                     needs_update = True
 
         if needs_update:
-            RedisArchivist().set_message("config", db_config)
+            RedisArchivist().set_message("config", redis_config)
 
         return needs_update
 
@@ -163,7 +163,7 @@ class ScheduleBuilder:
     def update_schedule_conf(self, form_post):
         """process form post"""
         print("processing form, restart container for changes to take effect")
-        db_config = self.config
+        redis_config = self.config
         for key, value in form_post.items():
             if key in self.SCHEDULES and value:
                 try:
@@ -182,17 +182,17 @@ class ScheduleBuilder:
                     )
                     return
 
-                db_config["scheduler"][key] = to_write
+                redis_config["scheduler"][key] = to_write
             if key in self.CONFIG and value:
-                db_config["scheduler"][key] = int(value)
+                redis_config["scheduler"][key] = int(value)
             if key in self.NOTIFY and value:
                 if value == "0":
                     to_write = False
                 else:
                     to_write = value
-                db_config["scheduler"][key] = to_write
+                redis_config["scheduler"][key] = to_write
 
-        RedisArchivist().set_message("config", db_config, save=True)
+        RedisArchivist().set_message("config", redis_config, save=True)
         mess_dict = {
             "group": "setting:schedule",
             "level": "info",
