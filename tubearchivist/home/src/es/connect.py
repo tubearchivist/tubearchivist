@@ -9,6 +9,7 @@ import json
 import os
 
 import requests
+import urllib3
 
 
 class ElasticWrap:
@@ -19,19 +20,33 @@ class ElasticWrap:
     ES_URL: str = str(os.environ.get("ES_URL"))
     ES_PASS: str = str(os.environ.get("ELASTIC_PASSWORD"))
     ES_USER: str = str(os.environ.get("ELASTIC_USER") or "elastic")
+    ES_VERIFY_SSL: str = str(os.environ.get("ES_VERIFY_SSL") or "true")
 
     def __init__(self, path):
         self.url = f"{self.ES_URL}/{path}"
         self.auth = (self.ES_USER, self.ES_PASS)
+        self.verify_ssl = self.ES_VERIFY_SSL != "false"
+
+        if not self.verify_ssl:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def get(self, data=False, timeout=10, print_error=True):
         """get data from es"""
         if data:
             response = requests.get(
-                self.url, json=data, auth=self.auth, timeout=timeout
+                self.url,
+                json=data,
+                auth=self.auth,
+                timeout=timeout,
+                verify=self.verify_ssl,
             )
         else:
-            response = requests.get(self.url, auth=self.auth, timeout=timeout)
+            response = requests.get(
+                self.url,
+                auth=self.auth,
+                timeout=timeout,
+                verify=self.verify_ssl,
+            )
         if print_error and not response.ok:
             print(response.text)
 
@@ -48,10 +63,19 @@ class ElasticWrap:
 
         if data:
             response = requests.post(
-                self.url, data=payload, headers=headers, auth=self.auth
+                self.url,
+                data=payload,
+                headers=headers,
+                auth=self.auth,
+                verify=self.verify_ssl,
             )
         else:
-            response = requests.post(self.url, headers=headers, auth=self.auth)
+            response = requests.post(
+                self.url,
+                headers=headers,
+                auth=self.auth,
+                verify=self.verify_ssl,
+            )
 
         if not response.ok:
             print(response.text)
@@ -62,7 +86,9 @@ class ElasticWrap:
         """put data to es"""
         if refresh:
             self.url = f"{self.url}/?refresh=true"
-        response = requests.put(f"{self.url}", json=data, auth=self.auth)
+        response = requests.put(
+            f"{self.url}", json=data, auth=self.auth, verify=self.verify_ssl
+        )
         if not response.ok:
             print(response.text)
             print(data)
@@ -75,9 +101,13 @@ class ElasticWrap:
         if refresh:
             self.url = f"{self.url}/?refresh=true"
         if data:
-            response = requests.delete(self.url, json=data, auth=self.auth)
+            response = requests.delete(
+                self.url, json=data, auth=self.auth, verify=self.verify_ssl
+            )
         else:
-            response = requests.delete(self.url, auth=self.auth)
+            response = requests.delete(
+                self.url, auth=self.auth, verify=self.verify_ssl
+            )
 
         if not response.ok:
             print(response.text)

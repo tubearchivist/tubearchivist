@@ -3,6 +3,7 @@ Functionality:
 - check that all connections are working
 """
 
+from os import environ
 from time import sleep
 
 import requests
@@ -132,7 +133,19 @@ class Command(BaseCommand):
         """check that path.repo var is set"""
         self.stdout.write("[5] check ES path.repo env var")
         response, _ = ElasticWrap("_nodes/_all/settings").get()
+        snaphost_roles = [
+            "data",
+            "data_cold",
+            "data_content",
+            "data_frozen",
+            "data_hot",
+            "data_warm",
+            "master",
+        ]
         for node in response["nodes"].values():
+            if not (set(node["roles"]) & set(snaphost_roles)):
+                continue
+
             if node["settings"]["path"].get("repo"):
                 self.stdout.write(
                     self.style.SUCCESS("    ✓ path.repo env var is set")
@@ -142,7 +155,10 @@ class Command(BaseCommand):
             message = (
                 "    🗙 path.repo env var not found. "
                 + "set the following env var to the ES container:\n"
-                + "    path.repo=/usr/share/elasticsearch/data/snapshot"
+                + "    path.repo="
+                + environ.get(
+                    "ES_SNAPSHOT_DIR", "/usr/share/elasticsearch/data/snapshot"
+                ),
             )
             self.stdout.write(self.style.ERROR(f"{message}"))
             sleep(60)

@@ -59,6 +59,8 @@ Take a look at the example [docker-compose.yml](https://github.com/tubearchivist
 | TA_PORT | Overwrite Nginx port | Optional |
 | TA_UWSGI_PORT | Overwrite container internal uwsgi port | Optional |
 | ES_URL | URL That ElasticSearch runs on | Optional |
+| ES_VERIFY_SSL | Verify ElasticSearch SSL certificate, everything other than `false` defaults to `true` | Optional |
+| ES_SNAPSHOT_DIR | Custom path where elastic search stores snapshots for master/data nodes | Optional |
 | HOST_GID | Allow TA to own the video files instead of container user | Optional |
 | HOST_UID | Allow TA to own the video files instead of container user | Optional |
 | ELASTIC_USER | Change the default ElasticSearch user | Optional |
