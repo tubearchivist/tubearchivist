@@ -6,9 +6,9 @@ functionality:
 # pylint: disable=missing-timeout
 
 import json
+import os
 
 import requests
-from home.src.ta.config import AppConfig
 
 
 class ElasticWrap:
@@ -16,21 +16,13 @@ class ElasticWrap:
     returns response json and status code tuple
     """
 
-    def __init__(self, path, config=False):
-        self.url = False
-        self.auth = False
-        self.path = path
-        self.config = config
-        self._get_config()
+    ES_URL: str = str(os.environ.get("ES_URL"))
+    ES_PASS: str = str(os.environ.get("ELASTIC_PASSWORD"))
+    ES_USER: str = str(os.environ.get("ELASTIC_USER") or "elastic")
 
-    def _get_config(self):
-        """add config if not passed"""
-        if not self.config:
-            self.config = AppConfig().config
-
-        es_url = self.config["application"]["es_url"]
-        self.auth = self.config["application"]["es_auth"]
-        self.url = f"{es_url}/{self.path}"
+    def __init__(self, path):
+        self.url = f"{self.ES_URL}/{path}"
+        self.auth = (self.ES_USER, self.ES_PASS)
 
     def get(self, data=False, timeout=10, print_error=True):
         """get data from es"""
