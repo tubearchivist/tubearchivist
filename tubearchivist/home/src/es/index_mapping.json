@@ -3,7 +3,8 @@
             "index_name": "config",
             "expected_map": {
                 "config": {
-                    "type": "object"
+                    "type": "object",
+                    "enabled": false
                 }
             },
             "expected_set": {
