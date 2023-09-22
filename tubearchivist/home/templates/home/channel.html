@@ -42,33 +42,33 @@
             {% for channel in results %}
                 <div class="channel-item {{ view_style }}">
                     <div class="channel-banner {{ view_style }}">
-                        <a href="{% url 'channel_id' channel.source.channel_id %}">
-                            <img src="/cache/channels/{{ channel.source.channel_id }}_banner.jpg" alt="{{ channel.source.channel_id }}-banner">
+                        <a href="{% url 'channel_id' channel.channel_id %}">
+                            <img src="/cache/channels/{{ channel.channel_id }}_banner.jpg" alt="{{ channel.channel_id }}-banner">
                         </a>
                     </div>
                     <div class="info-box info-box-2 {{ view_style }}">
                         <div class="info-box-item">
                             <div class="round-img">
-                                <a href="{% url 'channel_id' channel.source.channel_id %}">
-                                    <img src="/cache/channels/{{ channel.source.channel_id }}_thumb.jpg" alt="channel-thumb">
+                                <a href="{% url 'channel_id' channel.channel_id %}">
+                                    <img src="/cache/channels/{{ channel.channel_id }}_thumb.jpg" alt="channel-thumb">
                                 </a>
                             </div>
                             <div>
-                                <h3><a href="{% url 'channel_id' channel.source.channel_id %}">{{ channel.source.channel_name }}</a></h3>
-                                {% if channel.source.channel_subs >= 1000000 %}
-                                    <p>Subscribers: {{ channel.source.channel_subs|intword }}</p>
+                                <h3><a href="{% url 'channel_id' channel.channel_id %}">{{ channel.channel_name }}</a></h3>
+                                {% if channel.channel_subs >= 1000000 %}
+                                    <p>Subscribers: {{ channel.channel_subs|intword }}</p>
                                 {% else %}
-                                    <p>Subscribers: {{ channel.source.channel_subs|intcomma }}</p>
+                                    <p>Subscribers: {{ channel.channel_subs|intcomma }}</p>
                                 {% endif %}
                             </div>
                         </div>
                         <div class="info-box-item">
                             <div>
-                                <p>Last refreshed: {{ channel.source.channel_last_refresh }}</p>
-                                {% if channel.source.channel_subscribed %}
-                                    <button class="unsubscribe" type="button" data-type="channel" data-subscribe="" data-id="{{ channel.source.channel_id }}" onclick="subscribeStatus(this)" title="Unsubscribe from {{ channel.source.channel_name }}">Unsubscribe</button>
+                                <p>Last refreshed: {{ channel.channel_last_refresh }}</p>
+                                {% if channel.channel_subscribed %}
+                                    <button class="unsubscribe" type="button" data-type="channel" data-subscribe="" data-id="{{ channel.channel_id }}" onclick="subscribeStatus(this)" title="Unsubscribe from {{ channel.channel_name }}">Unsubscribe</button>
                                 {% else %}
-                                    <button type="button" data-type="channel" data-subscribe="true" data-id="{{ channel.source.channel_id }}" onclick="subscribeStatus(this)" title="Subscribe to {{ channel.source.channel_name }}">Subscribe</button>
+                                    <button type="button" data-type="channel" data-subscribe="true" data-id="{{ channel.channel_id }}" onclick="subscribeStatus(this)" title="Subscribe to {{ channel.channel_name }}">Subscribe</button>
                                 {% endif %}
                             </div>
                         </div>

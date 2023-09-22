@@ -32,7 +32,6 @@ from home.src.frontend.forms import (
     SubscribeToPlaylistForm,
     UserSettingsForm,
 )
-from home.src.frontend.searching import SearchHandler
 from home.src.index.channel import channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
@@ -200,12 +199,17 @@ class ArchivistResultsView(ArchivistViewConfig):
 
     def find_results(self):
         """add results and pagination to context"""
-        search = SearchHandler(self.es_search, data=self.data)
-        self.context["results"] = search.get_data()
-        self.pagination_handler.validate(search.max_hits)
-        self.context["max_hits"] = search.max_hits
-        self.context["pagination"] = self.pagination_handler.pagination
-        self.context["aggs"] = search.aggs
+        response, _ = ElasticWrap(self.es_search).get(self.data)
+        max_hits = response["hits"]["total"]["value"]
+        self.pagination_handler.validate(max_hits)
+        self.context.update(
+            {
+                "results": [i["_source"] for i in response["hits"]["hits"]],
+                "max_hits": max_hits,
+                "pagination": self.pagination_handler.pagination,
+                "aggs": response.get("aggregations"),
+            }
+        )
 
 
 class MinView(View):
@@ -499,7 +503,7 @@ class ChannelIdView(ChannelIdBaseView):
         self.channel_pages(channel_id)
 
         if self.context["results"]:
-            channel_info = self.context["results"][0]["source"]["channel"]
+            channel_info = self.context["results"][0]["channel"]
             channel_name = channel_info["channel_name"]
         else:
             # fall back channel lookup if no videos found
