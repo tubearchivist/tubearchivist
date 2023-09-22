@@ -835,7 +835,7 @@ class VideoView(MinView):
 
     def get(self, request, video_id):
         """get single video"""
-        config_handler = AppConfig(request.user.id)
+        config_handler = AppConfig()
         response, _ = ElasticWrap(f"ta_video/_doc/{video_id}").get()
         video_data = SearchProcess(response).process()
 
