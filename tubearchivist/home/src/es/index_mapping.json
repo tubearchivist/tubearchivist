@@ -1,5 +1,17 @@
 {
     "index_config": [{
+            "index_name": "config",
+            "expected_map": {
+                "config": {
+                    "type": "object",
+                    "enabled": false
+                }
+            },
+            "expected_set": {
+                "number_of_replicas": "0"
+            }
+        },
+        {
             "index_name": "channel",
             "expected_map": {
                 "channel_id": {

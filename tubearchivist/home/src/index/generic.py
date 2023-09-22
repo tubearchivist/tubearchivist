@@ -8,7 +8,7 @@ import math
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap
 from home.src.ta.config import AppConfig
-from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.users import UserConfig
 
 
 class YouTubeItem:
@@ -100,13 +100,7 @@ class Pagination:
 
     def get_page_size(self):
         """get default or user modified page_size"""
-        key = f"{self.request.user.id}:page_size"
-        page_size = RedisArchivist().get_message(key)["status"]
-        if not page_size:
-            config = AppConfig().config
-            page_size = config["archive"]["page_size"]
-
-        return page_size
+        return UserConfig(self.request.user.id).get_value("page_size")
 
     def first_guess(self):
         """build first guess before api call"""

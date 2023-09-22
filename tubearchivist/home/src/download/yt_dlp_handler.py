@@ -417,7 +417,7 @@ class VideoDownloader:
                 "lang": "painless",
             },
         }
-        response, _ = ElasticWrap(path, config=self.config).post(data=data)
+        response, _ = ElasticWrap(path).post(data=data)
         updated = response.get("updated")
         if updated:
             print(f"[download] reset auto start on {updated} videos.")

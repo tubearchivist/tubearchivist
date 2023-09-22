@@ -12,23 +12,21 @@ from datetime import datetime
 from api.src.search_processor import SearchProcess
 from home.src.download.thumbnails import ThumbManager
 from home.src.es.connect import ElasticWrap
-from home.src.ta.config import AppConfig
 from home.src.ta.helper import get_duration_str
 
 
 class SearchHandler:
     """search elastic search"""
 
-    def __init__(self, path, config, data=False):
+    def __init__(self, path, data=False):
         self.max_hits = None
         self.aggs = None
         self.path = path
-        self.config = config
         self.data = data
 
     def get_data(self):
         """get the data"""
-        response, _ = ElasticWrap(self.path, config=self.config).get(self.data)
+        response, _ = ElasticWrap(self.path).get(self.data)
 
         if "hits" in response.keys():
             self.max_hits = response["hits"]["total"]["value"]
@@ -109,8 +107,6 @@ class SearchHandler:
 
 class SearchForm:
     """build query from search form data"""
-
-    CONFIG = AppConfig().config
 
     def multi_search(self, search_query):
         """searching through index"""

@@ -50,7 +50,10 @@
             <div>
                 {% if max_hits %}
                     <p>Total Videos archived: {{ max_hits }}/{{ playlist_info.playlist_entries|length }}</p>
-                    <p>Watched: <button title="Mark all videos from {{ playlist_info.playlist_name }} as watched" type="button" id="watched-button" data-id="{{ playlist_info.playlist_id }}" onclick="isWatchedButton(this)">Mark as watched</button></p>
+                    <div id="watched-button" class="button-box">
+                        <button title="Mark all videos from {{ playlist_info.playlist_name }} as watched" type="button" id="watched-button" data-id="{{ playlist_info.playlist_id }}" onclick="isWatchedButton(this)">Mark as watched</button>
+                        <button title="Mark all videos from {{ playlist_info.playlist_name }} as unwatched" type="button" id="unwatched-button" data-id="{{ playlist_info.playlist_id }}" onclick="isUnwatchedButton(this)">Mark as unwatched</button>
+                    </div>
                 {% endif %}
                 {% if reindex %}
                     <p>Reindex scheduled</p>

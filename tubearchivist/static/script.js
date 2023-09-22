@@ -64,7 +64,15 @@ function isWatchedButton(button) {
   let youtube_id = button.getAttribute('data-id');
   let apiEndpoint = '/api/watched/';
   let data = { id: youtube_id, is_watched: true };
-  button.remove();
+  apiRequest(apiEndpoint, 'POST', data);
+  setTimeout(function () {
+    location.reload();
+  }, 1000);
+}
+function isUnwatchedButton(button) {
+  let youtube_id = button.getAttribute('data-id');
+  let apiEndpoint = '/api/watched/';
+  let data = { id: youtube_id, is_watched: false };
   apiRequest(apiEndpoint, 'POST', data);
   setTimeout(function () {
     location.reload();
