@@ -12,7 +12,7 @@ from api.src.search_processor import SearchProcess
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
 from django.views import View
 from home.src.download.queue import PendingInteract
@@ -181,8 +181,12 @@ class ArchivistResultsView(ArchivistViewConfig):
 
     def single_lookup(self, es_path):
         """retrieve a single item from url"""
-        search = SearchHandler(es_path)
-        result = search.get_data()[0]["source"]
+        response, status_code = ElasticWrap(es_path).get()
+        if not status_code == 200:
+            raise Http404
+
+        result = SearchProcess(response).process()
+
         return result
 
     def initiate_vars(self, request):
