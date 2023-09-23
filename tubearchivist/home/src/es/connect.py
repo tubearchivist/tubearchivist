@@ -27,7 +27,7 @@ class ElasticWrap:
         self.url: str = f"{self.ES_URL}/{path}"
         self.auth: tuple[str, str] = (self.ES_USER, self.ES_PASS)
 
-        if not self.ES_DISABLE_VERIFY_SSL:
+        if self.ES_DISABLE_VERIFY_SSL:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def get(
