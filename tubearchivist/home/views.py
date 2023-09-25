@@ -200,11 +200,12 @@ class ArchivistResultsView(ArchivistViewConfig):
     def find_results(self):
         """add results and pagination to context"""
         response, _ = ElasticWrap(self.es_search).get(self.data)
+        results = SearchProcess(response).process()
         max_hits = response["hits"]["total"]["value"]
         self.pagination_handler.validate(max_hits)
         self.context.update(
             {
-                "results": [i["_source"] for i in response["hits"]["hits"]],
+                "results": results,
                 "max_hits": max_hits,
                 "pagination": self.pagination_handler.pagination,
                 "aggs": response.get("aggregations"),
