@@ -246,9 +246,10 @@ class ThumbManager(ThumbManagerBase):
 class ValidatorCallback:
     """handle callback validate thumbnails page by page"""
 
-    def __init__(self, source, index_name):
+    def __init__(self, source, index_name, counter=0):
         self.source = source
         self.index_name = index_name
+        self.counter = counter
 
     def run(self):
         """run the task for page"""
@@ -384,9 +385,10 @@ class EmbedCallback:
     MEDIA_DIR = CONFIG["application"]["videos"]
     FORMAT = MP4Cover.FORMAT_JPEG
 
-    def __init__(self, source, index_name):
+    def __init__(self, source, index_name, counter=0):
         self.source = source
         self.index_name = index_name
+        self.counter = counter
 
     def run(self):
         """run embed"""

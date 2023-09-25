@@ -204,7 +204,9 @@ class IndexPaginate:
                     all_results.append(hit["_source"])
 
             if self.kwargs.get("callback"):
-                self.kwargs.get("callback")(all_hits, self.index_name).run()
+                self.kwargs.get("callback")(
+                    all_hits, self.index_name, counter=counter
+                ).run()
 
             if self.kwargs.get("task"):
                 print(f"{self.index_name}: processing page {counter}")
