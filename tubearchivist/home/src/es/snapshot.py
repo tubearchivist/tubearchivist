@@ -19,7 +19,9 @@ class ElasticSnapshot:
     REPO_SETTINGS = {
         "compress": "true",
         "chunk_size": "1g",
-        "location": "/usr/share/elasticsearch/data/snapshot",
+        "location": environ.get(
+            "ES_SNAPSHOT_DIR", "/usr/share/elasticsearch/data/snapshot"
+        ),
     }
     POLICY = "ta_daily"
 
