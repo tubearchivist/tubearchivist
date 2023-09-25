@@ -8,7 +8,7 @@ import json
 import urllib.parse
 from time import sleep
 
-from api.src.search_processor import SearchProcess
+from api.src.search_processor import SearchProcess, process_aggs
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
@@ -200,6 +200,7 @@ class ArchivistResultsView(ArchivistViewConfig):
     def find_results(self):
         """add results and pagination to context"""
         response, _ = ElasticWrap(self.es_search).get(self.data)
+        process_aggs(response)
         results = SearchProcess(response).process()
         max_hits = response["hits"]["total"]["value"]
         self.pagination_handler.validate(max_hits)

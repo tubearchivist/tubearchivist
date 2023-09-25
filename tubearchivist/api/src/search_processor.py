@@ -8,7 +8,7 @@ import urllib.parse
 
 from home.src.download.thumbnails import ThumbManager
 from home.src.ta.config import AppConfig
-from home.src.ta.helper import date_praser
+from home.src.ta.helper import date_praser, get_duration_str
 
 
 class SearchProcess:
@@ -163,3 +163,15 @@ class SearchProcess:
         subtitle_dict.update({"vid_thumb_url": f"/cache/{thumb_path}"})
 
         return subtitle_dict
+
+
+def process_aggs(response):
+    """convert aggs duration to str"""
+
+    if response.get("aggregations"):
+        aggs = response["aggregations"]
+        if "total_duration" in aggs:
+            duration_sec = int(aggs["total_duration"]["value"])
+            aggs["total_duration"].update(
+                {"value_str": get_duration_str(duration_sec)}
+            )
