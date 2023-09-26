@@ -175,7 +175,6 @@ if bool(environ.get("TA_LDAP")):
             ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_NEVER,
         }
 
-    global AUTHENTICATION_BACKENDS
     AUTHENTICATION_BACKENDS = ("django_auth_ldap.backend.LDAPBackend",)
 
 # Database
@@ -210,6 +209,19 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTH_USER_MODEL = "home.Account"
+
+# Forward-auth authentication
+if bool(environ.get("TA_ENABLE_AUTH_PROXY")):
+    TA_AUTH_PROXY_USERNAME_HEADER = (
+        environ.get("TA_AUTH_PROXY_USERNAME_HEADER") or "HTTP_REMOTE_USER"
+    )
+    TA_AUTH_PROXY_LOGOUT_URL = environ.get("TA_AUTH_PROXY_LOGOUT_URL")
+
+    MIDDLEWARE.append("home.src.ta.auth.HttpRemoteUserMiddleware")
+
+    AUTHENTICATION_BACKENDS = (
+        "django.contrib.auth.backends.RemoteUserBackend",
+    )
 
 
 # Internationalization

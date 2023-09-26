@@ -3,18 +3,30 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LogoutView
+from django.shortcuts import redirect
 from django.urls import path
 from home import views
 
-urlpatterns = [
-    path("", login_required(views.HomeView.as_view()), name="home"),
-    path("login/", views.LoginView.as_view(), name="login"),
-    path(
+if hasattr(settings, "TA_AUTH_PROXY_LOGOUT_URL"):
+    logout_path = path(
+        "logout/",
+        lambda request: redirect(
+            settings.TA_AUTH_PROXY_LOGOUT_URL, permanent=False
+        ),
+        name="logout",
+    )
+else:
+    logout_path = path(
         "logout/",
         LogoutView.as_view(),
         {"next_page": settings.LOGOUT_REDIRECT_URL},
         name="logout",
-    ),
+    )
+
+urlpatterns = [
+    path("", login_required(views.HomeView.as_view()), name="home"),
+    path("login/", views.LoginView.as_view(), name="login"),
+    logout_path,
     path("about/", views.AboutView.as_view(), name="about"),
     path(
         "downloads/",
