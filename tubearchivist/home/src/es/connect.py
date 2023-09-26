@@ -6,9 +6,11 @@ functionality:
 # pylint: disable=missing-timeout
 
 import json
+import os
+from typing import Any
 
 import requests
-from home.src.ta.config import AppConfig
+import urllib3
 
 
 class ElasticWrap:
@@ -16,61 +18,96 @@ class ElasticWrap:
     returns response json and status code tuple
     """
 
-    def __init__(self, path, config=False):
-        self.url = False
-        self.auth = False
-        self.path = path
-        self.config = config
-        self._get_config()
+    ES_URL: str = str(os.environ.get("ES_URL"))
+    ES_PASS: str = str(os.environ.get("ELASTIC_PASSWORD"))
+    ES_USER: str = str(os.environ.get("ELASTIC_USER") or "elastic")
+    ES_DISABLE_VERIFY_SSL: bool = bool(os.environ.get("ES_DISABLE_VERIFY_SSL"))
 
-    def _get_config(self):
-        """add config if not passed"""
-        if not self.config:
-            self.config = AppConfig().config
+    def __init__(self, path: str):
+        self.url: str = f"{self.ES_URL}/{path}"
+        self.auth: tuple[str, str] = (self.ES_USER, self.ES_PASS)
 
-        es_url = self.config["application"]["es_url"]
-        self.auth = self.config["application"]["es_auth"]
-        self.url = f"{es_url}/{self.path}"
+        if self.ES_DISABLE_VERIFY_SSL:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    def get(self, data=False, timeout=10, print_error=True):
+    def get(
+        self,
+        data: bool | dict = False,
+        timeout: int = 10,
+        print_error: bool = True,
+    ) -> tuple[dict, int]:
         """get data from es"""
+
+        kwargs: dict[str, Any] = {
+            "auth": self.auth,
+            "timeout": timeout,
+        }
+
+        if self.ES_DISABLE_VERIFY_SSL:
+            kwargs["verify"] = False
+
         if data:
-            response = requests.get(
-                self.url, json=data, auth=self.auth, timeout=timeout
-            )
-        else:
-            response = requests.get(self.url, auth=self.auth, timeout=timeout)
+            kwargs["json"] = data
+
+        response = requests.get(self.url, **kwargs)
+
         if print_error and not response.ok:
             print(response.text)
 
         return response.json(), response.status_code
 
-    def post(self, data=False, ndjson=False):
+    def post(
+        self, data: bool | dict = False, ndjson: bool = False
+    ) -> tuple[dict, int]:
         """post data to es"""
-        if ndjson:
-            headers = {"Content-type": "application/x-ndjson"}
-            payload = data
-        else:
-            headers = {"Content-type": "application/json"}
-            payload = json.dumps(data)
 
-        if data:
-            response = requests.post(
-                self.url, data=payload, headers=headers, auth=self.auth
+        kwargs: dict[str, Any] = {"auth": self.auth}
+
+        if ndjson and data:
+            kwargs.update(
+                {
+                    "headers": {"Content-type": "application/x-ndjson"},
+                    "data": data,
+                }
             )
-        else:
-            response = requests.post(self.url, headers=headers, auth=self.auth)
+        elif data:
+            kwargs.update(
+                {
+                    "headers": {"Content-type": "application/json"},
+                    "data": json.dumps(data),
+                }
+            )
+
+        if self.ES_DISABLE_VERIFY_SSL:
+            kwargs["verify"] = False
+
+        response = requests.post(self.url, **kwargs)
 
         if not response.ok:
             print(response.text)
 
         return response.json(), response.status_code
 
-    def put(self, data, refresh=False):
+    def put(
+        self,
+        data: bool | dict = False,
+        refresh: bool = False,
+    ) -> tuple[dict, Any]:
         """put data to es"""
+
         if refresh:
             self.url = f"{self.url}/?refresh=true"
-        response = requests.put(f"{self.url}", json=data, auth=self.auth)
+
+        kwargs: dict[str, Any] = {
+            "json": data,
+            "auth": self.auth,
+        }
+
+        if self.ES_DISABLE_VERIFY_SSL:
+            kwargs["verify"] = False
+
+        response = requests.put(self.url, **kwargs)
+
         if not response.ok:
             print(response.text)
             print(data)
@@ -78,14 +115,25 @@ class ElasticWrap:
 
         return response.json(), response.status_code
 
-    def delete(self, data=False, refresh=False):
+    def delete(
+        self,
+        data: bool | dict = False,
+        refresh: bool = False,
+    ) -> tuple[dict, Any]:
         """delete document from es"""
+
         if refresh:
             self.url = f"{self.url}/?refresh=true"
+
+        kwargs: dict[str, Any] = {"auth": self.auth}
+
         if data:
-            response = requests.delete(self.url, json=data, auth=self.auth)
-        else:
-            response = requests.delete(self.url, auth=self.auth)
+            kwargs["json"] = data
+
+        if self.ES_DISABLE_VERIFY_SSL:
+            kwargs["verify"] = False
+
+        response = requests.delete(self.url, **kwargs)
 
         if not response.ok:
             print(response.text)
@@ -156,7 +204,9 @@ class IndexPaginate:
                     all_results.append(hit["_source"])
 
             if self.kwargs.get("callback"):
-                self.kwargs.get("callback")(all_hits, self.index_name).run()
+                self.kwargs.get("callback")(
+                    all_hits, self.index_name, counter=counter
+                ).run()
 
             if self.kwargs.get("task"):
                 print(f"{self.index_name}: processing page {counter}")

@@ -58,7 +58,12 @@ Take a look at the example [docker-compose.yml](https://github.com/tubearchivist
 | TZ | Set your timezone for the scheduler | Required |
 | TA_PORT | Overwrite Nginx port | Optional |
 | TA_UWSGI_PORT | Overwrite container internal uwsgi port | Optional |
+| TA_ENABLE_AUTH_PROXY | Enables support for forwarding auth in reverse proxies | [Read more](https://docs.tubearchivist.com/configuration/forward-auth/) |
+| TA_AUTH_PROXY_USERNAME_HEADER | Header containing username to log in | Optional |
+| TA_AUTH_PROXY_LOGOUT_URL | Logout URL for forwarded auth | Opttional |
 | ES_URL | URL That ElasticSearch runs on | Optional |
+| ES_DISABLE_VERIFY_SSL | Disable ElasticSearch SSL certificate verification | Optional |
+| ES_SNAPSHOT_DIR | Custom path where elastic search stores snapshots for master/data nodes | Optional |
 | HOST_GID | Allow TA to own the video files instead of container user | Optional |
 | HOST_UID | Allow TA to own the video files instead of container user | Optional |
 | ELASTIC_USER | Change the default ElasticSearch user | Optional |

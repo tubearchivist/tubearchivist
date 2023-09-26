@@ -8,11 +8,11 @@ import json
 import urllib.parse
 from time import sleep
 
-from api.src.search_processor import SearchProcess
+from api.src.search_processor import SearchProcess, process_aggs
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
 from django.views import View
 from home.src.download.queue import PendingInteract
@@ -32,7 +32,6 @@ from home.src.frontend.forms import (
     SubscribeToPlaylistForm,
     UserSettingsForm,
 )
-from home.src.frontend.searching import SearchHandler
 from home.src.index.channel import channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
@@ -41,6 +40,7 @@ from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.helper import time_parser
 from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.users import UserConfig
 from home.tasks import index_channel_playlists, subscribe_to
 from rest_framework.authtoken.models import Token
 
@@ -52,93 +52,38 @@ class ArchivistViewConfig(View):
         super().__init__()
         self.view_origin = view_origin
         self.user_id = False
-        self.user_conf = False
+        self.user_conf: UserConfig = False
         self.default_conf = False
         self.context = False
 
-    def _get_sort_by(self):
-        """return sort_by config var"""
-        messag_key = f"{self.user_id}:sort_by"
-        sort_by = self.user_conf.get_message(messag_key)["status"]
-        if not sort_by:
-            sort_by = self.default_conf["archive"]["sort_by"]
-
-        return sort_by
-
-    def _get_sort_order(self):
-        """return sort_order config var"""
-        sort_order_key = f"{self.user_id}:sort_order"
-        sort_order = self.user_conf.get_message(sort_order_key)["status"]
-        if not sort_order:
-            sort_order = self.default_conf["archive"]["sort_order"]
-
-        return sort_order
-
-    def _get_view_style(self):
-        """return view_style config var"""
-        view_key = f"{self.user_id}:view:{self.view_origin}"
-        view_style = self.user_conf.get_message(view_key)["status"]
-        if not view_style:
-            view_style = self.default_conf["default_view"][self.view_origin]
-
-        return view_style
-
-    def _get_grid_items(self):
-        """return items per row to show in grid view"""
-        grid_key = f"{self.user_id}:grid_items"
-        grid_items = self.user_conf.get_message(grid_key)["status"]
-        if not grid_items:
-            grid_items = self.default_conf["default_view"]["grid_items"]
-
-        return grid_items
-
     def get_all_view_styles(self):
-        """get dict of all view stiles for search form"""
-        all_keys = ["channel", "playlist", "home"]
+        """get dict of all view styles for search form"""
         all_styles = {}
-        for view_origin in all_keys:
-            view_key = f"{self.user_id}:view:{view_origin}"
-            view_style = self.user_conf.get_message(view_key)["status"]
-            if not view_style:
-                view_style = self.default_conf["default_view"][view_origin]
-            all_styles[view_origin] = view_style
+        for view_origin in ["channel", "playlist", "home", "downloads"]:
+            all_styles[view_origin] = self.user_conf.get_value(
+                f"view_style_{view_origin}"
+            )
 
         return all_styles
-
-    def _get_hide_watched(self):
-        hide_watched_key = f"{self.user_id}:hide_watched"
-        hide_watched = self.user_conf.get_message(hide_watched_key)["status"]
-
-        return hide_watched
-
-    def _get_show_ignore_only(self):
-        ignored_key = f"{self.user_id}:show_ignored_only"
-        show_ignored_only = self.user_conf.get_message(ignored_key)["status"]
-
-        return show_ignored_only
-
-    def _get_show_subed_only(self):
-        sub_only_key = f"{self.user_id}:show_subed_only"
-        show_subed_only = self.user_conf.get_message(sub_only_key)["status"]
-
-        return show_subed_only
 
     def config_builder(self, user_id):
         """build default context for every view"""
         self.user_id = user_id
-        self.user_conf = RedisArchivist()
-        self.default_conf = AppConfig(self.user_id).config
+        self.user_conf = UserConfig(self.user_id)
+        self.default_conf = AppConfig().config
 
         self.context = {
-            "colors": self.default_conf["application"]["colors"],
+            "colors": self.user_conf.get_value("colors"),
             "cast": self.default_conf["application"]["enable_cast"],
-            "sort_by": self._get_sort_by(),
-            "sort_order": self._get_sort_order(),
-            "view_style": self._get_view_style(),
-            "grid_items": self._get_grid_items(),
-            "hide_watched": self._get_hide_watched(),
-            "show_ignored_only": self._get_show_ignore_only(),
-            "show_subed_only": self._get_show_subed_only(),
+            "sort_by": self.user_conf.get_value("sort_by"),
+            "sort_order": self.user_conf.get_value("sort_order"),
+            "view_style": self.user_conf.get_value(
+                f"view_style_{self.view_origin}"
+            ),
+            "grid_items": self.user_conf.get_value("grid_items"),
+            "hide_watched": self.user_conf.get_value("hide_watched"),
+            "show_ignored_only": self.user_conf.get_value("show_ignored_only"),
+            "show_subed_only": self.user_conf.get_value("show_subed_only"),
             "version": settings.TA_VERSION,
             "ta_update": ReleaseVersion().get_update(),
         }
@@ -212,32 +157,35 @@ class ArchivistResultsView(ArchivistViewConfig):
         """get all videos in progress"""
         ids = [{"match": {"youtube_id": i.get("youtube_id")}} for i in results]
         data = {
-            "size": self.default_conf["archive"]["page_size"],
+            "size": UserConfig(self.user_id).get_value("page_size"),
             "query": {"bool": {"should": ids}},
             "sort": [{"published": {"order": "desc"}}],
         }
-        search = SearchHandler(
-            "ta_video/_search", self.default_conf, data=data
-        )
-        videos = search.get_data()
+        response, _ = ElasticWrap("ta_video/_search").get(data)
+        videos = SearchProcess(response).process()
+
         if not videos:
             return False
 
         for video in videos:
-            youtube_id = video["source"]["youtube_id"]
+            youtube_id = video["youtube_id"]
             matched = [i for i in results if i["youtube_id"] == youtube_id]
             played_sec = matched[0]["position"]
-            total = video["source"]["player"]["duration"]
+            total = video["player"]["duration"]
             if not total:
                 total = matched[0].get("position") * 2
-            video["source"]["player"]["progress"] = 100 * (played_sec / total)
+            video["player"]["progress"] = 100 * (played_sec / total)
 
         return videos
 
     def single_lookup(self, es_path):
         """retrieve a single item from url"""
-        search = SearchHandler(es_path, config=self.default_conf)
-        result = search.get_data()[0]["source"]
+        response, status_code = ElasticWrap(es_path).get()
+        if not status_code == 200:
+            raise Http404
+
+        result = SearchProcess(response).process()
+
         return result
 
     def initiate_vars(self, request):
@@ -251,14 +199,19 @@ class ArchivistResultsView(ArchivistViewConfig):
 
     def find_results(self):
         """add results and pagination to context"""
-        search = SearchHandler(
-            self.es_search, config=self.default_conf, data=self.data
+        response, _ = ElasticWrap(self.es_search).get(self.data)
+        process_aggs(response)
+        results = SearchProcess(response).process()
+        max_hits = response["hits"]["total"]["value"]
+        self.pagination_handler.validate(max_hits)
+        self.context.update(
+            {
+                "results": results,
+                "max_hits": max_hits,
+                "pagination": self.pagination_handler.pagination,
+                "aggs": response.get("aggregations"),
+            }
         )
-        self.context["results"] = search.get_data()
-        self.pagination_handler.validate(search.max_hits)
-        self.context["max_hits"] = search.max_hits
-        self.context["pagination"] = self.pagination_handler.pagination
-        self.context["aggs"] = search.aggs
 
 
 class MinView(View):
@@ -268,7 +221,7 @@ class MinView(View):
     def get_min_context(request):
         """build minimal vars for context"""
         return {
-            "colors": AppConfig(request.user.id).colors,
+            "colors": UserConfig(request.user.id).get_value("colors"),
             "version": settings.TA_VERSION,
             "ta_update": ReleaseVersion().get_update(),
         }
@@ -552,7 +505,7 @@ class ChannelIdView(ChannelIdBaseView):
         self.channel_pages(channel_id)
 
         if self.context["results"]:
-            channel_info = self.context["results"][0]["source"]["channel"]
+            channel_info = self.context["results"][0]["channel"]
             channel_name = channel_info["channel_name"]
         else:
             # fall back channel lookup if no videos found
@@ -892,9 +845,10 @@ class VideoView(MinView):
 
     def get(self, request, video_id):
         """get single video"""
-        config_handler = AppConfig(request.user.id)
-        look_up = SearchHandler(f"ta_video/_doc/{video_id}", config=False)
-        video_data = look_up.get_data()[0]["source"]
+        config_handler = AppConfig()
+        response, _ = ElasticWrap(f"ta_video/_doc/{video_id}").get()
+        video_data = SearchProcess(response).process()
+
         try:
             rating = video_data["stats"]["average_rating"]
             video_data["stats"]["average_rating"] = self.star_creator(rating)
@@ -1005,7 +959,9 @@ class SettingsUserView(MinView):
         context.update(
             {
                 "title": "User Settings",
-                "config": AppConfig(request.user.id).config,
+                "page_size": UserConfig(request.user.id).get_value(
+                    "page_size"
+                ),
                 "user_form": UserSettingsForm(),
             }
         )
@@ -1015,10 +971,17 @@ class SettingsUserView(MinView):
     def post(self, request):
         """handle form post to update settings"""
         user_form = UserSettingsForm(request.POST)
+        config_handler = UserConfig(request.user.id)
         if user_form.is_valid():
             user_form_post = user_form.cleaned_data
-            if any(user_form_post.values()):
-                AppConfig().set_user_config(user_form_post, request.user.id)
+            if user_form_post.get("colors"):
+                config_handler.set_value(
+                    "colors", user_form_post.get("colors")
+                )
+            if user_form_post.get("page_size"):
+                config_handler.set_value(
+                    "page_size", user_form_post.get("page_size")
+                )
 
         sleep(1)
         return redirect("settings_user", permanent=True)
@@ -1037,7 +1000,7 @@ class SettingsApplicationView(MinView):
         context.update(
             {
                 "title": "Application Settings",
-                "config": AppConfig(request.user.id).config,
+                "config": AppConfig().config,
                 "api_token": self.get_token(request),
                 "app_form": ApplicationSettingsForm(),
                 "snapshots": ElasticSnapshot().get_snapshot_stats(),
@@ -1126,7 +1089,7 @@ class SettingsSchedulingView(MinView):
         context.update(
             {
                 "title": "Scheduling Settings",
-                "config": AppConfig(request.user.id).config,
+                "config": AppConfig().config,
                 "scheduler_form": SchedulerSettingsForm(),
             }
         )

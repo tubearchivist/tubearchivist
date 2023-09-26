@@ -141,7 +141,7 @@
         <div class="settings-item">
             <p>Import YouTube cookie: <span class="settings-current">{{ config.downloads.cookie_import }}</span><br></p>
             <p>For automatic cookie import use <b>Tube Archivist Companion</b> <a href="https://github.com/tubearchivist/browser-extension" target="_blank">browser extension</a>.</p> 
-            <i>For manual cookie import, place your cookie file named <span class="settings-current">cookies.google.txt</span> in <span class="settings-current">cache/import</span> before enabling. Instructions in the <a href="https://docs.tubearchivist.com/settings/" target="_blank">Wiki.</a></i><br>
+            <i>For manual cookie import, place your cookie file named <span class="settings-current">cookies.google.txt</span> in <span class="settings-current">cache/import</span> before enabling. Instructions in the <a href="https://docs.tubearchivist.com/settings/application/#cookie" target="_blank">Wiki.</a></i><br>
             {{ app_form.downloads_cookie_import }}<br>
             {% if config.downloads.cookie_import %}
                 <div id="cookieMessage">
@@ -174,7 +174,7 @@
         <h2 id="snapshots">Snapshots</h2>
         <div class="settings-item">
             <p>Current system snapshot: <span class="settings-current">{{ config.application.enable_snapshot }}</span></p>
-            <i>Automatically create daily deduplicated snapshots of the index, stored in Elasticsearch. Read first before activating: <a target="_blank" href="https://docs.tubearchivist.com/settings/#snapshots">Wiki</a>.</i><br>
+            <i>Automatically create daily deduplicated snapshots of the index, stored in Elasticsearch. Read first before activating: <a target="_blank" href="https://docs.tubearchivist.com/settings/application/#snapshots">Wiki</a>.</i><br>
             {{ app_form.application_enable_snapshot }}
         </div>
         <div>

@@ -7,6 +7,7 @@ import json
 import os
 import random
 import string
+import subprocess
 from datetime import datetime
 from urllib.parse import urlparse
 
@@ -139,6 +140,47 @@ def is_shorts(youtube_id: str) -> bool:
     )
 
     return response.status_code == 200
+
+
+def get_duration_sec(file_path: str) -> int:
+    """get duration of media file from file path"""
+
+    duration = subprocess.run(
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
+            file_path,
+        ],
+        capture_output=True,
+        check=True,
+    )
+    duration_raw = duration.stdout.decode().strip()
+    if duration_raw == "N/A":
+        return 0
+
+    duration_sec = int(float(duration_raw))
+    return duration_sec
+
+
+def get_duration_str(seconds: int) -> str:
+    """Return a human-readable duration string from seconds."""
+    if not seconds:
+        return "NA"
+
+    units = [("y", 31536000), ("d", 86400), ("h", 3600), ("m", 60), ("s", 1)]
+    duration_parts = []
+
+    for unit_label, unit_seconds in units:
+        if seconds >= unit_seconds:
+            unit_count, seconds = divmod(seconds, unit_seconds)
+            duration_parts.append(f"{unit_count}{unit_label}")
+
+    return " ".join(duration_parts)
 
 
 def ta_host_parser(ta_host: str) -> tuple[list[str], list[str]]:

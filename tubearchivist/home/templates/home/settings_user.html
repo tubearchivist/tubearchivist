@@ -9,7 +9,7 @@
     <div class="settings-group">
         <h2>Color scheme</h2>
         <div class="settings-item">
-            <p>Current color scheme: <span class="settings-current">{{ config.application.colors }}</span></p>
+            <p>Current color scheme: <span class="settings-current">{{ colors }}</span></p>
             <i>Select your preferred color scheme between dark and light mode.</i><br>
             {{ user_form.colors }}
         </div>
@@ -17,7 +17,7 @@
     <div class="settings-group">
         <h2>Archive View</h2>
         <div class="settings-item">
-            <p>Current page size: <span class="settings-current">{{ config.archive.page_size }}</span></p>
+            <p>Current page size: <span class="settings-current">{{ page_size }}</span></p>
             <i>Result of videos showing in archive page</i><br>
             {{ user_form.page_size }}
         </div>

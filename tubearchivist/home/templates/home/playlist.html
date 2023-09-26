@@ -40,18 +40,18 @@
             {% for playlist in results %}
             <div class="playlist-item {{ view_style }}">
                 <div class="playlist-thumbnail">
-                    <a href="{% url 'playlist_id' playlist.source.playlist_id %}">
-                        <img src="/cache/playlists/{{ playlist.source.playlist_id }}.jpg" alt="{{ playlist.source.playlist_id }}-thumbnail">
+                    <a href="{% url 'playlist_id' playlist.playlist_id %}">
+                        <img src="/cache/playlists/{{ playlist.playlist_id }}.jpg" alt="{{ playlist.playlist_id }}-thumbnail">
                     </a>
                 </div>
                 <div class="playlist-desc {{ view_style }}">
-                    <a href="{% url 'channel_id' playlist.source.playlist_channel_id %}"><h3>{{ playlist.source.playlist_channel }}</h3></a>
-                    <a href="{% url 'playlist_id' playlist.source.playlist_id %}"><h2>{{ playlist.source.playlist_name }}</h2></a>
-                    <p>Last refreshed: {{ playlist.source.playlist_last_refresh }}</p>
-                    {% if playlist.source.playlist_subscribed %}
-                        <button class="unsubscribe" type="button" data-type="playlist" data-subscribe="" data-id="{{ playlist.source.playlist_id }}" onclick="subscribeStatus(this)" title="Unsubscribe from {{ playlist.source.playlist_name }}">Unsubscribe</button>
+                    <a href="{% url 'channel_id' playlist.playlist_channel_id %}"><h3>{{ playlist.playlist_channel }}</h3></a>
+                    <a href="{% url 'playlist_id' playlist.playlist_id %}"><h2>{{ playlist.playlist_name }}</h2></a>
+                    <p>Last refreshed: {{ playlist.playlist_last_refresh }}</p>
+                    {% if playlist.playlist_subscribed %}
+                        <button class="unsubscribe" type="button" data-type="playlist" data-subscribe="" data-id="{{ playlist.playlist_id }}" onclick="subscribeStatus(this)" title="Unsubscribe from {{ playlist.playlist_name }}">Unsubscribe</button>
                     {% else %}
-                        <button type="button" data-type="playlist" data-subscribe="true" data-id="{{ playlist.source.playlist_id }}" onclick="subscribeStatus(this)" title="Subscribe to {{ playlist.source.playlist_name }}">Subscribe</button>
+                        <button type="button" data-type="playlist" data-subscribe="true" data-id="{{ playlist.playlist_id }}" onclick="subscribeStatus(this)" title="Subscribe to {{ playlist.playlist_name }}">Subscribe</button>
                     {% endif %}
                 </div>
             </div>

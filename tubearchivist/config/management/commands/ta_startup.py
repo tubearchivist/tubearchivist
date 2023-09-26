@@ -16,6 +16,7 @@ from home.src.ta.config import AppConfig, ReleaseVersion
 from home.src.ta.helper import clear_dl_cache
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskManager
+from home.src.ta.users import UserConfig
 
 TOPIC = """
 
@@ -44,6 +45,7 @@ class Command(BaseCommand):
         self._mig_snapshot_check()
         self._mig_set_streams()
         self._mig_set_autostart()
+        self._mig_move_users_to_es()
 
     def _sync_redis_state(self):
         """make sure redis gets new config.json values"""
@@ -219,3 +221,99 @@ class Command(BaseCommand):
         self.stdout.write(response)
         sleep(60)
         raise CommandError(message)
+
+    def _mig_move_users_to_es(self):  # noqa: C901
+        """migration: update from 0.4.1 to 0.5.0 move user config to ES"""
+        self.stdout.write("[MIGRATION] move user configuration to ES")
+        redis = RedisArchivist()
+
+        # 1: Find all users in Redis
+        users = {i.split(":")[0] for i in redis.list_keys("[0-9]*:")}
+        if not users:
+            self.stdout.write("    no users needed migrating to ES")
+            return
+
+        # 2: Write all Redis user settings to ES
+        # 3: Remove user settings from Redis
+        try:
+            for user in users:
+                new_conf = UserConfig(user)
+
+                colors_key = f"{user}:colors"
+                colors = redis.get_message(colors_key).get("status")
+                if colors is not None:
+                    new_conf.set_value("colors", colors)
+                    redis.del_message(colors_key)
+
+                sort_by_key = f"{user}:sort_by"
+                sort_by = redis.get_message(sort_by_key).get("status")
+                if sort_by is not None:
+                    new_conf.set_value("sort_by", sort_by)
+                    redis.del_message(sort_by_key)
+
+                page_size_key = f"{user}:page_size"
+                page_size = redis.get_message(page_size_key).get("status")
+                if page_size is not None:
+                    new_conf.set_value("page_size", page_size)
+                    redis.del_message(page_size_key)
+
+                sort_order_key = f"{user}:sort_order"
+                sort_order = redis.get_message(sort_order_key).get("status")
+                if sort_order is not None:
+                    new_conf.set_value("sort_order", sort_order)
+                    redis.del_message(sort_order_key)
+
+                grid_items_key = f"{user}:grid_items"
+                grid_items = redis.get_message(grid_items_key).get("status")
+                if grid_items is not None:
+                    new_conf.set_value("grid_items", grid_items)
+                    redis.del_message(grid_items_key)
+
+                hide_watch_key = f"{user}:hide_watched"
+                hide_watch = redis.get_message(hide_watch_key).get("status")
+                if hide_watch is not None:
+                    new_conf.set_value("hide_watched", hide_watch)
+                    redis.del_message(hide_watch_key)
+
+                ignore_only_key = f"{user}:show_ignored_only"
+                ignore_only = redis.get_message(ignore_only_key).get("status")
+                if ignore_only is not None:
+                    new_conf.set_value("show_ignored_only", ignore_only)
+                    redis.del_message(ignore_only_key)
+
+                subed_only_key = f"{user}:show_subed_only"
+                subed_only = redis.get_message(subed_only_key).get("status")
+                if subed_only is not None:
+                    new_conf.set_value("show_subed_only", subed_only)
+                    redis.del_message(subed_only_key)
+
+                sb_id_key = f"{user}:id_sb_id"
+                sb_id = redis.get_message(sb_id_key).get("status")
+                if sb_id is not None:
+                    new_conf.set_value("sb_id_id", sb_id)
+                    redis.del_message(sb_id_key)
+
+                for view in ["channel", "playlist", "home", "downloads"]:
+                    view_key = f"{user}:view:{view}"
+                    view_style = redis.get_message(view_key).get("status")
+                    if view_style is not None:
+                        new_conf.set_value(f"view_style_{view}", view_style)
+                        redis.del_message(view_key)
+
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"    ✓ Settings for user '{user}' migrated to ES"
+                    )
+                )
+        except Exception as e:
+            message = "    🗙 user migration to ES failed"
+            self.stdout.write(self.style.ERROR(message))
+            self.stdout.write(self.style.ERROR(e))
+            sleep(60)
+            raise CommandError(message)
+        else:
+            self.stdout.write(
+                self.style.SUCCESS(
+                    "    ✓ Settings for all users migrated to ES"
+                )
+            )
