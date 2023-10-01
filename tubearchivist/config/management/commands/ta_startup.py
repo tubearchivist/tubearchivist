@@ -287,12 +287,6 @@ class Command(BaseCommand):
                     new_conf.set_value("show_subed_only", subed_only)
                     redis.del_message(subed_only_key)
 
-                sb_id_key = f"{user}:id_sb_id"
-                sb_id = redis.get_message(sb_id_key).get("status")
-                if sb_id is not None:
-                    new_conf.set_value("sb_id_id", sb_id)
-                    redis.del_message(sb_id_key)
-
                 for view in ["channel", "playlist", "home", "downloads"]:
                     view_key = f"{user}:view:{view}"
                     view_style = redis.get_message(view_key).get("status")
