@@ -144,8 +144,7 @@ class ArchivistResultsView(ArchivistViewConfig):
         self.context["continue_vids"] = self.get_in_progress(results)
 
         in_progress = {i["youtube_id"]: i["position"] for i in results}
-        for hit in self.context["results"]:
-            video = hit["source"]
+        for video in self.context["results"]:
             if video["youtube_id"] in in_progress:
                 played_sec = in_progress.get(video["youtube_id"])
                 total = video["player"]["duration"]
