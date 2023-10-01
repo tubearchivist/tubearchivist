@@ -151,6 +151,8 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Show total video downloaded vs total videos available in channel
 - [ ] Download or Ignore videos by keyword ([#163](https://github.com/tubearchivist/tubearchivist/issues/163))
 - [ ] Custom searchable notes to videos, channels, playlists ([#144](https://github.com/tubearchivist/tubearchivist/issues/144))
+- [ ] Search comments
+- [ ] Search download queue
 
 Implemented:
 - [X] Add statistics of index [2023-09-03]
