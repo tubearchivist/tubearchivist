@@ -152,6 +152,7 @@ class ElasitIndexWrap:
             index_name, expected_map, expected_set = self._config_split(index)
             handler = ElasticIndex(index_name, expected_map, expected_set)
             if not handler.exists:
+                self._check_backup()
                 handler.create_blank()
                 continue
 
