@@ -60,7 +60,7 @@ Take a look at the example [docker-compose.yml](https://github.com/tubearchivist
 | TA_UWSGI_PORT | Overwrite container internal uwsgi port | Optional |
 | TA_ENABLE_AUTH_PROXY | Enables support for forwarding auth in reverse proxies | [Read more](https://docs.tubearchivist.com/configuration/forward-auth/) |
 | TA_AUTH_PROXY_USERNAME_HEADER | Header containing username to log in | Optional |
-| TA_AUTH_PROXY_LOGOUT_URL | Logout URL for forwarded auth | Opttional |
+| TA_AUTH_PROXY_LOGOUT_URL | Logout URL for forwarded auth | Optional |
 | ES_URL | URL That ElasticSearch runs on | Optional |
 | ES_DISABLE_VERIFY_SSL | Disable ElasticSearch SSL certificate verification | Optional |
 | ES_SNAPSHOT_DIR | Custom path where elastic search stores snapshots for master/data nodes | Optional |
