@@ -663,7 +663,7 @@ class LoginApiView(ObtainAuthToken):
 
 class SnapshotApiListView(ApiBaseView):
     """resolves to /api/snapshot/
-    GET: returns snashot config plus list of existing snapshots
+    GET: returns snapshot config plus list of existing snapshots
     POST: take snapshot now
     """
 
