@@ -187,6 +187,11 @@ class PlaylistSubscription:
             playlist_h = YoutubePlaylist(playlist_id)
             playlist_h.all_youtube_ids = all_youtube_ids
             playlist_h.build_json()
+            if not playlist_h.json_data:
+                message = f"{playlist_h.youtube_id}: failed to extract data"
+                print(message)
+                raise ValueError(message)
+
             playlist_h.json_data["playlist_subscribed"] = subscribed
             playlist_h.upload_to_es()
             playlist_h.add_vids_to_playlist()
