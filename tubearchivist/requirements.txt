@@ -1,13 +1,13 @@
 apprise==1.5.0
 celery==5.3.4
-Django==4.2.5
-django-auth-ldap==4.5.0
+Django==4.2.6
+django-auth-ldap==4.6.0
 django-cors-headers==4.2.0
 djangorestframework==3.14.0
 Pillow==10.0.1
-redis==5.0.0
+redis==5.0.1
 requests==2.31.0
 ryd-client==0.0.6
 uWSGI==2.0.22
 whitenoise==6.5.0
-yt-dlp @ git+https://github.com/yt-dlp/yt-dlp@cc8d8441524ec3442d7c0d3f8f33f15b66aa06f3
+yt-dlp==2023.10.7
