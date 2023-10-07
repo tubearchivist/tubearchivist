@@ -223,7 +223,7 @@ class Command(BaseCommand):
         raise CommandError(message)
 
     def _mig_move_users_to_es(self):  # noqa: C901
-        """migration: update from 0.4.1 to 0.5.0 move user config to ES"""
+        """migration: update from 0.4.1 to 0.4.2 move user config to ES"""
         self.stdout.write("[MIGRATION] move user configuration to ES")
         redis = RedisArchivist()
 
