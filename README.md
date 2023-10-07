@@ -58,7 +58,12 @@ Take a look at the example [docker-compose.yml](https://github.com/tubearchivist
 | TZ | Set your timezone for the scheduler | Required |
 | TA_PORT | Overwrite Nginx port | Optional |
 | TA_UWSGI_PORT | Overwrite container internal uwsgi port | Optional |
+| TA_ENABLE_AUTH_PROXY | Enables support for forwarding auth in reverse proxies | [Read more](https://docs.tubearchivist.com/configuration/forward-auth/) |
+| TA_AUTH_PROXY_USERNAME_HEADER | Header containing username to log in | Optional |
+| TA_AUTH_PROXY_LOGOUT_URL | Logout URL for forwarded auth | Optional |
 | ES_URL | URL That ElasticSearch runs on | Optional |
+| ES_DISABLE_VERIFY_SSL | Disable ElasticSearch SSL certificate verification | Optional |
+| ES_SNAPSHOT_DIR | Custom path where elastic search stores snapshots for master/data nodes | Optional |
 | HOST_GID | Allow TA to own the video files instead of container user | Optional |
 | HOST_UID | Allow TA to own the video files instead of container user | Optional |
 | ELASTIC_USER | Change the default ElasticSearch user | Optional |
@@ -77,7 +82,7 @@ Take a look at the example [docker-compose.yml](https://github.com/tubearchivist
 ## Update
 Always use the *latest* (the default) or a named semantic version tag for the docker images. The *unstable* tags are only for your testing environment, there might not be an update path for these testing builds. 
 
-You will see the current version number of **Tube Archivist** in the footer of the interface. There is a daily version check task querying tubearchivist.com, notifying you of any new releases in the footer. To take advantage of the latest fixes and improvements, make sure you are running the *latest and greatest*. After updating, check the footer to verify you are running the expected version.  
+You will see the current version number of **Tube Archivist** in the footer of the interface. There is a daily version check task querying tubearchivist.com, notifying you of any new releases in the footer. To update, you need to update the docker images, the method for which will depend on your platform. For example, if you're using `docker-compose`, run `docker-compose pull` and then restart with `docker-compose up -d`. After updating, check the footer to verify you are running the expected version.  
 
   - This project is tested for updates between one or two releases maximum. Further updates back may or may not be supported and you might have to reset your index and configurations to update. Ideally apply new updates at least once per month.  
   - There can be breaking changes between updates, particularly as the application grows, new environment variables or settings might be required for you to set in the your docker-compose file. *Always* check the **release notes**: Any breaking changes will be marked there.  
@@ -146,6 +151,8 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Show total video downloaded vs total videos available in channel
 - [ ] Download or Ignore videos by keyword ([#163](https://github.com/tubearchivist/tubearchivist/issues/163))
 - [ ] Custom searchable notes to videos, channels, playlists ([#144](https://github.com/tubearchivist/tubearchivist/issues/144))
+- [ ] Search comments
+- [ ] Search download queue
 
 Implemented:
 - [X] Add statistics of index [2023-09-03]

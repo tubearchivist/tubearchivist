@@ -677,7 +677,7 @@ class LoginApiView(ObtainAuthToken):
 @method_decorator(user_passes_test(check_admin), name='dispatch')
 class SnapshotApiListView(ApiBaseView):
     """resolves to /api/snapshot/
-    GET: returns snashot config plus list of existing snapshots
+    GET: returns snapshot config plus list of existing snapshots
     POST: take snapshot now
     """
 
@@ -1042,9 +1042,9 @@ class StatBiggestChannel(ApiBaseView):
     def get(self, request):
         """handle get request"""
 
-        order = request.GET.get("order", False)
+        order = request.GET.get("order", "doc_count")
         if order and order not in self.order_choices:
             message = {"message": f"invalid order parameter {order}"}
             return Response(message, status=400)
 
-        return Response(BiggestChannel().process())
+        return Response(BiggestChannel(order).process())

@@ -17,24 +17,16 @@ from home.src.ta.ta_redis import RedisArchivist
 
 
 class AppConfig:
-    """handle user settings and application variables"""
+    """handle application variables"""
 
-    def __init__(self, user_id=False):
-        self.user_id = user_id
+    def __init__(self):
         self.config = self.get_config()
-        self.colors = self.get_colors()
 
     def get_config(self):
         """get config from default file or redis if changed"""
         config = self.get_config_redis()
         if not config:
             config = self.get_config_file()
-
-        if self.user_id:
-            key = f"{self.user_id}:page_size"
-            page_size = RedisArchivist().get_message(key)["status"]
-            if page_size:
-                config["archive"]["page_size"] = page_size
 
         config["application"].update(self.get_config_env())
         return config
@@ -50,14 +42,12 @@ class AppConfig:
 
     @staticmethod
     def get_config_env():
-        """read environment application variables"""
-        es_pass = os.environ.get("ELASTIC_PASSWORD")
-        es_user = os.environ.get("ELASTIC_USER", default="elastic")
+        """read environment application variables.
+
+        Connection to ES is managed in ElasticWrap and the
+        connection to Redis is managed in RedisArchivist."""
 
         application = {
-            "REDIS_HOST": os.environ.get("REDIS_HOST"),
-            "es_url": os.environ.get("ES_URL"),
-            "es_auth": (es_user, es_pass),
             "HOST_UID": int(os.environ.get("HOST_UID", False)),
             "HOST_GID": int(os.environ.get("HOST_GID", False)),
             "enable_cast": bool(os.environ.get("ENABLE_CAST")),
@@ -102,30 +92,6 @@ class AppConfig:
 
         RedisArchivist().set_message("config", self.config, save=True)
         return updated
-
-    @staticmethod
-    def set_user_config(form_post, user_id):
-        """set values in redis for user settings"""
-        for key, value in form_post.items():
-            if not value:
-                continue
-
-            message = {"status": value}
-            redis_key = f"{user_id}:{key}"
-            RedisArchivist().set_message(redis_key, message, save=True)
-
-    def get_colors(self):
-        """overwrite config if user has set custom values"""
-        colors = False
-        if self.user_id:
-            col_dict = RedisArchivist().get_message(f"{self.user_id}:colors")
-            colors = col_dict["status"]
-
-        if not colors:
-            colors = self.config["application"]["colors"]
-
-        self.config["application"]["colors"] = colors
-        return colors
 
     @staticmethod
     def _build_rand_daily():

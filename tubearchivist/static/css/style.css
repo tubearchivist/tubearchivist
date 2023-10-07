@@ -1099,6 +1099,15 @@ video:-webkit-full-screen {
     min-width: 300px;
 }
 
+.settings-item .agg-channel-table {
+    width: 100%;
+}
+
+.settings-item .agg-channel-right-align {
+    white-space: nowrap;
+    text-align: right;
+}
+
 .danger-zone {
     background-color: var(--highlight-error);
     color: #fff;
@@ -1315,11 +1324,6 @@ video:-webkit-full-screen {
     }
     .playlist-nav-item img {
         width: 100%;
-    }
-    .agg-channel-name {
-        min-width: 50px;
-        width: 100px;
-        max-width: 200px;
     }
     .td, th, span, label {
         text-align: unset;

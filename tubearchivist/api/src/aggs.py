@@ -1,7 +1,7 @@
 """aggregations"""
 
 from home.src.es.connect import ElasticWrap
-from home.src.index.video_streams import DurationConverter
+from home.src.ta.helper import get_duration_str
 
 
 class AggBase:
@@ -119,7 +119,7 @@ class WatchProgress(AggBase):
             {
                 "all": {
                     "duration": all_duration,
-                    "duration_str": DurationConverter().get_str(all_duration),
+                    "duration_str": get_duration_str(all_duration),
                     "items": aggregations["total_vids"].get("value"),
                 }
             }
@@ -135,7 +135,7 @@ class WatchProgress(AggBase):
         """parse bucket"""
 
         duration = int(bucket["watch_docs"]["duration"]["value"])
-        duration_str = DurationConverter().get_str(duration)
+        duration_str = get_duration_str(duration)
         items = bucket["watch_docs"]["true_count"]["value"]
         if bucket["key_as_string"] == "false":
             key = "unwatched"
@@ -196,6 +196,9 @@ class DownloadHist(AggBase):
 class BiggestChannel(AggBase):
     """get channel aggregations"""
 
+    def __init__(self, order):
+        self.data["aggs"][self.name]["multi_terms"]["order"] = {order: "desc"}
+
     name = "channel_stats"
     path = "ta_video/_search"
     data = {
@@ -231,9 +234,7 @@ class BiggestChannel(AggBase):
                 "name": i["key"][0].title(),
                 "doc_count": i["doc_count"]["value"],
                 "duration": i["duration"]["value"],
-                "duration_str": DurationConverter().get_str(
-                    i["duration"]["value"]
-                ),
+                "duration_str": get_duration_str(int(i["duration"]["value"])),
                 "media_size": i["media_size"]["value"],
             }
             for i in buckets

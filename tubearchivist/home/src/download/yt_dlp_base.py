@@ -111,7 +111,7 @@ class CookieHandler:
         print("cookie: import successful")
 
     def set_cookie(self, cookie):
-        """set cookie str and activate in cofig"""
+        """set cookie str and activate in config"""
         RedisArchivist().set_message("cookie", cookie, save=True)
         path = ".downloads.cookie_import"
         RedisArchivist().set_message("config", True, path=path, save=True)

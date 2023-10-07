@@ -16,9 +16,8 @@ from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video_constants import VideoTypeEnum
-from home.src.index.video_streams import DurationConverter
 from home.src.ta.config import AppConfig
-from home.src.ta.helper import is_shorts
+from home.src.ta.helper import get_duration_str, is_shorts
 
 
 class PendingIndex:
@@ -229,6 +228,11 @@ class PendingList(PendingIndex):
         """add all videos of playlist to list"""
         playlist = YoutubePlaylist(url)
         playlist.build_json()
+        if not playlist.json_data:
+            message = f"{playlist.youtube_id}: failed to extract metadata"
+            print(message)
+            raise ValueError(message)
+
         video_results = playlist.json_data.get("playlist_entries")
         youtube_ids = [i["youtube_id"] for i in video_results]
         for video_id in youtube_ids:
@@ -335,9 +339,6 @@ class PendingList(PendingIndex):
     def _parse_youtube_details(self, vid, vid_type=VideoTypeEnum.VIDEOS):
         """parse response"""
         vid_id = vid.get("id")
-        duration_str = DurationConverter.get_str(vid["duration"])
-        if duration_str == "NA":
-            print(f"skip extracting duration for: {vid_id}")
         published = datetime.strptime(vid["upload_date"], "%Y%m%d").strftime(
             "%Y-%m-%d"
         )
@@ -349,7 +350,7 @@ class PendingList(PendingIndex):
             "vid_thumb_url": vid["thumbnail"],
             "title": vid["title"],
             "channel_id": vid["channel_id"],
-            "duration": duration_str,
+            "duration": get_duration_str(vid["duration"]),
             "published": published,
             "timestamp": int(datetime.now().timestamp()),
             # Pulling enum value out so it is serializable

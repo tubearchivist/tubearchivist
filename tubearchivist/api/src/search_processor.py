@@ -8,7 +8,7 @@ import urllib.parse
 
 from home.src.download.thumbnails import ThumbManager
 from home.src.ta.config import AppConfig
-from home.src.ta.helper import date_praser
+from home.src.ta.helper import date_praser, get_duration_str
 
 
 class SearchProcess:
@@ -50,6 +50,16 @@ class SearchProcess:
             processed = self._process_download(result["_source"])
         if index == "ta_comment":
             processed = self._process_comment(result["_source"])
+        if index == "ta_subtitle":
+            processed = self._process_subtitle(result)
+
+        if isinstance(processed, dict):
+            processed.update(
+                {
+                    "_index": index,
+                    "_score": round(result.get("_score") or 0, 2),
+                }
+            )
 
         return processed
 
@@ -139,3 +149,29 @@ class SearchProcess:
                 processed_comments[-1]["comment_replies"].append(comment)
 
         return processed_comments
+
+    def _process_subtitle(self, result):
+        """take complete result dict to extract highlight"""
+        subtitle_dict = result["_source"]
+        highlight = result.get("highlight")
+        if highlight:
+            # replace lines with the highlighted markdown
+            subtitle_line = highlight.get("subtitle_line")[0]
+            subtitle_dict.update({"subtitle_line": subtitle_line})
+
+        thumb_path = ThumbManager(subtitle_dict["youtube_id"]).vid_thumb_path()
+        subtitle_dict.update({"vid_thumb_url": f"/cache/{thumb_path}"})
+
+        return subtitle_dict
+
+
+def process_aggs(response):
+    """convert aggs duration to str"""
+
+    if response.get("aggregations"):
+        aggs = response["aggregations"]
+        if "total_duration" in aggs:
+            duration_sec = int(aggs["total_duration"]["value"])
+            aggs["total_duration"].update(
+                {"value_str": get_duration_str(duration_sec)}
+            )
