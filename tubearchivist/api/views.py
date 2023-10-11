@@ -116,7 +116,7 @@ class VideoApiView(ApiBaseView):
         self.get_document(video_id)
         return Response(self.response, status=self.status_code)
     
-    @method_decorator(user_passes_test(check_admin), name='dispatch')
+    @method_decorator(user_passes_test(check_admin), name="dispatch")
     def delete(self, request, video_id):
         # pylint: disable=unused-argument
         """delete single video"""
@@ -290,7 +290,7 @@ class ChannelApiView(ApiBaseView):
         self.get_document(channel_id)
         return Response(self.response, status=self.status_code)
 
-    @method_decorator(user_passes_test(check_admin), name='dispatch')
+    @method_decorator(user_passes_test(check_admin), name="dispatch")
     def delete(self, request, channel_id):
         # pylint: disable=unused-argument
         """delete channel"""
@@ -336,7 +336,7 @@ class ChannelApiListView(ApiBaseView):
 
         return Response(self.response)
 
-    @method_decorator(user_passes_test(check_admin), name='dispatch')
+    @method_decorator(user_passes_test(check_admin), name="dispatch")
     def post(self, request):
         """subscribe/unsubscribe to list of channels"""
         data = request.data
@@ -529,7 +529,7 @@ class DownloadApiView(ApiBaseView):
         self.get_document(video_id)
         return Response(self.response, status=self.status_code)
 
-    @method_decorator(user_passes_test(check_admin), name='dispatch')
+    @method_decorator(user_passes_test(check_admin), name="dispatch")
     def post(self, request, video_id):
         """post to video to change status"""
         item_status = request.data.get("status")
@@ -550,7 +550,7 @@ class DownloadApiView(ApiBaseView):
 
         return Response(request.data)
     
-    @method_decorator(user_passes_test(check_admin), name='dispatch')
+    @method_decorator(user_passes_test(check_admin), name="dispatch")
     @staticmethod
     def delete(request, video_id):
         # pylint: disable=unused-argument
@@ -596,7 +596,7 @@ class DownloadApiListView(ApiBaseView):
         self.get_document_list(request)
         return Response(self.response)
 
-    @method_decorator(user_passes_test(check_admin), name='dispatch')
+    @method_decorator(user_passes_test(check_admin), name="dispatch")
     @staticmethod
     def post(request):
         """add list of videos to download queue"""
@@ -622,7 +622,7 @@ class DownloadApiListView(ApiBaseView):
 
         return Response(data)
 
-    @method_decorator(user_passes_test(check_admin), name='dispatch')
+    @method_decorator(user_passes_test(check_admin), name="dispatch")
     def delete(self, request):
         """delete download queue"""
         query_filter = request.GET.get("filter", False)
@@ -674,7 +674,7 @@ class LoginApiView(ObtainAuthToken):
         return Response({"token": token.key, "user_id": user.pk})
 
 
-@method_decorator(user_passes_test(check_admin), name='dispatch')
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class SnapshotApiListView(ApiBaseView):
     """resolves to /api/snapshot/
     GET: returns snapshot config plus list of existing snapshots
@@ -698,7 +698,7 @@ class SnapshotApiListView(ApiBaseView):
         return Response(response)
 
 
-@method_decorator(user_passes_test(check_admin), name='dispatch')
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class SnapshotApiView(ApiBaseView):
     """resolves to /api/snapshot/<snapshot-id>/
     GET: return a single snapshot
@@ -752,7 +752,7 @@ class TaskListView(ApiBaseView):
 
         return Response(all_results)
 
-@method_decorator(user_passes_test(check_admin), name='dispatch')
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class TaskNameListView(ApiBaseView):
     """resolves to /api/task-name/<task-name>/
     GET: return a list of stored results of task
@@ -791,7 +791,7 @@ class TaskNameListView(ApiBaseView):
         return Response({"message": message})
 
 
-@method_decorator(user_passes_test(check_admin), name='dispatch')
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class TaskIDView(ApiBaseView):
     """resolves to /api/task-id/<task-id>/
     GET: return details of task id
@@ -842,7 +842,7 @@ class TaskIDView(ApiBaseView):
         """build message key to forward command to notification"""
         return f"message:{task_conf.get('group')}:{task_id.split('-')[0]}"
 
-@method_decorator(user_passes_test(check_admin), name='dispatch')
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class RefreshView(ApiBaseView):
     """resolves to /api/refresh/
     GET: get refresh progress
@@ -964,7 +964,7 @@ class SearchView(ApiBaseView):
         return Response(search_results)
 
 
-@method_decorator(user_passes_test(check_admin), name='dispatch')
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class TokenView(ApiBaseView):
     """resolves to /api/token/
     DELETE: revoke the token
