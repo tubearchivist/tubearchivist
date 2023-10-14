@@ -17,8 +17,8 @@ from pathlib import Path
 import ldap
 from corsheaders.defaults import default_headers
 from django_auth_ldap.config import LDAPSearch
-from home.src.ta.config import AppConfig
 from home.src.ta.helper import ta_host_parser
+from home.src.ta.settings import EnvironmentSettings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -180,7 +180,7 @@ if bool(environ.get("TA_LDAP")):
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-CACHE_DIR = AppConfig().config["application"]["cache_dir"]
+CACHE_DIR = EnvironmentSettings().get_cache_dir()
 DB_PATH = path.join(CACHE_DIR, "db.sqlite3")
 DATABASES = {
     "default": {

@@ -19,6 +19,7 @@ from home.src.index.comments import Comments
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video import YoutubeVideo
 from home.src.ta.config import AppConfig
+from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisQueue
 
 
@@ -51,6 +52,7 @@ class ReindexBase:
 
     def __init__(self):
         self.config = AppConfig().config
+        self.media_dir = EnvironmentSettings().get_media_dir()
         self.now = int(datetime.now().timestamp())
         self.total = None
 
@@ -292,9 +294,7 @@ class Reindex(ReindexBase):
         es_meta = video.json_data.copy()
 
         # get new
-        media_url = os.path.join(
-            self.config["application"]["videos"], es_meta["media_url"]
-        )
+        media_url = os.path.join(self.media_dir, es_meta["media_url"])
         video.build_json(media_path=media_url)
         if not video.youtube_meta:
             video.deactivate()
@@ -328,9 +328,8 @@ class Reindex(ReindexBase):
     def _rename_media_file(self, media_url_is, media_url_should):
         """handle title change"""
         print(f"[reindex] fix media_url {media_url_is} to {media_url_should}")
-        videos = self.config["application"]["videos"]
-        old_path = os.path.join(videos, media_url_is)
-        new_path = os.path.join(videos, media_url_should)
+        old_path = os.path.join(self.media_dir, media_url_is)
+        new_path = os.path.join(self.media_dir, media_url_should)
         os.rename(old_path, new_path)
 
     def _reindex_single_channel(self, channel_id):

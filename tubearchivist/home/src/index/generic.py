@@ -8,6 +8,7 @@ import math
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap
 from home.src.ta.config import AppConfig
+from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.users import UserConfig
 
 
@@ -26,7 +27,7 @@ class YouTubeItem:
         self.youtube_id = youtube_id
         self.es_path = f"{self.index_name}/_doc/{youtube_id}"
         self.config = AppConfig().config
-        self.app_conf = self.config["application"]
+        self.app_conf = EnvironmentSettings()
         self.youtube_meta = False
         self.json_data = False
 

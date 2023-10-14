@@ -134,7 +134,7 @@ class YoutubeChannel(YouTubeItem):
     def _info_json_fallback(self):
         """read channel info.json for additional metadata"""
         info_json = os.path.join(
-            self.config["application"]["cache_dir"],
+            self.app_conf.get_cache_dir(),
             "import",
             f"{self.youtube_id}.info.json",
         )
@@ -178,7 +178,7 @@ class YoutubeChannel(YouTubeItem):
     def get_folder_path(self):
         """get folder where media files get stored"""
         folder_path = os.path.join(
-            self.app_conf["videos"],
+            self.app_conf.get_media_dir(),
             self.json_data["channel_id"],
         )
         return folder_path

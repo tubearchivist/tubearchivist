@@ -18,6 +18,7 @@ from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock, YoutubeVideo
 from home.src.ta.config import AppConfig, ReleaseVersion
+from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskCommand, TaskManager
 from home.src.ta.urlparser import Parser
@@ -49,7 +50,13 @@ class ApiBaseView(APIView):
 
     def __init__(self):
         super().__init__()
-        self.response = {"data": False, "config": AppConfig().config}
+        self.response = {
+            "data": False,
+            "config": {
+                "enable_cast": EnvironmentSettings().is_cast_enabled(),
+                "downloads": AppConfig().config["downloads"],
+            },
+        }
         self.data = {"query": {"match_all": {}}}
         self.status_code = False
         self.context = False

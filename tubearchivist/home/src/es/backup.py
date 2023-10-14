@@ -13,6 +13,7 @@ from datetime import datetime
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import get_mapping, ignore_filelist
+from home.src.ta.settings import EnvironmentSettings
 
 
 class ElasticBackup:
@@ -22,7 +23,7 @@ class ElasticBackup:
 
     def __init__(self, reason=False, task=False):
         self.config = AppConfig().config
-        self.cache_dir = self.config["application"]["cache_dir"]
+        self.cache_dir = EnvironmentSettings().get_cache_dir()
         self.timestamp = datetime.now().strftime("%Y%m%d")
         self.index_config = get_mapping()
         self.reason = reason
@@ -217,6 +218,7 @@ class BackupCallback:
         self.index_name = index_name
         self.counter = counter
         self.timestamp = datetime.now().strftime("%Y%m%d")
+        self.cache_dir = EnvironmentSettings().get_cache_dir()
 
     def run(self):
         """run the junk task"""
@@ -243,9 +245,8 @@ class BackupCallback:
 
     def _write_es_json(self, file_content):
         """write nd-json file for es _bulk API to disk"""
-        cache_dir = AppConfig().config["application"]["cache_dir"]
         index = self.index_name.lstrip("ta_")
         file_name = f"es_{index}-{self.timestamp}-{self.counter}.json"
-        file_path = os.path.join(cache_dir, "backup", file_name)
+        file_path = os.path.join(self.cache_dir, "backup", file_name)
         with open(file_path, "a+", encoding="utf-8") as f:
             f.write(file_content)

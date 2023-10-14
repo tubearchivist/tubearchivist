@@ -226,14 +226,14 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def build_dl_cache_path(self):
         """find video path in dl cache"""
-        cache_dir = self.app_conf["cache_dir"]
+        cache_dir = self.app_conf.get_cache_dir()
         video_id = self.json_data["youtube_id"]
         cache_path = f"{cache_dir}/download/{video_id}.mp4"
         if os.path.exists(cache_path):
             return cache_path
 
         channel_path = os.path.join(
-            self.app_conf["videos"],
+            self.app_conf.get_media_dir(),
             self.json_data["channel"]["channel_id"],
             f"{video_id}.mp4",
         )
@@ -282,7 +282,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         if not self.json_data:
             raise FileNotFoundError
 
-        video_base = self.app_conf["videos"]
+        video_base = self.app_conf.get_media_dir()
         media_url = self.json_data.get("media_url")
         file_path = os.path.join(video_base, media_url)
         try:
