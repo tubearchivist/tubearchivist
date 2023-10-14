@@ -2,6 +2,8 @@
 
 from api.src.aggs import BiggestChannel, DownloadHist, Primary, WatchProgress
 from api.src.search_processor import SearchProcess
+from django.contrib.auth.decorators import user_passes_test
+from django.utils.decorators import method_decorator
 from home.src.download.queue import PendingInteract
 from home.src.download.subscriptions import (
     ChannelSubscription,
@@ -38,13 +40,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import user_passes_test
-
 
 def check_admin(user):
     """if user has access to restricted views"""
     return user.is_staff or user.groups.filter(name="admin").exists()
+
 
 class ApiBaseView(APIView):
     """base view to inherit from"""
@@ -115,7 +115,7 @@ class VideoApiView(ApiBaseView):
         """get request"""
         self.get_document(video_id)
         return Response(self.response, status=self.status_code)
-    
+
     @method_decorator(user_passes_test(check_admin), name="dispatch")
     def delete(self, request, video_id):
         # pylint: disable=unused-argument
@@ -174,7 +174,7 @@ class VideoProgressView(ApiBaseView):
         RedisArchivist().set_message(key, message)
         self.response = request.data
         return Response(self.response)
-    
+
     def delete(self, request, video_id):
         """delete progress position"""
         key = f"{request.user.id}:progress:{video_id}"
@@ -549,7 +549,7 @@ class DownloadApiView(ApiBaseView):
             download_pending.delay(auto_only=True)
 
         return Response(request.data)
-    
+
     @method_decorator(user_passes_test(check_admin), name="dispatch")
     @staticmethod
     def delete(request, video_id):
@@ -752,6 +752,7 @@ class TaskListView(ApiBaseView):
 
         return Response(all_results)
 
+
 @method_decorator(user_passes_test(check_admin), name="dispatch")
 class TaskNameListView(ApiBaseView):
     """resolves to /api/task-name/<task-name>/
@@ -841,6 +842,7 @@ class TaskIDView(ApiBaseView):
     def _build_message_key(self, task_conf, task_id):
         """build message key to forward command to notification"""
         return f"message:{task_conf.get('group')}:{task_id.split('-')[0]}"
+
 
 @method_decorator(user_passes_test(check_admin), name="dispatch")
 class RefreshView(ApiBaseView):
