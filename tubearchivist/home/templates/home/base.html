@@ -1,4 +1,5 @@
 {% load static %}
+{% load auth_extras %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -57,9 +58,11 @@
                     <a href="{% url 'playlist' %}">
                         <div class="nav-item">playlists</div>
                     </a>
+                    {% if request.user|has_group:"admin" or request.user.is_staff %}
                     <a href="{% url 'downloads' %}">
                         <div class="nav-item">downloads</div>
                     </a>
+                    {% endif %}
                 </div>
                 <div class="nav-icons">
                     <a href="{% url 'search' %}">

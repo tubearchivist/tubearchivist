@@ -2,6 +2,8 @@
 {% load static %}
 {% load humanize %}
 {% block content %}
+{% load auth_extras %}
+
 <div class="boxed-content">
     <div class="title-bar">
         <h1>{{ playlist_info.playlist_name }}</h1>
@@ -27,7 +29,9 @@
                 <p>Last refreshed: {{ playlist_info.playlist_last_refresh }}</p>
                 <p>Playlist:
                     {% if playlist_info.playlist_subscribed %}
+                        {% if request.user|has_group:"admin" or request.user.is_staff %}
                         <button class="unsubscribe" type="button" data-type="playlist" data-subscribe="" data-id="{{ playlist_info.playlist_id }}" onclick="subscribeStatus(this)" title="Unsubscribe from {{ playlist_info.playlist_name }}">Unsubscribe</button>
+                        {% endif %}
                     {% else %}
                         <button type="button" data-type="playlist" data-subscribe="true" data-id="{{ playlist_info.playlist_id }}" onclick="subscribeStatus(this)" title="Subscribe to {{ playlist_info.playlist_name }}">Subscribe</button>
                     {% endif %}

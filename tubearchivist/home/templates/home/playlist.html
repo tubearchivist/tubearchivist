@@ -1,11 +1,15 @@
 {% extends "home/base.html" %}
 {% load static %}
 {% block content %}
+{% load auth_extras %}
+
 <div class="boxed-content">
     <div class="title-split">
         <div class="title-bar">
             <h1>Playlists</h1>
         </div>
+        {% if request.user|has_group:"admin" or request.user.is_staff %}
+
         <div class="title-split-form">
             <img id="animate-icon" onclick="showForm()" src="{% static 'img/icon-add.svg' %}" alt="add-icon" title="Subscribe to Playlists">
             <div class="show-form">
@@ -16,6 +20,8 @@
                 </form>
             </div>
         </div>
+        {% endif %}
+
     </div>
     <div id="notifications" data="subscription"></div>
     <div class="view-controls">

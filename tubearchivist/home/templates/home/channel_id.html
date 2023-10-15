@@ -2,6 +2,8 @@
 {% block content %}
 {% load static %}
 {% load humanize %}
+{% load auth_extras %}
+
 <div class="boxed-content">
     <div class="channel-banner">
         <a href="/channel/{{ channel_info.channel_id }}/"><img src="/cache/channels/{{ channel_info.channel_id }}_banner.jpg" alt="channel_banner"></a>
@@ -38,7 +40,9 @@
                     <p>Subscribers: {{ channel_info.channel_subs|intcomma }}</p>
                 {% endif %}
                 {% if channel_info.channel_subscribed %}
+                    {% if request.user|has_group:"admin" or request.user.is_staff %}
                     <button class="unsubscribe" type="button" data-type="channel" data-subscribe="" data-id="{{ channel_info.channel_id }}" onclick="subscribeStatus(this)" title="Unsubscribe from {{ channel_info.channel_name }}">Unsubscribe</button>
+                    {% endif %}
                 {% else %}
                     <button type="button" data-type="channel" data-subscribe="true" data-id="{{ channel_info.channel_id }}" onclick="subscribeStatus(this)" title="Subscribe to {{ channel_info.channel_name }}">Subscribe</button>
                 {% endif %}
