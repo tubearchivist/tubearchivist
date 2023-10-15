@@ -9,11 +9,14 @@ import urllib.parse
 from time import sleep
 
 from api.src.search_processor import SearchProcess, process_aggs
+from api.views import check_admin
 from django.conf import settings
 from django.contrib.auth import login
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
+from django.utils.decorators import method_decorator
 from django.views import View
 from home.src.download.queue import PendingInteract
 from home.src.download.yt_dlp_base import CookieHandler
@@ -317,6 +320,7 @@ class AboutView(MinView):
         return render(request, "home/about.html", context)
 
 
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class DownloadView(ArchivistResultsView):
     """resolves to /download/
     handle the download queue
@@ -597,6 +601,7 @@ class ChannelIdAboutView(ChannelIdBaseView):
 
         return render(request, "home/channel_id_about.html", self.context)
 
+    @method_decorator(user_passes_test(check_admin), name="dispatch")
     @staticmethod
     def post(request, channel_id):
         """handle post request"""
@@ -681,6 +686,7 @@ class ChannelView(ArchivistResultsView):
                 "term": {"channel_subscribed": {"value": True}}
             }
 
+    @method_decorator(user_passes_test(check_admin), name="dispatch")
     @staticmethod
     def post(request):
         """handle http post requests"""
@@ -824,6 +830,7 @@ class PlaylistView(ArchivistResultsView):
                 }
             }
 
+    @method_decorator(user_passes_test(check_admin), name="dispatch")
     @staticmethod
     def post(request):
         """handle post from search form"""
@@ -986,6 +993,7 @@ class SettingsUserView(MinView):
         return redirect("settings_user", permanent=True)
 
 
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class SettingsApplicationView(MinView):
     """resolves to /settings/application/
     handle the settings sub-page for application configuration,
@@ -1075,6 +1083,7 @@ class SettingsApplicationView(MinView):
         RedisArchivist().set_message(key, message=message, expire=True)
 
 
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class SettingsSchedulingView(MinView):
     """resolves to /settings/scheduling/
     handle the settings sub-page for scheduling settings,
@@ -1108,6 +1117,7 @@ class SettingsSchedulingView(MinView):
         return redirect("settings_scheduling", permanent=True)
 
 
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class SettingsActionsView(MinView):
     """resolves to /settings/actions/
     handle the settings actions sub-page

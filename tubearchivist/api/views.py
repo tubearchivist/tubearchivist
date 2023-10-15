@@ -437,6 +437,7 @@ class PlaylistApiListView(ApiBaseView):
         self.get_document_list(request)
         return Response(self.response)
 
+    @method_decorator(user_passes_test(check_admin), name="dispatch")
     def post(self, request):
         """subscribe/unsubscribe to list of playlists"""
         data = request.data
@@ -483,6 +484,7 @@ class PlaylistApiView(ApiBaseView):
         self.get_document(playlist_id)
         return Response(self.response, status=self.status_code)
 
+    @method_decorator(user_passes_test(check_admin), name="dispatch")
     def delete(self, request, playlist_id):
         """delete playlist"""
         print(f"{playlist_id}: delete playlist")
@@ -513,6 +515,7 @@ class PlaylistApiVideoView(ApiBaseView):
         return Response(self.response, status=self.status_code)
 
 
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class DownloadApiView(ApiBaseView):
     """resolves to /api/download/<video_id>/
     GET: returns metadata dict of an item in the download queue
@@ -529,7 +532,6 @@ class DownloadApiView(ApiBaseView):
         self.get_document(video_id)
         return Response(self.response, status=self.status_code)
 
-    @method_decorator(user_passes_test(check_admin), name="dispatch")
     def post(self, request, video_id):
         """post to video to change status"""
         item_status = request.data.get("status")
@@ -550,7 +552,6 @@ class DownloadApiView(ApiBaseView):
 
         return Response(request.data)
 
-    @method_decorator(user_passes_test(check_admin), name="dispatch")
     @staticmethod
     def delete(request, video_id):
         # pylint: disable=unused-argument
@@ -561,6 +562,7 @@ class DownloadApiView(ApiBaseView):
         return Response({"success": True})
 
 
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class DownloadApiListView(ApiBaseView):
     """resolves to /api/download/
     GET: returns latest videos in the download queue
@@ -596,7 +598,6 @@ class DownloadApiListView(ApiBaseView):
         self.get_document_list(request)
         return Response(self.response)
 
-    @method_decorator(user_passes_test(check_admin), name="dispatch")
     @staticmethod
     def post(request):
         """add list of videos to download queue"""
@@ -622,7 +623,6 @@ class DownloadApiListView(ApiBaseView):
 
         return Response(data)
 
-    @method_decorator(user_passes_test(check_admin), name="dispatch")
     def delete(self, request):
         """delete download queue"""
         query_filter = request.GET.get("filter", False)
@@ -740,6 +740,7 @@ class SnapshotApiView(ApiBaseView):
         return Response(response)
 
 
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class TaskListView(ApiBaseView):
     """resolves to /api/task-name/
     GET: return a list of all stored task results
@@ -877,6 +878,7 @@ class RefreshView(ApiBaseView):
         return Response(data)
 
 
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class CookieView(ApiBaseView):
     """resolves to /api/cookie/
     GET: check if cookie is enabled

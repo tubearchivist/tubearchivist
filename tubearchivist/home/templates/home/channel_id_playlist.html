@@ -2,6 +2,7 @@
 {% block content %}
 {% load static %}
 {% load humanize %}
+{% load auth_extras %}
 <div class="boxed-content">
     <div class="channel-banner">
         <a href="{% url 'channel_id' channel_info.channel_id %}"><img src="{{ channel_info.channel_banner_url }}" alt="channel_banner"></a>
@@ -19,7 +20,9 @@
         {% endif %}
         <a href="{% url 'channel_id_about' channel_info.channel_id %}"><h3>About</h3></a>
         {% if has_pending %}
-            <a href="{% url 'downloads' %}?channel={{ channel_info.channel_id }}"><h3>Downloads</h3></a>
+            {% if request.user|has_group:"admin" or request.user.is_staff %}
+                <a href="{% url 'downloads' %}?channel={{ channel_info.channel_id }}"><h3>Downloads</h3></a>
+            {% endif %}
         {% endif %}
     </div>
     <div id="notifications" data="channel reindex"></div>
