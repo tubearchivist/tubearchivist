@@ -58,8 +58,7 @@ class FolderMigration:
     """migrate video archive folder"""
 
     def __init__(self):
-        self.config = EnvironmentSettings()
-        self.videos = self.config.get_media_dir()
+        self.videos = EnvironmentSettings.MEDIA_DIR
         self.bulk_list = []
 
     def get_to_migrate(self):
@@ -84,8 +83,8 @@ class FolderMigration:
 
     def create_folders(self, to_migrate):
         """create required channel folders"""
-        host_uid = self.config.get_host_uid()
-        host_gid = self.config.get_host_gid()
+        host_uid = EnvironmentSettings.HOST_UID
+        host_gid = EnvironmentSettings.HOST_GID
         all_channel_ids = {i["channel"]["channel_id"] for i in to_migrate}
 
         for channel_id in all_channel_ids:

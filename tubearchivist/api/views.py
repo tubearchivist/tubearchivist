@@ -53,7 +53,7 @@ class ApiBaseView(APIView):
         self.response = {
             "data": False,
             "config": {
-                "enable_cast": EnvironmentSettings().is_cast_enabled(),
+                "enable_cast": EnvironmentSettings.ENABLE_CAST,
                 "downloads": AppConfig().config["downloads"],
             },
         }

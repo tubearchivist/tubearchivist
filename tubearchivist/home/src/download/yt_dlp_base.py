@@ -87,7 +87,7 @@ class CookieHandler:
     def __init__(self, config):
         self.cookie_io = False
         self.config = config
-        self.cache_dir = EnvironmentSettings().get_cache_dir()
+        self.cache_dir = EnvironmentSettings.CACHE_DIR
 
     def get(self):
         """get cookie io stream"""

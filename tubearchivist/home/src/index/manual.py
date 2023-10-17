@@ -29,7 +29,7 @@ class ImportFolderScanner:
     """
 
     CONFIG = AppConfig().config
-    CACHE_DIR = EnvironmentSettings().get_cache_dir()
+    CACHE_DIR = EnvironmentSettings.CACHE_DIR
     IMPORT_DIR = os.path.join(CACHE_DIR, "import")
 
     """All extensions should be in lowercase until better handling is in place.
@@ -434,10 +434,9 @@ class ManualImport:
 
     def _move_to_archive(self, json_data):
         """move identified media file to archive"""
-        settings = EnvironmentSettings()
-        videos = settings.get_media_dir()
-        host_uid = settings.get_host_uid()
-        host_gid = settings.get_host_gid()
+        videos = EnvironmentSettings.MEDIA_DIR
+        host_uid = EnvironmentSettings.HOST_UID
+        host_gid = EnvironmentSettings.HOST_GID
 
         channel, file = os.path.split(json_data["media_url"])
         channel_folder = os.path.join(videos, channel)
@@ -474,7 +473,7 @@ class ManualImport:
                 os.remove(subtitle_file)
 
         channel_info = os.path.join(
-            EnvironmentSettings().get_cache_dir(),
+            EnvironmentSettings.CACHE_DIR,
             "import",
             f"{json_data['channel']['channel_id']}.info.json",
         )

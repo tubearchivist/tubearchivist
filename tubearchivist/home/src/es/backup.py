@@ -23,7 +23,7 @@ class ElasticBackup:
 
     def __init__(self, reason=False, task=False):
         self.config = AppConfig().config
-        self.cache_dir = EnvironmentSettings().get_cache_dir()
+        self.cache_dir = EnvironmentSettings.CACHE_DIR
         self.timestamp = datetime.now().strftime("%Y%m%d")
         self.index_config = get_mapping()
         self.reason = reason
@@ -218,7 +218,7 @@ class BackupCallback:
         self.index_name = index_name
         self.counter = counter
         self.timestamp = datetime.now().strftime("%Y%m%d")
-        self.cache_dir = EnvironmentSettings().get_cache_dir()
+        self.cache_dir = EnvironmentSettings.CACHE_DIR
 
     def run(self):
         """run the junk task"""

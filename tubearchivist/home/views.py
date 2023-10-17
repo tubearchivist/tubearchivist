@@ -73,7 +73,7 @@ class ArchivistViewConfig(View):
 
         self.context = {
             "colors": self.user_conf.get_value("colors"),
-            "cast": EnvironmentSettings().is_cast_enabled(),
+            "cast": EnvironmentSettings.ENABLE_CAST,
             "sort_by": self.user_conf.get_value("sort_by"),
             "sort_order": self.user_conf.get_value("sort_order"),
             "view_style": self.user_conf.get_value(
@@ -869,7 +869,7 @@ class VideoView(MinView):
                 "video": video_data,
                 "playlist_nav": playlist_nav,
                 "title": video_data.get("title"),
-                "cast": EnvironmentSettings().is_cast_enabled(),
+                "cast": EnvironmentSettings.ENABLE_CAST,
                 "config": config_handler.config,
                 "position": time_parser(request.GET.get("t")),
                 "reindex": reindex.get("state"),

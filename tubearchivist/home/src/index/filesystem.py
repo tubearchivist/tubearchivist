@@ -15,7 +15,7 @@ from home.src.ta.settings import EnvironmentSettings
 class Scanner:
     """scan index and filesystem"""
 
-    VIDEOS: str = EnvironmentSettings().get_media_dir()
+    VIDEOS: str = EnvironmentSettings.MEDIA_DIR
 
     def __init__(self, task=False) -> None:
         self.task = task

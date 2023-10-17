@@ -21,8 +21,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 class ThumbManagerBase:
     """base class for thumbnail management"""
 
-    CONFIG = EnvironmentSettings()
-    CACHE_DIR = CONFIG.get_cache_dir()
+    CACHE_DIR = EnvironmentSettings.CACHE_DIR
     VIDEO_DIR = os.path.join(CACHE_DIR, "videos")
     CHANNEL_DIR = os.path.join(CACHE_DIR, "channels")
     PLAYLIST_DIR = os.path.join(CACHE_DIR, "playlists")
@@ -70,7 +69,7 @@ class ThumbManagerBase:
             img_raw = Image.open(self.fallback)
             return img_raw
 
-        app_root = self.CONFIG.get_app_root()
+        app_root = EnvironmentSettings.APP_DIR
         default_map = {
             "video": os.path.join(
                 app_root, "static/img/default-video-thumb.jpg"
@@ -380,9 +379,8 @@ class ThumbFilesystem:
 class EmbedCallback:
     """callback class to embed thumbnails"""
 
-    CONFIG = EnvironmentSettings()
-    CACHE_DIR = CONFIG.get_cache_dir()
-    MEDIA_DIR = CONFIG.get_media_dir()
+    CACHE_DIR = EnvironmentSettings.CACHE_DIR
+    MEDIA_DIR = EnvironmentSettings.MEDIA_DIR
     FORMAT = MP4Cover.FORMAT_JPEG
 
     def __init__(self, source, index_name, counter=0):

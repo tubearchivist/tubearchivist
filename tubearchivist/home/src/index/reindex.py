@@ -52,7 +52,7 @@ class ReindexBase:
 
     def __init__(self):
         self.config = AppConfig().config
-        self.media_dir = EnvironmentSettings().get_media_dir()
+        self.media_dir = EnvironmentSettings.MEDIA_DIR
         self.now = int(datetime.now().timestamp())
         self.total = None
 

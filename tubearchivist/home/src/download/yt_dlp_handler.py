@@ -154,9 +154,8 @@ class VideoDownloader:
         self.youtube_id_list = youtube_id_list
         self.task = task
         self.config = AppConfig().config
-        self.settings = EnvironmentSettings()
-        self.cache_dir = self.settings.get_cache_dir()
-        self.media_dir = self.settings.get_media_dir()
+        self.cache_dir = EnvironmentSettings.CACHE_DIR
+        self.media_dir = EnvironmentSettings.MEDIA_DIR
         self._build_obs()
         self.channels = set()
         self.videos = set()
@@ -371,8 +370,8 @@ class VideoDownloader:
 
     def move_to_archive(self, vid_dict):
         """move downloaded video from cache to archive"""
-        host_uid = self.settings.get_host_uid()
-        host_gid = self.settings.get_host_gid()
+        host_uid = EnvironmentSettings.HOST_UID
+        host_gid = EnvironmentSettings.HOST_GID
         # make folder
         folder = os.path.join(
             self.media_dir, vid_dict["channel"]["channel_id"]

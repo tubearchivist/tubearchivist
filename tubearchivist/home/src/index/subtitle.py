@@ -114,7 +114,7 @@ class YoutubeSubtitle:
 
     def download_subtitles(self, relevant_subtitles):
         """download subtitle files to archive"""
-        videos_base = EnvironmentSettings().get_media_dir()
+        videos_base = EnvironmentSettings.MEDIA_DIR
         indexed = []
         for subtitle in relevant_subtitles:
             dest_path = os.path.join(videos_base, subtitle["media_url"])
@@ -150,9 +150,8 @@ class YoutubeSubtitle:
         with open(dest_path, "w", encoding="utf-8") as subfile:
             subfile.write(subtitle_str)
 
-        settings = EnvironmentSettings()
-        host_uid = settings.get_host_uid()
-        host_gid = settings.get_host_gid()
+        host_uid = EnvironmentSettings.HOST_UID
+        host_gid = EnvironmentSettings.HOST_GID
         if host_uid and host_gid:
             os.chown(dest_path, host_uid, host_gid)
 
@@ -164,7 +163,7 @@ class YoutubeSubtitle:
     def delete(self, subtitles=False):
         """delete subtitles from index and filesystem"""
         youtube_id = self.video.youtube_id
-        videos_base = EnvironmentSettings().get_media_dir()
+        videos_base = EnvironmentSettings.MEDIA_DIR
         # delete files
         if subtitles:
             files = [i["media_url"] for i in subtitles]

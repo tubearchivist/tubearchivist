@@ -14,7 +14,7 @@ from home.src.ta.settings import EnvironmentSettings
 class SearchProcess:
     """process search results"""
 
-    CACHE_DIR = EnvironmentSettings().get_cache_dir()
+    CACHE_DIR = EnvironmentSettings.CACHE_DIR
 
     def __init__(self, response):
         self.response = response

@@ -180,7 +180,7 @@ if bool(environ.get("TA_LDAP")):
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-CACHE_DIR = EnvironmentSettings().get_cache_dir()
+CACHE_DIR = EnvironmentSettings.CACHE_DIR
 DB_PATH = path.join(CACHE_DIR, "db.sqlite3")
 DATABASES = {
     "default": {

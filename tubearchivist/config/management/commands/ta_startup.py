@@ -70,7 +70,7 @@ class Command(BaseCommand):
             "playlists",
             "videos",
         ]
-        cache_dir = EnvironmentSettings().get_cache_dir()
+        cache_dir = EnvironmentSettings.CACHE_DIR
         for folder in folders:
             folder_path = os.path.join(cache_dir, folder)
             os.makedirs(folder_path, exist_ok=True)
@@ -120,7 +120,7 @@ class Command(BaseCommand):
     def _clear_dl_cache(self):
         """clear leftover files from dl cache"""
         self.stdout.write("[5] clear leftover files from dl cache")
-        leftover_files = clear_dl_cache(EnvironmentSettings().get_cache_dir())
+        leftover_files = clear_dl_cache(EnvironmentSettings.CACHE_DIR)
         if leftover_files:
             self.stdout.write(
                 self.style.SUCCESS(f"    ✓ cleared {leftover_files} files")
@@ -152,7 +152,7 @@ class Command(BaseCommand):
     def _mig_set_streams(self):
         """migration: update from 0.3.5 to 0.3.6, set streams and media_size"""
         self.stdout.write("[MIGRATION] index streams and media size")
-        videos = EnvironmentSettings().get_media_dir()
+        videos = EnvironmentSettings.MEDIA_DIR
         data = {
             "query": {
                 "bool": {"must_not": [{"exists": {"field": "streams"}}]}
