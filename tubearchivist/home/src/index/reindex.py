@@ -52,7 +52,6 @@ class ReindexBase:
 
     def __init__(self):
         self.config = AppConfig().config
-        self.media_dir = EnvironmentSettings.MEDIA_DIR
         self.now = int(datetime.now().timestamp())
         self.total = None
 
@@ -294,7 +293,9 @@ class Reindex(ReindexBase):
         es_meta = video.json_data.copy()
 
         # get new
-        media_url = os.path.join(self.media_dir, es_meta["media_url"])
+        media_url = os.path.join(
+            EnvironmentSettings.MEDIA_DIR, es_meta["media_url"]
+        )
         video.build_json(media_path=media_url)
         if not video.youtube_meta:
             video.deactivate()
@@ -328,8 +329,9 @@ class Reindex(ReindexBase):
     def _rename_media_file(self, media_url_is, media_url_should):
         """handle title change"""
         print(f"[reindex] fix media_url {media_url_is} to {media_url_should}")
-        old_path = os.path.join(self.media_dir, media_url_is)
-        new_path = os.path.join(self.media_dir, media_url_should)
+        videos = EnvironmentSettings.MEDIA_DIR
+        old_path = os.path.join(videos, media_url_is)
+        new_path = os.path.join(videos, media_url_should)
         os.rename(old_path, new_path)
 
     def _reindex_single_channel(self, channel_id):
