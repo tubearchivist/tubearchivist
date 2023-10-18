@@ -10,7 +10,7 @@ from typing import Any
 
 import requests
 import urllib3
-from ta.settings import EnvironmentSettings
+from home.src.ta.settings import EnvironmentSettings
 
 
 class ElasticWrap:

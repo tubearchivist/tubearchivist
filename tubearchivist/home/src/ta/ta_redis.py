@@ -8,13 +8,13 @@ functionality:
 import json
 
 import redis
-from ta.settings import EnvironmentSettings
+from home.src.ta.settings import EnvironmentSettings
 
 
 class RedisBase:
     """connection base for redis"""
 
-    NAME_SPACE: EnvironmentSettings.REDIS_NAME_SPACE
+    NAME_SPACE: str = EnvironmentSettings.REDIS_NAME_SPACE
 
     def __init__(self):
         self.conn = redis.Redis(
