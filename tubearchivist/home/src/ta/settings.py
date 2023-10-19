@@ -17,6 +17,10 @@ class EnvironmentSettings:
     HOST_GID: int = int(os.environ.get("HOST_GID", False))
     ENABLE_CAST: bool = bool(os.environ.get("ENABLE_CAST"))
     TZ: str = str(os.environ.get("TZ", "UTC"))
+    TA_PORT: int = int(os.environ.get("TA_PORT", False))
+    TA_UWSGI_PORT: int = int(os.environ.get("TA_UWSGI_PORT", False))
+    TA_USERNAME: str = str(os.environ.get("TA_USERNAME"))
+    TA_PASSWORD: str = str(os.environ.get("TA_PASSWORD"))
 
     # Application Paths
     MEDIA_DIR: str = str(os.environ.get("TA_MEDIA_DIR", "/youtube"))
