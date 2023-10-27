@@ -123,7 +123,15 @@ function downloadHist() {
 function buildDailyStat(dailyStat) {
   let tile = buildTile(dailyStat.date);
   let message = document.createElement('p');
-  message.innerText = `new videos: ${dailyStat.count}`;
+  const isMoreThenOne = dailyStat.count > 1;
+
+  let text = 'Video';
+  if (isMoreThenOne) {
+    text = 'Videos';
+  }
+
+  message.innerText = `+${dailyStat.count} ${text}`;
+
   tile.appendChild(message);
   return tile;
 }
