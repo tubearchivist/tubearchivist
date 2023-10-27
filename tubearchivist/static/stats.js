@@ -8,13 +8,18 @@ function primaryStats() {
   let apiEndpoint = '/api/stats/primary/';
   let responseData = apiRequest(apiEndpoint, 'GET');
   let primaryBox = document.getElementById('primaryBox');
+
   clearLoading(primaryBox);
+
   let videoTile = buildVideoTile(responseData);
   primaryBox.appendChild(videoTile);
+
   let channelTile = buildChannelTile(responseData);
   primaryBox.appendChild(channelTile);
+
   let playlistTile = buildPlaylistTile(responseData);
   primaryBox.appendChild(playlistTile);
+
   let downloadTile = buildDownloadTile(responseData);
   primaryBox.appendChild(downloadTile);
 }
@@ -26,9 +31,12 @@ function clearLoading(dashBox) {
 function buildTile(titleText) {
   let tile = document.createElement('div');
   tile.classList.add('info-box-item');
+
   let title = document.createElement('h3');
+
   title.innerText = titleText;
   tile.appendChild(title);
+
   return tile;
 }
 
