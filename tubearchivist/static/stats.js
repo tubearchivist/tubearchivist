@@ -40,45 +40,120 @@ function buildTile(titleText) {
   return tile;
 }
 
+function buildTileContenTable(content, rowsWanted) {
+  let contentEntries = Object.entries(content);
+
+  const nbsp = '\u00A0'; // No-Break Space https://www.compart.com/en/unicode/U+00A0
+
+  if (contentEntries.length < rowsWanted) {
+    const rowsToAdd = rowsWanted - contentEntries.length;
+
+    for (let i = 0; i < rowsToAdd; i++) {
+      contentEntries.push([nbsp, nbsp]);
+    }
+  }
+
+  const table = document.createElement('table');
+  table.classList.add('agg-channel-table');
+  const tableBody = document.createElement('tbody');
+
+  for (const [key, value] of contentEntries) {
+    const row = document.createElement('tr');
+
+    const leftCell = document.createElement('td');
+    leftCell.classList.add('agg-channel-name');
+
+    // Do not add ":" when its a spacing entry
+    const keyText = key === nbsp ? key : `${key}: `;
+    const leftText = document.createTextNode(keyText);
+    leftCell.appendChild(leftText);
+
+    const rightCell = document.createElement('td');
+    rightCell.classList.add('agg-channel-right-align');
+
+    const rightText = document.createTextNode(value);
+    rightCell.appendChild(rightText);
+
+    row.appendChild(leftCell);
+    row.appendChild(rightCell);
+
+    tableBody.appendChild(row);
+  }
+
+  table.appendChild(tableBody);
+
+  return table;
+}
+
 function buildVideoTile(responseData) {
-  let tile = buildTile(`Total Videos: ${responseData.videos.total || 0}`);
-  let message = document.createElement('p');
-  message.innerHTML = `
-        videos: ${responseData.videos.videos || 0}<br>
-        shorts: ${responseData.videos.shorts || 0}<br>
-        streams: ${responseData.videos.streams || 0}<br>
-    `;
-  tile.appendChild(message);
+  let tile = buildTile(`Video types: `);
+
+  const total = responseData.videos.total || 0;
+  const videos = responseData.videos.videos || 0;
+  const shorts = responseData.videos.shorts || 0;
+  const streams = responseData.videos.streams || 0;
+
+  const content = {
+    videos: `${videos}/${total}`,
+    shorts: `${shorts}/${total}`,
+    streams: `${streams}/${total}`,
+  };
+
+  const table = buildTileContenTable(content, 3);
+
+  tile.appendChild(table);
 
   return tile;
 }
 
 function buildChannelTile(responseData) {
-  let tile = buildTile(`Total Channels: ${responseData.channels.total || 0}`);
-  let message = document.createElement('p');
-  message.innerHTML = `subscribed: ${responseData.channels.sub_true || 0}`;
-  tile.appendChild(message);
+  let tile = buildTile(`Channels: `);
+
+  const total = responseData.channels.total || 0;
+  const subscribed = responseData.channels.sub_true || 0;
+
+  const content = {
+    subscribed: `${subscribed}/${total}`,
+  };
+
+  const table = buildTileContenTable(content, 3);
+
+  tile.appendChild(table);
 
   return tile;
 }
 
 function buildPlaylistTile(responseData) {
-  let tile = buildTile(`Total Playlists: ${responseData.playlists.total || 0}`);
-  let message = document.createElement('p');
-  message.innerHTML = `subscribed: ${responseData.playlists.sub_true || 0}`;
-  tile.appendChild(message);
+  let tile = buildTile(`Playlists:`);
+
+  const total = responseData.playlists.total || 0;
+  const subscribed = responseData.playlists.sub_true || 0;
+
+  const content = {
+    subscribed: `${subscribed}/${total}`,
+  };
+
+  const table = buildTileContenTable(content, 3);
+
+  tile.appendChild(table);
 
   return tile;
 }
 
 function buildDownloadTile(responseData) {
   let tile = buildTile('Downloads');
-  let message = document.createElement('p');
-  message.innerHTML = `
-        pending: ${responseData.downloads.pending || 0}<br>
-        ignored: ${responseData.downloads.ignore || 0}<br>
-    `;
-  tile.appendChild(message);
+
+  const pending = responseData.downloads.pending || 0;
+  const ignored = responseData.downloads.ignore || 0;
+
+  const content = {
+    pending,
+    ignored,
+  };
+
+  const table = buildTileContenTable(content, 3);
+
+  tile.appendChild(table);
 
   return tile;
 }
