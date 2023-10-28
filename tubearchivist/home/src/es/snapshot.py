@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 
 from home.src.es.connect import ElasticWrap
 from home.src.ta.helper import get_mapping
+from home.src.ta.settings import EnvironmentSettings
 
 
 class ElasticSnapshot:
@@ -256,7 +257,7 @@ class ElasticSnapshot:
         expected_format = "%Y-%m-%dT%H:%M:%S.%fZ"
         date = datetime.strptime(date_utc, expected_format)
         local_datetime = date.replace(tzinfo=ZoneInfo("localtime"))
-        converted = local_datetime.astimezone(ZoneInfo(environ.get("TZ")))
+        converted = local_datetime.astimezone(ZoneInfo(EnvironmentSettings.TZ))
         converted_str = converted.strftime("%Y-%m-%d %H:%M")
 
         return converted_str

@@ -14,6 +14,7 @@ from home.src.es.snapshot import ElasticSnapshot
 from home.src.index.video_streams import MediaStreamExtractor
 from home.src.ta.config import AppConfig, ReleaseVersion
 from home.src.ta.helper import clear_dl_cache
+from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskManager
 from home.src.ta.users import UserConfig
@@ -69,7 +70,7 @@ class Command(BaseCommand):
             "playlists",
             "videos",
         ]
-        cache_dir = AppConfig().config["application"]["cache_dir"]
+        cache_dir = EnvironmentSettings.CACHE_DIR
         for folder in folders:
             folder_path = os.path.join(cache_dir, folder)
             os.makedirs(folder_path, exist_ok=True)
@@ -119,8 +120,7 @@ class Command(BaseCommand):
     def _clear_dl_cache(self):
         """clear leftover files from dl cache"""
         self.stdout.write("[5] clear leftover files from dl cache")
-        config = AppConfig().config
-        leftover_files = clear_dl_cache(config)
+        leftover_files = clear_dl_cache(EnvironmentSettings.CACHE_DIR)
         if leftover_files:
             self.stdout.write(
                 self.style.SUCCESS(f"    ✓ cleared {leftover_files} files")
@@ -152,7 +152,7 @@ class Command(BaseCommand):
     def _mig_set_streams(self):
         """migration: update from 0.3.5 to 0.3.6, set streams and media_size"""
         self.stdout.write("[MIGRATION] index streams and media size")
-        videos = AppConfig().config["application"]["videos"]
+        videos = EnvironmentSettings.MEDIA_DIR
         data = {
             "query": {
                 "bool": {"must_not": [{"exists": {"field": "streams"}}]}

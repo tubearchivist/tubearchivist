@@ -17,8 +17,8 @@ from pathlib import Path
 import ldap
 from corsheaders.defaults import default_headers
 from django_auth_ldap.config import LDAPSearch
-from home.src.ta.config import AppConfig
 from home.src.ta.helper import ta_host_parser
+from home.src.ta.settings import EnvironmentSettings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-PW_HASH = hashlib.sha256(environ["TA_PASSWORD"].encode())
+PW_HASH = hashlib.sha256(EnvironmentSettings.TA_PASSWORD.encode())
 SECRET_KEY = PW_HASH.hexdigest()
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -180,7 +180,7 @@ if bool(environ.get("TA_LDAP")):
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-CACHE_DIR = AppConfig().config["application"]["cache_dir"]
+CACHE_DIR = EnvironmentSettings.CACHE_DIR
 DB_PATH = path.join(CACHE_DIR, "db.sqlite3")
 DATABASES = {
     "default": {
@@ -228,7 +228,7 @@ if bool(environ.get("TA_ENABLE_AUTH_PROXY")):
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = environ.get("TZ") or "UTC"
+TIME_ZONE = EnvironmentSettings.TZ
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True

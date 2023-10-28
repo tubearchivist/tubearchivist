@@ -21,6 +21,7 @@ from home.src.index.video import YoutubeVideo, index_new_video
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import ignore_filelist
+from home.src.ta.settings import EnvironmentSettings
 
 
 class DownloadPostProcess:
@@ -153,6 +154,8 @@ class VideoDownloader:
         self.youtube_id_list = youtube_id_list
         self.task = task
         self.config = AppConfig().config
+        self.cache_dir = EnvironmentSettings.CACHE_DIR
+        self.media_dir = EnvironmentSettings.MEDIA_DIR
         self._build_obs()
         self.channels = set()
         self.videos = set()
@@ -262,10 +265,7 @@ class VideoDownloader:
         """initial obs"""
         self.obs = {
             "merge_output_format": "mp4",
-            "outtmpl": (
-                self.config["application"]["cache_dir"]
-                + "/download/%(id)s.mp4"
-            ),
+            "outtmpl": (self.cache_dir + "/download/%(id)s.mp4"),
             "progress_hooks": [self._progress_hook],
             "noprogress": True,
             "continuedl": True,
@@ -340,7 +340,7 @@ class VideoDownloader:
         if format_overwrite:
             obs["format"] = format_overwrite
 
-        dl_cache = self.config["application"]["cache_dir"] + "/download/"
+        dl_cache = self.cache_dir + "/download/"
 
         # check if already in cache to continue from there
         all_cached = ignore_filelist(os.listdir(dl_cache))
@@ -370,20 +370,20 @@ class VideoDownloader:
 
     def move_to_archive(self, vid_dict):
         """move downloaded video from cache to archive"""
-        videos = self.config["application"]["videos"]
-        host_uid = self.config["application"]["HOST_UID"]
-        host_gid = self.config["application"]["HOST_GID"]
+        host_uid = EnvironmentSettings.HOST_UID
+        host_gid = EnvironmentSettings.HOST_GID
         # make folder
-        folder = os.path.join(videos, vid_dict["channel"]["channel_id"])
+        folder = os.path.join(
+            self.media_dir, vid_dict["channel"]["channel_id"]
+        )
         if not os.path.exists(folder):
             os.makedirs(folder)
             if host_uid and host_gid:
                 os.chown(folder, host_uid, host_gid)
         # move media file
         media_file = vid_dict["youtube_id"] + ".mp4"
-        cache_dir = self.config["application"]["cache_dir"]
-        old_path = os.path.join(cache_dir, "download", media_file)
-        new_path = os.path.join(videos, vid_dict["media_url"])
+        old_path = os.path.join(self.cache_dir, "download", media_file)
+        new_path = os.path.join(self.media_dir, vid_dict["media_url"])
         # move media file and fix permission
         shutil.move(old_path, new_path, copy_function=shutil.copyfile)
         if host_uid and host_gid:

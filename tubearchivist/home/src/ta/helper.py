@@ -112,13 +112,13 @@ def time_parser(timestamp: str) -> float:
     return int(hours) * 60 * 60 + int(minutes) * 60 + float(seconds)
 
 
-def clear_dl_cache(config: dict) -> int:
+def clear_dl_cache(cache_dir: str) -> int:
     """clear leftover files from dl cache"""
     print("clear download cache")
-    cache_dir = os.path.join(config["application"]["cache_dir"], "download")
-    leftover_files = ignore_filelist(os.listdir(cache_dir))
+    download_cache_dir = os.path.join(cache_dir, "download")
+    leftover_files = ignore_filelist(os.listdir(download_cache_dir))
     for cached in leftover_files:
-        to_delete = os.path.join(cache_dir, cached)
+        to_delete = os.path.join(download_cache_dir, cached)
         os.remove(to_delete)
 
     return len(leftover_files)

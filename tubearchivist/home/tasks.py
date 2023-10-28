@@ -24,13 +24,14 @@ from home.src.index.manual import ImportFolderScanner
 from home.src.index.reindex import Reindex, ReindexManual, ReindexPopulate
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.notify import Notifications
+from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskManager
 from home.src.ta.urlparser import Parser
 
 CONFIG = AppConfig().config
-REDIS_HOST = os.environ.get("REDIS_HOST")
-REDIS_PORT = os.environ.get("REDIS_PORT") or 6379
+REDIS_HOST = EnvironmentSettings.REDIS_HOST
+REDIS_PORT = EnvironmentSettings.REDIS_PORT
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 app = Celery(
@@ -39,9 +40,11 @@ app = Celery(
     backend=f"redis://{REDIS_HOST}:{REDIS_PORT}",
     result_extended=True,
 )
-app.config_from_object("django.conf:settings", namespace="ta:")
+app.config_from_object(
+    "django.conf:settings", namespace=EnvironmentSettings.REDIS_NAME_SPACE
+)
 app.autodiscover_tasks()
-app.conf.timezone = os.environ.get("TZ") or "UTC"
+app.conf.timezone = EnvironmentSettings.TZ
 
 
 class BaseTask(Task):

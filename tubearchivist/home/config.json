@@ -25,10 +25,6 @@
         "integrate_sponsorblock": false
     },
     "application": {
-        "app_root": "/app",
-        "cache_dir": "/cache",
-        "videos": "/youtube",
-        "enable_cast": false,
         "enable_snapshot": true
     },
     "scheduler": {

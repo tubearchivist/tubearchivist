@@ -6,8 +6,8 @@ import shutil
 
 from django.core.management.base import BaseCommand
 from home.src.es.connect import ElasticWrap, IndexPaginate
-from home.src.ta.config import AppConfig
 from home.src.ta.helper import ignore_filelist
+from home.src.ta.settings import EnvironmentSettings
 
 TOPIC = """
 
@@ -58,8 +58,7 @@ class FolderMigration:
     """migrate video archive folder"""
 
     def __init__(self):
-        self.config = AppConfig().config
-        self.videos = self.config["application"]["videos"]
+        self.videos = EnvironmentSettings.MEDIA_DIR
         self.bulk_list = []
 
     def get_to_migrate(self):
@@ -84,8 +83,8 @@ class FolderMigration:
 
     def create_folders(self, to_migrate):
         """create required channel folders"""
-        host_uid = self.config["application"]["HOST_UID"]
-        host_gid = self.config["application"]["HOST_GID"]
+        host_uid = EnvironmentSettings.HOST_UID
+        host_gid = EnvironmentSettings.HOST_GID
         all_channel_ids = {i["channel"]["channel_id"] for i in to_migrate}
 
         for channel_id in all_channel_ids:

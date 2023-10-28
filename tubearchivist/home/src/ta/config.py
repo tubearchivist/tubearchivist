@@ -5,7 +5,6 @@ Functionality:
 """
 
 import json
-import os
 import re
 from random import randint
 from time import sleep
@@ -28,7 +27,6 @@ class AppConfig:
         if not config:
             config = self.get_config_file()
 
-        config["application"].update(self.get_config_env())
         return config
 
     def get_config_file(self):
@@ -36,24 +34,7 @@ class AppConfig:
         with open("home/config.json", "r", encoding="utf-8") as f:
             config_file = json.load(f)
 
-        config_file["application"].update(self.get_config_env())
-
         return config_file
-
-    @staticmethod
-    def get_config_env():
-        """read environment application variables.
-
-        Connection to ES is managed in ElasticWrap and the
-        connection to Redis is managed in RedisArchivist."""
-
-        application = {
-            "HOST_UID": int(os.environ.get("HOST_UID", False)),
-            "HOST_GID": int(os.environ.get("HOST_GID", False)),
-            "enable_cast": bool(os.environ.get("ENABLE_CAST")),
-        }
-
-        return application
 
     @staticmethod
     def get_config_redis():

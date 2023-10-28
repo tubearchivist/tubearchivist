@@ -42,6 +42,7 @@ from home.src.index.reindex import ReindexProgress
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.helper import time_parser
+from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.users import UserConfig
 from home.tasks import index_channel_playlists, subscribe_to
@@ -56,7 +57,6 @@ class ArchivistViewConfig(View):
         self.view_origin = view_origin
         self.user_id = False
         self.user_conf: UserConfig = False
-        self.default_conf = False
         self.context = False
 
     def get_all_view_styles(self):
@@ -73,11 +73,10 @@ class ArchivistViewConfig(View):
         """build default context for every view"""
         self.user_id = user_id
         self.user_conf = UserConfig(self.user_id)
-        self.default_conf = AppConfig().config
 
         self.context = {
             "colors": self.user_conf.get_value("colors"),
-            "cast": self.default_conf["application"]["enable_cast"],
+            "cast": EnvironmentSettings.ENABLE_CAST,
             "sort_by": self.user_conf.get_value("sort_by"),
             "sort_order": self.user_conf.get_value("sort_order"),
             "view_style": self.user_conf.get_value(
@@ -877,7 +876,7 @@ class VideoView(MinView):
                 "video": video_data,
                 "playlist_nav": playlist_nav,
                 "title": video_data.get("title"),
-                "cast": config_handler.config["application"]["enable_cast"],
+                "cast": EnvironmentSettings.ENABLE_CAST,
                 "config": config_handler.config,
                 "position": time_parser(request.GET.get("t")),
                 "reindex": reindex.get("state"),

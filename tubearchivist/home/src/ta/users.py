@@ -28,12 +28,7 @@ class UserConfigType(TypedDict, total=False):
 
 
 class UserConfig:
-    """Handle settings for an individual user
-
-    Create getters and setters for usage in the application.
-    Although tedious it helps prevents everything caring about how properties
-    are persisted. Plus it allows us to save anytime any value is set.
-    """
+    """Handle settings for an individual user"""
 
     _DEFAULT_USER_SETTINGS = UserConfigType(
         colors="dark",
