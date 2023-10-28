@@ -299,12 +299,12 @@ class Command(BaseCommand):
                         f"    ✓ Settings for user '{user}' migrated to ES"
                     )
                 )
-        except Exception as e:
+        except Exception as err:
             message = "    🗙 user migration to ES failed"
             self.stdout.write(self.style.ERROR(message))
-            self.stdout.write(self.style.ERROR(e))
+            self.stdout.write(self.style.ERROR(err))
             sleep(60)
-            raise CommandError(message)
+            raise CommandError(message) from err
         else:
             self.stdout.write(
                 self.style.SUCCESS(
