@@ -4,7 +4,6 @@ functionality:
 """
 
 from datetime import datetime
-from os import environ
 from time import sleep
 from zoneinfo import ZoneInfo
 
@@ -20,9 +19,7 @@ class ElasticSnapshot:
     REPO_SETTINGS = {
         "compress": "true",
         "chunk_size": "1g",
-        "location": environ.get(
-            "ES_SNAPSHOT_DIR", "/usr/share/elasticsearch/data/snapshot"
-        ),
+        "location": EnvironmentSettings.ES_SNAPSHOT_DIR,
     }
     POLICY = "ta_daily"
 

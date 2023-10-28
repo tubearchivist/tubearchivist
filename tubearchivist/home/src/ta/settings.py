@@ -37,6 +37,11 @@ class EnvironmentSettings:
     ES_URL: str = str(environ.get("ES_URL"))
     ES_PASS: str = str(environ.get("ELASTIC_PASSWORD"))
     ES_USER: str = str(environ.get("ELASTIC_USER", "elastic"))
+    ES_SNAPSHOT_DIR: str = str(
+        environ.get(
+            "ES_SNAPSHOT_DIR", "/usr/share/elasticsearch/data/snapshot"
+        )
+    )
     ES_DISABLE_VERIFY_SSL: bool = bool(environ.get("ES_DISABLE_VERIFY_SSL"))
 
     def print_generic(self):
@@ -78,6 +83,7 @@ class EnvironmentSettings:
             ES_URL: {self.ES_URL}
             ES_PASS: *****
             ES_USER: {self.ES_USER}
+            ES_SNAPSHOT_DIR: {self.ES_SNAPSHOT_DIR}
             ES_DISABLE_VERIFY_SSL: {self.ES_DISABLE_VERIFY_SSL}"""
         )
 
