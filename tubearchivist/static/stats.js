@@ -45,11 +45,15 @@ function buildTileContenTable(content, rowsWanted) {
 
   const nbsp = '\u00A0'; // No-Break Space https://www.compart.com/en/unicode/U+00A0
 
-  if (contentEntries.length < rowsWanted) {
-    const rowsToAdd = rowsWanted - contentEntries.length;
+  // Do not add spacing rows when on mobile device
+  const isMobile = window.matchMedia('(max-width: 600px)');
+  if (!isMobile.matches) {
+    if (contentEntries.length < rowsWanted) {
+      const rowsToAdd = rowsWanted - contentEntries.length;
 
-    for (let i = 0; i < rowsToAdd; i++) {
-      contentEntries.push([nbsp, nbsp]);
+      for (let i = 0; i < rowsToAdd; i++) {
+        contentEntries.push([nbsp, nbsp]);
+      }
     }
   }
 
