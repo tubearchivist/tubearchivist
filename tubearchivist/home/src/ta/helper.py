@@ -178,7 +178,7 @@ def get_duration_str(seconds: int) -> str:
     for unit_label, unit_seconds in units:
         if seconds >= unit_seconds:
             unit_count, seconds = divmod(seconds, unit_seconds)
-            duration_parts.append(f"{'{:0>2}'.format(unit_count)}{unit_label}")
+            duration_parts.append(f"{unit_count:02}{unit_label}")
 
     return " ".join(duration_parts)
 
