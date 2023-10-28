@@ -312,10 +312,6 @@ class Reindex(ReindexBase):
             video.json_data["playlist"] = es_meta.get("playlist")
 
         video.upload_to_es()
-        if es_meta.get("media_url") != video.json_data["media_url"]:
-            self._rename_media_file(
-                es_meta.get("media_url"), video.json_data["media_url"]
-            )
 
         thumb_handler = ThumbManager(youtube_id)
         thumb_handler.delete_video_thumb()
@@ -325,14 +321,6 @@ class Reindex(ReindexBase):
         self.processed["videos"] += 1
 
         return
-
-    def _rename_media_file(self, media_url_is, media_url_should):
-        """handle title change"""
-        print(f"[reindex] fix media_url {media_url_is} to {media_url_should}")
-        videos = EnvironmentSettings.MEDIA_DIR
-        old_path = os.path.join(videos, media_url_is)
-        new_path = os.path.join(videos, media_url_should)
-        os.rename(old_path, new_path)
 
     def _reindex_single_channel(self, channel_id):
         """refresh channel data and sync to videos"""
