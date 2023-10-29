@@ -168,24 +168,48 @@ function watchStats() {
   let watchBox = document.getElementById('watchBox');
   clearLoading(watchBox);
 
-  for (const property in responseData) {
-    let tile = buildWatchTile(property, responseData[property]);
-    watchBox.appendChild(tile);
-  }
+  const { total, watched, unwatched } = responseData;
+
+  let firstCard = buildWatchTile('total', total);
+  watchBox.appendChild(firstCard);
+
+  let secondCard = buildWatchTile('watched', watched);
+  watchBox.appendChild(secondCard);
+
+  let thirdCard = buildWatchTile('unwatched', unwatched);
+  watchBox.appendChild(thirdCard);
+}
+
+function capitalizeFirstLetter(string) {
+  // source: https://stackoverflow.com/a/1026087
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 function buildWatchTile(title, watchDetail) {
-  let tile = buildTile(`Total ${title}`);
-  let message = document.createElement('p');
-  message.innerHTML = `
-    ${watchDetail.items} Videos<br>
-    ${watchDetail.duration} Seconds<br>
-    ${watchDetail.duration_str} Playback
-  `;
-  if (watchDetail.progress) {
-    message.innerHTML += `<br>${Number(watchDetail.progress * 100).toFixed(2)}%`;
+  const items = watchDetail.items || 0;
+  const duration = watchDetail.duration || 0;
+  const duration_str = watchDetail.duration_str || 0;
+  const hasProgess = !!watchDetail.progress;
+  const progress = Number(watchDetail.progress * 100).toFixed(2);
+
+  let titleCapizalized = capitalizeFirstLetter(title);
+
+  if (hasProgess) {
+    titleCapizalized = `${progress}% ` + titleCapizalized;
   }
-  tile.appendChild(message);
+
+  let tile = buildTile(titleCapizalized);
+
+  const content = {
+    Videos: items,
+    Seconds: duration,
+    Playback: duration_str,
+  };
+
+  const table = buildTileContenTable(content, 3);
+
+  tile.appendChild(table);
+
   return tile;
 }
 

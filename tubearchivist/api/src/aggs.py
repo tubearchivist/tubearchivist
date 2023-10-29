@@ -117,7 +117,7 @@ class WatchProgress(AggBase):
         all_duration = int(aggregations["total_duration"].get("value"))
         response.update(
             {
-                "all": {
+                "total": {
                     "duration": all_duration,
                     "duration_str": get_duration_str(all_duration),
                     "items": aggregations["total_vids"].get("value"),
