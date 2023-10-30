@@ -234,11 +234,11 @@ function downloadHist() {
 function buildDailyStat(dailyStat) {
   let tile = buildTile(dailyStat.date);
   let message = document.createElement('p');
-  const isMoreThenOne = dailyStat.count > 1;
+  const isExactlyOne = dailyStat.count === 1;
 
-  let text = 'Video';
-  if (isMoreThenOne) {
-    text = 'Videos';
+  let text = 'Videos';
+  if (isExactlyOne) {
+    text = 'Video';
   }
 
   message.innerText = `+${dailyStat.count} ${text}`;
