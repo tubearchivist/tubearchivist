@@ -98,9 +98,9 @@ function buildVideoTile(responseData) {
   const streams = responseData.videos.streams || 0;
 
   const content = {
-    videos: `${videos}/${total}`,
-    shorts: `${shorts}/${total}`,
-    streams: `${streams}/${total}`,
+    Videos: `${videos}/${total}`,
+    Shorts: `${shorts}/${total}`,
+    Streams: `${streams}/${total}`,
   };
 
   const table = buildTileContenTable(content, 3);
@@ -117,7 +117,7 @@ function buildChannelTile(responseData) {
   const subscribed = responseData.channels.sub_true || 0;
 
   const content = {
-    subscribed: `${subscribed}/${total}`,
+    Subscribed: `${subscribed}/${total}`,
   };
 
   const table = buildTileContenTable(content, 3);
@@ -134,7 +134,7 @@ function buildPlaylistTile(responseData) {
   const subscribed = responseData.playlists.sub_true || 0;
 
   const content = {
-    subscribed: `${subscribed}/${total}`,
+    Subscribed: `${subscribed}/${total}`,
   };
 
   const table = buildTileContenTable(content, 3);
@@ -151,8 +151,8 @@ function buildDownloadTile(responseData) {
   const ignored = responseData.downloads.ignore || 0;
 
   const content = {
-    pending,
-    ignored,
+    Pending: pending,
+    Ignored: ignored,
   };
 
   const table = buildTileContenTable(content, 3);
