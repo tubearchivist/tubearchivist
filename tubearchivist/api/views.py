@@ -2,8 +2,6 @@
 
 from api.src.aggs import BiggestChannel, DownloadHist, Primary, WatchProgress
 from api.src.search_processor import SearchProcess
-from django.contrib.auth.decorators import user_passes_test
-from django.utils.decorators import method_decorator
 from home.src.download.queue import PendingInteract
 from home.src.download.subscriptions import (
     ChannelSubscription,
@@ -31,27 +29,44 @@ from home.tasks import (
     extrac_dl,
     subscribe_to,
 )
+from rest_framework import permissions
 from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
 )
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 
 def check_admin(user):
-    """if user has access to restricted views"""
+    """check for admin permission for restricted views"""
     return user.is_staff or user.groups.filter(name="admin").exists()
+
+
+class AdminOnly(permissions.BasePermission):
+    """allow only admin"""
+
+    def has_permission(self, request, view):
+        return check_admin(request.user)
+
+
+class AdminWriteOnly(permissions.BasePermission):
+    """allow only admin writes"""
+
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return permissions.IsAuthenticated().has_permission(request, view)
+
+        return check_admin(request.user)
 
 
 class ApiBaseView(APIView):
     """base view to inherit from"""
 
     authentication_classes = [SessionAuthentication, TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     search_base = ""
     data = ""
 
@@ -116,6 +131,7 @@ class VideoApiView(ApiBaseView):
     """
 
     search_base = "ta_video/_doc/"
+    permission_classes = [AdminWriteOnly]
 
     def get(self, request, video_id):
         # pylint: disable=unused-argument
@@ -123,7 +139,6 @@ class VideoApiView(ApiBaseView):
         self.get_document(video_id)
         return Response(self.response, status=self.status_code)
 
-    @method_decorator(user_passes_test(check_admin), name="dispatch")
     def delete(self, request, video_id):
         # pylint: disable=unused-argument
         """delete single video"""
@@ -290,6 +305,7 @@ class ChannelApiView(ApiBaseView):
     """
 
     search_base = "ta_channel/_doc/"
+    permission_classes = [AdminWriteOnly]
 
     def get(self, request, channel_id):
         # pylint: disable=unused-argument
@@ -297,7 +313,6 @@ class ChannelApiView(ApiBaseView):
         self.get_document(channel_id)
         return Response(self.response, status=self.status_code)
 
-    @method_decorator(user_passes_test(check_admin), name="dispatch")
     def delete(self, request, channel_id):
         # pylint: disable=unused-argument
         """delete channel"""
@@ -321,6 +336,7 @@ class ChannelApiListView(ApiBaseView):
 
     search_base = "ta_channel/_search/"
     valid_filter = ["subscribed"]
+    permission_classes = [AdminWriteOnly]
 
     def get(self, request):
         """get request"""
@@ -343,7 +359,6 @@ class ChannelApiListView(ApiBaseView):
 
         return Response(self.response)
 
-    @method_decorator(user_passes_test(check_admin), name="dispatch")
     def post(self, request):
         """subscribe/unsubscribe to list of channels"""
         data = request.data
@@ -435,6 +450,7 @@ class PlaylistApiListView(ApiBaseView):
     """
 
     search_base = "ta_playlist/_search/"
+    permission_classes = [AdminWriteOnly]
 
     def get(self, request):
         """handle get request"""
@@ -444,7 +460,6 @@ class PlaylistApiListView(ApiBaseView):
         self.get_document_list(request)
         return Response(self.response)
 
-    @method_decorator(user_passes_test(check_admin), name="dispatch")
     def post(self, request):
         """subscribe/unsubscribe to list of playlists"""
         data = request.data
@@ -484,6 +499,7 @@ class PlaylistApiView(ApiBaseView):
     """
 
     search_base = "ta_playlist/_doc/"
+    permission_classes = [AdminWriteOnly]
 
     def get(self, request, playlist_id):
         # pylint: disable=unused-argument
@@ -491,7 +507,6 @@ class PlaylistApiView(ApiBaseView):
         self.get_document(playlist_id)
         return Response(self.response, status=self.status_code)
 
-    @method_decorator(user_passes_test(check_admin), name="dispatch")
     def delete(self, request, playlist_id):
         """delete playlist"""
         print(f"{playlist_id}: delete playlist")
@@ -522,7 +537,6 @@ class PlaylistApiVideoView(ApiBaseView):
         return Response(self.response, status=self.status_code)
 
 
-@method_decorator(user_passes_test(check_admin), name="dispatch")
 class DownloadApiView(ApiBaseView):
     """resolves to /api/download/<video_id>/
     GET: returns metadata dict of an item in the download queue
@@ -532,6 +546,7 @@ class DownloadApiView(ApiBaseView):
 
     search_base = "ta_download/_doc/"
     valid_status = ["pending", "ignore", "priority"]
+    permission_classes = [AdminOnly]
 
     def get(self, request, video_id):
         # pylint: disable=unused-argument
@@ -569,7 +584,6 @@ class DownloadApiView(ApiBaseView):
         return Response({"success": True})
 
 
-@method_decorator(user_passes_test(check_admin), name="dispatch")
 class DownloadApiListView(ApiBaseView):
     """resolves to /api/download/
     GET: returns latest videos in the download queue
@@ -579,6 +593,7 @@ class DownloadApiListView(ApiBaseView):
 
     search_base = "ta_download/_search/"
     valid_filter = ["pending", "ignore"]
+    permission_classes = [AdminOnly]
 
     def get(self, request):
         """get request"""
@@ -681,12 +696,13 @@ class LoginApiView(ObtainAuthToken):
         return Response({"token": token.key, "user_id": user.pk})
 
 
-@method_decorator(user_passes_test(check_admin), name="dispatch")
 class SnapshotApiListView(ApiBaseView):
     """resolves to /api/snapshot/
     GET: returns snapshot config plus list of existing snapshots
     POST: take snapshot now
     """
+
+    permission_classes = [AdminOnly]
 
     @staticmethod
     def get(request):
@@ -705,13 +721,14 @@ class SnapshotApiListView(ApiBaseView):
         return Response(response)
 
 
-@method_decorator(user_passes_test(check_admin), name="dispatch")
 class SnapshotApiView(ApiBaseView):
     """resolves to /api/snapshot/<snapshot-id>/
     GET: return a single snapshot
     POST: restore snapshot
     DELETE: delete a snapshot
     """
+
+    permission_classes = [AdminOnly]
 
     @staticmethod
     def get(request, snapshot_id):
@@ -747,11 +764,12 @@ class SnapshotApiView(ApiBaseView):
         return Response(response)
 
 
-@method_decorator(user_passes_test(check_admin), name="dispatch")
 class TaskListView(ApiBaseView):
     """resolves to /api/task-name/
     GET: return a list of all stored task results
     """
+
+    permission_classes = [AdminOnly]
 
     def get(self, request):
         """handle get request"""
@@ -761,12 +779,13 @@ class TaskListView(ApiBaseView):
         return Response(all_results)
 
 
-@method_decorator(user_passes_test(check_admin), name="dispatch")
 class TaskNameListView(ApiBaseView):
     """resolves to /api/task-name/<task-name>/
     GET: return a list of stored results of task
     POST: start new background process
     """
+
+    permission_classes = [AdminOnly]
 
     def get(self, request, task_name):
         """handle get request"""
@@ -800,13 +819,13 @@ class TaskNameListView(ApiBaseView):
         return Response({"message": message})
 
 
-@method_decorator(user_passes_test(check_admin), name="dispatch")
 class TaskIDView(ApiBaseView):
     """resolves to /api/task-id/<task-id>/
     GET: return details of task id
     """
 
     valid_commands = ["stop", "kill"]
+    permission_classes = [AdminOnly]
 
     def get(self, request, task_id):
         """handle get request"""
@@ -852,12 +871,13 @@ class TaskIDView(ApiBaseView):
         return f"message:{task_conf.get('group')}:{task_id.split('-')[0]}"
 
 
-@method_decorator(user_passes_test(check_admin), name="dispatch")
 class RefreshView(ApiBaseView):
     """resolves to /api/refresh/
     GET: get refresh progress
     POST: start a manual refresh task
     """
+
+    permission_classes = [AdminOnly]
 
     def get(self, request):
         """handle get request"""
@@ -885,13 +905,14 @@ class RefreshView(ApiBaseView):
         return Response(data)
 
 
-@method_decorator(user_passes_test(check_admin), name="dispatch")
 class CookieView(ApiBaseView):
     """resolves to /api/cookie/
     GET: check if cookie is enabled
     POST: verify validity of cookie
     PUT: import cookie
     """
+
+    permission_classes = [AdminOnly]
 
     @staticmethod
     def get(request):
@@ -975,11 +996,12 @@ class SearchView(ApiBaseView):
         return Response(search_results)
 
 
-@method_decorator(user_passes_test(check_admin), name="dispatch")
 class TokenView(ApiBaseView):
     """resolves to /api/token/
     DELETE: revoke the token
     """
+
+    permission_classes = [AdminOnly]
 
     @staticmethod
     def delete(request):
