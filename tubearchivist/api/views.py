@@ -785,9 +785,13 @@ class BackupApiListView(ApiBaseView):
     def post(self, request):
         """handle post request"""
         # pylint: disable=unused-argument
-        message = TaskCommand().start(self.task_name)
+        response = TaskCommand().start(self.task_name)
+        message = {
+            "message": "backup task started",
+            "task_id": response["task_id"],
+        }
 
-        return Response({"message": message})
+        return Response(message)
 
 
 class BackupApiView(ApiBaseView):
@@ -820,7 +824,7 @@ class BackupApiView(ApiBaseView):
             "filename": filename,
             "task_id": task.id,
         }
-        return Response({"message": message})
+        return Response(message)
 
     @staticmethod
     def delete(request, filename):
