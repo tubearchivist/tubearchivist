@@ -5,7 +5,6 @@ Functionality:
 """
 
 from home.src.ta.users import UserConfig
-from home.tasks import run_restore_backup
 
 
 class PostData:
@@ -34,7 +33,6 @@ class PostData:
             "hide_watched": self._hide_watched,
             "show_subed_only": self._show_subed_only,
             "show_ignored_only": self._show_ignored_only,
-            "db-restore": self._db_restore,
         }
 
         return exec_map[self.to_exec]
@@ -82,11 +80,4 @@ class PostData:
         UserConfig(self.current_user).set_value(
             "show_ignored_only", bool(int(self.exec_val))
         )
-        return {"success": True}
-
-    def _db_restore(self):
-        """restore es zip from settings page"""
-        print("restoring index from backup zip")
-        filename = self.exec_val
-        run_restore_backup.delay(filename)
         return {"success": True}
