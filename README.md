@@ -149,6 +149,7 @@ This can happen if you have nested virtualizations, e.g. LXC running Docker in P
 We have come far, nonetheless we are not short of ideas on how to improve and extend this project. Issues waiting for you to be tackled in no particular order:
 
 - [ ] User roles
+- [ ] Audio download
 - [ ] Podcast mode to serve channel as mp3
 - [ ] User created playlists, random and repeat controls ([#108](https://github.com/tubearchivist/tubearchivist/issues/108), [#220](https://github.com/tubearchivist/tubearchivist/issues/220))
 - [ ] Auto play or play next link ([#226](https://github.com/tubearchivist/tubearchivist/issues/226))
@@ -158,6 +159,7 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Custom searchable notes to videos, channels, playlists ([#144](https://github.com/tubearchivist/tubearchivist/issues/144))
 - [ ] Search comments
 - [ ] Search download queue
+- [ ] Configure shorts, streams and video sizes per channel
 
 Implemented:
 - [X] Add statistics of index [2023-09-03]
