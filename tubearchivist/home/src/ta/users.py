@@ -46,9 +46,15 @@ class UserConfig:
         sponsorblock_id=None,
     )
 
+    VALID_COLORS = ["dark", "light"]
+    VALID_VIEW_STYLE = ["grid", "list"]
+    VALID_SORT_ORDER = ["asc", "desc"]
+    VALID_SORT_BY = ["published", "downloaded", "views", "likes"]
+    VALID_GRID_ITEMS = range(3, 8)
+
     def __init__(self, user_id: str):
         self._user_id: str = user_id
-        self._config: UserConfigType = self._get_config()
+        self._config: UserConfigType = self.get_config()
 
     def get_value(self, key: str):
         """Get the given key from the users configuration
@@ -60,15 +66,8 @@ class UserConfig:
         return self._config.get(key) or self._DEFAULT_USER_SETTINGS.get(key)
 
     def set_value(self, key: str, value: str | bool | int):
-        """Set or replace a configuration value for the user
-
-        Throws a KeyError if the requested Key is not a permitted value"""
-        if not self._user_id:
-            raise ValueError("Unable to persist config for null user_id")
-
-        if key not in self._DEFAULT_USER_SETTINGS:
-            raise KeyError(f"Unable to persist config for unknown key '{key}'")
-
+        """Set or replace a configuration value for the user"""
+        self._validate(key, value)
         old = self.get_value(key)
         self._config[key] = value
 
@@ -79,9 +78,45 @@ class UserConfig:
         if status < 200 or status > 299:
             raise ValueError(f"Failed storing user value {status}: {response}")
 
-        print(f"User {self._user_id} value '{key}' change: {old} > {value}")
+        print(f"User {self._user_id} value '{key}' change: {old} -> {value}")
 
-    def _get_config(self) -> UserConfigType:
+    def _validate(self, key, value):
+        """validate key and value"""
+        if not self._user_id:
+            raise ValueError("Unable to persist config for null user_id")
+
+        if key not in self._DEFAULT_USER_SETTINGS:
+            raise KeyError(
+                f"Unable to persist config for an unknown key '{key}'"
+            )
+
+        valid_values = {
+            "colors": self.VALID_COLORS,
+            "sort_by": self.VALID_SORT_BY,
+            "sort_order": self.VALID_SORT_ORDER,
+            "view_style_home": self.VALID_VIEW_STYLE,
+            "view_style_channel": self.VALID_VIEW_STYLE,
+            "view_style_download": self.VALID_VIEW_STYLE,
+            "view_style_playlist": self.VALID_VIEW_STYLE,
+            "grid_items": self.VALID_GRID_ITEMS,
+            "page_size": int,
+            "hide_watched": bool,
+            "show_ignored_only": bool,
+            "show_subed_only": bool,
+        }
+        validation_value = valid_values.get(key)
+
+        if isinstance(validation_value, (list, range)):
+            if value not in validation_value:
+                raise ValueError(f"Invalid value for {key}: {value}")
+        elif validation_value == int:
+            if not isinstance(value, int):
+                raise ValueError(f"Invalid value for {key}: {value}")
+        elif validation_value == bool:
+            if not isinstance(value, bool):
+                raise ValueError(f"Invalid value for {key}: {value}")
+
+    def get_config(self) -> UserConfigType:
         """get config from ES or load from the application defaults"""
         if not self._user_id:
             # this is for a non logged-in user so use all the defaults
