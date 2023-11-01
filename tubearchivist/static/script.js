@@ -283,7 +283,7 @@ function reEmbed() {
 }
 
 function dbBackup() {
-  let apiEndpoint = '/api/task-name/run_backup/';
+  let apiEndpoint = '/api/backup/';
   apiRequest(apiEndpoint, 'POST');
   // clear button
   let message = document.createElement('p');
@@ -299,8 +299,8 @@ function dbBackup() {
 
 function dbRestore(button) {
   let fileName = button.getAttribute('data-id');
-  let payload = JSON.stringify({ 'db-restore': fileName });
-  sendPost(payload);
+  let apiEndpoint = `/api/backup/${fileName}/`;
+  apiRequest(apiEndpoint, 'POST');
   // clear backup row
   let message = document.createElement('p');
   message.innerText = 'restoring from backup';

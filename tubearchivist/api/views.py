@@ -8,6 +8,7 @@ from home.src.download.subscriptions import (
     PlaylistSubscription,
 )
 from home.src.download.yt_dlp_base import CookieHandler
+from home.src.es.backup import ElasticBackup
 from home.src.es.connect import ElasticWrap
 from home.src.es.snapshot import ElasticSnapshot
 from home.src.frontend.searching import SearchForm
@@ -27,6 +28,7 @@ from home.tasks import (
     check_reindex,
     download_pending,
     extrac_dl,
+    run_restore_backup,
     subscribe_to,
 )
 from rest_framework import permissions
@@ -762,6 +764,76 @@ class SnapshotApiView(ApiBaseView):
             return Response(message, status=400)
 
         return Response(response)
+
+
+class BackupApiListView(ApiBaseView):
+    """resolves to /api/backup/
+    GET: returns list of available zip backups
+    POST: take zip backup now
+    """
+
+    permission_classes = [AdminOnly]
+    task_name = "run_backup"
+
+    @staticmethod
+    def get(request):
+        """handle get request"""
+        # pylint: disable=unused-argument
+        backup_files = ElasticBackup().get_all_backup_files()
+        return Response(backup_files)
+
+    def post(self, request):
+        """handle post request"""
+        # pylint: disable=unused-argument
+        message = TaskCommand().start(self.task_name)
+
+        return Response({"message": message})
+
+
+class BackupApiView(ApiBaseView):
+    """resolves to /api/backup/<filename>/
+    GET: return a single backup
+    POST: restore backup
+    DELETE: delete backup
+    """
+
+    permission_classes = [AdminOnly]
+    task_name = "restore_backup"
+
+    @staticmethod
+    def get(request, filename):
+        """get single backup"""
+        # pylint: disable=unused-argument
+        backup_file = ElasticBackup().build_backup_file_data(filename)
+        if not backup_file:
+            message = {"message": "file not found"}
+            return Response(message, status=404)
+
+        return Response(backup_file)
+
+    def post(self, request, filename):
+        """restore backup file"""
+        # pylint: disable=unused-argument
+        task = run_restore_backup.delay(filename)
+        message = {
+            "message": "backup restore task started",
+            "filename": filename,
+            "task_id": task.id,
+        }
+        return Response({"message": message})
+
+    @staticmethod
+    def delete(request, filename):
+        """delete backup file"""
+        # pylint: disable=unused-argument
+
+        backup_file = ElasticBackup().delete_file(filename)
+        if not backup_file:
+            message = {"message": "file not found"}
+            return Response(message, status=404)
+
+        message = {"message": f"file {filename} deleted"}
+        return Response(message)
 
 
 class TaskListView(ApiBaseView):

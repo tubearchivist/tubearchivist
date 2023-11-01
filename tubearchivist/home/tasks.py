@@ -294,13 +294,15 @@ def run_restore_backup(self, filename):
     if manager.is_pending(self):
         print(f"[task][{self.name}] restore is already running")
         self.send_progress("Restore is already running.")
-        return
+        return None
 
     manager.init(self)
     self.send_progress(["Reset your Index"])
     ElasitIndexWrap().reset()
     ElasticBackup(task=self).restore(filename)
     print("index restore finished")
+
+    return f"backup restore completed: {filename}"
 
 
 @shared_task(bind=True, name="rescan_filesystem", base=BaseTask)
