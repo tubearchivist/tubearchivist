@@ -6,11 +6,11 @@ functionality:
 # pylint: disable=missing-timeout
 
 import json
-import os
 from typing import Any
 
 import requests
 import urllib3
+from home.src.ta.settings import EnvironmentSettings
 
 
 class ElasticWrap:
@@ -18,16 +18,14 @@ class ElasticWrap:
     returns response json and status code tuple
     """
 
-    ES_URL: str = str(os.environ.get("ES_URL"))
-    ES_PASS: str = str(os.environ.get("ELASTIC_PASSWORD"))
-    ES_USER: str = str(os.environ.get("ELASTIC_USER") or "elastic")
-    ES_DISABLE_VERIFY_SSL: bool = bool(os.environ.get("ES_DISABLE_VERIFY_SSL"))
-
     def __init__(self, path: str):
-        self.url: str = f"{self.ES_URL}/{path}"
-        self.auth: tuple[str, str] = (self.ES_USER, self.ES_PASS)
+        self.url: str = f"{EnvironmentSettings.ES_URL}/{path}"
+        self.auth: tuple[str, str] = (
+            EnvironmentSettings.ES_USER,
+            EnvironmentSettings.ES_PASS,
+        )
 
-        if self.ES_DISABLE_VERIFY_SSL:
+        if EnvironmentSettings.ES_DISABLE_VERIFY_SSL:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def get(
@@ -43,7 +41,7 @@ class ElasticWrap:
             "timeout": timeout,
         }
 
-        if self.ES_DISABLE_VERIFY_SSL:
+        if EnvironmentSettings.ES_DISABLE_VERIFY_SSL:
             kwargs["verify"] = False
 
         if data:
@@ -78,7 +76,7 @@ class ElasticWrap:
                 }
             )
 
-        if self.ES_DISABLE_VERIFY_SSL:
+        if EnvironmentSettings.ES_DISABLE_VERIFY_SSL:
             kwargs["verify"] = False
 
         response = requests.post(self.url, **kwargs)
@@ -103,7 +101,7 @@ class ElasticWrap:
             "auth": self.auth,
         }
 
-        if self.ES_DISABLE_VERIFY_SSL:
+        if EnvironmentSettings.ES_DISABLE_VERIFY_SSL:
             kwargs["verify"] = False
 
         response = requests.put(self.url, **kwargs)
@@ -130,7 +128,7 @@ class ElasticWrap:
         if data:
             kwargs["json"] = data
 
-        if self.ES_DISABLE_VERIFY_SSL:
+        if EnvironmentSettings.ES_DISABLE_VERIFY_SSL:
             kwargs["verify"] = False
 
         response = requests.delete(self.url, **kwargs)

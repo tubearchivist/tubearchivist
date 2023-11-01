@@ -18,6 +18,7 @@ from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock, YoutubeVideo
 from home.src.ta.config import AppConfig, ReleaseVersion
+from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskCommand, TaskManager
 from home.src.ta.urlparser import Parser
@@ -28,28 +29,56 @@ from home.tasks import (
     extrac_dl,
     subscribe_to,
 )
+from rest_framework import permissions
 from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
 )
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+
+def check_admin(user):
+    """check for admin permission for restricted views"""
+    return user.is_staff or user.groups.filter(name="admin").exists()
+
+
+class AdminOnly(permissions.BasePermission):
+    """allow only admin"""
+
+    def has_permission(self, request, view):
+        return check_admin(request.user)
+
+
+class AdminWriteOnly(permissions.BasePermission):
+    """allow only admin writes"""
+
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return permissions.IsAuthenticated().has_permission(request, view)
+
+        return check_admin(request.user)
 
 
 class ApiBaseView(APIView):
     """base view to inherit from"""
 
     authentication_classes = [SessionAuthentication, TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     search_base = ""
     data = ""
 
     def __init__(self):
         super().__init__()
-        self.response = {"data": False, "config": AppConfig().config}
+        self.response = {
+            "data": False,
+            "config": {
+                "enable_cast": EnvironmentSettings.ENABLE_CAST,
+                "downloads": AppConfig().config["downloads"],
+            },
+        }
         self.data = {"query": {"match_all": {}}}
         self.status_code = False
         self.context = False
@@ -102,6 +131,7 @@ class VideoApiView(ApiBaseView):
     """
 
     search_base = "ta_video/_doc/"
+    permission_classes = [AdminWriteOnly]
 
     def get(self, request, video_id):
         # pylint: disable=unused-argument
@@ -165,7 +195,6 @@ class VideoProgressView(ApiBaseView):
         message = {"position": position, "youtube_id": video_id}
         RedisArchivist().set_message(key, message)
         self.response = request.data
-
         return Response(self.response)
 
     def delete(self, request, video_id):
@@ -276,6 +305,7 @@ class ChannelApiView(ApiBaseView):
     """
 
     search_base = "ta_channel/_doc/"
+    permission_classes = [AdminWriteOnly]
 
     def get(self, request, channel_id):
         # pylint: disable=unused-argument
@@ -306,6 +336,7 @@ class ChannelApiListView(ApiBaseView):
 
     search_base = "ta_channel/_search/"
     valid_filter = ["subscribed"]
+    permission_classes = [AdminWriteOnly]
 
     def get(self, request):
         """get request"""
@@ -419,6 +450,7 @@ class PlaylistApiListView(ApiBaseView):
     """
 
     search_base = "ta_playlist/_search/"
+    permission_classes = [AdminWriteOnly]
 
     def get(self, request):
         """handle get request"""
@@ -467,6 +499,7 @@ class PlaylistApiView(ApiBaseView):
     """
 
     search_base = "ta_playlist/_doc/"
+    permission_classes = [AdminWriteOnly]
 
     def get(self, request, playlist_id):
         # pylint: disable=unused-argument
@@ -513,6 +546,7 @@ class DownloadApiView(ApiBaseView):
 
     search_base = "ta_download/_doc/"
     valid_status = ["pending", "ignore", "priority"]
+    permission_classes = [AdminOnly]
 
     def get(self, request, video_id):
         # pylint: disable=unused-argument
@@ -559,6 +593,7 @@ class DownloadApiListView(ApiBaseView):
 
     search_base = "ta_download/_search/"
     valid_filter = ["pending", "ignore"]
+    permission_classes = [AdminOnly]
 
     def get(self, request):
         """get request"""
@@ -667,6 +702,8 @@ class SnapshotApiListView(ApiBaseView):
     POST: take snapshot now
     """
 
+    permission_classes = [AdminOnly]
+
     @staticmethod
     def get(request):
         """handle get request"""
@@ -690,6 +727,8 @@ class SnapshotApiView(ApiBaseView):
     POST: restore snapshot
     DELETE: delete a snapshot
     """
+
+    permission_classes = [AdminOnly]
 
     @staticmethod
     def get(request, snapshot_id):
@@ -730,6 +769,8 @@ class TaskListView(ApiBaseView):
     GET: return a list of all stored task results
     """
 
+    permission_classes = [AdminOnly]
+
     def get(self, request):
         """handle get request"""
         # pylint: disable=unused-argument
@@ -743,6 +784,8 @@ class TaskNameListView(ApiBaseView):
     GET: return a list of stored results of task
     POST: start new background process
     """
+
+    permission_classes = [AdminOnly]
 
     def get(self, request, task_name):
         """handle get request"""
@@ -782,6 +825,7 @@ class TaskIDView(ApiBaseView):
     """
 
     valid_commands = ["stop", "kill"]
+    permission_classes = [AdminOnly]
 
     def get(self, request, task_id):
         """handle get request"""
@@ -833,6 +877,8 @@ class RefreshView(ApiBaseView):
     POST: start a manual refresh task
     """
 
+    permission_classes = [AdminOnly]
+
     def get(self, request):
         """handle get request"""
         request_type = request.GET.get("type")
@@ -865,6 +911,8 @@ class CookieView(ApiBaseView):
     POST: verify validity of cookie
     PUT: import cookie
     """
+
+    permission_classes = [AdminOnly]
 
     @staticmethod
     def get(request):
@@ -952,6 +1000,8 @@ class TokenView(ApiBaseView):
     """resolves to /api/token/
     DELETE: revoke the token
     """
+
+    permission_classes = [AdminOnly]
 
     @staticmethod
     def delete(request):

@@ -2,6 +2,7 @@
 {% block content %}
 {% load static %}
 {% load humanize %}
+{% load auth_extras %}
 <div class="boxed-content">
     <div class="channel-banner">
         <a href="{% url 'channel_id' channel_info.channel_id %}"><img src="{{ channel_info.channel_banner_url }}" alt="channel_banner"></a>
@@ -19,7 +20,9 @@
         {% endif %}
         <a href="{% url 'channel_id_about' channel_info.channel_id %}"><h3>About</h3></a>
         {% if has_pending %}
-            <a href="{% url 'downloads' %}?channel={{ channel_info.channel_id }}"><h3>Downloads</h3></a>
+            {% if request.user|has_group:"admin" or request.user.is_staff %}
+                <a href="{% url 'downloads' %}?channel={{ channel_info.channel_id }}"><h3>Downloads</h3></a>
+            {% endif %}
         {% endif %}
     </div>
     <div id="notifications" data="channel reindex"></div>
@@ -53,7 +56,7 @@
                     <a href="{% url 'channel_id' playlist.playlist_channel_id %}"><h3>{{ playlist.playlist_channel }}</h3></a>
                     <a href="{% url 'playlist_id' playlist.playlist_id %}"><h2>{{ playlist.playlist_name }}</h2></a>
                     <p>Last refreshed: {{ playlist.playlist_last_refresh }}</p>
-                    {% if playlist.playlist_subscribed %}
+                    {% if playlist.playlist_subscribed and request.user|has_group:"admin" or request.user.is_staff %}
                         <button class="unsubscribe" type="button" data-type="playlist" data-subscribe="" data-id="{{ playlist.playlist_id }}" onclick="subscribeStatus(this)" title="Unsubscribe from {{ playlist.playlist_name }}">Unsubscribe</button>
                     {% else %}
                         <button type="button" data-type="playlist" data-subscribe="true" data-id="{{ playlist.playlist_id }}" onclick="subscribeStatus(this)" title="Subscribe to {{ playlist.playlist_name }}">Subscribe</button>

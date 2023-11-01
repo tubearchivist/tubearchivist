@@ -2,6 +2,7 @@
 {% block content %}
 {% load static %}
 {% load humanize %}
+{% load auth_extras %}
 <div id="player" class="player-wrapper">
     <div class="video-main">
         <div class="video-modal"><span class="video-modal-text"></span></div>
@@ -81,15 +82,19 @@
                 {% if reindex %}
                     <p>Reindex scheduled</p>
                 {% else %}
+                  {% if request.user|has_group:"admin" or request.user.is_staff %}
                     <div id="reindex-button" class="button-box">
                         <button data-id="{{ video.youtube_id }}" data-type="video" onclick="reindex(this)" title="Reindex {{ video.title }}">Reindex</button>
                     </div>
+                  {% endif %}
                 {% endif %}
-                <a download="" href="/media/{{ video.media_url }}"><button id="download-item">Download File</button></a>
+                <a download="" href="{{ video.media_url }}"><button id="download-item">Download File</button></a>
+                {% if request.user|has_group:"admin" or request.user.is_staff %}
                 <button onclick="deleteConfirm()" id="delete-item">Delete Video</button>
                 <div class="delete-confirm" id="delete-button">
                     <span>Are you sure? </span><button class="danger-button" onclick="deleteVideo(this)" data-id="{{ video.youtube_id }}" data-redirect = "{{ video.channel.channel_id }}">Delete</button> <button onclick="cancelDelete()">Cancel</button>
                 </div>
+                {% endif %}
             </div>
         </div>
         <div class="info-box-item">

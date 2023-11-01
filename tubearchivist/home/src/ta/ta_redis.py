@@ -6,20 +6,21 @@ functionality:
 """
 
 import json
-import os
 
 import redis
+from home.src.ta.settings import EnvironmentSettings
 
 
 class RedisBase:
     """connection base for redis"""
 
-    REDIS_HOST: str = str(os.environ.get("REDIS_HOST"))
-    REDIS_PORT: int = int(os.environ.get("REDIS_PORT") or 6379)
-    NAME_SPACE: str = "ta:"
+    NAME_SPACE: str = EnvironmentSettings.REDIS_NAME_SPACE
 
     def __init__(self):
-        self.conn = redis.Redis(host=self.REDIS_HOST, port=self.REDIS_PORT)
+        self.conn = redis.Redis(
+            host=EnvironmentSettings.REDIS_HOST,
+            port=EnvironmentSettings.REDIS_PORT,
+        )
 
 
 class RedisArchivist(RedisBase):

@@ -3,12 +3,12 @@ Functionality:
 - check that all connections are working
 """
 
-from os import environ
 from time import sleep
 
 import requests
 from django.core.management.base import BaseCommand, CommandError
 from home.src.es.connect import ElasticWrap
+from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 
 TOPIC = """
@@ -156,10 +156,8 @@ class Command(BaseCommand):
                 "    🗙 path.repo env var not found. "
                 + "set the following env var to the ES container:\n"
                 + "    path.repo="
-                + environ.get(
-                    "ES_SNAPSHOT_DIR", "/usr/share/elasticsearch/data/snapshot"
-                ),
+                + EnvironmentSettings.ES_SNAPSHOT_DIR
             )
-            self.stdout.write(self.style.ERROR(f"{message}"))
+            self.stdout.write(self.style.ERROR(message))
             sleep(60)
             raise CommandError(message)

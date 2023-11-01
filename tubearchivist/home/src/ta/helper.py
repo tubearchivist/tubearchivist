@@ -112,13 +112,13 @@ def time_parser(timestamp: str) -> float:
     return int(hours) * 60 * 60 + int(minutes) * 60 + float(seconds)
 
 
-def clear_dl_cache(config: dict) -> int:
+def clear_dl_cache(cache_dir: str) -> int:
     """clear leftover files from dl cache"""
     print("clear download cache")
-    cache_dir = os.path.join(config["application"]["cache_dir"], "download")
-    leftover_files = ignore_filelist(os.listdir(cache_dir))
+    download_cache_dir = os.path.join(cache_dir, "download")
+    leftover_files = ignore_filelist(os.listdir(download_cache_dir))
     for cached in leftover_files:
-        to_delete = os.path.join(cache_dir, cached)
+        to_delete = os.path.join(download_cache_dir, cached)
         os.remove(to_delete)
 
     return len(leftover_files)
@@ -178,7 +178,7 @@ def get_duration_str(seconds: int) -> str:
     for unit_label, unit_seconds in units:
         if seconds >= unit_seconds:
             unit_count, seconds = divmod(seconds, unit_seconds)
-            duration_parts.append(f"{unit_count}{unit_label}")
+            duration_parts.append(f"{unit_count:02}{unit_label}")
 
     return " ".join(duration_parts)
 

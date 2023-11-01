@@ -8,12 +8,11 @@ import os
 from time import sleep
 
 from django.core.management.base import BaseCommand, CommandError
-from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.es.index_setup import ElasitIndexWrap
 from home.src.es.snapshot import ElasticSnapshot
-from home.src.index.video_streams import MediaStreamExtractor
 from home.src.ta.config import AppConfig, ReleaseVersion
 from home.src.ta.helper import clear_dl_cache
+from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskManager
 from home.src.ta.users import UserConfig
@@ -43,8 +42,6 @@ class Command(BaseCommand):
         self._version_check()
         self._mig_index_setup()
         self._mig_snapshot_check()
-        self._mig_set_streams()
-        self._mig_set_autostart()
         self._mig_move_users_to_es()
 
     def _sync_redis_state(self):
@@ -69,7 +66,7 @@ class Command(BaseCommand):
             "playlists",
             "videos",
         ]
-        cache_dir = AppConfig().config["application"]["cache_dir"]
+        cache_dir = EnvironmentSettings.CACHE_DIR
         for folder in folders:
             folder_path = os.path.join(cache_dir, folder)
             os.makedirs(folder_path, exist_ok=True)
@@ -119,8 +116,7 @@ class Command(BaseCommand):
     def _clear_dl_cache(self):
         """clear leftover files from dl cache"""
         self.stdout.write("[5] clear leftover files from dl cache")
-        config = AppConfig().config
-        leftover_files = clear_dl_cache(config)
+        leftover_files = clear_dl_cache(EnvironmentSettings.CACHE_DIR)
         if leftover_files:
             self.stdout.write(
                 self.style.SUCCESS(f"    ✓ cleared {leftover_files} files")
@@ -148,79 +144,6 @@ class Command(BaseCommand):
         """migration setup snapshots"""
         self.stdout.write("[MIGRATION] setup snapshots")
         ElasticSnapshot().setup()
-
-    def _mig_set_streams(self):
-        """migration: update from 0.3.5 to 0.3.6, set streams and media_size"""
-        self.stdout.write("[MIGRATION] index streams and media size")
-        videos = AppConfig().config["application"]["videos"]
-        data = {
-            "query": {
-                "bool": {"must_not": [{"exists": {"field": "streams"}}]}
-            },
-            "_source": ["media_url", "youtube_id"],
-        }
-        all_missing = IndexPaginate("ta_video", data).get_results()
-        if not all_missing:
-            self.stdout.write("    no videos need updating")
-            return
-
-        total = len(all_missing)
-        for idx, missing in enumerate(all_missing):
-            media_url = missing["media_url"]
-            youtube_id = missing["youtube_id"]
-            media_path = os.path.join(videos, media_url)
-            if not os.path.exists(media_path):
-                self.stdout.write(f"    file not found: {media_path}")
-                self.stdout.write("    run file system rescan to fix")
-                continue
-
-            media = MediaStreamExtractor(media_path)
-            vid_data = {
-                "doc": {
-                    "streams": media.extract_metadata(),
-                    "media_size": media.get_file_size(),
-                }
-            }
-            path = f"ta_video/_update/{youtube_id}"
-            response, status_code = ElasticWrap(path).post(data=vid_data)
-            if not status_code == 200:
-                self.stdout.errors(
-                    f"    update failed: {path}, {response}, {status_code}"
-                )
-
-            if idx % 100 == 0:
-                self.stdout.write(f"    progress {idx}/{total}")
-
-    def _mig_set_autostart(self):
-        """migration: update from 0.3.5 to 0.3.6 set auto_start to false"""
-        self.stdout.write("[MIGRATION] set default download auto_start")
-        data = {
-            "query": {
-                "bool": {"must_not": [{"exists": {"field": "auto_start"}}]}
-            },
-            "script": {"source": "ctx._source['auto_start'] = false"},
-        }
-        path = "ta_download/_update_by_query"
-        response, status_code = ElasticWrap(path).post(data=data)
-        if status_code == 200:
-            updated = response.get("updated", 0)
-            if updated:
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        f"    ✓ {updated} videos updated in ta_download"
-                    )
-                )
-            else:
-                self.stdout.write(
-                    "    no videos needed updating in ta_download"
-                )
-            return
-
-        message = "    🗙 ta_download auto_start update failed"
-        self.stdout.write(self.style.ERROR(message))
-        self.stdout.write(response)
-        sleep(60)
-        raise CommandError(message)
 
     def _mig_move_users_to_es(self):  # noqa: C901
         """migration: update from 0.4.1 to 0.4.2 move user config to ES"""
@@ -299,12 +222,12 @@ class Command(BaseCommand):
                         f"    ✓ Settings for user '{user}' migrated to ES"
                     )
                 )
-        except Exception as e:
+        except Exception as err:
             message = "    🗙 user migration to ES failed"
             self.stdout.write(self.style.ERROR(message))
-            self.stdout.write(self.style.ERROR(e))
+            self.stdout.write(self.style.ERROR(err))
             sleep(60)
-            raise CommandError(message)
+            raise CommandError(message) from err
         else:
             self.stdout.write(
                 self.style.SUCCESS(

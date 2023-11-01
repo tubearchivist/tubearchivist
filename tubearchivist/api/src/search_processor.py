@@ -7,15 +7,14 @@ Functionality:
 import urllib.parse
 
 from home.src.download.thumbnails import ThumbManager
-from home.src.ta.config import AppConfig
 from home.src.ta.helper import date_praser, get_duration_str
+from home.src.ta.settings import EnvironmentSettings
 
 
 class SearchProcess:
     """process search results"""
 
-    CONFIG = AppConfig().config
-    CACHE_DIR = CONFIG["application"]["cache_dir"]
+    CACHE_DIR = EnvironmentSettings.CACHE_DIR
 
     def __init__(self, response):
         self.response = response

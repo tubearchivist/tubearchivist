@@ -11,7 +11,7 @@ from time import sleep
 
 import requests
 from home.src.es.connect import ElasticWrap, IndexPaginate
-from home.src.ta.config import AppConfig
+from home.src.ta.settings import EnvironmentSettings
 from mutagen.mp4 import MP4, MP4Cover
 from PIL import Image, ImageFile, ImageFilter, UnidentifiedImageError
 
@@ -21,8 +21,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 class ThumbManagerBase:
     """base class for thumbnail management"""
 
-    CONFIG = AppConfig().config
-    CACHE_DIR = CONFIG["application"]["cache_dir"]
+    CACHE_DIR = EnvironmentSettings.CACHE_DIR
     VIDEO_DIR = os.path.join(CACHE_DIR, "videos")
     CHANNEL_DIR = os.path.join(CACHE_DIR, "channels")
     PLAYLIST_DIR = os.path.join(CACHE_DIR, "playlists")
@@ -70,7 +69,7 @@ class ThumbManagerBase:
             img_raw = Image.open(self.fallback)
             return img_raw
 
-        app_root = self.CONFIG["application"]["app_root"]
+        app_root = EnvironmentSettings.APP_DIR
         default_map = {
             "video": os.path.join(
                 app_root, "static/img/default-video-thumb.jpg"
@@ -380,9 +379,8 @@ class ThumbFilesystem:
 class EmbedCallback:
     """callback class to embed thumbnails"""
 
-    CONFIG = AppConfig().config
-    CACHE_DIR = CONFIG["application"]["cache_dir"]
-    MEDIA_DIR = CONFIG["application"]["videos"]
+    CACHE_DIR = EnvironmentSettings.CACHE_DIR
+    MEDIA_DIR = EnvironmentSettings.MEDIA_DIR
     FORMAT = MP4Cover.FORMAT_JPEG
 
     def __init__(self, source, index_name, counter=0):

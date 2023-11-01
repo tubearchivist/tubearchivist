@@ -9,11 +9,14 @@ import urllib.parse
 from time import sleep
 
 from api.src.search_processor import SearchProcess, process_aggs
+from api.views import check_admin
 from django.conf import settings
 from django.contrib.auth import login
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
+from django.utils.decorators import method_decorator
 from django.views import View
 from home.src.download.queue import PendingInteract
 from home.src.download.yt_dlp_base import CookieHandler
@@ -39,6 +42,7 @@ from home.src.index.reindex import ReindexProgress
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.helper import time_parser
+from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.users import UserConfig
 from home.tasks import index_channel_playlists, subscribe_to
@@ -53,7 +57,6 @@ class ArchivistViewConfig(View):
         self.view_origin = view_origin
         self.user_id = False
         self.user_conf: UserConfig = False
-        self.default_conf = False
         self.context = False
 
     def get_all_view_styles(self):
@@ -70,11 +73,10 @@ class ArchivistViewConfig(View):
         """build default context for every view"""
         self.user_id = user_id
         self.user_conf = UserConfig(self.user_id)
-        self.default_conf = AppConfig().config
 
         self.context = {
             "colors": self.user_conf.get_value("colors"),
-            "cast": self.default_conf["application"]["enable_cast"],
+            "cast": EnvironmentSettings.ENABLE_CAST,
             "sort_by": self.user_conf.get_value("sort_by"),
             "sort_order": self.user_conf.get_value("sort_order"),
             "view_style": self.user_conf.get_value(
@@ -317,6 +319,7 @@ class AboutView(MinView):
         return render(request, "home/about.html", context)
 
 
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class DownloadView(ArchivistResultsView):
     """resolves to /download/
     handle the download queue
@@ -597,6 +600,7 @@ class ChannelIdAboutView(ChannelIdBaseView):
 
         return render(request, "home/channel_id_about.html", self.context)
 
+    @method_decorator(user_passes_test(check_admin), name="dispatch")
     @staticmethod
     def post(request, channel_id):
         """handle post request"""
@@ -681,6 +685,7 @@ class ChannelView(ArchivistResultsView):
                 "term": {"channel_subscribed": {"value": True}}
             }
 
+    @method_decorator(user_passes_test(check_admin), name="dispatch")
     @staticmethod
     def post(request):
         """handle http post requests"""
@@ -824,6 +829,7 @@ class PlaylistView(ArchivistResultsView):
                 }
             }
 
+    @method_decorator(user_passes_test(check_admin), name="dispatch")
     @staticmethod
     def post(request):
         """handle post from search form"""
@@ -870,7 +876,7 @@ class VideoView(MinView):
                 "video": video_data,
                 "playlist_nav": playlist_nav,
                 "title": video_data.get("title"),
-                "cast": config_handler.config["application"]["enable_cast"],
+                "cast": EnvironmentSettings.ENABLE_CAST,
                 "config": config_handler.config,
                 "position": time_parser(request.GET.get("t")),
                 "reindex": reindex.get("state"),
@@ -986,6 +992,7 @@ class SettingsUserView(MinView):
         return redirect("settings_user", permanent=True)
 
 
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class SettingsApplicationView(MinView):
     """resolves to /settings/application/
     handle the settings sub-page for application configuration,
@@ -1075,6 +1082,7 @@ class SettingsApplicationView(MinView):
         RedisArchivist().set_message(key, message=message, expire=True)
 
 
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class SettingsSchedulingView(MinView):
     """resolves to /settings/scheduling/
     handle the settings sub-page for scheduling settings,
@@ -1108,6 +1116,7 @@ class SettingsSchedulingView(MinView):
         return redirect("settings_scheduling", permanent=True)
 
 
+@method_decorator(user_passes_test(check_admin), name="dispatch")
 class SettingsActionsView(MinView):
     """resolves to /settings/actions/
     handle the settings actions sub-page

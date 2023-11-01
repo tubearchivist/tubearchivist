@@ -11,6 +11,7 @@ import re
 
 from django.core.management.base import BaseCommand, CommandError
 from home.models import Account
+from home.src.ta.settings import EnvironmentSettings
 
 LOGO = """
 
@@ -96,18 +97,14 @@ class Command(BaseCommand):
 
     def _elastic_user_overwrite(self):
         """check for ELASTIC_USER overwrite"""
-        self.stdout.write("[2] set default ES user")
-        if not os.environ.get("ELASTIC_USER"):
-            os.environ.setdefault("ELASTIC_USER", "elastic")
-
-        env = os.environ.get("ELASTIC_USER")
-
+        self.stdout.write("[2] check ES user overwrite")
+        env = EnvironmentSettings.ES_USER
         self.stdout.write(self.style.SUCCESS(f"    ✓ ES user is set to {env}"))
 
     def _ta_port_overwrite(self):
         """set TA_PORT overwrite for nginx"""
         self.stdout.write("[3] check TA_PORT overwrite")
-        overwrite = os.environ.get("TA_PORT")
+        overwrite = EnvironmentSettings.TA_PORT
         if not overwrite:
             self.stdout.write(self.style.SUCCESS("    TA_PORT is not set"))
             return
@@ -125,7 +122,7 @@ class Command(BaseCommand):
     def _ta_uwsgi_overwrite(self):
         """set TA_UWSGI_PORT overwrite"""
         self.stdout.write("[4] check TA_UWSGI_PORT overwrite")
-        overwrite = os.environ.get("TA_UWSGI_PORT")
+        overwrite = EnvironmentSettings.TA_UWSGI_PORT
         if not overwrite:
             message = "    TA_UWSGI_PORT is not set"
             self.stdout.write(self.style.SUCCESS(message))
@@ -151,7 +148,7 @@ class Command(BaseCommand):
     def _enable_cast_overwrite(self):
         """cast workaround, remove auth for static files in nginx"""
         self.stdout.write("[5] check ENABLE_CAST overwrite")
-        overwrite = os.environ.get("ENABLE_CAST")
+        overwrite = EnvironmentSettings.ENABLE_CAST
         if not overwrite:
             self.stdout.write(self.style.SUCCESS("    ENABLE_CAST is not set"))
             return
@@ -174,8 +171,8 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(message))
             return
 
-        name = os.environ.get("TA_USERNAME")
-        password = os.environ.get("TA_PASSWORD")
+        name = EnvironmentSettings.TA_USERNAME
+        password = EnvironmentSettings.TA_PASSWORD
         Account.objects.create_superuser(name, password)
         message = f"    ✓ new superuser with name {name} created"
         self.stdout.write(self.style.SUCCESS(message))

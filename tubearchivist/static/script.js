@@ -470,7 +470,7 @@ function createPlayer(button) {
 
   // If cast integration is enabled create cast button
   let castButton = '';
-  if (videoData.config.application.enable_cast) {
+  if (videoData.config.enable_cast) {
     castButton = `<google-cast-launcher id="castbutton"></google-cast-launcher>`;
   }
 

@@ -12,6 +12,7 @@ from datetime import datetime
 import requests
 from home.src.es.connect import ElasticWrap
 from home.src.ta.helper import requests_headers
+from home.src.ta.settings import EnvironmentSettings
 
 
 class YoutubeSubtitle:
@@ -113,7 +114,7 @@ class YoutubeSubtitle:
 
     def download_subtitles(self, relevant_subtitles):
         """download subtitle files to archive"""
-        videos_base = self.video.config["application"]["videos"]
+        videos_base = EnvironmentSettings.MEDIA_DIR
         indexed = []
         for subtitle in relevant_subtitles:
             dest_path = os.path.join(videos_base, subtitle["media_url"])
@@ -149,8 +150,8 @@ class YoutubeSubtitle:
         with open(dest_path, "w", encoding="utf-8") as subfile:
             subfile.write(subtitle_str)
 
-        host_uid = self.video.config["application"]["HOST_UID"]
-        host_gid = self.video.config["application"]["HOST_GID"]
+        host_uid = EnvironmentSettings.HOST_UID
+        host_gid = EnvironmentSettings.HOST_GID
         if host_uid and host_gid:
             os.chown(dest_path, host_uid, host_gid)
 
@@ -162,7 +163,7 @@ class YoutubeSubtitle:
     def delete(self, subtitles=False):
         """delete subtitles from index and filesystem"""
         youtube_id = self.video.youtube_id
-        videos_base = self.video.config["application"]["videos"]
+        videos_base = EnvironmentSettings.MEDIA_DIR
         # delete files
         if subtitles:
             files = [i["media_url"] for i in subtitles]

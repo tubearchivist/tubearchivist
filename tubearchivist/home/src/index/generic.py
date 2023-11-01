@@ -26,7 +26,6 @@ class YouTubeItem:
         self.youtube_id = youtube_id
         self.es_path = f"{self.index_name}/_doc/{youtube_id}"
         self.config = AppConfig().config
-        self.app_conf = self.config["application"]
         self.youtube_meta = False
         self.json_data = False
 

@@ -14,6 +14,7 @@ from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.generic import YouTubeItem
 from home.src.index.playlist import YoutubePlaylist
+from home.src.ta.settings import EnvironmentSettings
 
 
 class YoutubeChannel(YouTubeItem):
@@ -134,7 +135,7 @@ class YoutubeChannel(YouTubeItem):
     def _info_json_fallback(self):
         """read channel info.json for additional metadata"""
         info_json = os.path.join(
-            self.config["application"]["cache_dir"],
+            EnvironmentSettings.CACHE_DIR,
             "import",
             f"{self.youtube_id}.info.json",
         )
@@ -178,7 +179,7 @@ class YoutubeChannel(YouTubeItem):
     def get_folder_path(self):
         """get folder where media files get stored"""
         folder_path = os.path.join(
-            self.app_conf["videos"],
+            EnvironmentSettings.MEDIA_DIR,
             self.json_data["channel_id"],
         )
         return folder_path
