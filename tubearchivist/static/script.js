@@ -2,9 +2,11 @@
 
 /* globals checkMessages */
 
-function sortChange(sortValue) {
-  let payload = JSON.stringify({ sort_order: sortValue });
-  sendPost(payload);
+function sortChange(button) {
+  let apiEndpoint = '/api/config/user/';
+  let data = {};
+  data[button.name] = button.value;
+  apiRequest(apiEndpoint, 'POST', data);
   setTimeout(function () {
     location.reload();
   }, 500);
@@ -105,17 +107,21 @@ function subscribeStatus(subscribeButton) {
 function changeView(image) {
   let sourcePage = image.getAttribute('data-origin');
   let newView = image.getAttribute('data-value');
-  let payload = JSON.stringify({ change_view: sourcePage + ':' + newView });
-  sendPost(payload);
+  let apiEndpoint = '/api/config/user/';
+  let data = {};
+  data[`view_style_${sourcePage}`] = newView;
+  console.log(data);
+  apiRequest(apiEndpoint, 'POST', data);
   setTimeout(function () {
     location.reload();
   }, 500);
 }
 
 function changeGridItems(image) {
-  let operator = image.getAttribute('data-value');
-  let payload = JSON.stringify({ change_grid: operator });
-  sendPost(payload);
+  let newGridItems = Number(image.getAttribute('data-value'));
+  let apiEndpoint = '/api/config/user/';
+  let data = { grid_items: newGridItems };
+  apiRequest(apiEndpoint, 'POST', data);
   setTimeout(function () {
     location.reload();
   }, 500);
@@ -123,12 +129,10 @@ function changeGridItems(image) {
 
 function toggleCheckbox(checkbox) {
   // pass checkbox id as key and checkbox.checked as value
-  let toggleId = checkbox.id;
-  let toggleVal = checkbox.checked;
-  let payloadDict = {};
-  payloadDict[toggleId] = toggleVal;
-  let payload = JSON.stringify(payloadDict);
-  sendPost(payload);
+  let apiEndpoint = '/api/config/user/';
+  let data = {};
+  data[checkbox.id] = checkbox.checked;
+  apiRequest(apiEndpoint, 'POST', data);
   setTimeout(function () {
     let currPage = window.location.pathname;
     window.location.replace(currPage);
@@ -1303,14 +1307,6 @@ function populateEmpty() {
 }
 
 // generic
-
-function sendPost(payload) {
-  let http = new XMLHttpRequest();
-  http.open('POST', '/process/', true);
-  http.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-  http.setRequestHeader('Content-type', 'application/json');
-  http.send(payload);
-}
 
 function getCookie(c_name) {
   if (document.cookie.length > 0) {

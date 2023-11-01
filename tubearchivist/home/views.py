@@ -4,7 +4,6 @@ Functionality:
 - holds base classes to inherit from
 """
 import enum
-import json
 import urllib.parse
 from time import sleep
 
@@ -14,7 +13,7 @@ from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import Http404, JsonResponse
+from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -23,7 +22,6 @@ from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.backup import ElasticBackup
 from home.src.es.connect import ElasticWrap
 from home.src.es.snapshot import ElasticSnapshot
-from home.src.frontend.api_calls import PostData
 from home.src.frontend.forms import (
     AddToQueueForm,
     ApplicationSettingsForm,
@@ -1133,16 +1131,3 @@ class SettingsActionsView(MinView):
         )
 
         return render(request, "home/settings_actions.html", context)
-
-
-def process(request):
-    """handle all the buttons calls via POST ajax"""
-    if request.method == "POST":
-        current_user = request.user.id
-        post_dict = json.loads(request.body.decode())
-        post_handler = PostData(post_dict, current_user)
-        if post_handler.to_exec:
-            task_result = post_handler.run_task()
-            return JsonResponse(task_result)
-
-    return JsonResponse({"success": False})
