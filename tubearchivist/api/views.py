@@ -23,6 +23,7 @@ from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskCommand, TaskManager
 from home.src.ta.urlparser import Parser
+from home.src.ta.users import UserConfig
 from home.tasks import (
     BaseTask,
     check_reindex,
@@ -979,6 +980,42 @@ class RefreshView(ApiBaseView):
         check_reindex.delay(data=data, extract_videos=extract_videos)
 
         return Response(data)
+
+
+class UserConfigView(ApiBaseView):
+    """resolves to /api/config/user/
+    GET: return current user config
+    POST: update user config
+    """
+
+    def get(self, request):
+        """get config"""
+        user_id = request.user.id
+        response = UserConfig(user_id).get_config()
+        response.update({"user_id": user_id})
+
+        return Response(response)
+
+    def post(self, request):
+        """update config"""
+        user_id = request.user.id
+        data = request.data
+
+        user_conf = UserConfig(user_id)
+        for key, value in data.items():
+            try:
+                user_conf.set_value(key, value)
+            except ValueError as err:
+                message = {
+                    "status": "Bad Request",
+                    "message": f"failed updating {key} to '{value}', {err}",
+                }
+                return Response(message, status=400)
+
+        response = user_conf.get_config()
+        response.update({"user_id": user_id})
+
+        return Response(response)
 
 
 class CookieView(ApiBaseView):

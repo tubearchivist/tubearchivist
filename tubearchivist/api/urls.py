@@ -122,6 +122,11 @@ urlpatterns = [
         name="api-task-id",
     ),
     path(
+        "config/user/",
+        views.UserConfigView.as_view(),
+        name="api-config-user",
+    ),
+    path(
         "cookie/",
         views.CookieView.as_view(),
         name="api-cookie",
