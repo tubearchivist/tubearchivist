@@ -10,4 +10,5 @@
     --img-filter: invert(50%) sepia(9%) saturate(2940%) hue-rotate(122deg) brightness(94%) contrast(90%);
     --img-filter-error: invert(16%) sepia(60%) saturate(3717%) hue-rotate(349deg) brightness(86%) contrast(120%);
     --banner: url("../img/banner-tube-archivist-dark.png");
+    --logo: url("../img/logo-tube-archivist-dark.png");
 }

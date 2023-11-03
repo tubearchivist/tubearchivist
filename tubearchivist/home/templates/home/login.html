@@ -26,12 +26,7 @@
 </head>
 <body>
     <div class="boxed-content login-page">
-        {% if stylesheet == "dark.css" %}
-            <img src="{% static 'img/logo-tube-archivist-dark.png' %}" alt="tube-archivist-logo">
-        {% endif %}
-        {% if stylesheet == "light.css" %}
-            <img src="{% static 'img/logo-tube-archivist-light.png' %}" alt="tube-archivist-banner">
-        {% endif %}
+        <img alt="tube-archivist-logo">
         <h1>Tube Archivist</h1>
         <h2>Your Self Hosted YouTube Media Server</h2>
         {% if form_error %}
