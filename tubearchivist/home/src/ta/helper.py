@@ -10,6 +10,7 @@ import string
 import subprocess
 from datetime import datetime
 from urllib.parse import urlparse
+from home.src.ta.settings import EnvironmentSettings
 
 import requests
 
@@ -206,7 +207,8 @@ def ta_host_parser(ta_host: str) -> tuple[list[str], list[str]]:
 
 def get_stylesheets():
     """Get all valid stylesheets from /static/css"""
-    stylesheets = os.listdir("/app/static/css")
+    app_root = EnvironmentSettings.APP_DIR
+    stylesheets = os.listdir(os.path.join(app_root, "static/css"))
     stylesheets.remove("style.css")
     stylesheets.sort()
     stylesheets = list(filter(lambda x: x.endswith(".css"), stylesheets))
