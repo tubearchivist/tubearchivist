@@ -73,7 +73,7 @@ class ArchivistViewConfig(View):
         self.user_conf = UserConfig(self.user_id)
 
         self.context = {
-            "colors": self.user_conf.get_value("colors"),
+            "stylesheet": self.user_conf.get_value("stylesheet"),
             "cast": EnvironmentSettings.ENABLE_CAST,
             "sort_by": self.user_conf.get_value("sort_by"),
             "sort_order": self.user_conf.get_value("sort_order"),
@@ -220,7 +220,7 @@ class MinView(View):
     def get_min_context(request):
         """build minimal vars for context"""
         return {
-            "colors": UserConfig(request.user.id).get_value("colors"),
+            "stylesheet": UserConfig(request.user.id).get_value("stylesheet"),
             "version": settings.TA_VERSION,
             "ta_update": ReleaseVersion().get_update(),
         }
@@ -977,9 +977,9 @@ class SettingsUserView(MinView):
         config_handler = UserConfig(request.user.id)
         if user_form.is_valid():
             user_form_post = user_form.cleaned_data
-            if user_form_post.get("colors"):
+            if user_form_post.get("stylesheet"):
                 config_handler.set_value(
-                    "colors", user_form_post.get("colors")
+                    "stylesheet", user_form_post.get("stylesheet")
                 )
             if user_form_post.get("page_size"):
                 config_handler.set_value(

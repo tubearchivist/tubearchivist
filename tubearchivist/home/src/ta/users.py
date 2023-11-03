@@ -12,7 +12,7 @@ from home.src.es.connect import ElasticWrap
 class UserConfigType(TypedDict, total=False):
     """describes the user configuration"""
 
-    colors: str
+    stylesheet: str
     page_size: int
     sort_by: str
     sort_order: str
@@ -31,7 +31,7 @@ class UserConfig:
     """Handle settings for an individual user"""
 
     _DEFAULT_USER_SETTINGS = UserConfigType(
-        colors="dark",
+        stylesheet="dark.css",
         page_size=12,
         sort_by="published",
         sort_order="desc",
@@ -46,7 +46,7 @@ class UserConfig:
         sponsorblock_id=None,
     )
 
-    VALID_COLORS = ["dark", "light"]
+    VALID_STYLESHEETS = ["dark.css", "light.css"]
     VALID_VIEW_STYLE = ["grid", "list"]
     VALID_SORT_ORDER = ["asc", "desc"]
     VALID_SORT_BY = ["published", "downloaded", "views", "likes"]
@@ -91,7 +91,7 @@ class UserConfig:
             )
 
         valid_values = {
-            "colors": self.VALID_COLORS,
+            "stylesheet": self.VALID_STYLESHEETS,
             "sort_by": self.VALID_SORT_BY,
             "sort_order": self.VALID_SORT_ORDER,
             "view_style_home": self.VALID_VIEW_STYLE,

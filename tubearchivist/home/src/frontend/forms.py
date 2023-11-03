@@ -31,11 +31,11 @@ class UserSettingsForm(forms.Form):
 
     CHOICES = [
         ("", "-- change color scheme --"),
-        ("dark", "Dark"),
-        ("light", "Light"),
+        ("dark.css", "Dark"),
+        ("light.css", "Light"),
     ]
 
-    colors = forms.ChoiceField(
+    stylesheet = forms.ChoiceField(
         widget=forms.Select, choices=CHOICES, required=False
     )
     page_size = forms.IntegerField(required=False)
