@@ -18,11 +18,7 @@
     <meta name="msapplication-TileColor" content="#01202e">
     <meta name="msapplication-config" content="{% static 'favicon/browserconfig.xml' %}">
     <meta name="theme-color" content="#01202e">
-    {% if stylesheet == "dark.css" %}
-        <link rel="stylesheet" href="{% static 'css/dark.css' %}">
-    {% else %}
-        <link rel="stylesheet" href="{% static 'css/light.css' %}">
-    {% endif %}
+    <link rel="stylesheet" href="{% static 'css/' %}{{ stylesheet }}">
 </head>
 <body>
     <div class="boxed-content login-page">

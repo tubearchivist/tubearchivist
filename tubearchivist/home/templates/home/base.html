@@ -23,11 +23,7 @@
     {% else %}
         <title>TubeArchivist</title>
     {% endif %}
-    {% if stylesheet == "dark.css" %}
-        <link rel="stylesheet" href="{% static 'css/dark.css' %}">
-    {% else %}
-        <link rel="stylesheet" href="{% static 'css/light.css' %}">
-    {% endif %}
+    <link rel="stylesheet" href="{% static 'css/' %}{{ stylesheet }}">
     <script type="text/javascript" src="{% static 'script.js' %}"></script>
     {% if cast %}
         <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
