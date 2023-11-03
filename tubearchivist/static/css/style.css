@@ -165,6 +165,7 @@ button:hover {
 .top-banner img {
     width: 100%;
     max-width: 700px;
+    content: var(--banner);
 }
 
 .footer {
