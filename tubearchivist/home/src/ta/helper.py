@@ -203,3 +203,11 @@ def ta_host_parser(ta_host: str) -> tuple[list[str], list[str]]:
         csrf_trusted_origins.append(f"{parsed.scheme}://{parsed.hostname}")
 
     return allowed_hosts, csrf_trusted_origins
+
+def get_stylesheets():
+    """Get all valid stylesheets from /static/css"""
+    stylesheets = os.listdir("/app/static/css")
+    stylesheets.remove("style.css")
+    stylesheets.sort()
+    stylesheets = list(filter(lambda x: x.endswith(".css"), stylesheets))
+    return stylesheets

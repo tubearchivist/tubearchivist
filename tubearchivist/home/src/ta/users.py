@@ -7,7 +7,7 @@ Functionality:
 from typing import TypedDict
 
 from home.src.es.connect import ElasticWrap
-
+from home.src.ta.helper import get_stylesheets
 
 class UserConfigType(TypedDict, total=False):
     """describes the user configuration"""
@@ -46,7 +46,7 @@ class UserConfig:
         sponsorblock_id=None,
     )
 
-    VALID_STYLESHEETS = ["dark.css", "light.css"]
+    VALID_STYLESHEETS = get_stylesheets()
     VALID_VIEW_STYLE = ["grid", "list"]
     VALID_SORT_ORDER = ["asc", "desc"]
     VALID_SORT_BY = ["published", "downloaded", "views", "likes"]

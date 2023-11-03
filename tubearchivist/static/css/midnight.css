@@ -1,0 +1,14 @@
+:root {
+    --main-bg: #000000;
+    --highlight-bg: #0c0c0c;
+    --highlight-error: #220000;
+    --highlight-error-light: #330000;
+    --highlight-bg-transparent: #0c0c0caf;
+    --main-font: #888888;
+    --accent-font-dark: #555555;
+    --accent-font-light: #999999;
+    --img-filter: invert(50%) sepia(9%) saturate(2940%) hue-rotate(122deg) brightness(94%) contrast(90%);
+    --img-filter-error: invert(16%) sepia(60%) saturate(3717%) hue-rotate(349deg) brightness(86%) contrast(120%);
+    --banner: url("../img/banner-tube-archivist-dark.png");
+    --logo: url("../img/logo-tube-archivist-dark.png");
+}
