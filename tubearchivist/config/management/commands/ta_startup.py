@@ -162,7 +162,7 @@ class Command(BaseCommand):
             for user in users:
                 new_conf = UserConfig(user)
 
-                stylesheet_key = f"{user}:stylesheet"
+                stylesheet_key = f"{user}:color"
                 stylesheet = redis.get_message(stylesheet_key).get("status")
                 if stylesheet:
                     new_conf.set_value("stylesheet", stylesheet)
