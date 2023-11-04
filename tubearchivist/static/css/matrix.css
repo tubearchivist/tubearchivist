@@ -39,6 +39,30 @@
     filter: var(--filter);
 }
 
+.icon-text {
+    outline: var(--outline);
+}
+
+.video-item {
+    outline: var(--outline);
+}
+
+.channel-banner {
+    outline: var(--outline);
+}
+
+.description-box {
+    outline: var(--outline);
+}
+
+.video-player {
+    outline: var(--outline);
+}
+
+#notification {
+    outline: var(--outline);
+}
+
 textarea {
     background-color: var(--highlight-bg);
     outline: var(--outline);
