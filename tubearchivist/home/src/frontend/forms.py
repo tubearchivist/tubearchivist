@@ -37,7 +37,7 @@ class UserSettingsForm(forms.Form):
         (stylesheet, os.path.splitext(stylesheet)[0].title())
         for stylesheet in stylesheets
     ]
-    CHOICES.insert(0, ("", "-- change color scheme --"))
+    CHOICES.insert(0, ("", "-- change stylesheet --"))
 
     stylesheet = forms.ChoiceField(
         widget=forms.Select, choices=CHOICES, required=False
