@@ -10,9 +10,9 @@ import string
 import subprocess
 from datetime import datetime
 from urllib.parse import urlparse
-from home.src.ta.settings import EnvironmentSettings
 
 import requests
+from home.src.ta.settings import EnvironmentSettings
 
 
 def ignore_filelist(filelist: list[str]) -> list[str]:
@@ -205,6 +205,7 @@ def ta_host_parser(ta_host: str) -> tuple[list[str], list[str]]:
 
     return allowed_hosts, csrf_trusted_origins
 
+
 def get_stylesheets():
     """Get all valid stylesheets from /static/css"""
     app_root = EnvironmentSettings.APP_DIR
@@ -214,8 +215,9 @@ def get_stylesheets():
     stylesheets = list(filter(lambda x: x.endswith(".css"), stylesheets))
     return stylesheets
 
+
 def check_stylesheet(stylesheet: str):
-    """Check if a stylesheet exists. Otherwise, return dark.css as a fallback"""
+    """Check if a stylesheet exists. Return dark.css as a fallback"""
     app_root = EnvironmentSettings.APP_DIR
     stylesheets = os.listdir(os.path.join(app_root, "static/css"))
     stylesheets.remove("style.css")

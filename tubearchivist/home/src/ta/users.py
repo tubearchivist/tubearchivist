@@ -9,6 +9,7 @@ from typing import TypedDict
 from home.src.es.connect import ElasticWrap
 from home.src.ta.helper import get_stylesheets
 
+
 class UserConfigType(TypedDict, total=False):
     """describes the user configuration"""
 

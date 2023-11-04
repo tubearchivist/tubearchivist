@@ -2,11 +2,12 @@
 - hold all form classes used in the views
 """
 
+import os
+
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.forms.widgets import PasswordInput, TextInput
 from home.src.ta.helper import get_stylesheets
-from os.path import splitext
 
 
 class CustomAuthForm(AuthenticationForm):
@@ -32,7 +33,10 @@ class UserSettingsForm(forms.Form):
     """user configurations values"""
 
     stylesheets = get_stylesheets()
-    CHOICES = [(stylesheet, splitext(stylesheet)[0].title()) for stylesheet in stylesheets]
+    CHOICES = [
+        (stylesheet, os.path.splitext(stylesheet)[0].title())
+        for stylesheet in stylesheets
+    ]
     CHOICES.insert(0, ("", "-- change color scheme --"))
 
     stylesheet = forms.ChoiceField(
