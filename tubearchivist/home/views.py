@@ -39,7 +39,7 @@ from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
-from home.src.ta.helper import time_parser
+from home.src.ta.helper import time_parser, check_stylesheet
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.users import UserConfig
@@ -73,7 +73,7 @@ class ArchivistViewConfig(View):
         self.user_conf = UserConfig(self.user_id)
 
         self.context = {
-            "stylesheet": self.user_conf.get_value("stylesheet"),
+            "stylesheet": check_stylesheet(self.user_conf.get_value("stylesheet")),
             "cast": EnvironmentSettings.ENABLE_CAST,
             "sort_by": self.user_conf.get_value("sort_by"),
             "sort_order": self.user_conf.get_value("sort_order"),
@@ -220,7 +220,7 @@ class MinView(View):
     def get_min_context(request):
         """build minimal vars for context"""
         return {
-            "stylesheet": UserConfig(request.user.id).get_value("stylesheet"),
+            "stylesheet": check_stylesheet(UserConfig(request.user.id).get_value("stylesheet")),
             "version": settings.TA_VERSION,
             "ta_update": ReleaseVersion().get_update(),
         }
