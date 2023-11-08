@@ -23,19 +23,12 @@ class YoutubeChannel(YouTubeItem):
     es_path = False
     index_name = "ta_channel"
     yt_base = "https://www.youtube.com/channel/"
-    yt_obs = {
-        "extract_flat": True,
-        "allow_playlist_files": True,
-    }
+    yt_obs = {"playlist_items": "0,0"}
 
     def __init__(self, youtube_id, task=False):
         super().__init__(youtube_id)
         self.all_playlists = False
         self.task = task
-
-    def build_yt_url(self):
-        """overwrite base to use channel about page"""
-        return f"{self.yt_base}{self.youtube_id}/about"
 
     def build_json(self, upload=False, fallback=False):
         """get from es or from youtube"""
@@ -69,7 +62,7 @@ class YoutubeChannel(YouTubeItem):
             "channel_banner_url": self._get_banner_art(),
             "channel_thumb_url": self._get_thumb_art(),
             "channel_tvart_url": self._get_tv_art(),
-            "channel_views": self.youtube_meta.get("view_count", 0),
+            "channel_views": self.youtube_meta.get("view_count") or 0,
         }
 
     def _parse_tags(self, tags):
