@@ -32,15 +32,16 @@ class CustomAuthForm(AuthenticationForm):
 class UserSettingsForm(forms.Form):
     """user configurations values"""
 
-    stylesheets = get_stylesheets()
-    CHOICES = [
-        (stylesheet, os.path.splitext(stylesheet)[0].title())
-        for stylesheet in stylesheets
-    ]
-    CHOICES.insert(0, ("", "-- change stylesheet --"))
+    STYLESHEET_CHOICES = [("", "-- change stylesheet --")]
+    STYLESHEET_CHOICES.extend(
+        [
+            (stylesheet, os.path.splitext(stylesheet)[0].title())
+            for stylesheet in get_stylesheets()
+        ]
+    )
 
     stylesheet = forms.ChoiceField(
-        widget=forms.Select, choices=CHOICES, required=False
+        widget=forms.Select, choices=STYLESHEET_CHOICES, required=False
     )
     page_size = forms.IntegerField(required=False)
 

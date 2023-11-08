@@ -218,10 +218,7 @@ def get_stylesheets():
 
 def check_stylesheet(stylesheet: str):
     """Check if a stylesheet exists. Return dark.css as a fallback"""
-    app_root = EnvironmentSettings.APP_DIR
-    stylesheets = os.listdir(os.path.join(app_root, "static/css"))
-    stylesheets.remove("style.css")
-    if stylesheet in stylesheets:
+    if stylesheet in get_stylesheets():
         return stylesheet
-    else:
-        return "dark.css"
+
+    return "dark.css"
