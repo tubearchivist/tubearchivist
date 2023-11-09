@@ -186,11 +186,11 @@ function capitalizeFirstLetter(string) {
 }
 
 function buildWatchTile(title, watchDetail) {
-  const items = watchDetail.items || 0;
-  const duration = watchDetail.duration || 0;
-  const duration_str = watchDetail.duration_str || 0;
-  const hasProgess = !!watchDetail.progress;
-  const progress = Number(watchDetail.progress * 100).toFixed(2);
+  const items = watchDetail?.items ?? 0;
+  const duration = watchDetail?.duration ?? 0;
+  const duration_str = watchDetail?.duration_str ?? '0s';
+  const hasProgess = !!watchDetail?.progress;
+  const progress = (Number(watchDetail?.progress) * 100).toFixed(2) ?? '0';
 
   let titleCapizalized = capitalizeFirstLetter(title);
 
@@ -241,8 +241,7 @@ function buildDailyStat(dailyStat) {
     text = 'Video';
   }
 
-  message.innerText = 
-  `+${dailyStat.count} ${text}
+  message.innerText = `+${dailyStat.count} ${text}
   ${humanFileSize(dailyStat.media_size)}`;
 
   tile.appendChild(message);
