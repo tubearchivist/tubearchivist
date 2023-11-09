@@ -2,6 +2,7 @@
 
 from home.src.es.connect import ElasticWrap
 from home.src.ta.helper import get_duration_str
+from home.src.ta.settings import EnvironmentSettings
 
 
 class AggBase:
@@ -168,13 +169,22 @@ class DownloadHist(AggBase):
                     "calendar_interval": "day",
                     "format": "yyyy-MM-dd",
                     "order": {"_key": "desc"},
+                    "time_zone": EnvironmentSettings.TZ,
                 },
                 "aggs": {
-                    "total_videos": {"value_count": {"field": "youtube_id"}}
+                    "total_videos": {"value_count": {"field": "youtube_id"}},
+                    "media_size": {"sum": {"field": "media_size"}},
                 },
             }
         },
-        "query": {"range": {"date_downloaded": {"gte": "now-7d/d"}}},
+        "query": {
+            "range": {
+                "date_downloaded": {
+                    "gte": "now-7d/d",
+                    "time_zone": EnvironmentSettings.TZ,
+                }
+            }
+        },
     }
 
     def process(self):
@@ -186,6 +196,7 @@ class DownloadHist(AggBase):
             {
                 "date": i.get("key_as_string"),
                 "count": i.get("doc_count"),
+                "media_size": i["media_size"].get("value"),
             }
             for i in buckets
         ]
