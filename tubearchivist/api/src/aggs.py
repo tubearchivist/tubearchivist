@@ -170,7 +170,8 @@ class DownloadHist(AggBase):
                     "order": {"_key": "desc"},
                 },
                 "aggs": {
-                    "total_videos": {"value_count": {"field": "youtube_id"}}
+                    "total_videos": {"value_count": {"field": "youtube_id"}},
+                    "media_size": {"sum": {"field": "media_size"}},
                 },
             }
         },
@@ -186,6 +187,7 @@ class DownloadHist(AggBase):
             {
                 "date": i.get("key_as_string"),
                 "count": i.get("doc_count"),
+                "media_size": i["media_size"].get("value"),
             }
             for i in buckets
         ]

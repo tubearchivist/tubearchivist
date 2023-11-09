@@ -241,7 +241,9 @@ function buildDailyStat(dailyStat) {
     text = 'Video';
   }
 
-  message.innerText = `+${dailyStat.count} ${text}`;
+  message.innerText = 
+  `+${dailyStat.count} ${text}
+  ${humanFileSize(dailyStat.media_size)}`;
 
   tile.appendChild(message);
   return tile;
