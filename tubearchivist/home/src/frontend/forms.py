@@ -2,9 +2,12 @@
 - hold all form classes used in the views
 """
 
+import os
+
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.forms.widgets import PasswordInput, TextInput
+from home.src.ta.helper import get_stylesheets
 
 
 class CustomAuthForm(AuthenticationForm):
@@ -29,14 +32,16 @@ class CustomAuthForm(AuthenticationForm):
 class UserSettingsForm(forms.Form):
     """user configurations values"""
 
-    CHOICES = [
-        ("", "-- change color scheme --"),
-        ("dark", "Dark"),
-        ("light", "Light"),
-    ]
+    STYLESHEET_CHOICES = [("", "-- change stylesheet --")]
+    STYLESHEET_CHOICES.extend(
+        [
+            (stylesheet, os.path.splitext(stylesheet)[0].title())
+            for stylesheet in get_stylesheets()
+        ]
+    )
 
-    colors = forms.ChoiceField(
-        widget=forms.Select, choices=CHOICES, required=False
+    stylesheet = forms.ChoiceField(
+        widget=forms.Select, choices=STYLESHEET_CHOICES, required=False
     )
     page_size = forms.IntegerField(required=False)
 

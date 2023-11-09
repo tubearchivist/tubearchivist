@@ -162,11 +162,11 @@ class Command(BaseCommand):
             for user in users:
                 new_conf = UserConfig(user)
 
-                colors_key = f"{user}:colors"
-                colors = redis.get_message(colors_key).get("status")
-                if colors:
-                    new_conf.set_value("colors", colors)
-                    redis.del_message(colors_key)
+                stylesheet_key = f"{user}:color"
+                stylesheet = redis.get_message(stylesheet_key).get("status")
+                if stylesheet:
+                    new_conf.set_value("stylesheet", stylesheet)
+                    redis.del_message(stylesheet_key)
 
                 sort_by_key = f"{user}:sort_by"
                 sort_by = redis.get_message(sort_by_key).get("status")

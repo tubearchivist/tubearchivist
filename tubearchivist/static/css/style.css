@@ -165,12 +165,13 @@ button:hover {
 .top-banner img {
     width: 100%;
     max-width: 700px;
+    content: var(--banner);
 }
 
 .footer {
     margin: 0;
     padding: 20px 0;
-    background-color: var(--accent-font-dark);
+    background-color: var(--highlight-bg);
     grid-row-start: 2;
     grid-row-end: 3;
 }
@@ -725,6 +726,7 @@ video:-webkit-full-screen {
     max-width: 200px;
     max-height: 200px;
     margin-bottom: 40px;
+    content: var(--logo);
 }
 
 .login-page form {
