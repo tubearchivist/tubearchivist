@@ -18,20 +18,11 @@
     <meta name="msapplication-TileColor" content="#01202e">
     <meta name="msapplication-config" content="{% static 'favicon/browserconfig.xml' %}">
     <meta name="theme-color" content="#01202e">
-    {% if colors == "dark" %}
-        <link rel="stylesheet" href="{% static 'css/dark.css' %}">
-    {% else %}
-        <link rel="stylesheet" href="{% static 'css/light.css' %}">
-    {% endif %}
+    <link rel="stylesheet" href="{% static 'css/' %}{{ stylesheet }}">
 </head>
 <body>
     <div class="boxed-content login-page">
-        {% if colors == 'dark' %}
-            <img src="{% static 'img/logo-tube-archivist-dark.png' %}" alt="tube-archivist-logo">
-        {% endif %}
-        {% if colors == 'light' %}
-            <img src="{% static 'img/logo-tube-archivist-light.png' %}" alt="tube-archivist-banner">
-        {% endif %}
+        <img alt="tube-archivist-logo">
         <h1>Tube Archivist</h1>
         <h2>Your Self Hosted YouTube Media Server</h2>
         {% if form_error %}

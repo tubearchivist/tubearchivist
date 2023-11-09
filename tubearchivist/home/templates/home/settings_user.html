@@ -7,11 +7,11 @@
 <form action="{% url 'settings_user' %}" method="POST" name="user-update">
     {% csrf_token %}
     <div class="settings-group">
-        <h2>Color scheme</h2>
+        <h2>Stylesheet</h2>
         <div class="settings-item">
-            <p>Current color scheme: <span class="settings-current">{{ colors }}</span></p>
-            <i>Select your preferred color scheme between dark and light mode.</i><br>
-            {{ user_form.colors }}
+            <p>Current stylesheet: <span class="settings-current">{{ stylesheet }}</span></p>
+            <i>Select your preferred stylesheet.</i><br>
+            {{ user_form.stylesheet }}
         </div>
     </div>
     <div class="settings-group">

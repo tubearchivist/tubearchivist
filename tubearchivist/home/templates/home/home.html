@@ -60,13 +60,13 @@
         <div class="sort">
             <div id="hidden-form">
                 <span>Sort by:</span>
-                <select name="sort" id="sort" onchange="sortChange(this.value)">
+                <select name="sort_by" id="sort" onchange="sortChange(this)">
                     <option value="published" {% if sort_by == "published" %}selected{% endif %}>date published</option>
                     <option value="downloaded" {% if sort_by == "downloaded" %}selected{% endif %}>date downloaded</option>
                     <option value="views" {% if sort_by == "views" %}selected{% endif %}>views</option>
                     <option value="likes" {% if sort_by == "likes" %}selected{% endif %}>likes</option>
                 </select>
-                <select name="sord-order" id="sort-order" onchange="sortChange(this.value)">
+                <select name="sort_order" id="sort-order" onchange="sortChange(this)">
                     <option value="asc" {% if sort_order == "asc" %}selected{% endif %}>asc</option>
                     <option value="desc" {% if sort_order == "desc" %}selected{% endif %}>desc</option>
                 </select>

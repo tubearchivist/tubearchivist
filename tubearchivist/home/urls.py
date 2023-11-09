@@ -58,7 +58,6 @@ urlpatterns = [
         login_required(views.SettingsActionsView.as_view()),
         name="settings_actions",
     ),
-    path("process/", login_required(views.process), name="process"),
     path(
         "channel/",
         login_required(views.ChannelView.as_view()),

@@ -83,7 +83,7 @@ class Scanner:
             if self.task:
                 self.task.send_progress(
                     message_lines=[
-                        f"Index missing video {youtube_id}, {idx}/{total}"
+                        f"Index missing video {youtube_id}, {idx + 1}/{total}"
                     ],
                     progress=(idx + 1) / total,
                 )

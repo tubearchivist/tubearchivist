@@ -4,7 +4,6 @@ Functionality:
 - holds base classes to inherit from
 """
 import enum
-import json
 import urllib.parse
 from time import sleep
 
@@ -14,7 +13,7 @@ from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import Http404, JsonResponse
+from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -23,7 +22,6 @@ from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.backup import ElasticBackup
 from home.src.es.connect import ElasticWrap
 from home.src.es.snapshot import ElasticSnapshot
-from home.src.frontend.api_calls import PostData
 from home.src.frontend.forms import (
     AddToQueueForm,
     ApplicationSettingsForm,
@@ -41,7 +39,7 @@ from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
-from home.src.ta.helper import time_parser
+from home.src.ta.helper import check_stylesheet, time_parser
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.users import UserConfig
@@ -75,7 +73,9 @@ class ArchivistViewConfig(View):
         self.user_conf = UserConfig(self.user_id)
 
         self.context = {
-            "colors": self.user_conf.get_value("colors"),
+            "stylesheet": check_stylesheet(
+                self.user_conf.get_value("stylesheet")
+            ),
             "cast": EnvironmentSettings.ENABLE_CAST,
             "sort_by": self.user_conf.get_value("sort_by"),
             "sort_order": self.user_conf.get_value("sort_order"),
@@ -222,7 +222,9 @@ class MinView(View):
     def get_min_context(request):
         """build minimal vars for context"""
         return {
-            "colors": UserConfig(request.user.id).get_value("colors"),
+            "stylesheet": check_stylesheet(
+                UserConfig(request.user.id).get_value("stylesheet")
+            ),
             "version": settings.TA_VERSION,
             "ta_update": ReleaseVersion().get_update(),
         }
@@ -979,9 +981,9 @@ class SettingsUserView(MinView):
         config_handler = UserConfig(request.user.id)
         if user_form.is_valid():
             user_form_post = user_form.cleaned_data
-            if user_form_post.get("colors"):
+            if user_form_post.get("stylesheet"):
                 config_handler.set_value(
-                    "colors", user_form_post.get("colors")
+                    "stylesheet", user_form_post.get("stylesheet")
                 )
             if user_form_post.get("page_size"):
                 config_handler.set_value(
@@ -1133,16 +1135,3 @@ class SettingsActionsView(MinView):
         )
 
         return render(request, "home/settings_actions.html", context)
-
-
-def process(request):
-    """handle all the buttons calls via POST ajax"""
-    if request.method == "POST":
-        current_user = request.user.id
-        post_dict = json.loads(request.body.decode())
-        post_handler = PostData(post_dict, current_user)
-        if post_handler.to_exec:
-            task_result = post_handler.run_task()
-            return JsonResponse(task_result)
-
-    return JsonResponse({"success": False})

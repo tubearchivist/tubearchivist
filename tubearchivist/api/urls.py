@@ -97,6 +97,16 @@ urlpatterns = [
         name="api-snapshot",
     ),
     path(
+        "backup/",
+        views.BackupApiListView.as_view(),
+        name="api-backup-list",
+    ),
+    path(
+        "backup/<str:filename>/",
+        views.BackupApiView.as_view(),
+        name="api-backup",
+    ),
+    path(
         "task-name/",
         views.TaskListView.as_view(),
         name="api-task-list",
@@ -110,6 +120,11 @@ urlpatterns = [
         "task-id/<slug:task_id>/",
         views.TaskIDView.as_view(),
         name="api-task-id",
+    ),
+    path(
+        "config/user/",
+        views.UserConfigView.as_view(),
+        name="api-config-user",
     ),
     path(
         "cookie/",
