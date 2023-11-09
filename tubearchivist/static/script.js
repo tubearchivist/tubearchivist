@@ -546,12 +546,20 @@ function createVideoTag(videoData, videoProgress) {
   }
 
   let videoTag = `
-    <video poster="${videoThumbUrl}" ontimeupdate="onVideoProgress()" onpause="onVideoPause()" onended="onVideoEnded()" controls autoplay width="100%" playsinline id="video-item">
+    <video poster="${videoThumbUrl}" onvolumechange="onVolumeChange(this)" onloadstart="this.volume=getPlayerVolume()" ontimeupdate="onVideoProgress()" onpause="onVideoPause()" onended="onVideoEnded()" controls autoplay width="100%" playsinline id="video-item">
         <source src="${videoUrl}#t=${videoProgress}" type="video/mp4" id="video-source" videoid="${videoId}">
         ${subtitles}
     </video>
     `;
   return videoTag;
+}
+
+function onVolumeChange(videoTag) {
+  localStorage.setItem('playerVolume', videoTag.volume);
+}
+
+function getPlayerVolume() {
+  return localStorage.getItem('playerVolume') ?? 1;
 }
 
 // Gets video tag
