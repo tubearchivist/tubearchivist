@@ -1,64 +1,15 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="500"
-   height="500"
-   viewBox="0 0 132.29197 132.29167"
-   version="1.1"
-   id="svg1303"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
-   sodipodi:docname="Icons_Lupe.svg">
-  <defs
-     id="defs1297" />
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="1.0105705"
-     inkscape:cx="-23.955221"
-     inkscape:cy="207.58555"
-     inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
-     showgrid="false"
-     units="px"
-     inkscape:window-width="1920"
-     inkscape:window-height="1017"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1" />
-  <metadata
-     id="metadata1300">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
-  <g
-     inkscape:label="Ebene 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(0,-164.70764)">
-    <path
-       style="opacity:1;fill:#002130;fill-opacity:1;stroke:none;stroke-width:0;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers fill stroke"
-       d="m 15.593586,179.85791 c 18.094683,-18.09394 47.431291,-18.09355 65.52552,7.7e-4 16.496472,16.53809 18.102694,42.7696 3.747207,61.19678 17.821687,15.21024 24.490877,18.93088 42.171347,34.20969 4.41254,4.71717 4.29213,12.08299 -0.27223,16.65347 -4.57089,4.56126 -11.93421,4.68001 -16.65007,0.26874 l -8.4e-4,9.1e-4 -0.0173,-0.0152 C 94.335453,273.50898 90.211408,265.24542 76.792795,249.15281 58.360539,263.5048 32.12693,261.89037 15.593512,245.38662 c -18.0947127,-18.09455 -18.0947127,-47.43175 0,-65.52636 z m 7.908493,7.90846 c -13.7275962,13.72683 -13.7279739,35.98299 -8.23e-4,49.71019 13.72719,13.72714 35.983444,13.72678 49.710173,-8.2e-4 13.726834,-13.72692 13.726834,-35.98245 0,-49.70937 -13.726863,-13.72676 -35.982478,-13.72676 -49.70935,0 z"
-       id="rect826"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="ccccccccccccccccc" />
-  </g>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 27.5.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1"
+	 id="svg1303" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:svg="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 500 500"
+	 style="enable-background:new 0 0 500 500;" xml:space="preserve">
+<g>
+	<path d="M492.4,462.2c-1,2.5-1.8,5.1-3,7.6C478,495,448.2,501.9,427.2,484c-1.8-1.5-3.5-3.2-5.2-4.9
+		c-34.1-34.8-68.3-69.5-102.3-104.4c-3.3-3.4-5.6-3.6-9.5-1c-30.5,20.3-64.1,31.1-100.6,32c-60.1,1.5-110.4-20.8-151.1-65.6
+		c-28.2-31-45.1-67.8-49.5-109.8C1.6,161.2,23.6,102.8,74.3,56.1c28.7-26.4,62.7-42.4,101-47.9c52.7-7.6,101,4.5,143.9,36.5
+		c43.7,32.6,70,76.6,78.4,131c7.1,45.8-1.1,89.2-23.7,129.6c-3.7,6.6-3.8,6.6,1.5,11.9c33.3,34,66.6,68,100.1,101.9
+		c7.6,7.7,14.2,15.9,16.9,26.7C494.1,451.5,493.6,456.9,492.4,462.2z M335.2,205.9c0.5-72.8-58.3-134.2-131.9-134
+		C132.9,72,72,129.3,72,206c0,74.8,58.1,134.2,131.7,134.2C278.8,340.2,335.8,278.1,335.2,205.9z"/>
+</g>
 </svg>

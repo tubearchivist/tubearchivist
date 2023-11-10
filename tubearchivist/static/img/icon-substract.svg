@@ -1,75 +1,12 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   width="474.99609"
-   height="78.428696"
-   viewBox="0 0 125.67634 20.750926"
-   version="1.1"
-   id="svg1303"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
-   sodipodi:docname="icon-add.svg"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:dc="http://purl.org/dc/elements/1.1/">
-  <defs
-     id="defs1297" />
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="0.85859018"
-     inkscape:cx="-97.380081"
-     inkscape:cy="261.09215"
-     inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
-     showgrid="false"
-     units="px"
-     inkscape:window-width="1920"
-     inkscape:window-height="1017"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1"
-     showguides="true"
-     inkscape:guide-bbox="true"
-     inkscape:showpageshadow="2"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1">
-    <sodipodi:guide
-       position="-225.18364,87.524084"
-       orientation="1,0"
-       id="guide1072"
-       inkscape:locked="false" />
-  </sodipodi:namedview>
-  <metadata
-     id="metadata1300">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
-  <g
-     inkscape:label="Ebene 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(-3.3077777,-220.4781)">
-    <path
-       style="opacity:1;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers fill stroke"
-       d="m 12.291019,220.47796 c -4.9648228,-0.009 -8.9691711,3.98046 -8.9784054,8.94536 l -0.00482,2.62846 c -0.00925,4.9649 3.9804459,8.96933 8.9452674,8.97832 107.703889,0.29274 22.266017,0.0414 107.747629,0.19881 4.96484,0.009 8.96917,-3.98046 8.9784,-8.94534 l 0.005,-2.62847 c 0.009,-4.96489 -3.98037,-8.96923 -8.94525,-8.97831 -107.850822,-0.0255 -20.413204,-0.038 -107.747821,-0.19883 z"
-       id="rect1073"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="ccccccccc" />
-  </g>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 27.5.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1"
+	 id="svg1303" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:svg="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 475 111.2"
+	 style="enable-background:new 0 0 475 111.2;" xml:space="preserve">
+<sodipodi:namedview  bordercolor="#666666" borderopacity="1.0" id="base" inkscape:current-layer="layer1" inkscape:cx="-97.380081" inkscape:cy="261.09215" inkscape:deskcolor="#d1d1d1" inkscape:document-units="mm" inkscape:guide-bbox="true" inkscape:pagecheckerboard="0" inkscape:pageopacity="0.0" inkscape:pageshadow="2" inkscape:showpageshadow="2" inkscape:window-height="1017" inkscape:window-maximized="1" inkscape:window-width="1920" inkscape:window-x="-8" inkscape:window-y="-8" inkscape:zoom="0.85859018" pagecolor="#ffffff" showgrid="false" showguides="true" units="px">
+	<sodipodi:guide  id="guide1072" inkscape:locked="false" orientation="1,0" position="-225.18364,87.524084"></sodipodi:guide>
+</sodipodi:namedview>
+<path d="M181.9,0H55.6C25,0,0,25,0,55.6l0,0c0,30.6,25,55.6,55.6,55.6h126.3h111.2h126.3c30.6,0,55.6-25,55.6-55.6l0,0
+	C475,25,450,0,419.4,0H293.1H181.9z"/>
 </svg>
