@@ -7,7 +7,7 @@
     --main-font: #00aa00;
     --accent-font-dark: #007700;
     --accent-font-light: #00aa00;
-    --img-filter: invert(50%) sepia(9%) saturate(2940%) hue-rotate(122deg) brightness(94%) contrast(90%);
+    --img-filter: brightness(0) saturate(100%) invert(45%) sepia(100%) saturate(3710%) hue-rotate(96deg) brightness(100%) contrast(102%);
     --img-filter-error: invert(16%) sepia(60%) saturate(3717%) hue-rotate(349deg) brightness(86%) contrast(120%);
     --banner: url("../img/banner-tube-archivist-dark.png");
     --logo: url("../img/logo-tube-archivist-dark.png");
@@ -27,15 +27,7 @@
     outline: var(--outline);
 }
 
-.nav-icons {
-    filter: var(--filter);
-}
-
-.view-icons {
-    filter: var(--filter);
-}
-
-.top-banner {
+.top-banner img {
     filter: var(--filter);
 }
 
