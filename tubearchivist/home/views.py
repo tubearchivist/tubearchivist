@@ -111,6 +111,8 @@ class ArchivistResultsView(ArchivistViewConfig):
             "likes": "stats.like_count",
             "downloaded": "date_downloaded",
             "published": "published",
+            "duration": "player.duration",
+            "filesize": "media_size",
         }
         sort_by = sort_by_map[self.context["sort_by"]]
 
