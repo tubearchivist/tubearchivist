@@ -1,63 +1,23 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="500"
-   height="500"
-   viewBox="0 0 132.29197 132.29167"
-   version="1.1"
-   id="svg1303"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
-   sodipodi:docname="Rescan Subscriptions.svg">
-  <defs
-     id="defs1297" />
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="0.85859018"
-     inkscape:cx="125.63373"
-     inkscape:cy="156.7016"
-     inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
-     showgrid="false"
-     units="px"
-     inkscape:window-width="1920"
-     inkscape:window-height="1017"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1" />
-  <metadata
-     id="metadata1300">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
-  <g
-     inkscape:label="Ebene 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(0,-164.70764)">
-    <path
-       style="opacity:1;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers fill stroke"
-       d="M 240.35352 18.810547 L 240.35352 29.246094 A 221.29301 221.29301 0 0 0 64.912109 129.45898 L 95.701172 150.14453 A 184.02261 184.02261 0 0 1 240.35352 66.369141 L 240.35352 87.705078 L 270.18359 70.480469 L 300.01562 53.257812 L 270.18359 36.035156 L 240.35352 18.810547 z M 312.28516 37.798828 L 301.08398 73.353516 A 184.02261 184.02261 0 0 1 422.6875 187.33594 L 406.34375 192.03125 L 431.13281 215.94922 L 455.92188 239.86719 L 464.24219 206.44141 L 472.56055 173.01367 L 458.55078 177.03711 A 221.29301 221.29301 0 0 0 312.28516 37.798828 z M 73.375 144.88281 L 48.585938 168.80078 L 23.796875 192.71875 L 35.617188 196.11328 A 221.29301 221.29301 0 0 0 28.707031 250 A 221.29301 221.29301 0 0 0 77.992188 388.9375 L 107.99805 366.83789 A 184.02261 184.02261 0 0 1 65.976562 250 A 184.02261 184.02261 0 0 1 71.474609 206.41211 L 90.013672 211.73633 L 81.693359 178.30859 L 73.375 144.88281 z M 433.95312 248.4375 A 184.02261 184.02261 0 0 1 434.02344 250 A 184.02261 184.02261 0 0 1 367.40625 391.49219 L 358.92773 380.14844 L 345.34375 411.80469 L 331.75977 443.45898 L 365.9668 439.39648 L 400.17188 435.33203 L 389.71484 421.33984 A 221.29301 221.29301 0 0 0 471.29297 250 A 221.29301 221.29301 0 0 0 471.23047 248.77539 L 433.95312 248.4375 z M 94.9375 385.80273 L 108.97852 417.25781 L 123.02148 448.71289 L 131.60156 436.87891 A 221.29301 221.29301 0 0 0 250 471.29297 A 221.29301 221.29301 0 0 0 328.64648 456.57227 L 315.99023 421.74805 A 184.02261 184.02261 0 0 1 250 434.02344 A 184.02261 184.02261 0 0 1 153.63867 406.48047 L 163.45898 392.93555 L 129.19727 389.36914 L 94.9375 385.80273 z "
-       transform="matrix(0.26458394,0,0,0.26458394,0,164.70749)"
-       id="path826" />
-  </g>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 27.5.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1"
+	 id="svg1303" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:svg="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 500 500"
+	 style="enable-background:new 0 0 500 500;" xml:space="preserve">
+<sodipodi:namedview  bordercolor="#666666" borderopacity="1.0" id="base" inkscape:current-layer="layer1" inkscape:cx="125.63373" inkscape:cy="156.7016" inkscape:document-units="mm" inkscape:pageopacity="0.0" inkscape:pageshadow="2" inkscape:window-height="1017" inkscape:window-maximized="1" inkscape:window-width="1920" inkscape:window-x="-8" inkscape:window-y="-8" inkscape:zoom="0.85859018" pagecolor="#ffffff" showgrid="false" units="px">
+	</sodipodi:namedview>
+<g>
+	<path d="M269,28.7c10.8,1.6,21.6,2.8,32.3,5.3c38.3,9.2,71.9,27.2,100.7,54.1c3.4,3.2,4.7,2.4,6.8-1.1c3.3-5.5,7.1-10.9,10.7-16.2
+		c4.8-7,11.3-9.7,18.5-7.6c6.8,1.9,11.5,8.2,11.5,16.5c-0.1,26.3,0.3,52.7-0.5,79c-0.4,12.5-0.1,25-0.2,37.6
+		c-0.1,14-11.1,21.3-23.9,15.6c-35.2-15.7-70.3-31.6-105.5-47.4c-7.7-3.5-11.8-10.1-10.8-16.9c1.1-7.8,6.9-13.2,15.6-14.4
+		c4-0.6,8-1.2,11.9-1.8c0.9-0.1,2.3,0.2,2.6-1.1c0.3-1.2-1-1.6-1.8-2.2c-12.2-8.9-25.5-15.7-39.8-20.3
+		c-72.7-23.2-148.9,9.9-181.6,78.9c-4.1,8.7-8.3,17-17.1,22.1c-13.7,8-30.1,6.6-42.2-3.8c-11.3-9.6-15.6-26.6-9.6-40.5
+		c15.7-36.9,39.4-67.7,71.6-91.8c29.8-22.4,63.2-36.3,100-41.9c4.8-0.7,9.7-1.3,14.5-2C244.8,28.7,256.9,28.7,269,28.7z"/>
+	<path d="M52.1,361.3c0.6-20,0.8-39,0.8-58c0-14,11.1-21.2,23.9-15.5c25.2,11.2,50.4,22.6,75.6,33.9c10.1,4.5,20.2,9,30.3,13.7
+		c6.4,2.9,10.5,7.8,10.5,15c0,6.4-3.2,11.2-9,14.2c-3.8,2-8.1,2-12.1,2.8c-2.1,0.4-4.3,0.6-6.4,1c-0.9,0.1-2.3-0.2-2.6,1.1
+		c-0.3,1.2,1,1.6,1.8,2.2c12.2,8.9,25.5,15.7,39.8,20.3c72.7,23.2,148.9-9.9,181.6-78.9c4.2-8.8,8.5-17.3,17.4-22.4
+		c13.6-7.7,29.8-6.3,41.8,4c11.3,9.6,15.6,26.6,9.7,40.5c-15.7,36.9-39.4,67.7-71.6,91.8c-29.7,22.3-62.9,36.5-99.6,41.8
+		c-57.8,8.3-110.9-4-159.1-36.9c-9.3-6.3-17.9-13.5-26.1-21.2c-2.1-2-3.3-2.1-4.9,0.5c-3.4,5.5-7.1,10.8-10.7,16.2
+		c-5.7,8.5-12.2,11.4-19.9,8.9c-7.3-2.3-11.1-8.6-11.1-18.5C52.1,398.6,52.1,379.4,52.1,361.3z"/>
+</g>
 </svg>

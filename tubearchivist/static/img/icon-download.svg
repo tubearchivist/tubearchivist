@@ -1,63 +1,14 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="500"
-   height="500"
-   viewBox="0 0 132.29197 132.29167"
-   version="1.1"
-   id="svg1303"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
-   sodipodi:docname="Download.svg">
-  <defs
-     id="defs1297" />
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="0.71458126"
-     inkscape:cx="-376.84122"
-     inkscape:cy="260.65826"
-     inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
-     showgrid="false"
-     units="px"
-     inkscape:window-width="1920"
-     inkscape:window-height="1017"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1" />
-  <metadata
-     id="metadata1300">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
-  <g
-     inkscape:label="Ebene 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(0,-164.70764)">
-    <path
-       style="opacity:1;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers fill stroke"
-       d="M 249.89062 39.6875 L 249.88477 39.693359 C 229.11581 39.693359 212.39453 59.135896 212.39453 83.289062 L 212.39453 289.66016 L 159.20312 236.46875 L 127.63867 268.05469 L 218.74805 359.14258 L 218.73242 359.1582 L 249.93555 390.33789 L 281.52148 358.77344 L 372.36133 267.91211 L 341.1582 236.73047 L 287.37891 290.50977 L 287.37891 83.283203 C 287.37891 59.130339 270.65971 39.6875 249.89062 39.6875 z M 50.566406 407.88867 C 44.284822 407.88867 39.228516 412.94498 39.228516 419.22656 L 39.228516 444.62695 C 39.228516 450.90854 44.284822 455.96484 50.566406 455.96484 L 449.43359 455.96484 C 455.71518 455.96484 460.77148 450.90854 460.77148 444.62695 L 460.77148 419.22656 C 460.77148 412.94498 455.71518 407.88867 449.43359 407.88867 L 50.566406 407.88867 z "
-       transform="matrix(0.26458394,0,0,0.26458394,0,164.70749)"
-       id="rect1208" />
-  </g>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 27.5.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1"
+	 id="svg1303" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:svg="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 500 500"
+	 style="enable-background:new 0 0 500 500;" xml:space="preserve">
+<g>
+	<path d="M231.3,382c4.8,5.3,11.6,8.3,18.7,8.3c7.1,0,13.9-3,18.7-8.3l112.1-124.2c6.7-7.4,8.4-18,4.3-27.1
+		c-4-9.1-13.1-14.9-23-14.9h-52.9V64.9c0-13.9-11.3-25.2-25.2-25.2h-68c-13.9,0-25.2,11.3-25.2,25.2v150.9h-52.9
+		c-10,0-19,5.9-23,14.9c-4,9.1-2.3,19.7,4.3,27.1L231.3,382z"/>
+	<path d="M436.1,408.8H63.9c-13.6,0-24.7,11.1-24.7,24.7c0,13.6,11.1,24.7,24.7,24.7h372.2c13.6,0,24.7-11.1,24.7-24.7
+		C460.8,419.9,449.7,408.8,436.1,408.8z"/>
+</g>
 </svg>
