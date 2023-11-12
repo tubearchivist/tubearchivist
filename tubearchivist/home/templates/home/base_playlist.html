@@ -1,0 +1,15 @@
+{# Base file for all of the playlist pages to ensure a common menu #}
+{% extends "home/base.html" %}
+{% load static %}
+{% load auth_extras %}
+{% block content %}
+<div class="boxed-content">
+    <div class="info-box-item child-page-nav">
+        <a href="{% url 'playlist' %}"><h3>YouTube Playlists</h3></a>
+        <a href="{% url 'custom_playlist' %}"><h3>Custom Playlists</h3></a>
+    </div>
+    <div id="notifications" data=""></div>
+    {% block playlist_content %}{% endblock %}
+</div>
+<script type="text/javascript" src="{% static 'progress.js' %}"></script>
+{% endblock content %}

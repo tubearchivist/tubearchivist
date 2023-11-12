@@ -4,6 +4,7 @@ Functionality:
 - holds base classes to inherit from
 """
 import enum
+import logging
 import urllib.parse
 from time import sleep
 
@@ -31,6 +32,7 @@ from home.src.frontend.forms import (
     SchedulerSettingsForm,
     SubscribeToChannelForm,
     SubscribeToPlaylistForm,
+    CreateCustomPlaylistForm,
     UserSettingsForm,
 )
 from home.src.index.channel import channel_overwrites
@@ -43,7 +45,7 @@ from home.src.ta.helper import check_stylesheet, time_parser
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.users import UserConfig
-from home.tasks import index_channel_playlists, subscribe_to
+from home.tasks import index_channel_playlists, subscribe_to, create_custom_playlist
 from rest_framework.authtoken.models import Token
 
 
@@ -843,6 +845,63 @@ class PlaylistView(ArchivistResultsView):
 
         sleep(1)
         return redirect("playlist")
+
+class CustomPlaylistView(ArchivistResultsView):
+    """resolves to /custom_playlist/
+    show all custom playlists indexed
+    """
+
+    view_origin = "custom_playlist"
+    es_search = "ta_custom_playlist/_search"
+
+    def get(self, request):
+        """handle get request"""
+        self.initiate_vars(request)
+        self._update_view_data()
+        self.find_results()
+        self.context.update(
+            {
+                "title": "Custom Playlists",
+                "create_form": CreateCustomPlaylistForm(),
+            }
+        )
+
+        return render(request, "home/custom_playlist.html", self.context)
+
+    def _update_view_data(self):
+        """update view specific data dict"""
+        self.data["sort"] = [{"playlist_name.keyword": {"order": "asc"}}]
+        if self.search_get:
+            self.data["query"] = {
+                "bool": {
+                    "should": [
+                        {
+                            "multi_match": {
+                                "query": self.search_get,
+                                "fields": [
+                                    "playlist_channel_id",
+                                    "playlist_channel",
+                                    "playlist_name",
+                                ],
+                            }
+                        }
+                    ],
+                    "minimum_should_match": 1,
+                }
+            }
+
+    @method_decorator(user_passes_test(check_admin), name="dispatch")
+    @staticmethod
+    def post(request):
+        """handle post from create form"""
+        create_form = CreateCustomPlaylistForm(data=request.POST)
+        if create_form.is_valid():
+            name = request.POST.get("create")
+            print(name)
+            create_custom_playlist.delay(name)
+
+        sleep(1)
+        return redirect("custom_playlist")
 
 
 class VideoView(MinView):

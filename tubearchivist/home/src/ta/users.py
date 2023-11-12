@@ -21,6 +21,7 @@ class UserConfigType(TypedDict, total=False):
     view_style_channel: str
     view_style_downloads: str
     view_style_playlist: str
+    view_style_custom_playlist: str
     grid_items: int
     hide_watched: bool
     show_ignored_only: bool
@@ -40,6 +41,7 @@ class UserConfig:
         view_style_channel="list",
         view_style_downloads="list",
         view_style_playlist="grid",
+        view_style_custom_playlist="list",
         grid_items=3,
         hide_watched=False,
         show_ignored_only=False,
@@ -99,6 +101,7 @@ class UserConfig:
             "view_style_channel": self.VALID_VIEW_STYLE,
             "view_style_download": self.VALID_VIEW_STYLE,
             "view_style_playlist": self.VALID_VIEW_STYLE,
+            "view_style_custom_playlist": self.VALID_VIEW_STYLE,
             "grid_items": self.VALID_GRID_ITEMS,
             "page_size": int,
             "hide_watched": bool,

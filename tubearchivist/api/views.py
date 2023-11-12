@@ -16,6 +16,7 @@ from home.src.frontend.watched import WatchState
 from home.src.index.channel import YoutubeChannel
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
+from home.src.index.custom_playlist import CustomPlaylist
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock, YoutubeVideo
 from home.src.ta.config import AppConfig, ReleaseVersion
@@ -518,6 +519,28 @@ class PlaylistApiView(ApiBaseView):
             YoutubePlaylist(playlist_id).delete_videos_playlist()
         else:
             YoutubePlaylist(playlist_id).delete_metadata()
+
+        return Response({"success": True})
+
+class CustomPlaylistApiView(ApiBaseView):
+    """resolves to /api/custom-playlist/<playlist_id>/
+    GET: returns metadata dict of custom playlist
+    """
+
+    search_base = "ta_custom_playlist/_doc/"
+    permission_classes = [AdminWriteOnly]
+
+    def get(self, request, playlist_id):
+        # pylint: disable=unused-argument
+        """get request"""
+        self.get_document(playlist_id)
+        return Response(self.response, status=self.status_code)
+
+    def delete(self, request, playlist_id):
+        """delete custom playlist"""
+        print(f"{playlist_id}: delete custom playlist")
+        
+        CustomPlaylist(playlist_id).delete_metadata()
 
         return Response({"success": True})
 

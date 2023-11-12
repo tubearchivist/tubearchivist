@@ -403,6 +403,17 @@ function deletePlaylist(button) {
   }, 1000);
 }
 
+function deleteCustomPlaylist(button) {
+  let playlist_id = button.getAttribute('data-id');
+  let apiEndpoint = `/api/custom-playlist/${playlist_id}/`;
+
+  apiRequest(apiEndpoint, 'DELETE');
+  let message = document.createElement('span');
+  message.innerText = 'Playlist removed.';
+  
+  button.replaceWith(message);
+}
+
 function cancelDelete() {
   document.getElementById('delete-button').style.display = 'none';
   document.getElementById('delete-item').style.display = 'block';

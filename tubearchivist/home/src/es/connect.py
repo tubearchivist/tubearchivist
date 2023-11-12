@@ -6,6 +6,7 @@ functionality:
 # pylint: disable=missing-timeout
 
 import json
+import logging
 from typing import Any
 
 import requests
@@ -51,7 +52,8 @@ class ElasticWrap:
 
         if print_error and not response.ok:
             print(response.text)
-
+        if logging.getLogger().isEnabledFor(logging.DEBUG):
+            logging.debug("get(%s,%s): %s %s", self.url, kwargs, response.status_code, response.json())
         return response.json(), response.status_code
 
     def post(
@@ -81,6 +83,9 @@ class ElasticWrap:
 
         response = requests.post(self.url, **kwargs)
 
+        if logging.getLogger().isEnabledFor(logging.DEBUG):
+            logging.debug("post(%s,%s): %s %s", self.url, kwargs, response.status_code, response.json())
+            
         if not response.ok:
             print(response.text)
 
@@ -105,6 +110,9 @@ class ElasticWrap:
             kwargs["verify"] = False
 
         response = requests.put(self.url, **kwargs)
+        
+        if logging.getLogger().isEnabledFor(logging.DEBUG):
+            logging.debug("put(%s,%s): %s %s", self.url, kwargs, response.status_code, response.json())
 
         if not response.ok:
             print(response.text)

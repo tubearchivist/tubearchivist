@@ -64,6 +64,7 @@ class Command(BaseCommand):
             "download",
             "import",
             "playlists",
+            "custom_playlists",
             "videos",
         ]
         cache_dir = EnvironmentSettings.CACHE_DIR

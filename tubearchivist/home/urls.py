@@ -99,6 +99,11 @@ urlpatterns = [
         name="playlist",
     ),
     path(
+        "custom_playlist/",
+        login_required(views.CustomPlaylistView.as_view()),
+        name="custom_playlist",
+    ),
+    path(
         "playlist/<slug:playlist_id>/",
         login_required(views.PlaylistIdView.as_view()),
         name="playlist_id",
