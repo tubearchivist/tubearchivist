@@ -50,7 +50,14 @@ class UserConfig:
     VALID_STYLESHEETS = get_stylesheets()
     VALID_VIEW_STYLE = ["grid", "list"]
     VALID_SORT_ORDER = ["asc", "desc"]
-    VALID_SORT_BY = ["published", "downloaded", "views", "likes", "duration", "filesize"]
+    VALID_SORT_BY = [
+        "published",
+        "downloaded",
+        "views",
+        "likes",
+        "duration",
+        "filesize"
+    ]
     VALID_GRID_ITEMS = range(3, 8)
 
     def __init__(self, user_id: str):
