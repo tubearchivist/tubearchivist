@@ -56,7 +56,7 @@ class UserConfig:
         "views",
         "likes",
         "duration",
-        "filesize"
+        "filesize",
     ]
     VALID_GRID_ITEMS = range(3, 8)
 
