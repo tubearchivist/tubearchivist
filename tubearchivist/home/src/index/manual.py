@@ -427,7 +427,13 @@ class ManualImport:
         if not self.current_video["metadata"]:
             return False
         
-        allowed_null_keys = ["description", "categories", "thumbnail", "tags", "view_count"]
+        allowed_null_keys = [
+            "description",
+            "categories",
+            "thumbnail",
+            "tags",
+            "view_count"
+        ]
         default_null = dict.fromkeys(allowed_null_keys, None)
 
         with open(self.current_video["metadata"], "r", encoding="utf-8") as f:
