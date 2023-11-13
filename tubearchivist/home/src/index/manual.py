@@ -432,7 +432,7 @@ class ManualImport:
             "categories",
             "thumbnail",
             "tags",
-            "view_count"
+            "view_count",
         ]
         default_null = dict.fromkeys(allowed_null_keys, None)
 
