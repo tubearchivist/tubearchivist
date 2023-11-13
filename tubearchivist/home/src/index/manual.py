@@ -427,7 +427,6 @@ class ManualImport:
         if not self.current_video["metadata"]:
             return False
 
-
         allowed_null_keys = [
             "description",
             "categories",
