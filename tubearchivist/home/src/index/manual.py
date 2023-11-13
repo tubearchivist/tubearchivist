@@ -426,9 +426,12 @@ class ManualImport:
         """read info_json from file"""
         if not self.current_video["metadata"]:
             return False
+        
+        allowed_null_keys = ["description", "categories", "thumbnail", "tags", "view_count"]
+        default_null = dict.fromkeys(allowed_null_keys, None)
 
         with open(self.current_video["metadata"], "r", encoding="utf-8") as f:
-            info_json = json.loads(f.read())
+            info_json = json.loads(f.read(), object_hook=default_null)
 
         return info_json
 
