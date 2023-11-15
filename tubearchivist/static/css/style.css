@@ -180,6 +180,10 @@ button:hover {
     text-decoration: underline;
 }
 
+.footer .boxed-content {
+    text-align: center;
+}
+
 /* toggle on-off */
 .toggle {
     display: flex;
