@@ -37,8 +37,10 @@ class CustomPlaylist(YouTubeItem):
     def create(self, name):
         self.json_data = {
             "playlist_id": self.youtube_id,
+            "playlist_active": True,
             "playlist_name": name,
             "playlist_last_refresh": int(datetime.now().timestamp()),
+            "playlist_entries": [],
         }
         
         self.upload_to_es()
@@ -81,6 +83,7 @@ class CustomPlaylist(YouTubeItem):
             "playlist_thumbnail": playlist_thumbnail,
             "playlist_description": self.youtube_meta["description"] or False,
             "playlist_last_refresh": int(datetime.now().timestamp()),
+            "playlist_entries": [],
         }
 
     def get_entries(self, playlistend=False):
@@ -112,36 +115,65 @@ class CustomPlaylist(YouTubeItem):
         url = self.json_data["playlist_thumbnail"]
         ThumbManager(self.youtube_id, item_type="playlist").download(url)
 
-    def add_vids_to_playlist(self):
-        """sync the playlist id to videos"""
-        script = (
-            'if (!ctx._source.containsKey("playlist")) '
-            + "{ctx._source.playlist = [params.playlist]} "
-            + "else if (!ctx._source.playlist.contains(params.playlist)) "
-            + "{ctx._source.playlist.add(params.playlist)} "
-            + "else {ctx.op = 'none'}"
-        )
-
-        bulk_list = []
-        for entry in self.json_data["playlist_entries"]:
-            video_id = entry["youtube_id"]
-            action = {"update": {"_id": video_id, "_index": "ta_video"}}
-            source = {
-                "script": {
-                    "source": script,
-                    "lang": "painless",
-                    "params": {"playlist": self.youtube_id},
-                }
-            }
-            bulk_list.append(json.dumps(action))
-            bulk_list.append(json.dumps(source))
-
-        # add last newline
-        bulk_list.append("\n")
-        query_str = "\n".join(bulk_list)
-
-        ElasticWrap("_bulk").post(query_str, ndjson=True)
-
+    def add_video_to_playlist(self, video_id):
+        logging.debug("add_video_to_playlist: %s", video_id)
+        
+        self.get_from_es()
+        video_metadata = self.get_video_metadata(video_id)
+        
+        logging.debug("video %s", video_metadata)
+          
+        if not self.playlist_entries_contains(video_id):
+            self.json_data["playlist_entries"].append(video_metadata)
+            self.json_data["playlist_last_refresh"] = int(datetime.now().timestamp())
+            self.upload_to_es()
+            
+        return True
+    
+    def move_video(self, video_id, action):
+        logging.debug("move_video: %s %s", video_id, action)
+        
+        self.get_from_es()
+        
+        video_index = self.get_video_index(video_id)
+        
+        logging.debug("video index %s", video_index)
+          
+        playlist = self.json_data["playlist_entries"]
+        item = playlist[video_index]
+        playlist.pop(video_index)
+        
+        if action != "remove":
+            if action == "up":
+                video_index = max(0,video_index-1)
+            elif action == "down":
+                video_index = min(len(playlist),video_index+1)
+            elif action == "top":
+                video_index = 0
+            else:
+                video_index = len(playlist)
+            
+            playlist.insert(video_index, item)
+        
+        self.json_data["playlist_last_refresh"] = int(datetime.now().timestamp())
+        self.upload_to_es()
+            
+        return True
+    
+    def get_video_index(self, video_id):
+        for i,child in enumerate(self.json_data["playlist_entries"]):
+            if child["youtube_id"] == video_id:
+                return i
+        return -1
+            
+    def playlist_entries_contains(self, video_id):
+         return len(list(filter(lambda x:x["youtube_id"]==video_id, self.json_data["playlist_entries"] ))) > 0
+        
+    def get_video_metadata(self, video_id):
+        video = YoutubeVideo(video_id)
+        video.get_from_es()
+        return video.json_data
+    
     def update_playlist(self):
         """update metadata for playlist with data from YouTube"""
         self.get_from_es()

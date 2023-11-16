@@ -903,6 +903,86 @@ class CustomPlaylistView(ArchivistResultsView):
         sleep(1)
         return redirect("custom_playlist")
 
+class CustomPlaylistIdView(ArchivistResultsView):
+    """resolves to /custom_playlist/<playlist_id>
+    show all videos in a custom playlist
+    """
+
+    view_origin = "home"
+    es_search = "ta_video/_search"
+
+    def get(self, request, playlist_id):
+        """handle get request"""
+        self.initiate_vars(request)
+        playlist_info = self._get_info(playlist_id)
+        playlist_name = playlist_info["playlist_name"]
+        #self._update_view_data(playlist_id)
+        #self.find_results()
+        #self.match_progress()
+        #reindex = ReindexProgress(
+        #    request_type="custom_playlist", request_id=playlist_id
+        #).get_progress()
+
+        self.context.update(
+            {
+                "title": "Playlist: " + playlist_name,
+                "playlist_info": playlist_info,
+                "playlist_name": playlist_name,
+                #"channel_info": channel_info,
+                #"reindex": reindex.get("state"),
+            }
+        )
+        return render(request, "home/custom_playlist_id.html", self.context)
+
+    def _get_info(self, playlist_id):
+        """return additional metadata"""
+        # playlist details
+        es_path = f"ta_custom_playlist/_doc/{playlist_id}"
+        playlist_info = self.single_lookup(es_path)
+
+        # channel details
+        #channel_id = playlist_info["playlist_channel_id"]
+        #es_path = f"ta_channel/_doc/{channel_id}"
+        #channel_info = self.single_lookup(es_path)
+
+        return playlist_info
+    
+    def _update_view_data(self, playlist_id):
+        """update view specific data dict"""
+        sort = {
+            i["youtube_id"]: i["idx"]
+            for i in playlist_info["playlist_entries"]
+        }
+        script = (
+            "if(params.scores.containsKey(doc['youtube_id'].value)) "
+            + "{return params.scores[doc['youtube_id'].value];} "
+            + "return 100000;"
+        )
+        self.data.update(
+            {
+                "query": {
+                    "bool": {
+                        "must": [{"match": {"playlist.keyword": playlist_id}}]
+                    }
+                },
+                "sort": [
+                    {
+                        "_script": {
+                            "type": "number",
+                            "script": {
+                                "lang": "painless",
+                                "source": script,
+                                "params": {"scores": sort},
+                            },
+                            "order": "asc",
+                        }
+                    }
+                ],
+            }
+        )
+        if self.context["hide_watched"]:
+            to_append = {"term": {"player.watched": {"value": False}}}
+            self.data["query"]["bool"]["must"].append(to_append)
 
 class VideoView(MinView):
     """resolves to /video/<video-id>/

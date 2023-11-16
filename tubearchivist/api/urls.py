@@ -71,7 +71,12 @@ urlpatterns = [
         views.PlaylistApiVideoView.as_view(),
         name="api-playlist-video",
     ),
-     path(
+    path(
+        "custom-playlist/",
+        views.CustomPlaylistApiListView.as_view(),
+        name="api-custom-playlist-list",
+    ),
+    path(
         "custom-playlist/<slug:playlist_id>/",
         views.CustomPlaylistApiView.as_view(),
         name="api-custom-playlist",

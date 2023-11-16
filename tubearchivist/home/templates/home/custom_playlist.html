@@ -35,12 +35,12 @@
             {% for playlist in results %}
             <div class="playlist-item {{ view_style }}">
                 <div class="playlist-thumbnail">
-                    <a href="{% url 'playlist_id' playlist.playlist_id %}">
+                    <a href="{% url 'custom_playlist_id' playlist.playlist_id %}">
                         <img src="/cache/custom_playlists/{{ playlist.playlist_id }}.jpg" alt="{{ playlist.playlist_id }}-thumbnail">
                     </a>
                 </div>
                 <div class="playlist-desc {{ view_style }}">
-                    <a href="{% url 'playlist_id' playlist.playlist_id %}"><h2>{{ playlist.playlist_name }}</h2></a>
+                    <a href="{% url 'custom_playlist_id' playlist.playlist_id %}"><h2>{{ playlist.playlist_name }}</h2></a>
                     <p>Last updated: {{ playlist.playlist_last_refresh }}</p>
                     <button type="button" data-id="{{ playlist.playlist_id }}" onclick="deleteCustomPlaylist(this)" title="Remove {{ playlist.playlist_name }}">Remove</button>
                 </div>

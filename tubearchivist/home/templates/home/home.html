@@ -33,9 +33,12 @@
                             {% endif %}
                             <span>{{ video.published }} | {{ video.player.duration_str }}</span>
                         </div>
-                        <div>
-                            <a href="{% url 'channel_id' video.channel.channel_id %}"><h3>{{ video.channel.channel_name }}</h3></a>
-                            <a class="video-more" href="{% url 'video' video.youtube_id %}"><h2>{{ video.title }}</h2></a>
+                        <div class="video-desc-details">
+	                        <div>
+	                            <a href="{% url 'channel_id' video.channel.channel_id %}"><h3>{{ video.channel.channel_name }}</h3></a>
+	                            <a class="video-more" href="{% url 'video' video.youtube_id %}"><h2>{{ video.title }}</h2></a>
+	                        </div>
+	                        <img id="{{ video.youtube_id }}-button1" src="{% static 'img/icon-dot-menu.svg' %}" alt="dot-menu-icon" data-id="{{ video.youtube_id }}" data-context="video" onclick="showDotMenu(this)" class="dot-button" title="More actions">
                         </div>
                     </div>
                 </div>
@@ -119,10 +122,13 @@
                             {% endif %}
                             <span>{{ video.published }} | {{ video.player.duration_str }}</span>
                         </div>
-                        <div>
-                            <a href="{% url 'channel_id' video.channel.channel_id %}"><h3>{{ video.channel.channel_name }}</h3></a>
-                            <a class="video-more" href="{% url 'video' video.youtube_id %}"><h2>{{ video.title }}</h2></a>
-                        </div>
+                        <div class="video-desc-details">
+                            <div>
+	                            <a href="{% url 'channel_id' video.channel.channel_id %}"><h3>{{ video.channel.channel_name }}</h3></a>
+	                            <a class="video-more" href="{% url 'video' video.youtube_id %}"><h2>{{ video.title }}</h2></a>
+                        	</div>
+                        	<img id="{{ video.youtube_id }}-button2" src="{% static 'img/icon-dot-menu.svg' %}" alt="dot-menu-icon" data-id="{{ video.youtube_id }}" data-context="video" onclick="showDotMenu(this)" class="dot-button" title="More actions">
+                        </div>       
                     </div>
                 </div>
             {% endfor %}

@@ -367,6 +367,13 @@ button:hover {
     filter: var(--img-filter);
 }
 
+.video-popup-menu {
+    border-top: 2px solid;
+    border-color: var(--accent-font-dark);
+    margin: 5px 0;
+    padding-top: 10px;
+}
+
 #hidden-form {
     display: none;
 }
@@ -560,6 +567,18 @@ video:-webkit-full-screen {
     margin-right: 10px;
 }
 
+.video-popup-menu img {
+	width: 12px;
+	cursor: pointer;
+    filter: var(--img-filter);
+}
+
+.video-popup-menu img.move-video-button {
+	width: 24px;
+	cursor: pointer;
+    filter: var(--img-filter);
+}
+
 .video-desc a {
     text-decoration: none;
     text-align: left;
@@ -588,10 +607,22 @@ video:-webkit-full-screen {
     align-items: center;
 }
 
+.video-desc-details {
+	display: flex;
+	justify-content: space-between;
+}
+
 .watch-button,
+.dot-button,
 .close-button {
     cursor: pointer;
     filter: var(--img-filter);
+}
+
+.video-popup-menu-close-button {
+	cursor: pointer;
+    filter: var(--img-filter);
+    float:right;
 }
 
 .video-more {

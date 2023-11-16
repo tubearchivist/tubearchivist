@@ -42,6 +42,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
 
 
 def check_admin(user):
@@ -522,6 +523,22 @@ class PlaylistApiView(ApiBaseView):
 
         return Response({"success": True})
 
+class CustomPlaylistApiListView(ApiBaseView):
+    """resolves to /api/custom-playlist/
+    GET: returns list of indexed custom playlists
+    """
+
+    search_base = "ta_custom_playlist/_search/"
+    permission_classes = [AdminWriteOnly]
+
+    def get(self, request):
+        """handle get request"""
+        self.data.update(
+            {"sort": [{"playlist_name.keyword": {"order": "asc"}}]}
+        )
+        self.get_document_list(request, False)
+        return Response(self.response)
+
 class CustomPlaylistApiView(ApiBaseView):
     """resolves to /api/custom-playlist/<playlist_id>/
     GET: returns metadata dict of custom playlist
@@ -535,6 +552,17 @@ class CustomPlaylistApiView(ApiBaseView):
         """get request"""
         self.get_document(playlist_id)
         return Response(self.response, status=self.status_code)
+    
+    def post(self, request, playlist_id):
+        """post to custom playlist to add a video to list"""
+        action = request.data.get("action")
+        video_id = request.data.get("video_id")
+        if action == "create":
+            CustomPlaylist(playlist_id).add_video_to_playlist(video_id)
+        else:
+            CustomPlaylist(playlist_id).move_video(video_id, action)
+        return Response({"success": True}, status=status.HTTP_201_CREATED)
+    
 
     def delete(self, request, playlist_id):
         """delete custom playlist"""

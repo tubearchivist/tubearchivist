@@ -197,6 +197,113 @@ function addToQueue(autostart = false) {
   showForm();
 }
 
+//shows the video sub menu popup
+function showDotMenu(input1) {
+  let dataId, dataContext, playlists, form_code, buttonId;
+  dataId = input1.getAttribute('data-id');
+  buttonId = input1.getAttribute('id');
+  dataContext = input1.getAttribute('data-context');
+  playlists = getCustomPlaylists();
+  
+  //hide the invoking button
+  input1.style.visibility = "hidden";
+  
+  //show the form
+  form_code = '<div class="video-popup-menu"><img src="/static/img/icon-close.svg" class="video-popup-menu-close-button" title="Close menu" onclick="removeDotMenu(this, \''+buttonId+'\')"/><h3>Save video to...</h3>';
+  
+  for(let i = 0; i < playlists.length; i++) {
+    	let obj = playlists[i];
+	    form_code += '<p onclick="addToCustomPlaylist(this, \''+dataId+'\',\''+obj.playlist_id+'\')"><img class="p-button" src="/static/img/icon-unseen.svg"/>'+obj.playlist_name+'</p>';
+  }
+  
+  form_code += '<p><a href="/custom_playlist">Create playlist</a></p></div>';
+  input1.parentNode.parentNode.innerHTML += form_code;
+}
+
+//handles user action of adding a video to a custom playlist
+function addToCustomPlaylist(input, video_id, playlist_id) {
+  let apiEndpoint = '/api/custom-playlist/' + playlist_id + '/';
+  let data = { "action": "create", "video_id": video_id };
+  apiRequest(apiEndpoint, 'POST', data);
+  
+  //mark the item added in the ui
+  input.firstChild.src='/static/img/icon-seen.svg';
+}
+
+function removeDotMenu(input1, button_id) {
+
+  //show the menu button
+  document.getElementById(button_id).style.visibility = "visible";
+  
+  //remove the form
+  input1.parentNode.remove();
+}
+
+//shows the video sub menu popup on custom playlist page
+function showDotMenuCustomPlaylist(input1, playlist_id) {
+  let dataId, dataContext, form_code, buttonId;
+  dataId = input1.getAttribute('data-id');
+  buttonId = input1.getAttribute('id');
+  dataContext = input1.getAttribute('data-context');
+  
+  //hide the invoking button
+  input1.style.visibility = "hidden";
+  
+  //show the form
+  form_code = '<div class="video-popup-menu"><img src="/static/img/icon-close.svg" class="video-popup-menu-close-button" title="Close menu" onclick="removeDotMenu(this, \''+buttonId+'\')"/><h3>Move Video</h3>';
+  
+  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="top" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\')" src="/static/img/icon-arrow-top.svg" title="Move to top"/>';
+  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="up" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\')" src="/static/img/icon-arrow-up.svg" title="Move up"/>';
+  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="down" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\')" src="/static/img/icon-arrow-down.svg" title="Move down"/>';
+  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="bottom" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\')" src="/static/img/icon-arrow-bottom.svg" title="Move to bottom"/>';
+  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="remove" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\')" src="/static/img/icon-remove.svg" title="Remove from playlist"/>';
+ 
+  
+  form_code += '</div>';
+  input1.parentNode.parentNode.innerHTML += form_code;
+}
+
+//process custom playlist form actions
+function moveCustomPlaylistVideo(input1, playlist_id) {
+  let dataId, dataContext;
+  dataId = input1.getAttribute('data-id');
+  dataContext = input1.getAttribute('data-context');
+  
+  let apiEndpoint = '/api/custom-playlist/' + playlist_id + '/';
+  let data = { "action": dataContext, "video_id": dataId };
+  apiRequest(apiEndpoint, 'POST', data);
+  
+  let itemDom = input1.parentElement.parentElement.parentElement;
+  let listDom = itemDom.parentElement;
+  
+  if (dataContext == "up")
+  {
+     let sibling = itemDom.previousElementSibling;
+     if (sibling != null)
+        sibling.before(itemDom);
+  }
+  else if (dataContext == "down")
+  {
+     let sibling = itemDom.nextElementSibling;
+     if (sibling != null)
+        sibling.after(itemDom);
+  }
+  else if (dataContext == "top")
+  {
+     let sibling = listDom.firstElementChild;
+     if (sibling != null)
+        sibling.before(itemDom);
+  }
+  else if (dataContext == "bottom")
+  {
+     let sibling = listDom.lastElementChild;
+     if (sibling != null)
+        sibling.after(itemDom);
+  }
+  else if (dataContext == "remove")
+     itemDom.remove();
+}
+
 function toIgnore(button) {
   let youtube_id = button.getAttribute('data-id');
   let apiEndpoint = '/api/download/' + youtube_id + '/';
@@ -780,6 +887,13 @@ function getPlaylistData(playlistId) {
   return playlistData.data;
 }
 
+// Gets custom playlists
+function getCustomPlaylists() {
+  let apiEndpoint = '/api/custom-playlist';
+  let playlistData = apiRequest(apiEndpoint, 'GET');
+  return playlistData.data;
+}
+
 // Get video progress data when passed video ID
 function getVideoProgress(videoId) {
   let apiEndpoint = '/api/video/' + videoId + '/progress/';
@@ -870,6 +984,7 @@ function apiRequest(apiEndpoint, method, data) {
   if (xhttp.status === 404) {
     return false;
   } else {
+    console.log("apiRequest("+apiEndpoint+"): " + xhttp.responseText);
     return JSON.parse(xhttp.responseText);
   }
 }

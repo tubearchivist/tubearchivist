@@ -57,6 +57,9 @@ RUN if [ "$INSTALL_DEBUG" ] ; then \
         && pip install --user ipython \
     ; fi
 
+#install additional python modules
+RUN python -m pip install numpy
+
 # make folders
 RUN mkdir /cache /youtube /app
 
