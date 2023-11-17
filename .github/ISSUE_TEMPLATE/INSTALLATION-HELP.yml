@@ -38,6 +38,6 @@ body:
     attributes:
       label: Relevant log output
       description: Please copy and paste any relevant Docker logs. This will be automatically formatted into code, so no need for backticks.
-      render: shell
+      render: Shell
     validations:
       required: true
