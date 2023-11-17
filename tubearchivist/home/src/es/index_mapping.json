@@ -252,6 +252,24 @@
                         }
                     }
                 },
+                "player": {
+                    "properties": {
+                        "duration": {
+                            "type": "long"
+                        },
+                        "duration_str": {
+                            "type": "keyword",
+                            "index": false
+                        },
+                        "watched": {
+                            "type": "boolean"
+                        },
+                        "watched_date": {
+                            "type": "date",
+                            "format": "epoch_second"
+                        }
+                    }
+                },
                 "subtitles": {
                     "properties": {
                         "ext": {
