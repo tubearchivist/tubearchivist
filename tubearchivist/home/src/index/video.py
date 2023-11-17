@@ -188,11 +188,11 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         # build json_data basics
         self.json_data = {
             "title": self.youtube_meta["title"],
-            "description": self.youtube_meta["description"],
-            "category": self.youtube_meta["categories"],
+            "description": self.youtube_meta.get("description", ""),
+            "category": self.youtube_meta.get("categories", []),
             "vid_thumb_url": self.youtube_meta["thumbnail"],
             "vid_thumb_base64": base64_blur,
-            "tags": self.youtube_meta["tags"],
+            "tags": self.youtube_meta.get("tags", []),
             "published": published,
             "vid_last_refresh": last_refresh,
             "date_downloaded": last_refresh,
