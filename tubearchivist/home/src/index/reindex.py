@@ -123,7 +123,7 @@ class ReindexPopulate(ReindexBase):
         """get outdated from index_name"""
         index_name = reindex_config["index_name"]
         refresh_key = reindex_config["refresh_key"]
-        now_lte = self.now - self.interval * 24 * 60 * 60
+        now_lte = str(self.now - self.interval * 24 * 60 * 60)
         must_list = [
             {"match": {reindex_config["active_key"]: True}},
             {"range": {refresh_key: {"lte": now_lte}}},
