@@ -195,6 +195,36 @@ class Playlist(AggBase):
         return response
 
 
+class Download(AggBase):
+    """get downloads queue stats"""
+
+    name = "download_queue_stats"
+    path = "ta_download/_search"
+    data = {
+        "size": 0,
+        "aggs": {
+            "status": {"terms": {"field": "status"}},
+            "video_type": {
+                "filter": {"term": {"status": "pending"}},
+                "aggs": {"type_pending": {"terms": {"field": "vid_type"}}},
+            },
+        },
+    }
+
+    def process(self):
+        """process aggregation"""
+        aggregations = self.get()
+        response = {}
+        for bucket in aggregations["status"]["buckets"]:
+            response.update({bucket["key"]: bucket.get("doc_count")})
+
+        for bucket in aggregations["video_type"]["type_pending"]["buckets"]:
+            key = f"pending_{bucket['key']}"
+            response.update({key: bucket.get("doc_count")})
+
+        return response
+
+
 class WatchProgress(AggBase):
     """get watch progress"""
 

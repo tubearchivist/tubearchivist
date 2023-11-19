@@ -167,6 +167,11 @@ urlpatterns = [
         name="api-stats-playlist",
     ),
     path(
+        "stats/download/",
+        views.StatDownloadView.as_view(),
+        name="api-stats-download",
+    ),
+    path(
         "stats/watch/",
         views.StatWatchProgress.as_view(),
         name="api-stats-watch",

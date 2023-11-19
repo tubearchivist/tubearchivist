@@ -3,6 +3,7 @@
 from api.src.aggs import (
     BiggestChannel,
     Channel,
+    Download,
     DownloadHist,
     Playlist,
     Video,
@@ -1182,6 +1183,18 @@ class StatPlaylistView(ApiBaseView):
         # pylint: disable=unused-argument
 
         return Response(Playlist().process())
+
+
+class StatDownloadView(ApiBaseView):
+    """resolves to /api/stats/download/
+    GET: return download stats
+    """
+
+    def get(self, request):
+        """get stats"""
+        # pylint: disable=unused-argument
+
+        return Response(Download().process())
 
 
 class StatWatchProgress(ApiBaseView):
