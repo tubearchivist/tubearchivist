@@ -34,14 +34,21 @@ class Video(AggBase):
         "aggs": {
             "video_type": {
                 "terms": {"field": "vid_type"},
-                "aggs": {"media_size": {"sum": {"field": "media_size"}}},
+                "aggs": {
+                    "media_size": {"sum": {"field": "media_size"}},
+                    "duration": {"sum": {"field": "player.duration"}},
+                },
             },
             "video_active": {
                 "terms": {"field": "active"},
-                "aggs": {"media_size": {"sum": {"field": "media_size"}}},
+                "aggs": {
+                    "media_size": {"sum": {"field": "media_size"}},
+                    "duration": {"sum": {"field": "player.duration"}},
+                },
             },
             "video_media_size": {"sum": {"field": "media_size"}},
             "video_count": {"value_count": {"field": "youtube_id"}},
+            "duration": {"sum": {"field": "player.duration"}},
         },
     }
 
@@ -49,26 +56,35 @@ class Video(AggBase):
         """process aggregation"""
         aggregations = self.get()
 
+        duration = int(aggregations["duration"]["value"])
         response = {
             "doc_count": aggregations["video_count"]["value"],
             "media_size": int(aggregations["video_media_size"]["value"]),
+            "duration": duration,
+            "duration_str": get_duration_str(duration),
         }
         for bucket in aggregations["video_type"]["buckets"]:
+            duration = int(bucket["duration"].get("value"))
             response.update(
                 {
                     f"type_{bucket['key']}": {
                         "doc_count": bucket.get("doc_count"),
                         "media_size": int(bucket["media_size"].get("value")),
+                        "duration": duration,
+                        "duration_str": get_duration_str(duration),
                     }
                 }
             )
 
         for bucket in aggregations["video_active"]["buckets"]:
+            duration = int(bucket["duration"].get("value"))
             response.update(
                 {
                     f"active_{bucket['key_as_string']}": {
                         "doc_count": bucket.get("doc_count"),
                         "media_size": int(bucket["media_size"].get("value")),
+                        "duration": duration,
+                        "duration_str": get_duration_str(duration),
                     }
                 }
             )

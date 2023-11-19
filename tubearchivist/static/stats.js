@@ -8,20 +8,25 @@ function primaryStats() {
   let apiVideoEndpoint = '/api/stats/video/';
   let responseData = apiRequest(apiVideoEndpoint, 'GET');
 
-  let primaryBox = document.getElementById('primaryBox');
-  clearLoading(primaryBox);
+  let activeBox = document.getElementById('activeBox');
+  clearLoading(activeBox);
 
   let totalTile = buildTotalVideoTile(responseData);
-  primaryBox.appendChild(totalTile);
+  activeBox.appendChild(totalTile);
+  let activeTile = buildActiveVideoTile(responseData);
+  activeBox.appendChild(activeTile);
+  let inActiveTile = buildInActiveVideoTile(responseData);
+  activeBox.appendChild(inActiveTile);
+
+  let videoTypeBox = document.getElementById('videoTypeBox');
+  clearLoading(videoTypeBox);
 
   let videosTypeTile = buildVideosTypeTile(responseData);
-  primaryBox.appendChild(videosTypeTile);
-
+  videoTypeBox.appendChild(videosTypeTile);
   let shortsTypeTile = buildShortsTypeTile(responseData);
-  primaryBox.appendChild(shortsTypeTile);
-
+  videoTypeBox.appendChild(shortsTypeTile);
   let streamsTypeTile = buildStreamsTypeTile(responseData);
-  primaryBox.appendChild(streamsTypeTile);
+  videoTypeBox.appendChild(streamsTypeTile);
 }
 
 function secondaryStats() {
@@ -49,8 +54,37 @@ function buildTotalVideoTile(responseData) {
   const content = {
     Items: `${totalCount}`,
     'Media Size': `${totalSize}`,
+    Duration: responseData.duration_str,
   };
   const tile = buildTile('All: ');
+  const table = buildTileContenTable(content, 2);
+  tile.appendChild(table);
+  return tile;
+}
+
+function buildActiveVideoTile(responseData) {
+  const activeCount = responseData.active_true.doc_count || 0;
+  const activeSize = humanFileSize(responseData.active_true.media_size) || 0;
+  const content = {
+    Items: `${activeCount}`,
+    'Media Size': `${activeSize}`,
+    Duration: responseData.active_true.duration_str,
+  };
+  const tile = buildTile('Active: ');
+  const table = buildTileContenTable(content, 2);
+  tile.appendChild(table);
+  return tile;
+}
+
+function buildInActiveVideoTile(responseData) {
+  const inActiveCount = responseData.active_false.doc_count || 0;
+  const inActiveSize = humanFileSize(responseData.active_false.media_size) || 0;
+  const content = {
+    Items: `${inActiveCount}`,
+    'Media Size': `${inActiveSize}`,
+    Duration: responseData.active_false.duration_str,
+  };
+  const tile = buildTile('Inactive: ');
   const table = buildTileContenTable(content, 2);
   tile.appendChild(table);
   return tile;
@@ -62,6 +96,7 @@ function buildVideosTypeTile(responseData) {
   const content = {
     Items: `${videosCount}`,
     'Media Size': `${videosSize}`,
+    Duration: responseData.type_videos.duration_str,
   };
   const tile = buildTile('Regular Videos: ');
   const table = buildTileContenTable(content, 2);
@@ -75,6 +110,7 @@ function buildShortsTypeTile(responseData) {
   const content = {
     Items: `${shortsCount}`,
     'Media Size': `${shortsSize}`,
+    Duration: responseData.type_shorts.duration_str,
   };
   const tile = buildTile('Shorts: ');
   const table = buildTileContenTable(content, 2);
@@ -88,6 +124,7 @@ function buildStreamsTypeTile(responseData) {
   const content = {
     Items: `${streamsCount}`,
     'Media Size': `${streamsSize}`,
+    Duration: responseData.type_streams.duration_str,
   };
   const tile = buildTile('Streams: ');
   const table = buildTileContenTable(content, 2);
@@ -150,16 +187,11 @@ function watchStats() {
   let watchBox = document.getElementById('watchBox');
   clearLoading(watchBox);
 
-  const { total, watched, unwatched } = responseData;
+  let watchedTile = buildWatchTile('watched', responseData.watched);
+  watchBox.appendChild(watchedTile);
 
-  let firstCard = buildWatchTile('total', total);
-  watchBox.appendChild(firstCard);
-
-  let secondCard = buildWatchTile('watched', watched);
-  watchBox.appendChild(secondCard);
-
-  let thirdCard = buildWatchTile('unwatched', unwatched);
-  watchBox.appendChild(thirdCard);
+  let unwatchedTile = buildWatchTile('unwatched', responseData.unwatched);
+  watchBox.appendChild(unwatchedTile);
 }
 
 function buildWatchTile(title, watchDetail) {
@@ -180,7 +212,7 @@ function buildWatchTile(title, watchDetail) {
   const content = {
     Videos: items,
     Seconds: duration,
-    Playback: duration_str,
+    Duration: duration_str,
   };
 
   const table = buildTileContenTable(content, 3);
