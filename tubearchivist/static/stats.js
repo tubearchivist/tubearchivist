@@ -5,158 +5,140 @@
 /* globals apiRequest */
 
 function primaryStats() {
-  let apiEndpoint = '/api/stats/primary/';
-  let responseData = apiRequest(apiEndpoint, 'GET');
-  let primaryBox = document.getElementById('primaryBox');
+  let apiVideoEndpoint = '/api/stats/video/';
+  let responseData = apiRequest(apiVideoEndpoint, 'GET');
 
+  let primaryBox = document.getElementById('primaryBox');
   clearLoading(primaryBox);
 
-  let videoTile = buildVideoTile(responseData);
-  primaryBox.appendChild(videoTile);
+  let totalTile = buildTotalVideoTile(responseData);
+  primaryBox.appendChild(totalTile);
 
-  let channelTile = buildChannelTile(responseData);
-  primaryBox.appendChild(channelTile);
+  let videosTypeTile = buildVideosTypeTile(responseData);
+  primaryBox.appendChild(videosTypeTile);
 
-  let playlistTile = buildPlaylistTile(responseData);
-  primaryBox.appendChild(playlistTile);
+  let shortsTypeTile = buildShortsTypeTile(responseData);
+  primaryBox.appendChild(shortsTypeTile);
 
-  let downloadTile = buildDownloadTile(responseData);
-  primaryBox.appendChild(downloadTile);
+  let streamsTypeTile = buildStreamsTypeTile(responseData);
+  primaryBox.appendChild(streamsTypeTile);
 }
 
-function clearLoading(dashBox) {
-  dashBox.querySelector('#loading').remove();
+function secondaryStats() {
+  let apiChannelEndpoint = '/api/stats/channel/';
+  let channelResponseData = apiRequest(apiChannelEndpoint, 'GET');
+  let secondaryBox = document.getElementById('secondaryBox');
+  clearLoading(secondaryBox);
+  let channelTile = buildChannelTile(channelResponseData);
+  secondaryBox.appendChild(channelTile);
+
+  let apiPlaylistEndpoint = '/api/stats/playlist/';
+  let playlistResponseData = apiRequest(apiPlaylistEndpoint, 'GET');
+  let playlistTile = buildPlaylistTile(playlistResponseData);
+  secondaryBox.appendChild(playlistTile);
+
+  let apiDownloadEndpoint = '/api/stats/download/';
+  let downloadResponseData = apiRequest(apiDownloadEndpoint, 'GET');
+  let downloadTile = buildDownloadTile(downloadResponseData);
+  secondaryBox.appendChild(downloadTile);
 }
 
-function buildTile(titleText) {
-  let tile = document.createElement('div');
-  tile.classList.add('info-box-item');
-
-  let title = document.createElement('h3');
-
-  title.innerText = titleText;
-  tile.appendChild(title);
-
+function buildTotalVideoTile(responseData) {
+  const totalCount = responseData.doc_count || 0;
+  const totalSize = humanFileSize(responseData.media_size || 0);
+  const content = {
+    Items: `${totalCount}`,
+    'Media Size': `${totalSize}`,
+  };
+  const tile = buildTile('All: ');
+  const table = buildTileContenTable(content, 2);
+  tile.appendChild(table);
   return tile;
 }
 
-function buildTileContenTable(content, rowsWanted) {
-  let contentEntries = Object.entries(content);
-
-  const nbsp = '\u00A0'; // No-Break Space https://www.compart.com/en/unicode/U+00A0
-
-  // Do not add spacing rows when on mobile device
-  const isMobile = window.matchMedia('(max-width: 600px)');
-  if (!isMobile.matches) {
-    if (contentEntries.length < rowsWanted) {
-      const rowsToAdd = rowsWanted - contentEntries.length;
-
-      for (let i = 0; i < rowsToAdd; i++) {
-        contentEntries.push([nbsp, nbsp]);
-      }
-    }
-  }
-
-  const table = document.createElement('table');
-  table.classList.add('agg-channel-table');
-  const tableBody = document.createElement('tbody');
-
-  for (const [key, value] of contentEntries) {
-    const row = document.createElement('tr');
-
-    const leftCell = document.createElement('td');
-    leftCell.classList.add('agg-channel-name');
-
-    // Do not add ":" when its a spacing entry
-    const keyText = key === nbsp ? key : `${key}: `;
-    const leftText = document.createTextNode(keyText);
-    leftCell.appendChild(leftText);
-
-    const rightCell = document.createElement('td');
-    rightCell.classList.add('agg-channel-right-align');
-
-    const rightText = document.createTextNode(value);
-    rightCell.appendChild(rightText);
-
-    row.appendChild(leftCell);
-    row.appendChild(rightCell);
-
-    tableBody.appendChild(row);
-  }
-
-  table.appendChild(tableBody);
-
-  return table;
+function buildVideosTypeTile(responseData) {
+  const videosCount = responseData.type_videos.doc_count || 0;
+  const videosSize = humanFileSize(responseData.type_videos.media_size || 0);
+  const content = {
+    Items: `${videosCount}`,
+    'Media Size': `${videosSize}`,
+  };
+  const tile = buildTile('Regular Videos: ');
+  const table = buildTileContenTable(content, 2);
+  tile.appendChild(table);
+  return tile;
 }
 
-function buildVideoTile(responseData) {
-  let tile = buildTile(`Video types: `);
-
-  const total = responseData.videos.total || 0;
-  const videos = responseData.videos.videos || 0;
-  const shorts = responseData.videos.shorts || 0;
-  const streams = responseData.videos.streams || 0;
-
+function buildShortsTypeTile(responseData) {
+  const shortsCount = responseData.type_shorts.doc_count || 0;
+  const shortsSize = humanFileSize(responseData.type_shorts.media_size || 0);
   const content = {
-    Videos: `${videos}/${total}`,
-    Shorts: `${shorts}/${total}`,
-    Streams: `${streams}/${total}`,
+    Items: `${shortsCount}`,
+    'Media Size': `${shortsSize}`,
   };
-
-  const table = buildTileContenTable(content, 3);
-
+  const tile = buildTile('Shorts: ');
+  const table = buildTileContenTable(content, 2);
   tile.appendChild(table);
+  return tile;
+}
 
+function buildStreamsTypeTile(responseData) {
+  const streamsCount = responseData.type_streams.doc_count || 0;
+  const streamsSize = humanFileSize(responseData.type_streams.media_size || 0);
+  const content = {
+    Items: `${streamsCount}`,
+    'Media Size': `${streamsSize}`,
+  };
+  const tile = buildTile('Streams: ');
+  const table = buildTileContenTable(content, 2);
+  tile.appendChild(table);
   return tile;
 }
 
 function buildChannelTile(responseData) {
-  let tile = buildTile(`Channels: `);
-
-  const total = responseData.channels.total || 0;
-  const subscribed = responseData.channels.sub_true || 0;
-
+  let tile = buildTile('Channels: ');
+  const total = responseData.doc_count || 0;
+  const subscribed = responseData.subscribed_true || 0;
+  const active = responseData.active_true || 0;
   const content = {
-    Subscribed: `${subscribed}/${total}`,
+    Subscribed: subscribed,
+    Active: active,
+    Total: total,
   };
-
   const table = buildTileContenTable(content, 3);
-
   tile.appendChild(table);
 
   return tile;
 }
 
 function buildPlaylistTile(responseData) {
-  let tile = buildTile(`Playlists:`);
-
-  const total = responseData.playlists.total || 0;
-  const subscribed = responseData.playlists.sub_true || 0;
-
+  let tile = buildTile('Playlists: ');
+  const total = responseData.doc_count || 0;
+  const subscribed = responseData.subscribed_true || 0;
+  const active = responseData.active_true || 0;
   const content = {
-    Subscribed: `${subscribed}/${total}`,
+    Subscribed: subscribed,
+    Active: active,
+    Total: total,
   };
-
-  const table = buildTileContenTable(content, 3);
-
+  const table = buildTileContenTable(content, 2);
   tile.appendChild(table);
 
   return tile;
 }
 
 function buildDownloadTile(responseData) {
-  let tile = buildTile('Downloads');
-
-  const pending = responseData.downloads.pending || 0;
-  const ignored = responseData.downloads.ignore || 0;
-
+  const pendingTotal = responseData.pending || 0;
+  let tile = buildTile(`Downloads Pending: ${pendingTotal}`);
+  const pendingVideos = responseData.pending_videos || 0;
+  const pendingShorts = responseData.pending_shorts || 0;
+  const pendingStreams = responseData.pending_streams || 0;
   const content = {
-    Pending: pending,
-    Ignored: ignored,
+    Videos: pendingVideos,
+    Shorts: pendingShorts,
+    Streams: pendingStreams,
   };
-
   const table = buildTileContenTable(content, 3);
-
   tile.appendChild(table);
 
   return tile;
@@ -178,11 +160,6 @@ function watchStats() {
 
   let thirdCard = buildWatchTile('unwatched', unwatched);
   watchBox.appendChild(thirdCard);
-}
-
-function capitalizeFirstLetter(string) {
-  // source: https://stackoverflow.com/a/1026087
-  return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 function buildWatchTile(title, watchDetail) {
@@ -248,11 +225,6 @@ function buildDailyStat(dailyStat) {
   return tile;
 }
 
-function humanFileSize(size) {
-  let i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
-  return (size / Math.pow(1024, i)).toFixed(1) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
-}
-
 function buildChannelRow(id, name, value) {
   let tableRow = document.createElement('tr');
 
@@ -309,6 +281,81 @@ function addBiggestChannelByMediaSize() {
   }
 }
 
+function clearLoading(dashBox) {
+  dashBox.querySelector('#loading').remove();
+}
+
+function capitalizeFirstLetter(string) {
+  // source: https://stackoverflow.com/a/1026087
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function humanFileSize(size) {
+  let i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+  return (size / Math.pow(1024, i)).toFixed(1) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+}
+
+function buildTile(titleText) {
+  let tile = document.createElement('div');
+  tile.classList.add('info-box-item');
+
+  let title = document.createElement('h3');
+
+  title.innerText = titleText;
+  tile.appendChild(title);
+
+  return tile;
+}
+
+function buildTileContenTable(content, rowsWanted) {
+  let contentEntries = Object.entries(content);
+
+  const nbsp = '\u00A0'; // No-Break Space https://www.compart.com/en/unicode/U+00A0
+
+  // Do not add spacing rows when on mobile device
+  const isMobile = window.matchMedia('(max-width: 600px)');
+  if (!isMobile.matches) {
+    if (contentEntries.length < rowsWanted) {
+      const rowsToAdd = rowsWanted - contentEntries.length;
+
+      for (let i = 0; i < rowsToAdd; i++) {
+        contentEntries.push([nbsp, nbsp]);
+      }
+    }
+  }
+
+  const table = document.createElement('table');
+  table.classList.add('agg-channel-table');
+  const tableBody = document.createElement('tbody');
+
+  for (const [key, value] of contentEntries) {
+    const row = document.createElement('tr');
+
+    const leftCell = document.createElement('td');
+    leftCell.classList.add('agg-channel-name');
+
+    // Do not add ":" when its a spacing entry
+    const keyText = key === nbsp ? key : `${key}: `;
+    const leftText = document.createTextNode(keyText);
+    leftCell.appendChild(leftText);
+
+    const rightCell = document.createElement('td');
+    rightCell.classList.add('agg-channel-right-align');
+
+    const rightText = document.createTextNode(value);
+    rightCell.appendChild(rightText);
+
+    row.appendChild(leftCell);
+    row.appendChild(rightCell);
+
+    tableBody.appendChild(row);
+  }
+
+  table.appendChild(tableBody);
+
+  return table;
+}
+
 function biggestChannel() {
   addBiggestChannelByDocCount();
   addBiggestChannelByDuration();
@@ -317,6 +364,7 @@ function biggestChannel() {
 
 async function buildStats() {
   primaryStats();
+  secondaryStats();
   watchStats();
   downloadHist();
   biggestChannel();
