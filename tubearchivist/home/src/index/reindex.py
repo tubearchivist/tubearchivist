@@ -105,11 +105,13 @@ class ReindexPopulate(ReindexBase):
         """get total hits from index"""
         index_name = reindex_config["index_name"]
         active_key = reindex_config["active_key"]
-        path = f"{index_name}/_search?filter_path=hits.total"
-        data = {"query": {"match": {active_key: True}}}
-        response, _ = ElasticWrap(path).post(data=data)
-        total_hits = response["hits"]["total"]["value"]
-        return total_hits
+        data = {
+            "query": {"term": {active_key: {"value": True}}},
+            "_source": False,
+        }
+        total = IndexPaginate(index_name, data, keep_source=True).get_results()
+
+        return len(total)
 
     def _get_daily_should(self, total_hits):
         """calc how many should reindex daily"""
@@ -123,7 +125,7 @@ class ReindexPopulate(ReindexBase):
         """get outdated from index_name"""
         index_name = reindex_config["index_name"]
         refresh_key = reindex_config["refresh_key"]
-        now_lte = self.now - self.interval * 24 * 60 * 60
+        now_lte = str(self.now - self.interval * 24 * 60 * 60)
         must_list = [
             {"match": {reindex_config["active_key"]: True}},
             {"range": {refresh_key: {"lte": now_lte}}},

@@ -1,8 +1,8 @@
 apprise==1.6.0
-celery==5.3.4
+celery==5.3.5
 Django==4.2.7
 django-auth-ldap==4.6.0
-django-cors-headers==4.3.0
+django-cors-headers==4.3.1
 djangorestframework==3.14.0
 Pillow==10.1.0
 redis==5.0.1
@@ -10,4 +10,4 @@ requests==2.31.0
 ryd-client==0.0.6
 uWSGI==2.0.23
 whitenoise==6.6.0
-yt-dlp==2023.10.13
+yt-dlp==2023.11.16
