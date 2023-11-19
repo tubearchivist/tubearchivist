@@ -84,6 +84,58 @@ class Primary(AggBase):
         return response
 
 
+class Video(AggBase):
+    """get video stats"""
+
+    name = "video_stats"
+    path = "ta_video/_search"
+    data = {
+        "size": 0,
+        "aggs": {
+            "video_type": {
+                "terms": {"field": "vid_type"},
+                "aggs": {"media_size": {"sum": {"field": "media_size"}}},
+            },
+            "video_active": {
+                "terms": {"field": "active"},
+                "aggs": {"media_size": {"sum": {"field": "media_size"}}},
+            },
+            "video_media_size": {"sum": {"field": "media_size"}},
+            "video_count": {"value_count": {"field": "youtube_id"}},
+        },
+    }
+
+    def process(self):
+        """process aggregation"""
+        aggregations = self.get()
+
+        response = {
+            "doc_count": aggregations["video_count"]["value"],
+            "media_size": int(aggregations["video_media_size"]["value"]),
+        }
+        for bucket in aggregations["video_type"]["buckets"]:
+            response.update(
+                {
+                    f"type_{bucket['key']}": {
+                        "doc_count": bucket.get("doc_count"),
+                        "media_size": int(bucket["media_size"].get("value")),
+                    }
+                }
+            )
+
+        for bucket in aggregations["video_active"]["buckets"]:
+            response.update(
+                {
+                    f"active_{bucket['key_as_string']}": {
+                        "doc_count": bucket.get("doc_count"),
+                        "media_size": int(bucket["media_size"].get("value")),
+                    }
+                }
+            )
+
+        return response
+
+
 class WatchProgress(AggBase):
     """get watch progress"""
 

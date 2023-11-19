@@ -1,6 +1,6 @@
 """all API views"""
 
-from api.src.aggs import BiggestChannel, DownloadHist, Primary, WatchProgress
+from api.src.aggs import BiggestChannel, DownloadHist, Video, WatchProgress
 from api.src.search_processor import SearchProcess
 from home.src.download.queue import PendingInteract
 from home.src.download.subscriptions import (
@@ -1141,16 +1141,16 @@ class NotificationView(ApiBaseView):
         return Response(RedisArchivist().list_items(query))
 
 
-class StatPrimaryView(ApiBaseView):
-    """resolves to /api/stats/primary/
-    GET: return document count
+class StatVideoView(ApiBaseView):
+    """resolves to /api/stats/video/
+    GET: return video stats
     """
 
     def get(self, request):
         """get stats"""
         # pylint: disable=unused-argument
 
-        return Response(Primary().process())
+        return Response(Video().process())
 
 
 class StatWatchProgress(ApiBaseView):

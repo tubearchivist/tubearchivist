@@ -152,9 +152,9 @@ urlpatterns = [
         name="api-notification",
     ),
     path(
-        "stats/primary/",
-        views.StatPrimaryView.as_view(),
-        name="api-stats-primary",
+        "stats/video/",
+        views.StatVideoView.as_view(),
+        name="api-stats-video",
     ),
     path(
         "stats/watch/",
