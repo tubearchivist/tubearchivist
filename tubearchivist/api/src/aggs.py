@@ -136,6 +136,37 @@ class Video(AggBase):
         return response
 
 
+class Channel(AggBase):
+    """get channel stats"""
+
+    name = "channel_stats"
+    path = "ta_channel/_search"
+    data = {
+        "size": 0,
+        "aggs": {
+            "channel_count": {"value_count": {"field": "channel_id"}},
+            "channel_active": {"terms": {"field": "channel_active"}},
+            "channel_subscribed": {"terms": {"field": "channel_subscribed"}},
+        },
+    }
+
+    def process(self):
+        """process aggregation"""
+        aggregations = self.get()
+
+        response = {
+            "doc_count": aggregations["channel_count"].get("value"),
+        }
+        for bucket in aggregations["channel_active"]["buckets"]:
+            key = f"active_{bucket['key_as_string']}"
+            response.update({key: bucket.get("doc_count")})
+        for bucket in aggregations["channel_subscribed"]["buckets"]:
+            key = f"subscribed_{bucket['key_as_string']}"
+            response.update({key: bucket.get("doc_count")})
+
+        return response
+
+
 class WatchProgress(AggBase):
     """get watch progress"""
 

@@ -1,6 +1,12 @@
 """all API views"""
 
-from api.src.aggs import BiggestChannel, DownloadHist, Video, WatchProgress
+from api.src.aggs import (
+    BiggestChannel,
+    Channel,
+    DownloadHist,
+    Video,
+    WatchProgress,
+)
 from api.src.search_processor import SearchProcess
 from home.src.download.queue import PendingInteract
 from home.src.download.subscriptions import (
@@ -1151,6 +1157,18 @@ class StatVideoView(ApiBaseView):
         # pylint: disable=unused-argument
 
         return Response(Video().process())
+
+
+class StatChannelView(ApiBaseView):
+    """resolves to /api/stats/channel/
+    GET: return channel stats
+    """
+
+    def get(self, request):
+        """get stats"""
+        # pylint: disable=unused-argument
+
+        return Response(Channel().process())
 
 
 class StatWatchProgress(ApiBaseView):
