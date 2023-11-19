@@ -24,66 +24,6 @@ class AggBase:
         raise NotImplementedError
 
 
-class Primary(AggBase):
-    """primary aggregation for total documents indexed"""
-
-    name = "primary"
-    path = "ta_video,ta_channel,ta_playlist,ta_subtitle,ta_download/_search"
-    data = {
-        "size": 0,
-        "aggs": {
-            "video_type": {
-                "filter": {"exists": {"field": "active"}},
-                "aggs": {"filtered": {"terms": {"field": "vid_type"}}},
-            },
-            "channel_total": {"value_count": {"field": "channel_active"}},
-            "channel_sub": {"terms": {"field": "channel_subscribed"}},
-            "playlist_total": {"value_count": {"field": "playlist_active"}},
-            "playlist_sub": {"terms": {"field": "playlist_subscribed"}},
-            "download": {"terms": {"field": "status"}},
-        },
-    }
-
-    def process(self):
-        """make the call"""
-        aggregations = self.get()
-
-        videos = {"total": aggregations["video_type"].get("doc_count")}
-        videos.update(
-            {
-                i.get("key"): i.get("doc_count")
-                for i in aggregations["video_type"]["filtered"]["buckets"]
-            }
-        )
-        channels = {"total": aggregations["channel_total"].get("value")}
-        channels.update(
-            {
-                "sub_" + i.get("key_as_string"): i.get("doc_count")
-                for i in aggregations["channel_sub"]["buckets"]
-            }
-        )
-        playlists = {"total": aggregations["playlist_total"].get("value")}
-        playlists.update(
-            {
-                "sub_" + i.get("key_as_string"): i.get("doc_count")
-                for i in aggregations["playlist_sub"]["buckets"]
-            }
-        )
-        downloads = {
-            i.get("key"): i.get("doc_count")
-            for i in aggregations["download"]["buckets"]
-        }
-
-        response = {
-            "videos": videos,
-            "channels": channels,
-            "playlists": playlists,
-            "downloads": downloads,
-        }
-
-        return response
-
-
 class Video(AggBase):
     """get video stats"""
 
