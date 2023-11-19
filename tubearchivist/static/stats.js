@@ -63,12 +63,13 @@ function buildTotalVideoTile(responseData) {
 }
 
 function buildActiveVideoTile(responseData) {
-  const activeCount = responseData.active_true.doc_count || 0;
-  const activeSize = humanFileSize(responseData.active_true.media_size) || 0;
+  const activeCount = responseData?.active_true?.doc_count || 0;
+  const activeSize = humanFileSize(responseData?.active_true?.media_size || 0);
+  const duration = responseData?.active_true?.duration_str || 'NA';
   const content = {
     Items: `${activeCount}`,
     'Media Size': `${activeSize}`,
-    Duration: responseData.active_true.duration_str,
+    Duration: duration,
   };
   const tile = buildTile('Active: ');
   const table = buildTileContenTable(content, 2);
@@ -77,12 +78,13 @@ function buildActiveVideoTile(responseData) {
 }
 
 function buildInActiveVideoTile(responseData) {
-  const inActiveCount = responseData.active_false.doc_count || 0;
-  const inActiveSize = humanFileSize(responseData.active_false.media_size) || 0;
+  const inActiveCount = responseData?.active_false?.doc_count || 0;
+  const inActiveSize = humanFileSize(responseData?.active_false?.media_size || 0);
+  const duration = responseData?.active_false?.duration_str || 'NA';
   const content = {
     Items: `${inActiveCount}`,
     'Media Size': `${inActiveSize}`,
-    Duration: responseData.active_false.duration_str,
+    Duration: duration,
   };
   const tile = buildTile('Inactive: ');
   const table = buildTileContenTable(content, 2);
@@ -91,12 +93,13 @@ function buildInActiveVideoTile(responseData) {
 }
 
 function buildVideosTypeTile(responseData) {
-  const videosCount = responseData.type_videos.doc_count || 0;
-  const videosSize = humanFileSize(responseData.type_videos.media_size || 0);
+  const videosCount = responseData?.type_videos?.doc_count || 0;
+  const videosSize = humanFileSize(responseData?.type_videos?.media_size || 0);
+  const duration = responseData?.type_videos?.duration_str || 'NA';
   const content = {
     Items: `${videosCount}`,
     'Media Size': `${videosSize}`,
-    Duration: responseData.type_videos.duration_str,
+    Duration: duration,
   };
   const tile = buildTile('Regular Videos: ');
   const table = buildTileContenTable(content, 2);
@@ -105,12 +108,13 @@ function buildVideosTypeTile(responseData) {
 }
 
 function buildShortsTypeTile(responseData) {
-  const shortsCount = responseData.type_shorts.doc_count || 0;
-  const shortsSize = humanFileSize(responseData.type_shorts.media_size || 0);
+  const shortsCount = responseData?.type_shorts?.doc_count || 0;
+  const shortsSize = humanFileSize(responseData?.type_shorts?.media_size || 0);
+  const duration = responseData?.type_shorts?.duration_str || 'NA';
   const content = {
     Items: `${shortsCount}`,
     'Media Size': `${shortsSize}`,
-    Duration: responseData.type_shorts.duration_str,
+    Duration: duration,
   };
   const tile = buildTile('Shorts: ');
   const table = buildTileContenTable(content, 2);
@@ -119,12 +123,13 @@ function buildShortsTypeTile(responseData) {
 }
 
 function buildStreamsTypeTile(responseData) {
-  const streamsCount = responseData.type_streams.doc_count || 0;
-  const streamsSize = humanFileSize(responseData.type_streams.media_size || 0);
+  const streamsCount = responseData?.type_streams?.doc_count || 0;
+  const streamsSize = humanFileSize(responseData?.type_streams?.media_size || 0);
+  const duration = responseData?.type_streams?.duration_str || 'NA';
   const content = {
     Items: `${streamsCount}`,
     'Media Size': `${streamsSize}`,
-    Duration: responseData.type_streams.duration_str,
+    Duration: duration,
   };
   const tile = buildTile('Streams: ');
   const table = buildTileContenTable(content, 2);
