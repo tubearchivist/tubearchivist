@@ -162,6 +162,11 @@ urlpatterns = [
         name="api-stats-channel",
     ),
     path(
+        "stats/playlist/",
+        views.StatPlaylistView.as_view(),
+        name="api-stats-playlist",
+    ),
+    path(
         "stats/watch/",
         views.StatWatchProgress.as_view(),
         name="api-stats-watch",

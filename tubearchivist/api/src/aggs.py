@@ -167,6 +167,34 @@ class Channel(AggBase):
         return response
 
 
+class Playlist(AggBase):
+    """get playlist stats"""
+
+    name = "playlist_stats"
+    path = "ta_playlist/_search"
+    data = {
+        "size": 0,
+        "aggs": {
+            "playlist_count": {"value_count": {"field": "playlist_id"}},
+            "playlist_active": {"terms": {"field": "playlist_active"}},
+            "playlist_subscribed": {"terms": {"field": "playlist_subscribed"}},
+        },
+    }
+
+    def process(self):
+        """process aggregation"""
+        aggregations = self.get()
+        response = {"doc_count": aggregations["playlist_count"].get("value")}
+        for bucket in aggregations["playlist_active"]["buckets"]:
+            key = f"active_{bucket['key_as_string']}"
+            response.update({key: bucket.get("doc_count")})
+        for bucket in aggregations["playlist_subscribed"]["buckets"]:
+            key = f"subscribed_{bucket['key_as_string']}"
+            response.update({key: bucket.get("doc_count")})
+
+        return response
+
+
 class WatchProgress(AggBase):
     """get watch progress"""
 
