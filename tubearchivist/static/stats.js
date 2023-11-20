@@ -52,7 +52,7 @@ function buildTotalVideoTile(responseData) {
   const totalCount = responseData.doc_count || 0;
   const totalSize = humanFileSize(responseData.media_size || 0);
   const content = {
-    Items: `${totalCount}`,
+    Videos: `${totalCount}`,
     'Media Size': `${totalSize}`,
     Duration: responseData.duration_str,
   };
@@ -67,7 +67,7 @@ function buildActiveVideoTile(responseData) {
   const activeSize = humanFileSize(responseData?.active_true?.media_size || 0);
   const duration = responseData?.active_true?.duration_str || 'NA';
   const content = {
-    Items: `${activeCount}`,
+    Videos: `${activeCount}`,
     'Media Size': `${activeSize}`,
     Duration: duration,
   };
@@ -82,7 +82,7 @@ function buildInActiveVideoTile(responseData) {
   const inActiveSize = humanFileSize(responseData?.active_false?.media_size || 0);
   const duration = responseData?.active_false?.duration_str || 'NA';
   const content = {
-    Items: `${inActiveCount}`,
+    Videos: `${inActiveCount}`,
     'Media Size': `${inActiveSize}`,
     Duration: duration,
   };
@@ -97,7 +97,7 @@ function buildVideosTypeTile(responseData) {
   const videosSize = humanFileSize(responseData?.type_videos?.media_size || 0);
   const duration = responseData?.type_videos?.duration_str || 'NA';
   const content = {
-    Items: `${videosCount}`,
+    Videos: `${videosCount}`,
     'Media Size': `${videosSize}`,
     Duration: duration,
   };
@@ -112,7 +112,7 @@ function buildShortsTypeTile(responseData) {
   const shortsSize = humanFileSize(responseData?.type_shorts?.media_size || 0);
   const duration = responseData?.type_shorts?.duration_str || 'NA';
   const content = {
-    Items: `${shortsCount}`,
+    Videos: `${shortsCount}`,
     'Media Size': `${shortsSize}`,
     Duration: duration,
   };
@@ -127,7 +127,7 @@ function buildStreamsTypeTile(responseData) {
   const streamsSize = humanFileSize(responseData?.type_streams?.media_size || 0);
   const duration = responseData?.type_streams?.duration_str || 'NA';
   const content = {
-    Items: `${streamsCount}`,
+    Videos: `${streamsCount}`,
     'Media Size': `${streamsSize}`,
     Duration: duration,
   };
