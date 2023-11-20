@@ -477,6 +477,41 @@
                 "playlist_last_refresh": {
                     "type": "date",
                     "format": "epoch_second"
+                },
+                "playlist_entries": {
+                    "properties": {
+                        "downloaded": {
+                            "type": "boolean"
+                        },
+                        "idx": {
+                            "type": "long"
+                        },
+                        "title": {
+                            "type": "text",
+                            "analyzer": "english",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256,
+                                    "normalizer": "to_lower"
+                                }
+                            }
+                        },
+                        "uploader": {
+                            "type": "text",
+                            "analyzer": "english",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256,
+                                    "normalizer": "to_lower"
+                                }
+                            }
+                        },
+                        "youtube_id": {
+                            "type": "keyword"
+                        }
+                    }
                 }
             },
             "expected_set": {
