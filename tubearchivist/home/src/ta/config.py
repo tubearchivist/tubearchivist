@@ -323,7 +323,7 @@ class ReleaseVersion:
         if not message:
             return False
 
-        if self._parse_version(message.get("version")) == self.local_version:
+        if self.local_version >= self._parse_version(message.get("version")):
             RedisArchivist().del_message(self.NEW_KEY)
             return settings.TA_VERSION
 
