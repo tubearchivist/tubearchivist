@@ -5,7 +5,6 @@ Functionality:
 """
 
 import urllib.parse
-import logging
 
 from home.src.download.thumbnails import ThumbManager
 from home.src.ta.helper import date_praser, get_duration_str
@@ -46,8 +45,6 @@ class SearchProcess:
             processed = self._process_channel(result["_source"])
         if index == "ta_playlist":
             processed = self._process_playlist(result["_source"])
-        if index == "ta_custom_playlist":
-            processed = self._process_custom_playlist(result["_source"])
         if index == "ta_download":
             processed = self._process_download(result["_source"])
         if index == "ta_comment":
@@ -123,23 +120,6 @@ class SearchProcess:
         )
 
         return dict(sorted(playlist_dict.items()))
-    
-    @staticmethod
-    def _process_custom_playlist(custom_playlist_dict):
-        logging.debug("_process_custom_playlist %s", custom_playlist_dict)
-        """run on single custom playlist dict"""
-        playlist_id = custom_playlist_dict["playlist_id"]
-        playlist_last_refresh = date_praser(
-            custom_playlist_dict["playlist_last_refresh"]
-        )
-        custom_playlist_dict.update(
-            {
-                "playlist_thumbnail": f"/cache/custom_playlists/{playlist_id}.jpg",
-                "playlist_last_refresh": playlist_last_refresh,
-            }
-        )
-
-        return dict(sorted(custom_playlist_dict.items()))
 
     def _process_download(self, download_dict):
         """run on single download item"""

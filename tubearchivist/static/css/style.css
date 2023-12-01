@@ -378,7 +378,12 @@ button:hover {
     display: none;
 }
 
-#hidden-form button {
+#hidden-form2 {
+    display: none;
+    margin-top: 10px;
+}
+
+#hidden-form button, #hidden-form2 button  {
     margin-right: 1rem;
 }
 

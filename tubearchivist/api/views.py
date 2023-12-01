@@ -16,7 +16,6 @@ from home.src.frontend.watched import WatchState
 from home.src.index.channel import YoutubeChannel
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
-from home.src.index.custom_playlist import CustomPlaylist
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock, YoutubeVideo
 from home.src.ta.config import AppConfig, ReleaseVersion
@@ -459,9 +458,17 @@ class PlaylistApiListView(ApiBaseView):
 
     def get(self, request):
         """handle get request"""
-        self.data.update(
-            {"sort": [{"playlist_name.keyword": {"order": "asc"}}]}
-        )
+        playlist_type = request.GET.get("playlist_type", None)
+        if playlist_type is not None:
+            query = {
+                "query": {"term": {"playlist_type": {"value": playlist_type}}},
+                "sort": [{"playlist_name.keyword": {"order": "asc"}}]
+            }
+            
+        else:
+            query = {"sort": [{"playlist_name.keyword": {"order": "asc"}}]}
+            
+        self.data.update(query)
         self.get_document_list(request)
         return Response(self.response)
 
@@ -511,6 +518,16 @@ class PlaylistApiView(ApiBaseView):
         """get request"""
         self.get_document(playlist_id)
         return Response(self.response, status=self.status_code)
+    
+    def post(self, request, playlist_id):
+        """post to custom playlist to add a video to list"""
+        action = request.data.get("action")
+        video_id = request.data.get("video_id")
+        if action == "create":
+            YoutubePlaylist(playlist_id).add_video_to_playlist(video_id)
+        else:
+            YoutubePlaylist(playlist_id).move_video(video_id, action)
+        return Response({"success": True}, status=status.HTTP_201_CREATED)
 
     def delete(self, request, playlist_id):
         """delete playlist"""
@@ -520,55 +537,6 @@ class PlaylistApiView(ApiBaseView):
             YoutubePlaylist(playlist_id).delete_videos_playlist()
         else:
             YoutubePlaylist(playlist_id).delete_metadata()
-
-        return Response({"success": True})
-
-class CustomPlaylistApiListView(ApiBaseView):
-    """resolves to /api/custom-playlist/
-    GET: returns list of indexed custom playlists
-    """
-
-    search_base = "ta_custom_playlist/_search/"
-    permission_classes = [AdminWriteOnly]
-
-    def get(self, request):
-        """handle get request"""
-        self.data.update(
-            {"sort": [{"playlist_name.keyword": {"order": "asc"}}]}
-        )
-        self.get_document_list(request, False)
-        return Response(self.response)
-
-class CustomPlaylistApiView(ApiBaseView):
-    """resolves to /api/custom-playlist/<playlist_id>/
-    GET: returns metadata dict of custom playlist
-    """
-
-    search_base = "ta_custom_playlist/_doc/"
-    permission_classes = [AdminWriteOnly]
-
-    def get(self, request, playlist_id):
-        # pylint: disable=unused-argument
-        """get request"""
-        self.get_document(playlist_id)
-        return Response(self.response, status=self.status_code)
-    
-    def post(self, request, playlist_id):
-        """post to custom playlist to add a video to list"""
-        action = request.data.get("action")
-        video_id = request.data.get("video_id")
-        if action == "create":
-            CustomPlaylist(playlist_id).add_video_to_playlist(video_id)
-        else:
-            CustomPlaylist(playlist_id).move_video(video_id, action)
-        return Response({"success": True}, status=status.HTTP_201_CREATED)
-    
-
-    def delete(self, request, playlist_id):
-        """delete custom playlist"""
-        print(f"{playlist_id}: delete custom playlist")
-        
-        CustomPlaylist(playlist_id).delete_metadata()
 
         return Response({"success": True})
 

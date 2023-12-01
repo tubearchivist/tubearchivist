@@ -19,7 +19,6 @@ from home.src.download.yt_dlp_handler import VideoDownloader
 from home.src.es.backup import ElasticBackup
 from home.src.es.index_setup import ElasitIndexWrap
 from home.src.index.channel import YoutubeChannel
-from home.src.index.custom_playlist import CustomPlaylist
 from home.src.index.filesystem import Scanner
 from home.src.index.manual import ImportFolderScanner
 from home.src.index.reindex import Reindex, ReindexManual, ReindexPopulate
@@ -111,10 +110,6 @@ class BaseTask(Task):
         "subscribe_to": {
             "title": "Add Subscription",
             "group": "subscription:add",
-        },
-        "create_custom_playlist": {
-            "title": "Create Custom Playlist",
-            "group": "custom_playlist:add",
         },
     }
 
@@ -359,13 +354,6 @@ def subscribe_to(self, url_str: str, expected_type: str | bool = False):
     optionally validate expected_type channel / playlist
     """
     SubscriptionHandler(url_str, task=self).subscribe(expected_type)
-
-@shared_task(bind=True, name="create_custom_playlist", base=BaseTask)
-def create_custom_playlist(self, name: str):
-    """
-    take a custom playlist name and create the playlist
-    """
-    CustomPlaylist().create(name)
 
 
 @shared_task(bind=True, name="index_playlists", base=BaseTask)

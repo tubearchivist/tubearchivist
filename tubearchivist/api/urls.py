@@ -72,16 +72,6 @@ urlpatterns = [
         name="api-playlist-video",
     ),
     path(
-        "custom-playlist/",
-        views.CustomPlaylistApiListView.as_view(),
-        name="api-custom-playlist-list",
-    ),
-    path(
-        "custom-playlist/<slug:playlist_id>/",
-        views.CustomPlaylistApiView.as_view(),
-        name="api-custom-playlist",
-    ),
-    path(
         "download/",
         views.DownloadApiListView.as_view(),
         name="api-download-list",

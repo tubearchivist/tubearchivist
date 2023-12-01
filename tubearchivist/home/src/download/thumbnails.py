@@ -25,7 +25,6 @@ class ThumbManagerBase:
     VIDEO_DIR = os.path.join(CACHE_DIR, "videos")
     CHANNEL_DIR = os.path.join(CACHE_DIR, "channels")
     PLAYLIST_DIR = os.path.join(CACHE_DIR, "playlists")
-    CUSTOM_PLAYLIST_DIR = os.path.join(CACHE_DIR, "custom_playlists")
 
     def __init__(self, item_id, item_type, fallback=False):
         self.item_id = item_id
@@ -76,9 +75,6 @@ class ThumbManagerBase:
                 app_root, "static/img/default-video-thumb.jpg"
             ),
             "playlist": os.path.join(
-                app_root, "static/img/default-video-thumb.jpg"
-            ),
-            "custom_playlist": os.path.join(
                 app_root, "static/img/default-playlist-thumb.jpg"
             ),
             "icon": os.path.join(
@@ -103,7 +99,7 @@ class ThumbManager(ThumbManagerBase):
     def __init__(self, item_id, item_type="video", fallback=False):
         super().__init__(item_id, item_type, fallback=fallback)
 
-    def download(self, url=None):
+    def download(self, url):
         """download thumbnail"""
         print(f"{self.item_id}: download {self.item_type} thumbnail")
         if self.item_type == "video":
@@ -112,8 +108,6 @@ class ThumbManager(ThumbManagerBase):
             self.download_channel_art(url)
         elif self.item_type == "playlist":
             self.download_playlist_thumb(url)
-        elif self.item_type == "custom_playlist":
-            self.download_custom_playlist_thumb(url)
 
     def delete(self):
         """delete thumbnail file"""
@@ -124,8 +118,6 @@ class ThumbManager(ThumbManagerBase):
             self.delete_channel_thumb()
         elif self.item_type == "playlist":
             self.delete_playlist_thumb()
-        elif self.item_type == "custom_playlist":
-            self.delete_custom_playlist_thumb()
 
     def download_video_thumb(self, url, skip_existing=False):
         """pass url for video thumbnail"""
@@ -212,15 +204,6 @@ class ThumbManager(ThumbManagerBase):
 
         img_raw = self.download_raw(url)
         img_raw.convert("RGB").save(thumb_path)
-        
-    def download_custom_playlist_thumb(self, url, skip_existing=False):
-        """pass thumbnail url"""
-        thumb_path = os.path.join(self.CUSTOM_PLAYLIST_DIR, f"{self.item_id}.jpg")
-        if skip_existing and os.path.exists(thumb_path):
-            return
-
-        img_raw = self.download_raw(url)
-        img_raw.convert("RGB").save(thumb_path)
 
     def delete_video_thumb(self):
         """delete video thumbnail if exists"""
@@ -241,12 +224,6 @@ class ThumbManager(ThumbManagerBase):
     def delete_playlist_thumb(self):
         """delete playlist thumbnail"""
         thumb_path = os.path.join(self.PLAYLIST_DIR, f"{self.item_id}.jpg")
-        if os.path.exists(thumb_path):
-            os.remove(thumb_path)
-    
-    def delete_custom_playlist_thumb(self):
-        """delete custom playlist thumbnail"""
-        thumb_path = os.path.join(self.CUSTOM_PLAYLIST_DIR, f"{self.item_id}.jpg")
         if os.path.exists(thumb_path):
             os.remove(thumb_path)
 

@@ -474,48 +474,6 @@
             }
         },
         {
-            "index_name": "custom_playlist",
-            "expected_map": {
-                "playlist_id": {
-                    "type": "keyword"
-                },
-                "playlist_name": {
-                    "type": "text",
-                    "analyzer": "english",
-                    "fields": {
-                        "keyword": {
-                            "type": "keyword",
-                            "ignore_above": 256,
-                            "normalizer": "to_lower"
-                        },
-                        "search_as_you_type": {
-                            "type": "search_as_you_type",
-                            "doc_values": false,
-                            "max_shingle_size": 3
-                        }
-                    }
-                },
-                "playlist_thumbnail": {
-                    "type": "keyword"
-                },
-                "playlist_last_refresh": {
-                    "type": "date",
-                    "format": "epoch_second"
-                }
-            },
-            "expected_set": {
-                "analysis": {
-                    "normalizer": {
-                        "to_lower": {
-                            "type": "custom",
-                            "filter": ["lowercase"]
-                        }
-                    }
-                },
-                "number_of_replicas": "0"
-            }
-        },
-        {
             "index_name": "subtitle",
             "expected_map": {
                 "youtube_id": {

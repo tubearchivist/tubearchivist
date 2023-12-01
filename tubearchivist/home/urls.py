@@ -99,19 +99,9 @@ urlpatterns = [
         name="playlist",
     ),
     path(
-        "custom_playlist/",
-        login_required(views.CustomPlaylistView.as_view()),
-        name="custom_playlist",
-    ),
-    path(
         "playlist/<slug:playlist_id>/",
         login_required(views.PlaylistIdView.as_view()),
         name="playlist_id",
-    ),
-    path(
-        "custom_playlist/<slug:playlist_id>/",
-        login_required(views.CustomPlaylistIdView.as_view()),
-        name="custom_playlist_id",
     ),
     path("search/", login_required(views.SearchView.as_view()), name="search"),
 ]

@@ -5,6 +5,8 @@ functionality:
 """
 
 import json
+import uuid
+import logging
 from datetime import datetime
 
 from home.src.download.thumbnails import ThumbManager
@@ -24,7 +26,9 @@ class YoutubePlaylist(YouTubeItem):
     }
     yt_base = "https://www.youtube.com/playlist?list="
 
-    def __init__(self, youtube_id):
+    def __init__(self, youtube_id=None):
+        if youtube_id is None:
+            youtube_id = str(uuid.uuid4())
         super().__init__(youtube_id)
         self.all_members = False
         self.nav = False
@@ -66,6 +70,7 @@ class YoutubePlaylist(YouTubeItem):
             "playlist_thumbnail": playlist_thumbnail,
             "playlist_description": self.youtube_meta["description"] or False,
             "playlist_last_refresh": int(datetime.now().timestamp()),
+            "playlist_type": "regular",
         }
 
     def get_entries(self, playlistend=False):
@@ -208,3 +213,93 @@ class YoutubePlaylist(YouTubeItem):
             YoutubeVideo(youtube_id).delete_media_file()
 
         self.delete_metadata()
+        
+    def create(self, name):
+        self.json_data = {
+            "playlist_id": self.youtube_id,
+            "playlist_active": True,
+            "playlist_name": name,
+            "playlist_last_refresh": int(datetime.now().timestamp()),
+            "playlist_entries": [],
+            "playlist_type": "custom",
+            "playlist_channel": None,
+            "playlist_channel_id": None,
+            "playlist_description": False,
+            "playlist_thumbnail": False
+        }
+        
+        self.upload_to_es()
+        self.get_playlist_art()
+        return True
+    
+    def add_video_to_playlist(self, video_id):
+        logging.debug("add_video_to_playlist: %s", video_id)
+        
+        self.get_from_es()
+        video_metadata = self.get_video_metadata(video_id)
+        video_metadata["idx"] = len(self.json_data["playlist_entries"])
+        
+        logging.debug("video %s", video_metadata)
+          
+        if not self.playlist_entries_contains(video_id):
+            self.json_data["playlist_entries"].append(video_metadata)
+            self.json_data["playlist_last_refresh"] = int(datetime.now().timestamp())
+            self.upload_to_es()
+            
+        return True
+    
+    def move_video(self, video_id, action):
+        logging.debug("move_video: %s %s", video_id, action)
+        
+        self.get_from_es()
+        
+        video_index = self.get_video_index(video_id)
+        
+        logging.debug("video index %s", video_index)
+          
+        playlist = self.json_data["playlist_entries"]
+        item = playlist[video_index]
+        playlist.pop(video_index)
+        
+        if action != "remove":
+            if action == "up":
+                video_index = max(0,video_index-1)
+            elif action == "down":
+                video_index = min(len(playlist),video_index+1)
+            elif action == "top":
+                video_index = 0
+            else:
+                video_index = len(playlist)
+            
+            playlist.insert(video_index, item)
+        
+        self.json_data["playlist_last_refresh"] = int(datetime.now().timestamp())
+        
+        for i,item in enumerate(playlist):
+            item["idx"] = i
+        
+        self.upload_to_es()
+            
+        return True
+    
+    def get_video_index(self, video_id):
+        for i,child in enumerate(self.json_data["playlist_entries"]):
+            if child["youtube_id"] == video_id:
+                return i
+        return -1
+            
+    def playlist_entries_contains(self, video_id):
+         return len(list(filter(lambda x:x["youtube_id"]==video_id, self.json_data["playlist_entries"] ))) > 0
+        
+    def get_video_metadata(self, video_id):
+        video = YoutubeVideo(video_id)
+        video.get_from_es()
+        video_json_data = {
+                "youtube_id": video.json_data["youtube_id"],
+                "title": video.json_data["title"],
+                "uploader": video.json_data["channel"]["channel_name"],
+                "idx": 0,
+                "downloaded": "date_downloaded" in video.json_data and video.json_data["date_downloaded"] > 0
+            }
+        
+        return video_json_data

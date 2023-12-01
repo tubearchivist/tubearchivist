@@ -216,13 +216,13 @@ function showDotMenu(input1) {
 	    form_code += '<p onclick="addToCustomPlaylist(this, \''+dataId+'\',\''+obj.playlist_id+'\')"><img class="p-button" src="/static/img/icon-unseen.svg"/>'+obj.playlist_name+'</p>';
   }
   
-  form_code += '<p><a href="/custom_playlist">Create playlist</a></p></div>';
+  form_code += '<p><a href="/playlist">Create playlist</a></p></div>';
   input1.parentNode.parentNode.innerHTML += form_code;
 }
 
 //handles user action of adding a video to a custom playlist
 function addToCustomPlaylist(input, video_id, playlist_id) {
-  let apiEndpoint = '/api/custom-playlist/' + playlist_id + '/';
+  let apiEndpoint = '/api/playlist/' + playlist_id + '/';
   let data = { "action": "create", "video_id": video_id };
   apiRequest(apiEndpoint, 'POST', data);
   
@@ -269,7 +269,7 @@ function moveCustomPlaylistVideo(input1, playlist_id) {
   dataId = input1.getAttribute('data-id');
   dataContext = input1.getAttribute('data-context');
   
-  let apiEndpoint = '/api/custom-playlist/' + playlist_id + '/';
+  let apiEndpoint = '/api/playlist/' + playlist_id + '/';
   let data = { "action": dataContext, "video_id": dataId };
   apiRequest(apiEndpoint, 'POST', data);
   
@@ -508,17 +508,6 @@ function deletePlaylist(button) {
   setTimeout(function () {
     window.location.replace('/playlist/');
   }, 1000);
-}
-
-function deleteCustomPlaylist(button) {
-  let playlist_id = button.getAttribute('data-id');
-  let apiEndpoint = `/api/custom-playlist/${playlist_id}/`;
-
-  apiRequest(apiEndpoint, 'DELETE');
-  let message = document.createElement('span');
-  message.innerText = 'Playlist removed.';
-  
-  button.replaceWith(message);
 }
 
 function cancelDelete() {
@@ -889,7 +878,7 @@ function getPlaylistData(playlistId) {
 
 // Gets custom playlists
 function getCustomPlaylists() {
-  let apiEndpoint = '/api/custom-playlist';
+  let apiEndpoint = '/api/playlist/?playlist_type=custom';
   let playlistData = apiRequest(apiEndpoint, 'GET');
   return playlistData.data;
 }
@@ -984,7 +973,6 @@ function apiRequest(apiEndpoint, method, data) {
   if (xhttp.status === 404) {
     return false;
   } else {
-    console.log("apiRequest("+apiEndpoint+"): " + xhttp.responseText);
     return JSON.parse(xhttp.responseText);
   }
 }
@@ -1505,8 +1493,10 @@ function textExpandButtonVisibilityUpdate() {
 document.addEventListener('readystatechange', textExpandButtonVisibilityUpdate);
 window.addEventListener('resize', textExpandButtonVisibilityUpdate);
 
-function showForm() {
-  let formElement = document.getElementById('hidden-form');
+function showForm(id) {
+  
+  let id2 = id == undefined ? 'hidden-form' : id;
+  let formElement = document.getElementById(id2);
   let displayStyle = formElement.style.display;
   if (displayStyle === '') {
     formElement.style.display = 'block';

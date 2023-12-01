@@ -32,7 +32,7 @@ from home.src.frontend.forms import (
     SchedulerSettingsForm,
     SubscribeToChannelForm,
     SubscribeToPlaylistForm,
-    CreateCustomPlaylistForm,
+    CreatePlaylistForm,
     UserSettingsForm,
 )
 from home.src.index.channel import channel_overwrites
@@ -45,7 +45,7 @@ from home.src.ta.helper import check_stylesheet, time_parser
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.users import UserConfig
-from home.tasks import index_channel_playlists, subscribe_to, create_custom_playlist
+from home.tasks import index_channel_playlists, subscribe_to
 from rest_framework.authtoken.models import Token
 
 
@@ -205,7 +205,7 @@ class ArchivistResultsView(ArchivistViewConfig):
         response, _ = ElasticWrap(self.es_search).get(self.data)
         process_aggs(response)
         results = SearchProcess(response).process()
-        max_hits = response["hits"]["total"]["value"]
+        max_hits = response["hits"]["total"]["value"] if "hits" in response else 0
         self.pagination_handler.validate(max_hits)
         self.context.update(
             {
@@ -739,11 +739,13 @@ class PlaylistIdView(ArchivistResultsView):
         # playlist details
         es_path = f"ta_playlist/_doc/{playlist_id}"
         playlist_info = self.single_lookup(es_path)
-
-        # channel details
-        channel_id = playlist_info["playlist_channel_id"]
-        es_path = f"ta_channel/_doc/{channel_id}"
-        channel_info = self.single_lookup(es_path)
+        
+        channel_info = None
+        if playlist_info["playlist_type"] != "custom":
+            # channel details
+            channel_id = playlist_info["playlist_channel_id"]
+            es_path = f"ta_channel/_doc/{channel_id}"
+            channel_info = self.single_lookup(es_path)
 
         return playlist_info, channel_info
 
@@ -758,11 +760,21 @@ class PlaylistIdView(ArchivistResultsView):
             + "{return params.scores[doc['youtube_id'].value];} "
             + "return 100000;"
         )
+        
+        if playlist_info["playlist_type"] == "custom":
+            video_ids = [
+                i["youtube_id"]
+                for i in playlist_info["playlist_entries"]
+            ]
+            must_clause = {"ids" : {"values" : video_ids}}
+        else:
+            must_clause = {"match": {"playlist.keyword": playlist_id}}
+            
         self.data.update(
             {
                 "query": {
                     "bool": {
-                        "must": [{"match": {"playlist.keyword": playlist_id}}]
+                        "must": [must_clause]
                     }
                 },
                 "sort": [
@@ -802,6 +814,7 @@ class PlaylistView(ArchivistResultsView):
             {
                 "title": "Playlists",
                 "subscribe_form": SubscribeToPlaylistForm(),
+                "create_form": CreatePlaylistForm(),
             }
         )
 
@@ -836,153 +849,22 @@ class PlaylistView(ArchivistResultsView):
     @method_decorator(user_passes_test(check_admin), name="dispatch")
     @staticmethod
     def post(request):
-        """handle post from search form"""
-        subscribe_form = SubscribeToPlaylistForm(data=request.POST)
-        if subscribe_form.is_valid():
-            url_str = request.POST.get("subscribe")
-            print(url_str)
-            subscribe_to.delay(url_str, expected_type="playlist")
+        """handle post from subscribe or create form"""
+        if request.POST.get("create") is not None:
+            create_form = CreatePlaylistForm(data=request.POST)
+            if create_form.is_valid():
+                name = request.POST.get("create")
+                YoutubePlaylist().create(name)
+        else:
+            subscribe_form = SubscribeToPlaylistForm(data=request.POST)
+            if subscribe_form.is_valid():
+                url_str = request.POST.get("subscribe")
+                print(url_str)
+                subscribe_to.delay(url_str, expected_type="playlist")
 
         sleep(1)
         return redirect("playlist")
 
-class CustomPlaylistView(ArchivistResultsView):
-    """resolves to /custom_playlist/
-    show all custom playlists indexed
-    """
-
-    view_origin = "custom_playlist"
-    es_search = "ta_custom_playlist/_search"
-
-    def get(self, request):
-        """handle get request"""
-        self.initiate_vars(request)
-        self._update_view_data()
-        self.find_results()
-        self.context.update(
-            {
-                "title": "Custom Playlists",
-                "create_form": CreateCustomPlaylistForm(),
-            }
-        )
-
-        return render(request, "home/custom_playlist.html", self.context)
-
-    def _update_view_data(self):
-        """update view specific data dict"""
-        self.data["sort"] = [{"playlist_name.keyword": {"order": "asc"}}]
-        if self.search_get:
-            self.data["query"] = {
-                "bool": {
-                    "should": [
-                        {
-                            "multi_match": {
-                                "query": self.search_get,
-                                "fields": [
-                                    "playlist_channel_id",
-                                    "playlist_channel",
-                                    "playlist_name",
-                                ],
-                            }
-                        }
-                    ],
-                    "minimum_should_match": 1,
-                }
-            }
-
-    @method_decorator(user_passes_test(check_admin), name="dispatch")
-    @staticmethod
-    def post(request):
-        """handle post from create form"""
-        create_form = CreateCustomPlaylistForm(data=request.POST)
-        if create_form.is_valid():
-            name = request.POST.get("create")
-            print(name)
-            create_custom_playlist.delay(name)
-
-        sleep(1)
-        return redirect("custom_playlist")
-
-class CustomPlaylistIdView(ArchivistResultsView):
-    """resolves to /custom_playlist/<playlist_id>
-    show all videos in a custom playlist
-    """
-
-    view_origin = "home"
-    es_search = "ta_video/_search"
-
-    def get(self, request, playlist_id):
-        """handle get request"""
-        self.initiate_vars(request)
-        playlist_info = self._get_info(playlist_id)
-        playlist_name = playlist_info["playlist_name"]
-        #self._update_view_data(playlist_id)
-        #self.find_results()
-        #self.match_progress()
-        #reindex = ReindexProgress(
-        #    request_type="custom_playlist", request_id=playlist_id
-        #).get_progress()
-
-        self.context.update(
-            {
-                "title": "Playlist: " + playlist_name,
-                "playlist_info": playlist_info,
-                "playlist_name": playlist_name,
-                #"channel_info": channel_info,
-                #"reindex": reindex.get("state"),
-            }
-        )
-        return render(request, "home/custom_playlist_id.html", self.context)
-
-    def _get_info(self, playlist_id):
-        """return additional metadata"""
-        # playlist details
-        es_path = f"ta_custom_playlist/_doc/{playlist_id}"
-        playlist_info = self.single_lookup(es_path)
-
-        # channel details
-        #channel_id = playlist_info["playlist_channel_id"]
-        #es_path = f"ta_channel/_doc/{channel_id}"
-        #channel_info = self.single_lookup(es_path)
-
-        return playlist_info
-    
-    def _update_view_data(self, playlist_id):
-        """update view specific data dict"""
-        sort = {
-            i["youtube_id"]: i["idx"]
-            for i in playlist_info["playlist_entries"]
-        }
-        script = (
-            "if(params.scores.containsKey(doc['youtube_id'].value)) "
-            + "{return params.scores[doc['youtube_id'].value];} "
-            + "return 100000;"
-        )
-        self.data.update(
-            {
-                "query": {
-                    "bool": {
-                        "must": [{"match": {"playlist.keyword": playlist_id}}]
-                    }
-                },
-                "sort": [
-                    {
-                        "_script": {
-                            "type": "number",
-                            "script": {
-                                "lang": "painless",
-                                "source": script,
-                                "params": {"scores": sort},
-                            },
-                            "order": "asc",
-                        }
-                    }
-                ],
-            }
-        )
-        if self.context["hide_watched"]:
-            to_append = {"term": {"player.watched": {"value": False}}}
-            self.data["query"]["bool"]["must"].append(to_append)
 
 class VideoView(MinView):
     """resolves to /video/<video-id>/

@@ -265,11 +265,11 @@ class SubscribeToPlaylistForm(forms.Form):
     )
     
 
-class CreateCustomPlaylistForm(forms.Form):
+class CreatePlaylistForm(forms.Form):
     """text area form to create a single custom playlist"""
 
     create = forms.CharField(
-        label="Create custom playlist",
+        label="Or create custom playlist",
         widget=forms.Textarea(
             attrs={
                 "rows": 1,

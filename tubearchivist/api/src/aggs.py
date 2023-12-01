@@ -28,7 +28,7 @@ class Primary(AggBase):
     """primary aggregation for total documents indexed"""
 
     name = "primary"
-    path = "ta_video,ta_channel,ta_playlist,ta_custom_playlist,ta_subtitle,ta_download/_search"
+    path = "ta_video,ta_channel,ta_playlist,ta_subtitle,ta_download/_search"
     data = {
         "size": 0,
         "aggs": {
