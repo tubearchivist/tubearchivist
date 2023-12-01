@@ -1,0 +1,12 @@
+# python testing cache
+__pycache__
+.venv
+
+# django testing db
+db.sqlite3
+
+# vscode custom conf
+.vscode
+
+# JavaScript stuff
+node_modules
