@@ -106,7 +106,10 @@ class AppConfig:
 
             # missing nested values
             for sub_key, sub_value in value.items():
-                if sub_key not in redis_config[key].keys():
+                if (
+                    sub_key not in redis_config[key].keys()
+                    or sub_value == "rand-d"
+                ):
                     if sub_value == "rand-d":
                         sub_value = self._build_rand_daily()
 
