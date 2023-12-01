@@ -269,7 +269,7 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 
 # TA application settings
 TA_UPSTREAM = "https://github.com/tubearchivist/tubearchivist"
-TA_VERSION = "v0.4.3"
+TA_VERSION = "v0.4.4"
 
 #Django application logging - displays to console Django HTTP 500 Server Error details
 if bool(DEBUG):
