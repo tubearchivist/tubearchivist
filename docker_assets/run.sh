@@ -6,9 +6,9 @@ set -e
 # django setup
 python manage.py migrate
 
-if [[ -z "$DJANGO_DEBUG" ]]; then
+#if [[ -z "$DJANGO_DEBUG" ]]; then
     python manage.py collectstatic --noinput -c
-fi
+#fi
 
 # ta setup
 python manage.py ta_envcheck
@@ -18,7 +18,7 @@ python manage.py ta_migpath
 
 # start all tasks
 nginx &
-celery -A home.tasks worker --loglevel=INFO &
-celery -A home beat --loglevel=INFO \
+celery -A home.tasks worker --loglevel=DEBUG &
+celery -A home beat --loglevel=DEBUG \
     -s "${BEAT_SCHEDULE_PATH:-${cachedir}/celerybeat-schedule}" &
 uwsgi --ini uwsgi.ini

@@ -10,3 +10,6 @@ db.sqlite3
 
 # JavaScript stuff
 node_modules
+/.project
+/.pydevproject
+/docker-compose.205.yml

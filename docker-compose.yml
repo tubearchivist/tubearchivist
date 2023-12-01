@@ -4,24 +4,26 @@ services:
   tubearchivist:
     container_name: tubearchivist
     restart: unless-stopped
-    image: bbilly1/tubearchivist
+    #image: bbilly1/tubearchivist
+    build: .
     ports:
-      - 8000:8000
+      - 8100:8000
     volumes:
-      - media:/youtube
-      - cache:/cache
+      - /opt/yt/video:/youtube
+      - /opt/yt/cache:/cache
     environment:
       - ES_URL=http://archivist-es:9200     # needs protocol e.g. http and port
       - REDIS_HOST=archivist-redis          # don't add protocol
       - HOST_UID=1000
       - HOST_GID=1000
-      - TA_HOST=tubearchivist.local         # set your host name
-      - TA_USERNAME=tubearchivist           # your initial TA credentials
-      - TA_PASSWORD=verysecret              # your initial TA credentials
-      - ELASTIC_PASSWORD=verysecret         # set password for Elasticsearch
+      - TA_HOST=192.168.1.101       # set your host name
+      - TA_USERNAME=grosensteel           # your initial TA credentials
+      - TA_PASSWORD=pw          # your initial TA credentials
+      - ELASTIC_PASSWORD=pw         # set password for Elasticsearch
       - TZ=America/New_York                 # set your time zone
+      - DJANGO_DEBUG=True		#enables additional application logging
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8100/health"]
       interval: 2m
       timeout: 10s
       retries: 3
@@ -36,15 +38,17 @@ services:
     expose:
       - "6379"
     volumes:
-      - redis:/data
+      - /opt/yt/data:/data
     depends_on:
       - archivist-es
   archivist-es:
     image: bbilly1/tubearchivist-es         # only for amd64, or use official es 8.11.0
     container_name: archivist-es
+    ports:
+      - 9200:9200
     restart: unless-stopped
     environment:
-      - "ELASTIC_PASSWORD=verysecret"       # matching Elasticsearch password
+      - "ELASTIC_PASSWORD=pw"       # matching Elasticsearch password
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - "xpack.security.enabled=true"
       - "discovery.type=single-node"
@@ -54,7 +58,7 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - es:/usr/share/elasticsearch/data    # check for permission error when using bind mount, see readme
+      - /opt/yt/es:/usr/share/elasticsearch/data    # check for permission error when using bind mount, see readme
     expose:
       - "9200"
 
