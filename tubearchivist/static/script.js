@@ -209,7 +209,7 @@ function showDotMenu(input1) {
   input1.style.visibility = "hidden";
   
   //show the form
-  form_code = '<div class="video-popup-menu"><img src="/static/img/icon-close.svg" class="video-popup-menu-close-button" title="Close menu" onclick="removeDotMenu(this, \''+buttonId+'\')"/><h3>Save video to...</h3>';
+  form_code = '<div class="video-popup-menu"><img src="/static/img/icon-close.svg" class="video-popup-menu-close-button" title="Close menu" onclick="removeDotMenu(this, \''+buttonId+'\')"/><h3>Add video to...</h3>';
   
   for(let i = 0; i < playlists.length; i++) {
     	let obj = playlists[i];
@@ -240,7 +240,7 @@ function removeDotMenu(input1, button_id) {
 }
 
 //shows the video sub menu popup on custom playlist page
-function showDotMenuCustomPlaylist(input1, playlist_id) {
+function showDotMenuCustomPlaylist(input1, playlist_id, current_page, last_page) {
   let dataId, dataContext, form_code, buttonId;
   dataId = input1.getAttribute('data-id');
   buttonId = input1.getAttribute('id');
@@ -252,11 +252,11 @@ function showDotMenuCustomPlaylist(input1, playlist_id) {
   //show the form
   form_code = '<div class="video-popup-menu"><img src="/static/img/icon-close.svg" class="video-popup-menu-close-button" title="Close menu" onclick="removeDotMenu(this, \''+buttonId+'\')"/><h3>Move Video</h3>';
   
-  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="top" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\')" src="/static/img/icon-arrow-top.svg" title="Move to top"/>';
-  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="up" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\')" src="/static/img/icon-arrow-up.svg" title="Move up"/>';
-  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="down" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\')" src="/static/img/icon-arrow-down.svg" title="Move down"/>';
-  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="bottom" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\')" src="/static/img/icon-arrow-bottom.svg" title="Move to bottom"/>';
-  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="remove" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\')" src="/static/img/icon-remove.svg" title="Remove from playlist"/>';
+  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="top" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\','+current_page+','+last_page+')" src="/static/img/icon-arrow-top.svg" title="Move to top"/>';
+  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="up" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\','+current_page+','+last_page+')" src="/static/img/icon-arrow-up.svg" title="Move up"/>';
+  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="down" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\','+current_page+','+last_page+')" src="/static/img/icon-arrow-down.svg" title="Move down"/>';
+  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="bottom" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\','+current_page+','+last_page+')" src="/static/img/icon-arrow-bottom.svg" title="Move to bottom"/>';
+  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="remove" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\','+current_page+','+last_page+')" src="/static/img/icon-remove.svg" title="Remove from playlist"/>';
  
   
   form_code += '</div>';
@@ -264,7 +264,7 @@ function showDotMenuCustomPlaylist(input1, playlist_id) {
 }
 
 //process custom playlist form actions
-function moveCustomPlaylistVideo(input1, playlist_id) {
+function moveCustomPlaylistVideo(input1, playlist_id, current_page, last_page) {
   let dataId, dataContext;
   dataId = input1.getAttribute('data-id');
   dataContext = input1.getAttribute('data-context');
@@ -281,24 +281,32 @@ function moveCustomPlaylistVideo(input1, playlist_id) {
      let sibling = itemDom.previousElementSibling;
      if (sibling != null)
         sibling.before(itemDom);
+     else if (current_page > 1)
+       itemDom.remove();
   }
   else if (dataContext == "down")
   {
      let sibling = itemDom.nextElementSibling;
      if (sibling != null)
         sibling.after(itemDom);
+     else if (current_page != last_page)
+       itemDom.remove();
   }
   else if (dataContext == "top")
   {
      let sibling = listDom.firstElementChild;
      if (sibling != null)
         sibling.before(itemDom);
+     if (current_page > 1)
+       itemDom.remove();
   }
   else if (dataContext == "bottom")
   {
      let sibling = listDom.lastElementChild;
      if (sibling != null)
         sibling.after(itemDom);
+     if (current_page != last_page)
+       itemDom.remove();
   }
   else if (dataContext == "remove")
      itemDom.remove();
@@ -1176,10 +1184,13 @@ function createVideo(video, viewStyle) {
                 ${watchStatusIndicator}
             <span>${videoPublished} | ${videoDuration}</span>
         </div>
-        <div>
-            <a href="/channel/${channelId}/"><h3>${channelName}</h3></a>
-            <a class="video-more" href="/video/${videoId}/"><h2>${videoTitle}</h2></a>
-        </div>
+        <div class="video-desc-details">
+	        <div>
+	            <a href="/channel/${channelId}/"><h3>${channelName}</h3></a>
+	            <a class="video-more" href="/video/${videoId}/"><h2>${videoTitle}</h2></a>
+	        </div>
+	        <img id="${videoId}-button2" src="../static/img/icon-dot-menu.svg" alt="dot-menu-icon" data-id="${videoId}" data-context="video" onclick="showDotMenu(this)" class="dot-button" title="More actions">
+	    </div>
     </div>
     `;
   const videoDiv = document.createElement('div');

@@ -244,11 +244,12 @@ class YoutubePlaylist(YouTubeItem):
         if not self.playlist_entries_contains(video_id):
             self.json_data["playlist_entries"].append(video_metadata)
             self.json_data["playlist_last_refresh"] = int(datetime.now().timestamp())
+            self.set_playlist_thumbnail()
             self.upload_to_es()
-            
+        
         return True
     
-    def move_video(self, video_id, action):
+    def move_video(self, video_id, action, hide_watched):
         logging.debug("move_video: %s %s", video_id, action)
         
         self.get_from_es()
@@ -263,9 +264,15 @@ class YoutubePlaylist(YouTubeItem):
         
         if action != "remove":
             if action == "up":
-                video_index = max(0,video_index-1)
+                while True:
+                    video_index = max(0,video_index-1)
+                    if not hide_watched or video_index == 0 or (not self.get_video_is_watched(playlist[video_index]["youtube_id"])):
+                        break
             elif action == "down":
-                video_index = min(len(playlist),video_index+1)
+                while True:
+                    video_index = min(len(playlist),video_index+1)
+                    if not hide_watched or video_index == len(playlist) or (not self.get_video_is_watched(playlist[video_index-1]["youtube_id"])):
+                        break
             elif action == "top":
                 video_index = 0
             else:
@@ -278,6 +285,7 @@ class YoutubePlaylist(YouTubeItem):
         for i,item in enumerate(playlist):
             item["idx"] = i
         
+        self.set_playlist_thumbnail()
         self.upload_to_es()
             
         return True
@@ -291,6 +299,26 @@ class YoutubePlaylist(YouTubeItem):
     def playlist_entries_contains(self, video_id):
          return len(list(filter(lambda x:x["youtube_id"]==video_id, self.json_data["playlist_entries"] ))) > 0
         
+    def get_video_is_watched(self, video_id):
+        video = YoutubeVideo(video_id)
+        video.get_from_es()
+        return video.json_data["player"]["watched"]
+    
+    def set_playlist_thumbnail(self):
+        playlist = self.json_data["playlist_entries"]
+        self.json_data["playlist_thumbnail"] = False
+        
+        for video in playlist:
+            url = self.get_video_thumbnail(video["youtube_id"])
+            if url is not None:
+                self.json_data["playlist_thumbnail"] = url
+                break
+                
+    def get_video_thumbnail(self, video_id):
+        video = YoutubeVideo(video_id)
+        video.get_from_es()
+        return video.json_data["vid_thumb_url"]
+    
     def get_video_metadata(self, video_id):
         video = YoutubeVideo(video_id)
         video.get_from_es()
@@ -301,5 +329,4 @@ class YoutubePlaylist(YouTubeItem):
                 "idx": 0,
                 "downloaded": "date_downloaded" in video.json_data and video.json_data["date_downloaded"] > 0
             }
-        
         return video_json_data

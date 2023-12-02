@@ -203,6 +203,13 @@ class ThumbManager(ThumbManagerBase):
             return
 
         img_raw = self.download_raw(url)
+        width, height = img_raw.size
+
+        if not width / height == 16 / 9:
+            new_height = width / 16 * 9
+            offset = (height - new_height) / 2
+            img_raw = img_raw.crop((0, offset, width, height - offset))
+        img_raw = img_raw.resize((336,189))
         img_raw.convert("RGB").save(thumb_path)
 
     def delete_video_thumb(self):

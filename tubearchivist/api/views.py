@@ -31,6 +31,7 @@ from home.tasks import (
     extrac_dl,
     run_restore_backup,
     subscribe_to,
+    get_playlist_art
 )
 from rest_framework import permissions
 from rest_framework.authentication import (
@@ -526,7 +527,8 @@ class PlaylistApiView(ApiBaseView):
         if action == "create":
             YoutubePlaylist(playlist_id).add_video_to_playlist(video_id)
         else:
-            YoutubePlaylist(playlist_id).move_video(video_id, action)
+            YoutubePlaylist(playlist_id).move_video(video_id, action, UserConfig(request.user.id).get_value("hide_watched"))
+        get_playlist_art.delay(playlist_id)
         return Response({"success": True}, status=status.HTTP_201_CREATED)
 
     def delete(self, request, playlist_id):
