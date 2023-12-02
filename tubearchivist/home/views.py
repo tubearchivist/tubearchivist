@@ -4,7 +4,6 @@ Functionality:
 - holds base classes to inherit from
 """
 import enum
-import logging
 import urllib.parse
 from time import sleep
 

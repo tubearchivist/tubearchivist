@@ -6,7 +6,6 @@ functionality:
 
 import json
 import uuid
-import logging
 from datetime import datetime
 
 from home.src.download.thumbnails import ThumbManager
@@ -28,7 +27,7 @@ class YoutubePlaylist(YouTubeItem):
 
     def __init__(self, youtube_id=None):
         if youtube_id is None:
-            youtube_id = str(uuid.uuid4())
+            youtube_id = "PL_" + str(uuid.uuid4())
         super().__init__(youtube_id)
         self.all_members = False
         self.nav = False
@@ -225,7 +224,8 @@ class YoutubePlaylist(YouTubeItem):
             "playlist_channel": None,
             "playlist_channel_id": None,
             "playlist_description": False,
-            "playlist_thumbnail": False
+            "playlist_thumbnail": False,
+            "playlist_subscribed": False
         }
         
         self.upload_to_es()
@@ -233,31 +233,29 @@ class YoutubePlaylist(YouTubeItem):
         return True
     
     def add_video_to_playlist(self, video_id):
-        logging.debug("add_video_to_playlist: %s", video_id)
-        
         self.get_from_es()
         video_metadata = self.get_video_metadata(video_id)
         video_metadata["idx"] = len(self.json_data["playlist_entries"])
-        
-        logging.debug("video %s", video_metadata)
           
         if not self.playlist_entries_contains(video_id):
             self.json_data["playlist_entries"].append(video_metadata)
             self.json_data["playlist_last_refresh"] = int(datetime.now().timestamp())
             self.set_playlist_thumbnail()
             self.upload_to_es()
+            
+            video = YoutubeVideo(video_id)
+            video.get_from_es()
+            if "playlist" not in video.json_data:
+                video.json_data["playlist"] = []
+            video.json_data["playlist"].append(self.youtube_id)
+            video.upload_to_es()
         
         return True
     
-    def move_video(self, video_id, action, hide_watched):
-        logging.debug("move_video: %s %s", video_id, action)
-        
+    def move_video(self, video_id, action, hide_watched=False): 
         self.get_from_es()
         
         video_index = self.get_video_index(video_id)
-        
-        logging.debug("video index %s", video_index)
-          
         playlist = self.json_data["playlist_entries"]
         item = playlist[video_index]
         playlist.pop(video_index)
@@ -289,6 +287,16 @@ class YoutubePlaylist(YouTubeItem):
         self.upload_to_es()
             
         return True
+    
+    def del_video(self, video_id):
+        playlist = self.json_data["playlist_entries"]
+        
+        i=0
+        while i < len(playlist):
+            if video_id == playlist[i]["youtube_id"]:
+                playlist.pop(i)
+                i-=1
+            i+=1
     
     def get_video_index(self, video_id):
         for i,child in enumerate(self.json_data["playlist_entries"]):
