@@ -182,6 +182,7 @@ class YoutubePlaylist(YouTubeItem):
 
     def delete_metadata(self):
         """delete metadata for playlist"""
+        self.delete_videos_metadata()
         script = (
             "ctx._source.playlist.removeAll("
             + "Collections.singleton(params.playlist)) "
@@ -198,6 +199,30 @@ class YoutubePlaylist(YouTubeItem):
         }
         _, _ = ElasticWrap("ta_video/_update_by_query").post(data)
         self.del_in_es()
+
+    def is_custom_playlist(self):
+        self.get_from_es()
+        return self.json_data["playlist_type"] == "custom"
+
+    def delete_videos_metadata(self, channel_id=None):
+        """delete video metadata for a specific channel"""
+        self.get_from_es()
+        playlist = self.json_data["playlist_entries"]
+        i = 0
+        while i < len(playlist):
+            video_id = playlist[i]["youtube_id"]
+            video = YoutubeVideo(video_id)
+            video.get_from_es()
+            if (
+                channel_id is None
+                or video.json_data["channel"]["channel_id"] == channel_id
+            ):
+                playlist.pop(i)
+                self.remove_playlist_from_video(video_id)
+                i -= 1
+            i += 1
+        self.set_playlist_thumbnail()
+        self.upload_to_es()
 
     def delete_videos_playlist(self):
         """delete playlist with all videos"""
@@ -251,13 +276,22 @@ class YoutubePlaylist(YouTubeItem):
             video.upload_to_es()
         return True
 
+    def remove_playlist_from_video(self, video_id):
+        video = YoutubeVideo(video_id)
+        video.get_from_es()
+        if video.json_data is not None and "playlist" in video.json_data:
+            video.json_data["playlist"].remove(self.youtube_id)
+            video.upload_to_es()
+
     def move_video(self, video_id, action, hide_watched=False):
         self.get_from_es()
         video_index = self.get_video_index(video_id)
         playlist = self.json_data["playlist_entries"]
         item = playlist[video_index]
         playlist.pop(video_index)
-        if action != "remove":
+        if action == "remove":
+            self.remove_playlist_from_video(item["youtube_id"])
+        else:
             if action == "up":
                 while True:
                     video_index = max(0, video_index - 1)
@@ -308,6 +342,7 @@ class YoutubePlaylist(YouTubeItem):
         while i < len(playlist):
             if video_id == playlist[i]["youtube_id"]:
                 playlist.pop(i)
+                self.set_playlist_thumbnail()
                 i -= 1
             i += 1
 
