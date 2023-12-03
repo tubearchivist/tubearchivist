@@ -1,5 +1,5 @@
 apprise==1.6.0
-celery==5.3.5
+celery==5.3.6
 Django==4.2.7
 django-auth-ldap==4.6.0
 django-cors-headers==4.3.1
