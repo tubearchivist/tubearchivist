@@ -30,6 +30,10 @@ class YoutubeChannel(YouTubeItem):
         self.all_playlists = False
         self.task = task
 
+    def build_yt_url(self):
+        """build youtube url"""
+        return f"{self.yt_base}{self.youtube_id}/featured"
+
     def build_json(self, upload=False, fallback=False):
         """get from es or from youtube"""
         self.get_from_es()
