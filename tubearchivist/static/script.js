@@ -199,10 +199,9 @@ function addToQueue(autostart = false) {
 
 //shows the video sub menu popup
 function showDotMenu(input1) {
-  let dataId, dataContext, playlists, form_code, buttonId;
+  let dataId, playlists, form_code, buttonId;
   dataId = input1.getAttribute('data-id');
   buttonId = input1.getAttribute('id');
-  dataContext = input1.getAttribute('data-context');
   playlists = getCustomPlaylists();
   
   //hide the invoking button
@@ -241,10 +240,9 @@ function removeDotMenu(input1, button_id) {
 
 //shows the video sub menu popup on custom playlist page
 function showDotMenuCustomPlaylist(input1, playlist_id, current_page, last_page) {
-  let dataId, dataContext, form_code, buttonId;
+  let dataId, form_code, buttonId;
   dataId = input1.getAttribute('data-id');
   buttonId = input1.getAttribute('id');
-  dataContext = input1.getAttribute('data-context');
   
   //hide the invoking button
   input1.style.visibility = "hidden";
@@ -276,40 +274,58 @@ function moveCustomPlaylistVideo(input1, playlist_id, current_page, last_page) {
   let itemDom = input1.parentElement.parentElement.parentElement;
   let listDom = itemDom.parentElement;
   
-  if (dataContext == "up")
+  if (dataContext === "up")
   {
      let sibling = itemDom.previousElementSibling;
-     if (sibling != null)
+     if (sibling !== null)
+     {
         sibling.before(itemDom);
+     }
      else if (current_page > 1)
+     {
        itemDom.remove();
+     }
   }
-  else if (dataContext == "down")
+  else if (dataContext === "down")
   {
      let sibling = itemDom.nextElementSibling;
-     if (sibling != null)
+     if (sibling !== null)
+     {
         sibling.after(itemDom);
-     else if (current_page != last_page)
+     }
+     else if (current_page !== last_page)
+     {
        itemDom.remove();
+     }
   }
-  else if (dataContext == "top")
+  else if (dataContext === "top")
   {
      let sibling = listDom.firstElementChild;
-     if (sibling != null)
+     if (sibling !== null)
+     {
         sibling.before(itemDom);
+     }
      if (current_page > 1)
+     {
        itemDom.remove();
+     }
   }
-  else if (dataContext == "bottom")
+  else if (dataContext === "bottom")
   {
      let sibling = listDom.lastElementChild;
-     if (sibling != null)
+     if (sibling !== null)
+     {
         sibling.after(itemDom);
-     if (current_page != last_page)
+     }
+     if (current_page !== last_page)
+     {
        itemDom.remove();
+     }
   }
-  else if (dataContext == "remove")
+  else if (dataContext === "remove")
+  {
      itemDom.remove();
+  }
 }
 
 function toIgnore(button) {
@@ -1506,7 +1522,7 @@ window.addEventListener('resize', textExpandButtonVisibilityUpdate);
 
 function showForm(id) {
   
-  let id2 = id == undefined ? 'hidden-form' : id;
+  let id2 = id === undefined ? 'hidden-form' : id;
   let formElement = document.getElementById(id2);
   let displayStyle = formElement.style.display;
   if (displayStyle === '') {

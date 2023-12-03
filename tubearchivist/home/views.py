@@ -204,7 +204,9 @@ class ArchivistResultsView(ArchivistViewConfig):
         response, _ = ElasticWrap(self.es_search).get(self.data)
         process_aggs(response)
         results = SearchProcess(response).process()
-        max_hits = response["hits"]["total"]["value"] if "hits" in response else 0
+        max_hits = (
+            response["hits"]["total"]["value"] if "hits" in response else 0
+        )
         self.pagination_handler.validate(max_hits)
         self.context.update(
             {
@@ -738,14 +740,12 @@ class PlaylistIdView(ArchivistResultsView):
         # playlist details
         es_path = f"ta_playlist/_doc/{playlist_id}"
         playlist_info = self.single_lookup(es_path)
-        
         channel_info = None
         if playlist_info["playlist_type"] != "custom":
             # channel details
             channel_id = playlist_info["playlist_channel_id"]
             es_path = f"ta_channel/_doc/{channel_id}"
             channel_info = self.single_lookup(es_path)
-
         return playlist_info, channel_info
 
     def _update_view_data(self, playlist_id, playlist_info):
@@ -759,23 +759,16 @@ class PlaylistIdView(ArchivistResultsView):
             + "{return params.scores[doc['youtube_id'].value];} "
             + "return 100000;"
         )
-        
         if playlist_info["playlist_type"] == "custom":
             video_ids = [
-                i["youtube_id"]
-                for i in playlist_info["playlist_entries"]
+                i["youtube_id"] for i in playlist_info["playlist_entries"]
             ]
-            must_clause = {"ids" : {"values" : video_ids}}
+            must_clause = {"ids": {"values": video_ids}}
         else:
             must_clause = {"match": {"playlist.keyword": playlist_id}}
-            
         self.data.update(
             {
-                "query": {
-                    "bool": {
-                        "must": [must_clause]
-                    }
-                },
+                "query": {"bool": {"must": [must_clause]}},
                 "sort": [
                     {
                         "_script": {

@@ -361,6 +361,7 @@ def subscribe_to(self, url_str: str, expected_type: str | bool = False):
     """
     SubscriptionHandler(url_str, task=self).subscribe(expected_type)
 
+
 @shared_task(bind=True, name="get_playlist_art", base=BaseTask)
 def get_playlist_art(self, playlist_id):
     """
@@ -369,7 +370,8 @@ def get_playlist_art(self, playlist_id):
     playlist = YoutubePlaylist(playlist_id)
     playlist.get_from_es()
     playlist.get_playlist_art()
-    
+
+
 @shared_task(bind=True, name="index_playlists", base=BaseTask)
 def index_channel_playlists(self, channel_id):
     """add all playlists of channel to index"""

@@ -263,7 +263,7 @@ class SubscribeToPlaylistForm(forms.Form):
             }
         ),
     )
-    
+
 
 class CreatePlaylistForm(forms.Form):
     """text area form to create a single custom playlist"""

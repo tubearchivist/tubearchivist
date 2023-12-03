@@ -236,7 +236,7 @@ class Command(BaseCommand):
                     "    ✓ Settings for all users migrated to ES"
                 )
             )
-    
+
     def _mig_custom_playlist(self):
         """migration for custom playlist"""
         self.stdout.write("[MIGRATION] custom playlist")
@@ -257,7 +257,11 @@ class Command(BaseCommand):
                     )
                 )
             else:
-                self.stdout.write(self.style.SUCCESS("    no playlist_type needed updating in ta_playlist"))
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        "    no playlist_type needed updating in ta_playlist"
+                    )
+                )
             return
 
         message = "    🗙 ta_playlist playlist_type update failed"
