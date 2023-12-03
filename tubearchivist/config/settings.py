@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "django_celery_beat",
     "rest_framework",
     "rest_framework.authtoken",
     "api",

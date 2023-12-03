@@ -2,6 +2,7 @@ apprise==1.6.0
 celery==5.3.6
 Django==4.2.7
 django-auth-ldap==4.6.0
+django-celery-beat==2.5.0
 django-cors-headers==4.3.1
 djangorestframework==3.14.0
 Pillow==10.1.0
