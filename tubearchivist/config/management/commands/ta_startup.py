@@ -350,7 +350,7 @@ class Command(BaseCommand):
 
         schedule.save()
 
-        task = PeriodicTask.objects.create(
+        task, _ = PeriodicTask.objects.get_or_create(
             crontab=schedule,
             name=task_config.get("title"),
             task=f"home.tasks.{task_name}",

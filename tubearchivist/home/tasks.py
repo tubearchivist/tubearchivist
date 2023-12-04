@@ -111,6 +111,9 @@ class BaseTask(Task):
             "title": "Add Subscription",
             "group": "subscription:add",
         },
+        "version_check": {
+            "title": "Look for new Version"
+        }
     }
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
