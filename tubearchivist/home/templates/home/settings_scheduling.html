@@ -25,10 +25,8 @@
         <h2>Rescan Subscriptions</h2>
         <div class="settings-item">
             <p>Current rescan schedule: <span class="settings-current">
-                {% if config.scheduler.update_subscribed %}
-                    {% for key, value in config.scheduler.update_subscribed.items %}
-                        {{ value }}
-                    {% endfor %}
+                {% if update_subscribed %}
+                    {{ update_subscribed.crontab.minute }} {{ update_subscribed.crontab.hour }} {{ update_subscribed.crontab.day_of_week }}
                 {% else %}
                     False
                 {% endif %}
@@ -39,13 +37,11 @@
         </div>
         <div class="settings-item">
             <p>Send notification on task completed:</p>
-            {% if config.scheduler.update_subscribed_notify %}
+            {% if download_pending.crontab.customcronschedule.task_config.notify %}
                 <p><button type="button" onclick="textReveal(this)" id="text-reveal-button">Show</button> stored notification links</p>
                 <div id="text-reveal" class="description-text">
-                    <p>{{ config.scheduler.update_subscribed_notify|linebreaks }}</p>
+                    <p>{{ download_pending.crontab.customcronschedule.task_config.notify|linebreaks }}</p>
                 </div>
-            {% else %}
-                <p>Current notification urls: <span class="settings-current">{{ config.scheduler.update_subscribed_notify }}</span></p>
             {% endif %}
             {{ scheduler_form.update_subscribed_notify }}
         </div>
@@ -54,10 +50,8 @@
         <h2>Start Download</h2>
         <div class="settings-item">
             <p>Current Download schedule: <span class="settings-current">
-                {% if config.scheduler.download_pending %}
-                    {% for key, value in config.scheduler.download_pending.items %}
-                        {{ value }}
-                    {% endfor %}
+                {% if download_pending %}
+                    {{ download_pending.crontab.minute }} {{ download_pending.crontab.hour }} {{ download_pending.crontab.day_of_week }}
                 {% else %}
                     False
                 {% endif %}
@@ -67,13 +61,11 @@
         </div>
         <div class="settings-item">
             <p>Send notification on task completed:</p>
-            {% if config.scheduler.download_pending_notify %}
+            {% if download_pending.crontab.customcronschedule.task_config.notify %}
                 <p><button type="button" onclick="textReveal(this)" id="text-reveal-button">Show</button> stored notification links</p>
                 <div id="text-reveal" class="description-text">
-                    <p>{{ config.scheduler.download_pending_notify|linebreaks }}</p>
+                    <p>{{ download_pending.crontab.customcronschedule.task_config.notify|linebreaks }}</p>
                 </div>
-            {% else %}
-                <p>Current notification urls: <span class="settings-current">{{ config.scheduler.download_pending_notify }}</span></p>
             {% endif %}
             {{ scheduler_form.download_pending_notify }}
         </div>
@@ -82,10 +74,8 @@
         <h2>Refresh Metadata</h2>
         <div class="settings-item">
             <p>Current Metadata refresh schedule: <span class="settings-current">
-                {% if config.scheduler.check_reindex %}
-                    {% for key, value in config.scheduler.check_reindex.items %}
-                        {{ value }}
-                    {% endfor %}
+                {% if check_reindex %}
+                    {{ check_reindex.crontab.minute }} {{ check_reindex.crontab.hour }} {{ check_reindex.crontab.day_of_week }}
                 {% else %}
                     False
                 {% endif %}
@@ -94,19 +84,17 @@
             {{ scheduler_form.check_reindex }}
         </div>
         <div class="settings-item">
-            <p>Current refresh for metadata older than x days: <span class="settings-current">{{ config.scheduler.check_reindex_days }}</span></p>
+            <p>Current refresh for metadata older than x days: <span class="settings-current">{{ check_reindex.crontab.customcronschedule.task_config.days }}</span></p>
             <p>Refresh older than x days, recommended 90:</p>
             {{ scheduler_form.check_reindex_days }}
         </div>
         <div class="settings-item">
             <p>Send notification on task completed:</p>
-            {% if config.scheduler.check_reindex_notify %}
+            {% if check_reindex.crontab.customcronschedule.task_config.notify %}
                 <p><button type="button" onclick="textReveal(this)" id="text-reveal-button">Show</button> stored notification links</p>
                 <div id="text-reveal" class="description-text">
-                    <p>{{ config.scheduler.check_reindex_notify|linebreaks }}</p>
+                    <p>{{ check_reindex.crontab.customcronschedule.task_config.notify|linebreaks }}</p>
                 </div>
-            {% else %}
-                <p>Current notification urls: <span class="settings-current">{{ config.scheduler.check_reindex_notify }}</span></p>
             {% endif %}
             {{ scheduler_form.check_reindex_notify }}
         </div>
@@ -115,10 +103,8 @@
         <h2>Thumbnail Check</h2>
         <div class="settings-item">
             <p>Current thumbnail check schedule: <span class="settings-current">
-                {% if config.scheduler.thumbnail_check %}
-                    {% for key, value in config.scheduler.thumbnail_check.items %}
-                        {{ value }}
-                    {% endfor %}
+                {% if thumbnail_check %}
+                    {{ thumbnail_check.crontab.minute }} {{ thumbnail_check.crontab.hour }} {{ thumbnail_check.crontab.day_of_week }}
                 {% else %}
                     False
                 {% endif %}
@@ -132,10 +118,8 @@
         <div class="settings-item">
             <p><i>Zip file backups are very slow for large archives and consistency is not guaranteed, use snapshots instead. Make sure no other tasks are running when creating a Zip file backup.</i></p>
             <p>Current index backup schedule: <span class="settings-current">
-                {% if config.scheduler.run_backup %}
-                    {% for key, value in config.scheduler.run_backup.items %}
-                        {{ value }}
-                    {% endfor %}
+                {% if run_backup %}
+                    {{ run_backup.crontab.minute }} {{ run_backup.crontab.hour }} {{ run_backup.crontab.day_of_week }}
                 {% else %}
                     False
                 {% endif %}
@@ -144,7 +128,7 @@
             {{ scheduler_form.run_backup }}
         </div>
         <div class="settings-item">
-            <p>Current backup files to keep: <span class="settings-current">{{ config.scheduler.run_backup_rotate }}</span></p>
+            <p>Current backup files to keep: <span class="settings-current">{{ run_backup.crontab.customcronschedule.task_config.rotate }}</span></p>
             <p>Max auto backups to keep:</p>
             {{ scheduler_form.run_backup_rotate }}
         </div>

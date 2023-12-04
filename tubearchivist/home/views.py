@@ -9,6 +9,7 @@ from time import sleep
 
 from api.src.search_processor import SearchProcess, process_aggs
 from api.views import check_admin
+from django_celery_beat.models import PeriodicTask
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import user_passes_test
@@ -1097,13 +1098,15 @@ class SettingsSchedulingView(MinView):
     def get(self, request):
         """read and display current settings"""
         context = self.get_min_context(request)
+        all_tasks = PeriodicTask.objects.all()
         context.update(
             {
                 "title": "Scheduling Settings",
-                "config": AppConfig().config,
                 "scheduler_form": SchedulerSettingsForm(),
             }
         )
+        for task in all_tasks:
+            context.update({task.name: task})
 
         return render(request, "home/settings_scheduling.html", context)
 
