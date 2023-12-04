@@ -342,7 +342,7 @@ class Command(BaseCommand):
 
     def _create_task(self, task_name, schedule, task_config=False):
         """create task"""
-        task_config = BaseTask.TASK_CONFIG.get(task_name)
+        description = BaseTask.TASK_CONFIG[task_name].get("title")
         schedule, _ = CustomCronSchedule.objects.get_or_create(**schedule)
         schedule.timezone = settings.TIME_ZONE
         if task_config:
@@ -353,7 +353,7 @@ class Command(BaseCommand):
         task, _ = PeriodicTask.objects.get_or_create(
             crontab=schedule,
             name=task_name,
-            description=task_config.get("title"),
+            description=description,
             task=f"home.tasks.{task_name}",
         )
         self.stdout.write(
