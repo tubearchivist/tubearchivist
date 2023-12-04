@@ -2,7 +2,7 @@
 
 import apprise
 from django_celery_beat.models import PeriodicTask
-from home.src.ta.task_manager import TaskManager
+from home.src.ta import task_manager  # partial import
 
 
 class Notifications:
@@ -51,7 +51,7 @@ class Notifications:
 
     def build_message(self) -> tuple[str, str | None]:
         """build message to send notification"""
-        task = TaskManager().get_task(self.task_id)
+        task = task_manager.TaskManager().get_task(self.task_id)
         status = task.get("status")
         title: str = f"[TA] {self.task_title} process ended with {status}"
         body: str | None = task.get("result")

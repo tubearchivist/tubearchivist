@@ -6,9 +6,7 @@ Functionality:
   because tasks are initiated at application start
 """
 
-import os
-
-from celery import Celery, Task, shared_task
+from celery import Task, shared_task
 from home.src.download.queue import PendingList
 from home.src.download.subscriptions import (
     SubscriptionHandler,
@@ -22,29 +20,11 @@ from home.src.index.channel import YoutubeChannel
 from home.src.index.filesystem import Scanner
 from home.src.index.manual import ImportFolderScanner
 from home.src.index.reindex import Reindex, ReindexManual, ReindexPopulate
-from home.src.ta.config import AppConfig, ReleaseVersion
+from home.src.ta import task_manager  # partial
+from home.src.ta.config import ReleaseVersion
 from home.src.ta.notify import Notifications
-from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
-from home.src.ta.task_manager import TaskManager
 from home.src.ta.urlparser import Parser
-
-CONFIG = AppConfig().config
-REDIS_HOST = EnvironmentSettings.REDIS_HOST
-REDIS_PORT = EnvironmentSettings.REDIS_PORT
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-app = Celery(
-    "tasks",
-    broker=f"redis://{REDIS_HOST}:{REDIS_PORT}",
-    backend=f"redis://{REDIS_HOST}:{REDIS_PORT}",
-    result_extended=True,
-)
-app.config_from_object(
-    "django.conf:settings", namespace=EnvironmentSettings.REDIS_NAME_SPACE
-)
-app.autodiscover_tasks()
-app.conf.timezone = EnvironmentSettings.TZ
 
 
 class BaseTask(Task):
@@ -160,7 +140,7 @@ class BaseTask(Task):
         task_id = self.request.id
         message = self.TASK_CONFIG.get(self.name).copy()
         message.update({"level": level, "id": task_id})
-        task_result = TaskManager().get_task(task_id)
+        task_result = task_manager.TaskManager().get_task(task_id)
         if task_result:
             command = task_result.get("command", False)
             message.update({"command": command})
@@ -170,13 +150,13 @@ class BaseTask(Task):
 
     def is_stopped(self):
         """check if task is stopped"""
-        return TaskManager().is_stopped(self.request.id)
+        return task_manager.TaskManager().is_stopped(self.request.id)
 
 
 @shared_task(name="update_subscribed", bind=True, base=BaseTask)
 def update_subscribed(self):
     """look for missing videos and add to pending"""
-    manager = TaskManager()
+    manager = task_manager.TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] rescan already running")
         self.send_progress("Rescan already in progress.")
@@ -198,7 +178,7 @@ def update_subscribed(self):
 @shared_task(name="download_pending", bind=True, base=BaseTask)
 def download_pending(self, auto_only=False):
     """download latest pending videos"""
-    manager = TaskManager()
+    manager = task_manager.TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] download queue already running")
         self.send_progress("Download Queue is already running.")
@@ -217,7 +197,7 @@ def download_pending(self, auto_only=False):
 @shared_task(name="extract_download", bind=True, base=BaseTask)
 def extrac_dl(self, youtube_ids, auto_start=False):
     """parse list passed and add to pending"""
-    TaskManager().init(self)
+    task_manager.TaskManager().init(self)
     if isinstance(youtube_ids, str):
         to_add = Parser(youtube_ids).parse()
     else:
@@ -240,7 +220,7 @@ def check_reindex(self, data=False, extract_videos=False):
         self.send_progress("Add items to the reindex Queue.")
         ReindexManual(extract_videos=extract_videos).extract_data(data)
 
-    manager = TaskManager()
+    manager = task_manager.TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] reindex queue is already running")
         self.send_progress("Reindex Queue is already running.")
@@ -252,6 +232,7 @@ def check_reindex(self, data=False, extract_videos=False):
         populate = ReindexPopulate()
         print(f"[task][{self.name}] reindex outdated documents")
         self.send_progress("Add recent documents to the reindex Queue.")
+        populate.get_interval()
         populate.add_recent()
         self.send_progress("Add outdated documents to the reindex Queue.")
         populate.add_outdated()
@@ -265,7 +246,7 @@ def check_reindex(self, data=False, extract_videos=False):
 @shared_task(bind=True, name="manual_import", base=BaseTask)
 def run_manual_import(self):
     """called from settings page, to go through import folder"""
-    manager = TaskManager()
+    manager = task_manager.TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] manual import is already running")
         self.send_progress("Manual import is already running.")
@@ -278,7 +259,7 @@ def run_manual_import(self):
 @shared_task(bind=True, name="run_backup", base=BaseTask)
 def run_backup(self, reason="auto"):
     """called from settings page, dump backup to zip file"""
-    manager = TaskManager()
+    manager = task_manager.TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] backup is already running")
         self.send_progress("Backup is already running.")
@@ -291,7 +272,7 @@ def run_backup(self, reason="auto"):
 @shared_task(bind=True, name="restore_backup", base=BaseTask)
 def run_restore_backup(self, filename):
     """called from settings page, dump backup to zip file"""
-    manager = TaskManager()
+    manager = task_manager.TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] restore is already running")
         self.send_progress("Restore is already running.")
@@ -309,7 +290,7 @@ def run_restore_backup(self, filename):
 @shared_task(bind=True, name="rescan_filesystem", base=BaseTask)
 def rescan_filesystem(self):
     """check the media folder for mismatches"""
-    manager = TaskManager()
+    manager = task_manager.TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] filesystem rescan already running")
         self.send_progress("Filesystem Rescan is already running.")
@@ -325,7 +306,7 @@ def rescan_filesystem(self):
 @shared_task(bind=True, name="thumbnail_check", base=BaseTask)
 def thumbnail_check(self):
     """validate thumbnails"""
-    manager = TaskManager()
+    manager = task_manager.TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] thumbnail check is already running")
         self.send_progress("Thumbnail check is already running.")
@@ -338,7 +319,7 @@ def thumbnail_check(self):
 @shared_task(bind=True, name="resync_thumbs", base=BaseTask)
 def re_sync_thumbs(self):
     """sync thumbnails to mediafiles"""
-    manager = TaskManager()
+    manager = task_manager.TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] thumb re-embed is already running")
         self.send_progress("Thumbnail re-embed is already running.")

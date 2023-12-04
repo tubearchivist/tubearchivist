@@ -9,6 +9,7 @@ import os
 from datetime import datetime
 from time import sleep
 
+from django_celery_beat.models import PeriodicTask
 from home.src.download.queue import PendingList
 from home.src.download.subscriptions import ChannelSubscription
 from home.src.download.thumbnails import ThumbManager
@@ -67,9 +68,22 @@ class ReindexBase:
 class ReindexPopulate(ReindexBase):
     """add outdated and recent documents to reindex queue"""
 
+    INTERVAL_DEFAIULT = 90
+
     def __init__(self):
         super().__init__()
-        self.interval = self.config["scheduler"]["check_reindex_days"]
+        self.interval = self.INTERVAL_DEFAIULT
+
+    def get_interval(self):
+        """get reindex days interval from task"""
+        try:
+            task = PeriodicTask.objects.get(name="check_reindex")
+        except PeriodicTask.DoesNotExist:
+            return
+
+        task_config = task.crontab.customcronschedule.task_config
+        if task_config.get("days"):
+            self.interval = task_config.get("days")
 
     def add_recent(self):
         """add recent videos to refresh"""

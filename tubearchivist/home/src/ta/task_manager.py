@@ -5,6 +5,7 @@ functionality:
 """
 
 from home import tasks as ta_tasks
+from home.celery import app as celery_app
 from home.src.ta.ta_redis import RedisArchivist, TaskRedis
 
 
@@ -86,7 +87,7 @@ class TaskCommand:
 
     def start(self, task_name):
         """start task by task_name, only pass task that don't take args"""
-        task = ta_tasks.app.tasks.get(task_name).delay()
+        task = celery_app.tasks.get(task_name).delay()
         message = {
             "task_id": task.id,
             "status": task.status,
@@ -113,4 +114,4 @@ class TaskCommand:
     def kill(self, task_id):
         """send kill signal to task_id"""
         print(f"[task][{task_id}]: received KILL signal.")
-        ta_tasks.app.control.revoke(task_id, terminate=True)
+        celery_app.control.revoke(task_id, terminate=True)
