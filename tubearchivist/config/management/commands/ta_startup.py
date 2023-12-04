@@ -352,7 +352,8 @@ class Command(BaseCommand):
 
         task, _ = PeriodicTask.objects.get_or_create(
             crontab=schedule,
-            name=task_config.get("title"),
+            name=task_name,
+            description=task_config.get("title"),
             task=f"home.tasks.{task_name}",
         )
         self.stdout.write(
