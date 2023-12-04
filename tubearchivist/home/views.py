@@ -9,7 +9,6 @@ from time import sleep
 
 from api.src.search_processor import SearchProcess, process_aggs
 from api.views import check_admin
-from django_celery_beat.models import PeriodicTask
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import user_passes_test
@@ -18,6 +17,7 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views import View
+from django_celery_beat.models import PeriodicTask
 from home.src.download.queue import PendingInteract
 from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.backup import ElasticBackup
