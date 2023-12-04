@@ -29,11 +29,11 @@ from home.tasks import (
     check_reindex,
     download_pending,
     extrac_dl,
+    get_playlist_art,
     run_restore_backup,
     subscribe_to,
-    get_playlist_art,
 )
-from rest_framework import permissions
+from rest_framework import permissions, status
 from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
@@ -42,7 +42,6 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
 
 
 def check_admin(user):

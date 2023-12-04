@@ -26,12 +26,12 @@ from home.src.frontend.forms import (
     AddToQueueForm,
     ApplicationSettingsForm,
     ChannelOverwriteForm,
+    CreatePlaylistForm,
     CustomAuthForm,
     MultiSearchForm,
     SchedulerSettingsForm,
     SubscribeToChannelForm,
     SubscribeToPlaylistForm,
-    CreatePlaylistForm,
     UserSettingsForm,
 )
 from home.src.index.channel import channel_overwrites

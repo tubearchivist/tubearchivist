@@ -8,8 +8,8 @@ import os
 from time import sleep
 
 from django.core.management.base import BaseCommand, CommandError
-from home.src.es.index_setup import ElasitIndexWrap
 from home.src.es.connect import ElasticWrap
+from home.src.es.index_setup import ElasitIndexWrap
 from home.src.es.snapshot import ElasticSnapshot
 from home.src.ta.config import AppConfig, ReleaseVersion
 from home.src.ta.helper import clear_dl_cache
