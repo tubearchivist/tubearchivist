@@ -22,7 +22,7 @@ from home.src.index.channel import YoutubeChannel
 from home.src.index.filesystem import Scanner
 from home.src.index.manual import ImportFolderScanner
 from home.src.index.reindex import Reindex, ReindexManual, ReindexPopulate
-from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
+from home.src.ta.config import AppConfig, ReleaseVersion
 from home.src.ta.notify import Notifications
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
@@ -111,9 +111,7 @@ class BaseTask(Task):
             "title": "Add Subscription",
             "group": "subscription:add",
         },
-        "version_check": {
-            "title": "Look for new Version"
-        }
+        "version_check": {"title": "Look for new Version"},
     }
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
@@ -370,7 +368,3 @@ def index_channel_playlists(self, channel_id):
 def version_check():
     """check for new updates"""
     ReleaseVersion().check()
-
-
-# start schedule here
-# app.conf.beat_schedule = ScheduleBuilder().build_schedule()
