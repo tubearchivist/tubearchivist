@@ -370,4 +370,4 @@ def version_check():
 
 
 # start schedule here
-app.conf.beat_schedule = ScheduleBuilder().build_schedule()
+# app.conf.beat_schedule = ScheduleBuilder().build_schedule()

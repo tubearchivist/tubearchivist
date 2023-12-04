@@ -5,9 +5,13 @@ Functionality:
 """
 
 import os
+from random import randint
 from time import sleep
 
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
+from django_celery_beat.models import PeriodicTask
+from home.models import CustomCronSchedule
 from home.src.es.index_setup import ElasitIndexWrap
 from home.src.es.snapshot import ElasticSnapshot
 from home.src.ta.config import AppConfig, ReleaseVersion
@@ -16,6 +20,7 @@ from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskManager
 from home.src.ta.users import UserConfig
+from home.tasks import BaseTask
 
 TOPIC = """
 
@@ -43,6 +48,7 @@ class Command(BaseCommand):
         self._mig_index_setup()
         self._mig_snapshot_check()
         self._mig_move_users_to_es()
+        self._mig_schedule_store()
 
     def _sync_redis_state(self):
         """make sure redis gets new config.json values"""
@@ -234,3 +240,121 @@ class Command(BaseCommand):
                     "    ✓ Settings for all users migrated to ES"
                 )
             )
+
+    def _mig_schedule_store(self):
+        """
+        update from 0.4.4 to 0.4.5
+        migrate schedule task store to CustomCronSchedule
+        """
+        self.stdout.write("[MIGRATION] migrate schedule store")
+        config = AppConfig().config
+        current_schedules = config.get("scheduler")
+        if not current_schedules:
+            self.stdout.write(
+                self.style.SUCCESS("    no schedules to migrate")
+            )
+            return
+
+        self._mig_update_subscribed(current_schedules)
+        self._mig_download_pending(current_schedules)
+        self._mig_check_reindex(current_schedules)
+        self._mig_thumbnail_check(current_schedules)
+        self._mig_run_backup(current_schedules)
+        self._mig_version_check()
+
+        del config["scheduler"]
+        RedisArchivist().set_message("config", config, save=True)
+
+    def _mig_update_subscribed(self, current_schedules):
+        """create update_subscribed schedule"""
+        update_subscribed_schedule = current_schedules.get("update_subscribed")
+        if update_subscribed_schedule:
+            task_config = False
+            notify = current_schedules.get("update_subscribed_notify")
+            if notify:
+                task_config = {"notify": notify}
+            self._create_task(
+                "update_subscribed",
+                update_subscribed_schedule,
+                task_config=task_config,
+            )
+
+    def _mig_download_pending(self, current_schedules):
+        """create download_pending schedule"""
+        download_pending_schedule = current_schedules.get("download_pending")
+        if download_pending_schedule:
+            task_config = False
+            notify = current_schedules.get("download_pending_notify")
+            if notify:
+                task_config = {"notify": notify}
+            self._create_task(
+                "download_pending",
+                download_pending_schedule,
+                task_config=task_config,
+            )
+
+    def _mig_check_reindex(self, current_schedules):
+        """create check_reindex schedule"""
+        check_reindex_schedule = current_schedules.get("check_reindex")
+        if check_reindex_schedule:
+            task_config = {}
+            notify = current_schedules.get("check_reindex_notify")
+            if notify:
+                task_config.update({"notify": notify})
+
+            days = current_schedules.get("check_reindex_days")
+            if days:
+                task_config.update({"days": days})
+
+            self._create_task(
+                "check_reindex",
+                check_reindex_schedule,
+                task_config=task_config,
+            )
+
+    def _mig_thumbnail_check(self, current_schedules):
+        """create thumbnail_check schedule"""
+        thumbnail_check_schedule = current_schedules.get("thumbnail_check")
+        if thumbnail_check_schedule:
+            self._create_task("thumbnail_check", thumbnail_check_schedule)
+
+    def _mig_run_backup(self, current_schedules):
+        """create run_backup schedule"""
+        run_backup_schedule = current_schedules.get("run_backup")
+        if run_backup_schedule:
+            task_config = False
+            rotate = current_schedules.get("run_backup_rotate")
+            if rotate:
+                task_config = {"rotate": rotate}
+
+            self._create_task(
+                "run_backup", run_backup_schedule, task_config=task_config
+            )
+
+    def _mig_version_check(self):
+        """create version_check schedule"""
+        version_check_schedule = {
+            "minute": randint(0, 59),
+            "hour": randint(0, 23),
+            "day_of_week": "*",
+        }
+        self._create_task("version_check", version_check_schedule)
+
+    def _create_task(self, task_name, schedule, task_config=False):
+        """create task"""
+        task_config = BaseTask.TASK_CONFIG.get(task_name)
+        schedule, _ = CustomCronSchedule.objects.get_or_create(**schedule)
+        schedule.timezone = settings.TIME_ZONE
+        if task_config:
+            schedule.task_config = task_config
+
+        schedule.save()
+
+        task = PeriodicTask.objects.create(
+            crontab=schedule,
+            name=task_config.get("title"),
+            task=f"home.tasks.{task_name}",
+        )
+        self.stdout.write(
+            self.style.SUCCESS(f"    ✓ new task created: '{task}'")
+        )
