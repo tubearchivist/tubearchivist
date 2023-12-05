@@ -203,7 +203,7 @@ class ElasticBackup:
         except PeriodicTask.DoesNotExist:
             return
 
-        rotate = task.crontab.customcronschedule.task_config.get("rotate")
+        rotate = task.task_config.get("rotate")
         if not rotate:
             return
 

@@ -10,8 +10,8 @@ from time import sleep
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-from django_celery_beat.models import PeriodicTask
-from home.models import CustomCronSchedule
+from django_celery_beat.models import CrontabSchedule
+from home.models import CustomPeriodicTask
 from home.src.es.index_setup import ElasitIndexWrap
 from home.src.es.snapshot import ElasticSnapshot
 from home.src.ta.config import AppConfig, ReleaseVersion
@@ -343,19 +343,20 @@ class Command(BaseCommand):
     def _create_task(self, task_name, schedule, task_config=False):
         """create task"""
         description = BaseTask.TASK_CONFIG[task_name].get("title")
-        schedule, _ = CustomCronSchedule.objects.get_or_create(**schedule)
+        schedule, _ = CrontabSchedule.objects.get_or_create(**schedule)
         schedule.timezone = settings.TIME_ZONE
-        if task_config:
-            schedule.task_config = task_config
-
         schedule.save()
 
-        task, _ = PeriodicTask.objects.get_or_create(
+        task, _ = CustomPeriodicTask.objects.get_or_create(
             crontab=schedule,
             name=task_name,
             description=description,
             task=task_name,
         )
+        if task_config:
+            task.task_config = task_config
+            task.save()
+
         self.stdout.write(
             self.style.SUCCESS(f"    ✓ new task created: '{task}'")
         )

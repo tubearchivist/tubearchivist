@@ -38,7 +38,7 @@ class Notifications:
         except PeriodicTask.DoesNotExist:
             return False
 
-        hooks: str = task.crontab.customcronschedule.task_config.get("notify")
+        hooks: str = task.task_config.get("notify")
 
         return hooks
 

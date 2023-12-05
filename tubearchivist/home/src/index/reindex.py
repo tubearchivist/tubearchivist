@@ -81,7 +81,7 @@ class ReindexPopulate(ReindexBase):
         except PeriodicTask.DoesNotExist:
             return
 
-        task_config = task.crontab.customcronschedule.task_config
+        task_config = task.task_config
         if task_config.get("days"):
             self.interval = task_config.get("days")
 

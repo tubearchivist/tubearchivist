@@ -5,7 +5,7 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 from django.db import models
-from django_celery_beat.models import CrontabSchedule
+from django_celery_beat.models import PeriodicTask
 
 
 class AccountManager(BaseUserManager):
@@ -54,7 +54,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ["password"]
 
 
-class CustomCronSchedule(CrontabSchedule):
-    """add custom metadata field"""
+class CustomPeriodicTask(PeriodicTask):
+    """add custom metadata to to task"""
 
     task_config = models.JSONField(default=dict)
