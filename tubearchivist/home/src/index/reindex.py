@@ -9,7 +9,7 @@ import os
 from datetime import datetime
 from time import sleep
 
-from django_celery_beat.models import PeriodicTask
+from home.models import CustomPeriodicTask
 from home.src.download.queue import PendingList
 from home.src.download.subscriptions import ChannelSubscription
 from home.src.download.thumbnails import ThumbManager
@@ -77,8 +77,8 @@ class ReindexPopulate(ReindexBase):
     def get_interval(self):
         """get reindex days interval from task"""
         try:
-            task = PeriodicTask.objects.get(name="check_reindex")
-        except PeriodicTask.DoesNotExist:
+            task = CustomPeriodicTask.objects.get(name="check_reindex")
+        except CustomPeriodicTask.DoesNotExist:
             return
 
         task_config = task.task_config

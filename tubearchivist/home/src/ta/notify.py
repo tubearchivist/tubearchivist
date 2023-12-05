@@ -1,7 +1,7 @@
 """send notifications using apprise"""
 
 import apprise
-from django_celery_beat.models import PeriodicTask
+from home.models import CustomPeriodicTask
 from home.src.ta import task_manager  # partial import
 
 
@@ -34,8 +34,8 @@ class Notifications:
     def get_url(self) -> str | None:
         """get apprise urls for task"""
         try:
-            task = PeriodicTask.objects.get(name=self.name)
-        except PeriodicTask.DoesNotExist:
+            task = CustomPeriodicTask.objects.get(name=self.name)
+        except CustomPeriodicTask.DoesNotExist:
             return False
 
         hooks: str = task.task_config.get("notify")
