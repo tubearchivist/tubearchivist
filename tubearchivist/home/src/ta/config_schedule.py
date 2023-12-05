@@ -40,6 +40,9 @@ class ScheduleBuilder:
                 continue
 
             if key in self.SCHEDULES:
+                if value == "auto":
+                    value = self.SCHEDULES.get(key)
+
                 _ = self.get_set_task(key, value)
                 continue
 

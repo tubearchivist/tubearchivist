@@ -41,6 +41,9 @@ class CrontabValidator:
 
     def validate(self, cron_expression):
         """create crontab schedule"""
+        if cron_expression == "auto":
+            return
+
         cron_fields = cron_expression.split()
         self.validate_fields(cron_fields)
 
