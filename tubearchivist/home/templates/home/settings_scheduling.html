@@ -37,10 +37,10 @@
         </div>
         <div class="settings-item">
             <p>Send notification on task completed:</p>
-            {% if download_pending.crontab.customcronschedule.task_config.notify %}
+            {% if download_pending.task_config.notify %}
                 <p><button type="button" onclick="textReveal(this)" id="text-reveal-button">Show</button> stored notification links</p>
                 <div id="text-reveal" class="description-text">
-                    <p>{{ download_pending.crontab.customcronschedule.task_config.notify|linebreaks }}</p>
+                    <p>{{ download_pending.task_config.notify|linebreaks }}</p>
                 </div>
             {% endif %}
             {{ scheduler_form.update_subscribed_notify }}
@@ -61,10 +61,10 @@
         </div>
         <div class="settings-item">
             <p>Send notification on task completed:</p>
-            {% if download_pending.crontab.customcronschedule.task_config.notify %}
+            {% if download_pending.task_config.notify %}
                 <p><button type="button" onclick="textReveal(this)" id="text-reveal-button">Show</button> stored notification links</p>
                 <div id="text-reveal" class="description-text">
-                    <p>{{ download_pending.crontab.customcronschedule.task_config.notify|linebreaks }}</p>
+                    <p>{{ download_pending.task_config.notify|linebreaks }}</p>
                 </div>
             {% endif %}
             {{ scheduler_form.download_pending_notify }}
@@ -84,16 +84,16 @@
             {{ scheduler_form.check_reindex }}
         </div>
         <div class="settings-item">
-            <p>Current refresh for metadata older than x days: <span class="settings-current">{{ check_reindex.crontab.customcronschedule.task_config.days }}</span></p>
+            <p>Current refresh for metadata older than x days: <span class="settings-current">{{ check_reindex.task_config.days }}</span></p>
             <p>Refresh older than x days, recommended 90:</p>
             {{ scheduler_form.check_reindex_days }}
         </div>
         <div class="settings-item">
             <p>Send notification on task completed:</p>
-            {% if check_reindex.crontab.customcronschedule.task_config.notify %}
+            {% if check_reindex.task_config.notify %}
                 <p><button type="button" onclick="textReveal(this)" id="text-reveal-button">Show</button> stored notification links</p>
                 <div id="text-reveal" class="description-text">
-                    <p>{{ check_reindex.crontab.customcronschedule.task_config.notify|linebreaks }}</p>
+                    <p>{{ check_reindex.task_config.notify|linebreaks }}</p>
                 </div>
             {% endif %}
             {{ scheduler_form.check_reindex_notify }}
@@ -110,6 +110,9 @@
                 {% endif %}
             </span></p>
             <p>Periodically check and cleanup thumbnails:</p>
+            {% for error in scheduler_form.thumbnail_check.errors %}
+                <p class="danger-zone">{{ error }}</p>
+            {% endfor %}
             {{ scheduler_form.thumbnail_check }}
         </div>
     </div>
@@ -128,7 +131,7 @@
             {{ scheduler_form.run_backup }}
         </div>
         <div class="settings-item">
-            <p>Current backup files to keep: <span class="settings-current">{{ run_backup.crontab.customcronschedule.task_config.rotate }}</span></p>
+            <p>Current backup files to keep: <span class="settings-current">{{ run_backup.task_config.rotate }}</span></p>
             <p>Max auto backups to keep:</p>
             {{ scheduler_form.run_backup_rotate }}
         </div>

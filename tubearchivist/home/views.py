@@ -17,7 +17,7 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views import View
-from django_celery_beat.models import PeriodicTask
+from home.models import CustomPeriodicTask
 from home.src.download.queue import PendingInteract
 from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.backup import ElasticBackup
@@ -29,17 +29,18 @@ from home.src.frontend.forms import (
     ChannelOverwriteForm,
     CustomAuthForm,
     MultiSearchForm,
-    SchedulerSettingsForm,
     SubscribeToChannelForm,
     SubscribeToPlaylistForm,
     UserSettingsForm,
 )
+from home.src.frontend.forms_schedule import SchedulerSettingsForm
 from home.src.index.channel import channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video_constants import VideoTypeEnum
-from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
+from home.src.ta.config import AppConfig, ReleaseVersion
+from home.src.ta.config_schedule import ScheduleBuilder
 from home.src.ta.helper import check_stylesheet, time_parser
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
@@ -1097,16 +1098,7 @@ class SettingsSchedulingView(MinView):
 
     def get(self, request):
         """read and display current settings"""
-        context = self.get_min_context(request)
-        all_tasks = PeriodicTask.objects.all()
-        context.update(
-            {
-                "title": "Scheduling Settings",
-                "scheduler_form": SchedulerSettingsForm(),
-            }
-        )
-        for task in all_tasks:
-            context.update({task.name: task})
+        context = self.get_context(request, SchedulerSettingsForm())
 
         return render(request, "home/settings_scheduling.html", context)
 
@@ -1118,9 +1110,40 @@ class SettingsSchedulingView(MinView):
             if any(scheduler_form_post.values()):
                 print(scheduler_form_post)
                 ScheduleBuilder().update_schedule_conf(scheduler_form_post)
+        else:
+            self.fail_message()
+            context = self.get_context(request, scheduler_form)
+            return render(request, "home/settings_scheduling.html", context)
 
         sleep(1)
         return redirect("settings_scheduling", permanent=True)
+
+    def get_context(self, request, scheduler_form):
+        """get context"""
+        context = self.get_min_context(request)
+        all_tasks = CustomPeriodicTask.objects.all()
+        context.update(
+            {
+                "title": "Scheduling Settings",
+                "scheduler_form": scheduler_form,
+            }
+        )
+        for task in all_tasks:
+            context.update({task.name: task})
+
+        return context
+
+    @staticmethod
+    def fail_message():
+        """send failure message"""
+        mess_dict = {
+            "group": "setting:schedule",
+            "level": "error",
+            "title": "Scheduler update failed.",
+            "messages": ["Invalid schedule input"],
+            "id": "0000",
+        }
+        RedisArchivist().set_message("message:setting", mess_dict, expire=True)
 
 
 @method_decorator(user_passes_test(check_admin), name="dispatch")

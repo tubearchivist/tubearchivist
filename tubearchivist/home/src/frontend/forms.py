@@ -159,50 +159,6 @@ class ApplicationSettingsForm(forms.Form):
     )
 
 
-class SchedulerSettingsForm(forms.Form):
-    """handle scheduler settings"""
-
-    HELP_TEXT = "Add Apprise notification URLs, one per line"
-
-    update_subscribed = forms.CharField(required=False)
-    update_subscribed_notify = forms.CharField(
-        label=False,
-        widget=forms.Textarea(
-            attrs={
-                "rows": 2,
-                "placeholder": HELP_TEXT,
-            }
-        ),
-        required=False,
-    )
-    download_pending = forms.CharField(required=False)
-    download_pending_notify = forms.CharField(
-        label=False,
-        widget=forms.Textarea(
-            attrs={
-                "rows": 2,
-                "placeholder": HELP_TEXT,
-            }
-        ),
-        required=False,
-    )
-    check_reindex = forms.CharField(required=False)
-    check_reindex_notify = forms.CharField(
-        label=False,
-        widget=forms.Textarea(
-            attrs={
-                "rows": 2,
-                "placeholder": HELP_TEXT,
-            }
-        ),
-        required=False,
-    )
-    check_reindex_days = forms.IntegerField(required=False)
-    thumbnail_check = forms.CharField(required=False)
-    run_backup = forms.CharField(required=False)
-    run_backup_rotate = forms.IntegerField(required=False)
-
-
 class MultiSearchForm(forms.Form):
     """multi search form for /search/"""
 
