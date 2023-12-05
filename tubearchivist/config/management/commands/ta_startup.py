@@ -354,7 +354,7 @@ class Command(BaseCommand):
             crontab=schedule,
             name=task_name,
             description=description,
-            task=f"home.tasks.{task_name}",
+            task=task_name,
         )
         self.stdout.write(
             self.style.SUCCESS(f"    ✓ new task created: '{task}'")
