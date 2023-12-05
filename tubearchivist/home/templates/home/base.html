@@ -35,7 +35,13 @@
         <div class="boxed-content">
             <div class="top-banner">
                 <a href="{% url 'home' %}">
-                    <img alt="tube-archivist-banner">
+                    <img id="top-banner-img" alt="tube-archivist-banner">
+                    <script>
+                        var src = getComputedStyle(document.body).getPropertyValue("--banner");
+                        src = src.replace(/\"/g, "");
+                        var img = document.getElementById("top-banner-img");
+                        img.setAttribute("src", src);
+                    </script>
                 </a>
             </div>
             <div class="top-nav">

@@ -22,7 +22,13 @@
 </head>
 <body>
     <div class="boxed-content login-page">
-        <img alt="tube-archivist-logo">
+        <img id="logo-img" alt="tube-archivist-banner">
+        <script>
+            var src = getComputedStyle(document.body).getPropertyValue("--logo");
+            src = src.replace(/\"/g, "");
+            var img = document.getElementById("logo-img");
+            img.setAttribute("src", src);
+        </script>
         <h1>Tube Archivist</h1>
         <h2>Your Self Hosted YouTube Media Server</h2>
         {% if form_error %}
