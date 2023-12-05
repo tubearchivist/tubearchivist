@@ -34,7 +34,7 @@ class Notifications:
     def get_url(self) -> str | None:
         """get apprise urls for task"""
         try:
-            task = PeriodicTask.objects.get(self.name)
+            task = PeriodicTask.objects.get(name=self.name)
         except PeriodicTask.DoesNotExist:
             return False
 
