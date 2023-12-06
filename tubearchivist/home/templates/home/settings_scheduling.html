@@ -24,6 +24,7 @@
     <div class="settings-group">
         <h2>Rescan Subscriptions</h2>
         <div class="settings-item">
+            <p>Become a sponsor and join <a href="https://members.tubearchivist.com/" target="_blank">members.tubearchivist.com</a> to get access to <span class="settings-current">real time</span> notifications for new videos uploaded by your favorite channels.</p>
             <p>Current rescan schedule: <span class="settings-current">
                 {% if update_subscribed %}
                     {{ update_subscribed.crontab.minute }} {{ update_subscribed.crontab.hour }} {{ update_subscribed.crontab.day_of_week }}
@@ -31,7 +32,6 @@
                     False
                 {% endif %}
             </span></p>
-            <p>Become a sponsor and join <a href="https://members.tubearchivist.com/" target="_blank">members.tubearchivist.com</a> to get access to <span class="settings-current">real time</span> notifications for new videos uploaded by your favorite channels.</p>
             <p>Periodically rescan your subscriptions:</p>
             {% for error in scheduler_form.update_subscribed.errors %}
                 <p class="danger-zone">{{ error }}</p>

@@ -10,6 +10,7 @@ from api.src.aggs import (
     WatchProgress,
 )
 from api.src.search_processor import SearchProcess
+from home.models import CustomPeriodicTask
 from home.src.download.queue import PendingInteract
 from home.src.download.subscriptions import (
     ChannelSubscription,
@@ -954,6 +955,27 @@ class TaskIDView(ApiBaseView):
     def _build_message_key(self, task_conf, task_id):
         """build message key to forward command to notification"""
         return f"message:{task_conf.get('group')}:{task_id.split('-')[0]}"
+
+
+class ScheduleView(ApiBaseView):
+    """resolves to /api/schedule/
+    GET: return a list of active schedules
+    """
+
+    permission_classes = [AdminOnly]
+
+    def delete(self, request):
+        """delete schedule by task_name query"""
+        task_name = request.GET.get("task_name")
+        try:
+            task = CustomPeriodicTask.objects.get(name=task_name)
+        except CustomPeriodicTask.DoesNotExist:
+            message = {"message": "task_name not found"}
+            return Response(message, status=404)
+
+        _ = task.delete()
+
+        return Response({"success": True})
 
 
 class RefreshView(ApiBaseView):
