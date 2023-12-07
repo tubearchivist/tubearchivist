@@ -119,7 +119,7 @@ class BaseTask(Task):
         """callback after task returns"""
         print(f"{task_id} return callback")
         task_title = self.TASK_CONFIG.get(self.name).get("title")
-        Notifications(self.name, task_id, task_title).send()
+        Notifications(self.name).send(task_id, task_title)
 
     def send_progress(self, message_lines, progress=False, title=False):
         """send progress message"""
