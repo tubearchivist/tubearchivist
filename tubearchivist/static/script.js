@@ -1567,6 +1567,6 @@ function doShortcut(e) {
 // Set img src attribute from value meant for stylesheets
 // Needed to fix scaling issues with Chromium
 function setImg(img, src) {
-  src = src.replace(/\"/g, "");
-  img.setAttribute("src", src);
+  src = src.replace(/["']/g, '');
+  img.setAttribute('src', src);
 }
