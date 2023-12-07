@@ -729,7 +729,6 @@ video:-webkit-full-screen {
     max-width: 200px;
     max-height: 200px;
     margin-bottom: 40px;
-    content: var(--logo);
 }
 
 .login-page form {
