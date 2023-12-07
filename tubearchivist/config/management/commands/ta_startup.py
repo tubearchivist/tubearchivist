@@ -16,6 +16,7 @@ from home.src.es.index_setup import ElasitIndexWrap
 from home.src.es.snapshot import ElasticSnapshot
 from home.src.ta.config import AppConfig, ReleaseVersion
 from home.src.ta.helper import clear_dl_cache
+from home.src.ta.notify import Notifications
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskManager
@@ -267,50 +268,39 @@ class Command(BaseCommand):
 
     def _mig_update_subscribed(self, current_schedules):
         """create update_subscribed schedule"""
-        update_subscribed_schedule = current_schedules.get("update_subscribed")
+        task_name = "update_subscribed"
+        update_subscribed_schedule = current_schedules.get(task_name)
         if update_subscribed_schedule:
-            task_config = False
-            notify = current_schedules.get("update_subscribed_notify")
-            if notify:
-                task_config = {"notify": notify}
-            self._create_task(
-                "update_subscribed",
-                update_subscribed_schedule,
-                task_config=task_config,
-            )
+            self._create_task(task_name, update_subscribed_schedule)
+
+        self._create_notifications(task_name, current_schedules)
 
     def _mig_download_pending(self, current_schedules):
         """create download_pending schedule"""
-        download_pending_schedule = current_schedules.get("download_pending")
+        task_name = "download_pending"
+        download_pending_schedule = current_schedules.get(task_name)
         if download_pending_schedule:
-            task_config = False
-            notify = current_schedules.get("download_pending_notify")
-            if notify:
-                task_config = {"notify": notify}
-            self._create_task(
-                "download_pending",
-                download_pending_schedule,
-                task_config=task_config,
-            )
+            self._create_task(task_name, download_pending_schedule)
+
+        self._create_notifications(task_name, current_schedules)
 
     def _mig_check_reindex(self, current_schedules):
         """create check_reindex schedule"""
-        check_reindex_schedule = current_schedules.get("check_reindex")
+        task_name = "check_reindex"
+        check_reindex_schedule = current_schedules.get(task_name)
         if check_reindex_schedule:
             task_config = {}
-            notify = current_schedules.get("check_reindex_notify")
-            if notify:
-                task_config.update({"notify": notify})
-
             days = current_schedules.get("check_reindex_days")
             if days:
                 task_config.update({"days": days})
 
             self._create_task(
-                "check_reindex",
+                task_name,
                 check_reindex_schedule,
                 task_config=task_config,
             )
+
+        self._create_notifications(task_name, current_schedules)
 
     def _mig_thumbnail_check(self, current_schedules):
         """create thumbnail_check schedule"""
@@ -360,3 +350,20 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS(f"    ✓ new task created: '{task}'")
         )
+
+    def _create_notifications(self, task_name, current_schedules):
+        """migrate notifications of task"""
+        notifications = current_schedules.get(f"{task_name}_notify")
+        if not notifications:
+            return
+
+        urls = [i.strip() for i in notifications.split()]
+        if not urls:
+            return
+
+        self.stdout.write(
+            self.style.SUCCESS(f"    ✓ migrate notifications: '{urls}'")
+        )
+        handler = Notifications(task_name)
+        for url in urls:
+            handler.add_url(url)

@@ -20,9 +20,9 @@ from home.src.index.channel import YoutubeChannel
 from home.src.index.filesystem import Scanner
 from home.src.index.manual import ImportFolderScanner
 from home.src.index.reindex import Reindex, ReindexManual, ReindexPopulate
+from home.src.ta import notify  # partial
 from home.src.ta import task_manager  # partial
 from home.src.ta.config import ReleaseVersion
-from home.src.ta.notify import Notifications
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.urlparser import Parser
 
@@ -119,7 +119,7 @@ class BaseTask(Task):
         """callback after task returns"""
         print(f"{task_id} return callback")
         task_title = self.TASK_CONFIG.get(self.name).get("title")
-        Notifications(self.name).send(task_id, task_title)
+        notify.Notifications(self.name).send(task_id, task_title)
 
     def send_progress(self, message_lines, progress=False, title=False):
         """send progress message"""
