@@ -52,13 +52,12 @@
 	            </div>
 	        </div>
             <div class="rss-icons">
-	        	<a href="/auth/{{ api_token }}{% url 'channel_id_podcast' channel_info.channel_id 'video' %}">
-	        		<img id="rss-audio-button" src="{% static 'img/icon-rss.svg' %}" alt="rss-icon" data-context="video" title="Podcast Video">
-	        	</a>
-	        	<a href="/auth/{{ api_token }}{% url 'channel_id_podcast' channel_info.channel_id 'audio' %}">
-	        		<img id="rss-audio-button" src="{% static 'img/icon-rss.svg' %}" alt="rss-icon" data-context="audio" title="Podcast Audio">
-	        	</a>
+	        	<img id="rss-audio-button" src="{% static 'img/icon-rss.svg' %}" alt="rss-icon" data-context="video" onclick="showForm('rss_buttons')" title="Podcast">
 	        </div>
+	        <div id="rss_buttons" class="hidden button-box-wrap">
+                	<button type="button" onclick="copyToClipboard('{{ request.scheme }}://{{ request.META.HTTP_HOST }}/auth/{{ api_token }}{% url 'channel_id_podcast' channel_info.channel_id 'audio' %}')">Copy Audio Podcast to clipboard</button>
+                    <button type="button" onclick="copyToClipboard('{{ request.scheme }}://{{ request.META.HTTP_HOST }}/auth/{{ api_token }}{% url 'channel_id_podcast' channel_info.channel_id 'video' %}')">Copy Video Podcast to clipboard</button>
+             </div>
         </div>
         <div class="info-box-item">
             {% if aggs %}

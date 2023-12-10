@@ -358,7 +358,6 @@ button:hover {
     align-items: center;
 }
 
-.rss-icons > a > img,
 .view-icons img {
     width: 30px;
     margin: 5px 10px;
@@ -373,7 +372,7 @@ button:hover {
     filter: var(--img-filter);
 }
 
-#hidden-form {
+#hidden-form, .hidden {
     display: none;
 }
 
@@ -670,6 +669,13 @@ video:-webkit-full-screen {
 .info-box img {
     width: 80px;
     margin: 0 15px;
+}
+
+.rss-icons > img {
+    width: 30px;
+    margin: 5px 10px;
+    cursor: pointer;
+    filter: var(--img-filter);
 }
 
 .info-box-item {

@@ -1379,8 +1379,10 @@ function textExpandButtonVisibilityUpdate() {
 document.addEventListener('readystatechange', textExpandButtonVisibilityUpdate);
 window.addEventListener('resize', textExpandButtonVisibilityUpdate);
 
-function showForm() {
-  let formElement = document.getElementById('hidden-form');
+function showForm(id) {
+  
+  let id2 = id === undefined ? 'hidden-form' : id;
+  let formElement = document.getElementById(id2);
   let displayStyle = formElement.style.display;
   if (displayStyle === '') {
     formElement.style.display = 'block';
@@ -1562,4 +1564,35 @@ function doShortcut(e) {
       break;
     }
   }
+}
+
+function fallbackCopyToClipboard(text) {
+	var textArea = document.createElement("textarea");
+	textArea.value = text;
+
+	// Avoid scrolling to bottom
+	textArea.style.top = "0";
+	textArea.style.left = "0";
+	textArea.style.position = "fixed";
+
+	document.body.appendChild(textArea);
+	textArea.focus();
+	textArea.select();
+
+	try {
+		document.execCommand('copy');
+	}
+	catch (err) {
+		console.error('fallbackCopyToClipboard: Unable to copy', err);
+	}
+
+	document.body.removeChild(textArea);
+}
+
+function copyToClipboard(text) {
+	if (!navigator.clipboard) {
+		fallbackCopyToClipboard(text);
+		return;
+	}
+	navigator.clipboard.writeText(text)
 }
