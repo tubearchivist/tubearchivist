@@ -120,6 +120,10 @@ button:hover {
     color: var(--main-bg);
 }
 
+#rss_buttons button {
+	margin-bottom: 5px;
+}
+
 .button-box {
     padding: 5px 0;
 }
