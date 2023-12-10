@@ -1,5 +1,7 @@
 """all API views"""
 
+import os
+
 from api.src.aggs import (
     BiggestChannel,
     Channel,
@@ -10,6 +12,8 @@ from api.src.aggs import (
     WatchProgress,
 )
 from api.src.search_processor import SearchProcess
+from django.core.files.temp import NamedTemporaryFile
+from django.http import FileResponse
 from home.src.download.queue import PendingInteract
 from home.src.download.subscriptions import (
     ChannelSubscription,
@@ -23,6 +27,7 @@ from home.src.frontend.searching import SearchForm
 from home.src.frontend.watched import WatchState
 from home.src.index.channel import YoutubeChannel
 from home.src.index.generic import Pagination
+from home.src.index.manual import ImportFolderScanner
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock, YoutubeVideo
@@ -308,6 +313,28 @@ class VideoSponsorView(ApiBaseView):
         )
 
         return response, status_code
+
+
+class VideoMP3View(ApiBaseView):
+    """resolves to /api/video/<video_id>/mp3/
+    handle mp3 version of video
+    """
+
+    def get(self, request, video_id):
+        video = YoutubeVideo(video_id)
+        video.get_from_es()
+        video_filepath = os.path.join(
+            EnvironmentSettings.MEDIA_DIR,
+            video.json_data["channel"]["channel_id"],
+            video.json_data["youtube_id"] + ".mp4",
+        )
+        audio_filepath = NamedTemporaryFile(suffix=".mp3")
+        ImportFolderScanner.convert_media(video_filepath, audio_filepath.name)
+        return FileResponse(
+            open(audio_filepath.name, "rb"),
+            as_attachment=True,
+            filename=video.json_data["youtube_id"] + ".mp3",
+        )
 
 
 class ChannelApiView(ApiBaseView):

@@ -18,6 +18,7 @@ from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views import View
 from home.src.download.queue import PendingInteract
+from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.backup import ElasticBackup
 from home.src.es.connect import ElasticWrap
@@ -33,13 +34,13 @@ from home.src.frontend.forms import (
     SubscribeToPlaylistForm,
     UserSettingsForm,
 )
-from home.src.index.channel import channel_overwrites
+from home.src.index.channel import YoutubeChannel, channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
-from home.src.ta.helper import check_stylesheet, time_parser
+from home.src.ta.helper import check_stylesheet, date_praser, time_parser
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.users import UserConfig
@@ -523,6 +524,7 @@ class ChannelIdView(ChannelIdBaseView):
             {
                 "title": "Channel: " + channel_name,
                 "channel_info": channel_info,
+                "api_token": SettingsApplicationView.get_token(request),
             }
         )
 
@@ -656,6 +658,49 @@ class ChannelIdPlaylistView(ChannelIdBaseView):
             must_list.append({"match": {"playlist_subscribed": True}})
 
         self.data["query"] = {"bool": {"must": must_list}}
+
+
+class ChannelIdPodcastView(ChannelIdBaseView):
+    """resolves to /channel/<channel-id>/podcast/<format>/
+    display single channel podcast from channel_id
+    """
+
+    def get(self, request, channel_id, format):
+        """handle get request"""
+        channel = YoutubeChannel(channel_id)
+        channel.get_from_es()
+        channel_info = channel.json_data
+        results = channel.get_channel_videos(2)
+        is_audio = format == "audio"
+        mime_format = "audio/mp3" if is_audio else "video/mp4"
+        for video in results:
+            video["vid_last_refresh"] = date_praser(
+                video["vid_last_refresh"], "%a, %d %b %Y %H:%M:%S -0000"
+            )
+            video["vid_thumb_path"] = ThumbManager(
+                video["youtube_id"]
+            ).vid_thumb_path()
+            if is_audio:
+                video["media_url"] = (
+                    "/api/video/" + video["youtube_id"] + "/mp3/"
+                )
+            else:
+                video["media_url"] = "/media/" + video["media_url"]
+        self.context = {
+            "channel_info": channel_info,
+            "results": results,
+            "api_token": request.headers["Authorization"][6:]
+            if "Authorization" in request.headers
+            else "none",
+            "format": format,
+            "mime_format": mime_format,
+        }
+        return render(
+            request,
+            "home/channel_id_podcast.xml",
+            self.context,
+            content_type="application/rss+xml",
+        )
 
 
 class ChannelView(ArchivistResultsView):

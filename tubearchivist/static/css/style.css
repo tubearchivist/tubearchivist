@@ -350,6 +350,7 @@ button:hover {
     margin: 15px 0;
 }
 
+.rss-icons,
 .view-icons,
 .grid-count {
     display: flex;
@@ -357,6 +358,7 @@ button:hover {
     align-items: center;
 }
 
+.rss-icons > a > img,
 .view-icons img {
     width: 30px;
     margin: 5px 10px;
@@ -676,6 +678,10 @@ video:-webkit-full-screen {
     align-items: center;
     padding: 15px;
     background-color: var(--highlight-bg);
+}
+
+.info-box-item.two {
+	justify-content: space-between;
 }
 
 .info-box-item p {
