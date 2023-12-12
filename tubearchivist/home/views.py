@@ -33,7 +33,10 @@ from home.src.frontend.forms import (
     SubscribeToPlaylistForm,
     UserSettingsForm,
 )
-from home.src.frontend.forms_schedule import SchedulerSettingsForm
+from home.src.frontend.forms_schedule import (
+    NotificationSettingsForm,
+    SchedulerSettingsForm,
+)
 from home.src.index.channel import channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
@@ -42,6 +45,7 @@ from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig, ReleaseVersion
 from home.src.ta.config_schedule import ScheduleBuilder
 from home.src.ta.helper import check_stylesheet, time_parser
+from home.src.ta.notify import Notifications, get_all_notifications
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.users import UserConfig
@@ -1105,6 +1109,16 @@ class SettingsSchedulingView(MinView):
     def post(self, request):
         """handle form post to update settings"""
         scheduler_form = SchedulerSettingsForm(request.POST)
+        notification_form = NotificationSettingsForm(request.POST)
+
+        if notification_form.is_valid():
+            notification_form_post = notification_form.cleaned_data
+            print(notification_form_post)
+            if any(notification_form_post.values()):
+                task_name = notification_form_post.get("task")
+                url = notification_form_post.get("notification_url")
+                Notifications(task_name).add_url(url)
+
         if scheduler_form.is_valid():
             scheduler_form_post = scheduler_form.cleaned_data
             if any(scheduler_form_post.values()):
@@ -1126,6 +1140,8 @@ class SettingsSchedulingView(MinView):
             {
                 "title": "Scheduling Settings",
                 "scheduler_form": scheduler_form,
+                "notification_form": NotificationSettingsForm(),
+                "notifications": get_all_notifications(),
             }
         )
         for task in all_tasks:

@@ -375,7 +375,8 @@ button:hover {
     display: none;
 }
 
-#hidden-form button {
+#hidden-form button,
+#text-reveal button {
     margin-right: 1rem;
 }
 

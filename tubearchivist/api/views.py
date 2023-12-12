@@ -28,6 +28,7 @@ from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock, YoutubeVideo
 from home.src.ta.config import AppConfig, ReleaseVersion
+from home.src.ta.notify import Notifications, get_all_notifications
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskCommand, TaskManager
@@ -976,6 +977,35 @@ class ScheduleView(ApiBaseView):
         _ = task.delete()
 
         return Response({"success": True})
+
+
+class ScheduleNotification(ApiBaseView):
+    """resolvues to /api/schedule/notification/
+    GET: get all schedule notifications
+    DEL: delete notification
+    """
+
+    def get(self, request):
+        """handle get request"""
+
+        return Response(get_all_notifications())
+
+    def delete(self, request):
+        """handle delete"""
+
+        task_name = request.data.get("task_name")
+        url = request.data.get("url")
+
+        if not BaseTask.TASK_CONFIG.get(task_name):
+            message = {"message": "task_name not found"}
+            return Response(message, status=404)
+
+        if url:
+            response, status_code = Notifications(task_name).remove_url(url)
+        else:
+            response, status_code = Notifications(task_name).remove_task()
+
+        return Response({"response": response, "status_code": status_code})
 
 
 class RefreshView(ApiBaseView):

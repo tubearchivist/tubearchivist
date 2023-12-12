@@ -363,6 +363,17 @@ function createSnapshot() {
   document.getElementById('createButton').replaceWith(message);
 }
 
+function deleteNotificationUrl(button) {
+  console.log('delete notification url');
+  let apiEndpoint = '/api/schedule/notification/';
+  let data = {
+    task_name: button.dataset.task,
+    url: button.dataset.url,
+  };
+  apiRequest(apiEndpoint, 'DELETE', data);
+  button.parentElement.remove();
+}
+
 // delete from file system
 function deleteConfirm() {
   let to_show = document.getElementById('delete-button');

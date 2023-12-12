@@ -60,48 +60,36 @@ def validate_cron(cron_expression):
 class SchedulerSettingsForm(forms.Form):
     """handle scheduler settings"""
 
-    HELP_TEXT = "Add Apprise notification URLs, one per line"
-
     update_subscribed = forms.CharField(
         required=False, validators=[validate_cron]
-    )
-    update_subscribed_notify = forms.CharField(
-        label=False,
-        widget=forms.Textarea(
-            attrs={
-                "rows": 2,
-                "placeholder": HELP_TEXT,
-            }
-        ),
-        required=False,
     )
     download_pending = forms.CharField(
         required=False, validators=[validate_cron]
     )
-    download_pending_notify = forms.CharField(
-        label=False,
-        widget=forms.Textarea(
-            attrs={
-                "rows": 2,
-                "placeholder": HELP_TEXT,
-            }
-        ),
-        required=False,
-    )
     check_reindex = forms.CharField(required=False, validators=[validate_cron])
-    check_reindex_notify = forms.CharField(
-        label=False,
-        widget=forms.Textarea(
-            attrs={
-                "rows": 2,
-                "placeholder": HELP_TEXT,
-            }
-        ),
-        required=False,
-    )
     check_reindex_days = forms.IntegerField(required=False)
     thumbnail_check = forms.CharField(
         required=False, validators=[validate_cron]
     )
     run_backup = forms.CharField(required=False, validators=[validate_cron])
     run_backup_rotate = forms.IntegerField(required=False)
+
+
+class NotificationSettingsForm(forms.Form):
+    """add notification URL"""
+
+    TASK_CHOICES = [
+        ("", "-- select task --"),
+        ("update_subscribed", "Rescan your Subscriptions"),
+        ("download_pending", "Downloading"),
+        ("check_reindex", "Reindex Documents"),
+    ]
+    PLACEHOLDER = "Apprise notification URL"
+
+    task = forms.ChoiceField(
+        widget=forms.Select, choices=TASK_CHOICES, required=False
+    )
+    notification_url = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": PLACEHOLDER}),
+    )

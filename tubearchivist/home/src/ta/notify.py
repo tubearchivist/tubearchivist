@@ -90,7 +90,11 @@ class Notifications:
             }
         }
 
-        _, _ = ElasticWrap(self.UPDATE_PATH).post(data)
+        response, status_code = ElasticWrap(self.UPDATE_PATH).post(data)
+        if not self.get_urls():
+            _, _ = self.remove_task()
+
+        return response, status_code
 
     def remove_task(self) -> None:
         """remove all notifications from task"""
@@ -106,4 +110,29 @@ class Notifications:
             }
         }
 
-        _, _ = ElasticWrap(self.UPDATE_PATH).post(data)
+        response, status_code = ElasticWrap(self.UPDATE_PATH).post(data)
+
+        return response, status_code
+
+
+def get_all_notifications() -> dict[str, list[str]]:
+    """get all notifications stored"""
+    path = "ta_config/_doc/notify"
+    response, status_code = ElasticWrap(path).get(print_error=False)
+    if not status_code == 200:
+        return {}
+
+    notifications = {}
+    task_config = task_manager.ta_tasks.BaseTask.TASK_CONFIG
+    source = response.get("_source")
+    for task_id, urls in source.items():
+        notifications.update(
+            {
+                task_id: {
+                    "urls": urls,
+                    "title": task_config[task_id].get("title"),
+                }
+            }
+        )
+
+    return notifications

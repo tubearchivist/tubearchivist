@@ -38,16 +38,6 @@
             {% endfor %}
             {{ scheduler_form.update_subscribed }}
         </div>
-        <div class="settings-item">
-            <p>Send notification on task completed:</p>
-            {% if download_pending.task_config.notify %}
-                <p><button type="button" onclick="textReveal(this)" id="text-reveal-button">Show</button> stored notification links</p>
-                <div id="text-reveal" class="description-text">
-                    <p>{{ download_pending.task_config.notify|linebreaks }}</p>
-                </div>
-            {% endif %}
-            {{ scheduler_form.update_subscribed_notify }}
-        </div>
     </div>
     <div class="settings-group">
         <h2>Start Download</h2>
@@ -64,16 +54,6 @@
                 <p class="danger-zone">{{ error }}</p>
             {% endfor %}
             {{ scheduler_form.download_pending }}
-        </div>
-        <div class="settings-item">
-            <p>Send notification on task completed:</p>
-            {% if download_pending.task_config.notify %}
-                <p><button type="button" onclick="textReveal(this)" id="text-reveal-button">Show</button> stored notification links</p>
-                <div id="text-reveal" class="description-text">
-                    <p>{{ download_pending.task_config.notify|linebreaks }}</p>
-                </div>
-            {% endif %}
-            {{ scheduler_form.download_pending_notify }}
         </div>
     </div>
     <div class="settings-group">
@@ -96,16 +76,6 @@
                 <p class="danger-zone">{{ error }}</p>
             {% endfor %}
             {{ scheduler_form.check_reindex_days }}
-        </div>
-        <div class="settings-item">
-            <p>Send notification on task completed:</p>
-            {% if check_reindex.task_config.notify %}
-                <p><button type="button" onclick="textReveal(this)" id="text-reveal-button">Show</button> stored notification links</p>
-                <div id="text-reveal" class="description-text">
-                    <p>{{ check_reindex.task_config.notify|linebreaks }}</p>
-                </div>
-            {% endif %}
-            {{ scheduler_form.check_reindex_notify }}
         </div>
     </div>
     <div class="settings-group">
@@ -146,6 +116,29 @@
             <p>Current backup files to keep: <span class="settings-current">{{ run_backup.task_config.rotate }}</span></p>
             <p>Max auto backups to keep:</p>
             {{ scheduler_form.run_backup_rotate }}
+        </div>
+    </div>
+    <div class="settings-group">
+        <h2>Add Notification URL</h2>
+        <div class="settings-item">
+            {% if notifications %}
+            <p><button type="button" onclick="textReveal(this)" id="text-reveal-button">Show</button> stored notification links</p>
+            <div id="text-reveal" class="description-text">
+                {% for task, notifications in notifications.items %}
+                    <h3>{{ notifications.title }}</h3>
+                    {% for url in notifications.urls %}
+                        <p><button type="button" class="danger-button" data-url="{{ url }}" data-task="{{ task }}" onclick="deleteNotificationUrl(this)"> Delete</button>{{ url }}</p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            {% else %}
+                <p>No notifications stored</p>
+            {% endif %}
+        </div>
+        <div class="settings-item">
+            <p><i>Send notification on completed tasks with the help of the <a href="https://github.com/caronc/apprise" target="_blank">Apprise</a> library.</i></p>
+            {{ notification_form.task }}
+            {{ notification_form.notification_url }}
         </div>
     </div>
     <button type="submit" name="scheduler-settings">Update Scheduler Settings</button>
