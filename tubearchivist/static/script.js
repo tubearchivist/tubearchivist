@@ -1344,6 +1344,43 @@ function textReveal(button) {
   }
 }
 
+async function copyToClipboard(textToCopy) {
+  // Navigator clipboard api needs a secure context (https)
+  if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(textToCopy);
+  } else {
+      // Use the 'out of viewport hidden text area' trick
+      const textArea = document.createElement("textarea");
+      textArea.value = textToCopy;
+          
+      // Move textarea out of the viewport so it's not visible
+      textArea.style.position = "absolute";
+      textArea.style.left = "-999999px";
+          
+      document.body.prepend(textArea);
+      textArea.select();
+
+      try {
+          document.execCommand('copy');
+      } catch (error) {
+          console.error(error);
+      } finally {
+          textArea.remove();
+      }
+  }
+}
+
+async function textCopy() {
+  let token = document.getElementById('text-token').innerHTML;
+  try {
+    await copyToClipboard(token);
+    alert("Token Copied");
+  } catch(error) {
+    console.error(error);
+  }
+}
+
+
 function textExpand() {
   let textBox = document.getElementById('text-expand');
   let button = document.getElementById('text-expand-button');

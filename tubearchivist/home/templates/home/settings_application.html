@@ -155,7 +155,8 @@
         <div class="settings-item">
             <p>API token: <button type="button" onclick="textReveal(this)" id="text-reveal-button">Show</button></p>
             <div id="text-reveal" class="description-text">
-                <p>{{ api_token }}</p>
+                <p id="text-token">{{ api_token }}</p>
+                <button type="button" onclick="textCopy()" id="text-copy-button">Copy</button>
                 <button class="danger-button" type="button" onclick="resetToken()">Revoke</button>
             </div>
         </div>
