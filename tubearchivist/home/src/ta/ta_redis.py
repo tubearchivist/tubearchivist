@@ -20,6 +20,7 @@ class RedisBase:
         self.conn = redis.Redis(
             host=EnvironmentSettings.REDIS_HOST,
             port=EnvironmentSettings.REDIS_PORT,
+            decode_responses=True,
         )
 
 
@@ -82,7 +83,7 @@ class RedisArchivist(RedisBase):
         if not reply:
             return []
 
-        return [i.decode().lstrip(self.NAME_SPACE) for i in reply]
+        return [i.lstrip(self.NAME_SPACE) for i in reply]
 
     def list_items(self, query: str) -> list:
         """list all matches"""
@@ -108,8 +109,7 @@ class RedisQueue(RedisBase):
     def get_all(self):
         """return all elements in list"""
         result = self.conn.execute_command("LRANGE", self.key, 0, -1)
-        all_elements = [i.decode() for i in result]
-        return all_elements
+        return result
 
     def length(self) -> int:
         """return total elements in list"""
@@ -136,11 +136,8 @@ class RedisQueue(RedisBase):
     def get_next(self) -> str | bool:
         """return next element in the queue, False if none"""
         result = self.conn.execute_command("LPOP", self.key)
-        if not result:
-            return False
 
-        next_element = result.decode()
-        return next_element
+        return result
 
     def clear(self) -> None:
         """delete list from redis"""
@@ -170,7 +167,7 @@ class TaskRedis(RedisBase):
     def get_all(self) -> list:
         """return all tasks"""
         all_keys = self.conn.execute_command("KEYS", f"{self.BASE}*")
-        return [i.decode().replace(self.BASE, "") for i in all_keys]
+        return [i.replace(self.BASE, "") for i in all_keys]
 
     def get_single(self, task_id: str) -> dict:
         """return content of single task"""
@@ -178,7 +175,7 @@ class TaskRedis(RedisBase):
         if not result:
             return {}
 
-        return json.loads(result.decode())
+        return json.loads(result)
 
     def set_key(
         self, task_id: str, message: dict, expire: bool | int = False
