@@ -50,7 +50,7 @@ class DownloadPostProcess:
             return
 
         print(f"auto delete older than {autodelete_days} days")
-        now_lte = self.now - autodelete_days * 24 * 60 * 60
+        now_lte = str(self.now - autodelete_days * 24 * 60 * 60)
         data = {
             "query": {"range": {"player.watched_date": {"lte": now_lte}}},
             "sort": [{"player.watched_date": {"order": "asc"}}],
@@ -63,7 +63,7 @@ class DownloadPostProcess:
             if "autodelete_days" in value:
                 autodelete_days = value.get("autodelete_days")
                 print(f"{channel_id}: delete older than {autodelete_days}d")
-                now_lte = self.now - autodelete_days * 24 * 60 * 60
+                now_lte = str(self.now - autodelete_days * 24 * 60 * 60)
                 must_list = [
                     {"range": {"player.watched_date": {"lte": now_lte}}},
                     {"term": {"channel.channel_id": {"value": channel_id}}},
