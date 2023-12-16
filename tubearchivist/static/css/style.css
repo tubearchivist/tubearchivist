@@ -159,13 +159,13 @@ button:hover {
 }
 
 .top-banner {
-    text-align: center;
-}
-
-.top-banner img {
-    width: 100%;
-    max-width: 700px;
-    content: var(--banner);
+    background-image: var(--banner);
+    background-repeat: no-repeat;
+    background-size: contain;
+    height: 10vh;
+    min-height: 80px;
+    max-height: 120px;
+    background-position: center center;
 }
 
 .footer {
