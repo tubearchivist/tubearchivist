@@ -100,61 +100,49 @@ class RedisArchivist(RedisBase):
 
 
 class RedisQueue(RedisBase):
-    """dynamically interact with queues in redis"""
+    """
+    dynamically interact with queues in redis using sorted set
+    - low score number is first in queue
+    - add new items with high score number
+    """
 
     def __init__(self, queue_name: str):
         super().__init__()
         self.key = f"{self.NAME_SPACE}{queue_name}"
 
-    def get_all(self):
+    def get_all(self) -> list[str]:
         """return all elements in list"""
-        result = self.conn.execute_command("LRANGE", self.key, 0, -1)
+        result = self.conn.zrange(self.key, 0, -1)
         return result
 
     def length(self) -> int:
         """return total elements in list"""
-        return self.conn.execute_command("LLEN", self.key)
+        return self.conn.zcard(self.key)
 
     def in_queue(self, element) -> str | bool:
         """check if element is in list"""
-        result = self.conn.execute_command("LPOS", self.key, element)
+        result = self.conn.zrank(self.key, element)
         if result is not None:
             return "in_queue"
 
         return False
 
-    def add_list(self, to_add):
+    def add_list(self, to_add: list) -> None:
         """add list to queue"""
-        self.conn.execute_command("RPUSH", self.key, *to_add)
-
-    def add_priority(self, to_add: str) -> None:
-        """add single video to front of queue"""
-        item: str = json.dumps(to_add)
-        self.clear_item(item)
-        self.conn.execute_command("LPUSH", self.key, item)
+        mapping = {i: "+inf" for i in to_add}
+        self.conn.zadd(self.key, mapping)
 
     def get_next(self) -> str | bool:
-        """return next element in the queue, False if none"""
-        result = self.conn.execute_command("LPOP", self.key)
+        """return next element in the queue, if available"""
+        result = self.conn.zpopmin(self.key)
+        if not result:
+            return False
 
-        return result
+        return result[0][0]
 
     def clear(self) -> None:
         """delete list from redis"""
-        self.conn.execute_command("DEL", self.key)
-
-    def clear_item(self, to_clear: str) -> None:
-        """remove single item from list if it's there"""
-        self.conn.execute_command("LREM", self.key, 0, to_clear)
-
-    def trim(self, size: int) -> None:
-        """trim the queue based on settings amount"""
-        self.conn.execute_command("LTRIM", self.key, 0, size)
-
-    def has_item(self) -> bool:
-        """check if queue as at least one pending item"""
-        result = self.conn.execute_command("LRANGE", self.key, 0, 0)
-        return bool(result)
+        self.conn.delete(self.key)
 
 
 class TaskRedis(RedisBase):
