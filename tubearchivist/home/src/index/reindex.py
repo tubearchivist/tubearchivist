@@ -243,7 +243,7 @@ class Reindex(ReindexBase):
             return
 
         for name, index_config in self.REINDEX_CONFIG.items():
-            if not RedisQueue(index_config["queue_name"]).has_item():
+            if not RedisQueue(index_config["queue_name"]).length():
                 continue
 
             self.total = RedisQueue(index_config["queue_name"]).length()
