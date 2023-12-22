@@ -292,7 +292,7 @@ class Reindex(ReindexBase):
 
         # read current state
         video.get_from_es()
-        if not video.json_data():
+        if not video.json_data:
             return
 
         es_meta = video.json_data.copy()
