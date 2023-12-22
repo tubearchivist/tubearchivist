@@ -269,14 +269,13 @@ class ReleaseVersion:
     REMOTE_URL = "https://www.tubearchivist.com/api/release/latest/"
     NEW_KEY = "versioncheck:new"
 
-    def __init__(self):
-        self.local_version = settings.TA_VERSION
-        self.is_unstable = settings.TA_VERSION.endswith("-unstable")
-        self.remote_version = False
-        self.is_breaking = False
-        self.response = False
+    def __init__(self) -> None:
+        self.local_version: str = settings.TA_VERSION
+        self.is_unstable: bool = settings.TA_VERSION.endswith("-unstable")
+        self.remote_version: str = ""
+        self.is_breaking: bool = False
 
-    def check(self):
+    def check(self) -> None:
         """check version"""
         print(f"[{self.local_version}]: look for updates")
         self.get_remote_version()
@@ -290,18 +289,18 @@ class ReleaseVersion:
             RedisArchivist().set_message(self.NEW_KEY, message)
             print(f"[{self.local_version}]: found new version {new_version}")
 
-    def get_local_version(self):
+    def get_local_version(self) -> str:
         """read version from local"""
         return self.local_version
 
-    def get_remote_version(self):
+    def get_remote_version(self) -> None:
         """read version from remote"""
         sleep(randint(0, 60))
-        self.response = requests.get(self.REMOTE_URL, timeout=20).json()
-        self.remote_version = self.response["release_version"]
-        self.is_breaking = self.response["breaking_changes"]
+        response = requests.get(self.REMOTE_URL, timeout=20).json()
+        self.remote_version = response["release_version"]
+        self.is_breaking = response["breaking_changes"]
 
-    def _has_update(self):
+    def _has_update(self) -> str | bool:
         """check if there is an update"""
         remote_parsed = self._parse_version(self.remote_version)
         local_parsed = self._parse_version(self.local_version)
@@ -314,12 +313,12 @@ class ReleaseVersion:
         return False
 
     @staticmethod
-    def _parse_version(version):
+    def _parse_version(version) -> tuple[int, ...]:
         """return version parts"""
         clean = version.rstrip("-unstable").lstrip("v")
         return tuple((int(i) for i in clean.split(".")))
 
-    def is_updated(self):
+    def is_updated(self) -> str | bool:
         """check if update happened in the mean time"""
         message = self.get_update()
         if not message:
@@ -334,15 +333,15 @@ class ReleaseVersion:
 
         return False
 
-    def get_update(self):
+    def get_update(self) -> dict:
         """return new version dict if available"""
         message = RedisArchivist().get_message(self.NEW_KEY)
         if not message.get("status"):
-            return False
+            return {}
 
         return message
 
-    def clear_fail(self):
+    def clear_fail(self) -> None:
         """clear key, catch previous error in v0.4.5"""
         message = self.get_update()
         if not message:
