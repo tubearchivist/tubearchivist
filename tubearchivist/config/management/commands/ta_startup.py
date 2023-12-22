@@ -39,6 +39,7 @@ class Command(BaseCommand):
         self._clear_redis_keys()
         self._clear_tasks()
         self._clear_dl_cache()
+        self._mig_clear_failed_versioncheck()
         self._version_check()
         self._mig_index_setup()
         self._mig_snapshot_check()
@@ -147,6 +148,10 @@ class Command(BaseCommand):
         """migration setup snapshots"""
         self.stdout.write("[MIGRATION] setup snapshots")
         ElasticSnapshot().setup()
+
+    def _mig_clear_failed_versioncheck(self):
+        """hotfix for v0.4.5, clearing faulty versioncheck"""
+        ReleaseVersion().clear_fail()
 
     def _mig_move_users_to_es(self):  # noqa: C901
         """migration: update from 0.4.1 to 0.4.2 move user config to ES"""
