@@ -190,7 +190,7 @@ Implemented:
 ## User Scripts
 This is a list of useful user scripts, generously created from folks like you to extend this project and its functionality. This is your time to shine, [read this](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#user-scripts) then open a PR to add your script here.
 
-- Example 1
+[danieljue/ta_dl_page_script](https://github.com/danieljue/ta_dl_page_script): Helper browser script to prioritize a channels' videos in download queue.
 
 ## Donate
 The best donation to **Tube Archivist** is your time, take a look at the [contribution page](CONTRIBUTING.md) to get started.  
