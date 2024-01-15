@@ -199,6 +199,15 @@ class YoutubeChannel(YouTubeItem):
         }
         _, _ = ElasticWrap("ta_comment/_delete_by_query").post(data)
 
+    def delete_es_subtitles(self):
+        """delete all subtitles from this channel"""
+        data = {
+            "query": {
+                "term": {"subtitle_channel_id": {"value": self.youtube_id}}
+            }
+        }
+        _, _ = ElasticWrap("ta_subtitle/_delete_by_query").post(data)
+
     def delete_playlists(self):
         """delete all indexed playlist from es"""
         all_playlists = self.get_indexed_playlists()
@@ -229,6 +238,7 @@ class YoutubeChannel(YouTubeItem):
         print(f"{self.youtube_id}: delete indexed videos")
         self.delete_es_videos()
         self.delete_es_comments()
+        self.delete_es_subtitles()
         self.del_in_es()
 
     def index_channel_playlists(self):

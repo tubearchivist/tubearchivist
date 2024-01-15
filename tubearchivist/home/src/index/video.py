@@ -177,6 +177,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def _process_youtube_meta(self):
         """extract relevant fields from youtube"""
+        self._validate_id()
         # extract
         self.channel_id = self.youtube_meta["channel_id"]
         upload_date = self.youtube_meta["upload_date"]
@@ -201,6 +202,19 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             "vid_type": self.video_type.value,
             "active": True,
         }
+
+    def _validate_id(self):
+        """validate expected video ID, raise value error on mismatch"""
+        remote_id = self.youtube_meta["id"]
+
+        if not self.youtube_id == remote_id:
+            # unexpected redirect
+            message = (
+                f"[reindex][{self.youtube_id}] got an unexpected redirect "
+                + f"to {remote_id}, you are probably getting blocked by YT. "
+                "See FAQ for more details."
+            )
+            raise ValueError(message)
 
     def _add_channel(self):
         """add channel dict to video json_data"""
