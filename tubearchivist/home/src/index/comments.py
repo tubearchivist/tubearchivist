@@ -164,18 +164,16 @@ class Comments:
         self.check_config()
         if not self.is_activated:
             return
-
-        self.build_json()
-        if not self.json_data:
-            return
-
+        # check for existing comments first (could return False).
         es_comments = self.get_es_comments()
-
-        if not self.comments_format:
+        if es_comments and es_comments["comment_comments"]:
+            # don't overwrite comments in es
             return
 
-        if not self.comments_format and es_comments["comment_comments"]:
-            # don't overwrite comments in es
+        # only try to grab new comments now
+        self.build_json()
+        if not self.json_data or not self.comments_format:
+            # we didn't get data or comments
             return
 
         self.delete_comments()
