@@ -37,9 +37,10 @@ class Command(BaseCommand):
         self.stdout.write(TOPIC)
         self._sync_redis_state()
         self._make_folders()
-        self._release_locks()
+        self._clear_redis_keys()
         self._clear_tasks()
         self._clear_dl_cache()
+        self._mig_clear_failed_versioncheck()
         self._version_check()
         self._mig_index_setup()
         self._mig_snapshot_check()
@@ -75,10 +76,10 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("    ✓ expected folders created"))
 
-    def _release_locks(self):
-        """make sure there are no leftover locks set in redis"""
-        self.stdout.write("[3] clear leftover locks in redis")
-        all_locks = [
+    def _clear_redis_keys(self):
+        """make sure there are no leftover locks or keys set in redis"""
+        self.stdout.write("[3] clear leftover keys in redis")
+        all_keys = [
             "dl_queue_id",
             "dl_queue",
             "downloading",
@@ -87,19 +88,22 @@ class Command(BaseCommand):
             "rescan",
             "run_backup",
             "startup_check",
+            "reindex:ta_video",
+            "reindex:ta_channel",
+            "reindex:ta_playlist",
         ]
 
         redis_con = RedisArchivist()
         has_changed = False
-        for lock in all_locks:
-            if redis_con.del_message(lock):
+        for key in all_keys:
+            if redis_con.del_message(key):
                 self.stdout.write(
-                    self.style.SUCCESS(f"    ✓ cleared lock {lock}")
+                    self.style.SUCCESS(f"    ✓ cleared key {key}")
                 )
                 has_changed = True
 
         if not has_changed:
-            self.stdout.write(self.style.SUCCESS("    no locks found"))
+            self.stdout.write(self.style.SUCCESS("    no keys found"))
 
     def _clear_tasks(self):
         """clear tasks and messages"""
@@ -146,6 +150,10 @@ class Command(BaseCommand):
         """migration setup snapshots"""
         self.stdout.write("[MIGRATION] setup snapshots")
         ElasticSnapshot().setup()
+
+    def _mig_clear_failed_versioncheck(self):
+        """hotfix for v0.4.5, clearing faulty versioncheck"""
+        ReleaseVersion().clear_fail()
 
     def _mig_move_users_to_es(self):  # noqa: C901
         """migration: update from 0.4.1 to 0.4.2 move user config to ES"""

@@ -3,6 +3,7 @@ Functionality:
 - all views for home app
 - holds base classes to inherit from
 """
+
 import enum
 import urllib.parse
 from time import sleep

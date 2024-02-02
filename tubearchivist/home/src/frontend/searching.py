@@ -6,7 +6,6 @@ Functionality:
 - calculate pagination values
 """
 
-
 from api.src.search_processor import SearchProcess
 from home.src.es.connect import ElasticWrap
 

@@ -243,7 +243,7 @@ class Reindex(ReindexBase):
             return
 
         for name, index_config in self.REINDEX_CONFIG.items():
-            if not RedisQueue(index_config["queue_name"]).has_item():
+            if not RedisQueue(index_config["queue_name"]).length():
                 continue
 
             self.total = RedisQueue(index_config["queue_name"]).length()
@@ -292,6 +292,9 @@ class Reindex(ReindexBase):
 
         # read current state
         video.get_from_es()
+        if not video.json_data:
+            return
+
         es_meta = video.json_data.copy()
 
         # get new
@@ -329,6 +332,9 @@ class Reindex(ReindexBase):
         # read current state
         channel = YoutubeChannel(channel_id)
         channel.get_from_es()
+        if not channel.json_data:
+            return
+
         es_meta = channel.json_data.copy()
 
         # get new
@@ -357,6 +363,9 @@ class Reindex(ReindexBase):
         self._get_all_videos()
         playlist = YoutubePlaylist(playlist_id)
         playlist.get_from_es()
+        if not playlist.json_data:
+            return
+
         subscribed = playlist.json_data["playlist_subscribed"]
         playlist.all_youtube_ids = self.all_indexed_ids
         playlist.build_json(scrape=True)

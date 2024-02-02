@@ -20,6 +20,7 @@ class RedisBase:
         self.conn = redis.Redis(
             host=EnvironmentSettings.REDIS_HOST,
             port=EnvironmentSettings.REDIS_PORT,
+            decode_responses=True,
         )
 
 
@@ -82,7 +83,7 @@ class RedisArchivist(RedisBase):
         if not reply:
             return []
 
-        return [i.decode().lstrip(self.NAME_SPACE) for i in reply]
+        return [i.lstrip(self.NAME_SPACE) for i in reply]
 
     def list_items(self, query: str) -> list:
         """list all matches"""
@@ -99,65 +100,49 @@ class RedisArchivist(RedisBase):
 
 
 class RedisQueue(RedisBase):
-    """dynamically interact with queues in redis"""
+    """
+    dynamically interact with queues in redis using sorted set
+    - low score number is first in queue
+    - add new items with high score number
+    """
 
     def __init__(self, queue_name: str):
         super().__init__()
         self.key = f"{self.NAME_SPACE}{queue_name}"
 
-    def get_all(self):
+    def get_all(self) -> list[str]:
         """return all elements in list"""
-        result = self.conn.execute_command("LRANGE", self.key, 0, -1)
-        all_elements = [i.decode() for i in result]
-        return all_elements
+        result = self.conn.zrange(self.key, 0, -1)
+        return result
 
     def length(self) -> int:
         """return total elements in list"""
-        return self.conn.execute_command("LLEN", self.key)
+        return self.conn.zcard(self.key)
 
     def in_queue(self, element) -> str | bool:
         """check if element is in list"""
-        result = self.conn.execute_command("LPOS", self.key, element)
+        result = self.conn.zrank(self.key, element)
         if result is not None:
             return "in_queue"
 
         return False
 
-    def add_list(self, to_add):
+    def add_list(self, to_add: list) -> None:
         """add list to queue"""
-        self.conn.execute_command("RPUSH", self.key, *to_add)
-
-    def add_priority(self, to_add: str) -> None:
-        """add single video to front of queue"""
-        item: str = json.dumps(to_add)
-        self.clear_item(item)
-        self.conn.execute_command("LPUSH", self.key, item)
+        mapping = {i: "+inf" for i in to_add}
+        self.conn.zadd(self.key, mapping)
 
     def get_next(self) -> str | bool:
-        """return next element in the queue, False if none"""
-        result = self.conn.execute_command("LPOP", self.key)
+        """return next element in the queue, if available"""
+        result = self.conn.zpopmin(self.key)
         if not result:
             return False
 
-        next_element = result.decode()
-        return next_element
+        return result[0][0]
 
     def clear(self) -> None:
         """delete list from redis"""
-        self.conn.execute_command("DEL", self.key)
-
-    def clear_item(self, to_clear: str) -> None:
-        """remove single item from list if it's there"""
-        self.conn.execute_command("LREM", self.key, 0, to_clear)
-
-    def trim(self, size: int) -> None:
-        """trim the queue based on settings amount"""
-        self.conn.execute_command("LTRIM", self.key, 0, size)
-
-    def has_item(self) -> bool:
-        """check if queue as at least one pending item"""
-        result = self.conn.execute_command("LRANGE", self.key, 0, 0)
-        return bool(result)
+        self.conn.delete(self.key)
 
 
 class TaskRedis(RedisBase):
@@ -170,7 +155,7 @@ class TaskRedis(RedisBase):
     def get_all(self) -> list:
         """return all tasks"""
         all_keys = self.conn.execute_command("KEYS", f"{self.BASE}*")
-        return [i.decode().replace(self.BASE, "") for i in all_keys]
+        return [i.replace(self.BASE, "") for i in all_keys]
 
     def get_single(self, task_id: str) -> dict:
         """return content of single task"""
@@ -178,7 +163,7 @@ class TaskRedis(RedisBase):
         if not result:
             return {}
 
-        return json.loads(result.decode())
+        return json.loads(result)
 
     def set_key(
         self, task_id: str, message: dict, expire: bool | int = False
