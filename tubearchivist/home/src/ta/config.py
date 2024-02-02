@@ -106,7 +106,10 @@ class AppConfig:
 
             # missing nested values
             for sub_key, sub_value in value.items():
-                if sub_key not in redis_config[key].keys():
+                if (
+                    sub_key not in redis_config[key].keys()
+                    or sub_value == "rand-d"
+                ):
                     if sub_value == "rand-d":
                         sub_value = self._build_rand_daily()
 
@@ -277,12 +280,12 @@ class ReleaseVersion:
         """check version"""
         print(f"[{self.local_version}]: look for updates")
         self.get_remote_version()
-        new_version, is_breaking = self._has_update()
+        new_version = self._has_update()
         if new_version:
             message = {
                 "status": True,
                 "version": new_version,
-                "is_breaking": is_breaking,
+                "is_breaking": self.is_breaking,
             }
             RedisArchivist().set_message(self.NEW_KEY, message)
             print(f"[{self.local_version}]: found new version {new_version}")
@@ -301,15 +304,13 @@ class ReleaseVersion:
 
     def _has_update(self):
         """check if there is an update"""
-        for idx, number in enumerate(self.local_version):
-            is_newer = self.remote_version[idx] > number
-            if is_newer:
-                return self.response["release_version"], self.is_breaking
+        if self.remote_version > self.local_version:
+            return self.remote_version
 
         if self.is_unstable and self.local_version == self.remote_version:
-            return self.response["release_version"], self.is_breaking
+            return self.remote_version
 
-        return False, False
+        return False
 
     @staticmethod
     def _parse_version(version):
@@ -323,7 +324,7 @@ class ReleaseVersion:
         if not message:
             return False
 
-        if self._parse_version(message.get("version")) == self.local_version:
+        if self.local_version >= self._parse_version(message.get("version")):
             RedisArchivist().del_message(self.NEW_KEY)
             return settings.TA_VERSION
 

@@ -74,7 +74,7 @@
                             "type": "boolean"
                         },
                         "integrate_sponsorblock": {
-                            "type" : "boolean"
+                            "type": "boolean"
                         }
                     }
                 }
@@ -168,7 +168,7 @@
                                     "type": "boolean"
                                 },
                                 "integrate_sponsorblock": {
-                                    "type" : "boolean"
+                                    "type": "boolean"
                                 }
                             }
                         }
@@ -236,19 +236,37 @@
                 "comment_count": {
                     "type": "long"
                 },
-                "stats" : {
-                    "properties" : {
-                        "average_rating" : {
-                            "type" : "float"
+                "stats": {
+                    "properties": {
+                        "average_rating": {
+                            "type": "float"
                         },
-                        "dislike_count" : {
-                            "type" : "long"
+                        "dislike_count": {
+                            "type": "long"
                         },
-                        "like_count" : {
-                            "type" : "long"
+                        "like_count": {
+                            "type": "long"
                         },
-                        "view_count" : {
-                            "type" : "long"
+                        "view_count": {
+                            "type": "long"
+                        }
+                    }
+                },
+                "player": {
+                    "properties": {
+                        "duration": {
+                            "type": "long"
+                        },
+                        "duration_str": {
+                            "type": "keyword",
+                            "index": false
+                        },
+                        "watched": {
+                            "type": "boolean"
+                        },
+                        "watched_date": {
+                            "type": "date",
+                            "format": "epoch_second"
                         }
                     }
                 },
@@ -314,28 +332,28 @@
                         "is_enabled": {
                             "type": "boolean"
                         },
-                        "segments" : {
-                            "properties" : {
-                                "UUID" : {
+                        "segments": {
+                            "properties": {
+                                "UUID": {
                                     "type": "keyword"
                                 },
-                                "actionType" : {
+                                "actionType": {
                                     "type": "keyword"
                                 },
-                                "category" : {
+                                "category": {
                                     "type": "keyword"
                                 },
-                                "locked" : {
-                                    "type" : "short"
+                                "locked": {
+                                    "type": "short"
                                 },
-                                "segment" : {
-                                    "type" : "float"
+                                "segment": {
+                                    "type": "float"
                                 },
-                                "videoDuration" : {
-                                    "type" : "float"
+                                "videoDuration": {
+                                    "type": "float"
                                 },
-                                "votes" : {
-                                    "type" : "long"
+                                "votes": {
+                                    "type": "long"
                                 }
                             }
                         }
@@ -459,6 +477,41 @@
                 "playlist_last_refresh": {
                     "type": "date",
                     "format": "epoch_second"
+                },
+                "playlist_entries": {
+                    "properties": {
+                        "downloaded": {
+                            "type": "boolean"
+                        },
+                        "idx": {
+                            "type": "long"
+                        },
+                        "title": {
+                            "type": "text",
+                            "analyzer": "english",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256,
+                                    "normalizer": "to_lower"
+                                }
+                            }
+                        },
+                        "uploader": {
+                            "type": "text",
+                            "analyzer": "english",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256,
+                                    "normalizer": "to_lower"
+                                }
+                            }
+                        },
+                        "youtube_id": {
+                            "type": "keyword"
+                        }
+                    }
                 }
             },
             "expected_set": {
@@ -516,7 +569,7 @@
                     "format": "epoch_second"
                 },
                 "subtitle_index": {
-                    "type" : "long"
+                    "type": "long"
                 },
                 "subtitle_lang": {
                     "type": "keyword"
@@ -525,7 +578,7 @@
                     "type": "keyword"
                 },
                 "subtitle_line": {
-                    "type" : "text",
+                    "type": "text",
                     "analyzer": "english"
                 }
             },
@@ -560,14 +613,14 @@
                             "type": "keyword"
                         },
                         "comment_text": {
-                            "type" : "text"
+                            "type": "text"
                         },
                         "comment_timestamp": {
                             "type": "date",
                             "format": "epoch_second"
                         },
                         "comment_time_text": {
-                            "type" : "text"
+                            "type": "text"
                         },
                         "comment_likecount": {
                             "type": "long"

@@ -1,6 +1,14 @@
 """all API views"""
 
-from api.src.aggs import BiggestChannel, DownloadHist, Primary, WatchProgress
+from api.src.aggs import (
+    BiggestChannel,
+    Channel,
+    Download,
+    DownloadHist,
+    Playlist,
+    Video,
+    WatchProgress,
+)
 from api.src.search_processor import SearchProcess
 from home.src.download.queue import PendingInteract
 from home.src.download.subscriptions import (
@@ -1163,16 +1171,52 @@ class NotificationView(ApiBaseView):
         return Response(RedisArchivist().list_items(query))
 
 
-class StatPrimaryView(ApiBaseView):
-    """resolves to /api/stats/primary/
-    GET: return document count
+class StatVideoView(ApiBaseView):
+    """resolves to /api/stats/video/
+    GET: return video stats
     """
 
     def get(self, request):
         """get stats"""
         # pylint: disable=unused-argument
 
-        return Response(Primary().process())
+        return Response(Video().process())
+
+
+class StatChannelView(ApiBaseView):
+    """resolves to /api/stats/channel/
+    GET: return channel stats
+    """
+
+    def get(self, request):
+        """get stats"""
+        # pylint: disable=unused-argument
+
+        return Response(Channel().process())
+
+
+class StatPlaylistView(ApiBaseView):
+    """resolves to /api/stats/playlist/
+    GET: return playlist stats
+    """
+
+    def get(self, request):
+        """get stats"""
+        # pylint: disable=unused-argument
+
+        return Response(Playlist().process())
+
+
+class StatDownloadView(ApiBaseView):
+    """resolves to /api/stats/download/
+    GET: return download stats
+    """
+
+    def get(self, request):
+        """get stats"""
+        # pylint: disable=unused-argument
+
+        return Response(Download().process())
 
 
 class StatWatchProgress(ApiBaseView):

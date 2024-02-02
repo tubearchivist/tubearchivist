@@ -188,11 +188,11 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         # build json_data basics
         self.json_data = {
             "title": self.youtube_meta["title"],
-            "description": self.youtube_meta["description"],
-            "category": self.youtube_meta["categories"],
+            "description": self.youtube_meta.get("description", ""),
+            "category": self.youtube_meta.get("categories", []),
             "vid_thumb_url": self.youtube_meta["thumbnail"],
             "vid_thumb_base64": base64_blur,
-            "tags": self.youtube_meta["tags"],
+            "tags": self.youtube_meta.get("tags", []),
             "published": published,
             "vid_last_refresh": last_refresh,
             "date_downloaded": last_refresh,
@@ -210,20 +210,13 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def _add_stats(self):
         """add stats dicst to json_data"""
-        # likes
-        like_count = self.youtube_meta.get("like_count", 0)
-        dislike_count = self.youtube_meta.get("dislike_count", 0)
-        average_rating = self.youtube_meta.get("average_rating", 0)
-        self.json_data.update(
-            {
-                "stats": {
-                    "view_count": self.youtube_meta["view_count"],
-                    "like_count": like_count,
-                    "dislike_count": dislike_count,
-                    "average_rating": average_rating,
-                }
-            }
-        )
+        stats = {
+            "view_count": self.youtube_meta.get("view_count", 0),
+            "like_count": self.youtube_meta.get("like_count", 0),
+            "dislike_count": self.youtube_meta.get("dislike_count", 0),
+            "average_rating": self.youtube_meta.get("average_rating", 0),
+        }
+        self.json_data.update({"stats": stats})
 
     def build_dl_cache_path(self):
         """find video path in dl cache"""

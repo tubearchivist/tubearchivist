@@ -112,6 +112,8 @@ class ArchivistResultsView(ArchivistViewConfig):
             "likes": "stats.like_count",
             "downloaded": "date_downloaded",
             "published": "published",
+            "duration": "player.duration",
+            "filesize": "media_size",
         }
         sort_by = sort_by_map[self.context["sort_by"]]
 
@@ -204,9 +206,7 @@ class ArchivistResultsView(ArchivistViewConfig):
         response, _ = ElasticWrap(self.es_search).get(self.data)
         process_aggs(response)
         results = SearchProcess(response).process()
-        max_hits = (
-            response["hits"]["total"]["value"] if "hits" in response else 0
-        )
+        max_hits = response["hits"]["total"]["value"]
         self.pagination_handler.validate(max_hits)
         self.context.update(
             {
