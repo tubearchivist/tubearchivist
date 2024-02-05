@@ -359,6 +359,20 @@ class ImportFolderScanner:
 
         return new_path
 
+    @staticmethod
+    def convert_media(input_path, output_path):
+        """convert media file format"""
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-i",
+                input_path,
+                output_path,
+            ],
+            check=True,
+        )
+
     def _convert_video(self, current_video):
         """convert if needed"""
         current_path = current_video["media"]

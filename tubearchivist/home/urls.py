@@ -89,6 +89,11 @@ urlpatterns = [
         name="channel_id_playlist",
     ),
     path(
+        "channel/<slug:channel_id>/podcast/<slug:format>/",
+        views.ChannelIdPodcastView.as_view(),
+        name="channel_id_podcast",
+    ),
+    path(
         "video/<slug:video_id>/",
         login_required(views.VideoView.as_view()),
         name="video",
