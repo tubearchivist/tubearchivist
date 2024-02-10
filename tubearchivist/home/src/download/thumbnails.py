@@ -202,7 +202,11 @@ class ThumbManager(ThumbManagerBase):
         if skip_existing and os.path.exists(thumb_path):
             return
 
-        img_raw = self.download_raw(url)
+        img_raw = (
+            self.download_raw(url)
+            if not isinstance(url, str) or url.startswith("http")
+            else Image.open(os.path.join(self.CACHE_DIR, url))
+        )
         width, height = img_raw.size
 
         if not width / height == 16 / 9:

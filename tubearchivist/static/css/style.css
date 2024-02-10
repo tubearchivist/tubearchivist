@@ -576,12 +576,6 @@ video:-webkit-full-screen {
     margin-right: 10px;
 }
 
-.video-popup-menu img {
-	width: 12px;
-	cursor: pointer;
-    filter: var(--img-filter);
-}
-
 .video-popup-menu img.move-video-button {
 	width: 24px;
 	cursor: pointer;
@@ -626,12 +620,6 @@ video:-webkit-full-screen {
 .close-button {
     cursor: pointer;
     filter: var(--img-filter);
-}
-
-.video-popup-menu-close-button {
-	cursor: pointer;
-    filter: var(--img-filter);
-    float:right;
 }
 
 .video-more {
@@ -716,6 +704,19 @@ video:-webkit-full-screen {
 
 .info-box-item p {
     width: 100%;
+}
+
+.video-popup-menu img {
+	width: 12px;
+	cursor: pointer;
+    filter: var(--img-filter);
+}
+
+
+.video-popup-menu-close-button {
+	cursor: pointer;
+    filter: var(--img-filter);
+    float:right;
 }
 
 .description-text {

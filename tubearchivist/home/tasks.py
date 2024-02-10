@@ -21,7 +21,6 @@ from home.src.es.index_setup import ElasitIndexWrap
 from home.src.index.channel import YoutubeChannel
 from home.src.index.filesystem import Scanner
 from home.src.index.manual import ImportFolderScanner
-from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import Reindex, ReindexManual, ReindexPopulate
 from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
 from home.src.ta.notify import Notifications
@@ -101,11 +100,6 @@ class BaseTask(Task):
         },
         "resync_thumbs": {
             "title": "Sync Thumbnails to Media Files",
-            "group": "setting:thumbnailsync",
-            "api-start": True,
-        },
-        "get_playlist_art": {
-            "title": "Get Playlist Thumbnail",
             "group": "setting:thumbnailsync",
             "api-start": True,
         },
@@ -360,16 +354,6 @@ def subscribe_to(self, url_str: str, expected_type: str | bool = False):
     optionally validate expected_type channel / playlist
     """
     SubscriptionHandler(url_str, task=self).subscribe(expected_type)
-
-
-@shared_task(bind=True, name="get_playlist_art", base=BaseTask)
-def get_playlist_art(self, playlist_id):
-    """
-    download a thumb image for a playlist
-    """
-    playlist = YoutubePlaylist(playlist_id)
-    playlist.get_from_es()
-    playlist.get_playlist_art()
 
 
 @shared_task(bind=True, name="index_playlists", base=BaseTask)

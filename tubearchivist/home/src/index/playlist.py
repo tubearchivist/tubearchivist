@@ -27,7 +27,7 @@ class YoutubePlaylist(YouTubeItem):
 
     def __init__(self, youtube_id=None):
         if youtube_id is None:
-            youtube_id = "PL_" + str(uuid.uuid4())
+            youtube_id = "TA_playlist_" + str(uuid.uuid4())
         super().__init__(youtube_id)
         self.all_members = False
         self.nav = False
@@ -241,7 +241,7 @@ class YoutubePlaylist(YouTubeItem):
     def create(self, name):
         self.json_data = {
             "playlist_id": self.youtube_id,
-            "playlist_active": True,
+            "playlist_active": False,
             "playlist_name": name,
             "playlist_last_refresh": int(datetime.now().timestamp()),
             "playlist_entries": [],
@@ -375,15 +375,11 @@ class YoutubePlaylist(YouTubeItem):
         self.json_data["playlist_thumbnail"] = False
 
         for video in playlist:
-            url = self.get_video_thumbnail(video["youtube_id"])
+            url = ThumbManager(video["youtube_id"]).vid_thumb_path()
             if url is not None:
                 self.json_data["playlist_thumbnail"] = url
                 break
-
-    def get_video_thumbnail(self, video_id):
-        video = YoutubeVideo(video_id)
-        video.get_from_es()
-        return video.json_data["vid_thumb_url"]
+        self.get_playlist_art()
 
     def get_video_metadata(self, video_id):
         video = YoutubeVideo(video_id)

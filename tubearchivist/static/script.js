@@ -198,7 +198,7 @@ function addToQueue(autostart = false) {
 }
 
 //shows the video sub menu popup
-function showDotMenu(input1) {
+function showAddToPlaylistMenu(input1) {
   let dataId, playlists, form_code, buttonId;
   dataId = input1.getAttribute('data-id');
   buttonId = input1.getAttribute('id');
@@ -239,7 +239,7 @@ function removeDotMenu(input1, button_id) {
 }
 
 //shows the video sub menu popup on custom playlist page
-function showDotMenuCustomPlaylist(input1, playlist_id, current_page, last_page) {
+function showCustomPlaylistMenu(input1, playlist_id, current_page, last_page) {
   let dataId, form_code, buttonId;
   dataId = input1.getAttribute('data-id');
   buttonId = input1.getAttribute('id');
@@ -1200,13 +1200,10 @@ function createVideo(video, viewStyle) {
                 ${watchStatusIndicator}
             <span>${videoPublished} | ${videoDuration}</span>
         </div>
-        <div class="video-desc-details">
-	        <div>
-	            <a href="/channel/${channelId}/"><h3>${channelName}</h3></a>
-	            <a class="video-more" href="/video/${videoId}/"><h2>${videoTitle}</h2></a>
-	        </div>
-	        <img id="${videoId}-button2" src="../static/img/icon-dot-menu.svg" alt="dot-menu-icon" data-id="${videoId}" data-context="video" onclick="showDotMenu(this)" class="dot-button" title="More actions">
-	    </div>
+        <div>
+            <a href="/channel/${channelId}/"><h3>${channelName}</h3></a>
+            <a class="video-more" href="/video/${videoId}/"><h2>${videoTitle}</h2></a>
+        </div>
     </div>
     `;
   const videoDiv = document.createElement('div');

@@ -37,7 +37,6 @@ from home.tasks import (
     check_reindex,
     download_pending,
     extrac_dl,
-    get_playlist_art,
     run_restore_backup,
     subscribe_to,
 )
@@ -537,7 +536,6 @@ class PlaylistApiView(ApiBaseView):
                 action,
                 UserConfig(request.user.id).get_value("hide_watched"),
             )
-        get_playlist_art.delay(playlist_id)
         return Response({"success": True}, status=status.HTTP_201_CREATED)
 
     def delete(self, request, playlist_id):

@@ -155,15 +155,13 @@
                         	{% if playlist_info.playlist_type == "custom" %}
                         		{% if pagination %}
                         			{% if pagination.last_page > 0 %}
-	                        			<img id="{{ video.youtube_id }}-button2" src="{% static 'img/icon-dot-menu.svg' %}" alt="dot-menu-icon" data-id="{{ video.youtube_id }}" data-context="video" onclick="showDotMenuCustomPlaylist(this,'{{playlist_info.playlist_id}}',{{pagination.current_page}},{{pagination.last_page}})" class="dot-button" title="More actions">
+	                        			<img id="{{ video.youtube_id }}-button" src="{% static 'img/icon-dot-menu.svg' %}" alt="dot-menu-icon" data-id="{{ video.youtube_id }}" data-context="video" onclick="showCustomPlaylistMenu(this,'{{playlist_info.playlist_id}}',{{pagination.current_page}},{{pagination.last_page}})" class="dot-button" title="More actions">
 	                        		{% else %}
-	                        			<img id="{{ video.youtube_id }}-button2" src="{% static 'img/icon-dot-menu.svg' %}" alt="dot-menu-icon" data-id="{{ video.youtube_id }}" data-context="video" onclick="showDotMenuCustomPlaylist(this,'{{playlist_info.playlist_id}}',{{pagination.current_page}},{{pagination.current_page}})" class="dot-button" title="More actions">
+	                        			<img id="{{ video.youtube_id }}-button" src="{% static 'img/icon-dot-menu.svg' %}" alt="dot-menu-icon" data-id="{{ video.youtube_id }}" data-context="video" onclick="showCustomPlaylistMenu(this,'{{playlist_info.playlist_id}}',{{pagination.current_page}},{{pagination.current_page}})" class="dot-button" title="More actions">
                         			{% endif %}
                         		{% else %}
-                        			<img id="{{ video.youtube_id }}-button2" src="{% static 'img/icon-dot-menu.svg' %}" alt="dot-menu-icon" data-id="{{ video.youtube_id }}" data-context="video" onclick="showDotMenuCustomPlaylist(this,'{{playlist_info.playlist_id}}',0,0)" class="dot-button" title="More actions">
+                        			<img id="{{ video.youtube_id }}-button" src="{% static 'img/icon-dot-menu.svg' %}" alt="dot-menu-icon" data-id="{{ video.youtube_id }}" data-context="video" onclick="showCustomPlaylistMenu(this,'{{playlist_info.playlist_id}}',0,0)" class="dot-button" title="More actions">
                         		{% endif %}
-                        	{% else %}
-                        		<img id="{{ video.youtube_id }}-button2" src="{% static 'img/icon-dot-menu.svg' %}" alt="dot-menu-icon" data-id="{{ video.youtube_id }}" data-context="video" onclick="showDotMenu(this)" class="dot-button" title="More actions">
                         	{% endif %}
                         </div>
                     </div>
