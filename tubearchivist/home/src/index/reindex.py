@@ -363,7 +363,10 @@ class Reindex(ReindexBase):
         self._get_all_videos()
         playlist = YoutubePlaylist(playlist_id)
         playlist.get_from_es()
-        if not playlist.json_data:
+        if (
+            not playlist.json_data
+            or playlist.json_data["playlist_type"] == "custom"
+        ):
             return
 
         subscribed = playlist.json_data["playlist_subscribed"]
