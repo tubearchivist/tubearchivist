@@ -582,7 +582,7 @@ function createPlayer(button) {
   }
   let videoName = videoData.data.title;
 
-  let videoTag = createVideoTag(videoData, videoProgress);
+  let videoTag = createVideoTag(videoData, videoProgress, true);
 
   let playlist = '';
   let videoPlaylists = videoData.data.playlist; // Array of playlists the video is in
@@ -660,7 +660,7 @@ function insertVideoTag(videoData, videoProgress) {
 }
 
 // Generates a video tag with subtitles when passed videoData and videoProgress.
-function createVideoTag(videoData, videoProgress) {
+function createVideoTag(videoData, videoProgress, autoplay = false) {
   let videoId = videoData.data.youtube_id;
   let videoUrl = videoData.data.media_url;
   let videoThumbUrl = videoData.data.vid_thumb_url;
@@ -677,7 +677,9 @@ function createVideoTag(videoData, videoProgress) {
   }
 
   let videoTag = `
-    <video poster="${videoThumbUrl}" onvolumechange="onVolumeChange(this)" onloadstart="this.volume=getPlayerVolume()" ontimeupdate="onVideoProgress()" onpause="onVideoPause()" onended="onVideoEnded()" controls autoplay width="100%" playsinline id="video-item">
+    <video poster="${videoThumbUrl}" onvolumechange="onVolumeChange(this)" onloadstart="this.volume=getPlayerVolume()" ontimeupdate="onVideoProgress()" onpause="onVideoPause()" onended="onVideoEnded()" ${
+    autoplay ? 'autoplay' : ''
+  } controls width="100%" playsinline id="video-item">
         <source src="${videoUrl}#t=${videoProgress}" type="video/mp4" id="video-source" videoid="${videoId}">
         ${subtitles}
     </video>
@@ -781,6 +783,7 @@ function onVideoProgress() {
       }
     }
   }
+  if (currentTime < 10) return;
   if ((currentTime % 10).toFixed(1) <= 0.2) {
     // Check progress every 10 seconds or else progress is checked a few times a second
     postVideoProgress(videoId, currentTime);
@@ -832,6 +835,7 @@ function watchedThreshold(currentTime, duration) {
 function onVideoPause() {
   let videoId = getVideoPlayerVideoId();
   let currentTime = getVideoPlayerCurrentTime();
+  if (currentTime < 10) return;
   postVideoProgress(videoId, currentTime);
 }
 
