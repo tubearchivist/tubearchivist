@@ -6,6 +6,7 @@ Functionality:
 
 import enum
 import urllib.parse
+import uuid
 from time import sleep
 
 from api.src.search_processor import SearchProcess, process_aggs
@@ -847,7 +848,8 @@ class PlaylistView(ArchivistResultsView):
             create_form = CreatePlaylistForm(data=request.POST)
             if create_form.is_valid():
                 name = request.POST.get("create")
-                YoutubePlaylist().create(name)
+                playlist_id = f"TA_playlist_{uuid.uuid4()}"
+                YoutubePlaylist(playlist_id).create(name)
         else:
             subscribe_form = SubscribeToPlaylistForm(data=request.POST)
             if subscribe_form.is_valid():

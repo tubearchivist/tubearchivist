@@ -5,7 +5,6 @@ functionality:
 """
 
 import json
-import uuid
 from datetime import datetime
 
 from home.src.download.thumbnails import ThumbManager
@@ -25,9 +24,7 @@ class YoutubePlaylist(YouTubeItem):
     }
     yt_base = "https://www.youtube.com/playlist?list="
 
-    def __init__(self, youtube_id=None):
-        if youtube_id is None:
-            youtube_id = "TA_playlist_" + str(uuid.uuid4())
+    def __init__(self, youtube_id):
         super().__init__(youtube_id)
         self.all_members = False
         self.nav = False
