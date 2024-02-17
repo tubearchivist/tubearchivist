@@ -525,6 +525,7 @@ class PlaylistApiView(ApiBaseView):
 
     search_base = "ta_playlist/_doc/"
     permission_classes = [AdminWriteOnly]
+    valid_custom_actions = ["create", "remove", "up", "down", "top", "bottom"]
 
     def get(self, request, playlist_id):
         # pylint: disable=unused-argument
@@ -534,16 +535,23 @@ class PlaylistApiView(ApiBaseView):
 
     def post(self, request, playlist_id):
         """post to custom playlist to add a video to list"""
+        playlist = YoutubePlaylist(playlist_id)
+        if not playlist.is_custom_playlist():
+            message = f"playlist with ID {playlist_id} is not custom"
+            return Response({"message": message}, status=400)
+
         action = request.data.get("action")
+        if action not in self.valid_custom_actions:
+            message = f"invalid action: {action}"
+            return Response({"message": message}, status=400)
+
         video_id = request.data.get("video_id")
         if action == "create":
-            YoutubePlaylist(playlist_id).add_video_to_playlist(video_id)
+            playlist.add_video_to_playlist(video_id)
         else:
-            YoutubePlaylist(playlist_id).move_video(
-                video_id,
-                action,
-                UserConfig(request.user.id).get_value("hide_watched"),
-            )
+            hide = UserConfig(request.user.id).get_value("hide_watched")
+            playlist.move_video(video_id, action, hide_watched=hide)
+
         return Response({"success": True}, status=status.HTTP_201_CREATED)
 
     def delete(self, request, playlist_id):
