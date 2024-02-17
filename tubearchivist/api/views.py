@@ -462,17 +462,25 @@ class PlaylistApiListView(ApiBaseView):
 
     search_base = "ta_playlist/_search/"
     permission_classes = [AdminWriteOnly]
+    valid_playlist_type = ["regular", "custom"]
 
     def get(self, request):
         """handle get request"""
         playlist_type = request.GET.get("playlist_type", None)
+        query = {"sort": [{"playlist_name.keyword": {"order": "asc"}}]}
         if playlist_type is not None:
-            query = {
-                "query": {"term": {"playlist_type": {"value": playlist_type}}},
-                "sort": [{"playlist_name.keyword": {"order": "asc"}}],
-            }
-        else:
-            query = {"sort": [{"playlist_name.keyword": {"order": "asc"}}]}
+            if playlist_type not in self.valid_playlist_type:
+                message = f"invalid playlist_type {playlist_type}"
+                return Response({"message": message}, status=400)
+
+            query.update(
+                {
+                    "query": {
+                        "term": {"playlist_type": {"value": playlist_type}}
+                    },
+                }
+            )
+
         self.data.update(query)
         self.get_document_list(request)
         return Response(self.response)
