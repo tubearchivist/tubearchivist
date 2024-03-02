@@ -381,6 +381,19 @@ function deleteVideo(button) {
   }, 1000);
 }
 
+function deleteAndIgnoreVideo(button) {
+  let to_delete = button.getAttribute('data-id');
+  let to_redirect = button.getAttribute('data-redirect');
+  let endpointDelete = '/api/video/' + to_delete + '/';
+  apiRequest(endpointDelete, 'DELETE');
+  let endpointDownload = '/api/download/';
+  apiRequest(endpointDownload, 'POST', { data: [{ youtube_id: to_delete, status: 'ignore' }] });
+  setTimeout(function () {
+    let redirect = '/channel/' + to_redirect;
+    window.location.replace(redirect);
+  }, 1000);
+}
+
 function deleteChannel(button) {
   let to_delete = button.getAttribute('data-id');
   let apiEndpoint = '/api/channel/' + to_delete + '/';

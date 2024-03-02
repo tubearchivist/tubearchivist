@@ -10,7 +10,7 @@ from api.src.aggs import (
     WatchProgress,
 )
 from api.src.search_processor import SearchProcess
-from home.src.download.queue import PendingInteract
+from home.src.download.queue import PendingInteract, PendingList
 from home.src.download.subscriptions import (
     ChannelSubscription,
     PlaylistSubscription,
@@ -644,15 +644,25 @@ class DownloadApiListView(ApiBaseView):
             return Response({"message": message}, status=400)
 
         pending = [i["youtube_id"] for i in to_add if i["status"] == "pending"]
-        url_str = " ".join(pending)
-        try:
-            youtube_ids = Parser(url_str).parse()
-        except ValueError:
-            message = f"failed to parse: {url_str}"
-            print(message)
-            return Response({"message": message}, status=400)
+        if pending:
+            url_str = " ".join(pending)
+            try:
+                youtube_ids = Parser(url_str).parse()
+            except ValueError:
+                message = f"failed to parse: {url_str}"
+                print(message)
+                return Response({"message": message}, status=400)
+            extrac_dl.delay(youtube_ids, auto_start=auto_start)
 
-        extrac_dl.delay(youtube_ids, auto_start=auto_start)
+        ignore = [
+            {"type": "video", "url": i["youtube_id"]}
+            for i in to_add
+            if i["status"] == "ignore"
+        ]
+        if ignore:
+            pending = PendingList(youtube_ids=ignore)
+            pending.parse_url_list()
+            pending.add_to_pending(status="ignore")
 
         return Response(data)
 
