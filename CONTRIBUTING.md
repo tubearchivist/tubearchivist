@@ -126,19 +126,17 @@ The documentation available at [docs.tubearchivist.com](https://docs.tubearchivi
 
 I have learned the hard way, that working on a dockerized application outside of docker is very error prone and in general not a good idea. So if you want to test your changes, it's best to run them in a docker testing environment. You might be able to run the application directly, but this document assumes you're using docker.
 
-### Instructions
-
-Set up docker on your development machine.
-
-Clone this repository.
+### Instructions (Docker)
 
 Functional changes should be made against the unstable `testing` branch, so check that branch out, then make a new branch for your work.
+There is two ways to run the application, either in a docker container as described below, or in a VM. The VM is a bit more complex to set up, but it's a good way to simulate a low end environment.
 
-Edit the `docker-compose.yml` file and replace the [`image: bbilly1/tubearchivist` line](https://github.com/tubearchivist/tubearchivist/blob/4af12aee15620e330adf3624c984c3acf6d0ac8b/docker-compose.yml#L7) with `build: .`. Also make any other changes to the environment variables and so on necessary to run the application, just like you're launching the application as normal.
+1. Set up docker on your development machine.
+2. Clone this repository.
+3. Optionally edit the `docker-compose.dev.yml` file to your liking or leave it as is. Especially the `TA_HOST` which is the domain name of the application that needs to match the URL accessing the application i.e `127.0.0.1`.
+4. Run `make dev` which will start the the docker compose project with the `docker-compose.dev.yml` file. Kill it with `ctrl-c` or by running `docker compose down` from a new terminal window in the same directory.
+5. Make your changes, application will automatically reload.
 
-Run `docker compose up --build`. This will bring up the application. Kill it with `ctrl-c` or by running `docker compose down` from a new terminal window in the same directory.
-
-Make your changes locally and re-run `docker compose up --build`. The `Dockerfile` is structured in a way that the actual application code is in the last layer so rebuilding the image with only code changes utilizes the build cache for everything else and will just take a few seconds.
 
 ### Develop environment inside a VM
 

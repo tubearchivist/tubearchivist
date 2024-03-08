@@ -18,9 +18,14 @@ python manage.py ta_connection
 python manage.py ta_startup
 python manage.py ta_migpath
 
+#export PYTHONWARNINGS=error
+
+pip install watchdog -U
+watchmedo shell-command --patterns="*.html;*.css;*.js" --recursive --command='kill -HUP `cat /tmp/project-master.pid`' . &
+
 # start all tasks
 nginx &
 celery -A home.tasks worker --loglevel=INFO --max-tasks-per-child 10 &
 celery -A home beat --loglevel=INFO \
     -s "${BEAT_SCHEDULE_PATH:-${cachedir}/celerybeat-schedule}" &
-uwsgi --ini /uwsgi.ini
+uwsgi --ini /uwsgi-dev.ini

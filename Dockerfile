@@ -35,16 +35,16 @@ RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recomm
 # install patched ffmpeg build, default to linux64
 RUN if [ "$TARGETPLATFORM" = "linux/arm64" ] ; then \
     curl -s https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest \
-        | grep browser_download_url \
-        | grep ".*master.*linuxarm64.*tar.xz" \
-        | cut -d '"' -f 4 \
-        | xargs curl -L --output ffmpeg.tar.xz ; \
+    | grep browser_download_url \
+    | grep ".*master.*linuxarm64.*tar.xz" \
+    | cut -d '"' -f 4 \
+    | xargs curl -L --output ffmpeg.tar.xz ; \
     else \
     curl -s https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest \
-        | grep browser_download_url \
-        | grep ".*master.*linux64.*tar.xz" \
-        | cut -d '"' -f 4 \
-        | xargs curl -L --output ffmpeg.tar.xz ; \
+    | grep browser_download_url \
+    | grep ".*master.*linux64.*tar.xz" \
+    | cut -d '"' -f 4 \
+    | xargs curl -L --output ffmpeg.tar.xz ; \
     fi && \
     tar -xf ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ "ffmpeg" && \
     tar -xf ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ "ffprobe" && \
@@ -52,9 +52,9 @@ RUN if [ "$TARGETPLATFORM" = "linux/arm64" ] ; then \
 
 # install debug tools for testing environment
 RUN if [ "$INSTALL_DEBUG" ] ; then \
-        apt-get -y update && apt-get -y install --no-install-recommends \
-        vim htop bmon net-tools iputils-ping procps \
-        && pip install --user ipython \
+    apt-get -y update && apt-get -y install --no-install-recommends \
+    vim htop bmon net-tools iputils-ping procps \
+    && pip install --user ipython \
     ; fi
 
 # make folders
@@ -65,9 +65,11 @@ COPY docker_assets/nginx.conf /etc/nginx/sites-available/default
 RUN sed -i 's/^user www\-data\;$/user root\;/' /etc/nginx/nginx.conf
 
 # copy application into container
-COPY ./tubearchivist /app
-COPY ./docker_assets/run.sh /app
-COPY ./docker_assets/uwsgi.ini /app
+#COPY ./tubearchivist /app
+COPY ./docker_assets/run-dev.sh /
+COPY ./docker_assets/run.sh /
+COPY ./docker_assets/uwsgi-dev.ini /
+COPY ./docker_assets/uwsgi.ini /
 
 # volumes
 VOLUME /cache
@@ -77,6 +79,6 @@ VOLUME /youtube
 WORKDIR /app
 EXPOSE 8000
 
-RUN chmod +x ./run.sh
+RUN chmod +x /run.sh /run-dev.sh
 
-CMD ["./run.sh"]
+ENTRYPOINT [ "/run.sh" ]
