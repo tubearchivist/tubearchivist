@@ -761,16 +761,13 @@ class PlaylistIdView(ArchivistResultsView):
             + "{return params.scores[doc['youtube_id'].value];} "
             + "return 100000;"
         )
-        if playlist_info["playlist_type"] == "custom":
-            video_ids = [
-                i["youtube_id"] for i in playlist_info["playlist_entries"]
-            ]
-            must_clause = {"ids": {"values": video_ids}}
-        else:
-            must_clause = {"match": {"playlist.keyword": playlist_id}}
         self.data.update(
             {
-                "query": {"bool": {"must": [must_clause]}},
+                "query": {
+                    "bool": {
+                        "must": [{"match": {"playlist.keyword": playlist_id}}]
+                    }
+                },
                 "sort": [
                     {
                         "_script": {
