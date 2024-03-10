@@ -11,12 +11,17 @@
         {% if request.user|has_group:"admin" or request.user.is_staff %}
 
         <div class="title-split-form">
-            <img id="animate-icon" onclick="showForm()" src="{% static 'img/icon-add.svg' %}" alt="add-icon" title="Subscribe to Playlists">
+            <img id="animate-icon" onclick="showForm();showForm('hidden-form2')" src="{% static 'img/icon-add.svg' %}" alt="add-icon" title="Subscribe to Playlists">
             <div class="show-form">
                 <form id="hidden-form" action="/playlist/" method="post">
                     {% csrf_token %}
                     {{ subscribe_form }}
                     <button type="submit">Subscribe</button>
+                </form>
+                <form id="hidden-form2" action="/playlist/" method="post">
+                    {% csrf_token %}
+                    {{ create_form }}
+                    <button type="submit">Create</button>
                 </form>
             </div>
         </div>
@@ -51,14 +56,18 @@
                     </a>
                 </div>
                 <div class="playlist-desc {{ view_style }}">
-                    <a href="{% url 'channel_id' playlist.playlist_channel_id %}"><h3>{{ playlist.playlist_channel }}</h3></a>
+                    {% if playlist.playlist_type != "custom" %}
+                    	<a href="{% url 'channel_id' playlist.playlist_channel_id %}"><h3>{{ playlist.playlist_channel }}</h3></a>
+                    {% endif %}
                     <a href="{% url 'playlist_id' playlist.playlist_id %}"><h2>{{ playlist.playlist_name }}</h2></a>
                     <p>Last refreshed: {{ playlist.playlist_last_refresh }}</p>
-                    {% if playlist.playlist_subscribed %}
-                        <button class="unsubscribe" type="button" data-type="playlist" data-subscribe="" data-id="{{ playlist.playlist_id }}" onclick="subscribeStatus(this)" title="Unsubscribe from {{ playlist.playlist_name }}">Unsubscribe</button>
-                    {% else %}
-                        <button type="button" data-type="playlist" data-subscribe="true" data-id="{{ playlist.playlist_id }}" onclick="subscribeStatus(this)" title="Subscribe to {{ playlist.playlist_name }}">Subscribe</button>
-                    {% endif %}
+                    {% if playlist.playlist_type != "custom" %}
+	                    {% if playlist.playlist_subscribed %}
+	                        <button class="unsubscribe" type="button" data-type="playlist" data-subscribe="" data-id="{{ playlist.playlist_id }}" onclick="subscribeStatus(this)" title="Unsubscribe from {{ playlist.playlist_name }}">Unsubscribe</button>
+	                    {% else %}
+	                        <button type="button" data-type="playlist" data-subscribe="true" data-id="{{ playlist.playlist_id }}" onclick="subscribeStatus(this)" title="Subscribe to {{ playlist.playlist_name }}">Subscribe</button>
+	                    {% endif %}
+	                {% endif %}
                 </div>
             </div>
             {% endfor %}

@@ -319,6 +319,8 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
                     playlist.json_data["playlist_entries"][idx].update(
                         {"downloaded": False}
                     )
+                    if playlist.json_data["playlist_type"] == "custom":
+                        playlist.del_video(self.youtube_id)
             playlist.upload_to_es()
 
     def delete_subtitles(self, subtitles=False):

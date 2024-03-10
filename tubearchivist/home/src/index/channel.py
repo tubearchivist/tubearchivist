@@ -213,6 +213,7 @@ class YoutubeChannel(YouTubeItem):
         all_playlists = self.get_indexed_playlists()
         for playlist in all_playlists:
             playlist_id = playlist["playlist_id"]
+            playlist = YoutubePlaylist(playlist_id)
             YoutubePlaylist(playlist_id).delete_metadata()
 
     def delete_channel(self):

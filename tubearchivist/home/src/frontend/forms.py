@@ -265,6 +265,20 @@ class SubscribeToPlaylistForm(forms.Form):
     )
 
 
+class CreatePlaylistForm(forms.Form):
+    """text area form to create a single custom playlist"""
+
+    create = forms.CharField(
+        label="Or create custom playlist",
+        widget=forms.Textarea(
+            attrs={
+                "rows": 1,
+                "placeholder": "Input playlist name",
+            }
+        ),
+    )
+
+
 class ChannelOverwriteForm(forms.Form):
     """custom overwrites for channel settings"""
 

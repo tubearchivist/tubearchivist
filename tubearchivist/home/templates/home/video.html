@@ -95,6 +95,7 @@
                     <span>Are you sure? </span><button class="danger-button" onclick="deleteVideo(this)" data-id="{{ video.youtube_id }}" data-redirect = "{{ video.channel.channel_id }}">Delete</button> <button onclick="cancelDelete()">Cancel</button>
                 </div>
                 {% endif %}
+                <button id="{{ video.youtube_id }}-button" data-id="{{ video.youtube_id }}" data-context="video" onclick="showAddToPlaylistMenu(this)">Add To Playlist</button>
             </div>
         </div>
         <div class="info-box-item">
