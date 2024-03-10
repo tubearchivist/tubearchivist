@@ -62,8 +62,8 @@ class YtWrap:
         """make extract request"""
         try:
             response = yt_dlp.YoutubeDL(self.obs).extract_info(url)
-        except cookiejar.LoadError:
-            print("cookie file is invalid")
+        except cookiejar.LoadError as err:
+            print(f"cookie file is invalid: {err}")
             return False
         except yt_dlp.utils.ExtractorError as err:
             print(f"{url}: failed to extract with message: {err}, continue...")
