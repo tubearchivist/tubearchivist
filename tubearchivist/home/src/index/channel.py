@@ -214,12 +214,7 @@ class YoutubeChannel(YouTubeItem):
         for playlist in all_playlists:
             playlist_id = playlist["playlist_id"]
             playlist = YoutubePlaylist(playlist_id)
-            if playlist.is_custom_playlist():
-                YoutubePlaylist(playlist_id).delete_videos_metadata(
-                    self.youtube_id
-                )
-            else:
-                YoutubePlaylist(playlist_id).delete_metadata()
+            YoutubePlaylist(playlist_id).delete_metadata()
 
     def delete_channel(self):
         """delete channel and all videos"""
