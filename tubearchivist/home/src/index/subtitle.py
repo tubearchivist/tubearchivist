@@ -128,6 +128,10 @@ class YoutubeSubtitle:
                 print(response.text)
                 continue
 
+            if not response.text:
+                print(f"{self.video.youtube_id}: skip empty subtitle")
+                continue
+
             parser = SubtitleParser(response.text, lang, source)
             parser.process()
             if not parser.all_cues:
