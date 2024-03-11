@@ -115,6 +115,9 @@ class Comments:
 
         time_text = time_text_datetime.strftime(format_string)
 
+        if not comment.get("author"):
+            comment["author"] = comment.get("author_id", "Unknown")
+
         cleaned_comment = {
             "comment_id": comment["id"],
             "comment_text": comment["text"].replace("\xa0", ""),

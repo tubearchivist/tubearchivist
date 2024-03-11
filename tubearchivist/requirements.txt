@@ -1,6 +1,6 @@
-apprise==1.7.1
+apprise==1.7.4
 celery==5.3.6
-Django==4.2.9
+Django==5.0.3
 django-auth-ldap==4.6.0
 django-cors-headers==4.3.1
 djangorestframework==3.14.0
@@ -8,6 +8,6 @@ Pillow==10.2.0
 redis==5.0.0
 requests==2.31.0
 ryd-client==0.0.6
-uWSGI==2.0.23
+uWSGI==2.0.24
 whitenoise==6.6.0
-yt-dlp==2023.12.30
+yt-dlp==2024.3.10

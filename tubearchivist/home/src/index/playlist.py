@@ -66,6 +66,7 @@ class YoutubePlaylist(YouTubeItem):
             "playlist_thumbnail": playlist_thumbnail,
             "playlist_description": self.youtube_meta["description"] or False,
             "playlist_last_refresh": int(datetime.now().timestamp()),
+            "playlist_type": "regular",
         }
 
     def get_entries(self, playlistend=False):
@@ -178,6 +179,7 @@ class YoutubePlaylist(YouTubeItem):
 
     def delete_metadata(self):
         """delete metadata for playlist"""
+        self.delete_videos_metadata()
         script = (
             "ctx._source.playlist.removeAll("
             + "Collections.singleton(params.playlist)) "
@@ -195,6 +197,30 @@ class YoutubePlaylist(YouTubeItem):
         _, _ = ElasticWrap("ta_video/_update_by_query").post(data)
         self.del_in_es()
 
+    def is_custom_playlist(self):
+        self.get_from_es()
+        return self.json_data["playlist_type"] == "custom"
+
+    def delete_videos_metadata(self, channel_id=None):
+        """delete video metadata for a specific channel"""
+        self.get_from_es()
+        playlist = self.json_data["playlist_entries"]
+        i = 0
+        while i < len(playlist):
+            video_id = playlist[i]["youtube_id"]
+            video = YoutubeVideo(video_id)
+            video.get_from_es()
+            if (
+                channel_id is None
+                or video.json_data["channel"]["channel_id"] == channel_id
+            ):
+                playlist.pop(i)
+                self.remove_playlist_from_video(video_id)
+                i -= 1
+            i += 1
+        self.set_playlist_thumbnail()
+        self.upload_to_es()
+
     def delete_videos_playlist(self):
         """delete playlist with all videos"""
         print(f"{self.youtube_id}: delete playlist")
@@ -208,3 +234,159 @@ class YoutubePlaylist(YouTubeItem):
             YoutubeVideo(youtube_id).delete_media_file()
 
         self.delete_metadata()
+
+    def create(self, name):
+        self.json_data = {
+            "playlist_id": self.youtube_id,
+            "playlist_active": False,
+            "playlist_name": name,
+            "playlist_last_refresh": int(datetime.now().timestamp()),
+            "playlist_entries": [],
+            "playlist_type": "custom",
+            "playlist_channel": None,
+            "playlist_channel_id": None,
+            "playlist_description": False,
+            "playlist_thumbnail": False,
+            "playlist_subscribed": False,
+        }
+        self.upload_to_es()
+        self.get_playlist_art()
+        return True
+
+    def add_video_to_playlist(self, video_id):
+        self.get_from_es()
+        video_metadata = self.get_video_metadata(video_id)
+        video_metadata["idx"] = len(self.json_data["playlist_entries"])
+
+        if not self.playlist_entries_contains(video_id):
+            self.json_data["playlist_entries"].append(video_metadata)
+            self.json_data["playlist_last_refresh"] = int(
+                datetime.now().timestamp()
+            )
+            self.set_playlist_thumbnail()
+            self.upload_to_es()
+            video = YoutubeVideo(video_id)
+            video.get_from_es()
+            if "playlist" not in video.json_data:
+                video.json_data["playlist"] = []
+            video.json_data["playlist"].append(self.youtube_id)
+            video.upload_to_es()
+        return True
+
+    def remove_playlist_from_video(self, video_id):
+        video = YoutubeVideo(video_id)
+        video.get_from_es()
+        if video.json_data is not None and "playlist" in video.json_data:
+            video.json_data["playlist"].remove(self.youtube_id)
+            video.upload_to_es()
+
+    def move_video(self, video_id, action, hide_watched=False):
+        self.get_from_es()
+        video_index = self.get_video_index(video_id)
+        playlist = self.json_data["playlist_entries"]
+        item = playlist[video_index]
+        playlist.pop(video_index)
+        if action == "remove":
+            self.remove_playlist_from_video(item["youtube_id"])
+        else:
+            if action == "up":
+                while True:
+                    video_index = max(0, video_index - 1)
+                    if (
+                        not hide_watched
+                        or video_index == 0
+                        or (
+                            not self.get_video_is_watched(
+                                playlist[video_index]["youtube_id"]
+                            )
+                        )
+                    ):
+                        break
+            elif action == "down":
+                while True:
+                    video_index = min(len(playlist), video_index + 1)
+                    if (
+                        not hide_watched
+                        or video_index == len(playlist)
+                        or (
+                            not self.get_video_is_watched(
+                                playlist[video_index - 1]["youtube_id"]
+                            )
+                        )
+                    ):
+                        break
+            elif action == "top":
+                video_index = 0
+            else:
+                video_index = len(playlist)
+            playlist.insert(video_index, item)
+        self.json_data["playlist_last_refresh"] = int(
+            datetime.now().timestamp()
+        )
+
+        for i, item in enumerate(playlist):
+            item["idx"] = i
+
+        self.set_playlist_thumbnail()
+        self.upload_to_es()
+
+        return True
+
+    def del_video(self, video_id):
+        playlist = self.json_data["playlist_entries"]
+
+        i = 0
+        while i < len(playlist):
+            if video_id == playlist[i]["youtube_id"]:
+                playlist.pop(i)
+                self.set_playlist_thumbnail()
+                i -= 1
+            i += 1
+
+    def get_video_index(self, video_id):
+        for i, child in enumerate(self.json_data["playlist_entries"]):
+            if child["youtube_id"] == video_id:
+                return i
+        return -1
+
+    def playlist_entries_contains(self, video_id):
+        return (
+            len(
+                list(
+                    filter(
+                        lambda x: x["youtube_id"] == video_id,
+                        self.json_data["playlist_entries"],
+                    )
+                )
+            )
+            > 0
+        )
+
+    def get_video_is_watched(self, video_id):
+        video = YoutubeVideo(video_id)
+        video.get_from_es()
+        return video.json_data["player"]["watched"]
+
+    def set_playlist_thumbnail(self):
+        playlist = self.json_data["playlist_entries"]
+        self.json_data["playlist_thumbnail"] = False
+
+        for video in playlist:
+            url = ThumbManager(video["youtube_id"]).vid_thumb_path()
+            if url is not None:
+                self.json_data["playlist_thumbnail"] = url
+                break
+        self.get_playlist_art()
+
+    def get_video_metadata(self, video_id):
+        video = YoutubeVideo(video_id)
+        video.get_from_es()
+        video_json_data = {
+            "youtube_id": video.json_data["youtube_id"],
+            "title": video.json_data["title"],
+            "uploader": video.json_data["channel"]["channel_name"],
+            "idx": 0,
+            "downloaded": "date_downloaded" in video.json_data
+            and video.json_data["date_downloaded"] > 0,
+        }
+        return video_json_data

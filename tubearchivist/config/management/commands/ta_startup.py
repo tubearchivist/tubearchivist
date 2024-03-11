@@ -8,6 +8,7 @@ import os
 from time import sleep
 
 from django.core.management.base import BaseCommand, CommandError
+from home.src.es.connect import ElasticWrap
 from home.src.es.index_setup import ElasitIndexWrap
 from home.src.es.snapshot import ElasticSnapshot
 from home.src.ta.config import AppConfig, ReleaseVersion
@@ -44,6 +45,7 @@ class Command(BaseCommand):
         self._mig_index_setup()
         self._mig_snapshot_check()
         self._mig_move_users_to_es()
+        self._mig_custom_playlist()
 
     def _sync_redis_state(self):
         """make sure redis gets new config.json values"""
@@ -242,3 +244,36 @@ class Command(BaseCommand):
                     "    ✓ Settings for all users migrated to ES"
                 )
             )
+
+    def _mig_custom_playlist(self):
+        """migration for custom playlist"""
+        self.stdout.write("[MIGRATION] custom playlist")
+        data = {
+            "query": {
+                "bool": {"must_not": [{"exists": {"field": "playlist_type"}}]}
+            },
+            "script": {"source": "ctx._source['playlist_type'] = 'regular'"},
+        }
+        path = "ta_playlist/_update_by_query"
+        response, status_code = ElasticWrap(path).post(data=data)
+        if status_code == 200:
+            updated = response.get("updated", 0)
+            if updated:
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"    ✓ {updated} playlist_type updated in ta_playlist"
+                    )
+                )
+            else:
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        "    no playlist_type needed updating in ta_playlist"
+                    )
+                )
+            return
+
+        message = "    🗙 ta_playlist playlist_type update failed"
+        self.stdout.write(self.style.ERROR(message))
+        self.stdout.write(response)
+        sleep(60)
+        raise CommandError(message)
