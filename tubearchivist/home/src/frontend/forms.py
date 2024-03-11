@@ -105,8 +105,8 @@ class ApplicationSettingsForm(forms.Form):
 
     COOKIE_IMPORT_CHOICES = [
         ("", "-- change cookie settings"),
-        ("0", "disable cookie"),
-        ("1", "enable cookie"),
+        ("0", "remove cookie"),
+        ("1", "import cookie"),
     ]
 
     subscriptions_channel_size = forms.IntegerField(
