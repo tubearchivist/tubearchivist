@@ -227,7 +227,7 @@ class PendingList(PendingIndex):
     def _parse_playlist(self, url):
         """add all videos of playlist to list"""
         playlist = YoutubePlaylist(url)
-        playlist.build_json()
+        playlist.build_json(scrape=True)
         if not playlist.json_data:
             message = f"{playlist.youtube_id}: failed to extract metadata"
             print(message)
