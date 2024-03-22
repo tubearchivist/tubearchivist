@@ -195,6 +195,7 @@ This is a list of useful user scripts, generously created from folks like you to
 - [DarkFighterLuke/ta_base_url_nginx](https://gist.github.com/DarkFighterLuke/4561b6bfbf83720493dc59171c58ac36): Set base URL with Nginx when you can't use subdomains.
 - [lamusmaser/ta_migration_helper](https://github.com/lamusmaser/ta_migration_helper): Advanced helper script for migration issues to TubeArchivist v0.4.4 or later.
 - [lamusmaser/create_info_json](https://gist.github.com/lamusmaser/837fb58f73ea0cad784a33497932e0dd): Script to generate `.info.json` files using `ffmpeg` collecting information from downloaded videos.
+- [lamusmaser/ta_fix_for_video_redirection](https://github.com/lamusmaser/ta_fix_for_video_redirection): Script to fix videos that were incorrectly indexed by YouTube's "Video is Unavailable" response. 
 - [RoninTech/ta-helper](https://github.com/RoninTech/ta-helper): Helper script to provide a symlink association to reference TubeArchivist videos with their original titles.
 
 ## Donate
