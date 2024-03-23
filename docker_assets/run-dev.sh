@@ -22,6 +22,7 @@ python manage.py ta_migpath
 
 pip install watchdog -U
 watchmedo shell-command --patterns="*.html;*.css;*.js" --recursive --command='kill -HUP `cat /tmp/project-master.pid`' . &
+watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A home.tasks worker --loglevel=INFO --max-tasks-per-child 10 &
 
 # start all tasks
 nginx &
