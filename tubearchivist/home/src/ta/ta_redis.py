@@ -17,11 +17,16 @@ class RedisBase:
     NAME_SPACE: str = EnvironmentSettings.REDIS_NAME_SPACE
 
     def __init__(self):
-        self.conn = redis.Redis(
-            host=EnvironmentSettings.REDIS_HOST,
-            port=EnvironmentSettings.REDIS_PORT,
-            decode_responses=True,
-        )
+        kwargs = {
+            "decode_responses": True,
+            "host": EnvironmentSettings.REDIS_HOST,
+            "port": EnvironmentSettings.REDIS_PORT,
+        }
+
+        if EnvironmentSettings.REDIS_SOCKET:
+            kwargs["unix_socket_path"] = EnvironmentSettings.REDIS_SOCKET
+
+        self.conn = redis.Redis(**kwargs)
 
 
 class RedisArchivist(RedisBase):

@@ -31,6 +31,9 @@ class EnvironmentSettings:
     # Redis
     REDIS_HOST: str = str(environ.get("REDIS_HOST"))
     REDIS_PORT: int = int(environ.get("REDIS_PORT", 6379))
+    REDIS_SOCKET: str | None = (
+        str(environ.get("REDIS_SOCKET")) if "REDIS_SOCKET" in environ else None
+    )
     REDIS_NAME_SPACE: str = str(environ.get("REDIS_NAME_SPACE", "ta:"))
 
     # ElasticSearch
