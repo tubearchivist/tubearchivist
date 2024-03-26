@@ -47,8 +47,8 @@ class AppConfig:
 
                 return config
 
-            except Exception:  # pylint: disable=broad-except
-                print(f"... Redis connection failed, retry [{i}/10]")
+            except Exception as e:  # pylint: disable=broad-except
+                print(f"... Redis connection failed, retry [{i}/10]: {e}")
                 sleep(3)
 
         raise ConnectionError("failed to connect to redis")
