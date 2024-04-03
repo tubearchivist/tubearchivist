@@ -14,7 +14,6 @@ fi
 python manage.py ta_envcheck
 python manage.py ta_connection
 python manage.py ta_startup
-python manage.py ta_migpath
 
 # start all tasks
 nginx &
