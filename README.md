@@ -188,11 +188,17 @@ Implemented:
 - [X] Scan your file system to index already downloaded videos [2021-09-14]
 
 ## User Scripts
-This is a list of useful user scripts, generously created from folks like you to extend this project and its functionality. This is your time to shine, [read this](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#user-scripts) then open a PR to add your script here.
+This is a list of useful user scripts, generously created from folks like you to extend this project and its functionality. Make sure to check the respective repository links for detailed license information.  
+
+This is your time to shine, [read this](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#user-scripts) then open a PR to add your script here.
 
 - [danieljue/ta_dl_page_script](https://github.com/danieljue/ta_dl_page_script): Helper browser script to prioritize a channels' videos in download queue.
 - [dot-mike/ta-scripts](https://github.com/dot-mike/ta-scripts): A collection of personal scripts for managing TubeArchivist.
 - [DarkFighterLuke/ta_base_url_nginx](https://gist.github.com/DarkFighterLuke/4561b6bfbf83720493dc59171c58ac36): Set base URL with Nginx when you can't use subdomains.
+- [lamusmaser/ta_migration_helper](https://github.com/lamusmaser/ta_migration_helper): Advanced helper script for migration issues to TubeArchivist v0.4.4 or later.
+- [lamusmaser/create_info_json](https://gist.github.com/lamusmaser/837fb58f73ea0cad784a33497932e0dd): Script to generate `.info.json` files using `ffmpeg` collecting information from downloaded videos.
+- [lamusmaser/ta_fix_for_video_redirection](https://github.com/lamusmaser/ta_fix_for_video_redirection): Script to fix videos that were incorrectly indexed by YouTube's "Video is Unavailable" response. 
+- [RoninTech/ta-helper](https://github.com/RoninTech/ta-helper): Helper script to provide a symlink association to reference TubeArchivist videos with their original titles.
 
 ## Donate
 The best donation to **Tube Archivist** is your time, take a look at the [contribution page](CONTRIBUTING.md) to get started.  
