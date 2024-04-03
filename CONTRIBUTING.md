@@ -66,7 +66,7 @@ IMPORTANT: When receiving help, contribute back to the community by improving th
 
 ## How to make a Pull Request
 
-Thank you for contributing and helping improve this project. Focus for the forseeable future is on improving and building on existing functionality, *not* on adding and expanding the application.
+Thank you for contributing and helping improve this project. Focus for the foreseeable future is on improving and building on existing functionality, *not* on adding and expanding the application.
 
 This is a quick checklist to help streamline the process:
 
