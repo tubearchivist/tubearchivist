@@ -92,7 +92,10 @@
                 {% if request.user|has_group:"admin" or request.user.is_staff %}
                 <button onclick="deleteConfirm()" id="delete-item">Delete Video</button>
                 <div class="delete-confirm" id="delete-button">
-                    <span>Are you sure? </span><button class="danger-button" onclick="deleteVideo(this)" data-id="{{ video.youtube_id }}" data-redirect = "{{ video.channel.channel_id }}">Delete</button> <button onclick="cancelDelete()">Cancel</button>
+                    <span>Are you sure? </span>
+                    <button class="danger-button" onclick="deleteVideo(this)" data-id="{{ video.youtube_id }}" data-redirect = "{{ video.channel.channel_id }}">Delete</button>
+                    <button class="danger-button" onclick="deleteVideo(this)" data-id="{{ video.youtube_id }}" data-ignore data-redirect = "{{ video.channel.channel_id }}">Delete and ignore</button>
+                    <button onclick="cancelDelete()">Cancel</button>
                 </div>
                 {% endif %}
                 <button id="{{ video.youtube_id }}-button" data-id="{{ video.youtube_id }}" data-context="video" onclick="showAddToPlaylistMenu(this)">Add To Playlist</button>

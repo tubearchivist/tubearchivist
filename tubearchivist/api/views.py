@@ -592,7 +592,7 @@ class DownloadApiView(ApiBaseView):
     """
 
     search_base = "ta_download/_doc/"
-    valid_status = ["pending", "ignore", "priority"]
+    valid_status = ["pending", "ignore", "ignore-force", "priority"]
     permission_classes = [AdminOnly]
 
     def get(self, request, video_id):
@@ -608,6 +608,11 @@ class DownloadApiView(ApiBaseView):
             message = f"{video_id}: invalid status {item_status}"
             print(message)
             return Response({"message": message}, status=400)
+
+        if item_status == "ignore-force":
+            extrac_dl.delay(video_id, status="ignore")
+            message = f"{video_id}: set status to ignore"
+            return Response(request.data)
 
         _, status_code = PendingInteract(video_id).get_item()
         if status_code == 404:

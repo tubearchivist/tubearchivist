@@ -214,7 +214,7 @@ def download_pending(self, auto_only=False):
 
 
 @shared_task(name="extract_download", bind=True, base=BaseTask)
-def extrac_dl(self, youtube_ids, auto_start=False):
+def extrac_dl(self, youtube_ids, auto_start=False, status="pending"):
     """parse list passed and add to pending"""
     TaskManager().init(self)
     if isinstance(youtube_ids, str):
@@ -224,7 +224,7 @@ def extrac_dl(self, youtube_ids, auto_start=False):
 
     pending_handler = PendingList(youtube_ids=to_add, task=self)
     pending_handler.parse_url_list()
-    pending_handler.add_to_pending(auto_start=auto_start)
+    pending_handler.add_to_pending(status=status, auto_start=auto_start)
 
     if auto_start:
         download_pending.delay(auto_only=True)

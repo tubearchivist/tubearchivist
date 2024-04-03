@@ -503,9 +503,16 @@ function deleteConfirm() {
 
 function deleteVideo(button) {
   let to_delete = button.getAttribute('data-id');
+  let to_ignore = button.getAttribute('data-ignore');
   let to_redirect = button.getAttribute('data-redirect');
-  let apiEndpoint = '/api/video/' + to_delete + '/';
-  apiRequest(apiEndpoint, 'DELETE');
+  let apiDeleteEndpoint = '/api/video/' + to_delete + '/';
+  apiRequest(apiDeleteEndpoint, 'DELETE');
+
+  if (to_ignore !== null) {
+    let apiIgnoreEndpoint = '/api/download/' + to_delete + '/';
+    apiRequest(apiIgnoreEndpoint, 'POST', { status: 'ignore-force' });
+  }
+
   setTimeout(function () {
     let redirect = '/channel/' + to_redirect;
     window.location.replace(redirect);
