@@ -524,7 +524,7 @@ class ChannelIdView(ChannelIdBaseView):
 
         self.context.update(
             {
-                "title": "Channel: " + channel_name,
+                "title": f"Channel: {channel_name}",
                 "channel_info": channel_info,
             }
         )

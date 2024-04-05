@@ -37,12 +37,12 @@ Please keep in mind:
 - A bug that can't be reproduced, is difficult or sometimes even impossible to fix. Provide very clear steps *how to reproduce*.
 
 ### Feature Request
-This project needs your help to grow further. There is no shortage of ideas, see the open [issues on GH](https://github.com/tubearchivist/tubearchivist/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement) and the [roadmap](https://github.com/tubearchivist/tubearchivist#roadmap), what this project lacks is contributors to implement these ideas.
+This project needs your help to grow further. There is no shortage of ideas, see the open [issues on GH](https://github.com/tubearchivist/tubearchivist/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement) and the [roadmap](https://github.com/tubearchivist/tubearchivist#roadmap), what this project lacks is contributors interested in helping with overall improvements of the application. Focus is *not* on adding new features, but improving existing ones.
 
-Existing ideas are easily *multiple years* worth of development effort, at least at current speed. Best and fastest way to implement your feature is to do it yourself, that's why this project is open source after all. This project is *very* selective with accepting new feature requests at this point.  
+Existing ideas are easily *multiple years* worth of development effort, at least at current speed. This project is *very* selective with accepting new feature requests at this point.  
 
 Good feature requests usually fall into one or more of these categories:
-- You want to work on your own idea within the next few days or weeks.
+- You want to work on your own small scoped idea within the next few days or weeks.
 - Your idea is beneficial for a wide range of users, not just for you.
 - Your idea extends the current project by building on and improving existing functionality.
 - Your idea is quick and easy to implement, for an experienced as well as for a first time contributor.
@@ -66,7 +66,9 @@ IMPORTANT: When receiving help, contribute back to the community by improving th
 
 ## How to make a Pull Request
 
-Thank you for contributing and helping improve this project. This is a quick checklist to help streamline the process:
+Thank you for contributing and helping improve this project. Focus for the foreseeable future is on improving and building on existing functionality, *not* on adding and expanding the application.
+
+This is a quick checklist to help streamline the process:
 
 - For **code changes**, make your PR against the [testing branch](https://github.com/tubearchivist/tubearchivist/tree/testing). That's where all active development happens. This simplifies the later merging into *master*, minimizes any conflicts and usually allows for easy and convenient *fast-forward* merging.
 - For **documentation changes**, make your PR directly against the *master* branch.
