@@ -12,7 +12,7 @@ checkMessages();
 // start to look for messages
 function checkMessages() {
   let notifications = document.getElementById('notifications');
-  if (notifications) {
+  if (notifications && notifications.childNodes.length === 0 ) {
     let dataOrigin = notifications.getAttribute('data');
     getMessages(dataOrigin);
   }
