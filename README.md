@@ -151,7 +151,7 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] User roles
 - [ ] Audio download
 - [ ] Podcast mode to serve channel as mp3
-- [ ] User created playlists, random and repeat controls ([#108](https://github.com/tubearchivist/tubearchivist/issues/108), [#220](https://github.com/tubearchivist/tubearchivist/issues/220))
+- [ ] Random and repeat controls ([#108](https://github.com/tubearchivist/tubearchivist/issues/108), [#220](https://github.com/tubearchivist/tubearchivist/issues/220))
 - [ ] Auto play or play next link ([#226](https://github.com/tubearchivist/tubearchivist/issues/226))
 - [ ] Multi language support
 - [ ] Show total video downloaded vs total videos available in channel
@@ -162,6 +162,7 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Configure shorts, streams and video sizes per channel
 
 Implemented:
+- [X] User created playlists [2024-04-10]
 - [X] Add statistics of index [2023-09-03]
 - [X] Implement [Apprise](https://github.com/caronc/apprise) for notifications [2023-08-05]
 - [X] Download video comments [2022-11-30]
