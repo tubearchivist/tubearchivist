@@ -34,8 +34,8 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 - [Discord](https://www.tubearchivist.com/discord): Connect with us on our Discord server.
 - [r/TubeArchivist](https://www.reddit.com/r/TubeArchivist/): Join our Subreddit.
 - [Browser Extension](https://github.com/tubearchivist/browser-extension) Tube Archivist Companion, for [Firefox](https://addons.mozilla.org/addon/tubearchivist-companion/) and [Chrome](https://chrome.google.com/webstore/detail/tubearchivist-companion/jjnkmicfnfojkkgobdfeieblocadmcie)
-- [Jellyfin Integration](https://github.com/tubearchivist/tubearchivist-jf): Add your videos to Jellyfin.
-- [Tube Archivist Metrics](https://github.com/tubearchivist/tubearchivist-metrics) to create statistics in Prometheus/OpenMetrics format.  
+- [Jellyfin Plugin](https://github.com/tubearchivist/tubearchivist-jf-plugin): Add your videos to Jellyfin
+- [Plex Plugin](https://github.com/tubearchivist/tubearchivist-plex): Add your videos to Plex
 
 ## Installing
 For minimal system requirements, the Tube Archivist stack needs around 2GB of available memory for a small testing setup and around 4GB of available memory for a mid to large sized installation. Minimal with dual core with 4 threads, better quad core plus. 
