@@ -36,13 +36,13 @@ RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recomm
 RUN if [ "$TARGETPLATFORM" = "linux/arm64" ] ; then \
     curl -s https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest \
         | grep browser_download_url \
-        | grep ".*master.*linuxarm64.*tar.xz" \
+        | grep ".*linuxarm64.*tar.xz" \
         | cut -d '"' -f 4 \
         | xargs curl -L --output ffmpeg.tar.xz ; \
     else \
     curl -s https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases/latest \
         | grep browser_download_url \
-        | grep ".*master.*linux64.*tar.xz" \
+        | grep ".*linux64.*tar.xz" \
         | cut -d '"' -f 4 \
         | xargs curl -L --output ffmpeg.tar.xz ; \
     fi && \
