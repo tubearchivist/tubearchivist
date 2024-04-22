@@ -31,8 +31,8 @@ from home.src.ta.config import AppConfig, ReleaseVersion
 from home.src.ta.notify import Notifications, get_all_notifications
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
-from home.src.ta.task_manager import TaskCommand, TaskManager
 from home.src.ta.task_config import TASK_CONFIG
+from home.src.ta.task_manager import TaskCommand, TaskManager
 from home.src.ta.urlparser import Parser
 from home.src.ta.users import UserConfig
 from home.tasks import (

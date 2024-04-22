@@ -2,8 +2,8 @@
 
 import apprise
 from home.src.es.connect import ElasticWrap
-from home.src.ta import task_manager  # partial import
 from home.src.ta.task_config import TASK_CONFIG
+from home.src.ta.task_manager import TaskManager
 
 
 class Notifications:
@@ -36,7 +36,7 @@ class Notifications:
         self, task_id: str, task_title: str
     ) -> tuple[str, str | None]:
         """build message to send notification"""
-        task = task_manager.TaskManager().get_task(task_id)
+        task = TaskManager().get_task(task_id)
         status = task.get("status")
         title: str = f"[TA] {task_title} process ended with {status}"
         body: str | None = task.get("result")
