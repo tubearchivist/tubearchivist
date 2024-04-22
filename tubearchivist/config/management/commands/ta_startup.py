@@ -379,7 +379,7 @@ class Command(BaseCommand):
             handler.add_url(url)
 
     def _mig_custom_playlist(self):
-        """migration for custom playlist"""
+        """add playlist_type for migration t0 v0.4.7"""
         self.stdout.write("[MIGRATION] custom playlist")
         data = {
             "query": {

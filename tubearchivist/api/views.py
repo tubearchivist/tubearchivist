@@ -1016,7 +1016,7 @@ class ScheduleView(ApiBaseView):
 
 
 class ScheduleNotification(ApiBaseView):
-    """resolvues to /api/schedule/notification/
+    """resolves to /api/schedule/notification/
     GET: get all schedule notifications
     DEL: delete notification
     """
