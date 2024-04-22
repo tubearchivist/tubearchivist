@@ -17,7 +17,7 @@ class Notifications:
     def send(self, task_id: str, task_title: str) -> None:
         """send notifications"""
         apobj = apprise.Apprise()
-        urls: str | None = self.get_urls()
+        urls: list[str] = self.get_urls()
         if not urls:
             return
 
@@ -73,7 +73,7 @@ class Notifications:
 
         _, _ = ElasticWrap(self.UPDATE_PATH).post(data)
 
-    def remove_url(self, url: str) -> None:
+    def remove_url(self, url: str) -> tuple[dict, int]:
         """remove url from task"""
         source = (
             "if (ctx._source.containsKey(params.task_name) "
@@ -96,7 +96,7 @@ class Notifications:
 
         return response, status_code
 
-    def remove_task(self) -> None:
+    def remove_task(self) -> tuple[dict, int]:
         """remove all notifications from task"""
         source = (
             "if (ctx._source.containsKey(params.task_name)) "
@@ -122,15 +122,18 @@ def get_all_notifications() -> dict[str, list[str]]:
     if not status_code == 200:
         return {}
 
-    notifications = {}
-    task_config = task_manager.ta_tasks.BaseTask.TASK_CONFIG
+    notifications: dict = {}
+    task_config: dict = task_manager.ta_tasks.BaseTask.TASK_CONFIG
     source = response.get("_source")
+    if not source:
+        return notifications
+
     for task_id, urls in source.items():
         notifications.update(
             {
                 task_id: {
                     "urls": urls,
-                    "title": task_config[task_id].get("title"),
+                    "title": task_config[task_id]["title"],
                 }
             }
         )
