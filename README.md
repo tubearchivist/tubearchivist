@@ -34,8 +34,8 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 - [Discord](https://www.tubearchivist.com/discord): Connect with us on our Discord server.
 - [r/TubeArchivist](https://www.reddit.com/r/TubeArchivist/): Join our Subreddit.
 - [Browser Extension](https://github.com/tubearchivist/browser-extension) Tube Archivist Companion, for [Firefox](https://addons.mozilla.org/addon/tubearchivist-companion/) and [Chrome](https://chrome.google.com/webstore/detail/tubearchivist-companion/jjnkmicfnfojkkgobdfeieblocadmcie)
-- [Jellyfin Integration](https://github.com/tubearchivist/tubearchivist-jf): Add your videos to Jellyfin.
-- [Tube Archivist Metrics](https://github.com/tubearchivist/tubearchivist-metrics) to create statistics in Prometheus/OpenMetrics format.  
+- [Jellyfin Plugin](https://github.com/tubearchivist/tubearchivist-jf-plugin): Add your videos to Jellyfin
+- [Plex Plugin](https://github.com/tubearchivist/tubearchivist-plex): Add your videos to Plex
 
 ## Installing
 For minimal system requirements, the Tube Archivist stack needs around 2GB of available memory for a small testing setup and around 4GB of available memory for a mid to large sized installation. Minimal with dual core with 4 threads, better quad core plus. 
@@ -151,7 +151,7 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] User roles
 - [ ] Audio download
 - [ ] Podcast mode to serve channel as mp3
-- [ ] User created playlists, random and repeat controls ([#108](https://github.com/tubearchivist/tubearchivist/issues/108), [#220](https://github.com/tubearchivist/tubearchivist/issues/220))
+- [ ] Random and repeat controls ([#108](https://github.com/tubearchivist/tubearchivist/issues/108), [#220](https://github.com/tubearchivist/tubearchivist/issues/220))
 - [ ] Auto play or play next link ([#226](https://github.com/tubearchivist/tubearchivist/issues/226))
 - [ ] Multi language support
 - [ ] Show total video downloaded vs total videos available in channel
@@ -162,6 +162,7 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Configure shorts, streams and video sizes per channel
 
 Implemented:
+- [X] User created playlists [2024-04-10]
 - [X] Add statistics of index [2023-09-03]
 - [X] Implement [Apprise](https://github.com/caronc/apprise) for notifications [2023-08-05]
 - [X] Download video comments [2022-11-30]
@@ -188,9 +189,17 @@ Implemented:
 - [X] Scan your file system to index already downloaded videos [2021-09-14]
 
 ## User Scripts
-This is a list of useful user scripts, generously created from folks like you to extend this project and its functionality. This is your time to shine, [read this](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#user-scripts) then open a PR to add your script here.
+This is a list of useful user scripts, generously created from folks like you to extend this project and its functionality. Make sure to check the respective repository links for detailed license information.  
 
-- Example 1
+This is your time to shine, [read this](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#user-scripts) then open a PR to add your script here.
+
+- [danieljue/ta_dl_page_script](https://github.com/danieljue/ta_dl_page_script): Helper browser script to prioritize a channels' videos in download queue.
+- [dot-mike/ta-scripts](https://github.com/dot-mike/ta-scripts): A collection of personal scripts for managing TubeArchivist.
+- [DarkFighterLuke/ta_base_url_nginx](https://gist.github.com/DarkFighterLuke/4561b6bfbf83720493dc59171c58ac36): Set base URL with Nginx when you can't use subdomains.
+- [lamusmaser/ta_migration_helper](https://github.com/lamusmaser/ta_migration_helper): Advanced helper script for migration issues to TubeArchivist v0.4.4 or later.
+- [lamusmaser/create_info_json](https://gist.github.com/lamusmaser/837fb58f73ea0cad784a33497932e0dd): Script to generate `.info.json` files using `ffmpeg` collecting information from downloaded videos.
+- [lamusmaser/ta_fix_for_video_redirection](https://github.com/lamusmaser/ta_fix_for_video_redirection): Script to fix videos that were incorrectly indexed by YouTube's "Video is Unavailable" response. 
+- [RoninTech/ta-helper](https://github.com/RoninTech/ta-helper): Helper script to provide a symlink association to reference TubeArchivist videos with their original titles.
 
 ## Donate
 The best donation to **Tube Archivist** is your time, take a look at the [contribution page](CONTRIBUTING.md) to get started.  

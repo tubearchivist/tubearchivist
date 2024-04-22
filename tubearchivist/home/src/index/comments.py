@@ -68,6 +68,7 @@ class Comments:
                 "youtube": {
                     "max_comments": max_comments_list,
                     "comment_sort": [comment_sort],
+                    "player_client": ["ios", "web"],  # workaround yt-dlp #9554
                 }
             },
         }
@@ -115,6 +116,9 @@ class Comments:
 
         time_text = time_text_datetime.strftime(format_string)
 
+        if not comment.get("author"):
+            comment["author"] = comment.get("author_id", "Unknown")
+
         cleaned_comment = {
             "comment_id": comment["id"],
             "comment_text": comment["text"].replace("\xa0", ""),
@@ -126,7 +130,7 @@ class Comments:
             "comment_author_id": comment["author_id"],
             "comment_author_thumbnail": comment["author_thumbnail"],
             "comment_author_is_uploader": comment.get(
-                "comment_author_is_uploader", False
+                "author_is_uploader", False
             ),
             "comment_parent": comment["parent"],
         }

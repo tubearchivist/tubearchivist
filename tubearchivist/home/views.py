@@ -3,8 +3,10 @@ Functionality:
 - all views for home app
 - holds base classes to inherit from
 """
+
 import enum
 import urllib.parse
+import uuid
 from time import sleep
 
 from api.src.search_processor import SearchProcess, process_aggs
@@ -27,6 +29,7 @@ from home.src.frontend.forms import (
     AddToQueueForm,
     ApplicationSettingsForm,
     ChannelOverwriteForm,
+    CreatePlaylistForm,
     CustomAuthForm,
     MultiSearchForm,
     SubscribeToChannelForm,
@@ -527,7 +530,7 @@ class ChannelIdView(ChannelIdBaseView):
 
         self.context.update(
             {
-                "title": "Channel: " + channel_name,
+                "title": f"Channel: {channel_name}",
                 "channel_info": channel_info,
             }
         )
@@ -745,12 +748,12 @@ class PlaylistIdView(ArchivistResultsView):
         # playlist details
         es_path = f"ta_playlist/_doc/{playlist_id}"
         playlist_info = self.single_lookup(es_path)
-
-        # channel details
-        channel_id = playlist_info["playlist_channel_id"]
-        es_path = f"ta_channel/_doc/{channel_id}"
-        channel_info = self.single_lookup(es_path)
-
+        channel_info = None
+        if playlist_info["playlist_type"] != "custom":
+            # channel details
+            channel_id = playlist_info["playlist_channel_id"]
+            es_path = f"ta_channel/_doc/{channel_id}"
+            channel_info = self.single_lookup(es_path)
         return playlist_info, channel_info
 
     def _update_view_data(self, playlist_id, playlist_info):
@@ -808,6 +811,7 @@ class PlaylistView(ArchivistResultsView):
             {
                 "title": "Playlists",
                 "subscribe_form": SubscribeToPlaylistForm(),
+                "create_form": CreatePlaylistForm(),
             }
         )
 
@@ -842,12 +846,19 @@ class PlaylistView(ArchivistResultsView):
     @method_decorator(user_passes_test(check_admin), name="dispatch")
     @staticmethod
     def post(request):
-        """handle post from search form"""
-        subscribe_form = SubscribeToPlaylistForm(data=request.POST)
-        if subscribe_form.is_valid():
-            url_str = request.POST.get("subscribe")
-            print(url_str)
-            subscribe_to.delay(url_str, expected_type="playlist")
+        """handle post from subscribe or create form"""
+        if request.POST.get("create") is not None:
+            create_form = CreatePlaylistForm(data=request.POST)
+            if create_form.is_valid():
+                name = request.POST.get("create")
+                playlist_id = f"TA_playlist_{uuid.uuid4()}"
+                YoutubePlaylist(playlist_id).create(name)
+        else:
+            subscribe_form = SubscribeToPlaylistForm(data=request.POST)
+            if subscribe_form.is_valid():
+                url_str = request.POST.get("subscribe")
+                print(url_str)
+                subscribe_to.delay(url_str, expected_type="playlist")
 
         sleep(1)
         return redirect("playlist")

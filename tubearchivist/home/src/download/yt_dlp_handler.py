@@ -50,7 +50,7 @@ class DownloadPostProcess:
             return
 
         print(f"auto delete older than {autodelete_days} days")
-        now_lte = self.now - autodelete_days * 24 * 60 * 60
+        now_lte = str(self.now - autodelete_days * 24 * 60 * 60)
         data = {
             "query": {"range": {"player.watched_date": {"lte": now_lte}}},
             "sort": [{"player.watched_date": {"order": "asc"}}],
@@ -63,7 +63,7 @@ class DownloadPostProcess:
             if "autodelete_days" in value:
                 autodelete_days = value.get("autodelete_days")
                 print(f"{channel_id}: delete older than {autodelete_days}d")
-                now_lte = self.now - autodelete_days * 24 * 60 * 60
+                now_lte = str(self.now - autodelete_days * 24 * 60 * 60)
                 must_list = [
                     {"range": {"player.watched_date": {"lte": now_lte}}},
                     {"term": {"channel.channel_id": {"value": channel_id}}},
@@ -177,7 +177,7 @@ class VideoDownloader:
             if not success:
                 continue
 
-            self._notify(video_data, "Add video metadata to index")
+            self._notify(video_data, "Add video metadata to index", progress=1)
 
             vid_dict = index_new_video(
                 youtube_id,
@@ -197,14 +197,16 @@ class VideoDownloader:
 
         return self.videos
 
-    def _notify(self, video_data, message):
+    def _notify(self, video_data, message, progress=False):
         """send progress notification to task"""
         if not self.task:
             return
 
         typ = VideoTypeEnum(video_data["vid_type"]).value.rstrip("s").title()
         title = video_data.get("title")
-        self.task.send_progress([f"Processing {typ}: {title}", message])
+        self.task.send_progress(
+            [f"Processing {typ}: {title}", message], progress=progress
+        )
 
     def _get_next(self, auto_only):
         """get next item in queue"""
