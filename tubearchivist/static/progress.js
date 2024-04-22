@@ -55,7 +55,7 @@ function buildMessage(responseData, dataOrigin) {
   }
   clearNotifications(responseData);
   if (currentNotifications > 0 && messages.length === 0) {
-    location.reload();
+    location.replace(location.href);
   }
   return messages;
 }
