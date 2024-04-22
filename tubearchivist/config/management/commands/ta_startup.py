@@ -20,9 +20,9 @@ from home.src.ta.helper import clear_dl_cache
 from home.src.ta.notify import Notifications
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.task_config import TASK_CONFIG
 from home.src.ta.task_manager import TaskManager
 from home.src.ta.users import UserConfig
-from home.tasks import BaseTask
 
 TOPIC = """
 
@@ -342,7 +342,7 @@ class Command(BaseCommand):
 
     def _create_task(self, task_name, schedule, task_config=False):
         """create task"""
-        description = BaseTask.TASK_CONFIG[task_name].get("title")
+        description = TASK_CONFIG[task_name].get("title")
         schedule, _ = CrontabSchedule.objects.get_or_create(**schedule)
         schedule.timezone = settings.TIME_ZONE
         schedule.save()

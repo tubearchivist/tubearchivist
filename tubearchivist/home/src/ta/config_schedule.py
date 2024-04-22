@@ -7,7 +7,7 @@ from django_celery_beat.models import CrontabSchedule
 from home.models import CustomPeriodicTask
 from home.src.ta.config import AppConfig
 from home.src.ta.settings import EnvironmentSettings
-from home.tasks import BaseTask
+from home.src.ta.task_config import TASK_CONFIG
 
 
 class ScheduleBuilder:
@@ -54,7 +54,7 @@ class ScheduleBuilder:
         try:
             task = CustomPeriodicTask.objects.get(name=task_name)
         except CustomPeriodicTask.DoesNotExist:
-            description = BaseTask.TASK_CONFIG[task_name].get("title")
+            description = TASK_CONFIG[task_name].get("title")
             task = CustomPeriodicTask(
                 name=task_name,
                 task=task_name,

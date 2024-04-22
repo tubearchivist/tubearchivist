@@ -3,6 +3,7 @@
 import apprise
 from home.src.es.connect import ElasticWrap
 from home.src.ta import task_manager  # partial import
+from home.src.ta.task_config import TASK_CONFIG
 
 
 class Notifications:
@@ -123,7 +124,6 @@ def get_all_notifications() -> dict[str, list[str]]:
         return {}
 
     notifications: dict = {}
-    task_config: dict = task_manager.ta_tasks.BaseTask.TASK_CONFIG
     source = response.get("_source")
     if not source:
         return notifications
@@ -133,7 +133,7 @@ def get_all_notifications() -> dict[str, list[str]]:
             {
                 task_id: {
                     "urls": urls,
-                    "title": task_config[task_id]["title"],
+                    "title": TASK_CONFIG[task_id]["title"],
                 }
             }
         )

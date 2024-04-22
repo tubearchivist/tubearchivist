@@ -79,7 +79,7 @@ function updateMessageBox(messageData) {
   children[1].innerHTML = messageData.messages.join('<br>');
   if (
     !messageBox.querySelector('#stop-icon') &&
-    messageData['api-stop'] &&
+    messageData['api_stop'] &&
     messageData.command !== 'STOP'
   ) {
     children[2].appendChild(buildStopIcon(messageData.id));

@@ -24,6 +24,7 @@ from home.src.ta import notify  # partial
 from home.src.ta import task_manager  # partial
 from home.src.ta.config import ReleaseVersion
 from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.task_config import TASK_CONFIG
 from home.src.ta.urlparser import Parser
 
 
@@ -31,68 +32,6 @@ class BaseTask(Task):
     """base class to inherit each class from"""
 
     # pylint: disable=abstract-method
-
-    TASK_CONFIG = {
-        "update_subscribed": {
-            "title": "Rescan your Subscriptions",
-            "group": "download:scan",
-            "api-start": True,
-            "api-stop": True,
-        },
-        "download_pending": {
-            "title": "Downloading",
-            "group": "download:run",
-            "api-start": True,
-            "api-stop": True,
-        },
-        "extract_download": {
-            "title": "Add to download queue",
-            "group": "download:add",
-            "api-stop": True,
-        },
-        "check_reindex": {
-            "title": "Reindex Documents",
-            "group": "reindex:run",
-        },
-        "manual_import": {
-            "title": "Manual video import",
-            "group": "setting:import",
-            "api-start": True,
-        },
-        "run_backup": {
-            "title": "Index Backup",
-            "group": "setting:backup",
-            "api-start": True,
-        },
-        "restore_backup": {
-            "title": "Restore Backup",
-            "group": "setting:restore",
-        },
-        "rescan_filesystem": {
-            "title": "Rescan your Filesystem",
-            "group": "setting:filesystemscan",
-            "api-start": True,
-        },
-        "thumbnail_check": {
-            "title": "Check your Thumbnails",
-            "group": "setting:thumbnailcheck",
-            "api-start": True,
-        },
-        "resync_thumbs": {
-            "title": "Sync Thumbnails to Media Files",
-            "group": "setting:thumbnailsync",
-            "api-start": True,
-        },
-        "index_playlists": {
-            "title": "Index Channel Playlist",
-            "group": "channel:indexplaylist",
-        },
-        "subscribe_to": {
-            "title": "Add Subscription",
-            "group": "subscription:add",
-        },
-        "version_check": {"title": "Look for new Version"},
-    }
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         """callback for task failure"""
@@ -118,7 +57,7 @@ class BaseTask(Task):
     def after_return(self, status, retval, task_id, args, kwargs, einfo):
         """callback after task returns"""
         print(f"{task_id} return callback")
-        task_title = self.TASK_CONFIG.get(self.name).get("title")
+        task_title = TASK_CONFIG.get(self.name).get("title")
         notify.Notifications(self.name).send(task_id, task_title)
 
     def send_progress(self, message_lines, progress=False, title=False):
@@ -138,7 +77,7 @@ class BaseTask(Task):
     def _build_message(self, level="info"):
         """build message dict"""
         task_id = self.request.id
-        message = self.TASK_CONFIG.get(self.name).copy()
+        message = TASK_CONFIG.get(self.name).copy()
         message.update({"level": level, "id": task_id})
         task_result = task_manager.TaskManager().get_task(task_id)
         if task_result:

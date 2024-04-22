@@ -32,10 +32,10 @@ from home.src.ta.notify import Notifications, get_all_notifications
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_manager import TaskCommand, TaskManager
+from home.src.ta.task_config import TASK_CONFIG
 from home.src.ta.urlparser import Parser
 from home.src.ta.users import UserConfig
 from home.tasks import (
-    BaseTask,
     check_reindex,
     download_pending,
     extrac_dl,
@@ -913,7 +913,7 @@ class TaskNameListView(ApiBaseView):
     def get(self, request, task_name):
         """handle get request"""
         # pylint: disable=unused-argument
-        if task_name not in BaseTask.TASK_CONFIG:
+        if task_name not in TASK_CONFIG:
             message = {"message": "invalid task name"}
             return Response(message, status=404)
 
@@ -928,12 +928,12 @@ class TaskNameListView(ApiBaseView):
         400 if task can't be started here without argument
         """
         # pylint: disable=unused-argument
-        task_config = BaseTask.TASK_CONFIG.get(task_name)
+        task_config = TASK_CONFIG.get(task_name)
         if not task_config:
             message = {"message": "invalid task name"}
             return Response(message, status=404)
 
-        if not task_config.get("api-start"):
+        if not task_config.get("api_start"):
             message = {"message": "can not start task through this endpoint"}
             return Response(message, status=400)
 
@@ -972,16 +972,16 @@ class TaskIDView(ApiBaseView):
             message = {"message": "task id not found"}
             return Response(message, status=404)
 
-        task_conf = BaseTask.TASK_CONFIG.get(task_result.get("name"))
+        task_conf = TASK_CONFIG.get(task_result.get("name"))
         if command == "stop":
-            if not task_conf.get("api-stop"):
+            if not task_conf.get("api_stop"):
                 message = {"message": "task can not be stopped"}
                 return Response(message, status=400)
 
             message_key = self._build_message_key(task_conf, task_id)
             TaskCommand().stop(task_id, message_key)
         if command == "kill":
-            if not task_conf.get("api-stop"):
+            if not task_conf.get("api_stop"):
                 message = {"message": "task can not be killed"}
                 return Response(message, status=400)
 
@@ -1032,7 +1032,7 @@ class ScheduleNotification(ApiBaseView):
         task_name = request.data.get("task_name")
         url = request.data.get("url")
 
-        if not BaseTask.TASK_CONFIG.get(task_name):
+        if not TASK_CONFIG.get(task_name):
             message = {"message": "task_name not found"}
             return Response(message, status=404)
 

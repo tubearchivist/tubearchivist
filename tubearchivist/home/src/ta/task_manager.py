@@ -4,9 +4,9 @@ functionality:
 - handle threads and locks
 """
 
-from home import tasks as ta_tasks
 from home.celery import app as celery_app
 from home.src.ta.ta_redis import RedisArchivist, TaskRedis
+from home.src.ta.task_config import TASK_CONFIG
 
 
 class TaskManager:
@@ -105,7 +105,7 @@ class TaskCommand:
         handler = TaskRedis()
 
         task = handler.get_single(task_id)
-        if not task["name"] in ta_tasks.BaseTask.TASK_CONFIG:
+        if not task["name"] in TASK_CONFIG:
             raise ValueError
 
         handler.set_command(task_id, "STOP")
