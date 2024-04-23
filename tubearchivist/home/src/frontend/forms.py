@@ -303,3 +303,12 @@ class ChannelOverwriteForm(forms.Form):
     integrate_sponsorblock = forms.ChoiceField(
         widget=forms.Select, choices=SP_CHOICES, required=False
     )
+    subscriptions_channel_size = forms.IntegerField(
+        label=False, required=False
+    )
+    subscriptions_live_channel_size = forms.IntegerField(
+        label=False, required=False
+    )
+    subscriptions_shorts_channel_size = forms.IntegerField(
+        label=False, required=False
+    )

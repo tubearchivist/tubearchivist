@@ -345,23 +345,30 @@ class YoutubeChannel(YouTubeItem):
             "autodelete_days",
             "index_playlists",
             "integrate_sponsorblock",
+            "subscriptions_channel_size",
+            "subscriptions_live_channel_size",
+            "subscriptions_shorts_channel_size",
         ]
 
         to_write = self.json_data.get("channel_overwrites", {})
         for key, value in overwrites.items():
             if key not in valid_keys:
                 raise ValueError(f"invalid overwrite key: {key}")
-            if value == "disable":
+            elif value == "disable":
                 to_write[key] = False
                 continue
-            if value in [0, "0"]:
+            elif value == "0":
                 if key in to_write:
                     del to_write[key]
                 continue
-            if value == "1":
+            elif value == "1":
                 to_write[key] = True
                 continue
-            if value:
+            elif isinstance(value, int) and int(value) < 0:
+                if key in to_write:
+                    del to_write[key]
+                continue
+            elif value is not None and value != "":
                 to_write.update({key: value})
 
         self.json_data["channel_overwrites"] = to_write
