@@ -267,7 +267,7 @@ class VideoDownloader:
         """initial obs"""
         self.obs = {
             "merge_output_format": "mp4",
-            "outtmpl": (self.cache_dir + "/download/%(id)s.mp4"),
+            "outtmpl": (self.cache_dir + "/download/%(title)s.mp4"),
             "progress_hooks": [self._progress_hook],
             "noprogress": True,
             "continuedl": True,
