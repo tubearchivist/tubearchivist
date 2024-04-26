@@ -2,24 +2,24 @@ version: '3.5'
 
 services:
   tubearchivist:
-    container_name: tubearchivist
+    container_name: tubearchivist-pro
     restart: unless-stopped
     image: bbilly1/tubearchivist
     ports:
-      - 8000:8000
+      - 8001:8000
     volumes:
-      - media:/youtube
-      - cache:/cache
+      - C:/Users/Administrator.DATA01/Desktop/tubeArch/youtube:/youtube
+      - C:/Users/Administrator.DATA01/Desktop/tubeArch/cache:/cache
     environment:
       - ES_URL=http://archivist-es:9200     # needs protocol e.g. http and port
       - REDIS_HOST=archivist-redis          # don't add protocol
       - HOST_UID=1000
       - HOST_GID=1000
       - TA_HOST=tubearchivist.local         # set your host name
-      - TA_USERNAME=tubearchivist           # your initial TA credentials
-      - TA_PASSWORD=verysecret              # your initial TA credentials
+      - TA_USERNAME=profoTubist             # your initial TA credentials
+      - TA_PASSWORD=profomedia              # your initial TA credentials
       - ELASTIC_PASSWORD=verysecret         # set password for Elasticsearch
-      - TZ=America/New_York                 # set your time zone
+      - TZ=Africa/Nairobi                   # set your time zone
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 2m
