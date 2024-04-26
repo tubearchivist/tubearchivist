@@ -24,7 +24,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 2m
       timeout: 10s
-      retries: 3
+      retries: 3 
       start_period: 30s
     depends_on:
       - archivist-es
