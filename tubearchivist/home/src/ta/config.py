@@ -72,15 +72,6 @@ class AppConfig:
         RedisArchivist().set_message("config", self.config, save=True)
         return updated
 
-    @staticmethod
-    def _build_rand_daily():
-        """build random daily schedule per installation"""
-        return {
-            "minute": randint(0, 59),
-            "hour": randint(0, 23),
-            "day_of_week": "*",
-        }
-
     def load_new_defaults(self):
         """check config.json for missing defaults"""
         default_config = self.get_config_file()
@@ -89,7 +80,6 @@ class AppConfig:
         # check for customizations
         if not redis_config:
             config = self.get_config()
-            config["scheduler"]["version_check"] = self._build_rand_daily()
             RedisArchivist().set_message("config", config)
             return False
 
@@ -104,13 +94,7 @@ class AppConfig:
 
             # missing nested values
             for sub_key, sub_value in value.items():
-                if (
-                    sub_key not in redis_config[key].keys()
-                    or sub_value == "rand-d"
-                ):
-                    if sub_value == "rand-d":
-                        sub_value = self._build_rand_daily()
-
+                if sub_key not in redis_config[key].keys():
                     redis_config[key].update({sub_key: sub_value})
                     needs_update = True
 

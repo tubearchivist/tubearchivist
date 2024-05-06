@@ -16,6 +16,7 @@ from home.src.es.connect import ElasticWrap
 from home.src.es.index_setup import ElasitIndexWrap
 from home.src.es.snapshot import ElasticSnapshot
 from home.src.ta.config import AppConfig, ReleaseVersion
+from home.src.ta.config_schedule import ScheduleBuilder
 from home.src.ta.helper import clear_dl_cache
 from home.src.ta.notify import Notifications
 from home.src.ta.settings import EnvironmentSettings
@@ -53,6 +54,7 @@ class Command(BaseCommand):
         self._mig_move_users_to_es()
         self._mig_schedule_store()
         self._mig_custom_playlist()
+        self._create_default_schedules()
 
     def _sync_redis_state(self):
         """make sure redis gets new config.json values"""
@@ -410,3 +412,54 @@ class Command(BaseCommand):
         self.stdout.write(response)
         sleep(60)
         raise CommandError(message)
+
+    def _create_default_schedules(self) -> None:
+        """
+        create default schedules for new installations
+        needs to be called after _mig_schedule_store
+        """
+        self.stdout.write("[7] create initial schedules")
+        init_has_run = CustomPeriodicTask.objects.filter(
+            name="version_check"
+        ).exists()
+
+        if init_has_run:
+            self.stdout.write(
+                self.style.SUCCESS(
+                    "    schedule init already done, skipping..."
+                )
+            )
+            return
+
+        builder = ScheduleBuilder()
+        check_reindex = builder.get_set_task(
+            "check_reindex", schedule=builder.SCHEDULES["check_reindex"]
+        )
+        check_reindex.task_config.update({"check_reindex_days": 90})
+        check_reindex.save()
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"    ✓ created new default schedule: {check_reindex}"
+            )
+        )
+
+        thumbnail_check = builder.get_set_task(
+            "thumbnail_check", schedule=builder.SCHEDULES["thumbnail_check"]
+        )
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"    ✓ created new default schedule: {thumbnail_check}"
+            )
+        )
+        daily_random = f"{randint(0, 59)} {randint(0, 23)} *"
+        version_check = builder.get_set_task(
+            "version_check", schedule=daily_random
+        )
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"    ✓ created new default schedule: {version_check}"
+            )
+        )
+        self.stdout.write(
+            self.style.SUCCESS("    ✓ all default schedules created")
+        )
