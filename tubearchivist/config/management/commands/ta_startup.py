@@ -435,7 +435,7 @@ class Command(BaseCommand):
         check_reindex = builder.get_set_task(
             "check_reindex", schedule=builder.SCHEDULES["check_reindex"]
         )
-        check_reindex.task_config.update({"check_reindex_days": 90})
+        check_reindex.task_config.update({"days": 90})
         check_reindex.save()
         self.stdout.write(
             self.style.SUCCESS(
