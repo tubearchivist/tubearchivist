@@ -28,6 +28,7 @@
             <p>Current rescan schedule: <span class="settings-current">
                 {% if update_subscribed %}
                     {{ update_subscribed.crontab.minute }} {{ update_subscribed.crontab.hour }} {{ update_subscribed.crontab.day_of_week }}
+                    <button data-schedule="update_subscribed" onclick="deleteSchedule(this)" class="danger-button">Delete</button>
                 {% else %}
                     False
                 {% endif %}
@@ -45,6 +46,7 @@
             <p>Current Download schedule: <span class="settings-current">
                 {% if download_pending %}
                     {{ download_pending.crontab.minute }} {{ download_pending.crontab.hour }} {{ download_pending.crontab.day_of_week }}
+                    <button data-schedule="download_pending" onclick="deleteSchedule(this)" class="danger-button">Delete</button>
                 {% else %}
                     False
                 {% endif %}
@@ -62,6 +64,7 @@
             <p>Current Metadata refresh schedule: <span class="settings-current">
                 {% if check_reindex %}
                     {{ check_reindex.crontab.minute }} {{ check_reindex.crontab.hour }} {{ check_reindex.crontab.day_of_week }}
+                    <button data-schedule="check_reindex" onclick="deleteSchedule(this)" class="danger-button">Delete</button>
                 {% else %}
                     False
                 {% endif %}
@@ -84,6 +87,7 @@
             <p>Current thumbnail check schedule: <span class="settings-current">
                 {% if thumbnail_check %}
                     {{ thumbnail_check.crontab.minute }} {{ thumbnail_check.crontab.hour }} {{ thumbnail_check.crontab.day_of_week }}
+                    <button data-schedule="thumbnail_check" onclick="deleteSchedule(this)" class="danger-button">Delete</button>
                 {% else %}
                     False
                 {% endif %}
@@ -102,6 +106,7 @@
             <p>Current index backup schedule: <span class="settings-current">
                 {% if run_backup %}
                     {{ run_backup.crontab.minute }} {{ run_backup.crontab.hour }} {{ run_backup.crontab.day_of_week }}
+                    <button data-schedule="run_backup" onclick="deleteSchedule(this)" class="danger-button">Delete</button>
                 {% else %}
                     False
                 {% endif %}
@@ -127,7 +132,10 @@
                 {% for task, notifications in notifications.items %}
                     <h3>{{ notifications.title }}</h3>
                     {% for url in notifications.urls %}
-                        <p><button type="button" class="danger-button" data-url="{{ url }}" data-task="{{ task }}" onclick="deleteNotificationUrl(this)"> Delete</button>{{ url }}</p>
+                        <p>
+                            <button type="button" class="danger-button" data-url="{{ url }}" data-task="{{ task }}" onclick="deleteNotificationUrl(this)"> Delete</button>
+                            <span> {{ url }}</span>
+                        </p>
                     {% endfor %}
                 {% endfor %}
             </div>

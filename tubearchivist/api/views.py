@@ -1003,7 +1003,7 @@ class ScheduleView(ApiBaseView):
 
     def delete(self, request):
         """delete schedule by task_name query"""
-        task_name = request.GET.get("task_name")
+        task_name = request.data.get("task_name")
         try:
             task = CustomPeriodicTask.objects.get(name=task_name)
         except CustomPeriodicTask.DoesNotExist:
