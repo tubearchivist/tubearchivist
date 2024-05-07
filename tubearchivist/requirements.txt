@@ -10,4 +10,4 @@ requests==2.31.0
 ryd-client==0.0.6
 uWSGI==2.0.24
 whitenoise==6.6.0
-yt-dlp @ git+https://github.com/bbilly1/yt-dlp@eb9e5adcab2fc47fc1e1e7d237fc27f30277a11c
+yt-dlp @ git+https://github.com/bbilly1/yt-dlp@4935eec0b4f4dffbd86d998a2d3a706875e9d761
