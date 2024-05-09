@@ -34,8 +34,8 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 - [Discord](https://www.tubearchivist.com/discord): Connect with us on our Discord server.
 - [r/TubeArchivist](https://www.reddit.com/r/TubeArchivist/): Join our Subreddit.
 - [Browser Extension](https://github.com/tubearchivist/browser-extension) Tube Archivist Companion, for [Firefox](https://addons.mozilla.org/addon/tubearchivist-companion/) and [Chrome](https://chrome.google.com/webstore/detail/tubearchivist-companion/jjnkmicfnfojkkgobdfeieblocadmcie)
-- [Jellyfin Integration](https://github.com/tubearchivist/tubearchivist-jf): Add your videos to Jellyfin.
-- [Tube Archivist Metrics](https://github.com/tubearchivist/tubearchivist-metrics) to create statistics in Prometheus/OpenMetrics format.  
+- [Jellyfin Plugin](https://github.com/tubearchivist/tubearchivist-jf-plugin): Add your videos to Jellyfin
+- [Plex Plugin](https://github.com/tubearchivist/tubearchivist-plex): Add your videos to Plex
 
 ## Installing
 For minimal system requirements, the Tube Archivist stack needs around 2GB of available memory for a small testing setup and around 4GB of available memory for a mid to large sized installation. Minimal with dual core with 4 threads, better quad core plus. 
@@ -151,7 +151,7 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] User roles
 - [ ] Audio download
 - [ ] Podcast mode to serve channel as mp3
-- [ ] User created playlists, random and repeat controls ([#108](https://github.com/tubearchivist/tubearchivist/issues/108), [#220](https://github.com/tubearchivist/tubearchivist/issues/220))
+- [ ] Random and repeat controls ([#108](https://github.com/tubearchivist/tubearchivist/issues/108), [#220](https://github.com/tubearchivist/tubearchivist/issues/220))
 - [ ] Auto play or play next link ([#226](https://github.com/tubearchivist/tubearchivist/issues/226))
 - [ ] Multi language support
 - [ ] Show total video downloaded vs total videos available in channel
@@ -162,6 +162,7 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Configure shorts, streams and video sizes per channel
 
 Implemented:
+- [X] User created playlists [2024-04-10]
 - [X] Add statistics of index [2023-09-03]
 - [X] Implement [Apprise](https://github.com/caronc/apprise) for notifications [2023-08-05]
 - [X] Download video comments [2022-11-30]

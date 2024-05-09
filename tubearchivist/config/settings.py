@@ -38,6 +38,7 @@ ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS = ta_host_parser(environ["TA_HOST"])
 # Application definition
 
 INSTALLED_APPS = [
+    "django_celery_beat",
     "home.apps.HomeConfig",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -269,4 +270,4 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 
 # TA application settings
 TA_UPSTREAM = "https://github.com/tubearchivist/tubearchivist"
-TA_VERSION = "v0.4.7-unstable"
+TA_VERSION = "v0.4.8-unstable"
