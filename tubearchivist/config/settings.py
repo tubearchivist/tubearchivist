@@ -38,6 +38,7 @@ ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS = ta_host_parser(environ["TA_HOST"])
 # Application definition
 
 INSTALLED_APPS = [
+    "django_celery_beat",
     "home.apps.HomeConfig",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -48,7 +49,6 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
-    "django_celery_beat",
     "rest_framework",
     "rest_framework.authtoken",
     "api",
