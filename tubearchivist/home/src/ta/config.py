@@ -181,12 +181,3 @@ class ReleaseVersion:
             return {}
 
         return message
-
-    def clear_fail(self) -> None:
-        """clear key, catch previous error in v0.4.5"""
-        message = self.get_update()
-        if not message:
-            return
-
-        if isinstance(message.get("version"), list):
-            RedisArchivist().del_message(self.NEW_KEY)

@@ -23,7 +23,6 @@ from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_config import TASK_CONFIG
 from home.src.ta.task_manager import TaskManager
-from home.src.ta.users import UserConfig
 
 TOPIC = """
 
@@ -47,11 +46,9 @@ class Command(BaseCommand):
         self._clear_redis_keys()
         self._clear_tasks()
         self._clear_dl_cache()
-        self._mig_clear_failed_versioncheck()
         self._version_check()
         self._mig_index_setup()
         self._mig_snapshot_check()
-        self._mig_move_users_to_es()
         self._mig_schedule_store()
         self._mig_custom_playlist()
         self._create_default_schedules()
@@ -160,103 +157,9 @@ class Command(BaseCommand):
         self.stdout.write("[MIGRATION] setup snapshots")
         ElasticSnapshot().setup()
 
-    def _mig_clear_failed_versioncheck(self):
-        """hotfix for v0.4.5, clearing faulty versioncheck"""
-        ReleaseVersion().clear_fail()
-
-    def _mig_move_users_to_es(self):  # noqa: C901
-        """migration: update from 0.4.1 to 0.4.2 move user config to ES"""
-        self.stdout.write("[MIGRATION] move user configuration to ES")
-        redis = RedisArchivist()
-
-        # 1: Find all users in Redis
-        users = {i.split(":")[0] for i in redis.list_keys("[0-9]*:")}
-        if not users:
-            self.stdout.write("    no users needed migrating to ES")
-            return
-
-        # 2: Write all Redis user settings to ES
-        # 3: Remove user settings from Redis
-        try:
-            for user in users:
-                new_conf = UserConfig(user)
-
-                stylesheet_key = f"{user}:color"
-                stylesheet = redis.get_message(stylesheet_key).get("status")
-                if stylesheet:
-                    new_conf.set_value("stylesheet", stylesheet)
-                    redis.del_message(stylesheet_key)
-
-                sort_by_key = f"{user}:sort_by"
-                sort_by = redis.get_message(sort_by_key).get("status")
-                if sort_by:
-                    new_conf.set_value("sort_by", sort_by)
-                    redis.del_message(sort_by_key)
-
-                page_size_key = f"{user}:page_size"
-                page_size = redis.get_message(page_size_key).get("status")
-                if page_size:
-                    new_conf.set_value("page_size", page_size)
-                    redis.del_message(page_size_key)
-
-                sort_order_key = f"{user}:sort_order"
-                sort_order = redis.get_message(sort_order_key).get("status")
-                if sort_order:
-                    new_conf.set_value("sort_order", sort_order)
-                    redis.del_message(sort_order_key)
-
-                grid_items_key = f"{user}:grid_items"
-                grid_items = redis.get_message(grid_items_key).get("status")
-                if grid_items:
-                    new_conf.set_value("grid_items", grid_items)
-                    redis.del_message(grid_items_key)
-
-                hide_watch_key = f"{user}:hide_watched"
-                hide_watch = redis.get_message(hide_watch_key).get("status")
-                if hide_watch:
-                    new_conf.set_value("hide_watched", hide_watch)
-                    redis.del_message(hide_watch_key)
-
-                ignore_only_key = f"{user}:show_ignored_only"
-                ignore_only = redis.get_message(ignore_only_key).get("status")
-                if ignore_only:
-                    new_conf.set_value("show_ignored_only", ignore_only)
-                    redis.del_message(ignore_only_key)
-
-                subed_only_key = f"{user}:show_subed_only"
-                subed_only = redis.get_message(subed_only_key).get("status")
-                if subed_only:
-                    new_conf.set_value("show_subed_only", subed_only)
-                    redis.del_message(subed_only_key)
-
-                for view in ["channel", "playlist", "home", "downloads"]:
-                    view_key = f"{user}:view:{view}"
-                    view_style = redis.get_message(view_key).get("status")
-                    if view_style:
-                        new_conf.set_value(f"view_style_{view}", view_style)
-                        redis.del_message(view_key)
-
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        f"    ✓ Settings for user '{user}' migrated to ES"
-                    )
-                )
-        except Exception as err:
-            message = "    🗙 user migration to ES failed"
-            self.stdout.write(self.style.ERROR(message))
-            self.stdout.write(self.style.ERROR(err))
-            sleep(60)
-            raise CommandError(message) from err
-        else:
-            self.stdout.write(
-                self.style.SUCCESS(
-                    "    ✓ Settings for all users migrated to ES"
-                )
-            )
-
     def _mig_schedule_store(self):
         """
-        update from 0.4.4 to 0.4.5
+        update from 0.4.7 to 0.4.8
         migrate schedule task store to CustomCronSchedule
         """
         self.stdout.write("[MIGRATION] migrate schedule store")
@@ -381,7 +284,7 @@ class Command(BaseCommand):
             handler.add_url(url)
 
     def _mig_custom_playlist(self):
-        """add playlist_type for migration t0 v0.4.7"""
+        """add playlist_type for migration from v0.4.6 to v0.4.7"""
         self.stdout.write("[MIGRATION] custom playlist")
         data = {
             "query": {
