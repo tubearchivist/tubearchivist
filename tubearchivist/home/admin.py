@@ -2,6 +2,7 @@
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django_celery_beat import models as BeatModels
 
 from .models import Account
 
@@ -34,3 +35,12 @@ class HomeAdmin(BaseUserAdmin):
 
 
 admin.site.register(Account, HomeAdmin)
+admin.site.unregister(
+    [
+        BeatModels.ClockedSchedule,
+        BeatModels.CrontabSchedule,
+        BeatModels.IntervalSchedule,
+        BeatModels.PeriodicTask,
+        BeatModels.SolarSchedule,
+    ]
+)

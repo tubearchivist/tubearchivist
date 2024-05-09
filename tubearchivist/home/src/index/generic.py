@@ -17,7 +17,7 @@ class YouTubeItem:
     es_path = False
     index_name = ""
     yt_base = ""
-    yt_obs = {
+    yt_obs: dict[str, bool | str] = {
         "skip_download": True,
         "noplaylist": True,
     }

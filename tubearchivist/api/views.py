@@ -10,6 +10,7 @@ from api.src.aggs import (
     WatchProgress,
 )
 from api.src.search_processor import SearchProcess
+from home.models import CustomPeriodicTask
 from home.src.download.queue import PendingInteract
 from home.src.download.subscriptions import (
     ChannelSubscription,
@@ -27,13 +28,14 @@ from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock, YoutubeVideo
 from home.src.ta.config import AppConfig, ReleaseVersion
+from home.src.ta.notify import Notifications, get_all_notifications
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.task_config import TASK_CONFIG
 from home.src.ta.task_manager import TaskCommand, TaskManager
 from home.src.ta.urlparser import Parser
 from home.src.ta.users import UserConfig
 from home.tasks import (
-    BaseTask,
     check_reindex,
     download_pending,
     extrac_dl,
@@ -911,7 +913,7 @@ class TaskNameListView(ApiBaseView):
     def get(self, request, task_name):
         """handle get request"""
         # pylint: disable=unused-argument
-        if task_name not in BaseTask.TASK_CONFIG:
+        if task_name not in TASK_CONFIG:
             message = {"message": "invalid task name"}
             return Response(message, status=404)
 
@@ -926,12 +928,12 @@ class TaskNameListView(ApiBaseView):
         400 if task can't be started here without argument
         """
         # pylint: disable=unused-argument
-        task_config = BaseTask.TASK_CONFIG.get(task_name)
+        task_config = TASK_CONFIG.get(task_name)
         if not task_config:
             message = {"message": "invalid task name"}
             return Response(message, status=404)
 
-        if not task_config.get("api-start"):
+        if not task_config.get("api_start"):
             message = {"message": "can not start task through this endpoint"}
             return Response(message, status=400)
 
@@ -970,16 +972,16 @@ class TaskIDView(ApiBaseView):
             message = {"message": "task id not found"}
             return Response(message, status=404)
 
-        task_conf = BaseTask.TASK_CONFIG.get(task_result.get("name"))
+        task_conf = TASK_CONFIG.get(task_result.get("name"))
         if command == "stop":
-            if not task_conf.get("api-stop"):
+            if not task_conf.get("api_stop"):
                 message = {"message": "task can not be stopped"}
                 return Response(message, status=400)
 
             message_key = self._build_message_key(task_conf, task_id)
             TaskCommand().stop(task_id, message_key)
         if command == "kill":
-            if not task_conf.get("api-stop"):
+            if not task_conf.get("api_stop"):
                 message = {"message": "task can not be killed"}
                 return Response(message, status=400)
 
@@ -990,6 +992,56 @@ class TaskIDView(ApiBaseView):
     def _build_message_key(self, task_conf, task_id):
         """build message key to forward command to notification"""
         return f"message:{task_conf.get('group')}:{task_id.split('-')[0]}"
+
+
+class ScheduleView(ApiBaseView):
+    """resolves to /api/schedule/
+    DEL: delete schedule for task
+    """
+
+    permission_classes = [AdminOnly]
+
+    def delete(self, request):
+        """delete schedule by task_name query"""
+        task_name = request.data.get("task_name")
+        try:
+            task = CustomPeriodicTask.objects.get(name=task_name)
+        except CustomPeriodicTask.DoesNotExist:
+            message = {"message": "task_name not found"}
+            return Response(message, status=404)
+
+        _ = task.delete()
+
+        return Response({"success": True})
+
+
+class ScheduleNotification(ApiBaseView):
+    """resolves to /api/schedule/notification/
+    GET: get all schedule notifications
+    DEL: delete notification
+    """
+
+    def get(self, request):
+        """handle get request"""
+
+        return Response(get_all_notifications())
+
+    def delete(self, request):
+        """handle delete"""
+
+        task_name = request.data.get("task_name")
+        url = request.data.get("url")
+
+        if not TASK_CONFIG.get(task_name):
+            message = {"message": "task_name not found"}
+            return Response(message, status=404)
+
+        if url:
+            response, status_code = Notifications(task_name).remove_url(url)
+        else:
+            response, status_code = Notifications(task_name).remove_task()
+
+        return Response({"response": response, "status_code": status_code})
 
 
 class RefreshView(ApiBaseView):

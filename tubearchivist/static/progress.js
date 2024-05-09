@@ -12,7 +12,7 @@ checkMessages();
 // start to look for messages
 function checkMessages() {
   let notifications = document.getElementById('notifications');
-  if (notifications && notifications.childNodes.length === 0 ) {
+  if (notifications && notifications.childNodes.length === 0) {
     let dataOrigin = notifications.getAttribute('data');
     getMessages(dataOrigin);
   }
@@ -55,7 +55,7 @@ function buildMessage(responseData, dataOrigin) {
   }
   clearNotifications(responseData);
   if (currentNotifications > 0 && messages.length === 0) {
-    location.reload();
+    location.replace(location.href);
   }
   return messages;
 }
@@ -79,7 +79,7 @@ function updateMessageBox(messageData) {
   children[1].innerHTML = messageData.messages.join('<br>');
   if (
     !messageBox.querySelector('#stop-icon') &&
-    messageData['api-stop'] &&
+    messageData['api_stop'] &&
     messageData.command !== 'STOP'
   ) {
     children[2].appendChild(buildStopIcon(messageData.id));
