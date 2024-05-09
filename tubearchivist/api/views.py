@@ -996,7 +996,7 @@ class TaskIDView(ApiBaseView):
 
 class ScheduleView(ApiBaseView):
     """resolves to /api/schedule/
-    GET: return a list of active schedules
+    DEL: delete schedule for task
     """
 
     permission_classes = [AdminOnly]
