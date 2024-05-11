@@ -160,16 +160,24 @@ class YoutubePlaylist(YouTubeItem):
             if status_code == 200:
                 print(f"{self.youtube_id}: removed {video_id} from playlist")
 
-    def update_playlist(self):
+    def update_playlist(self, skip_on_empty=False):
         """update metadata for playlist with data from YouTube"""
         self.build_json(scrape=True)
         if not self.json_data:
             # return false to deactivate
             return False
 
+        if skip_on_empty:
+            has_item_downloaded = next(
+                i["downloaded"] for i in self.json_data["playlist_entries"]
+            )
+            if not has_item_downloaded:
+                return True
+
         self.upload_to_es()
         self.add_vids_to_playlist()
         self.remove_vids_from_playlist()
+        self.get_playlist_art()
         return True
 
     def build_nav(self, youtube_id):

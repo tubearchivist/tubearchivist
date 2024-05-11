@@ -287,18 +287,7 @@ class YoutubeChannel(YouTubeItem):
     def _index_single_playlist(playlist):
         """add single playlist if needed"""
         playlist = YoutubePlaylist(playlist[0])
-        playlist.build_json()
-        if not playlist.json_data:
-            return
-
-        entries = playlist.json_data["playlist_entries"]
-        downloaded = [i for i in entries if i["downloaded"]]
-        if not downloaded:
-            return
-
-        playlist.upload_to_es()
-        playlist.add_vids_to_playlist()
-        playlist.get_playlist_art()
+        playlist.update_playlist(skip_on_empty=True)
 
     def get_channel_videos(self):
         """get all videos from channel"""
