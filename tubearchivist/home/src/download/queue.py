@@ -245,6 +245,7 @@ class PendingList(PendingIndex):
         bulk_list = []
 
         total = len(self.missing_videos)
+        videos_added = []
         for idx, (youtube_id, vid_type) in enumerate(self.missing_videos):
             if self.task and self.task.is_stopped():
                 break
@@ -268,12 +269,15 @@ class PendingList(PendingIndex):
 
             url = video_details["vid_thumb_url"]
             ThumbManager(youtube_id).download_video_thumb(url)
+            videos_added.append(youtube_id)
 
             if len(bulk_list) >= 20:
                 self._ingest_bulk(bulk_list)
                 bulk_list = []
 
         self._ingest_bulk(bulk_list)
+
+        return videos_added
 
     def _ingest_bulk(self, bulk_list):
         """add items to queue in bulk"""

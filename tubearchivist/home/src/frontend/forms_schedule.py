@@ -6,6 +6,7 @@ Functionality:
 
 from celery.schedules import crontab
 from django import forms
+from home.src.ta.task_config import TASK_CONFIG
 
 
 class CrontabValidator:
@@ -78,12 +79,17 @@ class SchedulerSettingsForm(forms.Form):
 class NotificationSettingsForm(forms.Form):
     """add notification URL"""
 
-    TASK_CHOICES = [
-        ("", "-- select task --"),
-        ("update_subscribed", "Rescan your Subscriptions"),
-        ("download_pending", "Downloading"),
-        ("check_reindex", "Reindex Documents"),
+    SUPPORTED_TASKS = [
+        "update_subscribed",
+        "extract_download",
+        "download_pending",
+        "check_reindex",
     ]
+    TASK_LIST = [(i, TASK_CONFIG[i]["title"]) for i in SUPPORTED_TASKS]
+
+    TASK_CHOICES = [("", "-- select task --")]
+    TASK_CHOICES.extend(TASK_LIST)
+
     PLACEHOLDER = "Apprise notification URL"
 
     task = forms.ChoiceField(

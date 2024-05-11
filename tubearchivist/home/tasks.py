@@ -144,10 +144,17 @@ def extrac_dl(self, youtube_ids, auto_start=False, status="pending"):
 
     pending_handler = PendingList(youtube_ids=to_add, task=self)
     pending_handler.parse_url_list()
-    pending_handler.add_to_pending(status=status, auto_start=auto_start)
+    videos_added = pending_handler.add_to_pending(
+        status=status, auto_start=auto_start
+    )
 
     if auto_start:
         download_pending.delay(auto_only=True)
+
+    if videos_added:
+        return f"added {len(videos_added)} Videos to Queue"
+
+    return None
 
 
 @shared_task(bind=True, name="check_reindex", base=BaseTask)

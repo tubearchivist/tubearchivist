@@ -90,7 +90,7 @@ class DownloadPostProcess:
         vids = [{"type": "video", "url": i["youtube_id"]} for i in to_delete]
         pending = PendingList(youtube_ids=vids)
         pending.parse_url_list()
-        pending.add_to_pending(status="ignore")
+        _ = pending.add_to_pending(status="ignore")
 
     def validate_playlists(self):
         """look for playlist needing to update"""
