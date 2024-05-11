@@ -12,6 +12,7 @@ from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
+from home.src.ta.helper import is_missing
 from home.src.ta.urlparser import Parser
 
 
@@ -218,27 +219,15 @@ class PlaylistSubscription:
         playlist.json_data["playlist_subscribed"] = subscribe_status
         playlist.upload_to_es()
 
-    @staticmethod
-    def get_to_ignore():
-        """get all youtube_ids already downloaded or ignored"""
-        pending = queue.PendingList()
-        pending.get_download()
-        pending.get_indexed()
-
-        return pending.to_skip
-
     def find_missing(self):
         """find videos in subscribed playlists not downloaded yet"""
         all_playlists = [i["playlist_id"] for i in self.get_playlists()]
         if not all_playlists:
             return False
 
-        to_ignore = self.get_to_ignore()
-
         missing_videos = []
         total = len(all_playlists)
         for idx, playlist_id in enumerate(all_playlists):
-            size_limit = self.config["subscriptions"]["channel_size"]
             playlist = YoutubePlaylist(playlist_id)
             is_active = playlist.update_playlist()
             if not is_active:
@@ -246,27 +235,29 @@ class PlaylistSubscription:
                 continue
 
             playlist_entries = playlist.json_data["playlist_entries"]
+            size_limit = self.config["subscriptions"]["channel_size"]
             if size_limit:
                 del playlist_entries[size_limit:]
 
-            all_missing = [i for i in playlist_entries if not i["downloaded"]]
-
-            for video in all_missing:
-                youtube_id = video["youtube_id"]
-                if youtube_id not in to_ignore:
-                    missing_videos.append(youtube_id)
+            to_check = [
+                i["youtube_id"]
+                for i in playlist_entries
+                if i["downloaded"] is False
+            ]
+            needs_downloading = is_missing(to_check)
+            missing_videos.extend(needs_downloading)
 
             if not self.task:
                 continue
 
-            if self.task:
-                self.task.send_progress(
-                    message_lines=[f"Scanning Playlists {idx + 1}/{total}"],
-                    progress=(idx + 1) / total,
-                )
-                if self.task.is_stopped():
-                    self.task.send_progress(["Received Stop signal."])
-                    break
+            if self.task.is_stopped():
+                self.task.send_progress(["Received Stop signal."])
+                break
+
+            self.task.send_progress(
+                message_lines=[f"Scanning Playlists {idx + 1}/{total}"],
+                progress=(idx + 1) / total,
+            )
 
         return missing_videos
 

@@ -12,6 +12,7 @@ from datetime import datetime
 from urllib.parse import urlparse
 
 import requests
+from home.src.es.connect import IndexPaginate
 from home.src.ta.settings import EnvironmentSettings
 
 
@@ -222,3 +223,21 @@ def check_stylesheet(stylesheet: str):
         return stylesheet
 
     return "dark.css"
+
+
+def is_missing(
+    to_check: str | list[str], index_name: str = "ta_video,ta_download"
+) -> list[str]:
+    """id or list of ids that are missing from index_name"""
+    if isinstance(to_check, str):
+        to_check = [to_check]
+
+    data = {
+        "query": {"terms": {"youtube_id": to_check}},
+        "_source": ["youtube_id"],
+    }
+    result = IndexPaginate(index_name, data=data).get_results()
+    existing_ids = [i["youtube_id"] for i in result]
+    dl = [i for i in to_check if i not in existing_ids]
+
+    return dl

@@ -142,6 +142,7 @@ class YoutubePlaylist(YouTubeItem):
             return False
 
         self.upload_to_es()
+        self.add_vids_to_playlist()
         return True
 
     def build_nav(self, youtube_id):
