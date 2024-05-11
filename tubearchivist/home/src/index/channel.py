@@ -23,16 +23,15 @@ class YoutubeChannel(YouTubeItem):
     es_path = False
     index_name = "ta_channel"
     yt_base = "https://www.youtube.com/channel/"
-    yt_obs = {"playlist_items": "0,0"}
+    yt_obs = {
+        "playlist_items": "1,0",
+        "skip_download": True,
+    }
 
     def __init__(self, youtube_id, task=False):
         super().__init__(youtube_id)
         self.all_playlists = False
         self.task = task
-
-    def build_yt_url(self):
-        """overwrite base to use channel about page"""
-        return f"{self.yt_base}{self.youtube_id}/about"
 
     def build_json(self, upload=False, fallback=False):
         """get from es or from youtube"""
@@ -53,14 +52,13 @@ class YoutubeChannel(YouTubeItem):
     def process_youtube_meta(self):
         """extract relevant fields"""
         self.youtube_meta["thumbnails"].reverse()
-        channel_subs = self.youtube_meta.get("channel_follower_count") or 0
         self.json_data = {
             "channel_active": True,
             "channel_description": self.youtube_meta.get("description", False),
             "channel_id": self.youtube_id,
             "channel_last_refresh": int(datetime.now().timestamp()),
             "channel_name": self.youtube_meta["uploader"],
-            "channel_subs": channel_subs,
+            "channel_subs": self._extract_follower_count(),
             "channel_subscribed": False,
             "channel_tags": self._parse_tags(self.youtube_meta.get("tags")),
             "channel_banner_url": self._get_banner_art(),
@@ -68,6 +66,22 @@ class YoutubeChannel(YouTubeItem):
             "channel_tvart_url": self._get_tv_art(),
             "channel_views": self.youtube_meta.get("view_count") or 0,
         }
+
+    def _extract_follower_count(self) -> int:
+        """workaround for upstream #9893, extract subs from first video"""
+        subs = self.youtube_meta.get("channel_follower_count")
+        if subs is not None:
+            return subs
+
+        entries = self.youtube_meta.get("entries", [])
+        if entries:
+            first_entry = entries[0]
+            if isinstance(first_entry, dict):
+                subs_entry = first_entry.get("channel_follower_count")
+                if subs_entry is not None:
+                    return subs_entry
+
+        return 0
 
     def _parse_tags(self, tags):
         """parse channel tags"""
