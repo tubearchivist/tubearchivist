@@ -106,10 +106,6 @@ class ChannelSubscription:
         if not all_channels:
             return False
 
-        pending = queue.PendingList()
-        pending.get_download()
-        pending.get_indexed()
-
         missing_videos = []
 
         total = len(all_channels)
@@ -119,22 +115,22 @@ class ChannelSubscription:
             last_videos = self.get_last_youtube_videos(channel_id)
 
             if last_videos:
+                ids_to_add = is_missing([i[0] for i in last_videos])
                 for video_id, _, vid_type in last_videos:
-                    if video_id not in pending.to_skip:
+                    if video_id in ids_to_add:
                         missing_videos.append((video_id, vid_type))
 
             if not self.task:
                 continue
 
-            if self.task:
-                if self.task.is_stopped():
-                    self.task.send_progress(["Received Stop signal."])
-                    break
+            if self.task.is_stopped():
+                self.task.send_progress(["Received Stop signal."])
+                break
 
-                self.task.send_progress(
-                    message_lines=[f"Scanning Channel {idx + 1}/{total}"],
-                    progress=(idx + 1) / total,
-                )
+            self.task.send_progress(
+                message_lines=[f"Scanning Channel {idx + 1}/{total}"],
+                progress=(idx + 1) / total,
+            )
 
         return missing_videos
 
