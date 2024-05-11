@@ -109,10 +109,8 @@ class DownloadPostProcess:
 
     def _validate_channel_playlist(self, all_channel_playlist, id_c):
         """scan channel for playlist needing update"""
-        all_youtube_ids = [i["youtube_id"] for i in self.pending.all_videos]
         for id_p, playlist_id in enumerate(all_channel_playlist):
             playlist = YoutubePlaylist(playlist_id)
-            playlist.all_youtube_ids = all_youtube_ids
             playlist.build_json(scrape=True)
             if not playlist.json_data:
                 playlist.deactivate()

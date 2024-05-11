@@ -10,7 +10,6 @@ from datetime import datetime
 from time import sleep
 
 from home.models import CustomPeriodicTask
-from home.src.download.queue import PendingList
 from home.src.download.subscriptions import ChannelSubscription
 from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import CookieHandler
@@ -243,7 +242,6 @@ class Reindex(ReindexBase):
     def __init__(self, task=False):
         super().__init__()
         self.task = task
-        self.all_indexed_ids = False
         self.processed = {
             "videos": 0,
             "channels": 0,
@@ -374,7 +372,6 @@ class Reindex(ReindexBase):
 
     def _reindex_single_playlist(self, playlist_id):
         """refresh playlist data"""
-        self._get_all_videos()
         playlist = YoutubePlaylist(playlist_id)
         playlist.get_from_es()
         if (
@@ -384,7 +381,6 @@ class Reindex(ReindexBase):
             return
 
         subscribed = playlist.json_data["playlist_subscribed"]
-        playlist.all_youtube_ids = self.all_indexed_ids
         playlist.build_json(scrape=True)
         if not playlist.json_data:
             playlist.deactivate()
@@ -394,16 +390,6 @@ class Reindex(ReindexBase):
         playlist.upload_to_es()
         self.processed["playlists"] += 1
         return
-
-    def _get_all_videos(self):
-        """add all videos for playlist index validation"""
-        if self.all_indexed_ids:
-            return
-
-        handler = PendingList()
-        handler.get_download()
-        handler.get_indexed()
-        self.all_indexed_ids = [i["youtube_id"] for i in handler.all_videos]
 
     def cookie_is_valid(self):
         """return true if cookie is enabled and valid"""

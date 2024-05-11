@@ -8,7 +8,6 @@ import json
 import os
 from datetime import datetime
 
-from home.src.download import queue  # partial import
 from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
@@ -267,13 +266,12 @@ class YoutubeChannel(YouTubeItem):
             print(f"{self.youtube_id}: no playlists found.")
             return
 
-        all_youtube_ids = self.get_all_video_ids()
         total = len(self.all_playlists)
         for idx, playlist in enumerate(self.all_playlists):
             if self.task:
                 self._notify_single_playlist(idx, total)
 
-            self._index_single_playlist(playlist, all_youtube_ids)
+            self._index_single_playlist(playlist)
             print("add playlist: " + playlist[1])
 
     def _notify_single_playlist(self, idx, total):
@@ -286,10 +284,9 @@ class YoutubeChannel(YouTubeItem):
         self.task.send_progress(message, progress=(idx + 1) / total)
 
     @staticmethod
-    def _index_single_playlist(playlist, all_youtube_ids):
+    def _index_single_playlist(playlist):
         """add single playlist if needed"""
         playlist = YoutubePlaylist(playlist[0])
-        playlist.all_youtube_ids = all_youtube_ids
         playlist.build_json()
         if not playlist.json_data:
             return
@@ -302,16 +299,6 @@ class YoutubeChannel(YouTubeItem):
         playlist.upload_to_es()
         playlist.add_vids_to_playlist()
         playlist.get_playlist_art()
-
-    @staticmethod
-    def get_all_video_ids():
-        """match all playlists with videos"""
-        handler = queue.PendingList()
-        handler.get_download()
-        handler.get_indexed()
-        all_youtube_ids = [i["youtube_id"] for i in handler.all_videos]
-
-        return all_youtube_ids
 
     def get_channel_videos(self):
         """get all videos from channel"""

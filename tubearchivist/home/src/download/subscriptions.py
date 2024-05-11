@@ -174,10 +174,6 @@ class PlaylistSubscription:
 
     def process_url_str(self, new_playlists, subscribed=True):
         """process playlist subscribe form url_str"""
-        data = {"query": {"match_all": {}}, "_source": ["youtube_id"]}
-        all_indexed = IndexPaginate("ta_video", data).get_results()
-        all_youtube_ids = [i["youtube_id"] for i in all_indexed]
-
         for idx, playlist in enumerate(new_playlists):
             playlist_id = playlist["url"]
             if not playlist["type"] == "playlist":
@@ -185,7 +181,6 @@ class PlaylistSubscription:
                 continue
 
             playlist_h = YoutubePlaylist(playlist_id)
-            playlist_h.all_youtube_ids = all_youtube_ids
             playlist_h.build_json()
             if not playlist_h.json_data:
                 message = f"{playlist_h.youtube_id}: failed to extract data"

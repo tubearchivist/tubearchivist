@@ -8,7 +8,7 @@ import json
 from datetime import datetime
 
 from home.src.download.thumbnails import ThumbManager
-from home.src.es.connect import ElasticWrap
+from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.generic import YouTubeItem
 from home.src.index.video import YoutubeVideo
 
@@ -28,7 +28,6 @@ class YoutubePlaylist(YouTubeItem):
         super().__init__(youtube_id)
         self.all_members = False
         self.nav = False
-        self.all_youtube_ids = []
 
     def build_json(self, scrape=False):
         """collection to create json_data"""
@@ -45,7 +44,8 @@ class YoutubePlaylist(YouTubeItem):
                 return
 
             self.process_youtube_meta()
-            self.get_entries()
+            ids_found = self.get_local_vids()
+            self.get_entries(ids_found)
             self.json_data["playlist_entries"] = self.all_members
             self.json_data["playlist_subscribed"] = subscribed
 
@@ -69,25 +69,31 @@ class YoutubePlaylist(YouTubeItem):
             "playlist_type": "regular",
         }
 
-    def get_entries(self, playlistend=False):
-        """get all videos in playlist"""
-        if playlistend:
-            # implement playlist end
-            print(playlistend)
+    def get_local_vids(self) -> list[str]:
+        """get local video ids from youtube entries"""
+        entries = self.youtube_meta["entries"]
+        data = {
+            "query": {"terms": {"youtube_id": [i["id"] for i in entries]}},
+            "_source": ["youtube_id"],
+        }
+        indexed_vids = IndexPaginate("ta_video", data).get_results()
+        ids_found = [i["youtube_id"] for i in indexed_vids]
+
+        return ids_found
+
+    def get_entries(self, ids_found) -> None:
+        """get all videos in playlist, match downloaded with ids_found"""
         all_members = []
         for idx, entry in enumerate(self.youtube_meta["entries"]):
-            if self.all_youtube_ids:
-                downloaded = entry["id"] in self.all_youtube_ids
-            else:
-                downloaded = False
             if not entry["channel"]:
                 continue
+
             to_append = {
                 "youtube_id": entry["id"],
                 "title": entry["title"],
                 "uploader": entry["channel"],
                 "idx": idx,
-                "downloaded": downloaded,
+                "downloaded": entry["id"] in ids_found,
             }
             all_members.append(to_append)
 
@@ -130,14 +136,11 @@ class YoutubePlaylist(YouTubeItem):
 
     def update_playlist(self):
         """update metadata for playlist with data from YouTube"""
-        self.get_from_es()
-        subscribed = self.json_data["playlist_subscribed"]
-        self.get_from_youtube()
+        self.build_json(scrape=True)
         if not self.json_data:
             # return false to deactivate
             return False
 
-        self.json_data["playlist_subscribed"] = subscribed
         self.upload_to_es()
         return True
 
