@@ -40,7 +40,8 @@ class DownloadPostProcess:
         self.pending.get_indexed()
         self.auto_delete_all()
         self.auto_delete_overwrites()
-        self.validate_playlists()
+        to_refresh = self.refresh_playlist()
+        self.match_videos(to_refresh)
         self.get_comments()
 
     def auto_delete_all(self):
@@ -92,48 +93,77 @@ class DownloadPostProcess:
         pending.parse_url_list()
         _ = pending.add_to_pending(status="ignore")
 
-    def validate_playlists(self):
-        """look for playlist needing to update"""
-        for id_c, channel_id in enumerate(self.download.channels):
-            channel = YoutubeChannel(channel_id, task=self.download.task)
+    def refresh_playlist(self) -> list[str]:
+        """match videos with playlists"""
+        to_refresh = self._get_to_refresh_playlists()
+
+        total_playlist = len(to_refresh)
+        for idx, playlist_id in enumerate(to_refresh):
+            playlist = YoutubePlaylist(playlist_id)
+            playlist.update_playlist(skip_on_empty=True)
+
+            if not self.pending.task:
+                continue
+
+            channel_name = playlist.json_data["playlist_channel"]
+            playlist_title = playlist.json_data["playlist_name"]
+            message = [
+                f"Post Processing Playlists for: {channel_name}",
+                f"Validate: {playlist_title} - {idx + 1}/{total_playlist}",
+            ]
+            progress = (idx + 1) / total_playlist
+            self.download.task.send_progress(message, progress=progress)
+
+        return to_refresh
+
+    def _get_to_refresh_playlists(self) -> list[str]:
+        """get playlists to refresh"""
+        if self.download.task:
+            message = ["Post Processing Playlists", "Scanning for Playlists"]
+            self.download.task.send_progress(message)
+
+        to_refresh = []
+        for channel_id in self.download.channels:
+            channel = YoutubeChannel(channel_id)
             overwrites = self.pending.channel_overwrites.get(channel_id, False)
             if overwrites and overwrites.get("index_playlists"):
-                # validate from remote
-                channel.index_channel_playlists()
-                continue
+                channel.get_all_playlists()
+                to_refresh.extend(channel.all_playlists)
 
-            # validate from local
-            playlists = channel.get_indexed_playlists(active_only=True)
-            all_channel_playlist = [i["playlist_id"] for i in playlists]
-            self._validate_channel_playlist(all_channel_playlist, id_c)
+        subs = PlaylistSubscription().get_playlists()
+        for playlist in subs:
+            playlist_id = playlist["playlist_id"]
+            if playlist_id not in to_refresh:
+                to_refresh.append(playlist_id)
 
-    def _validate_channel_playlist(self, all_channel_playlist, id_c):
-        """scan channel for playlist needing update"""
-        for id_p, playlist_id in enumerate(all_channel_playlist):
+        return to_refresh
+
+    def match_videos(self, to_refresh: list[str]) -> None:
+        """scan rest of indexed playlists to match videos"""
+        data = {
+            "query": {
+                "bool": {"must_not": [{"terms": {"playlist_id": to_refresh}}]}
+            },
+            "_source": ["playlist_id"],
+        }
+        playlists = IndexPaginate("ta_playlist", data).get_results()
+        total_playlist = len(playlists)
+        for idx, to_match in enumerate(playlists):
+            playlist_id = to_match["playlist_id"]
             playlist = YoutubePlaylist(playlist_id)
-            playlist.build_json(scrape=True)
-            if not playlist.json_data:
-                playlist.deactivate()
+            playlist.get_from_es()
+            playlist.add_vids_to_playlist()
+            playlist.remove_vids_from_playlist()
+
+            if not self.pending.task:
                 continue
 
-            playlist.add_vids_to_playlist()
-            playlist.upload_to_es()
-            self._notify_playlist_progress(all_channel_playlist, id_c, id_p)
-
-    def _notify_playlist_progress(self, all_channel_playlist, id_c, id_p):
-        """notify to UI"""
-        if not self.download.task:
-            return
-
-        total_channel = len(self.download.channels)
-        total_playlist = len(all_channel_playlist)
-
-        message = [
-            f"Post Processing Channels: {id_c}/{total_channel}",
-            f"Validate Playlists {id_p + 1}/{total_playlist}",
-        ]
-        progress = (id_c + 1) / total_channel
-        self.download.task.send_progress(message, progress=progress)
+            message = [
+                "Post Processing Playlists.",
+                f"Validate Playlists: - {idx + 1}/{total_playlist}",
+            ]
+            progress = (idx + 1) / total_playlist
+            self.download.task.send_progress(message, progress=progress)
 
     def get_comments(self):
         """get comments from youtube"""
