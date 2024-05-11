@@ -134,6 +134,32 @@ class YoutubePlaylist(YouTubeItem):
 
         ElasticWrap("_bulk").post(query_str, ndjson=True)
 
+    def remove_vids_from_playlist(self):
+        """remove playlist ids from videos if needed"""
+        needed = [i["youtube_id"] for i in self.json_data["playlist_entries"]]
+        data = {
+            "query": {"match": {"playlist": self.youtube_id}},
+            "_source": ["youtube_id"],
+        }
+        result = IndexPaginate("ta_video", data).get_results()
+        to_remove = [
+            i["youtube_id"] for i in result if i["youtube_id"] not in needed
+        ]
+        s = "ctx._source.playlist.removeAll(Collections.singleton(params.rm))"
+        for video_id in to_remove:
+            query = {
+                "script": {
+                    "source": s,
+                    "lang": "painless",
+                    "params": {"rm": self.youtube_id},
+                },
+                "query": {"match": {"youtube_id": video_id}},
+            }
+            path = "ta_video/_update_by_query"
+            _, status_code = ElasticWrap(path).post(query)
+            if status_code == 200:
+                print(f"{self.youtube_id}: removed {video_id} from playlist")
+
     def update_playlist(self):
         """update metadata for playlist with data from YouTube"""
         self.build_json(scrape=True)
@@ -143,6 +169,7 @@ class YoutubePlaylist(YouTubeItem):
 
         self.upload_to_es()
         self.add_vids_to_playlist()
+        self.remove_vids_from_playlist()
         return True
 
     def build_nav(self, youtube_id):
