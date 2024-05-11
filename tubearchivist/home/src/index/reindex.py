@@ -380,14 +380,11 @@ class Reindex(ReindexBase):
         ):
             return
 
-        subscribed = playlist.json_data["playlist_subscribed"]
-        playlist.build_json(scrape=True)
-        if not playlist.json_data:
+        is_active = playlist.update_playlist()
+        if not is_active:
             playlist.deactivate()
             return
 
-        playlist.json_data["playlist_subscribed"] = subscribed
-        playlist.upload_to_es()
         self.processed["playlists"] += 1
         return
 
