@@ -147,7 +147,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             self.youtube_meta = youtube_meta_overwrite
             self.offline_import = True
 
-        self._process_youtube_meta()
+        self.process_youtube_meta()
         self._add_channel()
         self._add_stats()
         self.add_file_path()
@@ -175,7 +175,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
         return integrate
 
-    def _process_youtube_meta(self):
+    def process_youtube_meta(self):
         """extract relevant fields from youtube"""
         self._validate_id()
         # extract

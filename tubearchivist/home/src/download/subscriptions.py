@@ -4,12 +4,12 @@ Functionality:
 - handle playlist subscriptions
 """
 
-from home.src.download import queue  # partial import
 from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import IndexPaginate
 from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
+from home.src.index.video import YoutubeVideo
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import is_missing
@@ -341,8 +341,10 @@ class SubscriptionHandler:
 
         if item["type"] == "video":
             # extract channel id from video
-            vid = queue.PendingList().get_youtube_details(item["url"])
-            channel_id = vid["channel_id"]
+            video = YoutubeVideo(item["url"])
+            video.get_from_youtube()
+            video.process_youtube_meta()
+            channel_id = video.channel_id
         elif item["type"] == "channel":
             channel_id = item["url"]
         else:
