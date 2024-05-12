@@ -9,6 +9,7 @@ import random
 import string
 import subprocess
 from datetime import datetime
+from typing import Any
 from urllib.parse import urlparse
 
 import requests
@@ -241,3 +242,17 @@ def is_missing(
     dl = [i for i in to_check if i not in existing_ids]
 
     return dl
+
+
+def get_channel_overwrites() -> dict[str, dict[str, Any]]:
+    """get overwrites indexed my channel_id"""
+    data = {
+        "query": {
+            "bool": {"must": [{"exists": {"field": "channel_overwrites"}}]}
+        },
+        "_source": ["channel_id", "channel_overwrites"],
+    }
+    result = IndexPaginate("ta_channel", data).get_results()
+    overwrites = {i["channel_id"]: i["channel_overwrites"] for i in result}
+
+    return overwrites

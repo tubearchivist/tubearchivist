@@ -20,7 +20,7 @@ from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video import YoutubeVideo, index_new_video
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
-from home.src.ta.helper import ignore_filelist
+from home.src.ta.helper import get_channel_overwrites, ignore_filelist
 from home.src.ta.settings import EnvironmentSettings
 
 
@@ -317,25 +317,12 @@ class DownloadPostProcess:
 
     def run(self):
         """run all functions"""
-        self.channel_overwrites = self.get_channel_overwrites()
+        self.channel_overwrites = get_channel_overwrites()
         self.auto_delete_all()
         self.auto_delete_overwrites()
         to_refresh = self.refresh_playlist()
         self.match_videos(to_refresh)
         self.get_comments()
-
-    def get_channel_overwrites(self):
-        """get overwrites"""
-        data = {
-            "query": {
-                "bool": {"must": [{"exists": {"field": "channel_overwrites"}}]}
-            },
-            "_source": ["channel_id", "channel_overwrites"],
-        }
-        result = IndexPaginate("ta_channel", data).get_results()
-        overwrites = {i["channel_id"]: i["channel_overwrites"] for i in result}
-
-        return overwrites
 
     def auto_delete_all(self):
         """handle auto delete"""
