@@ -7,10 +7,7 @@ Functionality:
 import json
 from datetime import datetime
 
-from home.src.download.subscriptions import (
-    ChannelSubscription,
-    PlaylistSubscription,
-)
+from home.src.download.subscriptions import ChannelSubscription
 from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
@@ -196,7 +193,6 @@ class PendingList(PendingIndex):
             self._parse_channel(entry["url"], vid_type)
         elif entry["type"] == "playlist":
             self._parse_playlist(entry["url"])
-            PlaylistSubscription().process_url_str([entry], subscribed=False)
         else:
             raise ValueError(f"invalid url_type: {entry}")
 
