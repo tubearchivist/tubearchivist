@@ -227,18 +227,20 @@ def check_stylesheet(stylesheet: str):
 
 
 def is_missing(
-    to_check: str | list[str], index_name: str = "ta_video,ta_download"
+    to_check: str | list[str],
+    index_name: str = "ta_video,ta_download",
+    on_key: str = "youtube_id",
 ) -> list[str]:
     """id or list of ids that are missing from index_name"""
     if isinstance(to_check, str):
         to_check = [to_check]
 
     data = {
-        "query": {"terms": {"youtube_id": to_check}},
-        "_source": ["youtube_id"],
+        "query": {"terms": {on_key: to_check}},
+        "_source": [on_key],
     }
     result = IndexPaginate(index_name, data=data).get_results()
-    existing_ids = [i["youtube_id"] for i in result]
+    existing_ids = [i[on_key] for i in result]
     dl = [i for i in to_check if i not in existing_ids]
 
     return dl
