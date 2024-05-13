@@ -382,14 +382,14 @@ class DownloadPostProcess:
             playlist = YoutubePlaylist(playlist_id)
             playlist.update_playlist(skip_on_empty=True)
 
-            if self.download.task:
+            if not self.download.task:
                 continue
 
             channel_name = playlist.json_data["playlist_channel"]
             playlist_title = playlist.json_data["playlist_name"]
             message = [
                 f"Post Processing Playlists for: {channel_name}",
-                f"Validate: {playlist_title} - {idx + 1}/{total_playlist}",
+                f"{playlist_title} [{idx + 1}/{total_playlist}]",
             ]
             progress = (idx + 1) / total_playlist
             self.download.task.send_progress(message, progress=progress)
@@ -407,9 +407,9 @@ class DownloadPostProcess:
             channel = YoutubeChannel(channel_id)
             channel.get_from_es()
             overwrites = channel.get_overwrites()
-            if overwrites and overwrites.get("index_playlists"):
+            if "index_playlists" in overwrites:
                 channel.get_all_playlists()
-                to_refresh.extend(channel.all_playlists)
+                to_refresh.extend([i[0] for i in channel.all_playlists])
 
         subs = PlaylistSubscription().get_playlists()
         for playlist in subs:

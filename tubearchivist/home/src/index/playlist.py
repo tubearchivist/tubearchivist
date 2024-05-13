@@ -168,7 +168,7 @@ class YoutubePlaylist(YouTubeItem):
             return False
 
         if skip_on_empty:
-            has_item_downloaded = next(
+            has_item_downloaded = any(
                 i["downloaded"] for i in self.json_data["playlist_entries"]
             )
             if not has_item_downloaded:

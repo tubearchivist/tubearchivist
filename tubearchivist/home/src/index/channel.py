@@ -225,9 +225,7 @@ class YoutubeChannel(YouTubeItem):
         """delete all indexed playlist from es"""
         all_playlists = self.get_indexed_playlists()
         for playlist in all_playlists:
-            playlist_id = playlist["playlist_id"]
-            playlist = YoutubePlaylist(playlist_id)
-            YoutubePlaylist(playlist_id).delete_metadata()
+            YoutubePlaylist(playlist["playlist_id"]).delete_metadata()
 
     def delete_channel(self):
         """delete channel and all videos"""
@@ -324,9 +322,9 @@ class YoutubeChannel(YouTubeItem):
         all_playlists = IndexPaginate("ta_playlist", data).get_results()
         return all_playlists
 
-    def get_overwrites(self):
+    def get_overwrites(self) -> dict:
         """get all per channel overwrites"""
-        return self.json_data.get("channel_overwrites", False)
+        return self.json_data.get("channel_overwrites", {})
 
     def set_overwrites(self, overwrites):
         """set per channel overwrites"""
