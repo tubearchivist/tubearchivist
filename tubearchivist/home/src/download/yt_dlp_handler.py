@@ -35,7 +35,7 @@ class VideoDownloader:
 
     def __init__(self, task=False):
         self.obs = False
-        self.video_overwrites = False
+        self.channel_overwrites = get_channel_overwrites()
         self.task = task
         self.config = AppConfig().config
         self._build_obs()
@@ -44,28 +44,24 @@ class VideoDownloader:
 
     def run_queue(self, auto_only=False):
         """setup download queue in redis loop until no more items"""
-        self._get_overwrites()
         while True:
             video_data = self._get_next(auto_only)
             if self.task.is_stopped() or not video_data:
                 self._reset_auto()
                 break
 
-            youtube_id = video_data.get("youtube_id")
+            youtube_id = video_data["youtube_id"]
+            channel_id = video_data["channel_id"]
             print(f"{youtube_id}: Downloading video")
             self._notify(video_data, "Validate download format")
 
-            success = self._dl_single_vid(youtube_id)
+            success = self._dl_single_vid(youtube_id, channel_id)
             if not success:
                 continue
 
             self._notify(video_data, "Add video metadata to index", progress=1)
-
-            vid_dict = index_new_video(
-                youtube_id,
-                video_overwrites=self.video_overwrites,
-                video_type=VideoTypeEnum(video_data["vid_type"]),
-            )
+            video_type = VideoTypeEnum(video_data["vid_type"])
+            vid_dict = index_new_video(youtube_id, video_type=video_type)
             self.channels.add(vid_dict["channel"]["channel_id"])
             self.videos.add(vid_dict["youtube_id"])
 
@@ -111,13 +107,6 @@ class VideoDownloader:
             return False
 
         return response["hits"]["hits"][0]["_source"]
-
-    def _get_overwrites(self):
-        """get channel overwrites"""
-        pending = PendingList()
-        pending.get_download()
-        pending.get_channels()
-        self.video_overwrites = pending.video_overwrites
 
     def _progress_hook(self, response):
         """process the progress_hooks from yt_dlp"""
@@ -209,21 +198,16 @@ class VideoDownloader:
 
         self.obs["postprocessors"] = postprocessors
 
-    def get_format_overwrites(self, youtube_id):
-        """get overwrites from single video"""
-        overwrites = self.video_overwrites.get(youtube_id, False)
-        if overwrites:
-            return overwrites.get("download_format", False)
+    def _set_overwrites(self, obs: dict, channel_id: str) -> None:
+        """add overwrites to obs"""
+        overwrites = self.channel_overwrites.get(channel_id)
+        if overwrites and overwrites.get("download_format"):
+            obs["format"] = overwrites.get("download_format")
 
-        return False
-
-    def _dl_single_vid(self, youtube_id):
+    def _dl_single_vid(self, youtube_id: str, channel_id: str) -> bool:
         """download single video"""
         obs = self.obs.copy()
-        format_overwrite = self.get_format_overwrites(youtube_id)
-        if format_overwrite:
-            obs["format"] = format_overwrite
-
+        self._set_overwrites(obs, channel_id)
         dl_cache = os.path.join(self.CACHE_DIR, "download")
 
         # check if already in cache to continue from there
