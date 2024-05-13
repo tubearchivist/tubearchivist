@@ -366,6 +366,15 @@ class ThumbValidator:
                 delete_path = os.path.join(folder_path, f"{thumb}.jpg")
                 os.remove(delete_path)
 
+            if to_delete:
+                message = (
+                    f"[thumbs][video][{video_folder}] "
+                    + f"delete {len(to_delete)} unused thumbnails"
+                )
+                print(message)
+                if self.task:
+                    self.task.send_progress([message])
+
     @staticmethod
     def _get_vid_thumbs_should(video_folder: str) -> set[str]:
         """get indexed"""
@@ -393,6 +402,15 @@ class ThumbValidator:
                 delete_path = os.path.join(channel_dir, channel_thumb)
                 os.remove(delete_path)
 
+        if to_delete:
+            message = (
+                "[thumbs][channel] "
+                + f"delete {len(to_delete)} unused channel art"
+            )
+            print(message)
+            if self.task:
+                self.task.send_progress([message])
+
     def _clean_up_playlists(self):
         """clean up unneeded playlist thumbs"""
         playlist_dir = os.path.join(EnvironmentSettings.CACHE_DIR, "playlists")
@@ -402,6 +420,15 @@ class ThumbValidator:
         for playlist_id in to_delete:
             delete_path = os.path.join(playlist_dir, f"{playlist_id}.jpg")
             os.remove(delete_path)
+
+        if to_delete:
+            message = (
+                "[thumbs][playlist] "
+                + f"delete {len(to_delete)} unused playlist art"
+            )
+            print(message)
+            if self.task:
+                self.task.send_progress([message])
 
     @staticmethod
     def _get_total(index_name):
