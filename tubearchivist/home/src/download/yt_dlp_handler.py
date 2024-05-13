@@ -30,14 +30,14 @@ class VideoDownloader:
     if not initiated with list, take from queue
     """
 
-    def __init__(self, youtube_id_list=False, task=False):
+    CACHE_DIR = EnvironmentSettings.CACHE_DIR
+    MEDIA_DIR = EnvironmentSettings.MEDIA_DIR
+
+    def __init__(self, task=False):
         self.obs = False
         self.video_overwrites = False
-        self.youtube_id_list = youtube_id_list
         self.task = task
         self.config = AppConfig().config
-        self.cache_dir = EnvironmentSettings.CACHE_DIR
-        self.media_dir = EnvironmentSettings.MEDIA_DIR
         self._build_obs()
         self.channels = set()
         self.videos = set()
@@ -149,7 +149,7 @@ class VideoDownloader:
         """initial obs"""
         self.obs = {
             "merge_output_format": "mp4",
-            "outtmpl": (self.cache_dir + "/download/%(id)s.mp4"),
+            "outtmpl": (self.CACHE_DIR + "/download/%(id)s.mp4"),
             "progress_hooks": [self._progress_hook],
             "noprogress": True,
             "continuedl": True,
@@ -224,7 +224,7 @@ class VideoDownloader:
         if format_overwrite:
             obs["format"] = format_overwrite
 
-        dl_cache = self.cache_dir + "/download/"
+        dl_cache = os.path.join(self.CACHE_DIR, "download")
 
         # check if already in cache to continue from there
         all_cached = ignore_filelist(os.listdir(dl_cache))
@@ -258,7 +258,7 @@ class VideoDownloader:
         host_gid = EnvironmentSettings.HOST_GID
         # make folder
         folder = os.path.join(
-            self.media_dir, vid_dict["channel"]["channel_id"]
+            self.MEDIA_DIR, vid_dict["channel"]["channel_id"]
         )
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -266,8 +266,8 @@ class VideoDownloader:
                 os.chown(folder, host_uid, host_gid)
         # move media file
         media_file = vid_dict["youtube_id"] + ".mp4"
-        old_path = os.path.join(self.cache_dir, "download", media_file)
-        new_path = os.path.join(self.media_dir, vid_dict["media_url"])
+        old_path = os.path.join(self.CACHE_DIR, "download", media_file)
+        new_path = os.path.join(self.MEDIA_DIR, vid_dict["media_url"])
         # move media file and fix permission
         shutil.move(old_path, new_path, copy_function=shutil.copyfile)
         if host_uid and host_gid:
