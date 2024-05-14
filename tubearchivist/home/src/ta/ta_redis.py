@@ -127,10 +127,24 @@ class RedisQueue(RedisBase):
 
         return False
 
+    def add(self, to_add: str) -> None:
+        """add single item to queue"""
+        next_score = self._get_next_score()
+        self.conn.zadd(self.key, {to_add: next_score})
+
     def add_list(self, to_add: list) -> None:
         """add list to queue"""
-        mapping = {i: "+inf" for i in to_add}
+        next_score = self._get_next_score()
+        mapping = {i[1]: next_score + i[0] for i in enumerate(to_add)}
         self.conn.zadd(self.key, mapping)
+
+    def _get_next_score(self) -> float:
+        """get next score in queue to append"""
+        last = self.conn.zrange(self.key, -1, -1, withscores=True)
+        if not last:
+            return 0.0
+
+        return last[0][1] + 1
 
     def get_next(self) -> str | bool:
         """return next element in the queue, if available"""
