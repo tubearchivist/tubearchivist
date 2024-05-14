@@ -267,7 +267,7 @@ class Reindex(ReindexBase):
     def reindex_index(self, name, index_config):
         """reindex all of a single index"""
         reindex = self.get_reindex_map(index_config["index_name"])
-        youtube_id = RedisQueue(index_config["queue_name"]).get_next()
+        youtube_id, _ = RedisQueue(index_config["queue_name"]).get_next()
         if youtube_id:
             if self.task:
                 self._notify(name, index_config)

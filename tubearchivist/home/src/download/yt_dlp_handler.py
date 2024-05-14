@@ -348,11 +348,12 @@ class DownloadPostProcess:
 
     def refresh_playlist(self) -> None:
         """match videos with playlists"""
-        total_playlist = self.add_playlists_to_refresh()
+        self.add_playlists_to_refresh()
 
         queue = RedisQueue(self.download.PLAYLIST_QUEUE)
         while True:
-            playlist_id = queue.get_next()
+            total = queue.max_score()
+            playlist_id, idx = queue.get_next()
             if not playlist_id:
                 break
 
@@ -362,18 +363,16 @@ class DownloadPostProcess:
             if not self.download.task:
                 continue
 
-            idx = total_playlist - queue.length()
-
             channel_name = playlist.json_data["playlist_channel"]
             playlist_title = playlist.json_data["playlist_name"]
             message = [
                 f"Post Processing Playlists for: {channel_name}",
-                f"{playlist_title} [{idx}/{total_playlist}]",
+                f"{playlist_title} [{idx}/{total}]",
             ]
-            progress = (idx) / total_playlist
+            progress = (idx) / total
             self.download.task.send_progress(message, progress=progress)
 
-    def add_playlists_to_refresh(self) -> int:
+    def add_playlists_to_refresh(self) -> None:
         """add playlists to refresh"""
         if self.download.task:
             message = ["Post Processing Playlists", "Scanning for Playlists"]
@@ -382,8 +381,6 @@ class DownloadPostProcess:
         self._add_playlist_sub()
         self._add_channel_playlists()
         self._add_video_playlists()
-
-        return RedisQueue(self.download.PLAYLIST_QUEUE).length()
 
     def _add_playlist_sub(self):
         """add subscribed playlists to refresh"""
@@ -395,7 +392,7 @@ class DownloadPostProcess:
         """add playlists from channels to refresh"""
         queue = RedisQueue(self.download.CHANNEL_QUEUE)
         while True:
-            channel_id = queue.get_next()
+            channel_id, _ = queue.get_next()
             if not channel_id:
                 break
 
@@ -424,9 +421,9 @@ class DownloadPostProcess:
     def match_videos(self) -> None:
         """scan rest of indexed playlists to match videos"""
         queue = RedisQueue(self.download.PLAYLIST_QUICK)
-        total_playlist = queue.length()
         while True:
-            playlist_id = queue.get_next()
+            total = queue.max_score()
+            playlist_id, idx = queue.get_next()
             if not playlist_id:
                 break
 
@@ -438,12 +435,11 @@ class DownloadPostProcess:
             if not self.download.task:
                 continue
 
-            idx = total_playlist - queue.length()
             message = [
                 "Post Processing Playlists.",
-                f"Validate Playlists: - {idx}/{total_playlist}",
+                f"Validate Playlists: - {idx}/{total}",
             ]
-            progress = (idx) / total_playlist
+            progress = (idx) / total
             self.download.task.send_progress(message, progress=progress)
 
     def get_comments(self):
