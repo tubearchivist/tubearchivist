@@ -128,7 +128,7 @@ def download_pending(self, auto_only=False):
     videos_downloaded = downloader.run_queue(auto_only=auto_only)
 
     if videos_downloaded:
-        return f"downloaded {len(videos_downloaded)} videos."
+        return f"downloaded {videos_downloaded} video(s)."
 
     return None
 

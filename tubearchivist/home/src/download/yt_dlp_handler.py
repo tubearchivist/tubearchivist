@@ -25,8 +25,8 @@ from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisQueue
 
 
-class VideoDownloader:
-    """handle the video download functionality"""
+class DownloaderBase:
+    """base class for shared config"""
 
     CACHE_DIR = EnvironmentSettings.CACHE_DIR
     MEDIA_DIR = EnvironmentSettings.MEDIA_DIR
@@ -35,11 +35,19 @@ class VideoDownloader:
     PLAYLIST_QUICK = "download:playlist:quick"
     VIDEO_QUEUE = "download:video"
 
-    def __init__(self, task=False):
-        self.obs = False
-        self.channel_overwrites = get_channel_overwrites()
+    def __init__(self, task):
         self.task = task
         self.config = AppConfig().config
+        self.channel_overwrites = get_channel_overwrites()
+        self.now = int(datetime.now().timestamp())
+
+
+class VideoDownloader(DownloaderBase):
+    """handle the video download functionality"""
+
+    def __init__(self, task=False):
+        super().__init__(task)
+        self.obs = False
         self._build_obs()
 
     def run_queue(self, auto_only=False) -> int:
@@ -72,7 +80,7 @@ class VideoDownloader:
             downloaded += 1
 
         # post processing
-        DownloadPostProcess(self).run()
+        DownloadPostProcess(self.task).run()
 
         return downloaded
 
@@ -280,17 +288,11 @@ class VideoDownloader:
             print(f"[download] reset auto start on {updated} videos.")
 
 
-class DownloadPostProcess:
+class DownloadPostProcess(DownloaderBase):
     """handle task to run after download queue finishes"""
-
-    def __init__(self, download: VideoDownloader) -> None:
-        self.download: VideoDownloader = download
-        self.now = int(datetime.now().timestamp())
-        self.channel_overwrites: dict | None = None
 
     def run(self):
         """run all functions"""
-        self.channel_overwrites = get_channel_overwrites()
         self.auto_delete_all()
         self.auto_delete_overwrites()
         self.refresh_playlist()
@@ -299,7 +301,7 @@ class DownloadPostProcess:
 
     def auto_delete_all(self):
         """handle auto delete"""
-        autodelete_days = self.download.config["downloads"]["autodelete_days"]
+        autodelete_days = self.config["downloads"]["autodelete_days"]
         if not autodelete_days:
             return
 
@@ -350,17 +352,17 @@ class DownloadPostProcess:
         """match videos with playlists"""
         self.add_playlists_to_refresh()
 
-        queue = RedisQueue(self.download.PLAYLIST_QUEUE)
+        queue = RedisQueue(self.PLAYLIST_QUEUE)
         while True:
             total = queue.max_score()
             playlist_id, idx = queue.get_next()
-            if not playlist_id:
+            if not playlist_id or not idx or not total:
                 break
 
             playlist = YoutubePlaylist(playlist_id)
             playlist.update_playlist(skip_on_empty=True)
 
-            if not self.download.task:
+            if not self.task:
                 continue
 
             channel_name = playlist.json_data["playlist_channel"]
@@ -369,14 +371,14 @@ class DownloadPostProcess:
                 f"Post Processing Playlists for: {channel_name}",
                 f"{playlist_title} [{idx}/{total}]",
             ]
-            progress = (idx) / total
-            self.download.task.send_progress(message, progress=progress)
+            progress = idx / total
+            self.task.send_progress(message, progress=progress)
 
     def add_playlists_to_refresh(self) -> None:
         """add playlists to refresh"""
-        if self.download.task:
+        if self.task:
             message = ["Post Processing Playlists", "Scanning for Playlists"]
-            self.download.task.send_progress(message)
+            self.task.send_progress(message)
 
         self._add_playlist_sub()
         self._add_channel_playlists()
@@ -386,11 +388,11 @@ class DownloadPostProcess:
         """add subscribed playlists to refresh"""
         subs = PlaylistSubscription().get_playlists()
         to_add = [i["playlist_id"] for i in subs]
-        RedisQueue(self.download.PLAYLIST_QUEUE).add_list(to_add)
+        RedisQueue(self.PLAYLIST_QUEUE).add_list(to_add)
 
     def _add_channel_playlists(self):
         """add playlists from channels to refresh"""
-        queue = RedisQueue(self.download.CHANNEL_QUEUE)
+        queue = RedisQueue(self.CHANNEL_QUEUE)
         while True:
             channel_id, _ = queue.get_next()
             if not channel_id:
@@ -402,13 +404,13 @@ class DownloadPostProcess:
             if "index_playlists" in overwrites:
                 channel.get_all_playlists()
                 to_add = [i[0] for i in channel.all_playlists]
-                RedisQueue(self.download.PLAYLIST_QUEUE).add_list(to_add)
+                RedisQueue(self.PLAYLIST_QUEUE).add_list(to_add)
 
     def _add_video_playlists(self):
         """add other playlists for quick sync"""
-        all_playlists = RedisQueue(self.download.PLAYLIST_QUEUE).get_all()
+        all_playlists = RedisQueue(self.PLAYLIST_QUEUE).get_all()
         must_not = [{"terms": {"playlist_id": all_playlists}}]
-        video_ids = RedisQueue(self.download.VIDEO_QUEUE).get_all()
+        video_ids = RedisQueue(self.VIDEO_QUEUE).get_all()
         must = [{"terms": {"playlist_entries.youtube_id": video_ids}}]
         data = {
             "query": {"bool": {"must_not": must_not, "must": must}},
@@ -416,15 +418,15 @@ class DownloadPostProcess:
         }
         playlists = IndexPaginate("ta_playlist", data).get_results()
         to_add = [i["playlist_id"] for i in playlists]
-        RedisQueue(self.download.PLAYLIST_QUICK).add_list(to_add)
+        RedisQueue(self.PLAYLIST_QUICK).add_list(to_add)
 
     def match_videos(self) -> None:
         """scan rest of indexed playlists to match videos"""
-        queue = RedisQueue(self.download.PLAYLIST_QUICK)
+        queue = RedisQueue(self.PLAYLIST_QUICK)
         while True:
             total = queue.max_score()
             playlist_id, idx = queue.get_next()
-            if not playlist_id:
+            if not playlist_id or not idx or not total:
                 break
 
             playlist = YoutubePlaylist(playlist_id)
@@ -432,17 +434,17 @@ class DownloadPostProcess:
             playlist.add_vids_to_playlist()
             playlist.remove_vids_from_playlist()
 
-            if not self.download.task:
+            if not self.task:
                 continue
 
             message = [
                 "Post Processing Playlists.",
                 f"Validate Playlists: - {idx}/{total}",
             ]
-            progress = (idx) / total
-            self.download.task.send_progress(message, progress=progress)
+            progress = idx / total
+            self.task.send_progress(message, progress=progress)
 
     def get_comments(self):
         """get comments from youtube"""
-        videos = RedisQueue(self.download.VIDEO_QUEUE).get_all()
-        CommentList(videos, task=self.download.task).index()
+        videos = RedisQueue(self.VIDEO_QUEUE).get_all()
+        CommentList(videos, task=self.task).index()
