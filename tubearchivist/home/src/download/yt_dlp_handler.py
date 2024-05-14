@@ -446,5 +446,9 @@ class DownloadPostProcess(DownloaderBase):
 
     def get_comments(self):
         """get comments from youtube"""
-        videos = RedisQueue(self.VIDEO_QUEUE).get_all()
-        CommentList(videos, task=self.task).index()
+        video_queue = RedisQueue(self.VIDEO_QUEUE)
+        comment_list = CommentList(task=self.task)
+        comment_list.add(video_ids=video_queue.get_all())
+
+        video_queue.clear()
+        comment_list.index()

@@ -10,6 +10,7 @@ from datetime import datetime
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap
 from home.src.ta.config import AppConfig
+from home.src.ta.ta_redis import RedisQueue
 
 
 class Comments:
@@ -189,20 +190,30 @@ class Comments:
 class CommentList:
     """interact with comments in group"""
 
-    def __init__(self, video_ids, task=False):
-        self.video_ids = video_ids
+    COMMENT_QUEUE = "index:comment"
+
+    def __init__(self, task=False):
         self.task = task
         self.config = AppConfig().config
 
-    def index(self):
-        """index comments for list, init with task object to notify"""
+    def add(self, video_ids: list[str]) -> None:
+        """add list of videos to get comments, if enabled in config"""
         if not self.config["downloads"].get("comment_max"):
             return
 
-        total_videos = len(self.video_ids)
-        for idx, youtube_id in enumerate(self.video_ids):
+        RedisQueue(self.COMMENT_QUEUE).add_list(video_ids)
+
+    def index(self):
+        """run comment index"""
+        queue = RedisQueue(self.COMMENT_QUEUE)
+        while True:
+            total = queue.max_score()
+            youtube_id, idx = queue.get_next()
+            if not youtube_id or not idx or not total:
+                break
+
             if self.task:
-                self.notify(idx, total_videos)
+                self.notify(idx, total)
 
             comment = Comments(youtube_id, config=self.config)
             comment.build_json()
@@ -211,6 +222,6 @@ class CommentList:
 
     def notify(self, idx, total_videos):
         """send notification on task"""
-        message = [f"Add comments for new videos {idx + 1}/{total_videos}"]
-        progress = (idx + 1) / total_videos
+        message = [f"Add comments for new videos {idx}/{total_videos}"]
+        progress = idx / total_videos
         self.task.send_progress(message, progress=progress)

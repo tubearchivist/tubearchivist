@@ -89,7 +89,9 @@ class Scanner:
                 )
             index_new_video(youtube_id)
 
-        CommentList(self.to_index, task=self.task).index()
+        comment_list = CommentList(task=self.task)
+        comment_list.add(video_ids=list(self.to_index))
+        comment_list.index()
 
     def url_fix(self) -> None:
         """
