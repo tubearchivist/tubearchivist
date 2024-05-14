@@ -386,7 +386,7 @@ class ThumbValidator:
             "query": {"bool": {"should": should_list}},
             "_source": ["youtube_id"],
         }
-        result = IndexPaginate("ta_video", data).get_results()
+        result = IndexPaginate("ta_video,ta_download", data).get_results()
         thumbs_should = {i["youtube_id"] for i in result}
 
         return thumbs_should

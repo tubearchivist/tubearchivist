@@ -431,6 +431,8 @@ class ChannelIdBaseView(ArchivistResultsView):
         path = f"ta_channel/_doc/{channel_id}"
         response, _ = ElasticWrap(path).get()
         channel_info = SearchProcess(response).process()
+        if not channel_info:
+            raise Http404
 
         return channel_info
 
@@ -724,6 +726,9 @@ class PlaylistIdView(ArchivistResultsView):
         """handle get request"""
         self.initiate_vars(request)
         playlist_info, channel_info = self._get_info(playlist_id)
+        if not playlist_info:
+            raise Http404
+
         playlist_name = playlist_info["playlist_name"]
         self._update_view_data(playlist_id, playlist_info)
         self.find_results()
@@ -874,6 +879,8 @@ class VideoView(MinView):
         config_handler = AppConfig()
         response, _ = ElasticWrap(f"ta_video/_doc/{video_id}").get()
         video_data = SearchProcess(response).process()
+        if not video_data:
+            raise Http404
 
         try:
             rating = video_data["stats"]["average_rating"]
