@@ -195,11 +195,13 @@ class ReindexManual(ReindexBase):
         if not values:
             return
 
-        RedisQueue("reindex:ta_video").add_list(values)
+        queue_name = self.REINDEX_CONFIG["video"]["queue_name"]
+        RedisQueue(queue_name).add_list(values)
 
     def _add_channels(self, values):
         """add list of channels to reindex queue"""
-        RedisQueue("reindex:ta_channel").add_list(values)
+        queue_name = self.REINDEX_CONFIG["channel"]["queue_name"]
+        RedisQueue(queue_name).add_list(values)
 
         if self.extract_videos:
             for channel_id in values:
@@ -208,7 +210,8 @@ class ReindexManual(ReindexBase):
 
     def _add_playlists(self, values):
         """add list of playlists to reindex queue"""
-        RedisQueue("reindex:ta_playlist").add_list(values)
+        queue_name = self.REINDEX_CONFIG["playlist"]["queue_name"]
+        RedisQueue(queue_name).add_list(values)
 
         if self.extract_videos:
             for playlist_id in values:

@@ -104,6 +104,17 @@ class RedisQueue(RedisBase):
     dynamically interact with queues in redis using sorted set
     - low score number is first in queue
     - add new items with high score number
+
+    queue names in use:
+    download:channel            channels during download
+    download:playlist:full      playlists during dl for full refresh
+    download:playlist:quick     playlists during dl for quick refresh
+    download:video              videos during downloads
+    index:comment               videos needing comment indexing
+    reindex:ta_video            reindex videos
+    reindex:ta_channel          reindex channels
+    reindex:ta_playlist         reindex playlists
+
     """
 
     def __init__(self, queue_name: str):
