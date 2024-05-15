@@ -167,7 +167,7 @@ class RedisQueue(RedisBase):
         """get next score in queue to append"""
         last = self.conn.zrange(self.key, -1, -1, withscores=True)
         if not last:
-            return 0.0
+            return 1.0
 
         return last[0][1] + 1
 
@@ -177,7 +177,7 @@ class RedisQueue(RedisBase):
         if not result:
             return None, None
 
-        item, idx = result[0][0], int(result[0][1]) + 1
+        item, idx = result[0][0], int(result[0][1])
 
         return item, idx
 
