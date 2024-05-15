@@ -203,18 +203,28 @@ function showAddToPlaylistMenu(input1) {
   dataId = input1.getAttribute('data-id');
   buttonId = input1.getAttribute('id');
   playlists = getCustomPlaylists();
-  
+
   //hide the invoking button
-  input1.style.visibility = "hidden";
-  
+  input1.style.visibility = 'hidden';
+
   //show the form
-  form_code = '<div class="video-popup-menu"><img src="/static/img/icon-close.svg" class="video-popup-menu-close-button" title="Close menu" onclick="removeDotMenu(this, \''+buttonId+'\')"/><h3>Add video to...</h3>';
-  
-  for(let i = 0; i < playlists.length; i++) {
-    	let obj = playlists[i];
-	    form_code += '<p onclick="addToCustomPlaylist(this, \''+dataId+'\',\''+obj.playlist_id+'\')"><img class="p-button" src="/static/img/icon-unseen.svg"/>'+obj.playlist_name+'</p>';
+  form_code =
+    '<div class="video-popup-menu"><img src="/static/img/icon-close.svg" class="video-popup-menu-close-button" title="Close menu" onclick="removeDotMenu(this, \'' +
+    buttonId +
+    '\')"/><h3>Add video to...</h3>';
+
+  for (let i = 0; i < playlists.length; i++) {
+    let obj = playlists[i];
+    form_code +=
+      '<p onclick="addToCustomPlaylist(this, \'' +
+      dataId +
+      "','" +
+      obj.playlist_id +
+      '\')"><img class="p-button" src="/static/img/icon-unseen.svg"/>' +
+      obj.playlist_name +
+      '</p>';
   }
-  
+
   form_code += '<p><a href="/playlist">Create playlist</a></p></div>';
   input1.parentNode.parentNode.innerHTML += form_code;
 }
@@ -222,18 +232,17 @@ function showAddToPlaylistMenu(input1) {
 //handles user action of adding a video to a custom playlist
 function addToCustomPlaylist(input, video_id, playlist_id) {
   let apiEndpoint = '/api/playlist/' + playlist_id + '/';
-  let data = { "action": "create", "video_id": video_id };
+  let data = { action: 'create', video_id: video_id };
   apiRequest(apiEndpoint, 'POST', data);
-  
+
   //mark the item added in the ui
-  input.firstChild.src='/static/img/icon-seen.svg';
+  input.firstChild.src = '/static/img/icon-seen.svg';
 }
 
 function removeDotMenu(input1, button_id) {
-
   //show the menu button
-  document.getElementById(button_id).style.visibility = "visible";
-  
+  document.getElementById(button_id).style.visibility = 'visible';
+
   //remove the form
   input1.parentNode.remove();
 }
@@ -243,20 +252,67 @@ function showCustomPlaylistMenu(input1, playlist_id, current_page, last_page) {
   let dataId, form_code, buttonId;
   dataId = input1.getAttribute('data-id');
   buttonId = input1.getAttribute('id');
-  
+
   //hide the invoking button
-  input1.style.visibility = "hidden";
-  
+  input1.style.visibility = 'hidden';
+
   //show the form
-  form_code = '<div class="video-popup-menu"><img src="/static/img/icon-close.svg" class="video-popup-menu-close-button" title="Close menu" onclick="removeDotMenu(this, \''+buttonId+'\')"/><h3>Move Video</h3>';
-  
-  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="top" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\','+current_page+','+last_page+')" src="/static/img/icon-arrow-top.svg" title="Move to top"/>';
-  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="up" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\','+current_page+','+last_page+')" src="/static/img/icon-arrow-up.svg" title="Move up"/>';
-  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="down" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\','+current_page+','+last_page+')" src="/static/img/icon-arrow-down.svg" title="Move down"/>';
-  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="bottom" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\','+current_page+','+last_page+')" src="/static/img/icon-arrow-bottom.svg" title="Move to bottom"/>';
-  form_code += '<img class="move-video-button" data-id="'+dataId+'" data-context="remove" onclick="moveCustomPlaylistVideo(this,\''+playlist_id+'\','+current_page+','+last_page+')" src="/static/img/icon-remove.svg" title="Remove from playlist"/>';
- 
-  
+  form_code =
+    '<div class="video-popup-menu"><img src="/static/img/icon-close.svg" class="video-popup-menu-close-button" title="Close menu" onclick="removeDotMenu(this, \'' +
+    buttonId +
+    '\')"/><h3>Move Video</h3>';
+
+  form_code +=
+    '<img class="move-video-button" data-id="' +
+    dataId +
+    '" data-context="top" onclick="moveCustomPlaylistVideo(this,\'' +
+    playlist_id +
+    "'," +
+    current_page +
+    ',' +
+    last_page +
+    ')" src="/static/img/icon-arrow-top.svg" title="Move to top"/>';
+  form_code +=
+    '<img class="move-video-button" data-id="' +
+    dataId +
+    '" data-context="up" onclick="moveCustomPlaylistVideo(this,\'' +
+    playlist_id +
+    "'," +
+    current_page +
+    ',' +
+    last_page +
+    ')" src="/static/img/icon-arrow-up.svg" title="Move up"/>';
+  form_code +=
+    '<img class="move-video-button" data-id="' +
+    dataId +
+    '" data-context="down" onclick="moveCustomPlaylistVideo(this,\'' +
+    playlist_id +
+    "'," +
+    current_page +
+    ',' +
+    last_page +
+    ')" src="/static/img/icon-arrow-down.svg" title="Move down"/>';
+  form_code +=
+    '<img class="move-video-button" data-id="' +
+    dataId +
+    '" data-context="bottom" onclick="moveCustomPlaylistVideo(this,\'' +
+    playlist_id +
+    "'," +
+    current_page +
+    ',' +
+    last_page +
+    ')" src="/static/img/icon-arrow-bottom.svg" title="Move to bottom"/>';
+  form_code +=
+    '<img class="move-video-button" data-id="' +
+    dataId +
+    '" data-context="remove" onclick="moveCustomPlaylistVideo(this,\'' +
+    playlist_id +
+    "'," +
+    current_page +
+    ',' +
+    last_page +
+    ')" src="/static/img/icon-remove.svg" title="Remove from playlist"/>';
+
   form_code += '</div>';
   input1.parentNode.parentNode.innerHTML += form_code;
 }
@@ -266,65 +322,46 @@ function moveCustomPlaylistVideo(input1, playlist_id, current_page, last_page) {
   let dataId, dataContext;
   dataId = input1.getAttribute('data-id');
   dataContext = input1.getAttribute('data-context');
-  
+
   let apiEndpoint = '/api/playlist/' + playlist_id + '/';
-  let data = { "action": dataContext, "video_id": dataId };
+  let data = { action: dataContext, video_id: dataId };
   apiRequest(apiEndpoint, 'POST', data);
-  
+
   let itemDom = input1.parentElement.parentElement.parentElement;
   let listDom = itemDom.parentElement;
-  
-  if (dataContext === "up")
-  {
-     let sibling = itemDom.previousElementSibling;
-     if (sibling !== null)
-     {
-        sibling.before(itemDom);
-     }
-     else if (current_page > 1)
-     {
-       itemDom.remove();
-     }
-  }
-  else if (dataContext === "down")
-  {
-     let sibling = itemDom.nextElementSibling;
-     if (sibling !== null)
-     {
-        sibling.after(itemDom);
-     }
-     else if (current_page !== last_page)
-     {
-       itemDom.remove();
-     }
-  }
-  else if (dataContext === "top")
-  {
-     let sibling = listDom.firstElementChild;
-     if (sibling !== null)
-     {
-        sibling.before(itemDom);
-     }
-     if (current_page > 1)
-     {
-       itemDom.remove();
-     }
-  }
-  else if (dataContext === "bottom")
-  {
-     let sibling = listDom.lastElementChild;
-     if (sibling !== null)
-     {
-        sibling.after(itemDom);
-     }
-     if (current_page !== last_page)
-     {
-       itemDom.remove();
-     }
-  }
-  else if (dataContext === "remove")
-  {
-     itemDom.remove();
+
+  if (dataContext === 'up') {
+    let sibling = itemDom.previousElementSibling;
+    if (sibling !== null) {
+      sibling.before(itemDom);
+    } else if (current_page > 1) {
+      itemDom.remove();
+    }
+  } else if (dataContext === 'down') {
+    let sibling = itemDom.nextElementSibling;
+    if (sibling !== null) {
+      sibling.after(itemDom);
+    } else if (current_page !== last_page) {
+      itemDom.remove();
+    }
+  } else if (dataContext === 'top') {
+    let sibling = listDom.firstElementChild;
+    if (sibling !== null) {
+      sibling.before(itemDom);
+    }
+    if (current_page > 1) {
+      itemDom.remove();
+    }
+  } else if (dataContext === 'bottom') {
+    let sibling = listDom.lastElementChild;
+    if (sibling !== null) {
+      sibling.after(itemDom);
+    }
+    if (current_page !== last_page) {
+      itemDom.remove();
+    }
+  } else if (dataContext === 'remove') {
+    itemDom.remove();
   }
 }
 
@@ -494,6 +531,28 @@ function createSnapshot() {
   document.getElementById('createButton').replaceWith(message);
 }
 
+function deleteNotificationUrl(button) {
+  console.log('delete notification url');
+  let apiEndpoint = '/api/schedule/notification/';
+  let data = {
+    task_name: button.dataset.task,
+    url: button.dataset.url,
+  };
+  apiRequest(apiEndpoint, 'DELETE', data);
+  button.parentElement.remove();
+}
+
+function deleteSchedule(button) {
+  console.log('delete schedule');
+  let apiEndpoint = '/api/schedule/';
+  let data = { task_name: button.dataset.schedule };
+  apiRequest(apiEndpoint, 'DELETE', data);
+  let message = document.createElement('span');
+  message.innerText = 'False';
+  message.classList.add('settings-current');
+  button.parentElement.replaceWith(message);
+}
+
 // delete from file system
 function deleteConfirm() {
   let to_show = document.getElementById('delete-button');
@@ -503,9 +562,16 @@ function deleteConfirm() {
 
 function deleteVideo(button) {
   let to_delete = button.getAttribute('data-id');
+  let to_ignore = button.getAttribute('data-ignore');
   let to_redirect = button.getAttribute('data-redirect');
-  let apiEndpoint = '/api/video/' + to_delete + '/';
-  apiRequest(apiEndpoint, 'DELETE');
+  let apiDeleteEndpoint = '/api/video/' + to_delete + '/';
+  apiRequest(apiDeleteEndpoint, 'DELETE');
+
+  if (to_ignore !== null) {
+    let apiIgnoreEndpoint = '/api/download/' + to_delete + '/';
+    apiRequest(apiIgnoreEndpoint, 'POST', { status: 'ignore-force' });
+  }
+
   setTimeout(function () {
     let redirect = '/channel/' + to_redirect;
     window.location.replace(redirect);
@@ -1522,7 +1588,6 @@ document.addEventListener('readystatechange', textExpandButtonVisibilityUpdate);
 window.addEventListener('resize', textExpandButtonVisibilityUpdate);
 
 function showForm(id) {
-  
   let id2 = id === undefined ? 'hidden-form' : id;
   let formElement = document.getElementById(id2);
   let displayStyle = formElement.style.display;

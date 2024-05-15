@@ -7,10 +7,7 @@ Functionality:
 import json
 from datetime import datetime
 
-from home.src.download.subscriptions import (
-    ChannelSubscription,
-    PlaylistSubscription,
-)
+from home.src.download.subscriptions import ChannelSubscription
 from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
@@ -196,7 +193,6 @@ class PendingList(PendingIndex):
             self._parse_channel(entry["url"], vid_type)
         elif entry["type"] == "playlist":
             self._parse_playlist(entry["url"])
-            PlaylistSubscription().process_url_str([entry], subscribed=False)
         else:
             raise ValueError(f"invalid url_type: {entry}")
 
@@ -227,15 +223,18 @@ class PendingList(PendingIndex):
     def _parse_playlist(self, url):
         """add all videos of playlist to list"""
         playlist = YoutubePlaylist(url)
-        playlist.build_json()
-        if not playlist.json_data:
+        is_active = playlist.update_playlist()
+        if not is_active:
             message = f"{playlist.youtube_id}: failed to extract metadata"
             print(message)
             raise ValueError(message)
 
-        video_results = playlist.json_data.get("playlist_entries")
-        youtube_ids = [i["youtube_id"] for i in video_results]
-        for video_id in youtube_ids:
+        entries = playlist.json_data["playlist_entries"]
+        to_add = [i["youtube_id"] for i in entries if not i["downloaded"]]
+        if not to_add:
+            return
+
+        for video_id in to_add:
             # match vid_type later
             self._add_video(video_id, VideoTypeEnum.UNKNOWN)
 
@@ -245,6 +244,7 @@ class PendingList(PendingIndex):
         bulk_list = []
 
         total = len(self.missing_videos)
+        videos_added = []
         for idx, (youtube_id, vid_type) in enumerate(self.missing_videos):
             if self.task and self.task.is_stopped():
                 break
@@ -268,12 +268,15 @@ class PendingList(PendingIndex):
 
             url = video_details["vid_thumb_url"]
             ThumbManager(youtube_id).download_video_thumb(url)
+            videos_added.append(youtube_id)
 
             if len(bulk_list) >= 20:
                 self._ingest_bulk(bulk_list)
                 bulk_list = []
 
         self._ingest_bulk(bulk_list)
+
+        return videos_added
 
     def _ingest_bulk(self, bulk_list):
         """add items to queue in bulk"""

@@ -20,182 +20,69 @@ from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video import YoutubeVideo, index_new_video
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
-from home.src.ta.helper import ignore_filelist
+from home.src.ta.helper import get_channel_overwrites, ignore_filelist
 from home.src.ta.settings import EnvironmentSettings
+from home.src.ta.ta_redis import RedisQueue
 
 
-class DownloadPostProcess:
-    """handle task to run after download queue finishes"""
+class DownloaderBase:
+    """base class for shared config"""
 
-    def __init__(self, download):
-        self.download = download
-        self.now = int(datetime.now().timestamp())
-        self.pending = False
+    CACHE_DIR = EnvironmentSettings.CACHE_DIR
+    MEDIA_DIR = EnvironmentSettings.MEDIA_DIR
+    CHANNEL_QUEUE = "download:channel"
+    PLAYLIST_QUEUE = "download:playlist:full"
+    PLAYLIST_QUICK = "download:playlist:quick"
+    VIDEO_QUEUE = "download:video"
 
-    def run(self):
-        """run all functions"""
-        self.pending = PendingList()
-        self.pending.get_download()
-        self.pending.get_channels()
-        self.pending.get_indexed()
-        self.auto_delete_all()
-        self.auto_delete_overwrites()
-        self.validate_playlists()
-        self.get_comments()
-
-    def auto_delete_all(self):
-        """handle auto delete"""
-        autodelete_days = self.download.config["downloads"]["autodelete_days"]
-        if not autodelete_days:
-            return
-
-        print(f"auto delete older than {autodelete_days} days")
-        now_lte = str(self.now - autodelete_days * 24 * 60 * 60)
-        data = {
-            "query": {"range": {"player.watched_date": {"lte": now_lte}}},
-            "sort": [{"player.watched_date": {"order": "asc"}}],
-        }
-        self._auto_delete_watched(data)
-
-    def auto_delete_overwrites(self):
-        """handle per channel auto delete from overwrites"""
-        for channel_id, value in self.pending.channel_overwrites.items():
-            if "autodelete_days" in value:
-                autodelete_days = value.get("autodelete_days")
-                print(f"{channel_id}: delete older than {autodelete_days}d")
-                now_lte = str(self.now - autodelete_days * 24 * 60 * 60)
-                must_list = [
-                    {"range": {"player.watched_date": {"lte": now_lte}}},
-                    {"term": {"channel.channel_id": {"value": channel_id}}},
-                ]
-                data = {
-                    "query": {"bool": {"must": must_list}},
-                    "sort": [{"player.watched_date": {"order": "desc"}}],
-                }
-                self._auto_delete_watched(data)
-
-    @staticmethod
-    def _auto_delete_watched(data):
-        """delete watched videos after x days"""
-        to_delete = IndexPaginate("ta_video", data).get_results()
-        if not to_delete:
-            return
-
-        for video in to_delete:
-            youtube_id = video["youtube_id"]
-            print(f"{youtube_id}: auto delete video")
-            YoutubeVideo(youtube_id).delete_media_file()
-
-        print("add deleted to ignore list")
-        vids = [{"type": "video", "url": i["youtube_id"]} for i in to_delete]
-        pending = PendingList(youtube_ids=vids)
-        pending.parse_url_list()
-        pending.add_to_pending(status="ignore")
-
-    def validate_playlists(self):
-        """look for playlist needing to update"""
-        for id_c, channel_id in enumerate(self.download.channels):
-            channel = YoutubeChannel(channel_id, task=self.download.task)
-            overwrites = self.pending.channel_overwrites.get(channel_id, False)
-            if overwrites and overwrites.get("index_playlists"):
-                # validate from remote
-                channel.index_channel_playlists()
-                continue
-
-            # validate from local
-            playlists = channel.get_indexed_playlists(active_only=True)
-            all_channel_playlist = [i["playlist_id"] for i in playlists]
-            self._validate_channel_playlist(all_channel_playlist, id_c)
-
-    def _validate_channel_playlist(self, all_channel_playlist, id_c):
-        """scan channel for playlist needing update"""
-        all_youtube_ids = [i["youtube_id"] for i in self.pending.all_videos]
-        for id_p, playlist_id in enumerate(all_channel_playlist):
-            playlist = YoutubePlaylist(playlist_id)
-            playlist.all_youtube_ids = all_youtube_ids
-            playlist.build_json(scrape=True)
-            if not playlist.json_data:
-                playlist.deactivate()
-                continue
-
-            playlist.add_vids_to_playlist()
-            playlist.upload_to_es()
-            self._notify_playlist_progress(all_channel_playlist, id_c, id_p)
-
-    def _notify_playlist_progress(self, all_channel_playlist, id_c, id_p):
-        """notify to UI"""
-        if not self.download.task:
-            return
-
-        total_channel = len(self.download.channels)
-        total_playlist = len(all_channel_playlist)
-
-        message = [
-            f"Post Processing Channels: {id_c}/{total_channel}",
-            f"Validate Playlists {id_p + 1}/{total_playlist}",
-        ]
-        progress = (id_c + 1) / total_channel
-        self.download.task.send_progress(message, progress=progress)
-
-    def get_comments(self):
-        """get comments from youtube"""
-        CommentList(self.download.videos, task=self.download.task).index()
-
-
-class VideoDownloader:
-    """
-    handle the video download functionality
-    if not initiated with list, take from queue
-    """
-
-    def __init__(self, youtube_id_list=False, task=False):
-        self.obs = False
-        self.video_overwrites = False
-        self.youtube_id_list = youtube_id_list
+    def __init__(self, task):
         self.task = task
         self.config = AppConfig().config
-        self.cache_dir = EnvironmentSettings.CACHE_DIR
-        self.media_dir = EnvironmentSettings.MEDIA_DIR
-        self._build_obs()
-        self.channels = set()
-        self.videos = set()
+        self.channel_overwrites = get_channel_overwrites()
+        self.now = int(datetime.now().timestamp())
 
-    def run_queue(self, auto_only=False):
+
+class VideoDownloader(DownloaderBase):
+    """handle the video download functionality"""
+
+    def __init__(self, task=False):
+        super().__init__(task)
+        self.obs = False
+        self._build_obs()
+
+    def run_queue(self, auto_only=False) -> int:
         """setup download queue in redis loop until no more items"""
-        self._get_overwrites()
+        downloaded = 0
         while True:
             video_data = self._get_next(auto_only)
             if self.task.is_stopped() or not video_data:
                 self._reset_auto()
                 break
 
-            youtube_id = video_data.get("youtube_id")
+            youtube_id = video_data["youtube_id"]
+            channel_id = video_data["channel_id"]
             print(f"{youtube_id}: Downloading video")
             self._notify(video_data, "Validate download format")
 
-            success = self._dl_single_vid(youtube_id)
+            success = self._dl_single_vid(youtube_id, channel_id)
             if not success:
                 continue
 
             self._notify(video_data, "Add video metadata to index", progress=1)
-
-            vid_dict = index_new_video(
-                youtube_id,
-                video_overwrites=self.video_overwrites,
-                video_type=VideoTypeEnum(video_data["vid_type"]),
-            )
-            self.channels.add(vid_dict["channel"]["channel_id"])
-            self.videos.add(vid_dict["youtube_id"])
+            video_type = VideoTypeEnum(video_data["vid_type"])
+            vid_dict = index_new_video(youtube_id, video_type=video_type)
+            RedisQueue(self.CHANNEL_QUEUE).add(channel_id)
+            RedisQueue(self.VIDEO_QUEUE).add(youtube_id)
 
             self._notify(video_data, "Move downloaded file to archive")
             self.move_to_archive(vid_dict)
             self._delete_from_pending(youtube_id)
+            downloaded += 1
 
         # post processing
-        self._add_subscribed_channels()
-        DownloadPostProcess(self).run()
+        DownloadPostProcess(self.task).run()
 
-        return self.videos
+        return downloaded
 
     def _notify(self, video_data, message, progress=False):
         """send progress notification to task"""
@@ -230,13 +117,6 @@ class VideoDownloader:
 
         return response["hits"]["hits"][0]["_source"]
 
-    def _get_overwrites(self):
-        """get channel overwrites"""
-        pending = PendingList()
-        pending.get_download()
-        pending.get_channels()
-        self.video_overwrites = pending.video_overwrites
-
     def _progress_hook(self, response):
         """process the progress_hooks from yt_dlp"""
         progress = False
@@ -267,7 +147,7 @@ class VideoDownloader:
         """initial obs"""
         self.obs = {
             "merge_output_format": "mp4",
-            "outtmpl": (self.cache_dir + "/download/%(id)s.mp4"),
+            "outtmpl": (self.CACHE_DIR + "/download/%(id)s.mp4"),
             "progress_hooks": [self._progress_hook],
             "noprogress": True,
             "continuedl": True,
@@ -327,22 +207,17 @@ class VideoDownloader:
 
         self.obs["postprocessors"] = postprocessors
 
-    def get_format_overwrites(self, youtube_id):
-        """get overwrites from single video"""
-        overwrites = self.video_overwrites.get(youtube_id, False)
-        if overwrites:
-            return overwrites.get("download_format", False)
+    def _set_overwrites(self, obs: dict, channel_id: str) -> None:
+        """add overwrites to obs"""
+        overwrites = self.channel_overwrites.get(channel_id)
+        if overwrites and overwrites.get("download_format"):
+            obs["format"] = overwrites.get("download_format")
 
-        return False
-
-    def _dl_single_vid(self, youtube_id):
+    def _dl_single_vid(self, youtube_id: str, channel_id: str) -> bool:
         """download single video"""
         obs = self.obs.copy()
-        format_overwrite = self.get_format_overwrites(youtube_id)
-        if format_overwrite:
-            obs["format"] = format_overwrite
-
-        dl_cache = self.cache_dir + "/download/"
+        self._set_overwrites(obs, channel_id)
+        dl_cache = os.path.join(self.CACHE_DIR, "download")
 
         # check if already in cache to continue from there
         all_cached = ignore_filelist(os.listdir(dl_cache))
@@ -376,7 +251,7 @@ class VideoDownloader:
         host_gid = EnvironmentSettings.HOST_GID
         # make folder
         folder = os.path.join(
-            self.media_dir, vid_dict["channel"]["channel_id"]
+            self.MEDIA_DIR, vid_dict["channel"]["channel_id"]
         )
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -384,8 +259,8 @@ class VideoDownloader:
                 os.chown(folder, host_uid, host_gid)
         # move media file
         media_file = vid_dict["youtube_id"] + ".mp4"
-        old_path = os.path.join(self.cache_dir, "download", media_file)
-        new_path = os.path.join(self.media_dir, vid_dict["media_url"])
+        old_path = os.path.join(self.CACHE_DIR, "download", media_file)
+        new_path = os.path.join(self.MEDIA_DIR, vid_dict["media_url"])
         # move media file and fix permission
         shutil.move(old_path, new_path, copy_function=shutil.copyfile)
         if host_uid and host_gid:
@@ -396,18 +271,6 @@ class VideoDownloader:
         """delete downloaded video from pending index if its there"""
         path = f"ta_download/_doc/{youtube_id}?refresh=true"
         _, _ = ElasticWrap(path).delete()
-
-    def _add_subscribed_channels(self):
-        """add all channels subscribed to refresh"""
-        all_subscribed = PlaylistSubscription().get_playlists()
-        if not all_subscribed:
-            return
-
-        channel_ids = [i["playlist_channel_id"] for i in all_subscribed]
-        for channel_id in channel_ids:
-            self.channels.add(channel_id)
-
-        return
 
     def _reset_auto(self):
         """reset autostart to defaults after queue stop"""
@@ -423,3 +286,169 @@ class VideoDownloader:
         updated = response.get("updated")
         if updated:
             print(f"[download] reset auto start on {updated} videos.")
+
+
+class DownloadPostProcess(DownloaderBase):
+    """handle task to run after download queue finishes"""
+
+    def run(self):
+        """run all functions"""
+        self.auto_delete_all()
+        self.auto_delete_overwrites()
+        self.refresh_playlist()
+        self.match_videos()
+        self.get_comments()
+
+    def auto_delete_all(self):
+        """handle auto delete"""
+        autodelete_days = self.config["downloads"]["autodelete_days"]
+        if not autodelete_days:
+            return
+
+        print(f"auto delete older than {autodelete_days} days")
+        now_lte = str(self.now - autodelete_days * 24 * 60 * 60)
+        data = {
+            "query": {"range": {"player.watched_date": {"lte": now_lte}}},
+            "sort": [{"player.watched_date": {"order": "asc"}}],
+        }
+        self._auto_delete_watched(data)
+
+    def auto_delete_overwrites(self):
+        """handle per channel auto delete from overwrites"""
+        for channel_id, value in self.channel_overwrites.items():
+            if "autodelete_days" in value:
+                autodelete_days = value.get("autodelete_days")
+                print(f"{channel_id}: delete older than {autodelete_days}d")
+                now_lte = str(self.now - autodelete_days * 24 * 60 * 60)
+                must_list = [
+                    {"range": {"player.watched_date": {"lte": now_lte}}},
+                    {"term": {"channel.channel_id": {"value": channel_id}}},
+                ]
+                data = {
+                    "query": {"bool": {"must": must_list}},
+                    "sort": [{"player.watched_date": {"order": "desc"}}],
+                }
+                self._auto_delete_watched(data)
+
+    @staticmethod
+    def _auto_delete_watched(data):
+        """delete watched videos after x days"""
+        to_delete = IndexPaginate("ta_video", data).get_results()
+        if not to_delete:
+            return
+
+        for video in to_delete:
+            youtube_id = video["youtube_id"]
+            print(f"{youtube_id}: auto delete video")
+            YoutubeVideo(youtube_id).delete_media_file()
+
+        print("add deleted to ignore list")
+        vids = [{"type": "video", "url": i["youtube_id"]} for i in to_delete]
+        pending = PendingList(youtube_ids=vids)
+        pending.parse_url_list()
+        _ = pending.add_to_pending(status="ignore")
+
+    def refresh_playlist(self) -> None:
+        """match videos with playlists"""
+        self.add_playlists_to_refresh()
+
+        queue = RedisQueue(self.PLAYLIST_QUEUE)
+        while True:
+            total = queue.max_score()
+            playlist_id, idx = queue.get_next()
+            if not playlist_id or not idx or not total:
+                break
+
+            playlist = YoutubePlaylist(playlist_id)
+            playlist.update_playlist(skip_on_empty=True)
+
+            if not self.task:
+                continue
+
+            channel_name = playlist.json_data["playlist_channel"]
+            playlist_title = playlist.json_data["playlist_name"]
+            message = [
+                f"Post Processing Playlists for: {channel_name}",
+                f"{playlist_title} [{idx}/{total}]",
+            ]
+            progress = idx / total
+            self.task.send_progress(message, progress=progress)
+
+    def add_playlists_to_refresh(self) -> None:
+        """add playlists to refresh"""
+        if self.task:
+            message = ["Post Processing Playlists", "Scanning for Playlists"]
+            self.task.send_progress(message)
+
+        self._add_playlist_sub()
+        self._add_channel_playlists()
+        self._add_video_playlists()
+
+    def _add_playlist_sub(self):
+        """add subscribed playlists to refresh"""
+        subs = PlaylistSubscription().get_playlists()
+        to_add = [i["playlist_id"] for i in subs]
+        RedisQueue(self.PLAYLIST_QUEUE).add_list(to_add)
+
+    def _add_channel_playlists(self):
+        """add playlists from channels to refresh"""
+        queue = RedisQueue(self.CHANNEL_QUEUE)
+        while True:
+            channel_id, _ = queue.get_next()
+            if not channel_id:
+                break
+
+            channel = YoutubeChannel(channel_id)
+            channel.get_from_es()
+            overwrites = channel.get_overwrites()
+            if "index_playlists" in overwrites:
+                channel.get_all_playlists()
+                to_add = [i[0] for i in channel.all_playlists]
+                RedisQueue(self.PLAYLIST_QUEUE).add_list(to_add)
+
+    def _add_video_playlists(self):
+        """add other playlists for quick sync"""
+        all_playlists = RedisQueue(self.PLAYLIST_QUEUE).get_all()
+        must_not = [{"terms": {"playlist_id": all_playlists}}]
+        video_ids = RedisQueue(self.VIDEO_QUEUE).get_all()
+        must = [{"terms": {"playlist_entries.youtube_id": video_ids}}]
+        data = {
+            "query": {"bool": {"must_not": must_not, "must": must}},
+            "_source": ["playlist_id"],
+        }
+        playlists = IndexPaginate("ta_playlist", data).get_results()
+        to_add = [i["playlist_id"] for i in playlists]
+        RedisQueue(self.PLAYLIST_QUICK).add_list(to_add)
+
+    def match_videos(self) -> None:
+        """scan rest of indexed playlists to match videos"""
+        queue = RedisQueue(self.PLAYLIST_QUICK)
+        while True:
+            total = queue.max_score()
+            playlist_id, idx = queue.get_next()
+            if not playlist_id or not idx or not total:
+                break
+
+            playlist = YoutubePlaylist(playlist_id)
+            playlist.get_from_es()
+            playlist.add_vids_to_playlist()
+            playlist.remove_vids_from_playlist()
+
+            if not self.task:
+                continue
+
+            message = [
+                "Post Processing Playlists.",
+                f"Validate Playlists: - {idx}/{total}",
+            ]
+            progress = idx / total
+            self.task.send_progress(message, progress=progress)
+
+    def get_comments(self):
+        """get comments from youtube"""
+        video_queue = RedisQueue(self.VIDEO_QUEUE)
+        comment_list = CommentList(task=self.task)
+        comment_list.add(video_ids=video_queue.get_all())
+
+        video_queue.clear()
+        comment_list.index()

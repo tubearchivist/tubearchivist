@@ -11,6 +11,7 @@ from time import sleep
 
 import requests
 from home.src.es.connect import ElasticWrap, IndexPaginate
+from home.src.ta.helper import is_missing
 from home.src.ta.settings import EnvironmentSettings
 from mutagen.mp4 import MP4, MP4Cover
 from PIL import Image, ImageFile, ImageFilter, UnidentifiedImageError
@@ -326,7 +327,7 @@ class ThumbValidator:
         },
     ]
 
-    def __init__(self, task):
+    def __init__(self, task=False):
         self.task = task
 
     def validate(self):
@@ -345,6 +346,89 @@ class ThumbValidator:
                 total=total,
             )
             _ = paginate.get_results()
+
+    def clean_up(self):
+        """clean up all thumbs"""
+        self._clean_up_vids()
+        self._clean_up_channels()
+        self._clean_up_playlists()
+
+    def _clean_up_vids(self):
+        """clean unneeded vid thumbs"""
+        video_dir = os.path.join(EnvironmentSettings.CACHE_DIR, "videos")
+        video_folders = os.listdir(video_dir)
+        for video_folder in video_folders:
+            folder_path = os.path.join(video_dir, video_folder)
+            thumbs_is = {i.split(".")[0] for i in os.listdir(folder_path)}
+            thumbs_should = self._get_vid_thumbs_should(video_folder)
+            to_delete = thumbs_is - thumbs_should
+            for thumb in to_delete:
+                delete_path = os.path.join(folder_path, f"{thumb}.jpg")
+                os.remove(delete_path)
+
+            if to_delete:
+                message = (
+                    f"[thumbs][video][{video_folder}] "
+                    + f"delete {len(to_delete)} unused thumbnails"
+                )
+                print(message)
+                if self.task:
+                    self.task.send_progress([message])
+
+    @staticmethod
+    def _get_vid_thumbs_should(video_folder: str) -> set[str]:
+        """get indexed"""
+        should_list = [
+            {"prefix": {"youtube_id": {"value": video_folder.lower()}}},
+            {"prefix": {"youtube_id": {"value": video_folder.upper()}}},
+        ]
+        data = {
+            "query": {"bool": {"should": should_list}},
+            "_source": ["youtube_id"],
+        }
+        result = IndexPaginate("ta_video,ta_download", data).get_results()
+        thumbs_should = {i["youtube_id"] for i in result}
+
+        return thumbs_should
+
+    def _clean_up_channels(self):
+        """clean unneeded channel thumbs"""
+        channel_dir = os.path.join(EnvironmentSettings.CACHE_DIR, "channels")
+        channel_art = os.listdir(channel_dir)
+        thumbs_is = {"_".join(i.split("_")[:-1]) for i in channel_art}
+        to_delete = is_missing(list(thumbs_is), "ta_channel", "channel_id")
+        for channel_thumb in channel_art:
+            if channel_thumb[:24] in to_delete:
+                delete_path = os.path.join(channel_dir, channel_thumb)
+                os.remove(delete_path)
+
+        if to_delete:
+            message = (
+                "[thumbs][channel] "
+                + f"delete {len(to_delete)} unused channel art"
+            )
+            print(message)
+            if self.task:
+                self.task.send_progress([message])
+
+    def _clean_up_playlists(self):
+        """clean up unneeded playlist thumbs"""
+        playlist_dir = os.path.join(EnvironmentSettings.CACHE_DIR, "playlists")
+        playlist_art = os.listdir(playlist_dir)
+        thumbs_is = {i.split(".")[0] for i in playlist_art}
+        to_delete = is_missing(list(thumbs_is), "ta_playlist", "playlist_id")
+        for playlist_id in to_delete:
+            delete_path = os.path.join(playlist_dir, f"{playlist_id}.jpg")
+            os.remove(delete_path)
+
+        if to_delete:
+            message = (
+                "[thumbs][playlist] "
+                + f"delete {len(to_delete)} unused playlist art"
+            )
+            print(message)
+            if self.task:
+                self.task.send_progress([message])
 
     @staticmethod
     def _get_total(index_name):

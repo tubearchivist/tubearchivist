@@ -53,13 +53,14 @@
                     </a>
                 </div>
                 <div class="playlist-desc {{ view_style }}">
-                    <a href="{% url 'channel_id' playlist.playlist_channel_id %}"><h3>{{ playlist.playlist_channel }}</h3></a>
                     <a href="{% url 'playlist_id' playlist.playlist_id %}"><h2>{{ playlist.playlist_name }}</h2></a>
                     <p>Last refreshed: {{ playlist.playlist_last_refresh }}</p>
-                    {% if playlist.playlist_subscribed and request.user|has_group:"admin" or request.user.is_staff %}
-                        <button class="unsubscribe" type="button" data-type="playlist" data-subscribe="" data-id="{{ playlist.playlist_id }}" onclick="subscribeStatus(this)" title="Unsubscribe from {{ playlist.playlist_name }}">Unsubscribe</button>
-                    {% else %}
-                        <button type="button" data-type="playlist" data-subscribe="true" data-id="{{ playlist.playlist_id }}" onclick="subscribeStatus(this)" title="Subscribe to {{ playlist.playlist_name }}">Subscribe</button>
+                    {% if request.user|has_group:"admin" or request.user.is_staff %}
+                        {% if playlist.playlist_subscribed %}
+                            <button class="unsubscribe" type="button" data-type="playlist" data-subscribe="" data-id="{{ playlist.playlist_id }}" onclick="subscribeStatus(this)" title="Unsubscribe from {{ playlist.playlist_name }}">Unsubscribe</button>
+                        {% else %}
+                            <button type="button" data-type="playlist" data-subscribe="true" data-id="{{ playlist.playlist_id }}" onclick="subscribeStatus(this)" title="Subscribe to {{ playlist.playlist_name }}">Subscribe</button>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>

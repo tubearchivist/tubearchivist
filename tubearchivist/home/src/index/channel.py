@@ -8,7 +8,6 @@ import json
 import os
 from datetime import datetime
 
-from home.src.download import queue  # partial import
 from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
@@ -23,16 +22,15 @@ class YoutubeChannel(YouTubeItem):
     es_path = False
     index_name = "ta_channel"
     yt_base = "https://www.youtube.com/channel/"
-    yt_obs = {"playlist_items": "0,0"}
+    yt_obs = {
+        "playlist_items": "1,0",
+        "skip_download": True,
+    }
 
     def __init__(self, youtube_id, task=False):
         super().__init__(youtube_id)
         self.all_playlists = False
         self.task = task
-
-    def build_yt_url(self):
-        """overwrite base to use channel about page"""
-        return f"{self.yt_base}{self.youtube_id}/about"
 
     def build_json(self, upload=False, fallback=False):
         """get from es or from youtube"""
@@ -53,14 +51,13 @@ class YoutubeChannel(YouTubeItem):
     def process_youtube_meta(self):
         """extract relevant fields"""
         self.youtube_meta["thumbnails"].reverse()
-        channel_subs = self.youtube_meta.get("channel_follower_count") or 0
         self.json_data = {
             "channel_active": True,
             "channel_description": self.youtube_meta.get("description", False),
             "channel_id": self.youtube_id,
             "channel_last_refresh": int(datetime.now().timestamp()),
             "channel_name": self.youtube_meta["uploader"],
-            "channel_subs": channel_subs,
+            "channel_subs": self._extract_follower_count(),
             "channel_subscribed": False,
             "channel_tags": self._parse_tags(self.youtube_meta.get("tags")),
             "channel_banner_url": self._get_banner_art(),
@@ -68,6 +65,22 @@ class YoutubeChannel(YouTubeItem):
             "channel_tvart_url": self._get_tv_art(),
             "channel_views": self.youtube_meta.get("view_count") or 0,
         }
+
+    def _extract_follower_count(self) -> int:
+        """workaround for upstream #9893, extract subs from first video"""
+        subs = self.youtube_meta.get("channel_follower_count")
+        if subs is not None:
+            return subs
+
+        entries = self.youtube_meta.get("entries", [])
+        if entries:
+            first_entry = entries[0]
+            if isinstance(first_entry, dict):
+                subs_entry = first_entry.get("channel_follower_count")
+                if subs_entry is not None:
+                    return subs_entry
+
+        return 0
 
     def _parse_tags(self, tags):
         """parse channel tags"""
@@ -212,9 +225,7 @@ class YoutubeChannel(YouTubeItem):
         """delete all indexed playlist from es"""
         all_playlists = self.get_indexed_playlists()
         for playlist in all_playlists:
-            playlist_id = playlist["playlist_id"]
-            playlist = YoutubePlaylist(playlist_id)
-            YoutubePlaylist(playlist_id).delete_metadata()
+            YoutubePlaylist(playlist["playlist_id"]).delete_metadata()
 
     def delete_channel(self):
         """delete channel and all videos"""
@@ -253,13 +264,12 @@ class YoutubeChannel(YouTubeItem):
             print(f"{self.youtube_id}: no playlists found.")
             return
 
-        all_youtube_ids = self.get_all_video_ids()
         total = len(self.all_playlists)
         for idx, playlist in enumerate(self.all_playlists):
             if self.task:
                 self._notify_single_playlist(idx, total)
 
-            self._index_single_playlist(playlist, all_youtube_ids)
+            self._index_single_playlist(playlist)
             print("add playlist: " + playlist[1])
 
     def _notify_single_playlist(self, idx, total):
@@ -272,32 +282,10 @@ class YoutubeChannel(YouTubeItem):
         self.task.send_progress(message, progress=(idx + 1) / total)
 
     @staticmethod
-    def _index_single_playlist(playlist, all_youtube_ids):
+    def _index_single_playlist(playlist):
         """add single playlist if needed"""
         playlist = YoutubePlaylist(playlist[0])
-        playlist.all_youtube_ids = all_youtube_ids
-        playlist.build_json()
-        if not playlist.json_data:
-            return
-
-        entries = playlist.json_data["playlist_entries"]
-        downloaded = [i for i in entries if i["downloaded"]]
-        if not downloaded:
-            return
-
-        playlist.upload_to_es()
-        playlist.add_vids_to_playlist()
-        playlist.get_playlist_art()
-
-    @staticmethod
-    def get_all_video_ids():
-        """match all playlists with videos"""
-        handler = queue.PendingList()
-        handler.get_download()
-        handler.get_indexed()
-        all_youtube_ids = [i["youtube_id"] for i in handler.all_videos]
-
-        return all_youtube_ids
+        playlist.update_playlist(skip_on_empty=True)
 
     def get_channel_videos(self):
         """get all videos from channel"""
@@ -334,9 +322,9 @@ class YoutubeChannel(YouTubeItem):
         all_playlists = IndexPaginate("ta_playlist", data).get_results()
         return all_playlists
 
-    def get_overwrites(self):
+    def get_overwrites(self) -> dict:
         """get all per channel overwrites"""
-        return self.json_data.get("channel_overwrites", False)
+        return self.json_data.get("channel_overwrites", {})
 
     def set_overwrites(self, overwrites):
         """set per channel overwrites"""

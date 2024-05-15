@@ -1,8 +1,9 @@
-## Contributing to Tube Archivist
+# Contributing to Tube Archivist
 
 Welcome, and thanks for showing interest in improving Tube Archivist!  
 
 ## Table of Content
+- [Next Steps](#next-steps)
 - [How to open an issue](#how-to-open-an-issue)
   - [Bug Report](#bug-report)
   - [Feature Request](#feature-request)
@@ -14,8 +15,18 @@ Welcome, and thanks for showing interest in improving Tube Archivist!
 - [Development Environment](#development-environment)
 ---
 
+## Next Steps
+Going forward, this project will focus on developing a new modern frontend.
+
+- For the time being, don't open any new PRs that are not towards the new frontend.
+- New features requests likely won't get accepted during this process.
+- Depending on the severity, bug reports may or may not get fixed during this time.
+- When in doubt, reach out.
+
+Join us on [Discord](https://tubearchivist.com/discord) if you want to help with that process.
+
 ## How to open an issue
-Please read this carefully before opening any [issue](https://github.com/tubearchivist/tubearchivist/issues) on GitHub.
+Please read this carefully before opening any [issue](https://github.com/tubearchivist/tubearchivist/issues) on GitHub. Make sure you read [Next Steps](#next-steps) above.
 
 **Do**:
 - Do provide details and context, this matters a lot and makes it easier for people to help.
@@ -65,6 +76,8 @@ IMPORTANT: When receiving help, contribute back to the community by improving th
 ---
 
 ## How to make a Pull Request
+
+Make sure you read [Next Steps](#next-steps) above.
 
 Thank you for contributing and helping improve this project. Focus for the foreseeable future is on improving and building on existing functionality, *not* on adding and expanding the application.
 

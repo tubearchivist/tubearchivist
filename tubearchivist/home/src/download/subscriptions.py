@@ -4,14 +4,15 @@ Functionality:
 - handle playlist subscriptions
 """
 
-from home.src.download import queue  # partial import
 from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import IndexPaginate
 from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
+from home.src.index.video import YoutubeVideo
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
+from home.src.ta.helper import is_missing
 from home.src.ta.urlparser import Parser
 
 
@@ -105,10 +106,6 @@ class ChannelSubscription:
         if not all_channels:
             return False
 
-        pending = queue.PendingList()
-        pending.get_download()
-        pending.get_indexed()
-
         missing_videos = []
 
         total = len(all_channels)
@@ -118,22 +115,22 @@ class ChannelSubscription:
             last_videos = self.get_last_youtube_videos(channel_id)
 
             if last_videos:
+                ids_to_add = is_missing([i[0] for i in last_videos])
                 for video_id, _, vid_type in last_videos:
-                    if video_id not in pending.to_skip:
+                    if video_id in ids_to_add:
                         missing_videos.append((video_id, vid_type))
 
             if not self.task:
                 continue
 
-            if self.task:
-                if self.task.is_stopped():
-                    self.task.send_progress(["Received Stop signal."])
-                    break
+            if self.task.is_stopped():
+                self.task.send_progress(["Received Stop signal."])
+                break
 
-                self.task.send_progress(
-                    message_lines=[f"Scanning Channel {idx + 1}/{total}"],
-                    progress=(idx + 1) / total,
-                )
+            self.task.send_progress(
+                message_lines=[f"Scanning Channel {idx + 1}/{total}"],
+                progress=(idx + 1) / total,
+            )
 
         return missing_videos
 
@@ -174,10 +171,6 @@ class PlaylistSubscription:
 
     def process_url_str(self, new_playlists, subscribed=True):
         """process playlist subscribe form url_str"""
-        data = {"query": {"match_all": {}}, "_source": ["youtube_id"]}
-        all_indexed = IndexPaginate("ta_video", data).get_results()
-        all_youtube_ids = [i["youtube_id"] for i in all_indexed]
-
         for idx, playlist in enumerate(new_playlists):
             playlist_id = playlist["url"]
             if not playlist["type"] == "playlist":
@@ -185,7 +178,6 @@ class PlaylistSubscription:
                 continue
 
             playlist_h = YoutubePlaylist(playlist_id)
-            playlist_h.all_youtube_ids = all_youtube_ids
             playlist_h.build_json()
             if not playlist_h.json_data:
                 message = f"{playlist_h.youtube_id}: failed to extract data"
@@ -223,27 +215,15 @@ class PlaylistSubscription:
         playlist.json_data["playlist_subscribed"] = subscribe_status
         playlist.upload_to_es()
 
-    @staticmethod
-    def get_to_ignore():
-        """get all youtube_ids already downloaded or ignored"""
-        pending = queue.PendingList()
-        pending.get_download()
-        pending.get_indexed()
-
-        return pending.to_skip
-
     def find_missing(self):
         """find videos in subscribed playlists not downloaded yet"""
         all_playlists = [i["playlist_id"] for i in self.get_playlists()]
         if not all_playlists:
             return False
 
-        to_ignore = self.get_to_ignore()
-
         missing_videos = []
         total = len(all_playlists)
         for idx, playlist_id in enumerate(all_playlists):
-            size_limit = self.config["subscriptions"]["channel_size"]
             playlist = YoutubePlaylist(playlist_id)
             is_active = playlist.update_playlist()
             if not is_active:
@@ -251,27 +231,29 @@ class PlaylistSubscription:
                 continue
 
             playlist_entries = playlist.json_data["playlist_entries"]
+            size_limit = self.config["subscriptions"]["channel_size"]
             if size_limit:
                 del playlist_entries[size_limit:]
 
-            all_missing = [i for i in playlist_entries if not i["downloaded"]]
-
-            for video in all_missing:
-                youtube_id = video["youtube_id"]
-                if youtube_id not in to_ignore:
-                    missing_videos.append(youtube_id)
+            to_check = [
+                i["youtube_id"]
+                for i in playlist_entries
+                if i["downloaded"] is False
+            ]
+            needs_downloading = is_missing(to_check)
+            missing_videos.extend(needs_downloading)
 
             if not self.task:
                 continue
 
-            if self.task:
-                self.task.send_progress(
-                    message_lines=[f"Scanning Playlists {idx + 1}/{total}"],
-                    progress=(idx + 1) / total,
-                )
-                if self.task.is_stopped():
-                    self.task.send_progress(["Received Stop signal."])
-                    break
+            if self.task.is_stopped():
+                self.task.send_progress(["Received Stop signal."])
+                break
+
+            self.task.send_progress(
+                message_lines=[f"Scanning Playlists {idx + 1}/{total}"],
+                progress=(idx + 1) / total,
+            )
 
         return missing_videos
 
@@ -359,8 +341,10 @@ class SubscriptionHandler:
 
         if item["type"] == "video":
             # extract channel id from video
-            vid = queue.PendingList().get_youtube_details(item["url"])
-            channel_id = vid["channel_id"]
+            video = YoutubeVideo(item["url"])
+            video.get_from_youtube()
+            video.process_youtube_meta()
+            channel_id = video.channel_id
         elif item["type"] == "channel":
             channel_id = item["url"]
         else:

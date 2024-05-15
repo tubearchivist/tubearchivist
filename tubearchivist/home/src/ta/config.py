@@ -5,12 +5,10 @@ Functionality:
 """
 
 import json
-import re
 from random import randint
 from time import sleep
 
 import requests
-from celery.schedules import crontab
 from django.conf import settings
 from home.src.ta.ta_redis import RedisArchivist
 
@@ -74,15 +72,6 @@ class AppConfig:
         RedisArchivist().set_message("config", self.config, save=True)
         return updated
 
-    @staticmethod
-    def _build_rand_daily():
-        """build random daily schedule per installation"""
-        return {
-            "minute": randint(0, 59),
-            "hour": randint(0, 23),
-            "day_of_week": "*",
-        }
-
     def load_new_defaults(self):
         """check config.json for missing defaults"""
         default_config = self.get_config_file()
@@ -91,7 +80,6 @@ class AppConfig:
         # check for customizations
         if not redis_config:
             config = self.get_config()
-            config["scheduler"]["version_check"] = self._build_rand_daily()
             RedisArchivist().set_message("config", config)
             return False
 
@@ -106,13 +94,7 @@ class AppConfig:
 
             # missing nested values
             for sub_key, sub_value in value.items():
-                if (
-                    sub_key not in redis_config[key].keys()
-                    or sub_value == "rand-d"
-                ):
-                    if sub_value == "rand-d":
-                        sub_value = self._build_rand_daily()
-
+                if sub_key not in redis_config[key].keys():
                     redis_config[key].update({sub_key: sub_value})
                     needs_update = True
 
@@ -120,147 +102,6 @@ class AppConfig:
             RedisArchivist().set_message("config", redis_config)
 
         return needs_update
-
-
-class ScheduleBuilder:
-    """build schedule dicts for beat"""
-
-    SCHEDULES = {
-        "update_subscribed": "0 8 *",
-        "download_pending": "0 16 *",
-        "check_reindex": "0 12 *",
-        "thumbnail_check": "0 17 *",
-        "run_backup": "0 18 0",
-        "version_check": "0 11 *",
-    }
-    CONFIG = ["check_reindex_days", "run_backup_rotate"]
-    NOTIFY = [
-        "update_subscribed_notify",
-        "download_pending_notify",
-        "check_reindex_notify",
-    ]
-    MSG = "message:setting"
-
-    def __init__(self):
-        self.config = AppConfig().config
-
-    def update_schedule_conf(self, form_post):
-        """process form post"""
-        print("processing form, restart container for changes to take effect")
-        redis_config = self.config
-        for key, value in form_post.items():
-            if key in self.SCHEDULES and value:
-                try:
-                    to_write = self.value_builder(key, value)
-                except ValueError:
-                    print(f"failed: {key} {value}")
-                    mess_dict = {
-                        "group": "setting:schedule",
-                        "level": "error",
-                        "title": "Scheduler update failed.",
-                        "messages": ["Invalid schedule input"],
-                        "id": "0000",
-                    }
-                    RedisArchivist().set_message(
-                        self.MSG, mess_dict, expire=True
-                    )
-                    return
-
-                redis_config["scheduler"][key] = to_write
-            if key in self.CONFIG and value:
-                redis_config["scheduler"][key] = int(value)
-            if key in self.NOTIFY and value:
-                if value == "0":
-                    to_write = False
-                else:
-                    to_write = value
-                redis_config["scheduler"][key] = to_write
-
-        RedisArchivist().set_message("config", redis_config, save=True)
-        mess_dict = {
-            "group": "setting:schedule",
-            "level": "info",
-            "title": "Scheduler changed.",
-            "messages": ["Restart container for changes to take effect"],
-            "id": "0000",
-        }
-        RedisArchivist().set_message(self.MSG, mess_dict, expire=True)
-
-    def value_builder(self, key, value):
-        """validate single cron form entry and return cron dict"""
-        print(f"change schedule for {key} to {value}")
-        if value == "0":
-            # deactivate this schedule
-            return False
-        if re.search(r"[\d]{1,2}\/[\d]{1,2}", value):
-            # number/number cron format will fail in celery
-            print("number/number schedule formatting not supported")
-            raise ValueError
-
-        keys = ["minute", "hour", "day_of_week"]
-        if value == "auto":
-            # set to sensible default
-            values = self.SCHEDULES[key].split()
-        else:
-            values = value.split()
-
-        if len(keys) != len(values):
-            print(f"failed to parse {value} for {key}")
-            raise ValueError("invalid input")
-
-        to_write = dict(zip(keys, values))
-        self._validate_cron(to_write)
-
-        return to_write
-
-    @staticmethod
-    def _validate_cron(to_write):
-        """validate all fields, raise value error for impossible schedule"""
-        all_hours = list(re.split(r"\D+", to_write["hour"]))
-        for hour in all_hours:
-            if hour.isdigit() and int(hour) > 23:
-                print("hour can not be greater than 23")
-                raise ValueError("invalid input")
-
-        all_days = list(re.split(r"\D+", to_write["day_of_week"]))
-        for day in all_days:
-            if day.isdigit() and int(day) > 6:
-                print("day can not be greater than 6")
-                raise ValueError("invalid input")
-
-        if not to_write["minute"].isdigit():
-            print("too frequent: only number in minutes are supported")
-            raise ValueError("invalid input")
-
-        if int(to_write["minute"]) > 59:
-            print("minutes can not be greater than 59")
-            raise ValueError("invalid input")
-
-    def build_schedule(self):
-        """build schedule dict as expected by app.conf.beat_schedule"""
-        AppConfig().load_new_defaults()
-        self.config = AppConfig().config
-        schedule_dict = {}
-
-        for schedule_item in self.SCHEDULES:
-            item_conf = self.config["scheduler"][schedule_item]
-            if not item_conf:
-                continue
-
-            schedule_dict.update(
-                {
-                    f"schedule_{schedule_item}": {
-                        "task": schedule_item,
-                        "schedule": crontab(
-                            minute=item_conf["minute"],
-                            hour=item_conf["hour"],
-                            day_of_week=item_conf["day_of_week"],
-                        ),
-                    }
-                }
-            )
-
-        return schedule_dict
 
 
 class ReleaseVersion:
@@ -340,12 +181,3 @@ class ReleaseVersion:
             return {}
 
         return message
-
-    def clear_fail(self) -> None:
-        """clear key, catch previous error in v0.4.5"""
-        message = self.get_update()
-        if not message:
-            return
-
-        if isinstance(message.get("version"), list):
-            RedisArchivist().del_message(self.NEW_KEY)

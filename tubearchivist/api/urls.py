@@ -122,6 +122,16 @@ urlpatterns = [
         name="api-task-id",
     ),
     path(
+        "schedule/",
+        views.ScheduleView.as_view(),
+        name="api-schedule",
+    ),
+    path(
+        "schedule/notification/",
+        views.ScheduleNotification.as_view(),
+        name="api-schedule-notification",
+    ),
+    path(
         "config/user/",
         views.UserConfigView.as_view(),
         name="api-config-user",

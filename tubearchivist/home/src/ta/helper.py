@@ -9,9 +9,11 @@ import random
 import string
 import subprocess
 from datetime import datetime
+from typing import Any
 from urllib.parse import urlparse
 
 import requests
+from home.src.es.connect import IndexPaginate
 from home.src.ta.settings import EnvironmentSettings
 
 
@@ -222,3 +224,37 @@ def check_stylesheet(stylesheet: str):
         return stylesheet
 
     return "dark.css"
+
+
+def is_missing(
+    to_check: str | list[str],
+    index_name: str = "ta_video,ta_download",
+    on_key: str = "youtube_id",
+) -> list[str]:
+    """id or list of ids that are missing from index_name"""
+    if isinstance(to_check, str):
+        to_check = [to_check]
+
+    data = {
+        "query": {"terms": {on_key: to_check}},
+        "_source": [on_key],
+    }
+    result = IndexPaginate(index_name, data=data).get_results()
+    existing_ids = [i[on_key] for i in result]
+    dl = [i for i in to_check if i not in existing_ids]
+
+    return dl
+
+
+def get_channel_overwrites() -> dict[str, dict[str, Any]]:
+    """get overwrites indexed my channel_id"""
+    data = {
+        "query": {
+            "bool": {"must": [{"exists": {"field": "channel_overwrites"}}]}
+        },
+        "_source": ["channel_id", "channel_overwrites"],
+    }
+    result = IndexPaginate("ta_channel", data).get_results()
+    overwrites = {i["channel_id"]: i["channel_overwrites"] for i in result}
+
+    return overwrites

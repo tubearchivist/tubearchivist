@@ -1,14 +1,12 @@
 """
 Functionality:
-- initiate celery app
 - collect tasks
-- user config changes won't get applied here
-  because tasks are initiated at application start
+- handle task callbacks
+- handle task notifications
+- handle task locking
 """
 
-import os
-
-from celery import Celery, Task, shared_task
+from celery import Task, shared_task
 from home.src.download.queue import PendingList
 from home.src.download.subscriptions import (
     SubscriptionHandler,
@@ -22,96 +20,18 @@ from home.src.index.channel import YoutubeChannel
 from home.src.index.filesystem import Scanner
 from home.src.index.manual import ImportFolderScanner
 from home.src.index.reindex import Reindex, ReindexManual, ReindexPopulate
-from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
+from home.src.ta.config import ReleaseVersion
 from home.src.ta.notify import Notifications
-from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.task_config import TASK_CONFIG
 from home.src.ta.task_manager import TaskManager
 from home.src.ta.urlparser import Parser
-
-CONFIG = AppConfig().config
-REDIS_HOST = EnvironmentSettings.REDIS_HOST
-REDIS_PORT = EnvironmentSettings.REDIS_PORT
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-app = Celery(
-    "tasks",
-    broker=f"redis://{REDIS_HOST}:{REDIS_PORT}",
-    backend=f"redis://{REDIS_HOST}:{REDIS_PORT}",
-    result_extended=True,
-)
-app.config_from_object(
-    "django.conf:settings", namespace=EnvironmentSettings.REDIS_NAME_SPACE
-)
-app.autodiscover_tasks()
-app.conf.timezone = EnvironmentSettings.TZ
 
 
 class BaseTask(Task):
     """base class to inherit each class from"""
 
     # pylint: disable=abstract-method
-
-    TASK_CONFIG = {
-        "update_subscribed": {
-            "title": "Rescan your Subscriptions",
-            "group": "download:scan",
-            "api-start": True,
-            "api-stop": True,
-        },
-        "download_pending": {
-            "title": "Downloading",
-            "group": "download:run",
-            "api-start": True,
-            "api-stop": True,
-        },
-        "extract_download": {
-            "title": "Add to download queue",
-            "group": "download:add",
-            "api-stop": True,
-        },
-        "check_reindex": {
-            "title": "Reindex Documents",
-            "group": "reindex:run",
-        },
-        "manual_import": {
-            "title": "Manual video import",
-            "group": "setting:import",
-            "api-start": True,
-        },
-        "run_backup": {
-            "title": "Index Backup",
-            "group": "setting:backup",
-            "api-start": True,
-        },
-        "restore_backup": {
-            "title": "Restore Backup",
-            "group": "setting:restore",
-        },
-        "rescan_filesystem": {
-            "title": "Rescan your Filesystem",
-            "group": "setting:filesystemscan",
-            "api-start": True,
-        },
-        "thumbnail_check": {
-            "title": "Check your Thumbnails",
-            "group": "setting:thumbnailcheck",
-            "api-start": True,
-        },
-        "resync_thumbs": {
-            "title": "Sync Thumbnails to Media Files",
-            "group": "setting:thumbnailsync",
-            "api-start": True,
-        },
-        "index_playlists": {
-            "title": "Index Channel Playlist",
-            "group": "channel:indexplaylist",
-        },
-        "subscribe_to": {
-            "title": "Add Subscription",
-            "group": "subscription:add",
-        },
-    }
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         """callback for task failure"""
@@ -137,8 +57,8 @@ class BaseTask(Task):
     def after_return(self, status, retval, task_id, args, kwargs, einfo):
         """callback after task returns"""
         print(f"{task_id} return callback")
-        task_title = self.TASK_CONFIG.get(self.name).get("title")
-        Notifications(self.name, task_id, task_title).send()
+        task_title = TASK_CONFIG.get(self.name).get("title")
+        Notifications(self.name).send(task_id, task_title)
 
     def send_progress(self, message_lines, progress=False, title=False):
         """send progress message"""
@@ -157,7 +77,7 @@ class BaseTask(Task):
     def _build_message(self, level="info"):
         """build message dict"""
         task_id = self.request.id
-        message = self.TASK_CONFIG.get(self.name).copy()
+        message = TASK_CONFIG.get(self.name).copy()
         message.update({"level": level, "id": task_id})
         task_result = TaskManager().get_task(task_id)
         if task_result:
@@ -208,13 +128,13 @@ def download_pending(self, auto_only=False):
     videos_downloaded = downloader.run_queue(auto_only=auto_only)
 
     if videos_downloaded:
-        return f"downloaded {len(videos_downloaded)} videos."
+        return f"downloaded {videos_downloaded} video(s)."
 
     return None
 
 
 @shared_task(name="extract_download", bind=True, base=BaseTask)
-def extrac_dl(self, youtube_ids, auto_start=False):
+def extrac_dl(self, youtube_ids, auto_start=False, status="pending"):
     """parse list passed and add to pending"""
     TaskManager().init(self)
     if isinstance(youtube_ids, str):
@@ -224,10 +144,17 @@ def extrac_dl(self, youtube_ids, auto_start=False):
 
     pending_handler = PendingList(youtube_ids=to_add, task=self)
     pending_handler.parse_url_list()
-    pending_handler.add_to_pending(auto_start=auto_start)
+    videos_added = pending_handler.add_to_pending(
+        status=status, auto_start=auto_start
+    )
 
     if auto_start:
         download_pending.delay(auto_only=True)
+
+    if videos_added:
+        return f"added {len(videos_added)} Videos to Queue"
+
+    return None
 
 
 @shared_task(bind=True, name="check_reindex", base=BaseTask)
@@ -251,6 +178,7 @@ def check_reindex(self, data=False, extract_videos=False):
         populate = ReindexPopulate()
         print(f"[task][{self.name}] reindex outdated documents")
         self.send_progress("Add recent documents to the reindex Queue.")
+        populate.get_interval()
         populate.add_recent()
         self.send_progress("Add outdated documents to the reindex Queue.")
         populate.add_outdated()
@@ -331,7 +259,9 @@ def thumbnail_check(self):
         return
 
     manager.init(self)
-    ThumbValidator(task=self).validate()
+    thumnail = ThumbValidator(task=self)
+    thumnail.validate()
+    thumnail.clean_up()
 
 
 @shared_task(bind=True, name="resync_thumbs", base=BaseTask)
@@ -367,7 +297,3 @@ def index_channel_playlists(self, channel_id):
 def version_check():
     """check for new updates"""
     ReleaseVersion().check()
-
-
-# start schedule here
-app.conf.beat_schedule = ScheduleBuilder().build_schedule()

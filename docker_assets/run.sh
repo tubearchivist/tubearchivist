@@ -17,7 +17,7 @@ python manage.py ta_startup
 
 # start all tasks
 nginx &
-celery -A home.tasks worker --loglevel=INFO --max-tasks-per-child 10 &
+celery -A home.celery worker --loglevel=INFO --max-tasks-per-child 10 &
 celery -A home beat --loglevel=INFO \
-    -s "${BEAT_SCHEDULE_PATH:-${cachedir}/celerybeat-schedule}" &
+    --scheduler django_celery_beat.schedulers:DatabaseScheduler &
 uwsgi --ini uwsgi.ini
