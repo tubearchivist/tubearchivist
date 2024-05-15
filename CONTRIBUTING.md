@@ -4,6 +4,7 @@ Welcome, and thanks for showing interest in improving Tube Archivist!
 
 ## Table of Content
 - [Next Steps](#next-steps)
+- [Beta Testing](#beta-testing)
 - [How to open an issue](#how-to-open-an-issue)
   - [Bug Report](#bug-report)
   - [Feature Request](#feature-request)
@@ -24,6 +25,19 @@ Going forward, this project will focus on developing a new modern frontend.
 - When in doubt, reach out.
 
 Join us on [Discord](https://tubearchivist.com/discord) if you want to help with that process.
+
+## Beta Testing
+Be the first to help test new features and improvements and provide feedback! There are regular `:unstable` builds for easy access. That's for the tinkerers and the breave. Ideally use a testing environment first, before a release be the first to install it on your main system.
+
+There is always something that can get missed during development. Look at the commit messages tagged with `#build`, these are the unstable builds and give a quick overview what has changed.
+
+- Test the features mentioned, play around, try to break it.
+- Test the update path by installing the `:latest` release first, the upgrade to `:unstable` to check for any errors.
+- Test the unstable build on a fresh install.
+
+Then provide feedback, if there is a problem but also if there is no problem. Reach out on [Discord](https://tubearchivist.com/discord) in the `#beta-testing` channel with your findings.
+
+This will help with a smooth update for the regular release. Plus you get to test things out early! 
 
 ## How to open an issue
 Please read this carefully before opening any [issue](https://github.com/tubearchivist/tubearchivist/issues) on GitHub. Make sure you read [Next Steps](#next-steps) above.
