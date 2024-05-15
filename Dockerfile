@@ -3,7 +3,7 @@
 
 
 # First stage to build python wheel
-FROM python:3.11.3-slim-bullseye AS builder
+FROM python:3.11.8-slim-bookworm AS builder
 ARG TARGETPLATFORM
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -14,12 +14,12 @@ COPY ./tubearchivist/requirements.txt /requirements.txt
 RUN pip install --user -r requirements.txt
 
 # build ffmpeg
-FROM python:3.11.3-slim-bullseye as ffmpeg-builder
+FROM python:3.11.8-slim-bookworm as ffmpeg-builder
 COPY docker_assets/ffmpeg_download.py ffmpeg_download.py
 RUN python ffmpeg_download.py $TARGETPLATFORM
 
 # build final image
-FROM python:3.11.3-slim-bullseye as tubearchivist
+FROM python:3.11.8-slim-bookworm as tubearchivist
 
 ARG TARGETPLATFORM
 ARG INSTALL_DEBUG
