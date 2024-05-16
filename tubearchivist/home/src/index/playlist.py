@@ -9,6 +9,7 @@ from datetime import datetime
 
 from home.src.download.thumbnails import ThumbManager
 from home.src.es.connect import ElasticWrap, IndexPaginate
+from home.src.index import channel
 from home.src.index.generic import YouTubeItem
 from home.src.index.video import YoutubeVideo
 
@@ -44,6 +45,7 @@ class YoutubePlaylist(YouTubeItem):
                 return
 
             self.process_youtube_meta()
+            self._ensure_channel()
             ids_found = self.get_local_vids()
             self.get_entries(ids_found)
             self.json_data["playlist_entries"] = self.all_members
@@ -68,6 +70,12 @@ class YoutubePlaylist(YouTubeItem):
             "playlist_last_refresh": int(datetime.now().timestamp()),
             "playlist_type": "regular",
         }
+
+    def _ensure_channel(self):
+        """make sure channel is indexed"""
+        channel_id = self.json_data["playlist_channel_id"]
+        channel_handler = channel.YoutubeChannel(channel_id)
+        channel_handler.build_json(upload=True)
 
     def get_local_vids(self) -> list[str]:
         """get local video ids from youtube entries"""
