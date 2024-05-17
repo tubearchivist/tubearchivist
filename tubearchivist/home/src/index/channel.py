@@ -6,14 +6,44 @@ functionality:
 
 import json
 import os
+import re
 from datetime import datetime
 
+import requests
 from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.generic import YouTubeItem
 from home.src.index.playlist import YoutubePlaylist
+from home.src.ta.helper import requests_headers
 from home.src.ta.settings import EnvironmentSettings
+
+
+def banner_extractor(channel_id: str) -> dict[str, str] | None:
+    """workaround for new channel renderer, upstream #9893"""
+    url = f"https://www.youtube.com/channel/{channel_id}?hl=en"
+    cookies = {"SOCS": "CAI"}
+    response = requests.get(
+        url, cookies=cookies, headers=requests_headers(), timeout=30
+    )
+    if not response.ok:
+        return None
+
+    matched_urls = re.findall(
+        r'"(https://yt3.googleusercontent.com/[^"]+=w(\d{3,4})-fcrop64[^"]*)"',
+        response.text,
+    )
+    if not matched_urls:
+        return None
+
+    sorted_urls = sorted(matched_urls, key=lambda x: int(x[1]), reverse=True)
+    banner = sorted_urls[0][0]
+    channel_art_fallback = {
+        "channel_banner_url": banner,
+        "channel_tvart_url": banner.split("-fcrop64")[0],
+    }
+
+    return channel_art_fallback
 
 
 class YoutubeChannel(YouTubeItem):
@@ -65,6 +95,18 @@ class YoutubeChannel(YouTubeItem):
             "channel_tvart_url": self._get_tv_art(),
             "channel_views": self.youtube_meta.get("view_count") or 0,
         }
+        self._inject_fallback()
+
+    def _inject_fallback(self):
+        """fallback channel art work, workaround for upstream #9893"""
+        if self.json_data["channel_banner_url"]:
+            return
+
+        print(f"{self.youtube_id}: attempt art fallback extraction")
+        fallback = banner_extractor(self.youtube_id)
+        if fallback:
+            print(f"{self.youtube_id}: fallback succeeded: {fallback}")
+            self.json_data.update(fallback)
 
     def _extract_follower_count(self) -> int:
         """workaround for upstream #9893, extract subs from first video"""
