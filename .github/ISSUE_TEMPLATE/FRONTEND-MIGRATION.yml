@@ -7,7 +7,6 @@ body:
   - type: dropdown
     id: domain
     attributes:
-      label: Domain
       description: Domain
       options:
         - Frontend
