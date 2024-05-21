@@ -3,10 +3,8 @@
 import os
 
 from celery import Celery
-from home.src.ta.config import AppConfig
 from home.src.ta.settings import EnvironmentSettings
 
-CONFIG = AppConfig().config
 REDIS_HOST = EnvironmentSettings.REDIS_HOST
 REDIS_PORT = EnvironmentSettings.REDIS_PORT
 
