@@ -25,6 +25,11 @@ jobs:
           key: ${{ runner.os }}-apt-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-apt-
+          before-save: |
+            sudo rm -f /var/cache/apt/archives/lock
+            sudo rm -f /var/lib/apt/lists/lock
+            sudo rm -rf /var/cache/apt/archives/partial
+            sudo rm -rf /var/lib/apt/lists/partial
 
       - name: Install system dependencies
         run: |
