@@ -186,6 +186,8 @@ def get_duration_str(seconds: int) -> str:
             unit_count, seconds = divmod(seconds, unit_seconds)
             duration_parts.append(f"{unit_count:02}{unit_label}")
 
+    duration_parts[0] = duration_parts[0].lstrip("0")
+
     return " ".join(duration_parts)
 
 
