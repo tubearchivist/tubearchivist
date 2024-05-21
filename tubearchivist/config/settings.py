@@ -33,7 +33,9 @@ SECRET_KEY = PW_HASH.hexdigest()
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(environ.get("DJANGO_DEBUG"))
 
-ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS = ta_host_parser(environ["TA_HOST"])
+ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS = ta_host_parser(
+    environ.get("TA_HOST", "localhost")
+)
 
 # Application definition
 
@@ -241,7 +243,11 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = (str(BASE_DIR.joinpath("static")),)
 STATIC_ROOT = str(BASE_DIR.joinpath("staticfiles"))
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

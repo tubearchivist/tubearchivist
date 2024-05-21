@@ -375,6 +375,7 @@ class Reindex(ReindexBase):
             channel.json_data["channel_overwrites"] = overwrites
 
         channel.upload_to_es()
+        channel.sync_to_videos()
         ChannelFullScan(channel_id).scan()
         self.processed["channels"] += 1
 

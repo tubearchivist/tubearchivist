@@ -93,12 +93,14 @@ def requests_headers() -> dict[str, str]:
     return {"User-Agent": template}
 
 
-def date_praser(timestamp: int | str) -> str:
+def date_parser(timestamp: int | str) -> str:
     """return formatted date string"""
     if isinstance(timestamp, int):
         date_obj = datetime.fromtimestamp(timestamp)
     elif isinstance(timestamp, str):
         date_obj = datetime.strptime(timestamp, "%Y-%m-%d")
+    else:
+        raise TypeError(f"invalid timestamp: {timestamp}")
 
     return date_obj.date().isoformat()
 
@@ -138,8 +140,9 @@ def get_mapping() -> dict:
 def is_shorts(youtube_id: str) -> bool:
     """check if youtube_id is a shorts video, bot not it it's not a shorts"""
     shorts_url = f"https://www.youtube.com/shorts/{youtube_id}"
+    cookies = {"SOCS": "CAI"}
     response = requests.head(
-        shorts_url, headers=requests_headers(), timeout=10
+        shorts_url, cookies=cookies, headers=requests_headers(), timeout=10
     )
 
     return response.status_code == 200
@@ -182,6 +185,8 @@ def get_duration_str(seconds: int) -> str:
         if seconds >= unit_seconds:
             unit_count, seconds = divmod(seconds, unit_seconds)
             duration_parts.append(f"{unit_count:02}{unit_label}")
+
+    duration_parts[0] = duration_parts[0].lstrip("0")
 
     return " ".join(duration_parts)
 

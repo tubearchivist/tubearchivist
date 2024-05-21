@@ -7,7 +7,7 @@ Functionality:
 import urllib.parse
 
 from home.src.download.thumbnails import ThumbManager
-from home.src.ta.helper import date_praser, get_duration_str
+from home.src.ta.helper import date_parser, get_duration_str
 from home.src.ta.settings import EnvironmentSettings
 
 
@@ -67,7 +67,7 @@ class SearchProcess:
         """run on single channel"""
         channel_id = channel_dict["channel_id"]
         art_base = f"/cache/channels/{channel_id}"
-        date_str = date_praser(channel_dict["channel_last_refresh"])
+        date_str = date_parser(channel_dict["channel_last_refresh"])
         channel_dict.update(
             {
                 "channel_last_refresh": date_str,
@@ -83,8 +83,8 @@ class SearchProcess:
         """run on single video dict"""
         video_id = video_dict["youtube_id"]
         media_url = urllib.parse.quote(video_dict["media_url"])
-        vid_last_refresh = date_praser(video_dict["vid_last_refresh"])
-        published = date_praser(video_dict["published"])
+        vid_last_refresh = date_parser(video_dict["vid_last_refresh"])
+        published = date_parser(video_dict["published"])
         vid_thumb_url = ThumbManager(video_id).vid_thumb_path()
         channel = self._process_channel(video_dict["channel"])
 
@@ -109,7 +109,7 @@ class SearchProcess:
     def _process_playlist(playlist_dict):
         """run on single playlist dict"""
         playlist_id = playlist_dict["playlist_id"]
-        playlist_last_refresh = date_praser(
+        playlist_last_refresh = date_parser(
             playlist_dict["playlist_last_refresh"]
         )
         playlist_dict.update(
@@ -125,7 +125,7 @@ class SearchProcess:
         """run on single download item"""
         video_id = download_dict["youtube_id"]
         vid_thumb_url = ThumbManager(video_id).vid_thumb_path()
-        published = date_praser(download_dict["published"])
+        published = date_parser(download_dict["published"])
 
         download_dict.update(
             {

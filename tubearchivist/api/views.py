@@ -688,14 +688,7 @@ class DownloadApiListView(ApiBaseView):
 
         pending = [i["youtube_id"] for i in to_add if i["status"] == "pending"]
         url_str = " ".join(pending)
-        try:
-            youtube_ids = Parser(url_str).parse()
-        except ValueError:
-            message = f"failed to parse: {url_str}"
-            print(message)
-            return Response({"message": message}, status=400)
-
-        extrac_dl.delay(youtube_ids, auto_start=auto_start)
+        extrac_dl.delay(url_str, auto_start=auto_start)
 
         return Response(data)
 

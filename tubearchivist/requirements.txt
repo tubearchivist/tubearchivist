@@ -7,8 +7,8 @@ django-cors-headers==4.3.1
 djangorestframework==3.15.1
 Pillow==10.3.0
 redis==5.0.4
-requests==2.31.0
+requests==2.32.1
 ryd-client==0.0.6
 uWSGI==2.0.25.1
 whitenoise==6.6.0
-yt-dlp @ git+https://github.com/bbilly1/yt-dlp@54b823be28f396608349cca69d52eb4c4b72b8b0
+yt-dlp @ git+https://github.com/yt-dlp/yt-dlp@8e15177b4113c355989881e4e030f695a9b59c3a
