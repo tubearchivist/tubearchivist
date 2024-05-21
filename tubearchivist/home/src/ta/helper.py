@@ -93,12 +93,14 @@ def requests_headers() -> dict[str, str]:
     return {"User-Agent": template}
 
 
-def date_praser(timestamp: int | str) -> str:
+def date_parser(timestamp: int | str) -> str:
     """return formatted date string"""
     if isinstance(timestamp, int):
         date_obj = datetime.fromtimestamp(timestamp)
     elif isinstance(timestamp, str):
         date_obj = datetime.strptime(timestamp, "%Y-%m-%d")
+    else:
+        raise TypeError(f"invalid timestamp: {timestamp}")
 
     return date_obj.date().isoformat()
 
