@@ -20,7 +20,7 @@ def test_randomizor_with_positive_length():
 
 def test_date_parser_with_int():
     """unix timestamp"""
-    timestamp = 1621539600  # May 21, 2021
+    timestamp = 1621539600
     expected_date = "2021-05-20"
     assert date_parser(timestamp) == expected_date
 
@@ -41,7 +41,7 @@ def test_date_parser_with_invalid_input():
 
 def test_date_parser_with_invalid_string_format():
     """invalid date string"""
-    invalid_date_str = "21/05/2021"  # Invalid format
+    invalid_date_str = "21/05/2021"
     with pytest.raises(ValueError):
         date_parser(invalid_date_str)
 
