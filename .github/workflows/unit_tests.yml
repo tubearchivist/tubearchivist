@@ -16,6 +16,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/cache/apt
+            /var/lib/apt
+          key: ${{ runner.os }}-apt-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc libldap2-dev libsasl2-dev libssl-dev
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -28,11 +43,6 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc libldap2-dev libsasl2-dev libssl-dev
 
       - name: Install dependencies
         run: |
