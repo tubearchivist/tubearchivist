@@ -118,6 +118,7 @@ INVALID_IDS_ERRORS = [
     "aaaaa",
     "https://www.youtube.com/playlist?list=AAAA",
     "https://www.youtube.com/channel/UC9-y-6csu5WGm29I7Jiwpn",
+    "https://www.youtube.com/watch?v=CK3_zarXkw",
 ]
 
 
