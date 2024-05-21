@@ -121,7 +121,7 @@ INVALID_IDS_ERRORS = [
 
 
 @pytest.mark.parametrize("invalid_value", INVALID_IDS_ERRORS)
-def test_utility_class_init_raises_value_error(invalid_value):
+def test_invalid_ids(invalid_value):
     """test for invalid IDs"""
     with pytest.raises(ValueError, match="not a valid id_str"):
         parser = Parser(invalid_value)
