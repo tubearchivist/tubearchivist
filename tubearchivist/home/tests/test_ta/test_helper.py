@@ -4,6 +4,7 @@ import pytest
 from home.src.ta.helper import (
     date_parser,
     get_duration_str,
+    get_mapping,
     is_shorts,
     randomizor,
     time_parser,
@@ -78,6 +79,13 @@ def test_time_parser_with_non_numeric_input():
     timestamp = "1a:00:00"
     with pytest.raises(ValueError):
         time_parser(timestamp)
+
+
+def test_get_mapping():
+    """test mappint"""
+    index_config = get_mapping()
+    assert isinstance(index_config, list)
+    assert all(isinstance(i, dict) for i in index_config)
 
 
 def test_is_shorts():
