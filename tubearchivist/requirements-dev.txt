@@ -5,4 +5,6 @@ flake8
 isort
 pylint
 pylint-django
+pytest
+pytest-django
 types-requests

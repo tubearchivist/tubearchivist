@@ -44,7 +44,7 @@ RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recomm
 RUN if [ "$INSTALL_DEBUG" ] ; then \
         apt-get -y update && apt-get -y install --no-install-recommends \
         vim htop bmon net-tools iputils-ping procps \
-        && pip install --user ipython \
+        && pip install --user ipython pytest pytest-django \
     ; fi
 
 # make folders

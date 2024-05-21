@@ -33,7 +33,9 @@ SECRET_KEY = PW_HASH.hexdigest()
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(environ.get("DJANGO_DEBUG"))
 
-ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS = ta_host_parser(environ["TA_HOST"])
+ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS = ta_host_parser(
+    environ.get("TA_HOST", "localhost")
+)
 
 # Application definition
 
