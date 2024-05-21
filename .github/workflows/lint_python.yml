@@ -1,5 +1,13 @@
 name: lint_python
-on: [pull_request, push]
+
+on:
+  push:
+    paths:
+      - '**/*.py'
+  pull_request:
+    paths:
+      - '**/*.py'
+
 jobs:
   lint_python:
     runs-on: ubuntu-latest

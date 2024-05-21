@@ -1,16 +1,22 @@
 name: lint_js
 
-on: [pull_request, push]
+on:
+  push:
+    paths:
+      - '**/*.js'
+  pull_request:
+    paths:
+      - '**/*.js'
 
 jobs:
   check:
     name: lint_js
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '22'
       - run: npm ci
       - run: npm run lint
       - run: npm run format -- --check
