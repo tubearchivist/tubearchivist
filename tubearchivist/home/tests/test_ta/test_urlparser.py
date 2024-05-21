@@ -117,6 +117,7 @@ def test_passing_parse(url_str, expected_result):
 INVALID_IDS_ERRORS = [
     "aaaaa",
     "https://www.youtube.com/playlist?list=AAAA",
+    "https://www.youtube.com/channel/UC9-y-6csu5WGm29I7Jiwpn",
 ]
 
 
@@ -125,4 +126,18 @@ def test_invalid_ids(invalid_value):
     """test for invalid IDs"""
     with pytest.raises(ValueError, match="not a valid id_str"):
         parser = Parser(invalid_value)
+        parser.parse()
+
+
+INVALID_DOMAINS = [
+    "https://vimeo.com/32001208",
+    "https://peertube.tv/w/8RiJE2j2nw569FVgPNjDt7",
+]
+
+
+@pytest.mark.parametrize("invalid_value", INVALID_DOMAINS)
+def test_invalid_domains(invalid_value):
+    """raise error on none YT domains"""
+    parser = Parser(invalid_value)
+    with pytest.raises(ValueError, match="invalid domain"):
         parser.parse()
