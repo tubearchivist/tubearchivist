@@ -64,6 +64,14 @@ services:
     networks:
       - tubearchivist
 
+  # kibana:
+  #   image: kibana:8.9.0
+  #   container_name: kibana
+  #   ports:
+  #   - "5601:5601"
+  #   volumes:
+  #   - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+
 volumes:
   media:
   cache:

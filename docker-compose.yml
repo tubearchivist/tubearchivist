@@ -1,5 +1,3 @@
-version: '3.5'
-
 services:
   tubearchivist:
     container_name: tubearchivist
@@ -29,6 +27,13 @@ services:
     depends_on:
       - archivist-es
       - archivist-redis
+
+  tubearchivist-frontend:
+    container_name: tubearchivist-frontend
+    image: tubearchivist-frontend
+    expose:
+      - "80"
+
   archivist-redis:
     image: redis/redis-stack-server
     container_name: archivist-redis
