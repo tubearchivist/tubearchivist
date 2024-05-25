@@ -16,8 +16,8 @@ python manage.py ta_connection
 python manage.py ta_startup
 
 # start all tasks
-nginx &
-celery -A home.celery worker --loglevel=INFO --max-tasks-per-child 10 &
-celery -A home beat --loglevel=INFO \
+exec nginx &
+exec celery -A home.celery worker --loglevel=INFO --max-tasks-per-child 10 &
+exec celery -A home beat --loglevel=INFO \
     --scheduler django_celery_beat.schedulers:DatabaseScheduler &
-uwsgi --ini uwsgi.ini
+exec uwsgi --hook-master-start "unix_signal:15 gracefully_kill_them_all" --ini uwsgi.ini
