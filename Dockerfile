@@ -4,7 +4,6 @@
 
 # First stage to build python wheel
 FROM python:3.11.8-slim-bookworm AS builder
-ARG TARGETPLATFORM
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential gcc libldap2-dev libsasl2-dev libssl-dev git
@@ -15,13 +14,15 @@ RUN pip install --user -r requirements.txt
 
 # build ffmpeg
 FROM python:3.11.8-slim-bookworm as ffmpeg-builder
+
+ARG TARGETPLATFORM
+
 COPY docker_assets/ffmpeg_download.py ffmpeg_download.py
 RUN python ffmpeg_download.py $TARGETPLATFORM
 
 # build final image
 FROM python:3.11.8-slim-bookworm as tubearchivist
 
-ARG TARGETPLATFORM
 ARG INSTALL_DEBUG
 
 ENV PYTHONUNBUFFERED 1
