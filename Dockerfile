@@ -10,8 +10,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential gcc libldap2-dev libsasl2-dev libssl-dev git
 
 # install requirements
+RUN python -m venv /applib
+ENV PATH="/applib/bin:$PATH"
 COPY ./tubearchivist/requirements.txt /requirements.txt
-RUN pip install --user -r requirements.txt
+RUN pip install -r requirements.txt
 
 # build ffmpeg
 FROM python:3.11.8-slim-bookworm as ffmpeg-builder
@@ -27,8 +29,8 @@ ARG INSTALL_DEBUG
 ENV PYTHONUNBUFFERED 1
 
 # copy build requirements
-COPY --from=builder /root/.local /root/.local
-ENV PATH=/root/.local/bin:$PATH
+COPY --from=builder /applib /applib
+ENV PATH=/applib/bin:$PATH
 
 # copy ffmpeg
 COPY --from=ffmpeg-builder ./ffmpeg/ffmpeg /usr/bin/ffmpeg
