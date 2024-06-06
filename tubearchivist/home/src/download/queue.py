@@ -324,6 +324,10 @@ class PendingList(PendingIndex):
             else:
                 vid_type = VideoTypeEnum.VIDEOS
 
+        if not vid.get("channel"):
+            print(f"{youtube_id}: skip video not part of channel")
+            return False
+
         return self._parse_youtube_details(vid, vid_type)
 
     @staticmethod
