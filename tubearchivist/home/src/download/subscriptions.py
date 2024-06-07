@@ -39,11 +39,15 @@ class ChannelSubscription:
         return all_channels
 
     def get_last_youtube_videos(
-        self, channel_id, limit=True, query_filter=VideoTypeEnum.UNKNOWN
+        self,
+        channel_id,
+        limit=True,
+        query_filter=None,
+        channel_overwrites=None,
     ):
         """get a list of last videos from channel"""
-        queries = self._build_queries(query_filter, limit)
-
+        query_handler = VideoQueryBuilder(self.config, channel_overwrites)
+        queries = query_handler.build_queries(query_filter)
         last_videos = []
 
         for vid_type_enum, limit_amount in queries:
@@ -51,54 +55,24 @@ class ChannelSubscription:
                 "skip_download": True,
                 "extract_flat": True,
             }
+            vid_type = vid_type_enum.value
+
             if limit:
                 obs["playlistend"] = limit_amount
 
-            vid_type = vid_type_enum.value
-            channel = YtWrap(obs, self.config).extract(
-                f"https://www.youtube.com/channel/{channel_id}/{vid_type}"
-            )
-            if not channel:
+            url = f"https://www.youtube.com/channel/{channel_id}/{vid_type}"
+            channel_query = YtWrap(obs, self.config).extract(url)
+            if not channel_query:
                 continue
+
             last_videos.extend(
-                [(i["id"], i["title"], vid_type) for i in channel["entries"]]
+                [
+                    (i["id"], i["title"], vid_type)
+                    for i in channel_query["entries"]
+                ]
             )
 
         return last_videos
-
-    def _build_queries(self, query_filter, limit):
-        """build query list for vid_type"""
-        limit_map = {
-            "videos": self.config["subscriptions"]["channel_size"],
-            "streams": self.config["subscriptions"]["live_channel_size"],
-            "shorts": self.config["subscriptions"]["shorts_channel_size"],
-        }
-
-        queries = []
-
-        if query_filter and query_filter.value != "unknown":
-            if limit:
-                query_limit = limit_map.get(query_filter.value)
-            else:
-                query_limit = False
-
-            queries.append((query_filter, query_limit))
-
-            return queries
-
-        for query_item, default_limit in limit_map.items():
-            if not default_limit:
-                # is deactivated in config
-                continue
-
-            if limit:
-                query_limit = default_limit
-            else:
-                query_limit = False
-
-            queries.append((VideoTypeEnum(query_item), query_limit))
-
-        return queries
 
     def find_missing(self):
         """add missing videos from subscribed channels to pending"""
@@ -112,7 +86,10 @@ class ChannelSubscription:
         for idx, channel in enumerate(all_channels):
             channel_id = channel["channel_id"]
             print(f"{channel_id}: find missing videos.")
-            last_videos = self.get_last_youtube_videos(channel_id)
+            last_videos = self.get_last_youtube_videos(
+                channel_id,
+                channel_overwrites=channel.get("channel_overwrites"),
+            )
 
             if last_videos:
                 ids_to_add = is_missing([i[0] for i in last_videos])
@@ -142,6 +119,92 @@ class ChannelSubscription:
         channel.json_data["channel_subscribed"] = channel_subscribed
         channel.upload_to_es()
         channel.sync_to_videos()
+
+
+class VideoQueryBuilder:
+    """Build queries for yt-dlp."""
+
+    def __init__(self, config: dict, channel_overwrites: dict | None = None):
+        self.config = config
+        self.channel_overwrites = channel_overwrites or {}
+
+    def build_queries(
+        self, video_type: VideoTypeEnum | None, limit: bool = True
+    ) -> list[tuple[VideoTypeEnum, int | None]]:
+        """Build queries for all or specific video type."""
+        query_methods = {
+            VideoTypeEnum.VIDEOS: self.videos_query,
+            VideoTypeEnum.STREAMS: self.streams_query,
+            VideoTypeEnum.SHORTS: self.shorts_query,
+        }
+
+        if video_type:
+            # build query for specific type
+            query_method = query_methods.get(video_type)
+            if query_method:
+                query = query_method(limit)
+                if query[1] != 0:
+                    return [query]
+                return []
+
+        # Build and return queries for all video types
+        queries = []
+        for build_query in query_methods.values():
+            query = build_query(limit)
+            if query[1] != 0:
+                queries.append(query)
+
+        return queries
+
+    def videos_query(self, limit: bool) -> tuple[VideoTypeEnum, int | None]:
+        """Build query for videos."""
+        return self._build_generic_query(
+            video_type=VideoTypeEnum.VIDEOS,
+            overwrite_key="subscriptions_channel_size",
+            config_key="channel_size",
+            limit=limit,
+        )
+
+    def streams_query(self, limit: bool) -> tuple[VideoTypeEnum, int | None]:
+        """Build query for streams."""
+        return self._build_generic_query(
+            video_type=VideoTypeEnum.STREAMS,
+            overwrite_key="subscriptions_live_channel_size",
+            config_key="live_channel_size",
+            limit=limit,
+        )
+
+    def shorts_query(self, limit: bool) -> tuple[VideoTypeEnum, int | None]:
+        """Build query for shorts."""
+        return self._build_generic_query(
+            video_type=VideoTypeEnum.SHORTS,
+            overwrite_key="subscriptions_shorts_channel_size",
+            config_key="shorts_channel_size",
+            limit=limit,
+        )
+
+    def _build_generic_query(
+        self,
+        video_type: VideoTypeEnum,
+        overwrite_key: str,
+        config_key: str,
+        limit: bool,
+    ) -> tuple[VideoTypeEnum, int | None]:
+        """Generic query for video page scraping."""
+        if not limit:
+            return (video_type, None)
+
+        if (
+            overwrite_key in self.channel_overwrites
+            and self.channel_overwrites[overwrite_key] is not None
+        ):
+            overwrite = self.channel_overwrites[overwrite_key]
+            return (video_type, overwrite)
+
+        if overwrite := self.config["subscriptions"].get(config_key):
+            return (video_type, overwrite)
+
+        return (video_type, 0)
 
 
 class PlaylistSubscription:
