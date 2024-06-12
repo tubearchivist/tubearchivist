@@ -1,8 +1,10 @@
-## Contributing to Tube Archivist
+# Contributing to Tube Archivist
 
 Welcome, and thanks for showing interest in improving Tube Archivist!  
 
 ## Table of Content
+- [Next Steps](#next-steps)
+- [Beta Testing](#beta-testing)
 - [How to open an issue](#how-to-open-an-issue)
   - [Bug Report](#bug-report)
   - [Feature Request](#feature-request)
@@ -14,8 +16,31 @@ Welcome, and thanks for showing interest in improving Tube Archivist!
 - [Development Environment](#development-environment)
 ---
 
+## Next Steps
+Going forward, this project will focus on developing a new modern frontend.
+
+- For the time being, don't open any new PRs that are not towards the new frontend.
+- New features requests likely won't get accepted during this process.
+- Depending on the severity, bug reports may or may not get fixed during this time.
+- When in doubt, reach out.
+
+Join us on [Discord](https://tubearchivist.com/discord) if you want to help with that process.
+
+## Beta Testing
+Be the first to help test new features and improvements and provide feedback! There are regular `:unstable` builds for easy access. That's for the tinkerers and the breave. Ideally use a testing environment first, before a release be the first to install it on your main system.
+
+There is always something that can get missed during development. Look at the commit messages tagged with `#build`, these are the unstable builds and give a quick overview what has changed.
+
+- Test the features mentioned, play around, try to break it.
+- Test the update path by installing the `:latest` release first, the upgrade to `:unstable` to check for any errors.
+- Test the unstable build on a fresh install.
+
+Then provide feedback, if there is a problem but also if there is no problem. Reach out on [Discord](https://tubearchivist.com/discord) in the `#beta-testing` channel with your findings.
+
+This will help with a smooth update for the regular release. Plus you get to test things out early! 
+
 ## How to open an issue
-Please read this carefully before opening any [issue](https://github.com/tubearchivist/tubearchivist/issues) on GitHub.
+Please read this carefully before opening any [issue](https://github.com/tubearchivist/tubearchivist/issues) on GitHub. Make sure you read [Next Steps](#next-steps) above.
 
 **Do**:
 - Do provide details and context, this matters a lot and makes it easier for people to help.
@@ -37,12 +62,12 @@ Please keep in mind:
 - A bug that can't be reproduced, is difficult or sometimes even impossible to fix. Provide very clear steps *how to reproduce*.
 
 ### Feature Request
-This project needs your help to grow further. There is no shortage of ideas, see the open [issues on GH](https://github.com/tubearchivist/tubearchivist/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement) and the [roadmap](https://github.com/tubearchivist/tubearchivist#roadmap), what this project lacks is contributors to implement these ideas.
+This project needs your help to grow further. There is no shortage of ideas, see the open [issues on GH](https://github.com/tubearchivist/tubearchivist/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement) and the [roadmap](https://github.com/tubearchivist/tubearchivist#roadmap), what this project lacks is contributors interested in helping with overall improvements of the application. Focus is *not* on adding new features, but improving existing ones.
 
-Existing ideas are easily *multiple years* worth of development effort, at least at current speed. Best and fastest way to implement your feature is to do it yourself, that's why this project is open source after all. This project is *very* selective with accepting new feature requests at this point.  
+Existing ideas are easily *multiple years* worth of development effort, at least at current speed. This project is *very* selective with accepting new feature requests at this point.  
 
 Good feature requests usually fall into one or more of these categories:
-- You want to work on your own idea within the next few days or weeks.
+- You want to work on your own small scoped idea within the next few days or weeks.
 - Your idea is beneficial for a wide range of users, not just for you.
 - Your idea extends the current project by building on and improving existing functionality.
 - Your idea is quick and easy to implement, for an experienced as well as for a first time contributor.
@@ -66,7 +91,11 @@ IMPORTANT: When receiving help, contribute back to the community by improving th
 
 ## How to make a Pull Request
 
-Thank you for contributing and helping improve this project. This is a quick checklist to help streamline the process:
+Make sure you read [Next Steps](#next-steps) above.
+
+Thank you for contributing and helping improve this project. Focus for the foreseeable future is on improving and building on existing functionality, *not* on adding and expanding the application.
+
+This is a quick checklist to help streamline the process:
 
 - For **code changes**, make your PR against the [testing branch](https://github.com/tubearchivist/tubearchivist/tree/testing). That's where all active development happens. This simplifies the later merging into *master*, minimizes any conflicts and usually allows for easy and convenient *fast-forward* merging.
 - For **documentation changes**, make your PR directly against the *master* branch.
