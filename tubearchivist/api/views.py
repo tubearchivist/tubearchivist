@@ -319,7 +319,7 @@ class VideoSponsorView(ApiBaseView):
 
 class VideoMP3View(ApiBaseView):
     """resolves to /api/video/<video_id>/mp3/
-    handle mp3 version of video
+    handle mp3 version of video.
     """
 
     def get(self, request, video_id):
