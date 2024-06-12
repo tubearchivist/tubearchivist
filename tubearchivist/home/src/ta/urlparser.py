@@ -42,6 +42,10 @@ class Parser:
             youtube_id = parsed.path.strip("/")
             return self._validate_expected(youtube_id, "video")
 
+        if "youtube.com" not in parsed.netloc:
+            message = f"invalid domain: {parsed.netloc}"
+            raise ValueError(message)
+
         query_parsed = parse_qs(parsed.query)
         if "v" in query_parsed:
             # video from v query str
@@ -92,7 +96,7 @@ class Parser:
             item_type = "video"
         elif len_id_str == 24:
             item_type = "channel"
-        elif len_id_str in (34, 26, 18):
+        elif len_id_str in (34, 26, 18) or id_str.startswith("TA_playlist_"):
             item_type = "playlist"
         else:
             raise ValueError(f"not a valid id_str: {id_str}")

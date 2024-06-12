@@ -10,6 +10,7 @@ import os
 import zipfile
 from datetime import datetime
 
+from home.models import CustomPeriodicTask
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import get_mapping, ignore_filelist
@@ -197,7 +198,12 @@ class ElasticBackup:
 
     def rotate_backup(self):
         """delete old backups if needed"""
-        rotate = self.config["scheduler"]["run_backup_rotate"]
+        try:
+            task = CustomPeriodicTask.objects.get(name="run_backup")
+        except CustomPeriodicTask.DoesNotExist:
+            return
+
+        rotate = task.task_config.get("rotate")
         if not rotate:
             return
 

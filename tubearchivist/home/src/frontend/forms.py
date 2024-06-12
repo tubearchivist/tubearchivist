@@ -105,8 +105,8 @@ class ApplicationSettingsForm(forms.Form):
 
     COOKIE_IMPORT_CHOICES = [
         ("", "-- change cookie settings"),
-        ("0", "disable cookie"),
-        ("1", "enable cookie"),
+        ("0", "remove cookie"),
+        ("1", "import cookie"),
     ]
 
     subscriptions_channel_size = forms.IntegerField(
@@ -157,50 +157,6 @@ class ApplicationSettingsForm(forms.Form):
     application_enable_snapshot = forms.ChoiceField(
         widget=forms.Select, choices=SNAPSHOT_CHOICES, required=False
     )
-
-
-class SchedulerSettingsForm(forms.Form):
-    """handle scheduler settings"""
-
-    HELP_TEXT = "Add Apprise notification URLs, one per line"
-
-    update_subscribed = forms.CharField(required=False)
-    update_subscribed_notify = forms.CharField(
-        label=False,
-        widget=forms.Textarea(
-            attrs={
-                "rows": 2,
-                "placeholder": HELP_TEXT,
-            }
-        ),
-        required=False,
-    )
-    download_pending = forms.CharField(required=False)
-    download_pending_notify = forms.CharField(
-        label=False,
-        widget=forms.Textarea(
-            attrs={
-                "rows": 2,
-                "placeholder": HELP_TEXT,
-            }
-        ),
-        required=False,
-    )
-    check_reindex = forms.CharField(required=False)
-    check_reindex_notify = forms.CharField(
-        label=False,
-        widget=forms.Textarea(
-            attrs={
-                "rows": 2,
-                "placeholder": HELP_TEXT,
-            }
-        ),
-        required=False,
-    )
-    check_reindex_days = forms.IntegerField(required=False)
-    thumbnail_check = forms.CharField(required=False)
-    run_backup = forms.CharField(required=False)
-    run_backup_rotate = forms.IntegerField(required=False)
 
 
 class MultiSearchForm(forms.Form):
@@ -265,6 +221,20 @@ class SubscribeToPlaylistForm(forms.Form):
     )
 
 
+class CreatePlaylistForm(forms.Form):
+    """text area form to create a single custom playlist"""
+
+    create = forms.CharField(
+        label="Or create custom playlist",
+        widget=forms.Textarea(
+            attrs={
+                "rows": 1,
+                "placeholder": "Input playlist name",
+            }
+        ),
+    )
+
+
 class ChannelOverwriteForm(forms.Form):
     """custom overwrites for channel settings"""
 
@@ -288,4 +258,13 @@ class ChannelOverwriteForm(forms.Form):
     )
     integrate_sponsorblock = forms.ChoiceField(
         widget=forms.Select, choices=SP_CHOICES, required=False
+    )
+    subscriptions_channel_size = forms.IntegerField(
+        label=False, required=False
+    )
+    subscriptions_live_channel_size = forms.IntegerField(
+        label=False, required=False
+    )
+    subscriptions_shorts_channel_size = forms.IntegerField(
+        label=False, required=False
     )

@@ -125,15 +125,9 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     index_name = "ta_video"
     yt_base = "https://www.youtube.com/watch?v="
 
-    def __init__(
-        self,
-        youtube_id,
-        video_overwrites=False,
-        video_type=VideoTypeEnum.VIDEOS,
-    ):
+    def __init__(self, youtube_id, video_type=VideoTypeEnum.VIDEOS):
         super().__init__(youtube_id)
         self.channel_id = False
-        self.video_overwrites = video_overwrites
         self.video_type = video_type
         self.offline_import = False
 
@@ -147,7 +141,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             self.youtube_meta = youtube_meta_overwrite
             self.offline_import = True
 
-        self._process_youtube_meta()
+        self.process_youtube_meta()
         self._add_channel()
         self._add_stats()
         self.add_file_path()
@@ -165,18 +159,18 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         """check if need to run sponsor block"""
         integrate = self.config["downloads"]["integrate_sponsorblock"]
 
-        if self.video_overwrites:
-            single_overwrite = self.video_overwrites.get(self.youtube_id)
-            if not single_overwrite:
+        if overwrite := self.json_data["channel"].get("channel_overwrites"):
+            if not overwrite:
                 return integrate
 
-            if "integrate_sponsorblock" in single_overwrite:
-                return single_overwrite.get("integrate_sponsorblock")
+            if "integrate_sponsorblock" in overwrite:
+                return overwrite.get("integrate_sponsorblock")
 
         return integrate
 
-    def _process_youtube_meta(self):
+    def process_youtube_meta(self):
         """extract relevant fields from youtube"""
+        self._validate_id()
         # extract
         self.channel_id = self.youtube_meta["channel_id"]
         upload_date = self.youtube_meta["upload_date"]
@@ -201,6 +195,19 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             "vid_type": self.video_type.value,
             "active": True,
         }
+
+    def _validate_id(self):
+        """validate expected video ID, raise value error on mismatch"""
+        remote_id = self.youtube_meta["id"]
+
+        if not self.youtube_id == remote_id:
+            # unexpected redirect
+            message = (
+                f"[reindex][{self.youtube_id}] got an unexpected redirect "
+                + f"to {remote_id}, you are probably getting blocked by YT. "
+                "See FAQ for more details."
+            )
+            raise ValueError(message)
 
     def _add_channel(self):
         """add channel dict to video json_data"""
@@ -305,6 +312,8 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
                     playlist.json_data["playlist_entries"][idx].update(
                         {"downloaded": False}
                     )
+                    if playlist.json_data["playlist_type"] == "custom":
+                        playlist.del_video(self.youtube_id)
             playlist.upload_to_es()
 
     def delete_subtitles(self, subtitles=False):
@@ -383,13 +392,9 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         _, _ = ElasticWrap(path).post(data=data)
 
 
-def index_new_video(
-    youtube_id, video_overwrites=False, video_type=VideoTypeEnum.VIDEOS
-):
+def index_new_video(youtube_id, video_type=VideoTypeEnum.VIDEOS):
     """combined classes to create new video in index"""
-    video = YoutubeVideo(
-        youtube_id, video_overwrites=video_overwrites, video_type=video_type
-    )
+    video = YoutubeVideo(youtube_id, video_type=video_type)
     video.build_json()
     if not video.json_data:
         raise ValueError("failed to get metadata for " + youtube_id)
