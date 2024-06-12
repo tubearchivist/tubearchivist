@@ -662,7 +662,7 @@ class ChannelIdPlaylistView(ChannelIdBaseView):
 
 class ChannelIdPodcastView(ChannelIdBaseView):
     """resolves to /channel/<channel-id>/podcast/<format>/
-    display single channel podcast from channel_id
+    display single channel podcast from channel_id.
     """
 
     def get(self, request, channel_id, format):
