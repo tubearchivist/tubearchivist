@@ -14,6 +14,7 @@ from api.src.aggs import (
 from api.src.search_processor import SearchProcess
 from django.core.files.temp import NamedTemporaryFile
 from django.http import FileResponse
+from home.models import CustomPeriodicTask
 from home.src.download.queue import PendingInteract
 from home.src.download.subscriptions import (
     ChannelSubscription,
@@ -32,20 +33,21 @@ from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video import SponsorBlock, YoutubeVideo
 from home.src.ta.config import AppConfig, ReleaseVersion
+from home.src.ta.notify import Notifications, get_all_notifications
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
+from home.src.ta.task_config import TASK_CONFIG
 from home.src.ta.task_manager import TaskCommand, TaskManager
 from home.src.ta.urlparser import Parser
 from home.src.ta.users import UserConfig
 from home.tasks import (
-    BaseTask,
     check_reindex,
     download_pending,
     extrac_dl,
     run_restore_backup,
     subscribe_to,
 )
-from rest_framework import permissions
+from rest_framework import permissions, status
 from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
@@ -386,7 +388,7 @@ class ChannelApiListView(ApiBaseView):
         must_list = []
         if query_filter:
             if query_filter not in self.valid_filter:
-                message = f"invalid url query filder: {query_filter}"
+                message = f"invalid url query filter: {query_filter}"
                 print(message)
                 return Response({"message": message}, status=400)
 
@@ -489,12 +491,26 @@ class PlaylistApiListView(ApiBaseView):
 
     search_base = "ta_playlist/_search/"
     permission_classes = [AdminWriteOnly]
+    valid_playlist_type = ["regular", "custom"]
 
     def get(self, request):
         """handle get request"""
-        self.data.update(
-            {"sort": [{"playlist_name.keyword": {"order": "asc"}}]}
-        )
+        playlist_type = request.GET.get("playlist_type", None)
+        query = {"sort": [{"playlist_name.keyword": {"order": "asc"}}]}
+        if playlist_type is not None:
+            if playlist_type not in self.valid_playlist_type:
+                message = f"invalid playlist_type {playlist_type}"
+                return Response({"message": message}, status=400)
+
+            query.update(
+                {
+                    "query": {
+                        "term": {"playlist_type": {"value": playlist_type}}
+                    },
+                }
+            )
+
+        self.data.update(query)
         self.get_document_list(request)
         return Response(self.response)
 
@@ -538,12 +554,34 @@ class PlaylistApiView(ApiBaseView):
 
     search_base = "ta_playlist/_doc/"
     permission_classes = [AdminWriteOnly]
+    valid_custom_actions = ["create", "remove", "up", "down", "top", "bottom"]
 
     def get(self, request, playlist_id):
         # pylint: disable=unused-argument
         """get request"""
         self.get_document(playlist_id)
         return Response(self.response, status=self.status_code)
+
+    def post(self, request, playlist_id):
+        """post to custom playlist to add a video to list"""
+        playlist = YoutubePlaylist(playlist_id)
+        if not playlist.is_custom_playlist():
+            message = f"playlist with ID {playlist_id} is not custom"
+            return Response({"message": message}, status=400)
+
+        action = request.data.get("action")
+        if action not in self.valid_custom_actions:
+            message = f"invalid action: {action}"
+            return Response({"message": message}, status=400)
+
+        video_id = request.data.get("video_id")
+        if action == "create":
+            playlist.add_video_to_playlist(video_id)
+        else:
+            hide = UserConfig(request.user.id).get_value("hide_watched")
+            playlist.move_video(video_id, action, hide_watched=hide)
+
+        return Response({"success": True}, status=status.HTTP_201_CREATED)
 
     def delete(self, request, playlist_id):
         """delete playlist"""
@@ -583,7 +621,7 @@ class DownloadApiView(ApiBaseView):
     """
 
     search_base = "ta_download/_doc/"
-    valid_status = ["pending", "ignore", "priority"]
+    valid_status = ["pending", "ignore", "ignore-force", "priority"]
     permission_classes = [AdminOnly]
 
     def get(self, request, video_id):
@@ -599,6 +637,11 @@ class DownloadApiView(ApiBaseView):
             message = f"{video_id}: invalid status {item_status}"
             print(message)
             return Response({"message": message}, status=400)
+
+        if item_status == "ignore-force":
+            extrac_dl.delay(video_id, status="ignore")
+            message = f"{video_id}: set status to ignore"
+            return Response(request.data)
 
         _, status_code = PendingInteract(video_id).get_item()
         if status_code == 404:
@@ -641,7 +684,7 @@ class DownloadApiListView(ApiBaseView):
         must_list = []
         if query_filter:
             if query_filter not in self.valid_filter:
-                message = f"invalid url query filder: {query_filter}"
+                message = f"invalid url query filter: {query_filter}"
                 print(message)
                 return Response({"message": message}, status=400)
 
@@ -672,14 +715,7 @@ class DownloadApiListView(ApiBaseView):
 
         pending = [i["youtube_id"] for i in to_add if i["status"] == "pending"]
         url_str = " ".join(pending)
-        try:
-            youtube_ids = Parser(url_str).parse()
-        except ValueError:
-            message = f"failed to parse: {url_str}"
-            print(message)
-            return Response({"message": message}, status=400)
-
-        extrac_dl.delay(youtube_ids, auto_start=auto_start)
+        extrac_dl.delay(url_str, auto_start=auto_start)
 
         return Response(data)
 
@@ -902,7 +938,7 @@ class TaskNameListView(ApiBaseView):
     def get(self, request, task_name):
         """handle get request"""
         # pylint: disable=unused-argument
-        if task_name not in BaseTask.TASK_CONFIG:
+        if task_name not in TASK_CONFIG:
             message = {"message": "invalid task name"}
             return Response(message, status=404)
 
@@ -917,12 +953,12 @@ class TaskNameListView(ApiBaseView):
         400 if task can't be started here without argument
         """
         # pylint: disable=unused-argument
-        task_config = BaseTask.TASK_CONFIG.get(task_name)
+        task_config = TASK_CONFIG.get(task_name)
         if not task_config:
             message = {"message": "invalid task name"}
             return Response(message, status=404)
 
-        if not task_config.get("api-start"):
+        if not task_config.get("api_start"):
             message = {"message": "can not start task through this endpoint"}
             return Response(message, status=400)
 
@@ -961,16 +997,16 @@ class TaskIDView(ApiBaseView):
             message = {"message": "task id not found"}
             return Response(message, status=404)
 
-        task_conf = BaseTask.TASK_CONFIG.get(task_result.get("name"))
+        task_conf = TASK_CONFIG.get(task_result.get("name"))
         if command == "stop":
-            if not task_conf.get("api-stop"):
+            if not task_conf.get("api_stop"):
                 message = {"message": "task can not be stopped"}
                 return Response(message, status=400)
 
             message_key = self._build_message_key(task_conf, task_id)
             TaskCommand().stop(task_id, message_key)
         if command == "kill":
-            if not task_conf.get("api-stop"):
+            if not task_conf.get("api_stop"):
                 message = {"message": "task can not be killed"}
                 return Response(message, status=400)
 
@@ -981,6 +1017,56 @@ class TaskIDView(ApiBaseView):
     def _build_message_key(self, task_conf, task_id):
         """build message key to forward command to notification"""
         return f"message:{task_conf.get('group')}:{task_id.split('-')[0]}"
+
+
+class ScheduleView(ApiBaseView):
+    """resolves to /api/schedule/
+    DEL: delete schedule for task
+    """
+
+    permission_classes = [AdminOnly]
+
+    def delete(self, request):
+        """delete schedule by task_name query"""
+        task_name = request.data.get("task_name")
+        try:
+            task = CustomPeriodicTask.objects.get(name=task_name)
+        except CustomPeriodicTask.DoesNotExist:
+            message = {"message": "task_name not found"}
+            return Response(message, status=404)
+
+        _ = task.delete()
+
+        return Response({"success": True})
+
+
+class ScheduleNotification(ApiBaseView):
+    """resolves to /api/schedule/notification/
+    GET: get all schedule notifications
+    DEL: delete notification
+    """
+
+    def get(self, request):
+        """handle get request"""
+
+        return Response(get_all_notifications())
+
+    def delete(self, request):
+        """handle delete"""
+
+        task_name = request.data.get("task_name")
+        url = request.data.get("url")
+
+        if not TASK_CONFIG.get(task_name):
+            message = {"message": "task_name not found"}
+            return Response(message, status=404)
+
+        if url:
+            response, status_code = Notifications(task_name).remove_url(url)
+        else:
+            response, status_code = Notifications(task_name).remove_task()
+
+        return Response({"response": response, "status_code": status_code})
 
 
 class RefreshView(ApiBaseView):
