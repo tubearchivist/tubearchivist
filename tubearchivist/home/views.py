@@ -699,9 +699,11 @@ class ChannelIdPodcastView(ChannelIdBaseView):
         self.context = {
             "channel_info": channel_info,
             "results": results,
-            "api_token": request.headers["Authorization"][6:]
-            if "Authorization" in request.headers
-            else "none",
+            "api_token": (
+                request.headers["Authorization"][6:]
+                if "Authorization" in request.headers
+                else "none"
+            ),
             "format": format,
             "mime_format": mime_format,
         }
