@@ -1,4 +1,4 @@
-name: lint_python
+name: python_unit_tests
 
 on:
   push:
@@ -9,8 +9,9 @@ on:
       - '**/*.py'
 
 jobs:
-  lint_python:
+  unit-tests:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -33,10 +34,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Install python dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r tubearchivist/requirements-dev.txt
 
-      - name: Run Linter
-        run: ./deploy.sh validate
+      - name: Run unit tests
+        run: pytest tubearchivist
