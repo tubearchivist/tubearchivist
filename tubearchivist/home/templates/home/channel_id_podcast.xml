@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+xmlns:podcast="https://podcastindex.org/namespace/1.0"
+xmlns:atom="http://www.w3.org/2005/Atom"
+xmlns:content="http://purl.org/rss/1.0/modules/content/">
+	<channel>
+		<title>{{ channel_info.channel_name|slice:":255" }}</title>
+		<link>{{ request.scheme }}://{{ request.META.HTTP_HOST }}{% url 'channel_id' channel_info.channel_id %}</link>
+		<description>{{ channel_info.channel_description|slice:":4000" }}</description>
+		<language>en-us</language>
+		<itunes:category text="Music"/>
+		<itunes:explicit>false</itunes:explicit>
+		<podcast:locked>yes</podcast:locked>
+		<itunes:image href="{{ request.scheme }}://{{ request.META.HTTP_HOST }}/auth/{{ api_token }}/cache/channels/{{ channel_info.channel_id }}_thumb.jpg" />
+		<atom:link href="{{ request.scheme }}://{{ request.META.HTTP_HOST }}/auth/{{ api_token }}{% url 'channel_id_podcast' channel_info.channel_id format %}" rel="self" type="application/rss+xml"/>{% if results %}{% for video in results %}
+        <item>
+			<title>{{ video.title|slice:":255" }}</title>
+			<link>{{ request.scheme }}://{{ request.META.HTTP_HOST }}{% url 'video' video.youtube_id %}</link>
+			<description>{{ video.description|slice:":4000" }}</description>
+			<pubDate>{{ video.vid_last_refresh }}</pubDate>
+			<guid isPermaLink="false">{{ video.youtube_id }}</guid>
+			<enclosure length="{{ video.media_size }}" type="{{ mime_format }}" url="{{ request.scheme }}://{{ request.META.HTTP_HOST }}/auth/{{ api_token }}{{ video.media_url }}"/>
+			<itunes:duration>{{ video.player.duration }}</itunes:duration>
+			<itunes:image href="{{ request.scheme }}://{{ request.META.HTTP_HOST }}/auth/{{ api_token }}/cache/{{ video.vid_thumb_path }}"/>
+			<itunes:block>yes</itunes:block>
+		</item>{% endfor %}{% endif %}
+	</channel>
+</rss>

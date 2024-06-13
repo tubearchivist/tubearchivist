@@ -37,6 +37,11 @@ urlpatterns = [
         name="api-video-sponsor",
     ),
     path(
+        "video/<slug:video_id>/mp3/",
+        views.VideoMP3View.as_view(),
+        name="api-video-mp3",
+    ),
+    path(
         "channel/",
         views.ChannelApiListView.as_view(),
         name="api-channel-list",
