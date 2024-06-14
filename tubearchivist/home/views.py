@@ -535,6 +535,7 @@ class ChannelIdView(ChannelIdBaseView):
             {
                 "title": f"Channel: {channel_name}",
                 "channel_info": channel_info,
+                "api_token": SettingsApplicationView.get_token(request),
             }
         )
 
@@ -790,6 +791,7 @@ class PlaylistIdView(ArchivistResultsView):
                 "playlist_name": playlist_name,
                 "channel_info": channel_info,
                 "reindex": reindex.get("state"),
+                "api_token": SettingsApplicationView.get_token(request),
             }
         )
         return render(request, "home/playlist_id.html", self.context)
