@@ -1774,7 +1774,7 @@ function doShortcut(e) {
 }
 
 function fallbackCopyToClipboard(text) {
-	var textArea = document.createElement("textarea");
+	let textArea = document.createElement("textarea");
 	textArea.value = text;
 
 	// Avoid scrolling to bottom

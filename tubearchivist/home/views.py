@@ -891,9 +891,11 @@ class PlaylistIdPodcastView(ArchivistResultsView):
         self.context = {
             "playlist_info": playlist_info,
             "results": results,
-            "api_token": request.headers["Authorization"][6:]
-            if "Authorization" in request.headers
-            else "none",
+            "api_token": (
+                request.headers["Authorization"][6:]
+                if "Authorization" in request.headers
+                else "none"
+            ),
             "format": format,
             "mime_format": mime_format,
         }
