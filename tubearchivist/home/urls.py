@@ -108,5 +108,10 @@ urlpatterns = [
         login_required(views.PlaylistIdView.as_view()),
         name="playlist_id",
     ),
+    path(
+        "playlist/<slug:playlist_id>/podcast/<slug:format>/",
+        views.PlaylistIdPodcastView.as_view(),
+        name="playlist_id_podcast",
+    ),
     path("search/", login_required(views.SearchView.as_view()), name="search"),
 ]

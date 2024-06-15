@@ -847,6 +847,64 @@ class PlaylistIdView(ArchivistResultsView):
             self.data["query"]["bool"]["must"].append(to_append)
 
 
+class PlaylistIdPodcastView(ArchivistResultsView):
+    """resolves to /playlist/<playlist-id>/podcast/<format>/
+    display single playlist podcast from playlist_id
+    """
+
+    def get(self, request, playlist_id, format):
+        """handle get request"""
+        playlist = YoutubePlaylist(playlist_id)
+        playlist.get_from_es()
+        playlist_info = playlist.json_data
+        results = playlist.get_playlist_videos(2)
+        is_audio = format == "audio"
+        mime_format = "audio/mp3" if is_audio else "video/mp4"
+        for video in results:
+            video["vid_last_refresh"] = date_parser(
+                video["vid_last_refresh"], "%a, %d %b %Y %H:%M:%S -0000"
+            )
+            video["vid_thumb_path"] = ThumbManager(
+                video["youtube_id"]
+            ).vid_thumb_path()
+            if is_audio:
+                video["media_url"] = (
+                    "/api/video/" + video["youtube_id"] + "/mp3/"
+                )
+            else:
+                video["media_url"] = "/media/" + video["media_url"]
+            video["idx"] = (
+                list(
+                    filter(
+                        lambda x: x["youtube_id"] == video["youtube_id"],
+                        playlist_info["playlist_entries"],
+                    )
+                )[0]["idx"]
+                + 1
+            )
+            video["title"] = (
+                str(video["idx"]).rjust(len(str(len(results))), "0")
+                + " "
+                + video["title"]
+            )
+        results = sorted(results, key=lambda v: v["idx"])
+        self.context = {
+            "playlist_info": playlist_info,
+            "results": results,
+            "api_token": request.headers["Authorization"][6:]
+            if "Authorization" in request.headers
+            else "none",
+            "format": format,
+            "mime_format": mime_format,
+        }
+        return render(
+            request,
+            "home/playlist_id_podcast.xml",
+            self.context,
+            content_type="application/rss+xml",
+        )
+
+
 class PlaylistView(ArchivistResultsView):
     """resolves to /playlist/
     show all playlists indexed

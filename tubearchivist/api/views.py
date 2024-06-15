@@ -56,6 +56,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from threading import Lock
 
 
 def check_admin(user):
@@ -322,21 +323,26 @@ class VideoMP3View(ApiBaseView):
     handle mp3 version of video.
     """
 
+    mutex = Lock()
+
     def get(self, request, video_id):
-        video = YoutubeVideo(video_id)
-        video.get_from_es()
-        video_filepath = os.path.join(
-            EnvironmentSettings.MEDIA_DIR,
-            video.json_data["channel"]["channel_id"],
-            video.json_data["youtube_id"] + ".mp4",
-        )
-        audio_filepath = NamedTemporaryFile(suffix=".mp3")
-        ImportFolderScanner.convert_media(video_filepath, audio_filepath.name)
-        return FileResponse(
-            open(audio_filepath.name, "rb"),
-            as_attachment=True,
-            filename=video.json_data["youtube_id"] + ".mp3",
-        )
+        with VideoMP3View.mutex:
+            video = YoutubeVideo(video_id)
+            video.get_from_es()
+            video_filepath = os.path.join(
+                EnvironmentSettings.MEDIA_DIR,
+                video.json_data["channel"]["channel_id"],
+                video.json_data["youtube_id"] + ".mp4",
+            )
+            audio_filepath = NamedTemporaryFile(suffix=".mp3")
+            ImportFolderScanner.convert_media(
+                video_filepath, audio_filepath.name
+            )
+            return FileResponse(
+                open(audio_filepath.name, "rb"),
+                as_attachment=True,
+                filename=video.json_data["youtube_id"] + ".mp3",
+            )
 
 
 class ChannelApiView(ApiBaseView):
