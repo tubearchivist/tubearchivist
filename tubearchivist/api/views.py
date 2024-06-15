@@ -1,6 +1,7 @@
 """all API views"""
 
 import os
+from threading import Lock
 
 from api.src.aggs import (
     BiggestChannel,
@@ -56,7 +57,6 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from threading import Lock
 
 
 def check_admin(user):
