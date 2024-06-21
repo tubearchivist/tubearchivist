@@ -1,6 +1,8 @@
 """all API views"""
 
+import glob
 import os
+import time
 from threading import Lock
 
 from api.src.aggs import (
@@ -13,6 +15,7 @@ from api.src.aggs import (
     WatchProgress,
 )
 from api.src.search_processor import SearchProcess
+from django.conf import settings
 from django.core.files.temp import NamedTemporaryFile
 from django.http import FileResponse
 from home.models import CustomPeriodicTask
@@ -326,23 +329,43 @@ class VideoMP3View(ApiBaseView):
     mutex = Lock()
 
     def get(self, request, video_id):
-        with VideoMP3View.mutex:
-            video = YoutubeVideo(video_id)
-            video.get_from_es()
-            video_filepath = os.path.join(
-                EnvironmentSettings.MEDIA_DIR,
-                video.json_data["channel"]["channel_id"],
-                video.json_data["youtube_id"] + ".mp4",
-            )
-            audio_filepath = NamedTemporaryFile(suffix=".mp3")
-            ImportFolderScanner.convert_media(
-                video_filepath, audio_filepath.name
-            )
-            return FileResponse(
-                open(audio_filepath.name, "rb"),
-                as_attachment=True,
-                filename=video.json_data["youtube_id"] + ".mp3",
-            )
+        video = YoutubeVideo(video_id)
+        video.get_from_es()
+        video_filepath = os.path.join(
+            EnvironmentSettings.MEDIA_DIR,
+            video.json_data["channel"]["channel_id"],
+            video.json_data["youtube_id"] + ".mp4",
+        )
+        audio_dir = os.path.join(
+            EnvironmentSettings.CACHE_DIR,
+            "audios",
+        )
+        audio_filepath = os.path.join(
+           audio_dir,
+            video.json_data["youtube_id"] + ".mp3",
+        )
+        
+        if not os.path.isfile(audio_filepath):
+            with VideoMP3View.mutex:
+                if not os.path.isfile(audio_filepath):
+                    os.makedirs(audio_dir, exist_ok=True)
+                    ImportFolderScanner.convert_media(
+                        video_filepath, audio_filepath
+                    )
+                    self.clean_cache(audio_dir)
+        
+        return FileResponse(
+            open(audio_filepath, "rb"),
+            as_attachment=True,
+            filename=video.json_data["youtube_id"] + ".mp3",
+        )
+
+    def clean_cache(self, dir):
+        """simple directory of files cache maintenance 
+        algorithm - remove oldest files
+        """
+        while len(os.listdir(dir)) > settings.MAX_CACHED_AUDIO_FILES:
+            os.remove(min(glob.glob(dir + os.sep + "*"), key=os.path.getmtime))
 
 
 class ChannelApiView(ApiBaseView):
