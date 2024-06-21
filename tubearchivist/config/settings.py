@@ -278,5 +278,6 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 TA_UPSTREAM = "https://github.com/tubearchivist/tubearchivist"
 TA_VERSION = "v0.4.8"
 
-# TA mp3 audio cache setting - specifies the maximum number of audio files to keep in disk backed cache directory CACHE_DIR/audios
+# TA mp3 audio cache setting - specifies the maximum number of audio
+# files to keep in disk backed cache directory CACHE_DIR/audios
 MAX_CACHED_AUDIO_FILES = 1000

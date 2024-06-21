@@ -2,7 +2,6 @@
 
 import glob
 import os
-import time
 from threading import Lock
 
 from api.src.aggs import (
@@ -16,7 +15,6 @@ from api.src.aggs import (
 )
 from api.src.search_processor import SearchProcess
 from django.conf import settings
-from django.core.files.temp import NamedTemporaryFile
 from django.http import FileResponse
 from home.models import CustomPeriodicTask
 from home.src.download.queue import PendingInteract
@@ -341,10 +339,10 @@ class VideoMP3View(ApiBaseView):
             "audios",
         )
         audio_filepath = os.path.join(
-           audio_dir,
+            audio_dir,
             video.json_data["youtube_id"] + ".mp3",
         )
-        
+
         if not os.path.isfile(audio_filepath):
             with VideoMP3View.mutex:
                 if not os.path.isfile(audio_filepath):
@@ -353,7 +351,7 @@ class VideoMP3View(ApiBaseView):
                         video_filepath, audio_filepath
                     )
                     self.clean_cache(audio_dir)
-        
+
         return FileResponse(
             open(audio_filepath, "rb"),
             as_attachment=True,
@@ -361,7 +359,7 @@ class VideoMP3View(ApiBaseView):
         )
 
     def clean_cache(self, dir):
-        """simple directory of files cache maintenance 
+        """simple directory of files cache maintenance
         algorithm - remove oldest files
         """
         while len(os.listdir(dir)) > settings.MAX_CACHED_AUDIO_FILES:
