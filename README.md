@@ -41,7 +41,7 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 For minimal system requirements, the Tube Archivist stack needs around 2GB of available memory for a small testing setup and around 4GB of available memory for a mid to large sized installation. Minimal with dual core with 4 threads, better quad core plus. 
 This project requires docker. Ensure it is installed and running on your system.  
 
-The documentation has additional user provided instructions for [Unraid](https://docs.tubearchivist.com/installation/unraid/), [Synology](https://docs.tubearchivist.com/installation/synology/), [Podman](https://docs.tubearchivist.com/installation/podman/) and [True NAS](https://docs.tubearchivist.com/installation/truenas-scale/).
+The documentation has additional user provided instructions for [Unraid](https://docs.tubearchivist.com/installation/unraid/), [Synology](https://docs.tubearchivist.com/installation/synology/) and [Podman](https://docs.tubearchivist.com/installation/podman/).
 
 The instructions here should get you up and running quickly, for Docker beginners and full explanation about each environment variable, see the [docs](https://docs.tubearchivist.com/installation/docker-compose/).
 
