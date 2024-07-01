@@ -20,7 +20,11 @@ from home.src.index.playlist import YoutubePlaylist
 from home.src.index.video import YoutubeVideo, index_new_video
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
-from home.src.ta.helper import get_channel_overwrites, ignore_filelist
+from home.src.ta.helper import (
+    clear_dl_cache,
+    get_channel_overwrites,
+    ignore_filelist,
+)
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisQueue
 
@@ -70,7 +74,13 @@ class VideoDownloader(DownloaderBase):
 
             self._notify(video_data, "Add video metadata to index", progress=1)
             video_type = VideoTypeEnum(video_data["vid_type"])
-            vid_dict = index_new_video(youtube_id, video_type=video_type)
+            try:
+                vid_dict = index_new_video(youtube_id, video_type=video_type)
+            except FileNotFoundError:
+                # If a previous run left some data in the DL cache,
+                # we clear it out here and try again...
+                clear_dl_cache(EnvironmentSettings.CACHE_DIR)
+                vid_dict = index_new_video(youtube_id, video_type=video_type)
             RedisQueue(self.CHANNEL_QUEUE).add(channel_id)
             RedisQueue(self.VIDEO_QUEUE).add(youtube_id)
 
