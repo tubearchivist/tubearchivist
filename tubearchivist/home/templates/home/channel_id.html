@@ -28,27 +28,36 @@
     </div>
     <div id="notifications" data="channel reindex"></div>
     <div class="info-box info-box-2">
-        <div class="info-box-item">
-            <div class="round-img">
-                <a href="{% url 'channel_id' channel_info.channel_id %}">
-                    <img src="/cache/channels/{{ channel_info.channel_id }}_thumb.jpg" alt="channel-thumb">
-                </a>
-            </div>
-            <div>
-                <h3><a href="{% url 'channel_id' channel_info.channel_id %}">{{ channel_info.channel_name }}</a></h3>
-                {% if channel_info.channel_subs >= 1000000 %}
-                    <p>Subscribers: {{ channel_info.channel_subs|intword }}</p>
-                {% else %}
-                    <p>Subscribers: {{ channel_info.channel_subs|intcomma }}</p>
-                {% endif %}
-                {% if channel_info.channel_subscribed %}
-                    {% if request.user|has_group:"admin" or request.user.is_staff %}
-                    <button class="unsubscribe" type="button" data-type="channel" data-subscribe="" data-id="{{ channel_info.channel_id }}" onclick="subscribeStatus(this)" title="Unsubscribe from {{ channel_info.channel_name }}">Unsubscribe</button>
-                    {% endif %}
-                {% else %}
-                    <button type="button" data-type="channel" data-subscribe="true" data-id="{{ channel_info.channel_id }}" onclick="subscribeStatus(this)" title="Subscribe to {{ channel_info.channel_name }}">Subscribe</button>
-                {% endif %}
-            </div>
+        <div class="info-box-item two">
+            <div class="info-box-item">
+	            <div class="round-img">
+	                <a href="{% url 'channel_id' channel_info.channel_id %}">
+	                    <img src="/cache/channels/{{ channel_info.channel_id }}_thumb.jpg" alt="channel-thumb">
+	                </a>
+	            </div>
+	            <div>
+	                <h3><a href="{% url 'channel_id' channel_info.channel_id %}">{{ channel_info.channel_name }}</a></h3>
+	                {% if channel_info.channel_subs >= 1000000 %}
+	                    <p>Subscribers: {{ channel_info.channel_subs|intword }}</p>
+	                {% else %}
+	                    <p>Subscribers: {{ channel_info.channel_subs|intcomma }}</p>
+	                {% endif %}
+	                {% if channel_info.channel_subscribed %}
+	                    {% if request.user|has_group:"admin" or request.user.is_staff %}
+	                    <button class="unsubscribe" type="button" data-type="channel" data-subscribe="" data-id="{{ channel_info.channel_id }}" onclick="subscribeStatus(this)" title="Unsubscribe from {{ channel_info.channel_name }}">Unsubscribe</button>
+	                    {% endif %}
+	                {% else %}
+	                    <button type="button" data-type="channel" data-subscribe="true" data-id="{{ channel_info.channel_id }}" onclick="subscribeStatus(this)" title="Subscribe to {{ channel_info.channel_name }}">Subscribe</button>
+	                {% endif %}
+	            </div>
+	        </div>
+            <div class="rss-icons">
+	        	<img id="rss-audio-button" src="{% static 'img/icon-rss.svg' %}" alt="rss-icon" data-context="video" onclick="showForm('rss_buttons')" title="Podcast">
+	        </div>
+	        <div id="rss_buttons" class="hidden button-box">
+                	<button type="button" onclick="copyToClipboard('{{ request.scheme }}://{{ request.META.HTTP_HOST }}/auth/{{ api_token }}{% url 'channel_id_podcast' channel_info.channel_id 'audio' %}')">Copy Audio Podcast to clipboard</button>
+                    <button type="button" onclick="copyToClipboard('{{ request.scheme }}://{{ request.META.HTTP_HOST }}/auth/{{ api_token }}{% url 'channel_id_podcast' channel_info.channel_id 'video' %}')">Copy Video Podcast to clipboard</button>
+             </div>
         </div>
         <div class="info-box-item">
             {% if aggs %}

@@ -107,6 +107,33 @@ class YoutubePlaylist(YouTubeItem):
 
         self.all_members = all_members
 
+    def get_playlist_videos(self, detail_level=1):
+        """get all videos from playlist"""
+        source = ["youtube_id", "vid_type"]
+        video_ids = [
+            i["youtube_id"]
+            for i in self.json_data["playlist_entries"]
+            if i["downloaded"]
+        ]
+        if detail_level == 2:
+            source = [
+                "youtube_id",
+                "vid_type",
+                "title",
+                "media_size",
+                "description",
+                "media_url",
+                "vid_last_refresh",
+                "published",
+                "player",
+            ]
+        data = {
+            "query": {"bool": {"must": [{"ids": {"values": video_ids}}]}},
+            "_source": source,
+        }
+        all_videos = IndexPaginate("ta_video", data).get_results()
+        return all_videos
+
     def get_playlist_art(self):
         """download artwork of playlist"""
         url = self.json_data["playlist_thumbnail"]

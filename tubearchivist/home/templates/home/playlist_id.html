@@ -9,24 +9,32 @@
         <h1>{{ playlist_info.playlist_name }}</h1>
     </div>
     <div class="info-box info-box-3">
-        {% if playlist_info.playlist_type != "custom" %}
+    	<div class="info-box-item two">
 	        <div class="info-box-item">
-	            <div class="round-img">
-	                <a href="{% url 'channel_id' channel_info.channel_id %}">
-	                    <img src="/cache/channels/{{ channel_info.channel_id }}_thumb.jpg" alt="channel-thumb">
-	                </a>
-	            </div>
-	            <div>
-	                <h3><a href="{% url 'channel_id' channel_info.channel_id %}">{{ channel_info.channel_name }}</a></h3>
-	                {% if channel_info.channel_subs >= 1000000 %}
-	                    <span>Subscribers: {{ channel_info.channel_subs|intword }}</span>
-	                {% else %}
-	                    <span>Subscribers: {{ channel_info.channel_subs|intcomma }}</span>
-	                {% endif %}
-	            </div>
+	        	{% if playlist_info.playlist_type != "custom" %}
+		            <div class="round-img">
+		                <a href="{% url 'channel_id' channel_info.channel_id %}">
+		                    <img src="/cache/channels/{{ channel_info.channel_id }}_thumb.jpg" alt="channel-thumb">
+		                </a>
+		            </div>
+		            <div>
+		                <h3><a href="{% url 'channel_id' channel_info.channel_id %}">{{ channel_info.channel_name }}</a></h3>
+		                {% if channel_info.channel_subs >= 1000000 %}
+		                    <span>Subscribers: {{ channel_info.channel_subs|intword }}</span>
+		                {% else %}
+		                    <span>Subscribers: {{ channel_info.channel_subs|intcomma }}</span>
+		                {% endif %}
+		            </div>
+		         {% endif %}
 	        </div>
-	    {% endif %}
-        
+	        <div class="rss-icons">
+	        	<img id="rss-audio-button" src="{% static 'img/icon-rss.svg' %}" alt="rss-icon" data-context="video" onclick="showForm('rss_buttons')" title="Podcast">
+	        </div>
+	        <div id="rss_buttons" class="hidden button-box">
+                	<button type="button" onclick="copyToClipboard('{{ request.scheme }}://{{ request.META.HTTP_HOST }}/auth/{{ api_token }}{% url 'playlist_id_podcast' playlist_info.playlist_id 'audio' %}')">Copy Audio Podcast to clipboard</button>
+                    <button type="button" onclick="copyToClipboard('{{ request.scheme }}://{{ request.META.HTTP_HOST }}/auth/{{ api_token }}{% url 'playlist_id_podcast' playlist_info.playlist_id 'video' %}')">Copy Video Podcast to clipboard</button>
+            </div>
+        </div>
         <div class="info-box-item">
             <div>
                 <p>Last refreshed: {{ playlist_info.playlist_last_refresh }}</p>
