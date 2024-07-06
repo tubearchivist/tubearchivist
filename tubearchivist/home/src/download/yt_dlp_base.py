@@ -10,6 +10,7 @@ from http import cookiejar
 from io import StringIO
 
 import yt_dlp
+from home.src.ta.helper import clear_dl_cache
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 
@@ -53,6 +54,9 @@ class YtWrap:
                 print(f"{url}: failed to download with message {err}")
                 if "Temporary failure in name resolution" in str(err):
                     raise ConnectionError("lost the internet, abort!") from err
+
+                # Clear download cache directory after failures
+                clear_dl_cache(EnvironmentSettings.CACHE_DIR)
 
                 return False, str(err)
 
