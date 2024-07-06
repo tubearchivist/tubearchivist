@@ -361,7 +361,7 @@ class ChannelApiListView(ApiBaseView):
         must_list = []
         if query_filter:
             if query_filter not in self.valid_filter:
-                message = f"invalid url query filder: {query_filter}"
+                message = f"invalid url query filter: {query_filter}"
                 print(message)
                 return Response({"message": message}, status=400)
 
@@ -657,7 +657,7 @@ class DownloadApiListView(ApiBaseView):
         must_list = []
         if query_filter:
             if query_filter not in self.valid_filter:
-                message = f"invalid url query filder: {query_filter}"
+                message = f"invalid url query filter: {query_filter}"
                 print(message)
                 return Response({"message": message}, status=400)
 

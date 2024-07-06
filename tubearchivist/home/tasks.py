@@ -7,6 +7,7 @@ Functionality:
 """
 
 from celery import Task, shared_task
+from celery.exceptions import Retry
 from home.src.download.queue import PendingList
 from home.src.download.subscriptions import (
     SubscriptionHandler,
@@ -114,7 +115,13 @@ def update_subscribed(self):
     return None
 
 
-@shared_task(name="download_pending", bind=True, base=BaseTask)
+@shared_task(
+    name="download_pending",
+    bind=True,
+    base=BaseTask,
+    max_retries=3,
+    default_retry_delay=10,
+)
 def download_pending(self, auto_only=False):
     """download latest pending videos"""
     manager = TaskManager()
@@ -124,11 +131,20 @@ def download_pending(self, auto_only=False):
         return None
 
     manager.init(self)
-    downloader = VideoDownloader(task=self)
-    videos_downloaded = downloader.run_queue(auto_only=auto_only)
+    try:
+        downloader = VideoDownloader(task=self)
+        downloaded, failed = downloader.run_queue(auto_only=auto_only)
 
-    if videos_downloaded:
-        return f"downloaded {videos_downloaded} video(s)."
+        if failed:
+            print(f"[task][{self.name}] Videos failed, retry.")
+            self.send_progress("Videos failed, retry.")
+            raise self.retry()
+
+    except Retry as exc:
+        raise exc
+
+    if downloaded:
+        return f"downloaded {downloaded} video(s)."
 
     return None
 

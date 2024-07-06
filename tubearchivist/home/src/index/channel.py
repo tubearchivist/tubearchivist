@@ -6,44 +6,14 @@ functionality:
 
 import json
 import os
-import re
 from datetime import datetime
 
-import requests
 from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.generic import YouTubeItem
 from home.src.index.playlist import YoutubePlaylist
-from home.src.ta.helper import requests_headers
 from home.src.ta.settings import EnvironmentSettings
-
-
-def banner_extractor(channel_id: str) -> dict[str, str] | None:
-    """workaround for new channel renderer, upstream #9893"""
-    url = f"https://www.youtube.com/channel/{channel_id}?hl=en"
-    cookies = {"SOCS": "CAI"}
-    response = requests.get(
-        url, cookies=cookies, headers=requests_headers(), timeout=30
-    )
-    if not response.ok:
-        return None
-
-    matched_urls = re.findall(
-        r'"(https://yt3.googleusercontent.com/[^"]+=w(\d{3,4})-fcrop64[^"]*)"',
-        response.text,
-    )
-    if not matched_urls:
-        return None
-
-    sorted_urls = sorted(matched_urls, key=lambda x: int(x[1]), reverse=True)
-    banner = sorted_urls[0][0]
-    channel_art_fallback = {
-        "channel_banner_url": banner,
-        "channel_tvart_url": banner.split("-fcrop64")[0],
-    }
-
-    return channel_art_fallback
 
 
 class YoutubeChannel(YouTubeItem):
@@ -87,7 +57,7 @@ class YoutubeChannel(YouTubeItem):
             "channel_id": self.youtube_id,
             "channel_last_refresh": int(datetime.now().timestamp()),
             "channel_name": self.youtube_meta["uploader"],
-            "channel_subs": self._extract_follower_count(),
+            "channel_subs": self.youtube_meta.get("channel_follower_count", 0),
             "channel_subscribed": False,
             "channel_tags": self._parse_tags(self.youtube_meta.get("tags")),
             "channel_banner_url": self._get_banner_art(),
@@ -95,34 +65,6 @@ class YoutubeChannel(YouTubeItem):
             "channel_tvart_url": self._get_tv_art(),
             "channel_views": self.youtube_meta.get("view_count") or 0,
         }
-        self._inject_fallback()
-
-    def _inject_fallback(self):
-        """fallback channel art work, workaround for upstream #9893"""
-        if self.json_data["channel_banner_url"]:
-            return
-
-        print(f"{self.youtube_id}: attempt art fallback extraction")
-        fallback = banner_extractor(self.youtube_id)
-        if fallback:
-            print(f"{self.youtube_id}: fallback succeeded: {fallback}")
-            self.json_data.update(fallback)
-
-    def _extract_follower_count(self) -> int:
-        """workaround for upstream #9893, extract subs from first video"""
-        subs = self.youtube_meta.get("channel_follower_count")
-        if subs is not None:
-            return subs
-
-        entries = self.youtube_meta.get("entries", [])
-        if entries:
-            first_entry = entries[0]
-            if isinstance(first_entry, dict):
-                subs_entry = first_entry.get("channel_follower_count")
-                if subs_entry is not None:
-                    return subs_entry
-
-        return 0
 
     def _parse_tags(self, tags):
         """parse channel tags"""
@@ -375,23 +317,30 @@ class YoutubeChannel(YouTubeItem):
             "autodelete_days",
             "index_playlists",
             "integrate_sponsorblock",
+            "subscriptions_channel_size",
+            "subscriptions_live_channel_size",
+            "subscriptions_shorts_channel_size",
         ]
 
         to_write = self.json_data.get("channel_overwrites", {})
         for key, value in overwrites.items():
             if key not in valid_keys:
                 raise ValueError(f"invalid overwrite key: {key}")
-            if value == "disable":
+            elif value == "disable":
                 to_write[key] = False
                 continue
-            if value in [0, "0"]:
+            elif value == "0":
                 if key in to_write:
                     del to_write[key]
                 continue
-            if value == "1":
+            elif value == "1":
                 to_write[key] = True
                 continue
-            if value:
+            elif isinstance(value, int) and int(value) < 0:
+                if key in to_write:
+                    del to_write[key]
+                continue
+            elif value is not None and value != "":
                 to_write.update({key: value})
 
         self.json_data["channel_overwrites"] = to_write
