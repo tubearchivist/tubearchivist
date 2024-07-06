@@ -50,9 +50,10 @@ class VideoDownloader(DownloaderBase):
         self.obs = False
         self._build_obs()
 
-    def run_queue(self, auto_only=False) -> int:
+    def run_queue(self, auto_only=False) -> tuple[int, int]:
         """setup download queue in redis loop until no more items"""
         downloaded = 0
+        failed = 0
         while True:
             video_data = self._get_next(auto_only)
             if self.task.is_stopped() or not video_data:
@@ -66,6 +67,7 @@ class VideoDownloader(DownloaderBase):
 
             success = self._dl_single_vid(youtube_id, channel_id)
             if not success:
+                failed += 1
                 continue
 
             self._notify(video_data, "Add video metadata to index", progress=1)
@@ -82,7 +84,7 @@ class VideoDownloader(DownloaderBase):
         # post processing
         DownloadPostProcess(self.task).run()
 
-        return downloaded
+        return downloaded, failed
 
     def _notify(self, video_data, message, progress=False):
         """send progress notification to task"""
@@ -153,6 +155,7 @@ class VideoDownloader(DownloaderBase):
             "continuedl": True,
             "writethumbnail": False,
             "noplaylist": True,
+            "color": "no_color",
         }
 
     def _build_obs_user(self):
@@ -218,12 +221,6 @@ class VideoDownloader(DownloaderBase):
         obs = self.obs.copy()
         self._set_overwrites(obs, channel_id)
         dl_cache = os.path.join(self.CACHE_DIR, "download")
-
-        # check if already in cache to continue from there
-        all_cached = ignore_filelist(os.listdir(dl_cache))
-        for file_name in all_cached:
-            if youtube_id in file_name:
-                obs["outtmpl"] = os.path.join(dl_cache, file_name)
 
         success, message = YtWrap(obs, self.config).download(youtube_id)
         if not success:
