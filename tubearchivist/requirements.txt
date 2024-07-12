@@ -1,6 +1,6 @@
 apprise==1.8.0
 celery==5.4.0
-Django==5.0.6
+Django==5.0.7
 django-auth-ldap==4.8.0
 django-celery-beat==2.6.0
 django-cors-headers==4.4.0
@@ -11,4 +11,4 @@ requests==2.32.3
 ryd-client==0.0.6
 uWSGI==2.0.26
 whitenoise==6.7.0
-yt-dlp==2024.7.2
+yt-dlp==2024.7.9

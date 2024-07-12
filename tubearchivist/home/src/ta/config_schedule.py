@@ -3,6 +3,9 @@ Functionality:
 - Handle scheduler config update
 """
 
+from datetime import datetime
+
+from django.utils import dateformat
 from django_celery_beat.models import CrontabSchedule
 from home.models import CustomPeriodicTask
 from home.src.ta.config import AppConfig
@@ -64,6 +67,7 @@ class ScheduleBuilder:
         if schedule:
             task_crontab = self.get_set_cron_tab(schedule)
             task.crontab = task_crontab
+            task.last_run_at = dateformat.make_aware(datetime.now())
             task.save()
 
         return task

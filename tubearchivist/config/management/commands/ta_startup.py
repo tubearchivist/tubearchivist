@@ -5,12 +5,14 @@ Functionality:
 """
 
 import os
+from datetime import datetime
 from random import randint
 from time import sleep
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-from django_celery_beat.models import CrontabSchedule
+from django.utils import dateformat
+from django_celery_beat.models import CrontabSchedule, PeriodicTasks
 from home.models import CustomPeriodicTask
 from home.src.es.connect import ElasticWrap
 from home.src.es.index_setup import ElasitIndexWrap
@@ -23,6 +25,7 @@ from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.task_config import TASK_CONFIG
 from home.src.ta.task_manager import TaskManager
+from home.tasks import version_check
 
 TOPIC = """
 
@@ -51,7 +54,9 @@ class Command(BaseCommand):
         self._mig_snapshot_check()
         self._mig_schedule_store()
         self._mig_custom_playlist()
+        self._mig_add_missing_timestamp()
         self._create_default_schedules()
+        self._update_schedule_tz()
 
     def _sync_redis_state(self):
         """make sure redis gets new config.json values"""
@@ -146,6 +151,14 @@ class Command(BaseCommand):
             )
         else:
             self.stdout.write(self.style.SUCCESS("    no new update found"))
+
+        version_task = CustomPeriodicTask.objects.filter(name="version_check")
+        if not version_task.exists():
+            return
+
+        if not version_task.first().last_run_at:
+            self.style.SUCCESS("    ✓ send initial version check task")
+            version_check.delay()
 
     def _mig_index_setup(self):
         """migration: validate index mappings"""
@@ -316,6 +329,22 @@ class Command(BaseCommand):
         sleep(60)
         raise CommandError(message)
 
+    def _mig_add_missing_timestamp(self) -> None:
+        """
+        add missing timestamp for versioncheck
+        migrate from v0.4.8 to v0.4.9
+        """
+        version_tasks = CustomPeriodicTask.objects.filter(name="version_check")
+        if not version_tasks.exists():
+            return
+
+        version_task = version_tasks.first()
+        if not version_task.last_run_at:
+            self.style.SUCCESS("    ✓ send initial version check task")
+            version_check.delay()
+            version_task.last_run_at = dateformat.make_aware(datetime.now())
+            version_task.save()
+
     def _create_default_schedules(self) -> None:
         """
         create default schedules for new installations
@@ -339,6 +368,7 @@ class Command(BaseCommand):
             "check_reindex", schedule=builder.SCHEDULES["check_reindex"]
         )
         check_reindex.task_config.update({"days": 90})
+        check_reindex.last_run_at = dateformat.make_aware(datetime.now())
         check_reindex.save()
         self.stdout.write(
             self.style.SUCCESS(
@@ -349,20 +379,39 @@ class Command(BaseCommand):
         thumbnail_check = builder.get_set_task(
             "thumbnail_check", schedule=builder.SCHEDULES["thumbnail_check"]
         )
+        thumbnail_check.last_run_at = dateformat.make_aware(datetime.now())
+        thumbnail_check.save()
         self.stdout.write(
             self.style.SUCCESS(
                 f"    ✓ created new default schedule: {thumbnail_check}"
             )
         )
         daily_random = f"{randint(0, 59)} {randint(0, 23)} *"
-        version_check = builder.get_set_task(
+        version_check_task = builder.get_set_task(
             "version_check", schedule=daily_random
         )
         self.stdout.write(
             self.style.SUCCESS(
-                f"    ✓ created new default schedule: {version_check}"
+                f"    ✓ created new default schedule: {version_check_task}"
             )
         )
         self.stdout.write(
             self.style.SUCCESS("    ✓ all default schedules created")
         )
+
+    def _update_schedule_tz(self) -> None:
+        """update timezone for Schedule instances"""
+        tz = EnvironmentSettings.TZ
+        to_update = CrontabSchedule.objects.exclude(timezone=tz)
+
+        if not to_update.exists():
+            self.stdout.write(
+                self.style.SUCCESS("    all schedules have correct TZ")
+            )
+            return
+
+        updated = to_update.update(timezone=tz)
+        self.stdout.write(
+            self.style.SUCCESS(f"    ✓ updated {updated} schedules to {tz}.")
+        )
+        PeriodicTasks.update_changed()
