@@ -12,6 +12,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django_celery_beat.models import CrontabSchedule
 from home.models import CustomPeriodicTask
+from home.tasks import version_check
 from home.src.es.connect import ElasticWrap
 from home.src.es.index_setup import ElasitIndexWrap
 from home.src.es.snapshot import ElasticSnapshot
@@ -146,6 +147,14 @@ class Command(BaseCommand):
             )
         else:
             self.stdout.write(self.style.SUCCESS("    no new update found"))
+
+        version_task = CustomPeriodicTask.objects.filter(name="version_check")
+        if not version_task.exists():
+            return
+
+        if not version_task.first().last_run_at:
+            self.style.SUCCESS("    ✓ send initial version check task")
+            version_check.delay()
 
     def _mig_index_setup(self):
         """migration: validate index mappings"""
