@@ -30,8 +30,6 @@ services:
     depends_on:
       - archivist-es
       - archivist-redis
-    networks:
-      - tubearchivist
 
   tubearchivist-frontend:
     container_name: tubearchivist-frontend
@@ -46,8 +44,6 @@ services:
       - type: bind
         source: ./tubearchivist-frontend
         target: /srv/app
-    networks:
-      - tubearchivist
 
   archivist-redis:
     image: redis/redis-stack-server
@@ -59,8 +55,6 @@ services:
       - redis:/data
     depends_on:
       - archivist-es
-    networks:
-      - tubearchivist
 
 
   archivist-es:
@@ -79,15 +73,9 @@ services:
         hard: -1
     volumes:
       - es:/data    # check for permission error when using bind mount, see readme
-    networks:
-      - tubearchivist
 
 volumes:
   media:
   cache:
   redis:
   es:
-
-networks:
-  tubearchivist:
-     name: tubearchivist
