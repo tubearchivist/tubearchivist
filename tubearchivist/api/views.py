@@ -740,7 +740,15 @@ class LoginApiView(ObtainAuthToken):
 
         print(f"returning token for user with id {user.pk}")
 
-        return Response({"token": token.key, "user_id": user.pk})
+        return Response(
+            {
+                "token": token.key,
+                "user_id": user.pk,
+                "is_superuser": user.is_superuser,
+                "is_staff": user.is_staff,
+                "user_groups": [group.name for group in user.groups.all()],
+            }
+        )
 
 
 class SnapshotApiListView(ApiBaseView):
