@@ -1,3 +1,5 @@
+# docker compose -f .\docker-compose-dev.yml up -d --build
+
 services:
   tubearchivist:
     container_name: tubearchivist
