@@ -132,9 +132,7 @@ class ApiBaseView(APIView):
             self.status_code = 404
 
         if pagination:
-            self.pagination_handler.validate(
-                response["hits"]["total"]["value"]
-            )
+            self.pagination_handler.validate(response["hits"]["total"]["value"])
             self.response["paginate"] = self.pagination_handler.pagination
 
 
@@ -305,9 +303,7 @@ class VideoSponsorView(ApiBaseView):
         user_id = request.user.id
         uuid = request.data["vote"]["uuid"]
         vote = request.data["vote"]["yourVote"]
-        response, status_code = SponsorBlock(user_id).vote_on_segment(
-            uuid, vote
-        )
+        response, status_code = SponsorBlock(user_id).vote_on_segment(uuid, vote)
 
         return response, status_code
 
@@ -353,9 +349,7 @@ class ChannelApiListView(ApiBaseView):
 
     def get(self, request):
         """get request"""
-        self.data.update(
-            {"sort": [{"channel_name.keyword": {"order": "asc"}}]}
-        )
+        self.data.update({"sort": [{"channel_name.keyword": {"order": "asc"}}]})
 
         query_filter = request.GET.get("filter", False)
         must_list = []
@@ -400,9 +394,7 @@ class ChannelApiListView(ApiBaseView):
     def _unsubscribe(channel_id: str):
         """unsubscribe"""
         print(f"[{channel_id}] unsubscribe from channel")
-        ChannelSubscription().change_subscribe(
-            channel_id, channel_subscribed=False
-        )
+        ChannelSubscription().change_subscribe(channel_id, channel_subscribed=False)
 
 
 class ChannelApiSearchView(ApiBaseView):
@@ -446,9 +438,7 @@ class ChannelApiVideoView(ApiBaseView):
         """handle get request"""
         self.data.update(
             {
-                "query": {
-                    "term": {"channel.channel_id": {"value": channel_id}}
-                },
+                "query": {"term": {"channel.channel_id": {"value": channel_id}}},
                 "sort": [{"published": {"order": "desc"}}],
             }
         )
@@ -477,9 +467,7 @@ class PlaylistApiListView(ApiBaseView):
 
             query.update(
                 {
-                    "query": {
-                        "term": {"playlist_type": {"value": playlist_type}}
-                    },
+                    "query": {"term": {"playlist_type": {"value": playlist_type}}},
                 }
             )
 
@@ -515,9 +503,7 @@ class PlaylistApiListView(ApiBaseView):
     def _unsubscribe(playlist_id: str):
         """unsubscribe"""
         print(f"[{playlist_id}] unsubscribe from playlist")
-        PlaylistSubscription().change_subscribe(
-            playlist_id, subscribe_status=False
-        )
+        PlaylistSubscription().change_subscribe(playlist_id, subscribe_status=False)
 
 
 class PlaylistApiView(ApiBaseView):
@@ -577,9 +563,7 @@ class PlaylistApiVideoView(ApiBaseView):
 
     def get(self, request, playlist_id):
         """handle get request"""
-        self.data["query"] = {
-            "term": {"playlist.keyword": {"value": playlist_id}}
-        }
+        self.data["query"] = {"term": {"playlist.keyword": {"value": playlist_id}}}
         self.data.update({"sort": [{"published": {"order": "desc"}}]})
 
         self.get_document_list(request)
@@ -665,9 +649,7 @@ class DownloadApiListView(ApiBaseView):
 
         filter_channel = request.GET.get("channel", False)
         if filter_channel:
-            must_list.append(
-                {"term": {"channel_id": {"value": filter_channel}}}
-            )
+            must_list.append({"term": {"channel_id": {"value": filter_channel}}})
 
         self.data["query"] = {"bool": {"must": must_list}}
 
@@ -740,7 +722,15 @@ class LoginApiView(ObtainAuthToken):
 
         print(f"returning token for user with id {user.pk}")
 
-        return Response({"token": token.key, "user_id": user.pk})
+        return Response(
+            {
+                "token": token.key,
+                "user_id": user.pk,
+                "is_superuser": user.is_superuser,
+                "is_staff": user.is_staff,
+                "user_groups": [group.name for group in user.groups.all()],
+            }
+        )
 
 
 class SnapshotApiListView(ApiBaseView):
@@ -1195,9 +1185,7 @@ class SearchView(ApiBaseView):
         search through all indexes"""
         search_query = request.GET.get("query", None)
         if search_query is None:
-            return Response(
-                {"message": "no search query specified"}, status=400
-            )
+            return Response({"message": "no search query specified"}, status=400)
 
         search_results = SearchForm().multi_search(search_query)
         return Response(search_results)
