@@ -1,0 +1,13 @@
+FROM node:alpine
+
+WORKDIR /srv/app
+
+COPY . .
+
+RUN npm config set registry https://registry.npmjs.org/
+
+RUN npm ci
+
+EXPOSE 80
+
+CMD [ "npm", "run", "dev" ]
