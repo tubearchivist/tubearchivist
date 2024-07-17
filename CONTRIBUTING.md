@@ -62,22 +62,7 @@ Please keep in mind:
 - A bug that can't be reproduced, is difficult or sometimes even impossible to fix. Provide very clear steps *how to reproduce*.
 
 ### Feature Request
-This project needs your help to grow further. There is no shortage of ideas, see the open [issues on GH](https://github.com/tubearchivist/tubearchivist/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement) and the [roadmap](https://github.com/tubearchivist/tubearchivist#roadmap), what this project lacks is contributors interested in helping with overall improvements of the application. Focus is *not* on adding new features, but improving existing ones.
-
-Existing ideas are easily *multiple years* worth of development effort, at least at current speed. This project is *very* selective with accepting new feature requests at this point.  
-
-Good feature requests usually fall into one or more of these categories:
-- You want to work on your own small scoped idea within the next few days or weeks.
-- Your idea is beneficial for a wide range of users, not just for you.
-- Your idea extends the current project by building on and improving existing functionality.
-- Your idea is quick and easy to implement, for an experienced as well as for a first time contributor.
-
-Your request is likely going to be rejected if:
-- Your idea requires multiple days worth of development time and is unrealistic to be implemented any time soon.
-- There are already other ways to do what you are trying to do.
-- You are trying to do something that only applies to your platform, your specific workflow or your specific setup.
-- Your idea would fundamentally change how the project works or it wouldn't be able to be implemented with backwards compatibility.
-- Your idea is not a good fit for this project.
+This project doesn't take any new feature requests. This project doesn't lack ideas, see the currently open tasks and roadmap. New feature requests aren't helpful at this point in time. Thank you for your understanding.
 
 ### Installation Help
 GitHub is most likely not the best place to ask for installation help. That's inherently individual and one on one.
