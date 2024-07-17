@@ -20,6 +20,14 @@ from django_auth_ldap.config import LDAPSearch
 from home.src.ta.helper import ta_host_parser
 from home.src.ta.settings import EnvironmentSettings
 
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(".env")
+except ModuleNotFoundError:
+    pass
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 

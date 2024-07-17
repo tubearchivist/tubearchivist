@@ -213,10 +213,14 @@ def ta_host_parser(ta_host: str) -> tuple[list[str], list[str]]:
     return allowed_hosts, csrf_trusted_origins
 
 
-def get_stylesheets():
+def get_stylesheets() -> list:
     """Get all valid stylesheets from /static/css"""
     app_root = EnvironmentSettings.APP_DIR
-    stylesheets = os.listdir(os.path.join(app_root, "static/css"))
+    try:
+        stylesheets = os.listdir(os.path.join(app_root, "static/css"))
+    except FileNotFoundError:
+        return []
+
     stylesheets.remove("style.css")
     stylesheets.sort()
     stylesheets = list(filter(lambda x: x.endswith(".css"), stylesheets))

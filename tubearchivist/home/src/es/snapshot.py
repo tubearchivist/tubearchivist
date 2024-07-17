@@ -251,10 +251,9 @@ class ElasticSnapshot:
     @staticmethod
     def _date_converter(date_utc):
         """convert datetime string"""
-        expected_format = "%Y-%m-%dT%H:%M:%S.%fZ"
-        date = datetime.strptime(date_utc, expected_format)
-        local_datetime = date.replace(tzinfo=ZoneInfo("localtime"))
-        converted = local_datetime.astimezone(ZoneInfo(EnvironmentSettings.TZ))
+        date = datetime.strptime(date_utc, "%Y-%m-%dT%H:%M:%S.%fZ")
+        utc_date = date.replace(tzinfo=ZoneInfo("UTC"))
+        converted = utc_date.astimezone(ZoneInfo(EnvironmentSettings.TZ))
         converted_str = converted.strftime("%Y-%m-%d %H:%M")
 
         return converted_str

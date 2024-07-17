@@ -138,9 +138,39 @@ The documentation available at [docs.tubearchivist.com](https://docs.tubearchivi
 
 ## Development Environment
 
-I have learned the hard way, that working on a dockerized application outside of docker is very error prone and in general not a good idea. So if you want to test your changes, it's best to run them in a docker testing environment. You might be able to run the application directly, but this document assumes you're using docker.
+I have learned the hard way, that working on a dockerized application outside of docker is very error prone and in general not a good idea. So if you want to test your changes, it's best to run them in a docker testing environment. But for quick development, running the application outside of docker, can also be helpful.
 
-### Instructions
+### Native Instruction
+
+For convenience, it's recommended to still run Redis and ES in a docker container.
+
+Set up your virtual environment and install the requirements defined in `requirements-dev.txt`.
+
+There are options built in to load environment variables from a file using `load_dotenv`. Example `.env` file to place in the same folder as `manage.py`:
+
+```
+TA_HOST="localhost"
+TA_USERNAME=tubearchivist
+TA_PASSWORD=verysecret
+TA_MEDIA_DIR="static/volume/media"
+TA_CACHE_DIR="static/volume/cache"
+TA_APP_DIR="."
+REDIS_HOST=localhost
+ES_URL="http://localhost:9200"
+ELASTIC_PASSWORD=verysecret
+TZ=America/New_York
+DJANGO_DEBUG=True
+```
+
+Than from look at the container startup script `run.sh`, make sure all needed migrations ran, then to start the dev server from the same folder as `manage.py` run:
+
+```bash
+python manage.py runserver
+```
+
+You'll probably also want to have a Celery worker instance running, refer to `run.sh` for that. The Beat Scheduler might not be needed.
+
+### Docker Instructions
 
 Set up docker on your development machine.
 

@@ -14,8 +14,6 @@ from home.src.ta.settings import EnvironmentSettings
 class SearchProcess:
     """process search results"""
 
-    CACHE_DIR = EnvironmentSettings.CACHE_DIR
-
     def __init__(self, response):
         self.response = response
         self.processed = False
@@ -66,7 +64,8 @@ class SearchProcess:
     def _process_channel(channel_dict):
         """run on single channel"""
         channel_id = channel_dict["channel_id"]
-        art_base = f"/cache/channels/{channel_id}"
+        cache_root = EnvironmentSettings().get_cache_root()
+        art_base = f"{cache_root}/channels/{channel_id}"
         date_str = date_parser(channel_dict["channel_last_refresh"])
         channel_dict.update(
             {
@@ -93,13 +92,16 @@ class SearchProcess:
                 url = video_dict["subtitles"][idx]["media_url"]
                 video_dict["subtitles"][idx]["media_url"] = f"/media/{url}"
 
+        cache_root = EnvironmentSettings().get_cache_root()
+        media_root = EnvironmentSettings().get_media_root()
+
         video_dict.update(
             {
                 "channel": channel,
-                "media_url": f"/media/{media_url}",
+                "media_url": f"{media_root}/{media_url}",
                 "vid_last_refresh": vid_last_refresh,
                 "published": published,
-                "vid_thumb_url": f"{self.CACHE_DIR}/{vid_thumb_url}",
+                "vid_thumb_url": f"{cache_root}/{vid_thumb_url}",
             }
         )
 
@@ -112,9 +114,11 @@ class SearchProcess:
         playlist_last_refresh = date_parser(
             playlist_dict["playlist_last_refresh"]
         )
+        cache_root = EnvironmentSettings().get_cache_root()
+        playlist_thumbnail = f"{cache_root}/playlists/{playlist_id}.jpg"
         playlist_dict.update(
             {
-                "playlist_thumbnail": f"/cache/playlists/{playlist_id}.jpg",
+                "playlist_thumbnail": playlist_thumbnail,
                 "playlist_last_refresh": playlist_last_refresh,
             }
         )
@@ -124,12 +128,13 @@ class SearchProcess:
     def _process_download(self, download_dict):
         """run on single download item"""
         video_id = download_dict["youtube_id"]
+        cache_root = EnvironmentSettings().get_cache_root()
         vid_thumb_url = ThumbManager(video_id).vid_thumb_path()
         published = date_parser(download_dict["published"])
 
         download_dict.update(
             {
-                "vid_thumb_url": f"{self.CACHE_DIR}/{vid_thumb_url}",
+                "vid_thumb_url": f"{cache_root}/{vid_thumb_url}",
                 "published": published,
             }
         )

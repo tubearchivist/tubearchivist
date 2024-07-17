@@ -13,7 +13,7 @@
 	        <div class="info-box-item">
 	            <div class="round-img">
 	                <a href="{% url 'channel_id' channel_info.channel_id %}">
-	                    <img src="/cache/channels/{{ channel_info.channel_id }}_thumb.jpg" alt="channel-thumb">
+	                    <img src="{{ channel_info.channel_thumb_url }}" alt="channel-thumb">
 	                </a>
 	            </div>
 	            <div>

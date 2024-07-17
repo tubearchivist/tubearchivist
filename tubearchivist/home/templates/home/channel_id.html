@@ -6,7 +6,7 @@
 
 <div class="boxed-content">
     <div class="channel-banner">
-        <a href="/channel/{{ channel_info.channel_id }}/"><img src="/cache/channels/{{ channel_info.channel_id }}_banner.jpg" alt="channel_banner"></a>
+        <a href="/channel/{{ channel_info.channel_id }}/"><img src="{{ channel_info.channel_banner_url }}" alt="channel_banner"></a>
     </div>
     <div class="info-box-item child-page-nav">
         <a href="{% url 'channel_id' channel_info.channel_id %}"><h3>Videos</h3></a>
@@ -31,7 +31,7 @@
         <div class="info-box-item">
             <div class="round-img">
                 <a href="{% url 'channel_id' channel_info.channel_id %}">
-                    <img src="/cache/channels/{{ channel_info.channel_id }}_thumb.jpg" alt="channel-thumb">
+                    <img src="{{ channel_info.channel_thumb_url }}" alt="channel-thumb">
                 </a>
             </div>
             <div>

@@ -46,14 +46,14 @@
                 <div class="channel-item {{ view_style }}">
                     <div class="channel-banner {{ view_style }}">
                         <a href="{% url 'channel_id' channel.channel_id %}">
-                            <img src="/cache/channels/{{ channel.channel_id }}_banner.jpg" alt="{{ channel.channel_id }}-banner">
+                            <img src="{{ channel.channel_banner_url }}" alt="{{ channel.channel_id }}-banner">
                         </a>
                     </div>
                     <div class="info-box info-box-2 {{ view_style }}">
                         <div class="info-box-item">
                             <div class="round-img">
                                 <a href="{% url 'channel_id' channel.channel_id %}">
-                                    <img src="/cache/channels/{{ channel.channel_id }}_thumb.jpg" alt="channel-thumb">
+                                    <img src="{{ channel.channel_thumb_url }}" alt="channel-thumb">
                                 </a>
                             </div>
                             <div>

@@ -2,9 +2,11 @@
 black
 codespell
 flake8
+ipython
 isort
 pylint
 pylint-django
 pytest
 pytest-django
+python-dotenv
 types-requests

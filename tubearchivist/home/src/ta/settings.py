@@ -6,6 +6,14 @@ Functionality:
 
 from os import environ
 
+try:
+    from dotenv import load_dotenv
+
+    print("loading local dotenv")
+    load_dotenv(".env")
+except ModuleNotFoundError:
+    pass
+
 
 class EnvironmentSettings:
     """
@@ -43,6 +51,20 @@ class EnvironmentSettings:
         )
     )
     ES_DISABLE_VERIFY_SSL: bool = bool(environ.get("ES_DISABLE_VERIFY_SSL"))
+
+    def get_cache_root(self):
+        """get root for web server"""
+        if self.CACHE_DIR.startswith("/"):
+            return self.CACHE_DIR
+
+        return f"/{self.CACHE_DIR}"
+
+    def get_media_root(self):
+        """get root for media folder"""
+        if self.MEDIA_DIR.startswith("/"):
+            return self.MEDIA_DIR
+
+        return f"/{self.MEDIA_DIR}"
 
     def print_generic(self):
         """print generic env vars"""
