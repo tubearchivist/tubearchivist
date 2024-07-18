@@ -9,11 +9,11 @@ from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import IndexPaginate
 from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
-from home.src.index.video import YoutubeVideo
-from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import is_missing
 from home.src.ta.urlparser import Parser
+from video.src.constants import VideoTypeEnum
+from video.src.index import YoutubeVideo
 
 
 class ChannelSubscription:

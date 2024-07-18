@@ -12,12 +12,12 @@ import shutil
 import subprocess
 
 from home.src.download.thumbnails import ThumbManager
-from home.src.index.comments import CommentList
-from home.src.index.video import YoutubeVideo
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import ignore_filelist
 from home.src.ta.settings import EnvironmentSettings
 from PIL import Image
+from video.src.comments import CommentList
+from video.src.index import YoutubeVideo
 from yt_dlp.utils import ISO639Utils
 
 

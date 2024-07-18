@@ -6,10 +6,10 @@ Functionality:
 import os
 
 from home.src.es.connect import ElasticWrap, IndexPaginate
-from home.src.index.comments import CommentList
-from home.src.index.video import YoutubeVideo, index_new_video
 from home.src.ta.helper import ignore_filelist
 from home.src.ta.settings import EnvironmentSettings
+from video.src.comments import CommentList
+from video.src.index import YoutubeVideo, index_new_video
 
 
 class Scanner:

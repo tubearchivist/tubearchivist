@@ -12,9 +12,9 @@ from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.playlist import YoutubePlaylist
-from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import get_duration_str, is_shorts
+from video.src.constants import VideoTypeEnum
 
 
 class PendingIndex:

@@ -44,7 +44,6 @@ from home.src.index.channel import channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress
-from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig, ReleaseVersion
 from home.src.ta.config_schedule import ScheduleBuilder
 from home.src.ta.helper import check_stylesheet, time_parser
@@ -54,6 +53,7 @@ from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.users import UserConfig
 from home.tasks import index_channel_playlists, subscribe_to
 from rest_framework.authtoken.models import Token
+from video.src.constants import VideoTypeEnum
 
 
 class ArchivistViewConfig(View):

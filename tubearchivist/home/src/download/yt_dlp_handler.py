@@ -15,14 +15,14 @@ from home.src.download.subscriptions import PlaylistSubscription
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.channel import YoutubeChannel
-from home.src.index.comments import CommentList
 from home.src.index.playlist import YoutubePlaylist
-from home.src.index.video import YoutubeVideo, index_new_video
-from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import get_channel_overwrites, ignore_filelist
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisQueue
+from video.src.comments import CommentList
+from video.src.constants import VideoTypeEnum
+from video.src.index import YoutubeVideo, index_new_video
 
 
 class DownloaderBase:

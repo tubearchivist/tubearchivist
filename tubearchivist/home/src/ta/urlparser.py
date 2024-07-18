@@ -7,7 +7,7 @@ Functionality:
 from urllib.parse import parse_qs, urlparse
 
 from home.src.download.yt_dlp_base import YtWrap
-from home.src.index.video_constants import VideoTypeEnum
+from video.src.constants import VideoTypeEnum
 
 
 class Parser:
