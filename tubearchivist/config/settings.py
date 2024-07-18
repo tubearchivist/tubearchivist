@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "api",
     "video",
+    "channel",
     "config",
 ]
 

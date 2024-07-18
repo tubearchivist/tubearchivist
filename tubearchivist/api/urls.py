@@ -7,26 +7,6 @@ urlpatterns = [
     path("ping/", views.PingView.as_view(), name="ping"),
     path("login/", views.LoginApiView.as_view(), name="api-login"),
     path(
-        "channel/",
-        views.ChannelApiListView.as_view(),
-        name="api-channel-list",
-    ),
-    path(
-        "channel/search/",
-        views.ChannelApiSearchView.as_view(),
-        name="api-channel-search",
-    ),
-    path(
-        "channel/<slug:channel_id>/",
-        views.ChannelApiView.as_view(),
-        name="api-channel",
-    ),
-    path(
-        "channel/<slug:channel_id>/video/",
-        views.ChannelApiVideoView.as_view(),
-        name="api-channel-video",
-    ),
-    path(
         "playlist/",
         views.PlaylistApiListView.as_view(),
         name="api-playlist-list",

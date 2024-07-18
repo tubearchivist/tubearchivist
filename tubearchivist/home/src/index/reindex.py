@@ -10,12 +10,12 @@ from datetime import datetime
 from time import sleep
 from typing import Callable, TypedDict
 
+from channel.src.index import YoutubeChannel
 from home.models import CustomPeriodicTask
 from home.src.download.subscriptions import ChannelSubscription
 from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.connect import ElasticWrap, IndexPaginate
-from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.config import AppConfig
 from home.src.ta.settings import EnvironmentSettings

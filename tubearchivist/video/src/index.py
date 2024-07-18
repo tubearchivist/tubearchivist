@@ -8,9 +8,9 @@ import os
 from datetime import datetime
 
 import requests
+from channel.src import index as ta_channel
 from django.conf import settings
 from home.src.es.connect import ElasticWrap
-from home.src.index import channel as ta_channel
 from home.src.index import playlist as ta_playlist
 from home.src.index.generic import YouTubeItem
 from home.src.ta.helper import get_duration_sec, get_duration_str, randomizor

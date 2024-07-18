@@ -4,10 +4,10 @@ Functionality:
 - handle playlist subscriptions
 """
 
+from channel.src.index import YoutubeChannel
 from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import IndexPaginate
-from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import is_missing

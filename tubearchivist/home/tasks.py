@@ -8,6 +8,7 @@ Functionality:
 
 from celery import Task, shared_task
 from celery.exceptions import Retry
+from channel.src.index import YoutubeChannel
 from home.src.download.queue import PendingList
 from home.src.download.subscriptions import (
     SubscriptionHandler,
@@ -17,7 +18,6 @@ from home.src.download.thumbnails import ThumbFilesystem, ThumbValidator
 from home.src.download.yt_dlp_handler import VideoDownloader
 from home.src.es.backup import ElasticBackup
 from home.src.es.index_setup import ElasitIndexWrap
-from home.src.index.channel import YoutubeChannel
 from home.src.index.filesystem import Scanner
 from home.src.index.manual import ImportFolderScanner
 from home.src.index.reindex import Reindex, ReindexManual, ReindexPopulate

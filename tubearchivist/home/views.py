@@ -11,6 +11,7 @@ from time import sleep
 
 from api.src.search_processor import SearchProcess, process_aggs
 from api.views import check_admin
+from channel.src.index import channel_overwrites
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import user_passes_test
@@ -40,7 +41,6 @@ from home.src.frontend.forms_schedule import (
     NotificationSettingsForm,
     SchedulerSettingsForm,
 )
-from home.src.index.channel import channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress

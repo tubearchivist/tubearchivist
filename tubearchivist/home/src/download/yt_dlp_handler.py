@@ -10,11 +10,11 @@ import os
 import shutil
 from datetime import datetime
 
+from channel.src.index import YoutubeChannel
 from home.src.download.queue import PendingList
 from home.src.download.subscriptions import PlaylistSubscription
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
-from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import get_channel_overwrites, ignore_filelist
