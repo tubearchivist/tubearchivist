@@ -11,7 +11,7 @@ import re
 import shutil
 import subprocess
 
-from home.src.download.thumbnails import ThumbManager
+from download.src.thumbnails import ThumbManager
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import ignore_filelist
 from home.src.ta.settings import EnvironmentSettings

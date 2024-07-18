@@ -2,7 +2,7 @@
 
 from api.views import AdminWriteOnly, ApiBaseView
 from channel.src.index import YoutubeChannel
-from home.src.download.subscriptions import ChannelSubscription
+from download.src.subscriptions import ChannelSubscription
 from home.src.ta.urlparser import Parser
 from home.tasks import subscribe_to
 from rest_framework.response import Response

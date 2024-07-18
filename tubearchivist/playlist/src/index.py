@@ -8,7 +8,7 @@ import json
 from datetime import datetime
 
 from channel.src import index as channel
-from home.src.download.thumbnails import ThumbManager
+from download.src.thumbnails import ThumbManager
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.generic import YouTubeItem
 from video.src.index import YoutubeVideo

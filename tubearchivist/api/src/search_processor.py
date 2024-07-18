@@ -6,7 +6,7 @@ Functionality:
 
 import urllib.parse
 
-from home.src.download.thumbnails import ThumbManager
+from download.src.thumbnails import ThumbManager
 from home.src.ta.helper import date_parser, get_duration_str
 from home.src.ta.settings import EnvironmentSettings
 

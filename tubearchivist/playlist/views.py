@@ -1,7 +1,7 @@
 """all playlist API views"""
 
 from api.views import AdminWriteOnly, ApiBaseView
-from home.src.download.subscriptions import PlaylistSubscription
+from download.src.subscriptions import PlaylistSubscription
 from home.src.ta.users import UserConfig
 from home.tasks import subscribe_to
 from playlist.src.index import YoutubePlaylist

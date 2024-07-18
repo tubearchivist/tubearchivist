@@ -8,8 +8,8 @@ import json
 import os
 from datetime import datetime
 
-from home.src.download.thumbnails import ThumbManager
-from home.src.download.yt_dlp_base import YtWrap
+from download.src.thumbnails import ThumbManager
+from download.src.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.generic import YouTubeItem
 from home.src.ta.settings import EnvironmentSettings

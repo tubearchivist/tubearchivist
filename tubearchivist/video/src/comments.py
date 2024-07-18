@@ -7,7 +7,7 @@ Functionality:
 
 from datetime import datetime
 
-from home.src.download.yt_dlp_base import YtWrap
+from download.src.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap
 from home.src.ta.config import AppConfig
 from home.src.ta.ta_redis import RedisQueue

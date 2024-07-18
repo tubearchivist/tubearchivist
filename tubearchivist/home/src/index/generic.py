@@ -5,7 +5,7 @@ functionality:
 
 import math
 
-from home.src.download.yt_dlp_base import YtWrap
+from download.src.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap
 from home.src.ta.config import AppConfig
 from home.src.ta.users import UserConfig
@@ -104,8 +104,8 @@ class Pagination:
     def first_guess(self):
         """build first guess before api call"""
         page_get = self.page_get
+        page_from = 0
         if page_get in [0, 1]:
-            page_from = 0
             prev_pages = False
         elif page_get > 1:
             page_from = (page_get - 1) * self.page_size

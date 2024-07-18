@@ -9,13 +9,10 @@ Functionality:
 from celery import Task, shared_task
 from celery.exceptions import Retry
 from channel.src.index import YoutubeChannel
-from home.src.download.queue import PendingList
-from home.src.download.subscriptions import (
-    SubscriptionHandler,
-    SubscriptionScanner,
-)
-from home.src.download.thumbnails import ThumbFilesystem, ThumbValidator
-from home.src.download.yt_dlp_handler import VideoDownloader
+from download.src.queue import PendingList
+from download.src.subscriptions import SubscriptionHandler, SubscriptionScanner
+from download.src.thumbnails import ThumbFilesystem, ThumbValidator
+from download.src.yt_dlp_handler import VideoDownloader
 from home.src.es.backup import ElasticBackup
 from home.src.es.index_setup import ElasitIndexWrap
 from home.src.index.filesystem import Scanner
