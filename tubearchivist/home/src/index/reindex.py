@@ -16,10 +16,10 @@ from home.src.download.subscriptions import ChannelSubscription
 from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.connect import ElasticWrap, IndexPaginate
-from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.config import AppConfig
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisQueue
+from playlist.src.index import YoutubePlaylist
 from video.src.comments import Comments
 from video.src.index import YoutubeVideo
 

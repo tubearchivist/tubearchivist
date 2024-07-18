@@ -7,21 +7,6 @@ urlpatterns = [
     path("ping/", views.PingView.as_view(), name="ping"),
     path("login/", views.LoginApiView.as_view(), name="api-login"),
     path(
-        "playlist/",
-        views.PlaylistApiListView.as_view(),
-        name="api-playlist-list",
-    ),
-    path(
-        "playlist/<slug:playlist_id>/",
-        views.PlaylistApiView.as_view(),
-        name="api-playlist",
-    ),
-    path(
-        "playlist/<slug:playlist_id>/video/",
-        views.PlaylistApiVideoView.as_view(),
-        name="api-playlist-video",
-    ),
-    path(
         "download/",
         views.DownloadApiListView.as_view(),
         name="api-download-list",

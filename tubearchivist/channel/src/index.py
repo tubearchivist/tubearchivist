@@ -12,8 +12,8 @@ from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.generic import YouTubeItem
-from home.src.index.playlist import YoutubePlaylist
 from home.src.ta.settings import EnvironmentSettings
+from playlist.src.index import YoutubePlaylist
 
 
 class YoutubeChannel(YouTubeItem):

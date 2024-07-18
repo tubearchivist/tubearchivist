@@ -22,5 +22,6 @@ urlpatterns = [
     path("api/", include("api.urls")),
     path("api/video/", include("video.urls")),
     path("api/channel/", include("channel.urls")),
+    path("api/playlist/", include("playlist.urls")),
     path("admin/", admin.site.urls),
 ]

@@ -11,11 +11,11 @@ import requests
 from channel.src import index as ta_channel
 from django.conf import settings
 from home.src.es.connect import ElasticWrap
-from home.src.index import playlist as ta_playlist
 from home.src.index.generic import YouTubeItem
 from home.src.ta.helper import get_duration_sec, get_duration_str, randomizor
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.users import UserConfig
+from playlist.src import index as ta_playlist
 from ryd_client import ryd_client
 from video.src.comments import Comments
 from video.src.constants import VideoTypeEnum
