@@ -380,9 +380,9 @@ const Video = () => {
             {video.media_size && <p>File size: {humanFileSize(video.media_size)}</p>}
 
             {video.streams &&
-              video.streams.map((stream, index) => {
+              video.streams.map(stream => {
                 return (
-                  <p key={index}>
+                  <p key={stream.index}>
                     {capitalizeFirstLetter(stream.type)}: {stream.codec}{' '}
                     {humanFileSize(stream.bitrate)}/s
                     {stream.width && (
@@ -398,9 +398,9 @@ const Video = () => {
         {video.tags && video.tags.length > 0 && (
           <div className="description-box">
             <div className="video-tag-box">
-              {video.tags.map((tag, index) => {
+              {video.tags.map(tag => {
                 return (
-                  <span key={index} className="video-tag">
+                  <span key={tag} className="video-tag">
                     {tag}
                   </span>
                 );
@@ -428,8 +428,8 @@ const Video = () => {
 
         {playlistNav && (
           <>
-            {playlistNav.map((playlistItem, index: number) => {
-              <div key={index} className="playlist-wrap">
+            {playlistNav.map(playlistItem => {
+              <div key={playlistItem.playlist_meta.playlist_id} className="playlist-wrap">
                 <Link to={Routes.Playlist(playlistItem.playlist_meta.playlist_id)}>
                   <h3>
                     Playlist [{playlistItem.playlist_meta.current_idx + 1}
@@ -506,9 +506,9 @@ const Video = () => {
           <div className="comments-section">
             <h3>Comments: {video.comment_count}</h3>
             <div id="comments-list" className="comments-list">
-              {comments?.map((comment, index) => {
+              {comments?.map(comment => {
                 return (
-                  <Fragment key={index}>
+                  <Fragment key={comment.comment_id}>
                     <CommentBox comment={comment} />
                   </Fragment>
                 );

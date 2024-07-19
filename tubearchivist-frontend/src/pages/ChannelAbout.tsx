@@ -192,9 +192,9 @@ const ChannelAbout = () => {
         {channel.channel_tags && (
           <div className="description-box">
             <div className="video-tag-box">
-              {channel.channel_tags.map((tag, index) => {
+              {channel.channel_tags.map(tag => {
                 return (
-                  <span key={index} className="video-tag">
+                  <span key={tag} className="video-tag">
                     {tag}
                   </span>
                 );

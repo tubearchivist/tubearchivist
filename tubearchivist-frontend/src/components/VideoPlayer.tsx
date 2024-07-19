@@ -28,7 +28,7 @@ type SubtitlesProp = {
 };
 
 const Subtitles = ({ subtitles }: SubtitlesProp) => {
-  return subtitles.map((subtitle: Subtitle, index) => {
+  return subtitles.map((subtitle: Subtitle) => {
     let label = subtitle.name;
 
     if (subtitle.source === 'auto') {
@@ -37,7 +37,7 @@ const Subtitles = ({ subtitles }: SubtitlesProp) => {
 
     return (
       <track
-        key={index}
+        key={subtitle.name}
         label={label}
         kind="subtitles"
         srcLang={subtitle.lang}

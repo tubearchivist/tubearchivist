@@ -74,9 +74,9 @@ const SettingsUser = () => {
                 }}
               >
                 <option value="">-- change stylesheet --</option>
-                {Object.entries(ColourConstant).map(([key, value], index) => {
+                {Object.entries(ColourConstant).map(([key, value]) => {
                   return (
-                    <option key={index} value={value}>
+                    <option key={key} value={value}>
                       {key}
                     </option>
                   );

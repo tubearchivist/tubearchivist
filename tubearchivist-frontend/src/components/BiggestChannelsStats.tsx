@@ -38,9 +38,9 @@ const BiggestChannelsStats = ({
 
           <tbody>
             {biggestChannelsStatsByCount &&
-              biggestChannelsStatsByCount.map(({ id, name, doc_count }, index) => {
+              biggestChannelsStatsByCount.map(({ id, name, doc_count }) => {
                 return (
-                  <tr key={index}>
+                  <tr key={id}>
                     <td className="agg-channel-name">
                       <Link to={Routes.Channel(id)}>{name}</Link>
                     </td>
@@ -63,9 +63,9 @@ const BiggestChannelsStats = ({
 
           <tbody>
             {biggestChannelsStatsByDuration &&
-              biggestChannelsStatsByDuration.map(({ id, name, duration_str }, index) => {
+              biggestChannelsStatsByDuration.map(({ id, name, duration_str }) => {
                 return (
-                  <tr key={index}>
+                  <tr key={id}>
                     <td className="agg-channel-name">
                       <Link to={Routes.Channel(id)}>{name}</Link>
                     </td>
@@ -88,9 +88,9 @@ const BiggestChannelsStats = ({
 
           <tbody>
             {biggestChannelsStatsByMediaSize &&
-              biggestChannelsStatsByMediaSize.map(({ id, name, media_size }, index) => {
+              biggestChannelsStatsByMediaSize.map(({ id, name, media_size }) => {
                 return (
-                  <tr key={index}>
+                  <tr key={id}>
                     <td className="agg-channel-name">
                       <Link to={Routes.Channel(id)}>{name}</Link>
                     </td>

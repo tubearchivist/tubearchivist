@@ -21,12 +21,12 @@ const DownloadHistoryStats = ({ downloadHistoryStats, useSI }: DownloadHistorySt
     );
   }
 
-  return downloadHistoryStats.map(({ date, count, media_size }, index) => {
+  return downloadHistoryStats.map(({ date, count, media_size }) => {
     const videoText = count === 1 ? 'Video' : 'Videos';
     const intlDate = formatDate(date);
 
     return (
-      <div key={index} className="info-box-item">
+      <div key={date} className="info-box-item">
         <h3>{intlDate}</h3>
         <p>
           +{formatNumbers(count)} {videoText}

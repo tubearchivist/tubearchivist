@@ -41,9 +41,9 @@ const VideoTypeStats = ({ videoStats, useSI }: VideoTypeStatsProps) => {
     },
   ];
 
-  return cards.map((card, index) => {
+  return cards.map(card => {
     return (
-      <Fragment key={index}>
+      <Fragment key={card.title}>
         <StatsInfoBoxItem title={card.title} card={card.data} />
       </Fragment>
     );

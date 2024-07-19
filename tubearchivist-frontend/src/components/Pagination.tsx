@@ -98,10 +98,10 @@ const Pagination = ({ pagination, setPage }: Props) => {
 
           {prev_pages !== false &&
             prev_pages &&
-            prev_pages.map((page: number, index: number) => {
+            prev_pages.map((page: number) => {
               if (hasParams) {
                 return (
-                  <Fragment key={index}>
+                  <Fragment key={page}>
                     <Link
                       to={`${Routes.Home}?page=${page}&${params}`}
                       className="pagination-item"
@@ -116,7 +116,7 @@ const Pagination = ({ pagination, setPage }: Props) => {
                 );
               } else {
                 return (
-                  <Fragment key={index}>
+                  <Fragment key={page}>
                     <Link
                       to={`${Routes.Home}?page=${page}`}
                       className="pagination-item"
@@ -137,10 +137,10 @@ const Pagination = ({ pagination, setPage }: Props) => {
           {next_pages && next_pages.length > 0 && (
             <>
               <span>{'>'}</span>{' '}
-              {next_pages.map((page, index) => {
+              {next_pages.map(page => {
                 if (hasParams) {
                   return (
-                    <Fragment key={index}>
+                    <Fragment key={page}>
                       <a
                         className="pagination-item"
                         href={`?page=${page}&${params}`}
@@ -155,7 +155,7 @@ const Pagination = ({ pagination, setPage }: Props) => {
                   );
                 } else {
                   return (
-                    <Fragment key={index}>
+                    <Fragment key={page}>
                       <a
                         className="pagination-item"
                         href={`?page=${page}`}

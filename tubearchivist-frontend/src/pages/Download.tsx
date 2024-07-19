@@ -260,10 +260,10 @@ const Download = () => {
                 <option value="all" selected={!channelFilterFromUrl}>
                   all
                 </option>
-                {channel_agg_list.map((channel, index) => {
+                {channel_agg_list.map(channel => {
                   return (
                     <option
-                      key={index}
+                      key={channel.id}
                       selected={channelFilterFromUrl == channel.id}
                       value={channel.id}
                     >
@@ -328,9 +328,9 @@ const Download = () => {
       <div className={`boxed-content ${gridView}`}>
         <div className={`video-list ${view} ${gridViewGrid}`}>
           {downloadList &&
-            downloadList?.map((download, index) => {
+            downloadList?.map(download => {
               return (
-                <Fragment key={index}>
+                <Fragment key={download.channel_id}>
                   <DownloadListItem
                     download={download}
                     view={view}

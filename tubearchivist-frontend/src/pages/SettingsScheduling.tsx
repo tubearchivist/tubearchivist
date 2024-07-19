@@ -210,9 +210,9 @@ const SettingsScheduling = () => {
                 </span>
               </p>
               <p>Periodically rescan your subscriptions:</p>
-              {scheduler_form.update_subscribed.errors.map((error, index) => {
+              {scheduler_form.update_subscribed.errors.map(error => {
                 return (
-                  <p key={index} className="danger-zone">
+                  <p key={error} className="danger-zone">
                     {error}
                   </p>
                 );
@@ -244,9 +244,9 @@ const SettingsScheduling = () => {
                 </span>
               </p>
               <p>Automatic video download schedule:</p>
-              {scheduler_form.download_pending.errors.map((error, index) => {
+              {scheduler_form.download_pending.errors.map(error => {
                 return (
-                  <p key={index} className="danger-zone">
+                  <p key={error} className="danger-zone">
                     {error}
                   </p>
                 );
@@ -287,9 +287,9 @@ const SettingsScheduling = () => {
                 <span className="settings-current">{check_reindex.task_config.days}</span>
               </p>
               <p>Refresh older than x days, recommended 90:</p>
-              {scheduler_form.check_reindex.errors.map((error, index) => {
+              {scheduler_form.check_reindex.errors.map(error => {
                 return (
-                  <p key={index} className="danger-zone">
+                  <p key={error} className="danger-zone">
                     {error}
                   </p>
                 );
@@ -321,9 +321,9 @@ const SettingsScheduling = () => {
                 </span>
               </p>
               <p>Periodically check and cleanup thumbnails:</p>
-              {scheduler_form.thumbnail_check.errors.map((error, index) => {
+              {scheduler_form.thumbnail_check.errors.map(error => {
                 return (
-                  <p key={index} className="danger-zone">
+                  <p key={error} className="danger-zone">
                     {error}
                   </p>
                 );
@@ -362,9 +362,9 @@ const SettingsScheduling = () => {
                 </span>
               </p>
               <p>Automatically backup metadata to a zip file:</p>
-              {scheduler_form.run_backup.errors.map((error, index) => {
+              {scheduler_form.run_backup.errors.map(error => {
                 return (
-                  <p key={index} className="danger-zone">
+                  <p key={error} className="danger-zone">
                     {error}
                   </p>
                 );
@@ -397,10 +397,10 @@ const SettingsScheduling = () => {
                     stored notification links
                   </p>
                   <div id="text-reveal" className="description-text">
-                    {notifications.items.map(({ task, notification }, index) => {
+                    {notifications.items.map(({ task, notification }) => {
                       return (
                         <>
-                          <h3 key={index}>{notification.title}</h3>
+                          <h3 key={task}>{notification.title}</h3>
                           {notification.urls.map((url: string) => {
                             return (
                               <p>

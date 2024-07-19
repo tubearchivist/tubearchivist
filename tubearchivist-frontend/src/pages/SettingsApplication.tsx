@@ -810,9 +810,9 @@ const SettingsApplication = () => {
                   {restoringSnapshot && <p>Snapshot restore started</p>}
                   {!restoringSnapshot &&
                     snapshots.snapshots &&
-                    snapshots.snapshots.map((snapshot, index) => {
+                    snapshots.snapshots.map(snapshot => {
                       return (
-                        <p key={index}>
+                        <p key={snapshot.id}>
                           <Button
                             label="Restore"
                             onClick={async () => {

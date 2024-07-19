@@ -156,9 +156,9 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
                 <Link to={Routes.Channel(channelId)}>{channelName}</Link>
               </h3>
 
-              {playlists?.map(({ id, name }, index) => {
+              {playlists?.map(({ id, name }) => {
                 return (
-                  <h5 key={index}>
+                  <h5 key={id}>
                     <Link to={Routes.Playlist(id)}>{name}</Link>
                   </h5>
                 );

@@ -22,9 +22,9 @@ const ChannelList = ({ channelList, viewLayout, refreshChannelList }: ChannelLis
 
   return (
     <>
-      {channelList.map((channel, index) => {
+      {channelList.map(channel => {
         return (
-          <div key={index} className={`channel-item ${viewLayout}`}>
+          <div key={channel.channel_id} className={`channel-item ${viewLayout}`}>
             <div className={`channel-banner ${viewLayout}`}>
               <Link to={Routes.Channel(channel.channel_id)}>
                 <ChannelBanner channel_id={channel.channel_id} />

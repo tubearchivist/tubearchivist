@@ -19,9 +19,9 @@ const PlaylistList = ({ playlistList, viewLayout, setRefresh }: PlaylistListProp
 
   return (
     <>
-      {playlistList.map((playlist: PlaylistType, index: number) => {
+      {playlistList.map((playlist: PlaylistType) => {
         return (
-          <div key={index} className={`playlist-item ${viewLayout}`}>
+          <div key={playlist.playlist_id} className={`playlist-item ${viewLayout}`}>
             <div className="playlist-thumbnail">
               <Link to={Routes.Playlist(playlist.playlist_id)}>
                 <img

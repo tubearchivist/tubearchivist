@@ -58,13 +58,17 @@ const Notifications = ({
 
   return (
     <>
-      {notificationResponse.map((notification, index) => (
-        <div id={notification.id} className={`notification ${notification.level}`} key={index}>
+      {notificationResponse.map(notification => (
+        <div
+          id={notification.id}
+          className={`notification ${notification.level}`}
+          key={notification.id}
+        >
           <h3>{notification.title}</h3>
           <p>
-            {notification.messages.map((message, index) => {
+            {notification.messages.map(message => {
               return (
-                <Fragment key={index}>
+                <Fragment key={message}>
                   {message}
                   <br />
                 </Fragment>

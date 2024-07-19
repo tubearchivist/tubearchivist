@@ -89,9 +89,9 @@ const CommentBox = ({ comment }: CommentBoxProps) => {
 
           <div className="comments-replies" style={{ display: 'block' }}>
             {showSubComments &&
-              comment.comment_replies?.map((comment, index) => {
+              comment.comment_replies?.map(comment => {
                 return (
-                  <Fragment key={index}>
+                  <Fragment key={comment.comment_id}>
                     <CommentBox comment={comment} />
                   </Fragment>
                 );

@@ -22,10 +22,10 @@ const VideoList = ({
 
   return (
     <>
-      {videoList.map((video, index) => {
+      {videoList.map(video => {
         return (
           <VideoListItem
-            key={index}
+            key={video.youtube_id}
             video={video}
             viewLayout={viewLayout}
             playlistId={playlistId}

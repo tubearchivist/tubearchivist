@@ -188,9 +188,9 @@ const SettingsActions = () => {
               </div>
               {isRestoringBackup && <p>Restoring from backup</p>}
               {!isRestoringBackup &&
-                backups.map((backup, index) => {
+                backups.map(backup => {
                   return (
-                    <div key={index} id={backup.filename} className="backup-grid-row">
+                    <div key={backup.filename} id={backup.filename} className="backup-grid-row">
                       <Button
                         label="Restore"
                         onClick={async () => {
