@@ -2,9 +2,9 @@ import { useState } from 'react';
 import Routes from '../configuration/routes/RouteList';
 import { useNavigate } from 'react-router-dom';
 import importColours, { ColourConstant, ColourVariants } from '../configuration/colours/getColours';
-import loadSignIn from '../api/loader/loadSignIn';
 import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
+import loadSignIn from '../api/loader/loadSignIn';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -21,7 +21,6 @@ const Login = () => {
 
     const loginResponse = await loadSignIn(username, password, saveLogin);
 
-    // TODO: replace with proper Api based handling?
     const signedIn = loginResponse.status === 200;
 
     if (signedIn) {

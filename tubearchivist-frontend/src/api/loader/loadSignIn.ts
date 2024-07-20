@@ -1,32 +1,33 @@
 import getApiUrl from '../../configuration/getApiUrl';
-import getCookie from '../../functions/getCookie';
+
+export type LoginResponseType = {
+  token: string;
+  user_id: number;
+  is_superuser: boolean;
+  is_staff: boolean;
+  user_groups: [];
+};
 
 const loadSignIn = async (username: string, password: string, saveLogin: boolean) => {
   const apiUrl = getApiUrl();
-  const responseHead = await fetch(`${apiUrl}/api/csrf/`, {
-    method: 'HEAD',
-  });
-
-  console.log(responseHead);
-
-  const body = new FormData();
-  body.set('username', username);
-  body.set('password', password);
-  body.set('remember_me', saveLogin ? 'on' : 'off');
-
   const header = new Headers();
 
-  const csrfCookie = getCookie('csrftoken');
-  if (csrfCookie) {
-    header.append('X-CSRFToken', csrfCookie);
-    body.set('csrfmiddlewaretoken', csrfCookie);
-  }
+  header.append('Content-Type', 'application/json');
+  header.append('Authorization', 'Basic ' + btoa(username + ':' + password));
 
-  //TODO: move to /api/login/ and keep token for baerer auth
-  const response = await fetch(`${apiUrl}/login/`, {
+  const response = await fetch(`${apiUrl}/api/login/`, {
     method: 'POST',
-    body,
+    headers: header,
+    body: JSON.stringify({
+      username,
+      password,
+      remember_me: saveLogin ? 'on' : 'off',
+    }),
   });
+
+  if (response.status === 403) {
+    console.log('Might be already logged in.', await response.json());
+  }
 
   return response;
 };
