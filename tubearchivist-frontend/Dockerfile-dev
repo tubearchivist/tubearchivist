@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:lts-alpine
 
 WORKDIR /srv/app
 
@@ -6,7 +6,7 @@ COPY . .
 
 RUN npm config set registry https://registry.npmjs.org/
 
-RUN npm ci
+RUN npm i
 
 EXPOSE 80
 
