@@ -2,8 +2,8 @@
 
 from api.views import AdminOnly, ApiBaseView
 from download.src.queue import PendingInteract
-from home.tasks import download_pending, extrac_dl
 from rest_framework.response import Response
+from task.tasks import download_pending, extrac_dl
 
 
 class DownloadApiListView(ApiBaseView):

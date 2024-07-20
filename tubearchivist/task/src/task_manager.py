@@ -6,7 +6,7 @@ functionality:
 
 from home.celery import app as celery_app
 from home.src.ta.ta_redis import RedisArchivist, TaskRedis
-from home.src.ta.task_config import TASK_CONFIG
+from task.src.task_config import TASK_CONFIG
 
 
 class TaskManager:

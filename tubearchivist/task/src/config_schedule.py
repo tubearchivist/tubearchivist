@@ -7,10 +7,10 @@ from datetime import datetime
 
 from django.utils import dateformat
 from django_celery_beat.models import CrontabSchedule
-from home.models import CustomPeriodicTask
 from home.src.ta.config import AppConfig
 from home.src.ta.settings import EnvironmentSettings
-from home.src.ta.task_config import TASK_CONFIG
+from task.models import CustomPeriodicTask
+from task.src.task_config import TASK_CONFIG
 
 
 class ScheduleBuilder:

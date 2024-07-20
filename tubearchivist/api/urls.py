@@ -32,31 +32,6 @@ urlpatterns = [
         name="api-backup",
     ),
     path(
-        "task-name/",
-        views.TaskListView.as_view(),
-        name="api-task-list",
-    ),
-    path(
-        "task-name/<slug:task_name>/",
-        views.TaskNameListView.as_view(),
-        name="api-task-name-list",
-    ),
-    path(
-        "task-id/<slug:task_id>/",
-        views.TaskIDView.as_view(),
-        name="api-task-id",
-    ),
-    path(
-        "schedule/",
-        views.ScheduleView.as_view(),
-        name="api-schedule",
-    ),
-    path(
-        "schedule/notification/",
-        views.ScheduleNotification.as_view(),
-        name="api-schedule-notification",
-    ),
-    path(
         "config/user/",
         views.UserConfigView.as_view(),
         name="api-config-user",

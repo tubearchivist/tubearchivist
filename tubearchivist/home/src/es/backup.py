@@ -10,11 +10,11 @@ import os
 import zipfile
 from datetime import datetime
 
-from home.models import CustomPeriodicTask
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import get_mapping, ignore_filelist
 from home.src.ta.settings import EnvironmentSettings
+from task.models import CustomPeriodicTask
 
 
 class ElasticBackup:
@@ -139,6 +139,8 @@ class ElasticBackup:
         elif len(file_split) == 3:
             timestamp = file_split[1]
             reason = file_split[2].strip(".zip")
+        else:
+            raise ValueError
 
         data = {
             "filename": filename,

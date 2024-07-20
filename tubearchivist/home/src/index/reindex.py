@@ -14,12 +14,12 @@ from channel.src.index import YoutubeChannel
 from download.src.subscriptions import ChannelSubscription
 from download.src.thumbnails import ThumbManager
 from download.src.yt_dlp_base import CookieHandler
-from home.models import CustomPeriodicTask
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.ta.config import AppConfig
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisQueue
 from playlist.src.index import YoutubePlaylist
+from task.models import CustomPeriodicTask
 from video.src.comments import Comments
 from video.src.index import YoutubeVideo
 

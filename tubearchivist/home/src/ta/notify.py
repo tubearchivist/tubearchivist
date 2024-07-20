@@ -2,8 +2,8 @@
 
 import apprise
 from home.src.es.connect import ElasticWrap
-from home.src.ta.task_config import TASK_CONFIG
-from home.src.ta.task_manager import TaskManager
+from task.src.task_config import TASK_CONFIG
+from task.src.task_manager import TaskManager
 
 
 class Notifications:

@@ -22,7 +22,6 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from download.src.queue import PendingInteract
 from download.src.yt_dlp_base import CookieHandler
-from home.models import CustomPeriodicTask
 from home.src.es.backup import ElasticBackup
 from home.src.es.connect import ElasticWrap
 from home.src.es.snapshot import ElasticSnapshot
@@ -44,15 +43,16 @@ from home.src.frontend.forms_schedule import (
 from home.src.index.generic import Pagination
 from home.src.index.reindex import ReindexProgress
 from home.src.ta.config import AppConfig, ReleaseVersion
-from home.src.ta.config_schedule import ScheduleBuilder
 from home.src.ta.helper import check_stylesheet, time_parser
 from home.src.ta.notify import Notifications, get_all_notifications
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.users import UserConfig
-from home.tasks import index_channel_playlists, subscribe_to
 from playlist.src.index import YoutubePlaylist
 from rest_framework.authtoken.models import Token
+from task.models import CustomPeriodicTask
+from task.src.config_schedule import ScheduleBuilder
+from task.tasks import index_channel_playlists, subscribe_to
 from video.src.constants import VideoTypeEnum
 
 

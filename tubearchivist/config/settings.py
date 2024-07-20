@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "channel",
     "playlist",
     "download",
+    "task",
     "config",
 ]
 

@@ -21,9 +21,9 @@ from home.src.index.reindex import Reindex, ReindexManual, ReindexPopulate
 from home.src.ta.config import ReleaseVersion
 from home.src.ta.notify import Notifications
 from home.src.ta.ta_redis import RedisArchivist
-from home.src.ta.task_config import TASK_CONFIG
-from home.src.ta.task_manager import TaskManager
 from home.src.ta.urlparser import Parser
+from task.src.task_config import TASK_CONFIG
+from task.src.task_manager import TaskManager
 
 
 class BaseTask(Task):

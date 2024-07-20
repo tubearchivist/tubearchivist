@@ -6,7 +6,7 @@ Functionality:
 
 from celery.schedules import crontab
 from django import forms
-from home.src.ta.task_config import TASK_CONFIG
+from task.src.task_config import TASK_CONFIG
 
 
 class CrontabValidator:
