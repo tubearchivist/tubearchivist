@@ -1,36 +1,5 @@
 # Tubearchivist Frontend React
 
-## Development environment:
-
-Fist start the tubearchivist dev environment, then execute:
-
-```bash
-docker compose up --build
-```
-
-Now open: http://localhost:8001/
-
-stop:
-
-```bash
-docker compose down
-
-```
-
-## Production environment:
-
-Build the production image
-
-```bash
-docker build -t tubearchivist-frontend .
-```
-
-and switch to tubearchivist and execute
-
-```bash
-docker-compose -f .\docker-compose.yml up
-```
-
 # Folder structure
 
 ```
