@@ -1,7 +1,7 @@
 import getApiUrl from '../../configuration/getApiUrl';
 
 export type LoginResponseType = {
-  token: string;
+  token?: string;
   user_id: number;
   is_superuser: boolean;
   is_staff: boolean;
