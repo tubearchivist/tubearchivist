@@ -3,7 +3,6 @@ import ChannelOverview from '../components/ChannelOverview';
 import { useEffect, useState } from 'react';
 import loadChannelById from '../api/loader/loadChannelById';
 import { ChannelResponseType } from './ChannelBase';
-import getIsAdmin from '../functions/getIsAdmin';
 import Linkify from '../components/Linkify';
 import deleteChannel from '../api/actions/deleteChannel';
 import Routes from '../configuration/routes/RouteList';
@@ -26,7 +25,19 @@ const handleSponsorBlockIntegrationOverwrite = (integration: boolean | undefined
   }
 };
 
-export type ChannelBaseOutletContextType = [number, () => void, boolean, (status: boolean) => void];
+export type ChannelBaseOutletContextType = {
+  isAdmin: boolean;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  startNotification: boolean;
+  setStartNotification: (status: boolean) => void;
+};
+
+export type OutletContextType = {
+  isAdmin: boolean;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+};
 
 type ChannelAboutParams = {
   channelId: string;
@@ -34,7 +45,7 @@ type ChannelAboutParams = {
 
 const ChannelAbout = () => {
   const { channelId } = useParams() as ChannelAboutParams;
-  const [, , , setStartNotification] = useOutletContext() as ChannelBaseOutletContextType;
+  const { isAdmin, setStartNotification } = useOutletContext() as ChannelBaseOutletContextType;
   const navigate = useNavigate();
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -63,8 +74,6 @@ const ChannelAbout = () => {
       setRefresh(false);
     })();
   }, [refresh, channelId]);
-
-  const isAdmin = getIsAdmin();
 
   if (!channel) {
     return 'Channel not found!';

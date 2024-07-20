@@ -18,7 +18,11 @@ type BaseLoaderData = {
   auth: AuthenticationType;
 };
 
-export type OutletContextType = [number, () => void];
+export type OutletContextType = {
+  isAdmin: boolean;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+};
 
 const Base = () => {
   const { userConfig, auth } = useLoaderData() as BaseLoaderData;
@@ -29,10 +33,17 @@ const Base = () => {
   const currentPageFromUrl = Number(searchParams.get('page'));
 
   const [currentPage, setCurrentPage] = useState(currentPageFromUrl);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [, setSearchParams] = useSearchParams();
 
   const version = auth.version;
   const taUpdate = auth.ta_update;
+
+  useEffect(() => {
+    (async () => {
+      setIsAdmin(await getIsAdmin());
+    })();
+  }, []);
 
   useEffect(() => {
     if (currentPageFromUrl !== currentPage) {
@@ -67,14 +78,12 @@ const Base = () => {
 
   importColours(userConfig.stylesheet);
 
-  const isAdmin = getIsAdmin();
-
   return (
     <>
       <div className="main-content">
         <Navigation isAdmin={isAdmin} />
         {/** Outlet: https://reactrouter.com/en/main/components/outlet */}
-        <Outlet context={[currentPage, setCurrentPage]} />
+        <Outlet context={{ isAdmin, currentPage, setCurrentPage }} />
       </div>
       <Footer version={version} taUpdate={taUpdate} />
     </>

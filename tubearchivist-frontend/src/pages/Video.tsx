@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import loadVideoById from '../api/loader/loadVideoById';
 import { Fragment, useEffect, useState } from 'react';
 import { ConfigType, VideoType } from './Home';
@@ -19,7 +19,6 @@ import updateWatchedState from '../api/actions/updateWatchedState';
 import humanFileSize from '../functions/humanFileSize';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import loadVideoProgressById from '../api/loader/loadVideoProgressById';
-import getIsAdmin from '../functions/getIsAdmin';
 import ChannelOverview from '../components/ChannelOverview';
 import deleteVideo from '../api/actions/deleteVideo';
 import capitalizeFirstLetter from '../functions/capitalizeFirstLetter';
@@ -39,6 +38,7 @@ import loadCommentsbyVideoId from '../api/loader/loadCommentsbyVideoId';
 import CommentBox, { CommentsType } from '../components/CommentBox';
 import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
+import { OutletContextType } from './Base';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {
   return playlist.playlist_entries.some(entry => {
@@ -118,6 +118,7 @@ export type VideoCommentsResponseType = {
 };
 
 const Video = () => {
+  const { isAdmin } = useOutletContext() as OutletContextType;
   const { videoId } = useParams() as VideoParams;
   const navigate = useNavigate();
 
@@ -167,8 +168,6 @@ const Video = () => {
   const comments = commentsResponse?.data;
 
   const cast = config.enable_cast;
-
-  const isAdmin = getIsAdmin();
 
   return (
     <>

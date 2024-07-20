@@ -11,7 +11,6 @@ import { UserConfigType } from '../api/actions/updateUserConfig';
 import loadPlaylistById from '../api/loader/loadPlaylistById';
 import { OutletContextType } from './Base';
 import { ConfigType, VideoType, ViewLayout } from './Home';
-import getIsAdmin from '../functions/getIsAdmin';
 import Filterbar from '../components/Filterbar';
 import { PlaylistEntryType } from './Playlists';
 import loadChannelById from '../api/loader/loadChannelById';
@@ -71,7 +70,7 @@ const Playlist = () => {
   const videoId = searchParams.get('videoId');
 
   const { userConfig } = useLoaderData() as PlaylistLoaderDataType;
-  const [currentPage, setCurrentPage] = useOutletContext() as OutletContextType;
+  const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const [hideWatched, setHideWatched] = useState(userConfig.hide_watched || false);
   const [view, setView] = useState<ViewLayout>(userConfig.view_style_home || 'grid');
@@ -127,7 +126,6 @@ const Playlist = () => {
     return `Playlist ${playlistId} not found!`;
   }
 
-  const isAdmin = getIsAdmin();
   const isCustomPlaylist = playlist.playlist_type === 'custom';
 
   return (

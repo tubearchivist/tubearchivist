@@ -8,7 +8,6 @@ import Pagination, { PaginationType } from '../components/Pagination';
 import { ConfigType, ViewLayout } from './Home';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import { OutletContextType } from './Base';
-import getIsAdmin from '../functions/getIsAdmin';
 import ChannelList from '../components/ChannelList';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import Notifications from '../components/Notifications';
@@ -53,7 +52,7 @@ type ChannelsLoaderDataType = {
 
 const Channels = () => {
   const { userConfig } = useLoaderData() as ChannelsLoaderDataType;
-  const [currentPage, setCurrentPage] = useOutletContext() as OutletContextType;
+  const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const [channelListResponse, setChannelListResponse] = useState<ChannelsListResponse>();
   const [showSubscribedOnly, setShowSubscribedOnly] = useState(userConfig.show_subed_only || false);
@@ -96,8 +95,6 @@ const Channels = () => {
       }
     })();
   }, [currentPage, showSubscribedOnly, refresh, pagination?.current_page]);
-
-  const isAdmin = getIsAdmin();
 
   return (
     <>

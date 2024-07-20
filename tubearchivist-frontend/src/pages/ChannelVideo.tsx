@@ -16,7 +16,6 @@ import loadChannelVideosById from '../api/loader/loadChannelVideosById';
 import Filterbar from '../components/Filterbar';
 import { ViewStyleNames, ViewStyles } from '../configuration/constants/ViewStyle';
 import ChannelOverview from '../components/ChannelOverview';
-import getIsAdmin from '../functions/getIsAdmin';
 import loadChannelById from '../api/loader/loadChannelById';
 import { ChannelResponseType } from './ChannelBase';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
@@ -36,7 +35,7 @@ type ChannelVideoLoaderType = {
 const ChannelVideo = () => {
   const { channelId } = useParams() as ChannelParams;
   const { userConfig } = useLoaderData() as ChannelVideoLoaderType;
-  const [currentPage, setCurrentPage] = useOutletContext() as OutletContextType;
+  const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');
 
@@ -84,7 +83,6 @@ const ChannelVideo = () => {
     total_duration: { value_str: '<debug>' },
     total_size: { value: '<debug>' },
   };
-  const isAdmin = getIsAdmin();
 
   if (!channel) {
     return (

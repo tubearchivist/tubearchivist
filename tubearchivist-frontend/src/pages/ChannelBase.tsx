@@ -2,7 +2,6 @@ import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
 import { ChannelType } from './Channels';
 import { ConfigType } from './Home';
-import getIsAdmin from '../functions/getIsAdmin';
 import { OutletContextType } from './Base';
 import Notifications from '../components/Notifications';
 import { useState } from 'react';
@@ -19,7 +18,7 @@ export type ChannelResponseType = {
 
 const ChannelBase = () => {
   const { channelId } = useParams() as ChannelParams;
-  const [currentPage, setCurrentPage] = useOutletContext() as OutletContextType;
+  const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const [startNotification, setStartNotification] = useState(false);
 
@@ -27,8 +26,6 @@ const ChannelBase = () => {
   const has_shorts = false;
   const has_playlists = false;
   const has_pending = false;
-
-  const isAdmin = getIsAdmin();
 
   if (!channelId) {
     return [];
@@ -79,7 +76,15 @@ const ChannelBase = () => {
         />
       </div>
 
-      <Outlet context={[currentPage, setCurrentPage, startNotification, setStartNotification]} />
+      <Outlet
+        context={{
+          isAdmin,
+          currentPage,
+          setCurrentPage,
+          startNotification,
+          setStartNotification,
+        }}
+      />
     </>
   );
 };

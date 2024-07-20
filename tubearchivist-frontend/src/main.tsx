@@ -282,11 +282,9 @@ const router = createBrowserRouter(
               return redirect(Routes.Login);
             }
 
-            const authData = await auth.json();
-
             const userConfig = await loadUserConfig();
 
-            return { userConfig, auth: authData };
+            return { userConfig };
           },
         },
         {

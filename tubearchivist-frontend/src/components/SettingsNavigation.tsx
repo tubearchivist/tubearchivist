@@ -1,9 +1,10 @@
-import { Link } from 'react-router-dom';
-import getIsAdmin from '../functions/getIsAdmin';
+import { Link, useOutletContext } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
+import { OutletContextType } from '../pages/Base';
 
 const SettingsNavigation = () => {
-  const isAdmin = getIsAdmin();
+  const { isAdmin } = useOutletContext() as OutletContextType;
+
   return (
     <>
       <div className="info-box-item child-page-nav">

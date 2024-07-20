@@ -1,6 +1,5 @@
-import { useLoaderData, useNavigate } from 'react-router-dom';
+import { useLoaderData, useNavigate, useOutletContext } from 'react-router-dom';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
-import { AuthenticationType } from './Base';
 import { useEffect, useState } from 'react';
 import loadUserConfig from '../api/loader/loadUserConfig';
 import { ColourConstant, ColourVariants } from '../configuration/colours/getColours';
@@ -8,14 +7,15 @@ import SettingsNavigation from '../components/SettingsNavigation';
 import Notifications from '../components/Notifications';
 import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
+import { OutletContextType } from './Base';
 
 type SettingsUserLoaderData = {
   userConfig: UserConfigType;
-  auth: AuthenticationType;
 };
 
 const SettingsUser = () => {
-  const { userConfig, auth } = useLoaderData() as SettingsUserLoaderData;
+  const { isAdmin } = useOutletContext() as OutletContextType;
+  const { userConfig } = useLoaderData() as SettingsUserLoaderData;
   const { stylesheet, page_size } = userConfig;
   const navigate = useNavigate();
 
@@ -28,8 +28,6 @@ const SettingsUser = () => {
   const stylesheetOverwritable =
     userConfigResponse?.stylesheet || stylesheet || (ColourConstant.Dark as ColourVariants);
   const pageSizeOverwritable = userConfigResponse?.page_size || page_size || 12;
-
-  const isSuperuser = auth?.user?.is_superuser;
 
   useEffect(() => {
     (async () => {
@@ -118,7 +116,7 @@ const SettingsUser = () => {
           />
         </div>
 
-        {isSuperuser && (
+        {isAdmin && (
           <>
             <div className="title-bar">
               <h1>Users</h1>

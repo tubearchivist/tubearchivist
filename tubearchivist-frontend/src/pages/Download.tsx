@@ -58,7 +58,7 @@ type DownloadLoaderDataType = {
 
 const Download = () => {
   const { userConfig } = useLoaderData() as DownloadLoaderDataType;
-  const [currentPage, setCurrentPage] = useOutletContext() as OutletContextType;
+  const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const searchParams = new URLSearchParams(location.search);
   const channelFilterFromUrl = searchParams.get('channel');

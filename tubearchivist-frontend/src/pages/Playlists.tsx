@@ -10,7 +10,6 @@ import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfi
 import loadPlaylistList from '../api/loader/loadPlaylistList';
 import { ConfigType, ViewLayout } from './Home';
 import Pagination, { PaginationType } from '../components/Pagination';
-import getIsAdmin from '../functions/getIsAdmin';
 import PlaylistList from '../components/PlaylistList';
 import { PlaylistType } from './Playlist';
 import updatePlaylistSubscription from '../api/actions/updatePlaylistSubscription';
@@ -39,7 +38,7 @@ type PlaylistLoaderDataType = {
 
 const Playlists = () => {
   const { userConfig } = useLoaderData() as PlaylistLoaderDataType;
-  const [currentPage, setCurrentPage] = useOutletContext() as OutletContextType;
+  const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const [showSubedOnly, setShowSubedOnly] = useState(userConfig.hide_watched || false);
   const [view, setView] = useState<ViewLayout>(userConfig.view_style_playlist || 'grid');
@@ -54,8 +53,6 @@ const Playlists = () => {
   const pagination = playlistResponse?.paginate;
 
   const hasPlaylists = playlistResponse?.data?.length !== 0;
-
-  const isAdmin = getIsAdmin();
 
   useEffect(() => {
     (async () => {

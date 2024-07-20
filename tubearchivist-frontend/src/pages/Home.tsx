@@ -111,7 +111,7 @@ export type ViewLayout = 'grid' | 'list';
 
 const Home = () => {
   const { userConfig } = useLoaderData() as HomeLoaderDataType;
-  const [currentPage, setCurrentPage] = useOutletContext() as OutletContextType;
+  const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');
 

@@ -18,7 +18,7 @@ type ChannelPlaylistLoaderDataType = {
 const ChannelPlaylist = () => {
   const { channelId } = useParams();
   const { userConfig } = useLoaderData() as ChannelPlaylistLoaderDataType;
-  const [currentPage, setCurrentPage] = useOutletContext() as OutletContextType;
+  const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const [hideWatched, setHideWatched] = useState(userConfig.hide_watched || false);
   const [view, setView] = useState<ViewLayout>(userConfig.view_style_home || 'grid');
