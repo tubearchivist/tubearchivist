@@ -87,7 +87,10 @@ class Scanner:
                     ],
                     progress=(idx + 1) / total,
                 )
-            index_new_video(youtube_id)
+            try:
+                index_new_video(youtube_id)
+            except ValueError:
+                print(f"video {youtube_id} is no longer available")
 
         comment_list = CommentList(task=self.task)
         comment_list.add(video_ids=list(self.to_index))
