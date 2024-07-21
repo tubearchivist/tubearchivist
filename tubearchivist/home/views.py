@@ -11,6 +11,9 @@ from time import sleep
 
 from api.src.search_processor import SearchProcess, process_aggs
 from api.views import check_admin
+from appsettings.src.backup import ElasticBackup
+from appsettings.src.reindex import ReindexProgress
+from appsettings.src.snapshot import ElasticSnapshot
 from channel.src.index import channel_overwrites
 from django.conf import settings
 from django.contrib.auth import login
@@ -22,9 +25,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from download.src.queue import PendingInteract
 from download.src.yt_dlp_base import CookieHandler
-from home.src.es.backup import ElasticBackup
 from home.src.es.connect import ElasticWrap
-from home.src.es.snapshot import ElasticSnapshot
 from home.src.frontend.forms import (
     AddToQueueForm,
     ApplicationSettingsForm,
@@ -41,7 +42,6 @@ from home.src.frontend.forms_schedule import (
     SchedulerSettingsForm,
 )
 from home.src.index.generic import Pagination
-from home.src.index.reindex import ReindexProgress
 from home.src.ta.config import AppConfig, ReleaseVersion
 from home.src.ta.helper import check_stylesheet, time_parser
 from home.src.ta.notify import Notifications, get_all_notifications

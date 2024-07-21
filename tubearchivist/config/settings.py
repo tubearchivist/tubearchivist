@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     "playlist",
     "download",
     "task",
+    "appsettings",
     "config",
 ]
 

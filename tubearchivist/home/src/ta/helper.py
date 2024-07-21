@@ -131,7 +131,7 @@ def clear_dl_cache(cache_dir: str) -> int:
 
 def get_mapping() -> dict:
     """read index_mapping.json and get expected mapping and settings"""
-    with open("home/src/es/index_mapping.json", "r", encoding="utf-8") as f:
+    with open("appsettings/index_mapping.json", "r", encoding="utf-8") as f:
         index_config: dict = json.load(f).get("index_config")
 
     return index_config

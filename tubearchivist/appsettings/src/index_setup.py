@@ -5,9 +5,9 @@ functionality:
 - backup and restore metadata
 """
 
-from home.src.es.backup import ElasticBackup
+from appsettings.src.backup import ElasticBackup
+from appsettings.src.snapshot import ElasticSnapshot
 from home.src.es.connect import ElasticWrap
-from home.src.es.snapshot import ElasticSnapshot
 from home.src.ta.config import AppConfig
 from home.src.ta.helper import get_mapping
 
@@ -111,6 +111,8 @@ class ElasticIndex:
         elif method == "restore":
             source = f"ta_{self.index_name}_backup"
             destination = f"ta_{self.index_name}"
+        else:
+            raise ValueError("invalid method, expected 'backup' or 'restore'")
 
         data = {"source": {"index": source}, "dest": {"index": destination}}
         _, _ = ElasticWrap("_reindex?refresh=true").post(data=data)

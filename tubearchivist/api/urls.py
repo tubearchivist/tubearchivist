@@ -12,34 +12,9 @@ urlpatterns = [
         name="api-refresh",
     ),
     path(
-        "snapshot/",
-        views.SnapshotApiListView.as_view(),
-        name="api-snapshot-list",
-    ),
-    path(
-        "snapshot/<slug:snapshot_id>/",
-        views.SnapshotApiView.as_view(),
-        name="api-snapshot",
-    ),
-    path(
-        "backup/",
-        views.BackupApiListView.as_view(),
-        name="api-backup-list",
-    ),
-    path(
-        "backup/<str:filename>/",
-        views.BackupApiView.as_view(),
-        name="api-backup",
-    ),
-    path(
         "config/user/",
         views.UserConfigView.as_view(),
         name="api-config-user",
-    ),
-    path(
-        "cookie/",
-        views.CookieView.as_view(),
-        name="api-cookie",
     ),
     path(
         "watched/",
@@ -50,11 +25,6 @@ urlpatterns = [
         "search/",
         views.SearchView.as_view(),
         name="api-search",
-    ),
-    path(
-        "token/",
-        views.TokenView.as_view(),
-        name="api-token",
     ),
     path(
         "notification/",

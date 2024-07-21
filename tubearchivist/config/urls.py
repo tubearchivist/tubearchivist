@@ -25,5 +25,6 @@ urlpatterns = [
     path("api/playlist/", include("playlist.urls")),
     path("api/download/", include("download.urls")),
     path("api/task/", include("task.urls")),
+    path("api/appsettings/", include("appsettings.urls")),
     path("admin/", admin.site.urls),
 ]

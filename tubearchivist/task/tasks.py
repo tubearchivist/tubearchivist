@@ -6,6 +6,11 @@ Functionality:
 - handle task locking
 """
 
+from appsettings.src.backup import ElasticBackup
+from appsettings.src.filesystem import Scanner
+from appsettings.src.index_setup import ElasitIndexWrap
+from appsettings.src.manual import ImportFolderScanner
+from appsettings.src.reindex import Reindex, ReindexManual, ReindexPopulate
 from celery import Task, shared_task
 from celery.exceptions import Retry
 from channel.src.index import YoutubeChannel
@@ -13,11 +18,6 @@ from download.src.queue import PendingList
 from download.src.subscriptions import SubscriptionHandler, SubscriptionScanner
 from download.src.thumbnails import ThumbFilesystem, ThumbValidator
 from download.src.yt_dlp_handler import VideoDownloader
-from home.src.es.backup import ElasticBackup
-from home.src.es.index_setup import ElasitIndexWrap
-from home.src.index.filesystem import Scanner
-from home.src.index.manual import ImportFolderScanner
-from home.src.index.reindex import Reindex, ReindexManual, ReindexPopulate
 from home.src.ta.config import ReleaseVersion
 from home.src.ta.notify import Notifications
 from home.src.ta.ta_redis import RedisArchivist
