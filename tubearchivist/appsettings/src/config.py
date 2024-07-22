@@ -29,7 +29,7 @@ class AppConfig:
 
     def get_config_file(self):
         """read the defaults from config.json"""
-        with open("home/config.json", "r", encoding="utf-8") as f:
+        with open("appsettings/config.json", "r", encoding="utf-8") as f:
             config_file = json.load(f)
 
         return config_file

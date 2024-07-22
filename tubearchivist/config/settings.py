@@ -49,7 +49,6 @@ ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS = ta_host_parser(
 
 INSTALLED_APPS = [
     "django_celery_beat",
-    "home.apps.HomeConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

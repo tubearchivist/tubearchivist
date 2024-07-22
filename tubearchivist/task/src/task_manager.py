@@ -5,7 +5,7 @@ functionality:
 """
 
 from common.src.ta_redis import RedisArchivist, TaskRedis
-from home.celery import app as celery_app
+from task.celery import app as celery_app
 from task.src.task_config import TASK_CONFIG
 
 
