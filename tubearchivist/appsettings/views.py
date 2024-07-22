@@ -1,11 +1,11 @@
 """all app settings API views"""
 
-from api.views import AdminOnly, ApiBaseView
 from appsettings.src.backup import ElasticBackup
+from appsettings.src.config import AppConfig
 from appsettings.src.snapshot import ElasticSnapshot
+from common.src.ta_redis import RedisArchivist
+from common.views_base import AdminOnly, ApiBaseView
 from download.src.yt_dlp_base import CookieHandler
-from home.src.ta.config import AppConfig
-from home.src.ta.ta_redis import RedisArchivist
 from rest_framework.response import Response
 from task.src.task_manager import TaskCommand
 from task.tasks import run_restore_backup

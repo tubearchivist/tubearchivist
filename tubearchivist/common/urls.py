@@ -1,6 +1,6 @@
 """all api urls"""
 
-from api import views
+from common import views
 from django.urls import path
 
 urlpatterns = [

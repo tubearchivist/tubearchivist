@@ -10,9 +10,9 @@ from io import BytesIO
 from time import sleep
 
 import requests
-from home.src.es.connect import ElasticWrap, IndexPaginate
-from home.src.ta.helper import is_missing
-from home.src.ta.settings import EnvironmentSettings
+from common.src.env_settings import EnvironmentSettings
+from common.src.es_connect import ElasticWrap, IndexPaginate
+from common.src.helper import is_missing
 from mutagen.mp4 import MP4, MP4Cover
 from PIL import Image, ImageFile, ImageFilter, UnidentifiedImageError
 

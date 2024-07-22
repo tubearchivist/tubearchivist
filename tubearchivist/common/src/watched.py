@@ -5,8 +5,8 @@ functionality:
 
 from datetime import datetime
 
-from home.src.es.connect import ElasticWrap
-from home.src.ta.urlparser import Parser
+from common.src.es_connect import ElasticWrap
+from common.src.urlparser import Parser
 
 
 class WatchState:

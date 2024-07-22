@@ -10,8 +10,8 @@ from http import cookiejar
 from io import StringIO
 
 import yt_dlp
-from home.src.ta.settings import EnvironmentSettings
-from home.src.ta.ta_redis import RedisArchivist
+from common.src.env_settings import EnvironmentSettings
+from common.src.ta_redis import RedisArchivist
 
 
 class YtWrap:

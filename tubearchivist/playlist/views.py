@@ -1,6 +1,6 @@
 """all playlist API views"""
 
-from api.views import AdminWriteOnly, ApiBaseView
+from common.views_base import AdminWriteOnly, ApiBaseView
 from download.src.subscriptions import PlaylistSubscription
 from playlist.src.index import YoutubePlaylist
 from rest_framework import status

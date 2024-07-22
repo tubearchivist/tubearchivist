@@ -6,9 +6,9 @@ Functionality:
 
 import urllib.parse
 
+from common.src.env_settings import EnvironmentSettings
+from common.src.helper import date_parser, get_duration_str
 from download.src.thumbnails import ThumbManager
-from home.src.ta.helper import date_parser, get_duration_str
-from home.src.ta.settings import EnvironmentSettings
 
 
 class SearchProcess:

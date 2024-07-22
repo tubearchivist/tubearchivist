@@ -5,9 +5,9 @@ functionality:
 
 import math
 
+from appsettings.src.config import AppConfig
+from common.src.es_connect import ElasticWrap
 from download.src.yt_dlp_base import YtWrap
-from home.src.es.connect import ElasticWrap
-from home.src.ta.config import AppConfig
 from user.src.user_config import UserConfig
 
 

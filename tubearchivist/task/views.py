@@ -1,6 +1,6 @@
 """all task API views"""
 
-from api.views import AdminOnly, ApiBaseView
+from common.views_base import AdminOnly, ApiBaseView
 from rest_framework.response import Response
 from task.models import CustomPeriodicTask
 from task.src.notify import Notifications, get_all_notifications

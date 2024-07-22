@@ -7,6 +7,7 @@ Functionality:
 """
 
 from appsettings.src.backup import ElasticBackup
+from appsettings.src.config import ReleaseVersion
 from appsettings.src.filesystem import Scanner
 from appsettings.src.index_setup import ElasitIndexWrap
 from appsettings.src.manual import ImportFolderScanner
@@ -14,13 +15,12 @@ from appsettings.src.reindex import Reindex, ReindexManual, ReindexPopulate
 from celery import Task, shared_task
 from celery.exceptions import Retry
 from channel.src.index import YoutubeChannel
+from common.src.ta_redis import RedisArchivist
+from common.src.urlparser import Parser
 from download.src.queue import PendingList
 from download.src.subscriptions import SubscriptionHandler, SubscriptionScanner
 from download.src.thumbnails import ThumbFilesystem, ThumbValidator
 from download.src.yt_dlp_handler import VideoDownloader
-from home.src.ta.config import ReleaseVersion
-from home.src.ta.ta_redis import RedisArchivist
-from home.src.ta.urlparser import Parser
 from task.src.notify import Notifications
 from task.src.task_config import TASK_CONFIG
 from task.src.task_manager import TaskManager

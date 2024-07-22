@@ -15,10 +15,10 @@ from os import environ, path
 from pathlib import Path
 
 import ldap
+from common.src.env_settings import EnvironmentSettings
+from common.src.helper import ta_host_parser
 from corsheaders.defaults import default_headers
 from django_auth_ldap.config import LDAPSearch
-from home.src.ta.helper import ta_host_parser
-from home.src.ta.settings import EnvironmentSettings
 
 try:
     from dotenv import load_dotenv
@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     "django.contrib.humanize",
     "rest_framework",
     "rest_framework.authtoken",
-    "api",
+    "common",
     "video",
     "channel",
     "playlist",
@@ -83,7 +83,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "home.src.ta.health.HealthCheckMiddleware",
+    "common.src.health.HealthCheckMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -236,7 +236,7 @@ if bool(environ.get("TA_ENABLE_AUTH_PROXY")):
     )
     TA_AUTH_PROXY_LOGOUT_URL = environ.get("TA_AUTH_PROXY_LOGOUT_URL")
 
-    MIDDLEWARE.append("home.src.ta.auth.HttpRemoteUserMiddleware")
+    MIDDLEWARE.append("user.src.remote_user_auth.HttpRemoteUserMiddleware")
 
     AUTHENTICATION_BACKENDS = (
         "django.contrib.auth.backends.RemoteUserBackend",

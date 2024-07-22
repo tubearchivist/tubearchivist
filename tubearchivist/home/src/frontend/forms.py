@@ -4,10 +4,10 @@
 
 import os
 
+from common.src.helper import get_stylesheets
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.forms.widgets import PasswordInput, TextInput
-from home.src.ta.helper import get_stylesheets
 
 
 class CustomAuthForm(AuthenticationForm):

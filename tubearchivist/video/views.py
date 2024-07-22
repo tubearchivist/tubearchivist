@@ -1,7 +1,7 @@
 """all API views for video endpoints"""
 
-from api.views import AdminWriteOnly, ApiBaseView
-from home.src.ta.ta_redis import RedisArchivist
+from common.src.ta_redis import RedisArchivist
+from common.views_base import AdminWriteOnly, ApiBaseView
 from rest_framework.response import Response
 from video.src.index import YoutubeVideo
 

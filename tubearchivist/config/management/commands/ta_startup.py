@@ -9,17 +9,17 @@ from datetime import datetime
 from random import randint
 from time import sleep
 
+from appsettings.src.config import AppConfig, ReleaseVersion
 from appsettings.src.index_setup import ElasitIndexWrap
 from appsettings.src.snapshot import ElasticSnapshot
+from common.src.env_settings import EnvironmentSettings
+from common.src.es_connect import ElasticWrap
+from common.src.helper import clear_dl_cache
+from common.src.ta_redis import RedisArchivist
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import dateformat
 from django_celery_beat.models import CrontabSchedule, PeriodicTasks
-from home.src.es.connect import ElasticWrap
-from home.src.ta.config import AppConfig, ReleaseVersion
-from home.src.ta.helper import clear_dl_cache
-from home.src.ta.settings import EnvironmentSettings
-from home.src.ta.ta_redis import RedisArchivist
 from task.models import CustomPeriodicTask
 from task.src.config_schedule import ScheduleBuilder
 from task.src.notify import Notifications

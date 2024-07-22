@@ -10,10 +10,10 @@ import os
 import zipfile
 from datetime import datetime
 
-from home.src.es.connect import ElasticWrap, IndexPaginate
-from home.src.ta.config import AppConfig
-from home.src.ta.helper import get_mapping, ignore_filelist
-from home.src.ta.settings import EnvironmentSettings
+from appsettings.src.config import AppConfig
+from common.src.env_settings import EnvironmentSettings
+from common.src.es_connect import ElasticWrap, IndexPaginate
+from common.src.helper import get_mapping, ignore_filelist
 from task.models import CustomPeriodicTask
 
 

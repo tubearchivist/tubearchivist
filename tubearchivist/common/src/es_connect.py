@@ -11,7 +11,7 @@ from typing import Any
 
 import requests
 import urllib3
-from home.src.ta.settings import EnvironmentSettings
+from common.src.env_settings import EnvironmentSettings
 
 
 class ElasticWrap:

@@ -9,12 +9,18 @@ import urllib.parse
 import uuid
 from time import sleep
 
-from api.src.search_processor import SearchProcess, process_aggs
-from api.views import check_admin
 from appsettings.src.backup import ElasticBackup
+from appsettings.src.config import AppConfig, ReleaseVersion
 from appsettings.src.reindex import ReindexProgress
 from appsettings.src.snapshot import ElasticSnapshot
 from channel.src.index import channel_overwrites
+from common.src.env_settings import EnvironmentSettings
+from common.src.es_connect import ElasticWrap
+from common.src.helper import check_stylesheet, time_parser
+from common.src.index_generic import Pagination
+from common.src.search_processor import SearchProcess, process_aggs
+from common.src.ta_redis import RedisArchivist
+from common.views_base import check_admin
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import user_passes_test
@@ -25,7 +31,6 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from download.src.queue import PendingInteract
 from download.src.yt_dlp_base import CookieHandler
-from home.src.es.connect import ElasticWrap
 from home.src.frontend.forms import (
     AddToQueueForm,
     ApplicationSettingsForm,
@@ -41,11 +46,6 @@ from home.src.frontend.forms_schedule import (
     NotificationSettingsForm,
     SchedulerSettingsForm,
 )
-from home.src.index.generic import Pagination
-from home.src.ta.config import AppConfig, ReleaseVersion
-from home.src.ta.helper import check_stylesheet, time_parser
-from home.src.ta.settings import EnvironmentSettings
-from home.src.ta.ta_redis import RedisArchivist
 from playlist.src.index import YoutubePlaylist
 from rest_framework.authtoken.models import Token
 from task.models import CustomPeriodicTask

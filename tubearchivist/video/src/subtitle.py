@@ -10,9 +10,9 @@ import os
 from datetime import datetime
 
 import requests
-from home.src.es.connect import ElasticWrap
-from home.src.ta.helper import requests_headers
-from home.src.ta.settings import EnvironmentSettings
+from common.src.env_settings import EnvironmentSettings
+from common.src.es_connect import ElasticWrap
+from common.src.helper import requests_headers
 
 
 class YoutubeSubtitle:

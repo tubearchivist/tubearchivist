@@ -1,6 +1,6 @@
 """all stats API views"""
 
-from api.views import ApiBaseView
+from common.views_base import ApiBaseView
 from rest_framework.response import Response
 from stats.src.aggs import (
     BiggestChannel,

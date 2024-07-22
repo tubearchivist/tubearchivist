@@ -6,8 +6,8 @@ Functionality:
 - calculate pagination values
 """
 
-from api.src.search_processor import SearchProcess
-from home.src.es.connect import ElasticWrap
+from common.src.es_connect import ElasticWrap
+from common.src.search_processor import SearchProcess
 
 
 class SearchForm:

@@ -6,10 +6,10 @@ Functionality:
 from time import sleep
 
 import requests
+from common.src.env_settings import EnvironmentSettings
+from common.src.es_connect import ElasticWrap
+from common.src.ta_redis import RedisArchivist
 from django.core.management.base import BaseCommand, CommandError
-from home.src.es.connect import ElasticWrap
-from home.src.ta.settings import EnvironmentSettings
-from home.src.ta.ta_redis import RedisArchivist
 
 TOPIC = """
 

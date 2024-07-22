@@ -1,9 +1,9 @@
 """all channel API views"""
 
-from api.views import AdminWriteOnly, ApiBaseView
 from channel.src.index import YoutubeChannel
+from common.src.urlparser import Parser
+from common.views_base import AdminWriteOnly, ApiBaseView
 from download.src.subscriptions import ChannelSubscription
-from home.src.ta.urlparser import Parser
 from rest_framework.response import Response
 from task.tasks import subscribe_to
 

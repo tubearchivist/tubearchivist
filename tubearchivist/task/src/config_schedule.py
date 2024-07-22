@@ -5,10 +5,10 @@ Functionality:
 
 from datetime import datetime
 
+from appsettings.src.config import AppConfig
+from common.src.env_settings import EnvironmentSettings
 from django.utils import dateformat
 from django_celery_beat.models import CrontabSchedule
-from home.src.ta.config import AppConfig
-from home.src.ta.settings import EnvironmentSettings
 from task.models import CustomPeriodicTask
 from task.src.task_config import TASK_CONFIG
 

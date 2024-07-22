@@ -11,10 +11,10 @@ import re
 import shutil
 import subprocess
 
+from appsettings.src.config import AppConfig
+from common.src.env_settings import EnvironmentSettings
+from common.src.helper import ignore_filelist
 from download.src.thumbnails import ThumbManager
-from home.src.ta.config import AppConfig
-from home.src.ta.helper import ignore_filelist
-from home.src.ta.settings import EnvironmentSettings
 from PIL import Image
 from video.src.comments import CommentList
 from video.src.index import YoutubeVideo

@@ -6,10 +6,10 @@ functionality:
 """
 
 from appsettings.src.backup import ElasticBackup
+from appsettings.src.config import AppConfig
 from appsettings.src.snapshot import ElasticSnapshot
-from home.src.es.connect import ElasticWrap
-from home.src.ta.config import AppConfig
-from home.src.ta.helper import get_mapping
+from common.src.es_connect import ElasticWrap
+from common.src.helper import get_mapping
 
 
 class ElasticIndex:

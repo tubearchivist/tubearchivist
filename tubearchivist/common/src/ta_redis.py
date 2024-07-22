@@ -8,7 +8,7 @@ functionality:
 import json
 
 import redis
-from home.src.ta.settings import EnvironmentSettings
+from common.src.env_settings import EnvironmentSettings
 
 
 class RedisBase:

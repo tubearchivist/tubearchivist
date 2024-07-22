@@ -3,7 +3,7 @@
 import os
 
 from celery import Celery
-from home.src.ta.settings import EnvironmentSettings
+from common.src.env_settings import EnvironmentSettings
 
 REDIS_HOST = EnvironmentSettings.REDIS_HOST
 REDIS_PORT = EnvironmentSettings.REDIS_PORT

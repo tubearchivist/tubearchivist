@@ -1,6 +1,6 @@
 """all download API views"""
 
-from api.views import AdminOnly, ApiBaseView
+from common.views_base import AdminOnly, ApiBaseView
 from download.src.queue import PendingInteract
 from rest_framework.response import Response
 from task.tasks import download_pending, extrac_dl

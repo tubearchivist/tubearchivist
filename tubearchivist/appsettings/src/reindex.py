@@ -10,14 +10,14 @@ from datetime import datetime
 from time import sleep
 from typing import Callable, TypedDict
 
+from appsettings.src.config import AppConfig
 from channel.src.index import YoutubeChannel
+from common.src.env_settings import EnvironmentSettings
+from common.src.es_connect import ElasticWrap, IndexPaginate
+from common.src.ta_redis import RedisQueue
 from download.src.subscriptions import ChannelSubscription
 from download.src.thumbnails import ThumbManager
 from download.src.yt_dlp_base import CookieHandler
-from home.src.es.connect import ElasticWrap, IndexPaginate
-from home.src.ta.config import AppConfig
-from home.src.ta.settings import EnvironmentSettings
-from home.src.ta.ta_redis import RedisQueue
 from playlist.src.index import YoutubePlaylist
 from task.models import CustomPeriodicTask
 from video.src.comments import Comments

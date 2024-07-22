@@ -4,8 +4,8 @@ functionality:
 - handle threads and locks
 """
 
+from common.src.ta_redis import RedisArchivist, TaskRedis
 from home.celery import app as celery_app
-from home.src.ta.ta_redis import RedisArchivist, TaskRedis
 from task.src.task_config import TASK_CONFIG
 
 

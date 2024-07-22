@@ -1,8 +1,8 @@
 """aggregations"""
 
-from home.src.es.connect import ElasticWrap
-from home.src.ta.helper import get_duration_str
-from home.src.ta.settings import EnvironmentSettings
+from common.src.env_settings import EnvironmentSettings
+from common.src.es_connect import ElasticWrap
+from common.src.helper import get_duration_str
 
 
 class AggBase:

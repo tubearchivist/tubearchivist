@@ -5,9 +5,9 @@ Functionality:
 
 import os
 
-from home.src.es.connect import ElasticWrap, IndexPaginate
-from home.src.ta.helper import ignore_filelist
-from home.src.ta.settings import EnvironmentSettings
+from common.src.env_settings import EnvironmentSettings
+from common.src.es_connect import ElasticWrap, IndexPaginate
+from common.src.helper import ignore_filelist
 from video.src.comments import CommentList
 from video.src.index import YoutubeVideo, index_new_video
 

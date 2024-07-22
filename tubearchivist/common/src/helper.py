@@ -13,8 +13,8 @@ from typing import Any
 from urllib.parse import urlparse
 
 import requests
-from home.src.es.connect import IndexPaginate
-from home.src.ta.settings import EnvironmentSettings
+from common.src.env_settings import EnvironmentSettings
+from common.src.es_connect import IndexPaginate
 
 
 def ignore_filelist(filelist: list[str]) -> list[str]:

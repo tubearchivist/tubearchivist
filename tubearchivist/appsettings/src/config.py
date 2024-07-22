@@ -9,8 +9,8 @@ from random import randint
 from time import sleep
 
 import requests
+from common.src.ta_redis import RedisArchivist
 from django.conf import settings
-from home.src.ta.ta_redis import RedisArchivist
 
 
 class AppConfig:

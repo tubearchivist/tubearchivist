@@ -7,10 +7,10 @@ Functionality:
 
 from datetime import datetime
 
+from appsettings.src.config import AppConfig
+from common.src.es_connect import ElasticWrap
+from common.src.ta_redis import RedisQueue
 from download.src.yt_dlp_base import YtWrap
-from home.src.es.connect import ElasticWrap
-from home.src.ta.config import AppConfig
-from home.src.ta.ta_redis import RedisQueue
 
 
 class Comments:

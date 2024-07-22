@@ -7,9 +7,9 @@ from datetime import datetime
 from time import sleep
 from zoneinfo import ZoneInfo
 
-from home.src.es.connect import ElasticWrap
-from home.src.ta.helper import get_mapping
-from home.src.ta.settings import EnvironmentSettings
+from common.src.env_settings import EnvironmentSettings
+from common.src.es_connect import ElasticWrap
+from common.src.helper import get_mapping
 
 
 class ElasticSnapshot:

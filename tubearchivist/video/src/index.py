@@ -9,11 +9,11 @@ from datetime import datetime
 
 import requests
 from channel.src import index as ta_channel
+from common.src.env_settings import EnvironmentSettings
+from common.src.es_connect import ElasticWrap
+from common.src.helper import get_duration_sec, get_duration_str, randomizor
+from common.src.index_generic import YouTubeItem
 from django.conf import settings
-from home.src.es.connect import ElasticWrap
-from home.src.index.generic import YouTubeItem
-from home.src.ta.helper import get_duration_sec, get_duration_str, randomizor
-from home.src.ta.settings import EnvironmentSettings
 from playlist.src import index as ta_playlist
 from ryd_client import ryd_client
 from user.src.user_config import UserConfig

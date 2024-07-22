@@ -1,7 +1,7 @@
 """send notifications using apprise"""
 
 import apprise
-from home.src.es.connect import ElasticWrap
+from common.src.es_connect import ElasticWrap
 from task.src.task_config import TASK_CONFIG
 from task.src.task_manager import TaskManager
 
