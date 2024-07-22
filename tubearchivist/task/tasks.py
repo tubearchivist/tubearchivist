@@ -19,9 +19,9 @@ from download.src.subscriptions import SubscriptionHandler, SubscriptionScanner
 from download.src.thumbnails import ThumbFilesystem, ThumbValidator
 from download.src.yt_dlp_handler import VideoDownloader
 from home.src.ta.config import ReleaseVersion
-from home.src.ta.notify import Notifications
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.urlparser import Parser
+from task.src.notify import Notifications
 from task.src.task_config import TASK_CONFIG
 from task.src.task_manager import TaskManager
 

@@ -1,9 +1,9 @@
 """all task API views"""
 
 from api.views import AdminOnly, ApiBaseView
-from home.src.ta.notify import Notifications, get_all_notifications
 from rest_framework.response import Response
 from task.models import CustomPeriodicTask
+from task.src.notify import Notifications, get_all_notifications
 from task.src.task_config import TASK_CONFIG
 from task.src.task_manager import TaskCommand, TaskManager
 
