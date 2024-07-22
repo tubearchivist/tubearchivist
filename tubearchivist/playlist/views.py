@@ -2,11 +2,11 @@
 
 from api.views import AdminWriteOnly, ApiBaseView
 from download.src.subscriptions import PlaylistSubscription
-from home.src.ta.users import UserConfig
 from playlist.src.index import YoutubePlaylist
 from rest_framework import status
 from rest_framework.response import Response
 from task.tasks import subscribe_to
+from user.src.user_config import UserConfig
 
 
 class PlaylistApiListView(ApiBaseView):

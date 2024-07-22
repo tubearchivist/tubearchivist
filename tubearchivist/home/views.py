@@ -46,13 +46,13 @@ from home.src.ta.config import AppConfig, ReleaseVersion
 from home.src.ta.helper import check_stylesheet, time_parser
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
-from home.src.ta.users import UserConfig
 from playlist.src.index import YoutubePlaylist
 from rest_framework.authtoken.models import Token
 from task.models import CustomPeriodicTask
 from task.src.config_schedule import ScheduleBuilder
 from task.src.notify import Notifications, get_all_notifications
 from task.tasks import index_channel_playlists, subscribe_to
+from user.src.user_config import UserConfig
 from video.src.constants import VideoTypeEnum
 
 

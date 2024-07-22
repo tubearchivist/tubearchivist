@@ -14,9 +14,9 @@ from home.src.es.connect import ElasticWrap
 from home.src.index.generic import YouTubeItem
 from home.src.ta.helper import get_duration_sec, get_duration_str, randomizor
 from home.src.ta.settings import EnvironmentSettings
-from home.src.ta.users import UserConfig
 from playlist.src import index as ta_playlist
 from ryd_client import ryd_client
+from user.src.user_config import UserConfig
 from video.src.comments import Comments
 from video.src.constants import VideoTypeEnum
 from video.src.media_streams import MediaStreamExtractor

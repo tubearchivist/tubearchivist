@@ -8,7 +8,7 @@ import math
 from download.src.yt_dlp_base import YtWrap
 from home.src.es.connect import ElasticWrap
 from home.src.ta.config import AppConfig
-from home.src.ta.users import UserConfig
+from user.src.user_config import UserConfig
 
 
 class YouTubeItem:

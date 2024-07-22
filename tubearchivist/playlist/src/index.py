@@ -11,7 +11,7 @@ from channel.src import index as channel
 from download.src.thumbnails import ThumbManager
 from home.src.es.connect import ElasticWrap, IndexPaginate
 from home.src.index.generic import YouTubeItem
-from video.src.index import YoutubeVideo
+from video.src import index as ta_video
 
 
 class YoutubePlaylist(YouTubeItem):
@@ -255,7 +255,7 @@ class YoutubePlaylist(YouTubeItem):
         i = 0
         while i < len(playlist):
             video_id = playlist[i]["youtube_id"]
-            video = YoutubeVideo(video_id)
+            video = ta_video.YoutubeVideo(video_id)
             video.get_from_es()
             if (
                 channel_id is None
@@ -278,7 +278,7 @@ class YoutubePlaylist(YouTubeItem):
             if i["downloaded"]
         ]
         for youtube_id in all_youtube_id:
-            YoutubeVideo(youtube_id).delete_media_file()
+            ta_video.YoutubeVideo(youtube_id).delete_media_file()
 
         self.delete_metadata()
 
@@ -312,7 +312,7 @@ class YoutubePlaylist(YouTubeItem):
             )
             self.set_playlist_thumbnail()
             self.upload_to_es()
-            video = YoutubeVideo(video_id)
+            video = ta_video.YoutubeVideo(video_id)
             video.get_from_es()
             if "playlist" not in video.json_data:
                 video.json_data["playlist"] = []
@@ -321,7 +321,7 @@ class YoutubePlaylist(YouTubeItem):
         return True
 
     def remove_playlist_from_video(self, video_id):
-        video = YoutubeVideo(video_id)
+        video = ta_video.YoutubeVideo(video_id)
         video.get_from_es()
         if video.json_data is not None and "playlist" in video.json_data:
             video.json_data["playlist"].remove(self.youtube_id)
@@ -410,7 +410,7 @@ class YoutubePlaylist(YouTubeItem):
         )
 
     def get_video_is_watched(self, video_id):
-        video = YoutubeVideo(video_id)
+        video = ta_video.YoutubeVideo(video_id)
         video.get_from_es()
         return video.json_data["player"]["watched"]
 
@@ -426,7 +426,7 @@ class YoutubePlaylist(YouTubeItem):
         self.get_playlist_art()
 
     def get_video_metadata(self, video_id):
-        video = YoutubeVideo(video_id)
+        video = ta_video.YoutubeVideo(video_id)
         video.get_from_es()
         video_json_data = {
             "youtube_id": video.json_data["youtube_id"],

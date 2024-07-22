@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     "task",
     "appsettings",
     "stats",
+    "user",
     "config",
 ]
 
@@ -226,7 +227,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = "home.Account"
+AUTH_USER_MODEL = "user.Account"
 
 # Forward-auth authentication
 if bool(environ.get("TA_ENABLE_AUTH_PROXY")):

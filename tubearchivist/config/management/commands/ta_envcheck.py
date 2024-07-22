@@ -10,8 +10,8 @@ import os
 import re
 
 from django.core.management.base import BaseCommand, CommandError
-from home.models import Account
 from home.src.ta.settings import EnvironmentSettings
+from user.models import Account
 
 LOGO = """
 
