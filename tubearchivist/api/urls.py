@@ -31,39 +31,4 @@ urlpatterns = [
         views.NotificationView.as_view(),
         name="api-notification",
     ),
-    path(
-        "stats/video/",
-        views.StatVideoView.as_view(),
-        name="api-stats-video",
-    ),
-    path(
-        "stats/channel/",
-        views.StatChannelView.as_view(),
-        name="api-stats-channel",
-    ),
-    path(
-        "stats/playlist/",
-        views.StatPlaylistView.as_view(),
-        name="api-stats-playlist",
-    ),
-    path(
-        "stats/download/",
-        views.StatDownloadView.as_view(),
-        name="api-stats-download",
-    ),
-    path(
-        "stats/watch/",
-        views.StatWatchProgress.as_view(),
-        name="api-stats-watch",
-    ),
-    path(
-        "stats/downloadhist/",
-        views.StatDownloadHist.as_view(),
-        name="api-stats-downloadhist",
-    ),
-    path(
-        "stats/biggestchannels/",
-        views.StatBiggestChannel.as_view(),
-        name="api-stats-biggestchannels",
-    ),
 ]

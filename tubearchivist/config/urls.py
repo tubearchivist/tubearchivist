@@ -26,5 +26,6 @@ urlpatterns = [
     path("api/download/", include("download.urls")),
     path("api/task/", include("task.urls")),
     path("api/appsettings/", include("appsettings.urls")),
+    path("api/stats/", include("stats.urls")),
     path("admin/", admin.site.urls),
 ]

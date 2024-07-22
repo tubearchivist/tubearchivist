@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     "download",
     "task",
     "appsettings",
+    "stats",
     "config",
 ]
 
