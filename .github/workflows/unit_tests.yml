@@ -7,9 +7,6 @@ on:
   pull_request:
     paths:
       - '**/*.py'
-  workflow_dispatch:
-    paths:
-      - '**/*.py'
 
 jobs:
   unit-tests:
