@@ -31,6 +31,7 @@ class EnvironmentSettings:
     # Redis
     REDIS_HOST: str = str(environ.get("REDIS_HOST"))
     REDIS_PORT: int = int(environ.get("REDIS_PORT", 6379))
+    REDIS_DB: int = int(environ.get("REDIS_DB", 0))
     REDIS_NAME_SPACE: str = str(environ.get("REDIS_NAME_SPACE", "ta:"))
 
     # ElasticSearch
@@ -73,6 +74,7 @@ class EnvironmentSettings:
             f"""
             REDIS_HOST: {self.REDIS_HOST}
             REDIS_PORT: {self.REDIS_PORT}
+            REDIS_DB: {self.REDIS_DB}
             REDIS_NAME_SPACE: {self.REDIS_NAME_SPACE}"""
         )
 

@@ -68,6 +68,7 @@ Take a look at the example [docker-compose.yml](https://github.com/tubearchivist
 | HOST_UID | Allow TA to own the video files instead of container user | Optional |
 | ELASTIC_USER | Change the default ElasticSearch user | Optional |
 | REDIS_PORT | Port that Redis runs on | Optional |
+| REDIS_DB | The database number that's used in Redis | Optional |
 | TA_LDAP | Configure TA to use LDAP Authentication | [Read more](https://docs.tubearchivist.com/configuration/ldap/) |
 | ENABLE_CAST | Enable casting support | [Read more](https://docs.tubearchivist.com/configuration/cast/) |
 | DJANGO_DEBUG | Return additional error messages, for debug only |  |

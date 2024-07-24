@@ -20,6 +20,7 @@ class RedisBase:
         self.conn = redis.Redis(
             host=EnvironmentSettings.REDIS_HOST,
             port=EnvironmentSettings.REDIS_PORT,
+            db=EnvironmentSettings.REDIS_DB,
             decode_responses=True,
         )
 
