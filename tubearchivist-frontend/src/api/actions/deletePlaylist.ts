@@ -1,17 +1,9 @@
+import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
-import getCookie from '../../functions/getCookie';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
 const deletePlaylist = async (playlistId: string, allVideos = false) => {
   const apiUrl = getApiUrl();
-  const headers = new Headers();
-
-  headers.append('Content-Type', 'application/json');
-
-  const csrfCookie = getCookie('csrftoken');
-  if (csrfCookie) {
-    headers.append('X-CSRFToken', csrfCookie);
-  }
 
   let params = '';
   if (allVideos) {
@@ -20,7 +12,7 @@ const deletePlaylist = async (playlistId: string, allVideos = false) => {
 
   const response = await fetch(`${apiUrl}/api/playlist/${playlistId}/${params}`, {
     method: 'DELETE',
-    headers,
+    headers: defaultHeaders,
   });
 
   const playlistDeleted = await response.json();

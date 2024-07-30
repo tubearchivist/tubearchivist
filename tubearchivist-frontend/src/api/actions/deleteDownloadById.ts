@@ -1,21 +1,13 @@
+import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
-import getCookie from '../../functions/getCookie';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
 const deleteDownloadById = async (youtubeId: string) => {
   const apiUrl = getApiUrl();
-  const headers = new Headers();
-
-  headers.append('Content-Type', 'application/json');
-
-  const csrfCookie = getCookie('csrftoken');
-  if (csrfCookie) {
-    headers.append('X-CSRFToken', csrfCookie);
-  }
 
   const response = await fetch(`${apiUrl}/api/download/${youtubeId}/`, {
     method: 'DELETE',
-    headers,
+    headers: defaultHeaders,
   });
 
   const downloadState = await response.json();

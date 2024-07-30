@@ -1,15 +1,9 @@
+import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
-import getCookie from '../../functions/getCookie';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
 const loadChannelList = async (page: number, showSubscribed: boolean) => {
   const apiUrl = getApiUrl();
-  const headers = new Headers();
-
-  const csrfCookie = getCookie('csrftoken');
-  if (csrfCookie) {
-    headers.append('X-CSRFToken', csrfCookie);
-  }
 
   const searchParams = new URLSearchParams();
 
@@ -22,7 +16,7 @@ const loadChannelList = async (page: number, showSubscribed: boolean) => {
   }
 
   const response = await fetch(`${apiUrl}/api/channel/?${searchParams.toString()}`, {
-    headers,
+    headers: defaultHeaders,
   });
 
   const channels = await response.json();

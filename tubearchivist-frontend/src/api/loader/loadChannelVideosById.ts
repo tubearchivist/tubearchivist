@@ -1,5 +1,5 @@
+import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
-import getCookie from '../../functions/getCookie';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
 const loadChannelVideosById = async (youtubeChannelId: string | undefined, page: number) => {
@@ -10,15 +10,8 @@ const loadChannelVideosById = async (youtubeChannelId: string | undefined, page:
     return;
   }
 
-  const headers = new Headers();
-
-  const csrfCookie = getCookie('csrftoken');
-  if (csrfCookie) {
-    headers.append('X-CSRFToken', csrfCookie);
-  }
-
   const response = await fetch(`${apiUrl}/api/channel/${youtubeChannelId}/video/?page=${page}`, {
-    headers,
+    headers: defaultHeaders,
   });
 
   const videos = await response.json();

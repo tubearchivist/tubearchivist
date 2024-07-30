@@ -1,5 +1,5 @@
+import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
-import getCookie from '../../functions/getCookie';
 import deleteVideoProgressById from './deleteVideoProgressById';
 
 export type Watched = {
@@ -14,18 +14,9 @@ const updateWatchedState = async (watched: Watched) => {
     await deleteVideoProgressById(watched.id);
   }
 
-  const headers = new Headers();
-
-  headers.append('Content-Type', 'application/json');
-
-  const csrfCookie = getCookie('csrftoken');
-  if (csrfCookie) {
-    headers.append('X-CSRFToken', csrfCookie);
-  }
-
   const response = await fetch(`${apiUrl}/api/watched/`, {
     method: 'POST',
-    headers,
+    headers: defaultHeaders,
 
     body: JSON.stringify(watched),
   });

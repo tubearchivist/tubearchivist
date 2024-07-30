@@ -1,15 +1,9 @@
+import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
-import getCookie from '../../functions/getCookie';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
 const loadDownloadQueue = async (page: number, channelId: string | null, showIgnored: boolean) => {
   const apiUrl = getApiUrl();
-  const headers = new Headers();
-
-  const csrfCookie = getCookie('csrftoken');
-  if (csrfCookie) {
-    headers.append('X-CSRFToken', csrfCookie);
-  }
 
   const searchParams = new URLSearchParams();
 
@@ -24,7 +18,7 @@ const loadDownloadQueue = async (page: number, channelId: string | null, showIgn
   searchParams.append('filter', showIgnored ? 'ignore' : 'pending');
 
   const response = await fetch(`${apiUrl}/api/download/?${searchParams.toString()}`, {
-    headers,
+    headers: defaultHeaders,
   });
 
   const playlist = await response.json();

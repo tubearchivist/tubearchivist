@@ -1,7 +1,7 @@
-import getCookie from '../../functions/getCookie';
 import { ColourVariants } from '../../configuration/colours/getColours';
 import { SortBy, SortOrder, ViewLayout } from '../../pages/Home';
 import getApiUrl from '../../configuration/getApiUrl';
+import defaultHeaders from '../../configuration/defaultHeaders';
 
 export type UserConfigType = {
   stylesheet?: ColourVariants;
@@ -21,18 +21,10 @@ export type UserConfigType = {
 
 const updateUserConfig = async (config: UserConfigType) => {
   const apiUrl = getApiUrl();
-  const headers = new Headers();
-
-  headers.append('Content-Type', 'application/json');
-
-  const csrfCookie = getCookie('csrftoken');
-  if (csrfCookie) {
-    headers.append('X-CSRFToken', csrfCookie);
-  }
 
   const response = await fetch(`${apiUrl}/api/config/user/`, {
     method: 'POST',
-    headers,
+    headers: defaultHeaders,
 
     body: JSON.stringify(config),
   });

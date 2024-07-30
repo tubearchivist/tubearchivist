@@ -1,20 +1,12 @@
+import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
-import getCookie from '../../functions/getCookie';
 
 const stopTaskByName = async (taskId: string) => {
   const apiUrl = getApiUrl();
-  const headers = new Headers();
-
-  headers.append('Content-Type', 'application/json');
-
-  const csrfCookie = getCookie('csrftoken');
-  if (csrfCookie) {
-    headers.append('X-CSRFToken', csrfCookie);
-  }
 
   const response = await fetch(`${apiUrl}/api/task-id/${taskId}/`, {
     method: 'POST',
-    headers,
+    headers: defaultHeaders,
 
     body: JSON.stringify({ command: 'stop' }),
   });

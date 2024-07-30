@@ -1,15 +1,9 @@
+import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
-import getCookie from '../../functions/getCookie';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
 const loadPlaylistList = async (page: number | undefined, isCustom = false) => {
   const apiUrl = getApiUrl();
-  const headers = new Headers();
-
-  const csrfCookie = getCookie('csrftoken');
-  if (csrfCookie) {
-    headers.append('X-CSRFToken', csrfCookie);
-  }
 
   const searchParams = new URLSearchParams();
 
@@ -22,7 +16,7 @@ const loadPlaylistList = async (page: number | undefined, isCustom = false) => {
   }
 
   const response = await fetch(`${apiUrl}/api/playlist/?${searchParams.toString()}`, {
-    headers,
+    headers: defaultHeaders,
   });
 
   const playlist = await response.json();

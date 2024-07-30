@@ -1,21 +1,13 @@
 import { UserConfigType } from '../actions/updateUserConfig';
-import getCookie from '../../functions/getCookie';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 import getApiUrl from '../../configuration/getApiUrl';
+import defaultHeaders from '../../configuration/defaultHeaders';
 
 const loadUserConfig = async (): Promise<UserConfigType> => {
   const apiUrl = getApiUrl();
-  const headers = new Headers();
-
-  headers.append('Content-Type', 'application/json');
-
-  const csrfCookie = getCookie('csrftoken');
-  if (csrfCookie) {
-    headers.append('X-CSRFToken', csrfCookie);
-  }
 
   const response = await fetch(`${apiUrl}/api/config/user/`, {
-    headers,
+    headers: defaultHeaders,
   });
 
   const userConfig = await response.json();

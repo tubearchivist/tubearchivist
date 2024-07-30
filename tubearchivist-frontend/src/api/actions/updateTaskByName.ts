@@ -1,5 +1,5 @@
+import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
-import getCookie from '../../functions/getCookie';
 
 type TaskNamesType =
   | 'download_pending'
@@ -10,18 +10,10 @@ type TaskNamesType =
 
 const updateTaskByName = async (taskName: TaskNamesType) => {
   const apiUrl = getApiUrl();
-  const headers = new Headers();
-
-  headers.append('Content-Type', 'application/json');
-
-  const csrfCookie = getCookie('csrftoken');
-  if (csrfCookie) {
-    headers.append('X-CSRFToken', csrfCookie);
-  }
 
   const response = await fetch(`${apiUrl}/api/task-name/${taskName}/`, {
     method: 'POST',
-    headers,
+    headers: defaultHeaders,
   });
 
   const downloadQueueState = await response.json();

@@ -1,3 +1,4 @@
+import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
 
 export type LoginResponseType = {
@@ -10,14 +11,13 @@ export type LoginResponseType = {
 
 const loadSignIn = async (username: string, password: string, saveLogin: boolean) => {
   const apiUrl = getApiUrl();
-  const header = new Headers();
-
-  header.append('Content-Type', 'application/json');
-  header.append('Authorization', 'Basic ' + btoa(username + ':' + password));
 
   const response = await fetch(`${apiUrl}/api/login/`, {
     method: 'POST',
-    headers: header,
+    headers: {
+      ...defaultHeaders,
+      Authorization: 'Basic ' + btoa(username + ':' + password),
+    },
     body: JSON.stringify({
       username,
       password,

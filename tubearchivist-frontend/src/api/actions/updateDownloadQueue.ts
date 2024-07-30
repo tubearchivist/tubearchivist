@@ -1,16 +1,8 @@
+import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
-import getCookie from '../../functions/getCookie';
 
 const updateDownloadQueue = async (download: string, autostart: boolean) => {
   const apiUrl = getApiUrl();
-  const headers = new Headers();
-
-  headers.append('Content-Type', 'application/json');
-
-  const csrfCookie = getCookie('csrftoken');
-  if (csrfCookie) {
-    headers.append('X-CSRFToken', csrfCookie);
-  }
 
   let params = '';
   if (autostart) {
@@ -19,7 +11,7 @@ const updateDownloadQueue = async (download: string, autostart: boolean) => {
 
   const response = await fetch(`${apiUrl}/api/download/${params}`, {
     method: 'POST',
-    headers,
+    headers: defaultHeaders,
 
     body: JSON.stringify({
       data: [{ youtube_id: download, status: 'pending' }],
