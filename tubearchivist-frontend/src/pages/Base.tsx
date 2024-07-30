@@ -4,7 +4,7 @@ import importColours from '../configuration/colours/getColours';
 import { UserConfigType } from '../api/actions/updateUserConfig';
 import { useEffect, useState } from 'react';
 import Navigation from '../components/Navigation';
-import getIsAdmin from '../functions/getIsAdmin';
+import loadIsAdmin from '../api/loader/loadIsAdmin';
 
 export type AuthenticationType = {
   response: string;
@@ -41,7 +41,7 @@ const Base = () => {
 
   useEffect(() => {
     (async () => {
-      setIsAdmin(await getIsAdmin());
+      setIsAdmin(await loadIsAdmin());
     })();
   }, []);
 

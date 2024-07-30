@@ -1,14 +1,11 @@
-import getApiUrl from '../configuration/getApiUrl';
+import defaultHeaders from '../../configuration/defaultHeaders';
+import getApiUrl from '../../configuration/getApiUrl';
 
-const getIsAdmin = async () => {
+const loadIsAdmin = async () => {
   const apiUrl = getApiUrl();
 
-  const header = new Headers();
-
-  header.append('Content-Type', 'application/json');
-
   const response = await fetch(`${apiUrl}/api/permission/user/`, {
-    headers: header,
+    headers: defaultHeaders,
   });
 
   const user = await response.json();
@@ -23,4 +20,4 @@ const getIsAdmin = async () => {
   return isAdmin;
 };
 
-export default getIsAdmin;
+export default loadIsAdmin;
