@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getCookie from '../../functions/getCookie';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
 export type ReindexType = 'channel' | 'video' | 'playlist';
@@ -12,6 +13,7 @@ export const ReindexTypeEnum = {
 
 const queueReindex = async (id: string, type: ReindexType, reindexVideos = false) => {
   const apiUrl = getApiUrl();
+  const csrfCookie = getCookie('csrftoken');
 
   let params = '';
   if (reindexVideos) {
@@ -24,7 +26,10 @@ const queueReindex = async (id: string, type: ReindexType, reindexVideos = false
 
   const response = await fetch(`${apiUrl}/api/refresh/${params}`, {
     method: 'POST',
-    headers: defaultHeaders,
+    headers: {
+      ...defaultHeaders,
+      'X-CSRFToken': csrfCookie || '',
+    },
 
     body,
   });

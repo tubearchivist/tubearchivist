@@ -1,14 +1,19 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getCookie from '../../functions/getCookie';
 
 export type DownloadQueueStatus = 'ignore' | 'pending' | 'priority';
 
 const updateDownloadQueueStatusById = async (youtubeId: string, status: DownloadQueueStatus) => {
   const apiUrl = getApiUrl();
+  const csrfCookie = getCookie('csrftoken');
 
   const response = await fetch(`${apiUrl}/api/download/${youtubeId}/`, {
     method: 'POST',
-    headers: defaultHeaders,
+    headers: {
+      ...defaultHeaders,
+      'X-CSRFToken': csrfCookie || '',
+    },
 
     body: JSON.stringify({
       status,

@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getCookie from '../../functions/getCookie';
 
 export type LoginResponseType = {
   token?: string;
@@ -9,13 +10,15 @@ export type LoginResponseType = {
   user_groups: [];
 };
 
-const loadSignIn = async (username: string, password: string, saveLogin: boolean) => {
+const signIn = async (username: string, password: string, saveLogin: boolean) => {
   const apiUrl = getApiUrl();
+  const csrfCookie = getCookie('csrftoken');
 
   const response = await fetch(`${apiUrl}/api/login/`, {
     method: 'POST',
     headers: {
       ...defaultHeaders,
+      'X-CSRFToken': csrfCookie || '',
       Authorization: 'Basic ' + btoa(username + ':' + password),
     },
     body: JSON.stringify({
@@ -32,4 +35,4 @@ const loadSignIn = async (username: string, password: string, saveLogin: boolean
   return response;
 };
 
-export default loadSignIn;
+export default signIn;

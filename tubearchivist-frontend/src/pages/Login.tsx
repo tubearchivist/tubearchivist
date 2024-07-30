@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import importColours, { ColourConstant, ColourVariants } from '../configuration/colours/getColours';
 import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
-import loadSignIn from '../api/loader/loadSignIn';
+import signIn from '../api/actions/signIn';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -19,7 +19,7 @@ const Login = () => {
   const handleSubmit = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
 
-    const loginResponse = await loadSignIn(username, password, saveLogin);
+    const loginResponse = await signIn(username, password, saveLogin);
 
     const signedIn = loginResponse.status === 200;
 
