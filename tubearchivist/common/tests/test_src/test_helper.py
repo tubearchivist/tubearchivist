@@ -1,7 +1,7 @@
 """tests for helper functions"""
 
 import pytest
-from home.src.ta.helper import (
+from common.src.helper import (
     date_parser,
     get_duration_str,
     get_mapping,

@@ -1,7 +1,7 @@
 """tests for url parser"""
 
 import pytest
-from home.src.ta.urlparser import Parser
+from common.src.urlparser import Parser
 
 # video id parsing
 VIDEO_URL_IN = [
