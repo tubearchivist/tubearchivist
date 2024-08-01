@@ -1,8 +1,10 @@
 """all task API views"""
 
 from common.views_base import AdminOnly, ApiBaseView
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from task.models import CustomPeriodicTask
+from task.src.config_schedule import CrontabValidator, ScheduleBuilder
 from task.src.notify import Notifications, get_all_notifications
 from task.src.task_config import TASK_CONFIG
 from task.src.task_manager import TaskCommand, TaskManager
@@ -118,20 +120,40 @@ class TaskIDView(ApiBaseView):
 
 class ScheduleView(ApiBaseView):
     """resolves to /api/task/schedule/<task-name>/
+    POST: create/update schedule for task with config
+    - example: {"schedule": "0 0 *", "config": {"days": 90}}
     DEL: delete schedule for task
     """
 
     permission_classes = [AdminOnly]
 
-    def delete(self, request):
-        """delete schedule by task_name query"""
-        task_name = request.data.get("task_name")
-        try:
-            task = CustomPeriodicTask.objects.get(name=task_name)
-        except CustomPeriodicTask.DoesNotExist:
-            message = {"message": "task_name not found"}
-            return Response(message, status=404)
+    def post(self, request, task_name):
+        """create/update schedule for task"""
+        cron_schedule = request.data.get("schedule")
+        schedule_config = request.data.get("config")
+        if not cron_schedule and not schedule_config:
+            message = {"message": "expected schedule or config key"}
+            return Response(message, status=400)
 
+        try:
+            validator = CrontabValidator()
+            validator.validate_cron(cron_schedule)
+            validator.validate_config(task_name, schedule_config)
+        except ValueError as err:
+            return Response({"message": str(err)}, status=400)
+
+        ScheduleBuilder().update_schedule(
+            task_name, cron_schedule, schedule_config
+        )
+        message = f"update schedule for task {task_name}"
+        if schedule_config:
+            message += f" with config {schedule_config}"
+
+        return Response({"message": message})
+
+    def delete(self, request, task_name):
+        """delete schedule by task_name query"""
+        task = get_object_or_404(CustomPeriodicTask, name=task_name)
         _ = task.delete()
 
         return Response({"success": True})
