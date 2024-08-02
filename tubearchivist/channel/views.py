@@ -1,6 +1,7 @@
 """all channel API views"""
 
 from channel.src.index import YoutubeChannel
+from channel.src.nav import ChannelNav
 from common.src.urlparser import Parser
 from common.views_base import AdminWriteOnly, ApiBaseView
 from download.src.subscriptions import ChannelSubscription
@@ -125,6 +126,18 @@ class ChannelAggsApiView(ApiBaseView):
         self.get_aggs()
 
         return Response(self.response)
+
+
+class ChannelNavApiView(ApiBaseView):
+    """resolves to /api/channel/<channel_id>/nav/
+    GET: get channel nav
+    """
+
+    def get(self, request, channel_id):
+        """get nav"""
+
+        nav = ChannelNav(channel_id).get_nav()
+        return Response(nav)
 
 
 class ChannelApiSearchView(ApiBaseView):
