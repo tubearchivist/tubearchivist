@@ -8,35 +8,6 @@ from rest_framework.response import Response
 from task.tasks import subscribe_to
 
 
-class ChannelApiView(ApiBaseView):
-    """resolves to /api/channel/<channel_id>/
-    GET: returns metadata dict of channel
-    """
-
-    search_base = "ta_channel/_doc/"
-    permission_classes = [AdminWriteOnly]
-
-    def get(self, request, channel_id):
-        # pylint: disable=unused-argument
-        """get request"""
-        self.get_document(channel_id)
-        return Response(self.response, status=self.status_code)
-
-    def delete(self, request, channel_id):
-        # pylint: disable=unused-argument
-        """delete channel"""
-        message = {"channel": channel_id}
-        try:
-            YoutubeChannel(channel_id).delete_channel()
-            status_code = 200
-            message.update({"state": "delete"})
-        except FileNotFoundError:
-            status_code = 404
-            message.update({"state": "not found"})
-
-        return Response(message, status=status_code)
-
-
 class ChannelApiListView(ApiBaseView):
     """resolves to /api/channel/
     GET: returns list of channels
@@ -99,6 +70,61 @@ class ChannelApiListView(ApiBaseView):
         ChannelSubscription().change_subscribe(
             channel_id, channel_subscribed=False
         )
+
+
+class ChannelApiView(ApiBaseView):
+    """resolves to /api/channel/<channel_id>/
+    GET: returns metadata dict of channel
+    """
+
+    search_base = "ta_channel/_doc/"
+    permission_classes = [AdminWriteOnly]
+
+    def get(self, request, channel_id):
+        # pylint: disable=unused-argument
+        """get request"""
+        self.get_document(channel_id)
+        return Response(self.response, status=self.status_code)
+
+    def delete(self, request, channel_id):
+        # pylint: disable=unused-argument
+        """delete channel"""
+        message = {"channel": channel_id}
+        try:
+            YoutubeChannel(channel_id).delete_channel()
+            status_code = 200
+            message.update({"state": "delete"})
+        except FileNotFoundError:
+            status_code = 404
+            message.update({"state": "not found"})
+
+        return Response(message, status=status_code)
+
+
+class ChannelAggsApiView(ApiBaseView):
+    """resolves to /api/channel/<channel_id>/aggs/
+    GET: get channel aggregations
+    """
+
+    search_base = "ta_video/_search"
+
+    def get(self, request, channel_id):
+        """get aggs"""
+        self.data.update(
+            {
+                "query": {
+                    "term": {"channel.channel_id": {"value": channel_id}}
+                },
+                "aggs": {
+                    "total_items": {"value_count": {"field": "youtube_id"}},
+                    "total_size": {"sum": {"field": "media_size"}},
+                    "total_duration": {"sum": {"field": "player.duration"}},
+                },
+            }
+        )
+        self.get_aggs()
+
+        return Response(self.response)
 
 
 class ChannelApiSearchView(ApiBaseView):

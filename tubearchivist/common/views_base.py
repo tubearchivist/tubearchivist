@@ -4,7 +4,7 @@ from appsettings.src.config import AppConfig
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap
 from common.src.index_generic import Pagination
-from common.src.search_processor import SearchProcess
+from common.src.search_processor import SearchProcess, process_aggs
 from rest_framework import permissions
 from rest_framework.authentication import (
     SessionAuthentication,
@@ -96,3 +96,11 @@ class ApiBaseView(APIView):
                 response["hits"]["total"]["value"]
             )
             self.response["paginate"] = self.pagination_handler.pagination
+
+    def get_aggs(self):
+        """get aggs alone"""
+        self.data["size"] = 0
+        response, _ = ElasticWrap(self.search_base).get(data=self.data)
+        process_aggs(response)
+
+        self.response = response.get("aggregations")

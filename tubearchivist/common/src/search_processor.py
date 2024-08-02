@@ -20,6 +20,7 @@ class SearchProcess:
 
     def process(self):
         """detect type and process"""
+        print(self.response)
         if "_source" in self.response.keys():
             # single
             self.processed = self._process_result(self.response)
