@@ -8,6 +8,7 @@ import json
 from datetime import datetime
 
 from channel.src import index as channel
+from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
 from common.src.index_generic import YouTubeItem
 from download.src.thumbnails import ThumbManager
@@ -190,6 +191,7 @@ class YoutubePlaylist(YouTubeItem):
 
     def build_nav(self, youtube_id):
         """find next and previous in playlist of a given youtube_id"""
+        cache_root = EnvironmentSettings().get_cache_root()
         all_entries_available = self.json_data["playlist_entries"]
         all_entries = [i for i in all_entries_available if i["downloaded"]]
         current = [i for i in all_entries if i["youtube_id"] == youtube_id]
@@ -203,14 +205,16 @@ class YoutubePlaylist(YouTubeItem):
         else:
             previous_item = all_entries[current_idx - 1]
             prev_id = previous_item["youtube_id"]
-            previous_item["vid_thumb"] = ThumbManager(prev_id).vid_thumb_path()
+            prev_thumb_path = ThumbManager(prev_id).vid_thumb_path()
+            previous_item["vid_thumb"] = f"{cache_root}/{prev_thumb_path}"
 
         if current_idx == len(all_entries) - 1:
             next_item = False
         else:
             next_item = all_entries[current_idx + 1]
             next_id = next_item["youtube_id"]
-            next_item["vid_thumb"] = ThumbManager(next_id).vid_thumb_path()
+            next_thumb_path = ThumbManager(next_id).vid_thumb_path()
+            next_item["vid_thumb"] = f"{cache_root}/{next_thumb_path}"
 
         self.nav = {
             "playlist_meta": {

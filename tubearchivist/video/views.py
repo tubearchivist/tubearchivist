@@ -2,8 +2,24 @@
 
 from common.src.ta_redis import RedisArchivist
 from common.views_base import AdminWriteOnly, ApiBaseView
+from playlist.src.index import YoutubePlaylist
 from rest_framework.response import Response
 from video.src.index import YoutubeVideo
+
+
+class VideoApiListView(ApiBaseView):
+    """resolves to /api/video/
+    GET: returns list of videos
+    """
+
+    search_base = "ta_video/_search/"
+
+    def get(self, request):
+        """get request"""
+        self.data.update({"sort": [{"published": {"order": "desc"}}]})
+        self.get_document_list(request)
+
+        return Response(self.response)
 
 
 class VideoApiView(ApiBaseView):
@@ -35,19 +51,35 @@ class VideoApiView(ApiBaseView):
         return Response(message, status=status_code)
 
 
-class VideoApiListView(ApiBaseView):
-    """resolves to /api/video/
-    GET: returns list of videos
+class VideoApiNavView(ApiBaseView):
+    """resolves to /api/video/<video-id>/nav/
+    GET: returns playlist nav
     """
 
-    search_base = "ta_video/_search/"
+    search_base = "ta_video/_doc/"
 
-    def get(self, request):
+    def get(self, request, video_id):
+        # pylint: disable=unused-argument
         """get request"""
-        self.data.update({"sort": [{"published": {"order": "desc"}}]})
-        self.get_document_list(request)
+        self.get_document(video_id)
+        if self.status_code != 200:
+            return Response(status=self.status_code)
 
-        return Response(self.response)
+        print(self.response)
+
+        playlist_nav = []
+
+        if not self.response["data"].get("playlist"):
+            return Response(playlist_nav)
+
+        for playlist_id in self.response["data"]["playlist"]:
+            playlist = YoutubePlaylist(playlist_id)
+            playlist.get_from_es()
+            playlist.build_nav(video_id)
+            if playlist.nav:
+                playlist_nav.append(playlist.nav)
+
+        return Response(playlist_nav, status=self.status_code)
 
 
 class VideoProgressView(ApiBaseView):

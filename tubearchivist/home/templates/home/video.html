@@ -139,7 +139,7 @@
                     <div class="playlist-nav-item">
                         {% if playlist_item.playlist_previous %}
                             <a href="{% url 'video' playlist_item.playlist_previous.youtube_id %}">
-                                <img src="/cache/{{ playlist_item.playlist_previous.vid_thumb }}" alt="previous thumbnail">
+                                <img src="{{ playlist_item.playlist_previous.vid_thumb }}" alt="previous thumbnail">
                             </a>
                             <div class="playlist-desc">
                                 <p>Previous:</p>
@@ -158,7 +158,7 @@
                                 </a>
                             </div>
                             <a href="{% url 'video' playlist_item.playlist_next.youtube_id %}">
-                                <img src="/cache/{{ playlist_item.playlist_next.vid_thumb }}" alt="previous thumbnail">
+                                <img src="{{ playlist_item.playlist_next.vid_thumb }}" alt="previous thumbnail">
                             </a>
                         {% endif %}
                     </div>
