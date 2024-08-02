@@ -35,19 +35,19 @@ class QueryBuilder:
 
         watch = self.request_params.get("watch")
         if watch:
-            watch_must_list = self._parse_watch(watch[0])
+            watch_must_list = self.parse_watch(watch[0])
             must_list.append(watch_must_list)
 
         video_type = self.request_params.get("type")
         if video_type:
-            type_list_list = self._parse_type(video_type[0])
+            type_list_list = self.parse_type(video_type[0])
             must_list.append(type_list_list)
 
         query = {"bool": {"must": must_list}}
 
         return query
 
-    def _parse_watch(self, watch: str) -> dict:
+    def parse_watch(self, watch: str) -> dict:
         """build query"""
         if watch not in self.WATCH_OPTIONS:
             raise ValueError(f"'{watch}' not in {self.WATCH_OPTIONS}")
@@ -68,7 +68,7 @@ class QueryBuilder:
 
         return continue_ids
 
-    def _parse_type(self, video_type: str):
+    def parse_type(self, video_type: str):
         """parse video type"""
         if not hasattr(VideoTypeEnum, video_type.upper()):
             raise ValueError(f"'{video_type}' not in VideoTypeEnum")
