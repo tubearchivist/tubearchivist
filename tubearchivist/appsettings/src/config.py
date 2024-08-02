@@ -103,14 +103,18 @@ class AppConfig:
 
         return response["_source"]
 
-    def update_config(self, key, value):
+    def update_config(self, data: dict) -> AppConfigType:
         """update single config value"""
-        key_map = key.split(".")
-        self._validate_key(key_map)
-        self.config[key_map[0]][key_map[1]] = value
+        for key, value in data.items():
+            key_map = key.split(".")
+            self._validate_key(key_map)
+            self.config[key_map[0]][key_map[1]] = value
+
         response, status_code = ElasticWrap(self.ES_PATH).post(self.config)
         if not status_code == 200:
             print(response)
+
+        return self.config
 
     def _validate_key(self, key_map: list[str]) -> None:
         """raise valueerror on invalid key"""

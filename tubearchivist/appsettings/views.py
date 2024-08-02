@@ -11,6 +11,36 @@ from task.src.task_manager import TaskCommand
 from task.tasks import run_restore_backup
 
 
+class AppConfigApiView(ApiBaseView):
+    """resolves to /api/appsettings/config/
+    GET: return app settings
+    POST: update app settings
+    """
+
+    permission_classes = [AdminOnly]
+
+    @staticmethod
+    def get(request):
+        """get config"""
+        response = AppConfig().config
+        return Response(response)
+
+    @staticmethod
+    def post(request):
+        """
+        update config values
+        data object where key is flatted CONFIG_DEFAULTS separated by '.', e.g.
+        {"subscriptions.channel_size": 5, "subscriptions.live_channel_size": 5}
+        """
+        data = request.data
+        try:
+            config = AppConfig().update_config(data)
+        except ValueError as err:
+            return Response({"error": str(err)}, status=400)
+
+        return Response(config)
+
+
 class SnapshotApiListView(ApiBaseView):
     """resolves to /api/appsettings/snapshot/
     GET: returns snapshot config plus list of existing snapshots

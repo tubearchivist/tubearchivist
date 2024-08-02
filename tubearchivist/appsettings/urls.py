@@ -5,6 +5,11 @@ from django.urls import path
 
 urlpatterns = [
     path(
+        "config/",
+        views.AppConfigApiView.as_view(),
+        name="api-config",
+    ),
+    path(
         "snapshot/",
         views.SnapshotApiListView.as_view(),
         name="api-snapshot-list",
