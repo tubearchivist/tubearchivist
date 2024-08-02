@@ -162,6 +162,7 @@ class ScheduleView(ApiBaseView):
 class ScheduleNotification(ApiBaseView):
     """resolves to /api/task/notification/
     GET: get all schedule notifications
+    POST: add notification url to task
     DEL: delete notification
     """
 
@@ -169,6 +170,24 @@ class ScheduleNotification(ApiBaseView):
         """handle get request"""
 
         return Response(get_all_notifications())
+
+    def post(self, request):
+        """handle create notification"""
+        task_name = request.data.get("task_name")
+        url = request.data.get("url")
+
+        if not TASK_CONFIG.get(task_name):
+            message = {"message": "task_name not found"}
+            return Response(message, status=404)
+
+        if not url:
+            message = {"message": "missing url key"}
+            return Response(message, status=400)
+
+        Notifications(task_name).add_url(url)
+        message = {"task_name": task_name, "url": url}
+
+        return Response(message)
 
     def delete(self, request):
         """handle delete"""
