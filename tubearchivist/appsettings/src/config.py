@@ -4,104 +4,119 @@ Functionality:
 - load config variables into redis
 """
 
-import json
 from random import randint
 from time import sleep
+from typing import Literal, TypedDict
 
 import requests
+from common.src.es_connect import ElasticWrap
 from common.src.ta_redis import RedisArchivist
 from django.conf import settings
+
+
+class SubscriptionsConfigType(TypedDict):
+    """describes subscriptions config"""
+
+    channel_size: int
+    live_channel_size: int
+    shorts_channel_size: int
+    auto_start: bool
+
+
+class DownloadsConfigType(TypedDict):
+    """describes downloads config"""
+
+    limit_speed: int
+    sleep_interval: int
+    autodelete_days: int
+    format: str | bool
+    format_sort: str | bool
+    add_metadata: bool
+    add_thumbnail: bool
+    subtitle: str | bool
+    subtitle_source: Literal["user", "auto"] | bool
+    subtitle_index: bool
+    comment_max: str | bool
+    comment_sort: Literal["top", "new"]
+    cookie_import: bool
+    throttledratelimit: int
+    extractor_lang: str | bool
+    integrate_ryd: bool
+    integrate_sponsorblock: bool
+
+
+class ApplicationConfigType(TypedDict):
+    """describes application config"""
+
+    enable_snapshot: bool
+
+
+class AppConfigType(TypedDict):
+    """combined app config type"""
+
+    subscriptions: SubscriptionsConfigType
+    downloads: DownloadsConfigType
+    application: ApplicationConfigType
 
 
 class AppConfig:
     """handle application variables"""
 
+    ES_PATH = "ta_config/_doc/appsettings"
+    CONFIG_DEFAULTS: AppConfigType = {
+        "subscriptions": {
+            "channel_size": 50,
+            "live_channel_size": 50,
+            "shorts_channel_size": 50,
+            "auto_start": False,
+        },
+        "downloads": {
+            "limit_speed": False,
+            "sleep_interval": 3,
+            "autodelete_days": False,
+            "format": False,
+            "format_sort": False,
+            "add_metadata": False,
+            "add_thumbnail": False,
+            "subtitle": False,
+            "subtitle_source": False,
+            "subtitle_index": False,
+            "comment_max": False,
+            "comment_sort": "top",
+            "cookie_import": False,
+            "throttledratelimit": False,
+            "extractor_lang": False,
+            "integrate_ryd": False,
+            "integrate_sponsorblock": False,
+        },
+        "application": {"enable_snapshot": True},
+    }
+
     def __init__(self):
         self.config = self.get_config()
 
-    def get_config(self):
-        """get config from default file or redis if changed"""
-        config = self.get_config_redis()
-        if not config:
-            config = self.get_config_file()
+    def get_config(self) -> AppConfigType:
+        """get config from ES"""
+        response, status_code = ElasticWrap(self.ES_PATH).get()
+        if not status_code == 200:
+            return self.CONFIG_DEFAULTS
 
-        return config
+        return response["_source"]
 
-    def get_config_file(self):
-        """read the defaults from config.json"""
-        with open("appsettings/config.json", "r", encoding="utf-8") as f:
-            config_file = json.load(f)
+    def update_config(self, key, value):
+        """update single config value"""
+        key_map = key.split(".")
+        self._validate_key(key_map)
+        self.config[key_map[0]][key_map[1]] = value
+        response, status_code = ElasticWrap(self.ES_PATH).post(self.config)
+        if not status_code == 200:
+            print(response)
 
-        return config_file
-
-    @staticmethod
-    def get_config_redis():
-        """read config json set from redis to overwrite defaults"""
-        for i in range(10):
-            try:
-                config = RedisArchivist().get_message("config")
-                if not list(config.values())[0]:
-                    return False
-
-                return config
-
-            except Exception:  # pylint: disable=broad-except
-                print(f"... Redis connection failed, retry [{i}/10]")
-                sleep(3)
-
-        raise ConnectionError("failed to connect to redis")
-
-    def update_config(self, form_post):
-        """update config values from settings form"""
-        updated = []
-        for key, value in form_post.items():
-            if not value and not isinstance(value, int):
-                continue
-
-            if value in ["0", 0]:
-                to_write = False
-            elif value == "1":
-                to_write = True
-            else:
-                to_write = value
-
-            config_dict, config_value = key.split("_", maxsplit=1)
-            self.config[config_dict][config_value] = to_write
-            updated.append((config_value, to_write))
-
-        RedisArchivist().set_message("config", self.config, save=True)
-        return updated
-
-    def load_new_defaults(self):
-        """check config.json for missing defaults"""
-        default_config = self.get_config_file()
-        redis_config = self.get_config_redis()
-
-        # check for customizations
-        if not redis_config:
-            config = self.get_config()
-            RedisArchivist().set_message("config", config)
-            return False
-
-        needs_update = False
-
-        for key, value in default_config.items():
-            # missing whole main key
-            if key not in redis_config:
-                redis_config.update({key: value})
-                needs_update = True
-                continue
-
-            # missing nested values
-            for sub_key, sub_value in value.items():
-                if sub_key not in redis_config[key].keys():
-                    redis_config[key].update({sub_key: sub_value})
-                    needs_update = True
-
-        if needs_update:
-            RedisArchivist().set_message("config", redis_config)
-
-        return needs_update
+    def _validate_key(self, key_map: list[str]) -> None:
+        """raise valueerror on invalid key"""
+        exists = self.CONFIG_DEFAULTS.get(key_map[0], {}).get(key_map[1])  # type: ignore  # noqa: E501
+        if exists is None:
+            raise ValueError(f"trying to access invalid config key: {key_map}")
 
 
 class ReleaseVersion:
