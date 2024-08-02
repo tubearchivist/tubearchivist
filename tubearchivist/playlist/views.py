@@ -3,6 +3,7 @@
 from common.views_base import AdminWriteOnly, ApiBaseView
 from download.src.subscriptions import PlaylistSubscription
 from playlist.src.index import YoutubePlaylist
+from playlist.src.query_building import QueryBuilder
 from rest_framework import status
 from rest_framework.response import Response
 from task.tasks import subscribe_to
@@ -12,31 +13,26 @@ from user.src.user_config import UserConfig
 class PlaylistApiListView(ApiBaseView):
     """resolves to /api/playlist/
     GET: returns list of indexed playlists
+    params:
+    - channel:str=<channel-id>
+    - subscribed: bool
+    - type:enum=regular|custom
+    POST: change subscribe state
     """
 
     search_base = "ta_playlist/_search/"
     permission_classes = [AdminWriteOnly]
-    valid_playlist_type = ["regular", "custom"]
 
     def get(self, request):
-        """handle get request"""
-        playlist_type = request.GET.get("playlist_type", None)
-        query = {"sort": [{"playlist_name.keyword": {"order": "asc"}}]}
-        if playlist_type is not None:
-            if playlist_type not in self.valid_playlist_type:
-                message = f"invalid playlist_type {playlist_type}"
-                return Response({"message": message}, status=400)
+        """get request"""
+        try:
+            data = QueryBuilder(**request.GET).build_data()
+        except ValueError as err:
+            return Response({"error": str(err)}, status=400)
 
-            query.update(
-                {
-                    "query": {
-                        "term": {"playlist_type": {"value": playlist_type}}
-                    },
-                }
-            )
-
-        self.data.update(query)
+        self.data = data
         self.get_document_list(request)
+
         return Response(self.response)
 
     def post(self, request):
