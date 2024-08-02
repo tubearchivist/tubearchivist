@@ -75,6 +75,49 @@ class DownloadApiListView(ApiBaseView):
         return Response({"message": message})
 
 
+class DownloadAggsApiView(ApiBaseView):
+    """resolves to /api/download/aggs/
+    GET: get download aggregations
+    """
+
+    search_base = "ta_download/_search"
+    valid_filter_view = ["ignore", "pending"]
+
+    def get(self, request):
+        """get aggs"""
+        filter_view = request.GET.get("filter")
+        if filter_view:
+            if filter_view not in self.valid_filter_view:
+                message = f"invalid filter: {filter_view}"
+                return Response({"message": message}, status=400)
+
+            self.data.update(
+                {
+                    "query": {"term": {"status": {"value": filter_view}}},
+                }
+            )
+
+        self.data.update(
+            {
+                "aggs": {
+                    "channel_downloads": {
+                        "multi_terms": {
+                            "size": 30,
+                            "terms": [
+                                {"field": "channel_name.keyword"},
+                                {"field": "channel_id"},
+                            ],
+                            "order": {"_count": "desc"},
+                        }
+                    }
+                }
+            }
+        )
+        self.get_aggs()
+
+        return Response(self.response)
+
+
 class DownloadApiView(ApiBaseView):
     """resolves to /api/download/<video_id>/
     GET: returns metadata dict of an item in the download queue
