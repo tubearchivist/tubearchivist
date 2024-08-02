@@ -18,7 +18,7 @@ class QueryBuilder:
         data = {}
         data["query"] = self.build_query()
         if sort := self.parse_sort():
-            data["sort"] = sort
+            data.update(sort)
 
         return data
 
@@ -77,7 +77,7 @@ class QueryBuilder:
 
         return {"match": {"vid_type": vid_type}}
 
-    def parse_sort(self) -> list | None:
+    def parse_sort(self) -> dict | None:
         """build sort key"""
         sort = self.request_params.get("sort")
         if not sort:
@@ -95,6 +95,5 @@ class QueryBuilder:
             raise ValueError(f"'{order}' not in OrderEnum")
 
         order_by = getattr(OrderEnum, order.upper()).value
-        sort_key = [{sort_field: {"order": order_by}}]
 
-        return sort_key
+        return {"sort": [{sort_field: {"order": order_by}}]}
