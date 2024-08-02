@@ -19,9 +19,4 @@ urlpatterns = [
         views.ChannelApiView.as_view(),
         name="api-channel",
     ),
-    path(
-        "<slug:channel_id>/video/",
-        views.ChannelApiVideoView.as_view(),
-        name="api-channel-video",
-    ),
 ]

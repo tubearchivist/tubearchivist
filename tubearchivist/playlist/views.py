@@ -118,21 +118,3 @@ class PlaylistApiView(ApiBaseView):
             YoutubePlaylist(playlist_id).delete_metadata()
 
         return Response({"success": True})
-
-
-class PlaylistApiVideoView(ApiBaseView):
-    """resolves to /api/playlist/<playlist_id>/video
-    GET: returns list of videos in playlist
-    """
-
-    search_base = "ta_video/_search/"
-
-    def get(self, request, playlist_id):
-        """handle get request"""
-        self.data["query"] = {
-            "term": {"playlist.keyword": {"value": playlist_id}}
-        }
-        self.data.update({"sort": [{"published": {"order": "desc"}}]})
-
-        self.get_document_list(request)
-        return Response(self.response, status=self.status_code)

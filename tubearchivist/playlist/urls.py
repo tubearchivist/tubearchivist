@@ -14,9 +14,4 @@ urlpatterns = [
         views.PlaylistApiView.as_view(),
         name="api-playlist",
     ),
-    path(
-        "<slug:playlist_id>/video/",
-        views.PlaylistApiVideoView.as_view(),
-        name="api-playlist-video",
-    ),
 ]

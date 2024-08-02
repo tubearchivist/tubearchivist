@@ -129,25 +129,3 @@ class ChannelApiSearchView(ApiBaseView):
         self.get_document(parsed["url"])
 
         return Response(self.response, status=self.status_code)
-
-
-class ChannelApiVideoView(ApiBaseView):
-    """resolves to /api/channel/<channel-id>/video
-    GET: returns a list of videos of channel
-    """
-
-    search_base = "ta_video/_search/"
-
-    def get(self, request, channel_id):
-        """handle get request"""
-        self.data.update(
-            {
-                "query": {
-                    "term": {"channel.channel_id": {"value": channel_id}}
-                },
-                "sort": [{"published": {"order": "desc"}}],
-            }
-        )
-        self.get_document_list(request)
-
-        return Response(self.response, status=self.status_code)

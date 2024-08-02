@@ -5,18 +5,31 @@ from common.views_base import AdminWriteOnly, ApiBaseView
 from playlist.src.index import YoutubePlaylist
 from rest_framework.response import Response
 from video.src.index import YoutubeVideo
+from video.src.query_building import QueryBuilder
 
 
 class VideoApiListView(ApiBaseView):
     """resolves to /api/video/
     GET: returns list of videos
+    params:
+    - playlist:str=<playlist-id>
+    - channel:str=<channel-id>
+    - watch:enum=watched|unwatched|continue
+    - sort:enum=published|downloaded|views|likes|duration|filesize
+    - order:enum=asc|desc
+    - type:enum=videos|streams|shorts
     """
 
     search_base = "ta_video/_search/"
 
     def get(self, request):
         """get request"""
-        self.data.update({"sort": [{"published": {"order": "desc"}}]})
+        try:
+            data = QueryBuilder(request.user.id, **request.GET).build_data()
+        except ValueError as err:
+            return Response({"error": str(err)}, status=400)
+
+        self.data = data
         self.get_document_list(request)
 
         return Response(self.response)
