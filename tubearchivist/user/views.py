@@ -50,7 +50,7 @@ class UserConfigView(ApiBaseView):
 
 
 class LoginApiView(ObtainAuthToken):
-    """resolves to /api/login/
+    """resolves to /api/user/login/
     POST: return token and username after successful login
     """
 
