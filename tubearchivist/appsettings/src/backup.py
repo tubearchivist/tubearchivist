@@ -10,7 +10,6 @@ import os
 import zipfile
 from datetime import datetime
 
-from appsettings.src.config import AppConfig
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
 from common.src.helper import get_mapping, ignore_filelist
@@ -24,8 +23,7 @@ class ElasticBackup:
     CACHE_DIR = EnvironmentSettings.CACHE_DIR
     BACKUP_DIR = os.path.join(CACHE_DIR, "backup")
 
-    def __init__(self, reason=False, task=False):
-        self.config = AppConfig().config
+    def __init__(self, reason=False, task=False) -> None:
         self.timestamp = datetime.now().strftime("%Y%m%d")
         self.index_config = get_mapping()
         self.reason = reason
