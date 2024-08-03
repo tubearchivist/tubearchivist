@@ -70,7 +70,6 @@ INSTALLED_APPS = [
     "stats",
     "user",
     "config",
-    "home",
 ]
 
 MIDDLEWARE = [

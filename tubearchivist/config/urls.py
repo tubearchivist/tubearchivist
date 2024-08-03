@@ -18,7 +18,6 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
-    path("", include("home.urls")),
     path("api/", include("common.urls")),
     path("api/video/", include("video.urls")),
     path("api/channel/", include("channel.urls")),
