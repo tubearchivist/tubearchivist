@@ -12,6 +12,7 @@ from user.models import Account
 from user.serializers import AccountSerializer
 from user.src.user_config import UserConfig
 
+
 class UserConfigView(ApiBaseView):
     """resolves to /api/config/user/
     GET: return current user config
@@ -94,5 +95,5 @@ class LoginApiView(BasicAuthentication, ObtainAuthToken):
                     "user_groups": [group.name for group in user.groups.all()],
                 }
             )
-            
+
         return response
