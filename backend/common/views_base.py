@@ -7,6 +7,7 @@ from common.src.index_generic import Pagination
 from common.src.search_processor import SearchProcess, process_aggs
 from rest_framework import permissions
 from rest_framework.authentication import (
+    BasicAuthentication,
     SessionAuthentication,
     TokenAuthentication,
 )
@@ -38,7 +39,11 @@ class AdminWriteOnly(permissions.BasePermission):
 class ApiBaseView(APIView):
     """base view to inherit from"""
 
-    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    authentication_classes = [
+        BasicAuthentication,
+        SessionAuthentication,
+        TokenAuthentication,
+    ]
     permission_classes = [permissions.IsAuthenticated]
     search_base = ""
     data = ""
