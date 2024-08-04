@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="2000"
+   height="2000"
+   viewBox="0 0 529.16666 529.16735"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   sodipodi:docname="Listview.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.42053519"
+     inkscape:cx="851.82064"
+     inkscape:cy="1105.7974"
+     inkscape:document-units="mm"
+     inkscape:current-layer="g873"
+     showgrid="false"
+     units="px"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1">
+    <sodipodi:guide
+       position="247.25932,291.92959"
+       orientation="1,0"
+       id="guide853"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="337.22901,167.98535"
+       orientation="0,1"
+       id="guide855"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="266.76325,305.4565"
+       orientation="0,1"
+       id="guide857"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="257.79774,279.50371"
+       orientation="0,1"
+       id="guide861"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="22.413775,336.67894"
+       orientation="1,0"
+       id="guide926"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="503.71355,217.50031"
+       orientation="1,0"
+       id="guide928"
+       inkscape:locked="false" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,232.16736)">
+    <g
+       id="g873"
+       transform="matrix(1.3431799,0,0,1.3431799,-84.854433,26.13855)">
+      <rect
+         ry="7.445024"
+         rx="7.445024"
+         y="-121.34892"
+         x="79.944702"
+         height="70.107315"
+         width="358.24551"
+         id="rect815"
+         style="opacity:1;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.64810181;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:1.29620369, 0.64810185;stroke-dashoffset:0;stroke-opacity:0.22508042;paint-order:markers fill stroke" />
+      <rect
+         ry="7.4450235"
+         rx="7.4450235"
+         y="-31.167784"
+         x="79.861153"
+         height="70.107315"
+         width="358.32907"
+         id="rect815-20"
+         style="opacity:1;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.64817739;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:1.29635485, 0.64817743;stroke-dashoffset:0;stroke-opacity:0.22508042;paint-order:markers fill stroke" />
+      <rect
+         ry="7.4450235"
+         rx="7.4450231"
+         y="60.024326"
+         x="79.908524"
+         height="70.106117"
+         width="358.28171"
+         id="rect815-8"
+         style="opacity:1;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.64812905;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:1.29625813, 0.64812907;stroke-dashoffset:0;stroke-opacity:0.22508042;paint-order:markers fill stroke" />
+    </g>
+  </g>
+</svg>
