@@ -22,7 +22,7 @@ class PingView(ApiBaseView):
             "response": "pong",
             "user": request.user.id,
             "version": ReleaseVersion().get_local_version(),
-            "ta_update": ReleaseVersion().get_update()
+            "ta_update": ReleaseVersion().get_update(),
         }
         return Response(data)
 
