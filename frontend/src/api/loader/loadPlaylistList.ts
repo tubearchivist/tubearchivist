@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
 const loadPlaylistList = async (page: number | undefined, isCustom = false) => {
@@ -17,6 +18,7 @@ const loadPlaylistList = async (page: number | undefined, isCustom = false) => {
 
   const response = await fetch(`${apiUrl}/api/playlist/?${searchParams.toString()}`, {
     headers: defaultHeaders,
+    credentials: getFetchCredentials(),
   });
 
   const playlist = await response.json();

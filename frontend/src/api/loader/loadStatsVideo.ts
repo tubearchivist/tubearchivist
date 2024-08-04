@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
 const loadStatsVideo = async () => {
@@ -7,6 +8,7 @@ const loadStatsVideo = async () => {
 
   const response = await fetch(`${apiUrl}/api/stats/video/`, {
     headers: defaultHeaders,
+    credentials: getFetchCredentials(),
   });
 
   const notifications = await response.json();

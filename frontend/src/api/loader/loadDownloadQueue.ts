@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
 const loadDownloadQueue = async (page: number, channelId: string | null, showIgnored: boolean) => {
@@ -19,6 +20,7 @@ const loadDownloadQueue = async (page: number, channelId: string | null, showIgn
 
   const response = await fetch(`${apiUrl}/api/download/?${searchParams.toString()}`, {
     headers: defaultHeaders,
+    credentials: getFetchCredentials(),
   });
 
   const playlist = await response.json();

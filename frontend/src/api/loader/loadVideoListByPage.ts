@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
 const loadVideoListByPage = async (page: number) => {
@@ -7,6 +8,7 @@ const loadVideoListByPage = async (page: number) => {
 
   const response = await fetch(`${apiUrl}/api/video/?page=${page}`, {
     headers: defaultHeaders,
+    credentials: getFetchCredentials(),
   });
 
   const videos = await response.json();

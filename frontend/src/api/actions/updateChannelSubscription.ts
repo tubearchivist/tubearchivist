@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 import getCookie from '../../functions/getCookie';
 
 const updateChannelSubscription = async (channelId: string, status: boolean) => {
@@ -12,6 +13,7 @@ const updateChannelSubscription = async (channelId: string, status: boolean) => 
       ...defaultHeaders,
       'X-CSRFToken': csrfCookie || '',
     },
+    credentials: getFetchCredentials(),
 
     body: JSON.stringify({
       data: [{ channel_id: channelId, channel_subscribed: status }],

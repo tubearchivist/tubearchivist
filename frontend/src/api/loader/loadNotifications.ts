@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
 export type NotificationPages = 'download' | 'settings' | 'channel' | 'all';
@@ -14,6 +15,7 @@ const loadNotifications = async (pageName: NotificationPages, includeReindex = f
 
   const response = await fetch(`${apiUrl}/api/notification/${params}`, {
     headers: defaultHeaders,
+    credentials: getFetchCredentials(),
   });
 
   const notifications = await response.json();

@@ -3,6 +3,7 @@ import { SortBy, SortOrder, ViewLayout } from '../../pages/Home';
 import getApiUrl from '../../configuration/getApiUrl';
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getCookie from '../../functions/getCookie';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 
 export type UserConfigType = {
   stylesheet?: ColourVariants;
@@ -30,6 +31,7 @@ const updateUserConfig = async (config: UserConfigType) => {
       ...defaultHeaders,
       'X-CSRFToken': csrfCookie || '',
     },
+    credentials: getFetchCredentials(),
 
     body: JSON.stringify(config),
   });
