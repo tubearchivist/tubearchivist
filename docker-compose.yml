@@ -29,7 +29,6 @@ services:
     depends_on:
       - archivist-es
       - archivist-redis
-
   archivist-redis:
     image: redis/redis-stack-server
     container_name: archivist-redis
