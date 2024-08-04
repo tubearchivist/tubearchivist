@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 import getCookie from '../../functions/getCookie';
 
 type VideoProgressProp = {
@@ -17,6 +18,7 @@ const updateVideoProgressById = async ({ youtubeId, currentProgress }: VideoProg
       ...defaultHeaders,
       'X-CSRFToken': csrfCookie || '',
     },
+    credentials: getFetchCredentials(),
 
     body: JSON.stringify({
       position: currentProgress,

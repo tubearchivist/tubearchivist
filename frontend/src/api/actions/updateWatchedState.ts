@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 import getCookie from '../../functions/getCookie';
 import deleteVideoProgressById from './deleteVideoProgressById';
 
@@ -22,6 +23,7 @@ const updateWatchedState = async (watched: Watched) => {
       ...defaultHeaders,
       'X-CSRFToken': csrfCookie || '',
     },
+    credentials: getFetchCredentials(),
 
     body: JSON.stringify(watched),
   });

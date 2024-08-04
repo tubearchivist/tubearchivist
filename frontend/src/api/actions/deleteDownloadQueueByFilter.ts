@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
 type FilterType = 'ignore' | 'pending';
@@ -16,6 +17,7 @@ const deleteDownloadQueueByFilter = async (filter: FilterType) => {
   const response = await fetch(`${apiUrl}/api/download/?${searchParams.toString()}`, {
     method: 'DELETE',
     headers: defaultHeaders,
+    credentials: getFetchCredentials(),
   });
 
   const downloadState = await response.json();

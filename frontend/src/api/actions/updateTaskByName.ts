@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 import getCookie from '../../functions/getCookie';
 
 type TaskNamesType =
@@ -19,6 +20,7 @@ const updateTaskByName = async (taskName: TaskNamesType) => {
       ...defaultHeaders,
       'X-CSRFToken': csrfCookie || '',
     },
+    credentials: getFetchCredentials(),
   });
 
   const downloadQueueState = await response.json();

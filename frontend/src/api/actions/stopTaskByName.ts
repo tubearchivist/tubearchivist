@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 import getCookie from '../../functions/getCookie';
 
 const stopTaskByName = async (taskId: string) => {
@@ -12,6 +13,7 @@ const stopTaskByName = async (taskId: string) => {
       ...defaultHeaders,
       'X-CSRFToken': csrfCookie || '',
     },
+    credentials: getFetchCredentials(),
 
     body: JSON.stringify({ command: 'stop' }),
   });

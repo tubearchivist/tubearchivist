@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
 const loadPlaylistVideosById = async (playlistId: string | undefined, page: number) => {
@@ -16,6 +17,7 @@ const loadPlaylistVideosById = async (playlistId: string | undefined, page: numb
 
   const response = await fetch(`${apiUrl}/api/video/?${searchParams.toString()}`, {
     headers: defaultHeaders,
+    credentials: getFetchCredentials(),
   });
 
   const videos = await response.json();

@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 import getCookie from '../../functions/getCookie';
 
 export type DownloadQueueStatus = 'ignore' | 'pending' | 'priority';
@@ -14,6 +15,7 @@ const updateDownloadQueueStatusById = async (youtubeId: string, status: Download
       ...defaultHeaders,
       'X-CSRFToken': csrfCookie || '',
     },
+    credentials: getFetchCredentials(),
 
     body: JSON.stringify({
       status,

@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
 const deletePlaylist = async (playlistId: string, allVideos = false) => {
@@ -13,6 +14,7 @@ const deletePlaylist = async (playlistId: string, allVideos = false) => {
   const response = await fetch(`${apiUrl}/api/playlist/${playlistId}/${params}`, {
     method: 'DELETE',
     headers: defaultHeaders,
+    credentials: getFetchCredentials(),
   });
 
   const playlistDeleted = await response.json();

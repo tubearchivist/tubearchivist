@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
 const loadVideoById = async (youtubeId: string) => {
@@ -7,6 +8,7 @@ const loadVideoById = async (youtubeId: string) => {
 
   const response = await fetch(`${apiUrl}/api/video/${youtubeId}/`, {
     headers: defaultHeaders,
+    credentials: getFetchCredentials(),
   });
 
   const videos = await response.json();

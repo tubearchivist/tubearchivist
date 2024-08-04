@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 import getCookie from '../../functions/getCookie';
 
 type ValidatedCookieType = {
@@ -19,6 +20,7 @@ const updateCookie = async (): Promise<ValidatedCookieType> => {
       ...defaultHeaders,
       'X-CSRFToken': csrfCookie || '',
     },
+    credentials: getFetchCredentials(),
   });
 
   const validatedCookie = await response.json();
