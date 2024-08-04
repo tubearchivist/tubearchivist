@@ -42,7 +42,7 @@ const Subtitles = ({ subtitles }: SubtitlesProp) => {
         label={label}
         kind="subtitles"
         srcLang={subtitle.lang}
-        src={subtitle.media_url}
+        src={`${getApiUrl()}${subtitle.media_url}`}
       />
     );
   });
@@ -192,7 +192,11 @@ const VideoPlayer = ({ video, videoProgress, sponsorBlock, embed }: VideoPlayerP
             playsInline
             id="video-item"
           >
-            <source src={`${videoUrl}#t=${videoSrcProgress}`} type="video/mp4" id="video-source" />
+            <source
+              src={`${getApiUrl()}${videoUrl}#t=${videoSrcProgress}`}
+              type="video/mp4"
+              id="video-source"
+            />
             {videoSubtitles && <Subtitles subtitles={videoSubtitles} />}
           </video>
         </div>
