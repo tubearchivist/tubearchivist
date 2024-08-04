@@ -283,18 +283,6 @@ else:
         r"chrome-extension://*",
     ]
 
-    CSRF_TRUSTED_ORIGINS = [
-        'http://localhost:3000'
-    ]
-
-    ALLOWED_HOSTS = [
-        'localhost',
-    ]
-
-    CORS_ORIGIN_WHITELIST = [
-        'http://localhost:3000',
-    ]
-
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "mode",
