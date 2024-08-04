@@ -63,7 +63,7 @@ class LoginApiView(BasicAuthentication, ObtainAuthToken):
 
         user, _ = super(LoginApiView, self).authenticate(request)
 
-        if user != None:
+        if user is not None:
             login(request, user)
 
             response = Response(
@@ -75,7 +75,7 @@ class LoginApiView(BasicAuthentication, ObtainAuthToken):
                 }
             )
 
-        if user == None:
+        if user is None:
             # pylint: disable=no-member
             serializer = self.serializer_class(
                 data=request.data, context={"request": request}
