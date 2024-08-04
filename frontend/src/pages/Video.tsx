@@ -141,14 +141,14 @@ const Video = () => {
       const videoResponse = await loadVideoById(videoId);
       const simmilarVideosResponse = await loadSimmilarVideosById(videoId);
       const videoProgressResponse = await loadVideoProgressById(videoId);
-      const sponsorblockReponse = await loadSponsorblockByVideoId(videoId);
+      // const sponsorblockReponse = await loadSponsorblockByVideoId(videoId);
       const customPlaylistsResponse = await loadPlaylistList(undefined, true);
       const commentsResponse = await loadCommentsbyVideoId(videoId);
 
       setVideoResponse(videoResponse);
       setSimmilarVideos(simmilarVideosResponse);
       setVideoProgress(videoProgressResponse);
-      setSponsorblockResponse(sponsorblockReponse);
+      // setSponsorblockResponse(sponsorblockReponse);
       setCustomPlaylistsResponse(customPlaylistsResponse);
       setCommentsResponse(commentsResponse);
       setRefreshVideoList(false);
@@ -286,7 +286,7 @@ const Video = () => {
                   )}
                 </>
               )}
-              <a download="" href={video.media_url}>
+              <a download="" href={`${getApiUrl()}${video.media_url}`}>
                 <Button label="Download File" id="download-item" />
               </a>{' '}
               {isAdmin && (
