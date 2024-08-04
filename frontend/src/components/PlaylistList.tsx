@@ -5,6 +5,7 @@ import { PlaylistType } from '../pages/Playlist';
 import updatePlaylistSubscription from '../api/actions/updatePlaylistSubscription';
 import formatDate from '../functions/formatDates';
 import Button from './Button';
+import getApiUrl from '../configuration/getApiUrl';
 
 type PlaylistListProps = {
   playlistList: PlaylistType[] | undefined;
@@ -25,7 +26,7 @@ const PlaylistList = ({ playlistList, viewLayout, setRefresh }: PlaylistListProp
             <div className="playlist-thumbnail">
               <Link to={Routes.Playlist(playlist.playlist_id)}>
                 <img
-                  src={`/cache/playlists/${playlist.playlist_id}.jpg`}
+                  src={`${getApiUrl()}/cache/playlists/${playlist.playlist_id}.jpg`}
                   alt={`${playlist.playlist_id}-thumbnail`}
                 />
               </Link>

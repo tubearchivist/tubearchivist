@@ -6,6 +6,7 @@ import Button from './Button';
 import deleteDownloadById from '../api/actions/deleteDownloadById';
 import updateDownloadQueueStatusById from '../api/actions/updateDownloadQueueStatusById';
 import { useState } from 'react';
+import getApiUrl from '../configuration/getApiUrl';
 
 type DownloadListItemProps = {
   view: string;
@@ -21,7 +22,7 @@ const DownloadListItem = ({ view, download, showIgnored, setRefresh }: DownloadL
     <div className={`video-item ${view}`} id={`dl-${download.youtube_id}`}>
       <div className={`video-thumb-wrap ${view}`}>
         <div className="video-thumb">
-          <img src={download.vid_thumb_url} alt="video_thumb" />
+          <img src={`${getApiUrl()}${download.vid_thumb_url}`} alt="video_thumb" />
           <div className="video-tags">
             {showIgnored && <span>ignored</span>}
             {!showIgnored && <span>queued</span>}

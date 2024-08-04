@@ -9,6 +9,7 @@ import formatDate from '../functions/formatDates';
 import WatchedCheckBox from './WatchedCheckBox';
 import MoveVideoMenu from './MoveVideoMenu';
 import { useState } from 'react';
+import getApiUrl from '../configuration/getApiUrl';
 
 type VideoListItemProps = {
   video: VideoType;
@@ -43,7 +44,7 @@ const VideoListItem = ({
         <div className={`video-thumb-wrap ${viewLayout}`}>
           <div className="video-thumb">
             <picture>
-              <img src={video.vid_thumb_url} alt="video-thumb" />
+              <img src={`${getApiUrl()}${video.vid_thumb_url}`} alt="video-thumb" />
               <source srcSet={defaultVideoThumb} />
             </picture>
 

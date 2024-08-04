@@ -6,6 +6,7 @@ import Notifications from './Notifications';
 import { Dispatch, SetStateAction, SyntheticEvent, useState } from 'react';
 import formatTime from '../functions/formatTime';
 import { useSearchParams } from 'react-router-dom';
+import getApiUrl from '../configuration/getApiUrl';
 
 type VideoTag = SyntheticEvent<HTMLVideoElement, Event>;
 
@@ -160,7 +161,7 @@ const VideoPlayer = ({ video, videoProgress, sponsorBlock, embed }: VideoPlayerP
       <div id="player" className={embed ? '' : 'player-wrapper'}>
         <div className={embed ? '' : 'video-main'}>
           <video
-            poster={videoThumbUrl}
+            poster={`${getApiUrl()}${videoThumbUrl}`}
             onVolumeChange={(videoTag: VideoTag) => {
               localStorage.setItem('playerVolume', videoTag.currentTarget.volume.toString());
             }}

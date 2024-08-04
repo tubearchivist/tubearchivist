@@ -39,6 +39,7 @@ import CommentBox, { CommentsType } from '../components/CommentBox';
 import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
 import { OutletContextType } from './Base';
+import getApiUrl from '../configuration/getApiUrl';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {
   return playlist.playlist_entries.some(entry => {
@@ -441,7 +442,7 @@ const Video = () => {
                       <>
                         <Link to={Routes.Playlist(playlistItem.playlist_previous.youtube_id)}>
                           <img
-                            src={`/cache/${playlistItem.playlist_previous.vid_thumb}`}
+                            src={`${getApiUrl()}/cache/${playlistItem.playlist_previous.vid_thumb}`}
                             alt="previous thumbnail"
                           />
                         </Link>
@@ -471,7 +472,7 @@ const Video = () => {
                         </div>
                         <Link to={Routes.Playlist(playlistItem.playlist_next.youtube_id)}>
                           <img
-                            src={`/cache/${playlistItem.playlist_next.vid_thumb}`}
+                            src={`${getApiUrl()}/cache/${playlistItem.playlist_next.vid_thumb}`}
                             alt="previous thumbnail"
                           />
                         </Link>

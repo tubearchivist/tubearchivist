@@ -1,3 +1,4 @@
+import getApiUrl from '../configuration/getApiUrl';
 import defaultChannelIcon from '/img/default-channel-icon.jpg';
 
 type ChannelIconProps = {
@@ -7,7 +8,7 @@ type ChannelIconProps = {
 const ChannelIcon = ({ channel_id }: ChannelIconProps) => {
   return (
     <img
-      src={`/cache/channels/${channel_id}_thumb.jpg`}
+      src={`${getApiUrl()}/cache/channels/${channel_id}_thumb.jpg`}
       alt="channel-thumb"
       onError={({ currentTarget }) => {
         currentTarget.onerror = null; // prevents looping
