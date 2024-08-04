@@ -9,6 +9,8 @@ import updateCookie from '../api/actions/updateCookie';
 import deleteApiToken from '../api/actions/deleteApiToken';
 import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
+import loadAppsettingsConfig, { AppSettingsConfigType } from '../api/loader/loadAppsettingsConfig';
+import updateAppsettingsConfig from '../api/actions/updateAppsettingsConfig';
 
 type SnapshotType = {
   id: string;
@@ -29,97 +31,139 @@ type SnapshotListType = {
 
 type SettingsApplicationReponses = {
   snapshots?: SnapshotListType;
+  appSettingsConfig?: AppSettingsConfigType;
 };
 
 const SettingsApplication = () => {
+  const [response, setResponse] = useState<SettingsApplicationReponses>({
+    snapshots: undefined,
+    appSettingsConfig: undefined,
+  });
+
+  const snapshots = response?.snapshots;
+  const appSettingsConfig = response?.appSettingsConfig;
+
   // Subscriptions
-  const [videoPageSize, setVideoPageSize] = useState(0);
-  const [livePageSize, setLivePageSize] = useState(0);
-  const [shortPageSize, setShortPageSize] = useState(0);
-  const [isAutostart, setIsAutostart] = useState(false);
+  const [videoPageSize, setVideoPageSize] = useState(
+    appSettingsConfig?.subscriptions.channel_size || 0,
+  );
+  const [livePageSize, setLivePageSize] = useState(
+    appSettingsConfig?.subscriptions.live_channel_size || 0,
+  );
+  const [shortPageSize, setShortPageSize] = useState(
+    appSettingsConfig?.subscriptions.shorts_channel_size || 0,
+  );
+  const [isAutostart, setIsAutostart] = useState(
+    appSettingsConfig?.subscriptions.auto_start || false,
+  );
 
   // Downloads
-  const [currentDownloadSpeed, setCurrentDownloadSpeed] = useState(0);
-  const [currentThrottledRate, setCurrentThrottledRate] = useState(0);
-  const [currentScrapingSleep, setCurrentScrapingSleep] = useState(0);
-  const [currentAutodelete, setCurrentAutodelete] = useState(0);
+  const [currentDownloadSpeed, setCurrentDownloadSpeed] = useState(
+    appSettingsConfig?.downloads.limit_speed || 0,
+  );
+  const [currentThrottledRate, setCurrentThrottledRate] = useState(
+    appSettingsConfig?.downloads.throttledratelimit || 0,
+  );
+  const [currentScrapingSleep, setCurrentScrapingSleep] = useState(
+    appSettingsConfig?.downloads.sleep_interval || 0,
+  );
+  const [currentAutodelete, setCurrentAutodelete] = useState(
+    appSettingsConfig?.downloads.autodelete_days || 0,
+  );
 
   // Download Format
-  const [downloadsFormat, setDownloadsFormat] = useState('');
-  const [downloadsFormatSort, setDownloadsFormatSort] = useState('');
-  const [downloadsExtractorLang, setDownloadsExtractorLang] = useState('');
-  const [embedMetadata, setEmbedMetadata] = useState(false);
-  const [embedThumbnail, setEmbedThumbnail] = useState(false);
+  const [downloadsFormat, setDownloadsFormat] = useState(appSettingsConfig?.downloads.format || '');
+  const [downloadsFormatSort, setDownloadsFormatSort] = useState(
+    appSettingsConfig?.downloads.format_sort || '',
+  );
+  const [downloadsExtractorLang, setDownloadsExtractorLang] = useState(
+    appSettingsConfig?.downloads.extractor_lang || '',
+  );
+  const [embedMetadata, setEmbedMetadata] = useState(
+    appSettingsConfig?.downloads.add_metadata || false,
+  );
+  const [embedThumbnail, setEmbedThumbnail] = useState(
+    appSettingsConfig?.downloads.add_thumbnail || false,
+  );
 
   // Subtitles
-  const [subtitleLang, setSubtitleLang] = useState('');
-  const [subtitleSource, setSubtitleSource] = useState('');
-  const [indexSubtitles, setIndexSubtitles] = useState(false);
+  const [subtitleLang, setSubtitleLang] = useState(appSettingsConfig?.downloads.subtitle || '');
+  const [subtitleSource, setSubtitleSource] = useState(
+    appSettingsConfig?.downloads.subtitle_source || '',
+  );
+  const [indexSubtitles, setIndexSubtitles] = useState(
+    appSettingsConfig?.downloads.subtitle_index || false,
+  );
 
   // Comments
-  const [commentsMax, setCommentsMax] = useState('');
-  const [commentsSort, setCommentsSort] = useState('');
+  const [commentsMax, setCommentsMax] = useState(appSettingsConfig?.downloads.comment_max || 0);
+  const [commentsSort, setCommentsSort] = useState(appSettingsConfig?.downloads.comment_sort || '');
 
   // Cookie
-  const [cookieImport, setCookieImport] = useState(false);
+  const [cookieImport, setCookieImport] = useState(
+    appSettingsConfig?.downloads.cookie_import || false,
+  );
   const [validatingCookie, setValidatingCookie] = useState(false);
   const [cookieResponse, setCookieResponse] = useState({});
 
   // Integrations
   const [showApiToken, setShowApiToken] = useState(false);
-  const [downloadDislikes, setDownloadDislikes] = useState(false);
-  const [enableSponsorBlock, setEnableSponsorBlock] = useState(false);
+  const [downloadDislikes, setDownloadDislikes] = useState(
+    appSettingsConfig?.downloads.integrate_ryd || false,
+  );
+  const [enableSponsorBlock, setEnableSponsorBlock] = useState(
+    appSettingsConfig?.downloads.integrate_sponsorblock || false,
+  );
   const [resetTokenResponse, setResetTokenResponse] = useState({});
 
   // Snapshots
-  const [enableSnapshots, setEnableSnapshots] = useState(false);
+  const [enableSnapshots, setEnableSnapshots] = useState(
+    appSettingsConfig?.application.enable_snapshot || false,
+  );
   const [isSnapshotQueued, setIsSnapshotQueued] = useState(false);
   const [restoringSnapshot, setRestoringSnapshot] = useState(false);
 
-  const [response, setResponse] = useState<SettingsApplicationReponses>({
-    snapshots: undefined,
-  });
-
-  const snapshots = response?.snapshots;
-
-  const config = {
-    api_token: '<token>',
-    subscriptions: {
-      channel_size: 69,
-      live_channel_size: 69,
-      shorts_channel_size: 69,
-      auto_start: false,
-    },
-    downloads: {
-      limit_speed: false,
-      sleep_interval: 3,
-      autodelete_days: false,
-      format: false,
-      format_sort: false,
-      add_metadata: false,
-      add_thumbnail: false,
-      subtitle: false,
-      subtitle_source: false,
-      subtitle_index: false,
-      comment_max: false,
-      comment_sort: 'top',
-      cookie_import: false,
-      throttledratelimit: false,
-      extractor_lang: false,
-      integrate_ryd: false,
-      integrate_sponsorblock: false,
-    },
-    application: {
-      enable_snapshot: true,
-    },
+  const onSubmit = async () => {
+    return await updateAppsettingsConfig({
+      application: {
+        enable_snapshot: enableSnapshots,
+      },
+      downloads: {
+        limit_speed: currentDownloadSpeed,
+        sleep_interval: currentScrapingSleep,
+        autodelete_days: currentAutodelete,
+        format: downloadsFormat,
+        format_sort: downloadsFormatSort,
+        add_metadata: embedMetadata,
+        add_thumbnail: embedThumbnail,
+        subtitle: subtitleLang,
+        subtitle_source: subtitleSource,
+        subtitle_index: indexSubtitles,
+        comment_max: commentsMax,
+        comment_sort: commentsSort,
+        cookie_import: cookieImport,
+        throttledratelimit: currentThrottledRate,
+        extractor_lang: downloadsExtractorLang,
+        integrate_ryd: downloadDislikes,
+        integrate_sponsorblock: enableSponsorBlock,
+      },
+      subscriptions: {
+        auto_start: isAutostart,
+        channel_size: videoPageSize,
+        live_channel_size: livePageSize,
+        shorts_channel_size: shortPageSize,
+      },
+    });
   };
 
   useEffect(() => {
     (async () => {
       const snapshotResponse = await loadSnapshots();
+      const appSettingsConfig = await loadAppsettingsConfig();
 
       setResponse({
         snapshots: snapshotResponse,
+        appSettingsConfig,
       });
     })();
   }, []);
@@ -149,7 +193,9 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 YouTube page size:{' '}
-                <span className="settings-current">{config.subscriptions.channel_size}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.subscriptions.channel_size}
+                </span>
               </p>
               <i>
                 Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max
@@ -161,6 +207,7 @@ const SettingsApplication = () => {
                 name="subscriptions_channel_size"
                 min="1"
                 id="id_subscriptions_channel_size"
+                value={videoPageSize}
                 onChange={event => {
                   setVideoPageSize(Number(event.target.value));
                 }}
@@ -170,7 +217,9 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 YouTube Live page size:{' '}
-                <span className="settings-current">{config.subscriptions.live_channel_size}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.subscriptions.live_channel_size}
+                </span>
               </p>
               <i>
                 Live Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max
@@ -182,6 +231,7 @@ const SettingsApplication = () => {
                 name="subscriptions_live_channel_size"
                 min="0"
                 id="id_subscriptions_live_channel_size"
+                value={livePageSize}
                 onChange={event => {
                   setLivePageSize(Number(event.target.value));
                 }}
@@ -191,7 +241,9 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 YouTube Shorts page size:{' '}
-                <span className="settings-current">{config.subscriptions.shorts_channel_size}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.subscriptions.shorts_channel_size}
+                </span>
               </p>
               <i>
                 Shorts Videos to scan to find new items for the <b>Rescan subscriptions</b> task,
@@ -203,6 +255,7 @@ const SettingsApplication = () => {
                 name="subscriptions_shorts_channel_size"
                 min="0"
                 id="id_subscriptions_shorts_channel_size"
+                value={shortPageSize}
                 onChange={event => {
                   setShortPageSize(Number(event.target.value));
                 }}
@@ -212,7 +265,9 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 Auto start download from your subscriptions:{' '}
-                <span className="settings-current">{config.subscriptions.auto_start}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.subscriptions.auto_start}
+                </span>
               </p>
               <i>
                 Enable this will automatically start and prioritize videos from your subscriptions.
@@ -222,6 +277,7 @@ const SettingsApplication = () => {
                 name="subscriptions_auto_start"
                 id="id_subscriptions_auto_start"
                 defaultValue=""
+                value={isAutostart.toString()}
                 onChange={event => {
                   setIsAutostart(event.target.value === 'true');
                 }}
@@ -238,7 +294,9 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 Current download speed limit in KB/s:{' '}
-                <span className="settings-current">{config.downloads.limit_speed}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.downloads.limit_speed}
+                </span>
               </p>
               <i>
                 Limit download speed. 0 (zero) to deactivate, e.g. 1000 (1MB/s). Speeds are in KB/s.
@@ -249,6 +307,7 @@ const SettingsApplication = () => {
                 type="number"
                 name="downloads_limit_speed"
                 id="id_downloads_limit_speed"
+                value={currentDownloadSpeed.toString()}
                 onChange={event => {
                   setCurrentDownloadSpeed(Number(event.target.value));
                 }}
@@ -258,7 +317,9 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 Current throttled rate limit in KB/s:{' '}
-                <span className="settings-current">{config.downloads.throttledratelimit}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.downloads.throttledratelimit}
+                </span>
               </p>
               <i>
                 Download will restart if speeds drop below specified amount. 0 (zero) to deactivate,
@@ -269,6 +330,7 @@ const SettingsApplication = () => {
                 type="number"
                 name="downloads_throttledratelimit"
                 id="id_downloads_throttledratelimit"
+                value={currentThrottledRate.toString()}
                 onChange={event => {
                   setCurrentThrottledRate(Number(event.target.value));
                 }}
@@ -278,7 +340,9 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 Current scraping sleep interval:{' '}
-                <span className="settings-current">{config.downloads.sleep_interval}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.downloads.sleep_interval}
+                </span>
               </p>
               <i>
                 Seconds to sleep between calls to YouTube. Might be necessary to avoid throttling.
@@ -289,6 +353,7 @@ const SettingsApplication = () => {
                 type="number"
                 name="downloads_sleep_interval"
                 id="id_downloads_sleep_interval"
+                value={currentScrapingSleep}
                 onChange={event => {
                   setCurrentScrapingSleep(Number(event.target.value));
                 }}
@@ -298,7 +363,10 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 <span className="danger-zone">Danger Zone</span>: Current auto delete watched
-                videos: <span className="settings-current">{config.downloads.autodelete_days}</span>
+                videos:{' '}
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.downloads.autodelete_days}
+                </span>
               </p>
               <i>Auto delete watched videos after x days, 0 (zero) to deactivate:</i>
               <br />
@@ -306,6 +374,7 @@ const SettingsApplication = () => {
                 type="number"
                 name="downloads_autodelete_days"
                 id="id_downloads_autodelete_days"
+                value={currentAutodelete.toString()}
                 onChange={event => {
                   setCurrentAutodelete(Number(event.target.value));
                 }}
@@ -319,7 +388,10 @@ const SettingsApplication = () => {
               <p>
                 Limit video and audio quality format for yt-dlp.
                 <br />
-                Currently: <span className="settings-current">{config.downloads.format}</span>
+                Currently:{' '}
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.downloads.format}
+                </span>
               </p>
               <p>Example configurations:</p>
               <ul>
@@ -359,6 +431,7 @@ const SettingsApplication = () => {
                 type="text"
                 name="downloads_format"
                 id="id_downloads_format"
+                value={downloadsFormat.toString()}
                 onChange={event => {
                   setDownloadsFormat(event.target.value);
                 }}
@@ -370,7 +443,10 @@ const SettingsApplication = () => {
               <p>
                 Force sort order to have precedence over all yt-dlp fields.
                 <br />
-                Currently: <span className="settings-current">{config.downloads.format_sort}</span>
+                Currently:{' '}
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.downloads.format_sort}
+                </span>
               </p>
               <p>Example configurations:</p>
               <ul>
@@ -396,6 +472,7 @@ const SettingsApplication = () => {
                 type="text"
                 name="downloads_format_sort"
                 id="id_downloads_format_sort"
+                value={downloadsFormatSort.toString()}
                 onChange={event => {
                   setDownloadsFormatSort(event.target.value);
                 }}
@@ -406,7 +483,9 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 Prefer translated metadata language:{' '}
-                <span className="settings-current">{config.downloads.extractor_lang}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.downloads.extractor_lang}
+                </span>
               </p>
               <i>
                 This will change the language this video gets indexed as. That will only be
@@ -422,6 +501,7 @@ const SettingsApplication = () => {
                 type="text"
                 name="downloads_extractor_lang"
                 id="id_downloads_extractor_lang"
+                value={downloadsExtractorLang.toString()}
                 onChange={event => {
                   setDownloadsExtractorLang(event.target.value);
                 }}
@@ -431,7 +511,9 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 Current metadata embed setting:{' '}
-                <span className="settings-current">{config.downloads.add_metadata}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.downloads.add_metadata}
+                </span>
               </p>
               <i>Metadata is not embedded into the downloaded files by default.</i>
               <br />
@@ -439,6 +521,7 @@ const SettingsApplication = () => {
                 name="downloads_add_metadata"
                 id="id_downloads_add_metadata"
                 defaultValue=""
+                value={embedMetadata.toString()}
                 onChange={event => {
                   setEmbedMetadata(event.target.value === 'true');
                 }}
@@ -452,7 +535,9 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 Current thumbnail embed setting:{' '}
-                <span className="settings-current">{config.downloads.add_thumbnail}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.downloads.add_thumbnail}
+                </span>
               </p>
               <i>Embed thumbnail into the mediafile.</i>
               <br />
@@ -460,6 +545,7 @@ const SettingsApplication = () => {
                 name="downloads_add_thumbnail"
                 id="id_downloads_add_thumbnail"
                 defaultValue=""
+                value={embedThumbnail.toString()}
                 onChange={event => {
                   setEmbedThumbnail(event.target.value === 'true');
                 }}
@@ -476,7 +562,9 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 Subtitles download setting:{' '}
-                <span className="settings-current">{config.downloads.subtitle}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.downloads.subtitle}
+                </span>
                 <br />
                 <i>
                   Choose which subtitles to download, add comma separated language codes,
@@ -488,6 +576,7 @@ const SettingsApplication = () => {
                   type="text"
                   name="downloads_subtitle"
                   id="id_downloads_subtitle"
+                  value={subtitleLang.toString()}
                   onChange={event => {
                     setSubtitleLang(event.target.value);
                   }}
@@ -497,7 +586,9 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 Subtitle source settings:{' '}
-                <span className="settings-current">{config.downloads.subtitle_source}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.downloads.subtitle_source}
+                </span>
               </p>
               <i>Download only user generated, or also less accurate auto generated subtitles.</i>
               <br />
@@ -505,6 +596,7 @@ const SettingsApplication = () => {
                 name="downloads_subtitle_source"
                 id="id_downloads_subtitle_source"
                 defaultValue=""
+                value={subtitleSource.toString()}
                 onChange={event => {
                   setSubtitleSource(event.target.value);
                 }}
@@ -517,7 +609,9 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 Index and make subtitles searchable:{' '}
-                <span className="settings-current">{config.downloads.subtitle_index}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.downloads.subtitle_index}
+                </span>
               </p>
               <i>Store subtitle lines in Elasticsearch. Not recommended for low-end hardware.</i>
               <br />
@@ -525,6 +619,7 @@ const SettingsApplication = () => {
                 name="downloads_subtitle_index"
                 id="id_downloads_subtitle_index"
                 defaultValue=""
+                value={indexSubtitles.toString()}
                 onChange={event => {
                   setIndexSubtitles(event.target.value === 'true');
                 }}
@@ -541,7 +636,9 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 Download and index comments:{' '}
-                <span className="settings-current">{config.downloads.comment_max}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.downloads.comment_max}
+                </span>
                 <br />
                 <i>
                   Follow the yt-dlp max_comments documentation,{' '}
@@ -566,9 +663,9 @@ const SettingsApplication = () => {
                   type="text"
                   name="downloads_comment_max"
                   id="id_downloads_comment_max"
-                  value={commentsMax}
+                  value={commentsMax.toString()}
                   onChange={event => {
-                    setCommentsMax(event.target.value);
+                    setCommentsMax(Number(event.target.value));
                   }}
                 />
               </p>
@@ -576,7 +673,9 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 Selected comment sort method:{' '}
-                <span className="settings-current">{config.downloads.comment_sort}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.downloads.comment_sort}
+                </span>
                 <br />
                 <i>Select how many comments and threads to download:</i>
                 <br />
@@ -584,6 +683,7 @@ const SettingsApplication = () => {
                   name="downloads_comment_sort"
                   id="id_downloads_comment_sort"
                   defaultValue=""
+                  value={commentsSort.toString()}
                   onChange={event => {
                     setCommentsSort(event.target.value);
                   }}
@@ -601,7 +701,9 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 Import YouTube cookie:{' '}
-                <span className="settings-current">{config.downloads.cookie_import}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.downloads.cookie_import}
+                </span>
                 <br />
               </p>
               <p>
@@ -628,6 +730,7 @@ const SettingsApplication = () => {
                 name="downloads_cookie_import"
                 id="id_downloads_cookie_import"
                 defaultValue=""
+                value={cookieImport.toString()}
                 onChange={event => {
                   setCookieImport(event.target.value === 'true');
                 }}
@@ -646,7 +749,7 @@ const SettingsApplication = () => {
               )}
               {!validatingCookie && (
                 <>
-                  {config.downloads.cookie_import && (
+                  {appSettingsConfig && appSettingsConfig.downloads.cookie_import && (
                     <div id="cookieMessage">
                       <Button
                         id="cookieButton"
@@ -682,7 +785,7 @@ const SettingsApplication = () => {
               {resetTokenResponse && resetTokenResponse?.success && <p>Token revoked</p>}
               {showApiToken && !resetTokenResponse?.success && (
                 <div className="description-text">
-                  <p>{config.api_token}</p>
+                  <p>{appSettingsConfig && appSettingsConfig.api_token}</p>
                   <Button
                     className="danger-button"
                     label="Revoke"
@@ -703,7 +806,9 @@ const SettingsApplication = () => {
                   returnyoutubedislike.com
                 </a>{' '}
                 to get dislikes and average ratings back:{' '}
-                <span className="settings-current">{config.downloads.integrate_ryd}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.downloads.integrate_ryd}
+                </span>
               </p>
               <i>
                 Before activating that, make sure you have a scraping sleep interval of at least 3
@@ -714,6 +819,7 @@ const SettingsApplication = () => {
                 name="downloads_integrate_ryd"
                 id="id_downloads_integrate_ryd"
                 defaultValue=""
+                value={downloadDislikes.toString()}
                 onChange={event => {
                   setDownloadDislikes(event.target.value === 'true');
                 }}
@@ -731,7 +837,9 @@ const SettingsApplication = () => {
                   SponsorBlock
                 </a>{' '}
                 to get sponsored timestamps:{' '}
-                <span className="settings-current">{config.downloads.integrate_sponsorblock}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.downloads.integrate_sponsorblock}
+                </span>
               </p>
               <i>
                 Before activating that, make sure you have a scraping sleep interval of at least 3
@@ -742,6 +850,7 @@ const SettingsApplication = () => {
                 name="downloads_integrate_sponsorblock"
                 id="id_downloads_integrate_sponsorblock"
                 defaultValue=""
+                value={enableSponsorBlock.toString()}
                 onChange={event => {
                   setEnableSponsorBlock(event.target.value === 'true');
                 }}
@@ -758,7 +867,9 @@ const SettingsApplication = () => {
             <div className="settings-item">
               <p>
                 Current system snapshot:{' '}
-                <span className="settings-current">{config.application.enable_snapshot}</span>
+                <span className="settings-current">
+                  {appSettingsConfig && appSettingsConfig.application.enable_snapshot}
+                </span>
               </p>
               <i>
                 Automatically create daily deduplicated snapshots of the index, stored in
@@ -776,6 +887,7 @@ const SettingsApplication = () => {
                 name="application_enable_snapshot"
                 id="id_application_enable_snapshot"
                 defaultValue=""
+                value={enableSnapshots.toString()}
                 onChange={event => {
                   setEnableSnapshots(event.target.value === 'true');
                 }}
@@ -836,6 +948,9 @@ const SettingsApplication = () => {
             type="submit"
             name="application-settings"
             label="Update Application Configurations"
+            onClick={async () => {
+              await onSubmit();
+            }}
           />
         </form>
       </div>
