@@ -7,6 +7,7 @@ from common.src.index_generic import Pagination
 from common.src.search_processor import SearchProcess, process_aggs
 from rest_framework import permissions
 from rest_framework.authentication import (
+    BasicAuthentication,
     SessionAuthentication,
     TokenAuthentication,
 )

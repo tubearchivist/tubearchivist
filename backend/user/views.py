@@ -1,6 +1,7 @@
 """all user api views"""
 
 from common.views import ApiBaseView
+from django.contrib.auth import login
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
@@ -49,29 +50,47 @@ class UserConfigView(ApiBaseView):
         return Response(response)
 
 
-class LoginApiView(ObtainAuthToken):
+class LoginApiView(BasicAuthentication, ObtainAuthToken):
     """resolves to /api/user/login/
     POST: return token and username after successful login
     """
 
     def post(self, request, *args, **kwargs):
         """post data"""
-        # pylint: disable=no-member
-        serializer = self.serializer_class(
-            data=request.data, context={"request": request}
-        )
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["user"]
-        token, _ = Token.objects.get_or_create(user=user)
 
-        print(f"returning token for user with id {user.pk}")
+        user, _ = super(LoginApiView, self).authenticate(request)
 
-        return Response(
-            {
-                "token": token.key,
-                "user_id": user.pk,
-                "is_superuser": user.is_superuser,
-                "is_staff": user.is_staff,
-                "user_groups": [group.name for group in user.groups.all()],
-            }
-        )
+        if user != None:
+            login(request, user)
+
+            response = Response(
+                {
+                    "user_id": user.pk,
+                    "is_superuser": user.is_superuser,
+                    "is_staff": user.is_staff,
+                    "user_groups": [group.name for group in user.groups.all()],
+                }
+            )
+
+        if user == None:
+            # pylint: disable=no-member
+            serializer = self.serializer_class(
+                data=request.data, context={"request": request}
+            )
+            serializer.is_valid(raise_exception=True)
+            user = serializer.validated_data["user"]
+            token, _ = Token.objects.get_or_create(user=user)
+
+            print(f"returning token for user with id {user.pk}")
+
+            response = Response(
+                {
+                    "token": token.key,
+                    "user_id": user.pk,
+                    "is_superuser": user.is_superuser,
+                    "is_staff": user.is_staff,
+                    "user_groups": [group.name for group in user.groups.all()],
+                }
+            )
+            
+        return response
