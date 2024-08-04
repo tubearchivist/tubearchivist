@@ -282,6 +282,7 @@ else:
         r"moz-extension://*",
         r"chrome-extension://*",
     ]
+    CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
 
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
