@@ -42,7 +42,7 @@ class ApiBaseView(APIView):
     authentication_classes = [
         BasicAuthentication,
         SessionAuthentication,
-        TokenAuthentication
+        TokenAuthentication,
     ]
     permission_classes = [permissions.IsAuthenticated]
     search_base = ""
