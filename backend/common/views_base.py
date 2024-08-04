@@ -39,7 +39,7 @@ class AdminWriteOnly(permissions.BasePermission):
 class ApiBaseView(APIView):
     """base view to inherit from"""
 
-    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    authentication_classes = [BasicAuthentication, SessionAuthentication, TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     search_base = ""
     data = ""

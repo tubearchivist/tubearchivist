@@ -5,10 +5,12 @@ from django.contrib.auth import login
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
+from rest_framework.authentication import (
+    BasicAuthentication,
+)
 from user.models import Account
 from user.serializers import AccountSerializer
 from user.src.user_config import UserConfig
-
 
 class UserConfigView(ApiBaseView):
     """resolves to /api/config/user/
