@@ -1,6 +1,17 @@
 # multi stage to build tube archivist
 # build python wheel, download and extract ffmpeg, copy into final image
 
+FROM node:lts-alpine as node-builder
+
+# RUN npm config set registry https://registry.npmjs.org/
+
+COPY ./frontend /frontend
+
+WORKDIR /frontend
+RUN npm i
+RUN npm run build:deploy
+
+WORKDIR /
 
 # First stage to build python wheel
 FROM python:3.11.8-slim-bookworm AS builder
@@ -59,6 +70,8 @@ RUN sed -i 's/^user www\-data\;$/user root\;/' /etc/nginx/nginx.conf
 COPY ./backend /app
 COPY ./docker_assets/run.sh /app
 COPY ./docker_assets/uwsgi.ini /app
+
+COPY --from=node-builder ./frontend/dist /app/static
 
 # volumes
 VOLUME /cache
