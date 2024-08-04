@@ -7,7 +7,7 @@ const queueSnapshot = async () => {
   const apiUrl = getApiUrl();
   const csrfCookie = getCookie('csrftoken');
 
-  const response = await fetch(`${apiUrl}/api/snapshot/`, {
+  const response = await fetch(`${apiUrl}/api/appsettings/snapshot/`, {
     method: 'POST',
     headers: {
       ...defaultHeaders,

@@ -6,7 +6,7 @@ import defaultHeaders from '../../configuration/defaultHeaders';
 const loadUserConfig = async (): Promise<UserConfigType> => {
   const apiUrl = getApiUrl();
 
-  const response = await fetch(`${apiUrl}/api/config/user/`, {
+  const response = await fetch(`${apiUrl}/api/user/me/`, {
     headers: defaultHeaders,
   });
 

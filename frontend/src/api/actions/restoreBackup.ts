@@ -7,7 +7,7 @@ const restoreBackup = async (fileName: string) => {
   const apiUrl = getApiUrl();
   const csrfCookie = getCookie('csrftoken');
 
-  const response = await fetch(`${apiUrl}/api/backup/${fileName}/`, {
+  const response = await fetch(`${apiUrl}/api/appsettings/backup/${fileName}/`, {
     method: 'POST',
     headers: {
       ...defaultHeaders,

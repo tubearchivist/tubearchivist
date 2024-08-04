@@ -13,7 +13,7 @@ const updateCookie = async (): Promise<ValidatedCookieType> => {
   const apiUrl = getApiUrl();
   const csrfCookie = getCookie('csrftoken');
 
-  const response = await fetch(`${apiUrl}/api/cookie/`, {
+  const response = await fetch(`${apiUrl}/api/appsettings/cookie/`, {
     method: 'POST',
     headers: {
       ...defaultHeaders,

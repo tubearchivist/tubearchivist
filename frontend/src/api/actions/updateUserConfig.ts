@@ -24,7 +24,7 @@ const updateUserConfig = async (config: UserConfigType) => {
   const apiUrl = getApiUrl();
   const csrfCookie = getCookie('csrftoken');
 
-  const response = await fetch(`${apiUrl}/api/config/user/`, {
+  const response = await fetch(`${apiUrl}/api/user/me/`, {
     method: 'POST',
     headers: {
       ...defaultHeaders,

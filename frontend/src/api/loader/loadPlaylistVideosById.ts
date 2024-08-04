@@ -4,8 +4,17 @@ import isDevEnvironment from '../../functions/isDevEnvironment';
 
 const loadPlaylistVideosById = async (playlistId: string | undefined, page: number) => {
   const apiUrl = getApiUrl();
+  const searchParams = new URLSearchParams();
 
-  const response = await fetch(`${apiUrl}/api/playlist/${playlistId}/video/?page=${page}`, {
+  if (page) {
+    searchParams.append('page', page.toString());
+  }
+
+  if (playlistId) {
+    searchParams.append('playlist', playlistId);
+  }
+
+  const response = await fetch(`${apiUrl}/api/video/?${searchParams.toString()}`, {
     headers: defaultHeaders,
   });
 

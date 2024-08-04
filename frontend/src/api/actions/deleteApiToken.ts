@@ -5,7 +5,7 @@ import isDevEnvironment from '../../functions/isDevEnvironment';
 const deleteApiToken = async () => {
   const apiUrl = getApiUrl();
 
-  const response = await fetch(`${apiUrl}/api/token/`, {
+  const response = await fetch(`${apiUrl}/api/appsettings/token/`, {
     method: 'DELETE',
     headers: defaultHeaders,
   });

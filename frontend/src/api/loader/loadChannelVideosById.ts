@@ -4,13 +4,22 @@ import isDevEnvironment from '../../functions/isDevEnvironment';
 
 const loadChannelVideosById = async (youtubeChannelId: string | undefined, page: number) => {
   const apiUrl = getApiUrl();
+  const searchParams = new URLSearchParams();
 
   if (!youtubeChannelId) {
     console.log('loadChannelVideosById - youtubeChannelId missing');
     return;
   }
 
-  const response = await fetch(`${apiUrl}/api/channel/${youtubeChannelId}/video/?page=${page}`, {
+  if (page) {
+    searchParams.append('page', page.toString());
+  }
+
+  if (youtubeChannelId) {
+    searchParams.append('channel', youtubeChannelId);
+  }
+
+  const response = await fetch(`${apiUrl}/api/video/?${searchParams.toString()}`, {
     headers: defaultHeaders,
   });
 

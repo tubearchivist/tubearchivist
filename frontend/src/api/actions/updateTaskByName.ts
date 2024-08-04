@@ -13,7 +13,7 @@ const updateTaskByName = async (taskName: TaskNamesType) => {
   const apiUrl = getApiUrl();
   const csrfCookie = getCookie('csrftoken');
 
-  const response = await fetch(`${apiUrl}/api/task-name/${taskName}/`, {
+  const response = await fetch(`${apiUrl}/api/task/by-name/${taskName}/`, {
     method: 'POST',
     headers: {
       ...defaultHeaders,

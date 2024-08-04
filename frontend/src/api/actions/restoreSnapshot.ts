@@ -7,7 +7,7 @@ const restoreSnapshot = async (snapshotId: string) => {
   const apiUrl = getApiUrl();
   const csrfCookie = getCookie('csrftoken');
 
-  const response = await fetch(`${apiUrl}/api/snapshot/${snapshotId}/`, {
+  const response = await fetch(`${apiUrl}/api/appsettings/snapshot/${snapshotId}/`, {
     method: 'POST',
     headers: {
       ...defaultHeaders,

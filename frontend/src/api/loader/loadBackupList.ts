@@ -5,7 +5,7 @@ import isDevEnvironment from '../../functions/isDevEnvironment';
 const loadBackupList = async () => {
   const apiUrl = getApiUrl();
 
-  const response = await fetch(`${apiUrl}/api/backup/`, {
+  const response = await fetch(`${apiUrl}/api/appsettings/backup/`, {
     headers: defaultHeaders,
   });
 

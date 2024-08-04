@@ -7,7 +7,7 @@ const queueBackup = async () => {
   const apiUrl = getApiUrl();
   const csrfCookie = getCookie('csrftoken');
 
-  const response = await fetch(`${apiUrl}/api/backup/`, {
+  const response = await fetch(`${apiUrl}/api/appsettings/backup/`, {
     method: 'POST',
     headers: {
       ...defaultHeaders,

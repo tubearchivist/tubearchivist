@@ -6,7 +6,7 @@ const stopTaskByName = async (taskId: string) => {
   const apiUrl = getApiUrl();
   const csrfCookie = getCookie('csrftoken');
 
-  const response = await fetch(`${apiUrl}/api/task-id/${taskId}/`, {
+  const response = await fetch(`${apiUrl}/api/task/by-id/${taskId}/`, {
     method: 'POST',
     headers: {
       ...defaultHeaders,

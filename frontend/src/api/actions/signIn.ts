@@ -14,7 +14,7 @@ const signIn = async (username: string, password: string, saveLogin: boolean) =>
   const apiUrl = getApiUrl();
   const csrfCookie = getCookie('csrftoken');
 
-  const response = await fetch(`${apiUrl}/api/login/`, {
+  const response = await fetch(`${apiUrl}/api/user/login/`, {
     method: 'POST',
     headers: {
       ...defaultHeaders,
