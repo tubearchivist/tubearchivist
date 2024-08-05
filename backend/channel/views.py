@@ -1,7 +1,10 @@
 """all channel API views"""
 
-from channel.src.index import YoutubeChannel
+from appsettings.src.config import AppConfig
+from channel.src.index import YoutubeChannel, channel_overwrites
 from channel.src.nav import ChannelNav
+from common.src.es_connect import ElasticWrap
+from common.src.search_processor import SearchProcess
 from common.src.urlparser import Parser
 from common.views_base import AdminWriteOnly, ApiBaseView
 from download.src.subscriptions import ChannelSubscription
@@ -100,6 +103,99 @@ class ChannelApiView(ApiBaseView):
             message.update({"state": "not found"})
 
         return Response(message, status=status_code)
+
+
+def test(func):
+    def wrap(*args, **kwargs):
+        try:
+            print(f"Testing {func} ...")
+            return func(*args, **kwargs)
+        except Exception as e:
+            print(e)
+            raise e
+
+    return wrap
+
+
+class ChannelApiAboutView(ApiBaseView):
+    """resolves to /api/channel/<channel_id>/about/
+    GET: returns the channel specific settings, defaulting to globals
+    POST: sets the channel specific settings, returning current values
+    """
+
+    permission_classes = [AdminWriteOnly]
+
+    _VALID_KEYS = {
+        "index_playlists",
+        "download_format",
+        "autodelete_days",
+        "integrate_sponsorblock",
+        "subscriptions_channel_size",
+        "subscriptions_live_channel_size",
+        "subscriptions_shorts_channel_size",
+    }
+
+    def _get_channel_info(self, channel_id):
+        response, status_code = ElasticWrap(
+            f"ta_channel/_doc/{channel_id}"
+        ).get()
+        if status_code != 200:
+            raise ValueError()
+        try:
+            channel_info = SearchProcess(response).process()
+        except KeyError:
+            raise ValueError()
+        return channel_info
+
+    def _current_values(self, channel_id, channel_info=None):
+        if channel_info is None:
+            channel_info = self._get_channel_info(channel_id)
+
+        _global_config = AppConfig().get_config()
+        _defaults = {
+            "index_playlists": False,
+            "download_format": _global_config["downloads"]["format"],
+            "autodelete_days": _global_config["downloads"]["autodelete_days"],
+            "integrate_sponsorblock": _global_config["downloads"][
+                "integrate_sponsorblock"
+            ],
+            "subscriptions_channel_size": _global_config["subscriptions"][
+                "channel_size"
+            ],
+            "subscriptions_live_channel_size": _global_config["subscriptions"][
+                "live_channel_size"
+            ],
+            "subscriptions_shorts_channel_size": _global_config[
+                "subscriptions"
+            ]["shorts_channel_size"],
+        }
+
+        return {
+            key: channel_info.get("channel_overwrites", {}).get(key, value)
+            for key, value in _defaults.items()
+        }
+
+    def get(self, request, channel_id):
+        # pylint: disable=unused-argument
+        try:
+            response = self._current_values(channel_id)
+        except ValueError:
+            return Response({"error": "unknown channel id"}, status=404)
+        return Response(response, status=200)
+
+    @test
+    def post(self, request, channel_id):
+        data = request.data
+        if not isinstance(data, dict):
+            return Response({"error": "invalid payload"}, status=400)
+
+        channel_overwrites(channel_id, data)
+
+        try:
+            response = self._current_values(channel_id)
+        except ValueError:
+            return Response({"error": "unknown channel id"}, status=404)
+        return Response(response, status=200)
 
 
 class ChannelAggsApiView(ApiBaseView):
