@@ -24,7 +24,9 @@ class ChannelApiListView(ApiBaseView):
 
     def get(self, request):
         """get request"""
-        self.data.update({"sort": [{"channel_name.keyword": {"order": "asc"}}]})
+        self.data.update(
+            {"sort": [{"channel_name.keyword": {"order": "asc"}}]}
+        )
 
         query_filter = request.GET.get("filter", False)
         must_list = []
@@ -69,7 +71,9 @@ class ChannelApiListView(ApiBaseView):
     def _unsubscribe(channel_id: str):
         """unsubscribe"""
         print(f"[{channel_id}] unsubscribe from channel")
-        ChannelSubscription().change_subscribe(channel_id, channel_subscribed=False)
+        ChannelSubscription().change_subscribe(
+            channel_id, channel_subscribed=False
+        )
 
 
 class ChannelApiView(ApiBaseView):
@@ -110,7 +114,9 @@ class ChannelApiAboutView(ApiBaseView):
     permission_classes = [AdminWriteOnly]
 
     def _get_channel_info(self, channel_id):
-        response, status_code = ElasticWrap(f"ta_channel/_doc/{channel_id}").get()
+        response, status_code = ElasticWrap(
+            f"ta_channel/_doc/{channel_id}"
+        ).get()
         if status_code != 200:
             raise ValueError()
         try:
@@ -137,9 +143,9 @@ class ChannelApiAboutView(ApiBaseView):
             "subscriptions_live_channel_size": _global_config["subscriptions"][
                 "live_channel_size"
             ],
-            "subscriptions_shorts_channel_size": _global_config["subscriptions"][
-                "shorts_channel_size"
-            ],
+            "subscriptions_shorts_channel_size": _global_config[
+                "subscriptions"
+            ]["shorts_channel_size"],
         }
 
         return {
@@ -180,7 +186,9 @@ class ChannelAggsApiView(ApiBaseView):
         """get aggs"""
         self.data.update(
             {
-                "query": {"term": {"channel.channel_id": {"value": channel_id}}},
+                "query": {
+                    "term": {"channel.channel_id": {"value": channel_id}}
+                },
                 "aggs": {
                     "total_items": {"value_count": {"field": "youtube_id"}},
                     "total_size": {"sum": {"field": "media_size"}},
