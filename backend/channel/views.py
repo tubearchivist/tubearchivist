@@ -1,7 +1,7 @@
 """all channel API views"""
 
 from appsettings.src.config import AppConfig
-from channel.src.index import YoutubeChannel, channel_overwrites
+from channel.src.index import YoutubeChannel
 from channel.src.nav import ChannelNav
 from common.src.es_connect import ElasticWrap
 from common.src.search_processor import SearchProcess
