@@ -1,13 +1,12 @@
 """all channel API views"""
 
 from appsettings.src.config import AppConfig
-from channel.src.index import YoutubeChannel
+from channel.src.index import YoutubeChannel, channel_overwrites
 from channel.src.nav import ChannelNav
 from common.src.es_connect import ElasticWrap
 from common.src.search_processor import SearchProcess
 from common.src.urlparser import Parser
 from common.views_base import AdminWriteOnly, ApiBaseView
-from common.util import catch_all_test
 from download.src.subscriptions import ChannelSubscription
 from rest_framework.response import Response
 from task.tasks import subscribe_to
@@ -25,9 +24,7 @@ class ChannelApiListView(ApiBaseView):
 
     def get(self, request):
         """get request"""
-        self.data.update(
-            {"sort": [{"channel_name.keyword": {"order": "asc"}}]}
-        )
+        self.data.update({"sort": [{"channel_name.keyword": {"order": "asc"}}]})
 
         query_filter = request.GET.get("filter", False)
         must_list = []
@@ -72,9 +69,7 @@ class ChannelApiListView(ApiBaseView):
     def _unsubscribe(channel_id: str):
         """unsubscribe"""
         print(f"[{channel_id}] unsubscribe from channel")
-        ChannelSubscription().change_subscribe(
-            channel_id, channel_subscribed=False
-        )
+        ChannelSubscription().change_subscribe(channel_id, channel_subscribed=False)
 
 
 class ChannelApiView(ApiBaseView):
@@ -115,9 +110,7 @@ class ChannelApiAboutView(ApiBaseView):
     permission_classes = [AdminWriteOnly]
 
     def _get_channel_info(self, channel_id):
-        response, status_code = ElasticWrap(
-            f"ta_channel/_doc/{channel_id}"
-        ).get()
+        response, status_code = ElasticWrap(f"ta_channel/_doc/{channel_id}").get()
         if status_code != 200:
             raise ValueError()
         try:
@@ -144,9 +137,9 @@ class ChannelApiAboutView(ApiBaseView):
             "subscriptions_live_channel_size": _global_config["subscriptions"][
                 "live_channel_size"
             ],
-            "subscriptions_shorts_channel_size": _global_config[
-                "subscriptions"
-            ]["shorts_channel_size"],
+            "subscriptions_shorts_channel_size": _global_config["subscriptions"][
+                "shorts_channel_size"
+            ],
         }
 
         return {
@@ -187,9 +180,7 @@ class ChannelAggsApiView(ApiBaseView):
         """get aggs"""
         self.data.update(
             {
-                "query": {
-                    "term": {"channel.channel_id": {"value": channel_id}}
-                },
+                "query": {"term": {"channel.channel_id": {"value": channel_id}}},
                 "aggs": {
                     "total_items": {"value_count": {"field": "youtube_id"}},
                     "total_size": {"sum": {"field": "media_size"}},
