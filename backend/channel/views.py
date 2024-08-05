@@ -7,6 +7,7 @@ from common.src.es_connect import ElasticWrap
 from common.src.search_processor import SearchProcess
 from common.src.urlparser import Parser
 from common.views_base import AdminWriteOnly, ApiBaseView
+from common.util import catch_all_test
 from download.src.subscriptions import ChannelSubscription
 from rest_framework.response import Response
 from task.tasks import subscribe_to
@@ -105,18 +106,6 @@ class ChannelApiView(ApiBaseView):
         return Response(message, status=status_code)
 
 
-def test(func):
-    def wrap(*args, **kwargs):
-        try:
-            print(f"Testing {func} ...")
-            return func(*args, **kwargs)
-        except Exception as e:
-            print(e)
-            raise e
-
-    return wrap
-
-
 class ChannelApiAboutView(ApiBaseView):
     """resolves to /api/channel/<channel_id>/about/
     GET: returns the channel specific settings, defaulting to globals
@@ -124,16 +113,6 @@ class ChannelApiAboutView(ApiBaseView):
     """
 
     permission_classes = [AdminWriteOnly]
-
-    _VALID_KEYS = {
-        "index_playlists",
-        "download_format",
-        "autodelete_days",
-        "integrate_sponsorblock",
-        "subscriptions_channel_size",
-        "subscriptions_live_channel_size",
-        "subscriptions_shorts_channel_size",
-    }
 
     def _get_channel_info(self, channel_id):
         response, status_code = ElasticWrap(
@@ -183,7 +162,6 @@ class ChannelApiAboutView(ApiBaseView):
             return Response({"error": "unknown channel id"}, status=404)
         return Response(response, status=200)
 
-    @test
     def post(self, request, channel_id):
         data = request.data
         if not isinstance(data, dict):
