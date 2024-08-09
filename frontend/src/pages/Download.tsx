@@ -7,7 +7,7 @@ import iconListView from '/img/icon-listview.svg';
 import { Fragment, useEffect, useState } from 'react';
 import { useLoaderData, useOutletContext } from 'react-router-dom';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
-import { ConfigType, ViewLayout } from './Home';
+import { ConfigType, ViewLayoutType } from './Home';
 import loadDownloadQueue from '../api/loader/loadDownloadQueue';
 import { OutletContextType } from './Base';
 import Pagination, { PaginationType } from '../components/Pagination';
@@ -63,7 +63,7 @@ const Download = () => {
   const searchParams = new URLSearchParams(location.search);
   const channelFilterFromUrl = searchParams.get('channel');
 
-  const [view, setView] = useState<ViewLayout>(userConfig.view_style_downloads || 'grid');
+  const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_downloads || 'grid');
   const [gridItems, setGridItems] = useState(userConfig.grid_items || 3);
   const [showIgnored, setShowIgnored] = useState(userConfig.show_ignored_only || false);
   const [refresh, setRefresh] = useState(false);

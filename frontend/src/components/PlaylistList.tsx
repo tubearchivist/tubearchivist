@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
-import { ViewLayout } from '../pages/Home';
+import { ViewLayoutType } from '../pages/Home';
 import { PlaylistType } from '../pages/Playlist';
 import updatePlaylistSubscription from '../api/actions/updatePlaylistSubscription';
 import formatDate from '../functions/formatDates';
@@ -9,7 +9,7 @@ import getApiUrl from '../configuration/getApiUrl';
 
 type PlaylistListProps = {
   playlistList: PlaylistType[] | undefined;
-  viewLayout: ViewLayout;
+  viewLayout: ViewLayoutType;
   setRefresh: (status: boolean) => void;
 };
 

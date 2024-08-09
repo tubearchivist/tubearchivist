@@ -2,10 +2,9 @@ import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
 import getFetchCredentials from '../../configuration/getFetchCredentials';
 import isDevEnvironment from '../../functions/isDevEnvironment';
+import { SortByType, SortOrderType } from '../../pages/Home';
 
 type WatchTypes = 'watched' | 'unwatched' | 'continue';
-type SortTypes = 'published' | 'downloaded' | 'views' | 'likes' | 'duration' | 'filesize';
-type OrderTypes = 'asc' | 'desc';
 type VideoTypes = 'videos' | 'streams' | 'shorts';
 
 type FilterType = {
@@ -13,12 +12,12 @@ type FilterType = {
   playlist?: string;
   channel?: string;
   watch?: WatchTypes;
-  sort?: SortTypes;
-  order?: OrderTypes;
+  sort?: SortByType;
+  order?: SortOrderType;
   type?: VideoTypes;
 };
 
-const loadVideoListByPage = async (filter: FilterType) => {
+const loadVideoListByFilter = async (filter: FilterType) => {
   const apiUrl = getApiUrl();
 
   const searchParams = new URLSearchParams();
@@ -57,10 +56,10 @@ const loadVideoListByPage = async (filter: FilterType) => {
   const videos = await response.json();
 
   if (isDevEnvironment()) {
-    console.log('loadVideoListByPage', filter, videos);
+    console.log('loadVideoListByFilter', filter, videos);
   }
 
   return videos;
 };
 
-export default loadVideoListByPage;
+export default loadVideoListByFilter;

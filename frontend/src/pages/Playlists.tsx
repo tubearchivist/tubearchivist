@@ -8,7 +8,7 @@ import iconListView from '/img/icon-listview.svg';
 import { OutletContextType } from './Base';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import loadPlaylistList from '../api/loader/loadPlaylistList';
-import { ConfigType, ViewLayout } from './Home';
+import { ConfigType, ViewLayoutType } from './Home';
 import Pagination, { PaginationType } from '../components/Pagination';
 import PlaylistList from '../components/PlaylistList';
 import { PlaylistType } from './Playlist';
@@ -41,7 +41,7 @@ const Playlists = () => {
   const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const [showSubedOnly, setShowSubedOnly] = useState(userConfig.hide_watched || false);
-  const [view, setView] = useState<ViewLayout>(userConfig.view_style_playlist || 'grid');
+  const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_playlist || 'grid');
   const [showAddForm, setShowAddForm] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [playlistsToAddText, setPlaylistsToAddText] = useState('');

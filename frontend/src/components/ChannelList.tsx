@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ChannelType } from '../pages/Channels';
-import { ViewLayout } from '../pages/Home';
+import { ViewLayoutType } from '../pages/Home';
 import Routes from '../configuration/routes/RouteList';
 import updateChannelSubscription from '../api/actions/updateChannelSubscription';
 import formatDate from '../functions/formatDates';
@@ -11,7 +11,7 @@ import ChannelBanner from './ChannelBanner';
 
 type ChannelListProps = {
   channelList: ChannelType[] | undefined;
-  viewLayout: ViewLayout;
+  viewLayout: ViewLayoutType;
   refreshChannelList: (refresh: boolean) => void;
 };
 

@@ -4,7 +4,7 @@ import iconAdd from '/img/icon-add.svg';
 import iconSubstract from '/img/icon-substract.svg';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
-import { SortBy, SortOrder, ViewLayout } from '../pages/Home';
+import { SortByType, SortOrderType, ViewLayoutType } from '../pages/Home';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 
 type FilterbarProps = {
@@ -12,17 +12,17 @@ type FilterbarProps = {
   showHidden?: boolean;
   hideWatched?: boolean;
   isGridView?: boolean;
-  view: ViewLayout;
+  view: ViewLayoutType;
   viewStyleName: string;
   gridItems: number;
-  sortBy?: SortBy;
-  sortOrder?: SortOrder;
+  sortBy?: SortByType;
+  sortOrder?: SortOrderType;
   userConfig: UserConfigType;
   setShowHidden?: (showHidden: boolean) => void;
   setHideWatched?: (hideWatched: boolean) => void;
-  setView: (view: ViewLayout) => void;
-  setSortBy?: (sortBy: SortBy) => void;
-  setSortOrder?: (sortOrder: SortOrder) => void;
+  setView: (view: ViewLayoutType) => void;
+  setSortBy?: (sortBy: SortByType) => void;
+  setSortOrder?: (sortOrder: SortOrderType) => void;
   setGridItems: (gridItems: number) => void;
   setRefresh?: (status: boolean) => void;
 };
@@ -105,7 +105,7 @@ const Filterbar = ({
               id="sort"
               value={sortBy}
               onChange={event => {
-                setSortBy?.(event.target.value as SortBy);
+                setSortBy?.(event.target.value as SortByType);
               }}
             >
               <option value="published">date published</option>
@@ -120,7 +120,7 @@ const Filterbar = ({
               id="sort-order"
               value={sortOrder}
               onChange={event => {
-                setSortOrder?.(event.target.value as SortOrder);
+                setSortOrder?.(event.target.value as SortOrderType);
               }}
             >
               <option value="asc">asc</option>

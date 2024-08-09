@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLoaderData, useOutletContext, useSearchParams } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
 import Pagination, { PaginationType } from '../components/Pagination';
-import loadVideoListByPage from '../api/loader/loadVideoListByPage';
+import loadVideoListByFilter from '../api/loader/loadVideoListByPage';
 import { UserConfigType } from '../api/actions/updateUserConfig';
 import VideoList from '../components/VideoList';
 import { ChannelType } from './Channels';
@@ -109,9 +109,9 @@ type HomeLoaderDataType = {
   userConfig: UserConfigType;
 };
 
-export type SortBy = 'published' | 'downloaded' | 'views' | 'likes' | 'duration' | 'filesize';
-export type SortOrder = 'asc' | 'desc';
-export type ViewLayout = 'grid' | 'list';
+export type SortByType = 'published' | 'downloaded' | 'views' | 'likes' | 'duration' | 'filesize';
+export type SortOrderType = 'asc' | 'desc';
+export type ViewLayoutType = 'grid' | 'list';
 
 const Home = () => {
   const { userConfig } = useLoaderData() as HomeLoaderDataType;
@@ -120,9 +120,9 @@ const Home = () => {
   const videoId = searchParams.get('videoId');
 
   const [hideWatched, setHideWatched] = useState(userConfig.hide_watched || false);
-  const [sortBy, setSortBy] = useState<SortBy>(userConfig.sort_by || 'published');
-  const [sortOrder, setSortOrder] = useState<SortOrder>(userConfig.sort_order || 'asc');
-  const [view, setView] = useState<ViewLayout>(userConfig.view_style_home || 'grid');
+  const [sortBy, setSortBy] = useState<SortByType>(userConfig.sort_by || 'published');
+  const [sortOrder, setSortOrder] = useState<SortOrderType>(userConfig.sort_order || 'asc');
+  const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_home || 'grid');
   const [gridItems, setGridItems] = useState(userConfig.grid_items || 3);
   const [showHidden, setShowHidden] = useState(false);
   const [refreshVideoList, setRefreshVideoList] = useState(false);
@@ -148,14 +148,27 @@ const Home = () => {
         pagination?.current_page === undefined ||
         currentPage !== pagination?.current_page
       ) {
-        const videos = await loadVideoListByPage({ page: currentPage });
-        const continueVideos = await loadVideoListByPage({ watch: 'continue' });
+        const videos = await loadVideoListByFilter({
+          page: currentPage,
+          watch: hideWatched ? 'unwatched' : undefined,
+          sort: sortBy,
+          order: sortOrder,
+        });
+
+        try {
+          const continueVideoResponse = await loadVideoListByFilter({ watch: 'continue' });
+          setContinueVideoResponse(continueVideoResponse);
+        } catch (error) {
+          console.log('Server error on continue vids?');
+        }
 
         setVideoReponse(videos);
-        setContinueVideoResponse(continueVideos);
+
         setRefreshVideoList(false);
       }
     })();
+    // Do not add sort, order, hideWatched this will not work as expected!
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshVideoList, currentPage, pagination?.current_page]);
 
   return (

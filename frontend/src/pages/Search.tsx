@@ -1,7 +1,7 @@
 import { useLoaderData, useSearchParams } from 'react-router-dom';
 import { UserConfigType } from '../api/actions/updateUserConfig';
 import { useEffect, useState } from 'react';
-import { VideoType, ViewLayout } from './Home';
+import { VideoType, ViewLayoutType } from './Home';
 import loadSearch from '../api/loader/loadSearch';
 import { PlaylistType } from './Playlist';
 import { ChannelType } from './Channels';
@@ -45,7 +45,7 @@ const Search = () => {
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');
 
-  const view = (userConfig.view_style_home || ViewStyles.grid) as ViewLayout;
+  const view = (userConfig.view_style_home || ViewStyles.grid) as ViewLayoutType;
   const gridItems = userConfig.grid_items || 3;
 
   const [searchQuery, setSearchQuery] = useState('');

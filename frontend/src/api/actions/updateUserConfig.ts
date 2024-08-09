@@ -1,5 +1,5 @@
 import { ColourVariants } from '../../configuration/colours/getColours';
-import { SortBy, SortOrder, ViewLayout } from '../../pages/Home';
+import { SortByType, SortOrderType, ViewLayoutType } from '../../pages/Home';
 import getApiUrl from '../../configuration/getApiUrl';
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getCookie from '../../functions/getCookie';
@@ -8,12 +8,12 @@ import getFetchCredentials from '../../configuration/getFetchCredentials';
 export type UserConfigType = {
   stylesheet?: ColourVariants;
   page_size?: number;
-  sort_by?: SortBy;
-  sort_order?: SortOrder;
-  view_style_home?: ViewLayout;
-  view_style_channel?: ViewLayout;
-  view_style_downloads?: ViewLayout;
-  view_style_playlist?: ViewLayout;
+  sort_by?: SortByType;
+  sort_order?: SortOrderType;
+  view_style_home?: ViewLayoutType;
+  view_style_channel?: ViewLayoutType;
+  view_style_downloads?: ViewLayoutType;
+  view_style_playlist?: ViewLayoutType;
   grid_items?: number;
   hide_watched?: boolean;
   show_ignored_only?: boolean;

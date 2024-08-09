@@ -2,7 +2,7 @@ import { useLoaderData, useOutletContext, useParams } from 'react-router-dom';
 import Notifications from '../components/Notifications';
 import Filterbar from '../components/Filterbar';
 import PlaylistList from '../components/PlaylistList';
-import { ViewLayout } from './Home';
+import { ViewLayoutType } from './Home';
 import { ViewStyleNames, ViewStyles } from '../configuration/constants/ViewStyle';
 import { UserConfigType } from '../api/actions/updateUserConfig';
 import { useEffect, useState } from 'react';
@@ -21,7 +21,7 @@ const ChannelPlaylist = () => {
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const [hideWatched, setHideWatched] = useState(userConfig.hide_watched || false);
-  const [view, setView] = useState<ViewLayout>(userConfig.view_style_home || 'grid');
+  const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_home || 'grid');
   const [gridItems, setGridItems] = useState(userConfig.grid_items || 3);
   const [refreshPlaylist, setRefreshPlaylist] = useState(false);
 

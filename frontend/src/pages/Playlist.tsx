@@ -10,13 +10,12 @@ import {
 import { UserConfigType } from '../api/actions/updateUserConfig';
 import loadPlaylistById from '../api/loader/loadPlaylistById';
 import { OutletContextType } from './Base';
-import { ConfigType, VideoType, ViewLayout } from './Home';
+import { ConfigType, VideoType, ViewLayoutType } from './Home';
 import Filterbar from '../components/Filterbar';
 import { PlaylistEntryType } from './Playlists';
 import loadChannelById from '../api/loader/loadChannelById';
 import VideoList from '../components/VideoList';
 import Pagination, { PaginationType } from '../components/Pagination';
-import loadPlaylistVideosById from '../api/loader/loadPlaylistVideosById';
 import ChannelOverview from '../components/ChannelOverview';
 import Linkify from '../components/Linkify';
 import { ViewStyleNames, ViewStyles } from '../configuration/constants/ViewStyle';
@@ -31,6 +30,7 @@ import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
+import loadVideoListByFilter from '../api/loader/loadVideoListByPage';
 
 export type PlaylistType = {
   playlist_active: boolean;
@@ -73,7 +73,7 @@ const Playlist = () => {
   const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const [hideWatched, setHideWatched] = useState(userConfig.hide_watched || false);
-  const [view, setView] = useState<ViewLayout>(userConfig.view_style_home || 'grid');
+  const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_home || 'grid');
   const [gridItems, setGridItems] = useState(userConfig.grid_items || 3);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [refresh, setRefresh] = useState(false);
@@ -106,7 +106,12 @@ const Playlist = () => {
         currentPage !== pagination?.current_page
       ) {
         const playlist = await loadPlaylistById(playlistId);
-        const video = await loadPlaylistVideosById(playlistId, currentPage);
+        const video = await loadVideoListByFilter({
+          playlist: playlistId,
+          page: currentPage,
+          watch: hideWatched ? 'unwatched' : undefined,
+          sort: 'downloaded', // downloaded or published? or playlist sort order?
+        });
 
         const isCustomPlaylist = playlist?.data?.playlist_type === 'custom';
         if (!isCustomPlaylist) {
@@ -120,6 +125,8 @@ const Playlist = () => {
         setRefresh(false);
       }
     })();
+    // Do not add hideWatched this will not work as expected!
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playlistId, refresh, currentPage, pagination?.current_page]);
 
   if (!playlistId || !playlist) {

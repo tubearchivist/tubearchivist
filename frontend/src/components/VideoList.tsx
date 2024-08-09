@@ -1,9 +1,9 @@
-import { VideoType, ViewLayout } from '../pages/Home';
+import { VideoType, ViewLayoutType } from '../pages/Home';
 import VideoListItem from './VideoListItem';
 
 type VideoListProps = {
   videoList: VideoType[] | undefined;
-  viewLayout: ViewLayout;
+  viewLayout: ViewLayoutType;
   playlistId?: string;
   showReorderButton?: boolean;
   refreshVideoList: (refresh: boolean) => void;

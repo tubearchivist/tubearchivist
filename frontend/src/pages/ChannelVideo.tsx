@@ -6,13 +6,12 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom';
-import { SortBy, SortOrder, VideoResponseType, ViewLayout } from './Home';
+import { SortByType, SortOrderType, VideoResponseType, ViewLayoutType } from './Home';
 import { OutletContextType } from './Base';
 import { UserConfigType } from '../api/actions/updateUserConfig';
 import VideoList from '../components/VideoList';
 import Routes from '../configuration/routes/RouteList';
 import Pagination from '../components/Pagination';
-import loadChannelVideosById from '../api/loader/loadChannelVideosById';
 import Filterbar from '../components/Filterbar';
 import { ViewStyleNames, ViewStyles } from '../configuration/constants/ViewStyle';
 import ChannelOverview from '../components/ChannelOverview';
@@ -23,6 +22,7 @@ import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import updateWatchedState from '../api/actions/updateWatchedState';
 import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
+import loadVideoListByFilter from '../api/loader/loadVideoListByPage';
 
 type ChannelParams = {
   channelId: string;
@@ -40,11 +40,10 @@ const ChannelVideo = () => {
   const videoId = searchParams.get('videoId');
 
   const [hideWatched, setHideWatched] = useState(userConfig.hide_watched || false);
-  const [sortBy, setSortBy] = useState<SortBy>(userConfig.sort_by || 'published');
-  const [sortOrder, setSortOrder] = useState<SortOrder>(userConfig.sort_order || 'asc');
-  const [view, setView] = useState<ViewLayout>(userConfig.view_style_home || 'grid');
+  const [sortBy, setSortBy] = useState<SortByType>(userConfig.sort_by || 'published');
+  const [sortOrder, setSortOrder] = useState<SortOrderType>(userConfig.sort_order || 'asc');
+  const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_home || 'grid');
   const [gridItems, setGridItems] = useState(userConfig.grid_items || 3);
-  const [showHidden, setShowHidden] = useState(false);
   const [refresh, setRefresh] = useState(false);
 
   const [channelResponse, setChannelResponse] = useState<ChannelResponseType>();
@@ -69,13 +68,21 @@ const ChannelVideo = () => {
         currentPage !== pagination?.current_page
       ) {
         const channelResponse = await loadChannelById(channelId);
-        const videos = await loadChannelVideosById(channelId, currentPage);
+        const videos = await loadVideoListByFilter({
+          channel: channelId,
+          page: currentPage,
+          watch: hideWatched ? 'unwatched' : undefined,
+          sort: sortBy,
+          order: sortOrder,
+        });
 
         setChannelResponse(channelResponse);
         setVideoReponse(videos);
         setRefresh(false);
       }
     })();
+    // Do not add sort, order, hideWatched this will not work as expected!
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh, currentPage, channelId, pagination?.current_page]);
 
   const aggs = {
@@ -160,14 +167,12 @@ const ChannelVideo = () => {
           isGridView={isGridView}
           hideWatched={hideWatched}
           gridItems={gridItems}
-          showHidden={showHidden}
           sortBy={sortBy}
           sortOrder={sortOrder}
           userConfig={userConfig}
           setSortBy={setSortBy}
           setSortOrder={setSortOrder}
           setHideWatched={setHideWatched}
-          setShowHidden={setShowHidden}
           setView={setView}
           setGridItems={setGridItems}
           viewStyleName={ViewStyleNames.channel}

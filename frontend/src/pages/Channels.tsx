@@ -5,7 +5,7 @@ import iconListView from '/img/icon-listview.svg';
 import iconAdd from '/img/icon-add.svg';
 import { useEffect, useState } from 'react';
 import Pagination, { PaginationType } from '../components/Pagination';
-import { ConfigType, ViewLayout } from './Home';
+import { ConfigType, ViewLayoutType } from './Home';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import { OutletContextType } from './Base';
 import ChannelList from '../components/ChannelList';
@@ -56,7 +56,7 @@ const Channels = () => {
 
   const [channelListResponse, setChannelListResponse] = useState<ChannelsListResponse>();
   const [showSubscribedOnly, setShowSubscribedOnly] = useState(userConfig.show_subed_only || false);
-  const [view, setView] = useState<ViewLayout>(userConfig.view_style_channel || 'grid');
+  const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_channel || 'grid');
   const [showAddForm, setShowAddForm] = useState(false);
   const [refresh, setRefresh] = useState(false);
 

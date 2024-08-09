@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
-import { VideoType, ViewLayout } from '../pages/Home';
+import { VideoType, ViewLayoutType } from '../pages/Home';
 import iconPlay from '/img/icon-play.svg';
 import iconDotMenu from '/img/icon-dot-menu.svg';
 import defaultVideoThumb from '/img/default-video-thumb.jpg';
@@ -13,7 +13,7 @@ import getApiUrl from '../configuration/getApiUrl';
 
 type VideoListItemProps = {
   video: VideoType;
-  viewLayout: ViewLayout;
+  viewLayout: ViewLayoutType;
   playlistId?: string;
   showReorderButton?: boolean;
   refreshVideoList: (refresh: boolean) => void;
