@@ -1,12 +1,14 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
 import getFetchCredentials from '../../configuration/getFetchCredentials';
+import getCookie from '../../functions/getCookie';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
 type FilterType = 'ignore' | 'pending';
 
 const deleteDownloadQueueByFilter = async (filter: FilterType) => {
   const apiUrl = getApiUrl();
+  const csrfCookie = getCookie('csrftoken');
 
   const searchParams = new URLSearchParams();
 
@@ -16,7 +18,10 @@ const deleteDownloadQueueByFilter = async (filter: FilterType) => {
 
   const response = await fetch(`${apiUrl}/api/download/?${searchParams.toString()}`, {
     method: 'DELETE',
-    headers: defaultHeaders,
+    headers: {
+      ...defaultHeaders,
+      'X-CSRFToken': csrfCookie || '',
+    },
     credentials: getFetchCredentials(),
   });
 

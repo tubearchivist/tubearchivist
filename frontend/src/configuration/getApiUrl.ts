@@ -8,8 +8,6 @@ const getApiUrl = () => {
     url = DEV_API_URL;
   }
 
-  console.log(url);
-
   return url;
 };
 
