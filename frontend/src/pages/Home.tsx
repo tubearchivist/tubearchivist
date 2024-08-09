@@ -99,7 +99,11 @@ export type VideoResponseType = {
   paginate?: PaginationType;
 };
 
-type ContinueVidsType = VideoType[];
+type ContinueVidsType = {
+  data?: VideoType[];
+  config?: ConfigType;
+  paginate?: PaginationType;
+};
 
 type HomeLoaderDataType = {
   userConfig: UserConfigType;
@@ -124,14 +128,14 @@ const Home = () => {
   const [refreshVideoList, setRefreshVideoList] = useState(false);
 
   const [videoResponse, setVideoReponse] = useState<VideoResponseType>();
+  const [continueVideoResponse, setContinueVideoResponse] = useState<ContinueVidsType>();
 
   const videoList = videoResponse?.data;
   const pagination = videoResponse?.paginate;
+  const continueVideos = continueVideoResponse?.data;
 
   const hasVideos = videoResponse?.data?.length !== 0;
   const showEmbeddedVideo = videoId !== null;
-
-  const continue_vids: ContinueVidsType = [];
 
   const isGridView = view === ViewStyles.grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
@@ -144,9 +148,11 @@ const Home = () => {
         pagination?.current_page === undefined ||
         currentPage !== pagination?.current_page
       ) {
-        const videos = await loadVideoListByPage(currentPage);
+        const videos = await loadVideoListByPage({ page: currentPage });
+        const continueVideos = await loadVideoListByPage({ watch: 'continue' });
 
         setVideoReponse(videos);
+        setContinueVideoResponse(continueVideos);
         setRefreshVideoList(false);
       }
     })();
@@ -159,14 +165,14 @@ const Home = () => {
       </Helmet>
       <ScrollToTopOnNavigate />
       <div className={`boxed-content ${gridView}`}>
-        {continue_vids.length > 0 && (
+        {continueVideos && continueVideos.length > 0 && (
           <>
             <div className="title-bar">
               <h1>Continue Watching</h1>
             </div>
             <div className={`video-list ${view} ${gridViewGrid}`}>
               <VideoList
-                videoList={continue_vids}
+                videoList={continueVideos}
                 viewLayout={view}
                 refreshVideoList={setRefreshVideoList}
               />
