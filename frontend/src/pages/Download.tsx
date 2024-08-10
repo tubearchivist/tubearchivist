@@ -5,7 +5,7 @@ import iconSubstract from '/img/icon-substract.svg';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
 import { Fragment, useEffect, useState } from 'react';
-import { useLoaderData, useOutletContext } from 'react-router-dom';
+import { useLoaderData, useOutletContext, useSearchParams } from 'react-router-dom';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import { ConfigType, ViewLayoutType } from './Home';
 import loadDownloadQueue from '../api/loader/loadDownloadQueue';
@@ -19,14 +19,7 @@ import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
 import DownloadListItem from '../components/DownloadListItem';
-
-type ChannelAggType = {
-  id: string;
-  name: string;
-  count: number;
-};
-
-type ChannelAggsType = ChannelAggType[];
+import loadDownloadAggs, { DownloadAggsType } from '../api/loader/loadDownloadAggs';
 
 type Download = {
   auto_start: boolean;
@@ -57,10 +50,10 @@ type DownloadLoaderDataType = {
 };
 
 const Download = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { userConfig } = useLoaderData() as DownloadLoaderDataType;
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
-  const searchParams = new URLSearchParams(location.search);
   const channelFilterFromUrl = searchParams.get('channel');
 
   const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_downloads || 'grid');
@@ -74,9 +67,12 @@ const Download = () => {
   const [downloadQueueText, setDownloadQueueText] = useState('');
 
   const [downloadResponse, setDownloadResponse] = useState<DownloadResponseType>();
+  const [downloadAggsResponse, setDownloadAggsResponse] = useState<DownloadAggsType>();
 
   const downloadList = downloadResponse?.data;
   const pagination = downloadResponse?.paginate;
+  const channelDownloads = downloadAggsResponse?.channel_downloads;
+  const channelAggsList = channelDownloads?.buckets;
 
   const downloadCount = pagination?.total_hits;
 
@@ -84,8 +80,6 @@ const Download = () => {
     downloadResponse?.data?.length && downloadResponse?.data?.length > 0
       ? downloadResponse?.data[0].channel_name
       : '';
-
-  const channel_agg_list: ChannelAggsType = [];
 
   const isGridView = view === ViewStyles.grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
@@ -125,8 +119,10 @@ const Download = () => {
         currentPage !== pagination?.current_page
       ) {
         const videos = await loadDownloadQueue(currentPage, channelFilterFromUrl, showIgnored);
+        const downloadAggs = await loadDownloadAggs();
 
         setDownloadResponse(videos);
+        setDownloadAggsResponse(downloadAggs);
         setRefresh(false);
       }
     })();
@@ -134,6 +130,10 @@ const Download = () => {
     // Do not add showIgnored otherwise it will not update the userconfig first.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh, currentPage, downloadPending]);
+
+  useEffect(() => {
+    setRefresh(true);
+  }, [channelFilterFromUrl]);
 
   return (
     <>
@@ -251,23 +251,31 @@ const Download = () => {
             </div>
           </div>
           <div className="view-icons">
-            {channel_agg_list.length > 1 && (
+            {channelAggsList && channelAggsList.length > 1 && (
               <select
                 name="channel_filter"
                 id="channel_filter"
-                onchange="channelFilterDownload(this.value)"
+                onChange={async event => {
+                  const value = event.currentTarget.value;
+
+                  const params = new URLSearchParams();
+                  if (value !== 'all') {
+                    params.append('channel', value);
+                  }
+
+                  setSearchParams(params);
+                }}
               >
                 <option value="all" selected={!channelFilterFromUrl}>
                   all
                 </option>
-                {channel_agg_list.map(channel => {
+                {channelAggsList.map(channel => {
+                  const [name, id] = channel.key;
+                  const count = channel.doc_count;
+
                   return (
-                    <option
-                      key={channel.id}
-                      selected={channelFilterFromUrl == channel.id}
-                      value={channel.id}
-                    >
-                      {channel.name} ({channel.count})
+                    <option key={id} selected={channelFilterFromUrl == id} value={id}>
+                      {name} ({count})
                     </option>
                   );
                 })}
