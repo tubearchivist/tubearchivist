@@ -4,8 +4,9 @@ import { ChannelType } from './Channels';
 import { ConfigType } from './Home';
 import { OutletContextType } from './Base';
 import Notifications from '../components/Notifications';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ChannelBanner from '../components/ChannelBanner';
+import loadChannelNav, { ChannelNavResponseType } from '../api/loader/loadChannelNav';
 
 type ChannelParams = {
   channelId: string;
@@ -20,12 +21,18 @@ const ChannelBase = () => {
   const { channelId } = useParams() as ChannelParams;
   const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
+  const [channelNav, setChannelNav] = useState<ChannelNavResponseType>();
   const [startNotification, setStartNotification] = useState(false);
 
-  const has_streams = false;
-  const has_shorts = false;
-  const has_playlists = false;
-  const has_pending = false;
+  const { has_streams, has_shorts, has_playlists, has_pending } = channelNav || {};
+
+  useEffect(() => {
+    (async () => {
+      const channelNavResponse = await loadChannelNav(channelId);
+
+      setChannelNav(channelNavResponse);
+    })();
+  }, [channelId]);
 
   if (!channelId) {
     return [];
