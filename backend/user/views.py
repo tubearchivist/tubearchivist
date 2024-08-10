@@ -35,8 +35,16 @@ class UserConfigView(ApiBaseView):
         user_id = request.user.id
         data = request.data
 
+        data_config = data.get("config")
+        if not data_config:
+            message = {
+                "status": "Bad Request",
+                "message": "missing config key",
+            }
+            return Response(message, status=400)
+
         user_conf = UserConfig(user_id)
-        for key, value in data.items():
+        for key, value in data_config.items():
             try:
                 user_conf.set_value(key, value)
             except ValueError as err:
