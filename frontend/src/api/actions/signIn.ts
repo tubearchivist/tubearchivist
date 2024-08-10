@@ -19,7 +19,6 @@ const signIn = async (username: string, password: string, saveLogin: boolean) =>
     headers: {
       ...defaultHeaders,
       'X-CSRFToken': csrfCookie || '',
-      Authorization: 'Basic ' + btoa(username + ':' + password),
     },
     body: JSON.stringify({
       username,
