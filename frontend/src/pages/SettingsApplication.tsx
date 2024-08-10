@@ -5,12 +5,13 @@ import PaginationDummy from '../components/PaginationDummy';
 import SettingsNavigation from '../components/SettingsNavigation';
 import restoreSnapshot from '../api/actions/restoreSnapshot';
 import queueSnapshot from '../api/actions/queueSnapshot';
-import updateCookie from '../api/actions/updateCookie';
+import updateCookie, { ValidatedCookieType } from '../api/actions/updateCookie';
 import deleteApiToken from '../api/actions/deleteApiToken';
 import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
 import loadAppsettingsConfig, { AppSettingsConfigType } from '../api/loader/loadAppsettingsConfig';
 import updateAppsettingsConfig from '../api/actions/updateAppsettingsConfig';
+import loadApiToken from '../api/loader/loadApiToken';
 
 type SnapshotType = {
   id: string;
@@ -32,16 +33,19 @@ type SnapshotListType = {
 type SettingsApplicationReponses = {
   snapshots?: SnapshotListType;
   appSettingsConfig?: AppSettingsConfigType;
+  apiToken: string;
 };
 
 const SettingsApplication = () => {
   const [response, setResponse] = useState<SettingsApplicationReponses>({
     snapshots: undefined,
     appSettingsConfig: undefined,
+    apiToken: '',
   });
 
   const snapshots = response?.snapshots;
   const appSettingsConfig = response?.appSettingsConfig;
+  const apiToken = response.apiToken;
 
   // Subscriptions
   const [videoPageSize, setVideoPageSize] = useState(
@@ -104,7 +108,7 @@ const SettingsApplication = () => {
     appSettingsConfig?.downloads.cookie_import || false,
   );
   const [validatingCookie, setValidatingCookie] = useState(false);
-  const [cookieResponse, setCookieResponse] = useState({});
+  const [cookieResponse, setCookieResponse] = useState<ValidatedCookieType>();
 
   // Integrations
   const [showApiToken, setShowApiToken] = useState(false);
@@ -160,10 +164,12 @@ const SettingsApplication = () => {
     (async () => {
       const snapshotResponse = await loadSnapshots();
       const appSettingsConfig = await loadAppsettingsConfig();
+      const apiToken = await loadApiToken();
 
       setResponse({
         snapshots: snapshotResponse,
         appSettingsConfig,
+        apiToken: apiToken.token,
       });
     })();
   }, []);
@@ -785,7 +791,7 @@ const SettingsApplication = () => {
               {resetTokenResponse && resetTokenResponse?.success && <p>Token revoked</p>}
               {showApiToken && !resetTokenResponse?.success && (
                 <div className="description-text">
-                  <p>{appSettingsConfig && appSettingsConfig.api_token}</p>
+                  <p>{apiToken}</p>
                   <Button
                     className="danger-button"
                     label="Revoke"
