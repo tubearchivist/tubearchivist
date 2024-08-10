@@ -10,6 +10,8 @@ import { OutletContextType } from './Base';
 import Pagination from '../components/Pagination';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import { Helmet } from 'react-helmet';
+import loadPlaylistList from '../api/loader/loadPlaylistList';
+import { PlaylistsResponseType } from './Playlists';
 
 type ChannelPlaylistLoaderDataType = {
   userConfig: UserConfigType;
@@ -21,35 +23,35 @@ const ChannelPlaylist = () => {
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const [hideWatched, setHideWatched] = useState(userConfig.hide_watched || false);
-  const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_home || 'grid');
+  const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_playlist || 'grid');
   const [gridItems, setGridItems] = useState(userConfig.grid_items || 3);
-  const [refreshPlaylist, setRefreshPlaylist] = useState(false);
+  const [refreshPlaylists, setRefreshPlaylists] = useState(false);
 
-  const [playlistsResponse, setPlaylistsResponse] = useState();
+  const [playlistsResponse, setPlaylistsResponse] = useState<PlaylistsResponseType>();
 
   const playlistList = playlistsResponse?.data;
   const pagination = playlistsResponse?.paginate;
-
-  useEffect(() => {
-    (async () => {
-      const playlists = {}; // await aaaaa(channelId);
-
-      setPlaylistsResponse(playlists);
-      setRefreshPlaylist(false);
-    })();
-  }, [channelId, refreshPlaylist, currentPage]);
 
   const isGridView = view === ViewStyles.grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
 
+  useEffect(() => {
+    (async () => {
+      const playlists = await loadPlaylistList({ channel: channelId });
+
+      setPlaylistsResponse(playlists);
+      setRefreshPlaylists(false);
+    })();
+  }, [channelId, refreshPlaylists, currentPage]);
+
   return (
     <>
       <Helmet>
-        <title>TA | Channel: Playlists {channel.channel_name}</title>
+        <title>TA | Channel: Playlists</title>
       </Helmet>
       <ScrollToTopOnNavigate />
-      <div className="boxed-content">
+      <div className={`boxed-content ${gridView}`}>
         <Notifications pageName="channel" includeReindex={true} />
         <Filterbar
           hideToggleText="Show subscribed only:"
@@ -62,13 +64,18 @@ const ChannelPlaylist = () => {
           setView={setView}
           setGridItems={setGridItems}
           viewStyleName={ViewStyleNames.playlist}
-          setRefresh={setRefreshPlaylist}
+          setRefresh={setRefreshPlaylists}
         />
-        <PlaylistList
-          playlistList={playlistList}
-          viewLayout={view}
-          setRefresh={setRefreshPlaylist}
-        />
+      </div>
+
+      <div className={`boxed-content ${gridView}`}>
+        <div className={`playlist-list ${view} ${gridViewGrid}`}>
+          <PlaylistList
+            playlistList={playlistList}
+            viewLayout={view}
+            setRefresh={setRefreshPlaylists}
+          />
+        </div>
       </div>
 
       <div className="boxed-content">

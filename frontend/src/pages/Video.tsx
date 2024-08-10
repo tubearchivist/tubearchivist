@@ -30,7 +30,7 @@ import GoogleCast from '../components/GoogleCast';
 import WatchedCheckBox from '../components/WatchedCheckBox';
 import convertStarRating from '../functions/convertStarRating';
 import loadPlaylistList from '../api/loader/loadPlaylistList';
-import { PlaylistResponseType } from './Playlists';
+import { PlaylistsResponseType } from './Playlists';
 import PaginationDummy from '../components/PaginationDummy';
 import updateCustomPlaylist from '../api/actions/updateCustomPlaylist';
 import { PlaylistType } from './Playlist';
@@ -133,7 +133,7 @@ const Video = () => {
   const [simmilarVideos, setSimmilarVideos] = useState<SimilarVideosResponseType>();
   const [videoProgress, setVideoProgress] = useState<VideoProgressType>();
   const [sponsorblockResponse, setSponsorblockResponse] = useState<SponsorBlockType>();
-  const [customPlaylistsResponse, setCustomPlaylistsResponse] = useState<PlaylistResponseType>();
+  const [customPlaylistsResponse, setCustomPlaylistsResponse] = useState<PlaylistsResponseType>();
   const [commentsResponse, setCommentsResponse] = useState<CommentsResponseType>();
 
   useEffect(() => {
@@ -142,7 +142,7 @@ const Video = () => {
       const simmilarVideosResponse = await loadSimmilarVideosById(videoId);
       const videoProgressResponse = await loadVideoProgressById(videoId);
       // const sponsorblockReponse = await loadSponsorblockByVideoId(videoId);
-      const customPlaylistsResponse = await loadPlaylistList(undefined, true);
+      const customPlaylistsResponse = await loadPlaylistList({ type: 'custom' });
       const commentsResponse = await loadCommentsbyVideoId(videoId);
 
       setVideoResponse(videoResponse);

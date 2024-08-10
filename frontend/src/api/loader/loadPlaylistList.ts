@@ -3,17 +3,34 @@ import getApiUrl from '../../configuration/getApiUrl';
 import getFetchCredentials from '../../configuration/getFetchCredentials';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 
-const loadPlaylistList = async (page: number | undefined, isCustom = false) => {
+type PlaylistType = 'regular' | 'custom';
+
+type LoadPlaylistListProps = {
+  channel?: string;
+  page?: number | undefined;
+  subscribed?: boolean;
+  type?: PlaylistType;
+};
+
+const loadPlaylistList = async ({ channel, page, subscribed, type }: LoadPlaylistListProps) => {
   const apiUrl = getApiUrl();
 
   const searchParams = new URLSearchParams();
+
+  if (channel) {
+    searchParams.append('channel', channel);
+  }
 
   if (page) {
     searchParams.append('page', page.toString());
   }
 
-  if (isCustom) {
-    searchParams.append('playlist_type', 'custom');
+  if (subscribed) {
+    searchParams.append('subscribed', subscribed.toString());
+  }
+
+  if (type) {
+    searchParams.append('type', type);
   }
 
   const response = await fetch(`${apiUrl}/api/playlist/?${searchParams.toString()}`, {

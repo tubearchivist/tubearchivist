@@ -26,7 +26,7 @@ export type PlaylistEntryType = {
   downloaded: boolean;
 };
 
-export type PlaylistResponseType = {
+export type PlaylistsResponseType = {
   data?: PlaylistType[];
   config?: ConfigType;
   paginate?: PaginationType;
@@ -47,7 +47,7 @@ const Playlists = () => {
   const [playlistsToAddText, setPlaylistsToAddText] = useState('');
   const [customPlaylistsToAddText, setCustomPlaylistsToAddText] = useState('');
 
-  const [playlistResponse, setPlaylistReponse] = useState<PlaylistResponseType>();
+  const [playlistResponse, setPlaylistReponse] = useState<PlaylistsResponseType>();
 
   const playlistList = playlistResponse?.data;
   const pagination = playlistResponse?.paginate;
@@ -74,7 +74,7 @@ const Playlists = () => {
         pagination?.current_page === undefined ||
         currentPage !== pagination?.current_page
       ) {
-        const playlist = await loadPlaylistList(currentPage);
+        const playlist = await loadPlaylistList({ page: currentPage });
 
         setPlaylistReponse(playlist);
         setRefresh(false);
