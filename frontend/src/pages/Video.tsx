@@ -40,6 +40,7 @@ import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
 import { OutletContextType } from './Base';
 import getApiUrl from '../configuration/getApiUrl';
+import loadVideoNav, { VideoNavResponseType } from '../api/loader/loadVideoNav';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {
   return playlist.playlist_entries.some(entry => {
@@ -132,6 +133,7 @@ const Video = () => {
   const [videoResponse, setVideoResponse] = useState<VideoResponseType>();
   const [simmilarVideos, setSimmilarVideos] = useState<SimilarVideosResponseType>();
   const [videoProgress, setVideoProgress] = useState<VideoProgressType>();
+  const [videoPlaylistNav, setVideoPlaylistNav] = useState<VideoNavResponseType[]>();
   const [sponsorblockResponse, setSponsorblockResponse] = useState<SponsorBlockType>();
   const [customPlaylistsResponse, setCustomPlaylistsResponse] = useState<PlaylistsResponseType>();
   const [commentsResponse, setCommentsResponse] = useState<CommentsResponseType>();
@@ -144,11 +146,13 @@ const Video = () => {
       // const sponsorblockReponse = await loadSponsorblockByVideoId(videoId);
       const customPlaylistsResponse = await loadPlaylistList({ type: 'custom' });
       const commentsResponse = await loadCommentsbyVideoId(videoId);
+      const videoNavResponse = await loadVideoNav(videoId);
 
       setVideoResponse(videoResponse);
       setSimmilarVideos(simmilarVideosResponse);
       setVideoProgress(videoProgressResponse);
       // setSponsorblockResponse(sponsorblockReponse);
+      setVideoPlaylistNav(videoNavResponse);
       setCustomPlaylistsResponse(customPlaylistsResponse);
       setCommentsResponse(commentsResponse);
       setRefreshVideoList(false);
@@ -162,11 +166,13 @@ const Video = () => {
   const video = videoResponse.data;
   const watched = videoResponse.data.player.watched;
   const config = videoResponse.config;
-  const playlistNav = videoResponse.playlist_nav;
+  const playlistNav = videoPlaylistNav;
   const sponsorBlock = sponsorblockResponse;
   const customPlaylists = customPlaylistsResponse?.data;
   const starRating = convertStarRating(video?.stats?.average_rating);
   const comments = commentsResponse?.data;
+
+  console.log('playlistNav', playlistNav);
 
   const cast = config.enable_cast;
 
@@ -429,58 +435,60 @@ const Video = () => {
         {playlistNav && (
           <>
             {playlistNav.map(playlistItem => {
-              <div key={playlistItem.playlist_meta.playlist_id} className="playlist-wrap">
-                <Link to={Routes.Playlist(playlistItem.playlist_meta.playlist_id)}>
-                  <h3>
-                    Playlist [{playlistItem.playlist_meta.current_idx + 1}
-                    ]: {playlistItem.playlist_meta.playlist_name}
-                  </h3>
-                </Link>
-                <div className="playlist-nav">
-                  <div className="playlist-nav-item">
-                    {playlistItem.playlist_previous && (
-                      <>
-                        <Link to={Routes.Playlist(playlistItem.playlist_previous.youtube_id)}>
-                          <img
-                            src={`${getApiUrl()}/cache/${playlistItem.playlist_previous.vid_thumb}`}
-                            alt="previous thumbnail"
-                          />
-                        </Link>
-                        <div className="playlist-desc">
-                          <p>Previous:</p>
-                          <Link to={Routes.Playlist(playlistItem.playlist_previous.youtube_id)}>
-                            <h3>
-                              [{playlistItem.playlist_previous.idx + 1}]{' '}
-                              {playlistItem.playlist_previous.title}
-                            </h3>
+              return (
+                <div key={playlistItem.playlist_meta.playlist_id} className="playlist-wrap">
+                  <Link to={Routes.Playlist(playlistItem.playlist_meta.playlist_id)}>
+                    <h3>
+                      Playlist [{playlistItem.playlist_meta.current_idx + 1}
+                      ]: {playlistItem.playlist_meta.playlist_name}
+                    </h3>
+                  </Link>
+                  <div className="playlist-nav">
+                    <div className="playlist-nav-item">
+                      {playlistItem.playlist_previous && (
+                        <>
+                          <Link to={Routes.Video(playlistItem.playlist_previous.youtube_id)}>
+                            <img
+                              src={`${getApiUrl()}/${playlistItem.playlist_previous.vid_thumb}`}
+                              alt="previous thumbnail"
+                            />
                           </Link>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  <div className="playlist-nav-item">
-                    {playlistItem.playlist_next && (
-                      <>
-                        <div className="playlist-desc">
-                          <p>Next:</p>
-                          <Link to={Routes.Playlist(playlistItem.playlist_next.youtube_id)}>
-                            <h3>
-                              [{playlistItem.playlist_next.idx + 1}]{' '}
-                              {playlistItem.playlist_next.title}
-                            </h3>
+                          <div className="playlist-desc">
+                            <p>Previous:</p>
+                            <Link to={Routes.Video(playlistItem.playlist_previous.youtube_id)}>
+                              <h3>
+                                [{playlistItem.playlist_previous.idx + 1}]{' '}
+                                {playlistItem.playlist_previous.title}
+                              </h3>
+                            </Link>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <div className="playlist-nav-item">
+                      {playlistItem.playlist_next && (
+                        <>
+                          <div className="playlist-desc">
+                            <p>Next:</p>
+                            <Link to={Routes.Video(playlistItem.playlist_next.youtube_id)}>
+                              <h3>
+                                [{playlistItem.playlist_next.idx + 1}]{' '}
+                                {playlistItem.playlist_next.title}
+                              </h3>
+                            </Link>
+                          </div>
+                          <Link to={Routes.Video(playlistItem.playlist_next.youtube_id)}>
+                            <img
+                              src={`${getApiUrl()}/${playlistItem.playlist_next.vid_thumb}`}
+                              alt="previous thumbnail"
+                            />
                           </Link>
-                        </div>
-                        <Link to={Routes.Playlist(playlistItem.playlist_next.youtube_id)}>
-                          <img
-                            src={`${getApiUrl()}/cache/${playlistItem.playlist_next.vid_thumb}`}
-                            alt="previous thumbnail"
-                          />
-                        </Link>
-                      </>
-                    )}
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>;
+              );
             })}
           </>
         )}
