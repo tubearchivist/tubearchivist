@@ -276,13 +276,17 @@ LOGOUT_REDIRECT_URL = "/login/"
 # background.js makes the request so HTTP_ORIGIN will be from extension
 if environ.get("DISABLE_CORS"):
     # disable cors
-    CORS_ORIGIN_ALLOW_ALL = True
+    CORS_ALLOW_ALL_ORIGINS = True
 else:
     CORS_ALLOWED_ORIGIN_REGEXES = [
         r"moz-extension://*",
         r"chrome-extension://*",
     ]
+    CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://localhost:8000"]
+    CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "http://localhost:8000"]
     CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+
+CORS_ALLOW_CREDENTIALS = True
 
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
