@@ -1,6 +1,8 @@
 """all user api views"""
 
 from common.views import ApiBaseView
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
@@ -49,6 +51,7 @@ class UserConfigView(ApiBaseView):
         return Response(response)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class LoginApiView(ObtainAuthToken):
     """resolves to /api/user/login/
     POST: return token and username after successful login
