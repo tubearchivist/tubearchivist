@@ -10,7 +10,7 @@ from user.src.user_config import UserConfig
 
 
 class UserConfigView(ApiBaseView):
-    """resolves to /api/config/user/
+    """resolves to /api/user/me/
     GET: return current user config
     POST: update user config
     """
