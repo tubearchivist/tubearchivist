@@ -91,7 +91,7 @@ class ApiBaseView(APIView):
         else:
             self.status_code = 404
 
-        if pagination:
+        if pagination and response.get("hits"):
             self.pagination_handler.validate(
                 response["hits"]["total"]["value"]
             )
