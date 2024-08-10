@@ -1,9 +1,8 @@
 import { useLoaderData, useOutletContext, useParams } from 'react-router-dom';
 import Notifications from '../components/Notifications';
-import Filterbar from '../components/Filterbar';
 import PlaylistList from '../components/PlaylistList';
 import { ViewLayoutType } from './Home';
-import { ViewStyleNames, ViewStyles } from '../configuration/constants/ViewStyle';
+import { ViewStyles } from '../configuration/constants/ViewStyle';
 import { UserConfigType } from '../api/actions/updateUserConfig';
 import { useEffect, useState } from 'react';
 import { OutletContextType } from './Base';
@@ -12,6 +11,8 @@ import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import { Helmet } from 'react-helmet';
 import loadPlaylistList from '../api/loader/loadPlaylistList';
 import { PlaylistsResponseType } from './Playlists';
+import iconGridView from '/img/icon-gridview.svg';
+import iconListView from '/img/icon-listview.svg';
 
 type ChannelPlaylistLoaderDataType = {
   userConfig: UserConfigType;
@@ -22,7 +23,7 @@ const ChannelPlaylist = () => {
   const { userConfig } = useLoaderData() as ChannelPlaylistLoaderDataType;
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
-  const [hideWatched, setHideWatched] = useState(userConfig.hide_watched || false);
+  const [showSubedOnly, setShowSubedOnly] = useState(userConfig.show_subed_only || false);
   const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_playlist || 'grid');
   const [gridItems, setGridItems] = useState(userConfig.grid_items || 3);
   const [refreshPlaylists, setRefreshPlaylists] = useState(false);
@@ -38,12 +39,15 @@ const ChannelPlaylist = () => {
 
   useEffect(() => {
     (async () => {
-      const playlists = await loadPlaylistList({ channel: channelId });
+      const playlists = await loadPlaylistList({
+        channel: channelId,
+        subscribed: showSubedOnly,
+      });
 
       setPlaylistsResponse(playlists);
       setRefreshPlaylists(false);
     })();
-  }, [channelId, refreshPlaylists, currentPage]);
+  }, [channelId, refreshPlaylists, showSubedOnly, currentPage]);
 
   return (
     <>
@@ -53,19 +57,47 @@ const ChannelPlaylist = () => {
       <ScrollToTopOnNavigate />
       <div className={`boxed-content ${gridView}`}>
         <Notifications pageName="channel" includeReindex={true} />
-        <Filterbar
-          hideToggleText="Show subscribed only:"
-          hideWatched={hideWatched}
-          isGridView={isGridView}
-          view={view}
-          gridItems={gridItems}
-          userConfig={userConfig}
-          setHideWatched={setHideWatched}
-          setView={setView}
-          setGridItems={setGridItems}
-          viewStyleName={ViewStyleNames.playlist}
-          setRefresh={setRefreshPlaylists}
-        />
+
+        <div className="view-controls">
+          <div className="toggle">
+            <span>Show subscribed only:</span>
+            <div className="toggleBox">
+              <input
+                checked={showSubedOnly}
+                onChange={() => {
+                  setShowSubedOnly(!showSubedOnly);
+                }}
+                type="checkbox"
+              />
+              {!showSubedOnly && (
+                <label htmlFor="" className="ofbtn">
+                  Off
+                </label>
+              )}
+              {showSubedOnly && (
+                <label htmlFor="" className="onbtn">
+                  On
+                </label>
+              )}
+            </div>
+          </div>
+          <div className="view-icons">
+            <img
+              src={iconGridView}
+              onClick={() => {
+                setView('grid');
+              }}
+              alt="grid view"
+            />
+            <img
+              src={iconListView}
+              onClick={() => {
+                setView('list');
+              }}
+              alt="list view"
+            />
+          </div>
+        </div>
       </div>
 
       <div className={`boxed-content ${gridView}`}>

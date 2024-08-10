@@ -40,7 +40,7 @@ const Playlists = () => {
   const { userConfig } = useLoaderData() as PlaylistLoaderDataType;
   const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
-  const [showSubedOnly, setShowSubedOnly] = useState(userConfig.hide_watched || false);
+  const [showSubedOnly, setShowSubedOnly] = useState(userConfig.show_subed_only || false);
   const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_playlist || 'grid');
   const [showAddForm, setShowAddForm] = useState(false);
   const [refresh, setRefresh] = useState(false);
