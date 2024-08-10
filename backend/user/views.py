@@ -1,11 +1,12 @@
 """all user api views"""
 
 from common.views import ApiBaseView
+from django.contrib.auth import authenticate, login
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.authtoken.models import Token
-from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from user.models import Account
 from user.serializers import AccountSerializer
 from user.src.user_config import UserConfig
@@ -51,30 +52,25 @@ class UserConfigView(ApiBaseView):
         return Response(response)
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class LoginApiView(ObtainAuthToken):
+@method_decorator(csrf_exempt, name="dispatch")
+class LoginApiView(APIView):
     """resolves to /api/user/login/
     POST: return token and username after successful login
     """
 
+    permission_classes = [AllowAny]
+
     def post(self, request, *args, **kwargs):
         """post data"""
         # pylint: disable=no-member
-        serializer = self.serializer_class(
-            data=request.data, context={"request": request}
-        )
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["user"]
-        token, _ = Token.objects.get_or_create(user=user)
 
-        print(f"returning token for user with id {user.pk}")
+        username = request.data.get("username")
+        password = request.data.get("password")
 
-        return Response(
-            {
-                "token": token.key,
-                "user_id": user.pk,
-                "is_superuser": user.is_superuser,
-                "is_staff": user.is_staff,
-                "user_groups": [group.name for group in user.groups.all()],
-            }
-        )
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)  # Creates a session for the user
+            return Response({"message": "Login successful"}, status=200)
+
+        return Response({"message": "Invalid credentials"}, status=400)
