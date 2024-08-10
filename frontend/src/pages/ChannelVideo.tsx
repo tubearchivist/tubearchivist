@@ -8,7 +8,7 @@ import {
 } from 'react-router-dom';
 import { SortByType, SortOrderType, VideoResponseType, ViewLayoutType } from './Home';
 import { OutletContextType } from './Base';
-import { UserConfigType } from '../api/actions/updateUserConfig';
+import { UserMeType } from '../api/actions/updateUserConfig';
 import VideoList from '../components/VideoList';
 import Routes from '../configuration/routes/RouteList';
 import Pagination from '../components/Pagination';
@@ -29,7 +29,7 @@ type ChannelParams = {
 };
 
 type ChannelVideoLoaderType = {
-  userConfig: UserConfigType;
+  userConfig: UserMeType;
 };
 
 const ChannelVideo = () => {
@@ -39,11 +39,13 @@ const ChannelVideo = () => {
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');
 
-  const [hideWatched, setHideWatched] = useState(userConfig.hide_watched || false);
-  const [sortBy, setSortBy] = useState<SortByType>(userConfig.sort_by || 'published');
-  const [sortOrder, setSortOrder] = useState<SortOrderType>(userConfig.sort_order || 'asc');
-  const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_home || 'grid');
-  const [gridItems, setGridItems] = useState(userConfig.grid_items || 3);
+  const userMeConfig = userConfig.config;
+
+  const [hideWatched, setHideWatched] = useState(userMeConfig.hide_watched || false);
+  const [sortBy, setSortBy] = useState<SortByType>(userMeConfig.sort_by || 'published');
+  const [sortOrder, setSortOrder] = useState<SortOrderType>(userMeConfig.sort_order || 'asc');
+  const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_home || 'grid');
+  const [gridItems, setGridItems] = useState(userMeConfig.grid_items || 3);
   const [refresh, setRefresh] = useState(false);
 
   const [channelResponse, setChannelResponse] = useState<ChannelResponseType>();
@@ -169,7 +171,7 @@ const ChannelVideo = () => {
           gridItems={gridItems}
           sortBy={sortBy}
           sortOrder={sortOrder}
-          userConfig={userConfig}
+          userMeConfig={userMeConfig}
           setSortBy={setSortBy}
           setSortOrder={setSortOrder}
           setHideWatched={setHideWatched}

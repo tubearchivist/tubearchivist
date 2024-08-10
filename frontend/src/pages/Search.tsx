@@ -1,5 +1,5 @@
 import { useLoaderData, useSearchParams } from 'react-router-dom';
-import { UserConfigType } from '../api/actions/updateUserConfig';
+import { UserMeType } from '../api/actions/updateUserConfig';
 import { useEffect, useState } from 'react';
 import { VideoType, ViewLayoutType } from './Home';
 import loadSearch from '../api/loader/loadSearch';
@@ -37,16 +37,17 @@ type SearchResultsType = {
 };
 
 type SearchLoaderDataType = {
-  userConfig: UserConfigType;
+  userConfig: UserMeType;
 };
 
 const Search = () => {
   const { userConfig } = useLoaderData() as SearchLoaderDataType;
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');
+  const userMeConfig = userConfig.config;
 
-  const view = (userConfig.view_style_home || ViewStyles.grid) as ViewLayoutType;
-  const gridItems = userConfig.grid_items || 3;
+  const view = (userMeConfig.view_style_home || ViewStyles.grid) as ViewLayoutType;
+  const gridItems = userMeConfig.grid_items || 3;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResultsType>();

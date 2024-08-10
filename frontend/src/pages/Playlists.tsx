@@ -6,7 +6,7 @@ import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
 
 import { OutletContextType } from './Base';
-import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
+import updateUserConfig, { UserConfigType, UserMeType } from '../api/actions/updateUserConfig';
 import loadPlaylistList from '../api/loader/loadPlaylistList';
 import { ConfigType, ViewLayoutType } from './Home';
 import Pagination, { PaginationType } from '../components/Pagination';
@@ -33,15 +33,17 @@ export type PlaylistsResponseType = {
 };
 
 type PlaylistLoaderDataType = {
-  userConfig: UserConfigType;
+  userConfig: UserMeType;
 };
 
 const Playlists = () => {
   const { userConfig } = useLoaderData() as PlaylistLoaderDataType;
   const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
-  const [showSubedOnly, setShowSubedOnly] = useState(userConfig.show_subed_only || false);
-  const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_playlist || 'grid');
+  const userMeConfig = userConfig.config;
+
+  const [showSubedOnly, setShowSubedOnly] = useState(userMeConfig.show_subed_only || false);
+  const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_playlist || 'grid');
   const [showAddForm, setShowAddForm] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [playlistsToAddText, setPlaylistsToAddText] = useState('');
@@ -56,7 +58,10 @@ const Playlists = () => {
 
   useEffect(() => {
     (async () => {
-      if (userConfig.view_style_playlist !== view || userConfig.show_subed_only !== showSubedOnly) {
+      if (
+        userMeConfig.view_style_playlist !== view ||
+        userMeConfig.show_subed_only !== showSubedOnly
+      ) {
         const userConfig: UserConfigType = {
           show_subed_only: showSubedOnly,
           view_style_playlist: view,
@@ -65,7 +70,7 @@ const Playlists = () => {
         await updateUserConfig(userConfig);
       }
     })();
-  }, [showSubedOnly, userConfig.show_subed_only, userConfig.view_style_playlist, view]);
+  }, [showSubedOnly, userMeConfig.show_subed_only, userMeConfig.view_style_playlist, view]);
 
   useEffect(() => {
     (async () => {

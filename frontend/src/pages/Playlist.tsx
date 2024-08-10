@@ -7,7 +7,7 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom';
-import { UserConfigType } from '../api/actions/updateUserConfig';
+import { UserMeType } from '../api/actions/updateUserConfig';
 import loadPlaylistById from '../api/loader/loadPlaylistById';
 import { OutletContextType } from './Base';
 import { ConfigType, VideoType, ViewLayoutType } from './Home';
@@ -49,7 +49,7 @@ export type PlaylistType = {
 };
 
 type PlaylistLoaderDataType = {
-  userConfig: UserConfigType;
+  userConfig: UserMeType;
 };
 
 export type PlaylistResponseType = {
@@ -72,9 +72,11 @@ const Playlist = () => {
   const { userConfig } = useLoaderData() as PlaylistLoaderDataType;
   const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
-  const [hideWatched, setHideWatched] = useState(userConfig.hide_watched || false);
-  const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_home || 'grid');
-  const [gridItems, setGridItems] = useState(userConfig.grid_items || 3);
+  const userMeConfig = userConfig.config;
+
+  const [hideWatched, setHideWatched] = useState(userMeConfig.hide_watched || false);
+  const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_home || 'grid');
+  const [gridItems, setGridItems] = useState(userMeConfig.grid_items || 3);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -335,7 +337,7 @@ const Playlist = () => {
           isGridView={isGridView}
           view={view}
           gridItems={gridItems}
-          userConfig={userConfig}
+          userMeConfig={userMeConfig}
           setHideWatched={setHideWatched}
           setView={setView}
           setGridItems={setGridItems}

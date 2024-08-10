@@ -5,6 +5,17 @@ import defaultHeaders from '../../configuration/defaultHeaders';
 import getCookie from '../../functions/getCookie';
 import getFetchCredentials from '../../configuration/getFetchCredentials';
 
+export type UserMeType = {
+  id: number;
+  name: string;
+  is_superuser: boolean;
+  is_staff: boolean;
+  groups: [];
+  user_permissions: [];
+  last_login: string;
+  config: UserConfigType;
+};
+
 export type UserConfigType = {
   stylesheet?: ColourVariants;
   page_size?: number;
@@ -21,7 +32,7 @@ export type UserConfigType = {
   sponsorblock_id?: number;
 };
 
-const updateUserConfig = async (config: UserConfigType) => {
+const updateUserConfig = async (config: UserConfigType): Promise<UserMeType> => {
   const apiUrl = getApiUrl();
   const csrfCookie = getCookie('csrftoken');
 
@@ -33,7 +44,7 @@ const updateUserConfig = async (config: UserConfigType) => {
     },
     credentials: getFetchCredentials(),
 
-    body: JSON.stringify(config),
+    body: JSON.stringify({ config }),
   });
 
   const userConfig = await response.json();

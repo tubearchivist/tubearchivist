@@ -3,7 +3,7 @@ import { Link, useLoaderData, useOutletContext, useSearchParams } from 'react-ro
 import Routes from '../configuration/routes/RouteList';
 import Pagination, { PaginationType } from '../components/Pagination';
 import loadVideoListByFilter from '../api/loader/loadVideoListByPage';
-import { UserConfigType } from '../api/actions/updateUserConfig';
+import { UserMeType } from '../api/actions/updateUserConfig';
 import VideoList from '../components/VideoList';
 import { ChannelType } from './Channels';
 import { OutletContextType } from './Base';
@@ -106,7 +106,7 @@ type ContinueVidsType = {
 };
 
 type HomeLoaderDataType = {
-  userConfig: UserConfigType;
+  userConfig: UserMeType;
 };
 
 export type SortByType = 'published' | 'downloaded' | 'views' | 'likes' | 'duration' | 'filesize';
@@ -119,11 +119,13 @@ const Home = () => {
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');
 
-  const [hideWatched, setHideWatched] = useState(userConfig.hide_watched || false);
-  const [sortBy, setSortBy] = useState<SortByType>(userConfig.sort_by || 'published');
-  const [sortOrder, setSortOrder] = useState<SortOrderType>(userConfig.sort_order || 'asc');
-  const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_home || 'grid');
-  const [gridItems, setGridItems] = useState(userConfig.grid_items || 3);
+  const userMeConfig = userConfig.config;
+
+  const [hideWatched, setHideWatched] = useState(userMeConfig.hide_watched || false);
+  const [sortBy, setSortBy] = useState<SortByType>(userMeConfig.sort_by || 'published');
+  const [sortOrder, setSortOrder] = useState<SortOrderType>(userMeConfig.sort_order || 'asc');
+  const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_home || 'grid');
+  const [gridItems, setGridItems] = useState(userMeConfig.grid_items || 3);
   const [showHidden, setShowHidden] = useState(false);
   const [refreshVideoList, setRefreshVideoList] = useState(false);
 
@@ -206,7 +208,7 @@ const Home = () => {
           gridItems={gridItems}
           sortBy={sortBy}
           sortOrder={sortOrder}
-          userConfig={userConfig}
+          userMeConfig={userMeConfig}
           setShowHidden={setShowHidden}
           setHideWatched={setHideWatched}
           setView={setView}

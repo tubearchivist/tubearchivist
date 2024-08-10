@@ -6,7 +6,7 @@ import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
 import { Fragment, useEffect, useState } from 'react';
 import { useLoaderData, useOutletContext, useSearchParams } from 'react-router-dom';
-import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
+import updateUserConfig, { UserConfigType, UserMeType } from '../api/actions/updateUserConfig';
 import { ConfigType, ViewLayoutType } from './Home';
 import loadDownloadQueue from '../api/loader/loadDownloadQueue';
 import { OutletContextType } from './Base';
@@ -46,7 +46,7 @@ export type DownloadResponseType = {
 };
 
 type DownloadLoaderDataType = {
-  userConfig: UserConfigType;
+  userConfig: UserMeType;
 };
 
 const Download = () => {
@@ -55,10 +55,11 @@ const Download = () => {
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const channelFilterFromUrl = searchParams.get('channel');
+  const userMeConfig = userConfig.config;
 
-  const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_downloads || 'grid');
-  const [gridItems, setGridItems] = useState(userConfig.grid_items || 3);
-  const [showIgnored, setShowIgnored] = useState(userConfig.show_ignored_only || false);
+  const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_downloads || 'grid');
+  const [gridItems, setGridItems] = useState(userMeConfig.grid_items || 3);
+  const [showIgnored, setShowIgnored] = useState(userMeConfig.show_ignored_only || false);
   const [refresh, setRefresh] = useState(false);
   const [showHiddenForm, setShowHiddenForm] = useState(false);
   const [downloadPending, setDownloadPending] = useState(false);
@@ -88,9 +89,9 @@ const Download = () => {
   useEffect(() => {
     (async () => {
       if (
-        userConfig.show_ignored_only !== showIgnored ||
-        userConfig.view_style_downloads !== view ||
-        userConfig.grid_items !== gridItems
+        userMeConfig.show_ignored_only !== showIgnored ||
+        userMeConfig.view_style_downloads !== view ||
+        userMeConfig.grid_items !== gridItems
       ) {
         const userConfig: UserConfigType = {
           show_ignored_only: showIgnored,
@@ -106,9 +107,9 @@ const Download = () => {
     view,
     gridItems,
     showIgnored,
-    userConfig.show_ignored_only,
-    userConfig.view_style_downloads,
-    userConfig.grid_items,
+    userMeConfig.show_ignored_only,
+    userMeConfig.view_style_downloads,
+    userMeConfig.grid_items,
   ]);
 
   useEffect(() => {

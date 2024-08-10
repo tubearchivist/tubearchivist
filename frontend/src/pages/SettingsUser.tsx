@@ -1,7 +1,7 @@
 import { useLoaderData, useNavigate, useOutletContext } from 'react-router-dom';
-import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
+import updateUserConfig, { UserConfigType, UserMeType } from '../api/actions/updateUserConfig';
 import { useEffect, useState } from 'react';
-import loadUserConfig from '../api/loader/loadUserConfig';
+import loadUserMeConfig from '../api/loader/loadUserConfig';
 import { ColourConstant, ColourVariants } from '../configuration/colours/getColours';
 import SettingsNavigation from '../components/SettingsNavigation';
 import Notifications from '../components/Notifications';
@@ -10,17 +10,19 @@ import Button from '../components/Button';
 import { OutletContextType } from './Base';
 
 type SettingsUserLoaderData = {
-  userConfig: UserConfigType;
+  userConfig: UserMeType;
 };
 
 const SettingsUser = () => {
   const { isAdmin } = useOutletContext() as OutletContextType;
   const { userConfig } = useLoaderData() as SettingsUserLoaderData;
-  const { stylesheet, page_size } = userConfig;
   const navigate = useNavigate();
 
-  const [selectedStylesheet, setSelectedStylesheet] = useState(userConfig.stylesheet);
-  const [selectedPageSize, setSelectedPageSize] = useState(userConfig.page_size);
+  const userMeConfig = userConfig.config;
+  const { stylesheet, page_size } = userMeConfig;
+
+  const [selectedStylesheet, setSelectedStylesheet] = useState(userMeConfig.stylesheet);
+  const [selectedPageSize, setSelectedPageSize] = useState(userMeConfig.page_size);
   const [refresh, setRefresh] = useState(false);
 
   const [userConfigResponse, setUserConfigResponse] = useState<UserConfigType>();
@@ -32,9 +34,9 @@ const SettingsUser = () => {
   useEffect(() => {
     (async () => {
       if (refresh) {
-        const userConfigResponse = await loadUserConfig();
+        const userConfigResponse = await loadUserMeConfig();
 
-        setUserConfigResponse(userConfigResponse);
+        setUserConfigResponse(userConfigResponse.config);
         setRefresh(false);
         navigate(0);
       }

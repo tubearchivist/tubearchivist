@@ -1,10 +1,10 @@
 import { Outlet, useLoaderData, useLocation, useSearchParams } from 'react-router-dom';
 import Footer, { TaUpdateType } from '../components/Footer';
 import importColours from '../configuration/colours/getColours';
-import { UserConfigType } from '../api/actions/updateUserConfig';
+import { UserMeType } from '../api/actions/updateUserConfig';
 import { useEffect, useState } from 'react';
 import Navigation from '../components/Navigation';
-import loadIsAdmin from '../api/loader/loadIsAdmin';
+import loadIsAdmin from '../functions/getIsAdmin';
 
 export type AuthenticationType = {
   response: string;
@@ -14,7 +14,7 @@ export type AuthenticationType = {
 };
 
 type BaseLoaderData = {
-  userConfig: UserConfigType;
+  userConfig: UserMeType;
   auth: AuthenticationType;
 };
 
@@ -28,22 +28,18 @@ const Base = () => {
   const { userConfig, auth } = useLoaderData() as BaseLoaderData;
   const location = useLocation();
 
+  const userMeConfig = userConfig.config;
+
   const searchParams = new URLSearchParams(location.search);
 
   const currentPageFromUrl = Number(searchParams.get('page'));
 
   const [currentPage, setCurrentPage] = useState(currentPageFromUrl);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [, setSearchParams] = useSearchParams();
 
+  const isAdmin = loadIsAdmin(userConfig);
   const version = auth.version;
   const taUpdate = auth.ta_update;
-
-  useEffect(() => {
-    (async () => {
-      setIsAdmin(await loadIsAdmin());
-    })();
-  }, []);
 
   useEffect(() => {
     if (currentPageFromUrl !== currentPage) {
@@ -76,7 +72,7 @@ const Base = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
-  importColours(userConfig.stylesheet);
+  importColours(userMeConfig.stylesheet);
 
   return (
     <>

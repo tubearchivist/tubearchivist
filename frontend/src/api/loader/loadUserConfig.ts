@@ -1,10 +1,10 @@
-import { UserConfigType } from '../actions/updateUserConfig';
+import { UserMeType } from '../actions/updateUserConfig';
 import isDevEnvironment from '../../functions/isDevEnvironment';
 import getApiUrl from '../../configuration/getApiUrl';
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getFetchCredentials from '../../configuration/getFetchCredentials';
 
-const loadUserConfig = async (): Promise<UserConfigType> => {
+const loadUserMeConfig = async (): Promise<UserMeType> => {
   const apiUrl = getApiUrl();
 
   const response = await fetch(`${apiUrl}/api/user/me/`, {
@@ -15,10 +15,10 @@ const loadUserConfig = async (): Promise<UserConfigType> => {
   const userConfig = await response.json();
 
   if (isDevEnvironment()) {
-    console.log('userConfig', userConfig);
+    console.log('loadUserMeConfig', userConfig);
   }
 
   return userConfig;
 };
 
-export default loadUserConfig;
+export default loadUserMeConfig;

@@ -6,7 +6,7 @@ import iconAdd from '/img/icon-add.svg';
 import { useEffect, useState } from 'react';
 import Pagination, { PaginationType } from '../components/Pagination';
 import { ConfigType, ViewLayoutType } from './Home';
-import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
+import updateUserConfig, { UserConfigType, UserMeType } from '../api/actions/updateUserConfig';
 import { OutletContextType } from './Base';
 import ChannelList from '../components/ChannelList';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
@@ -47,16 +47,20 @@ type ChannelsListResponse = {
 };
 
 type ChannelsLoaderDataType = {
-  userConfig: UserConfigType;
+  userConfig: UserMeType;
 };
 
 const Channels = () => {
   const { userConfig } = useLoaderData() as ChannelsLoaderDataType;
   const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
+  const userMeConfig = userConfig.config;
+
   const [channelListResponse, setChannelListResponse] = useState<ChannelsListResponse>();
-  const [showSubscribedOnly, setShowSubscribedOnly] = useState(userConfig.show_subed_only || false);
-  const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_channel || 'grid');
+  const [showSubscribedOnly, setShowSubscribedOnly] = useState(
+    userMeConfig.show_subed_only || false,
+  );
+  const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_channel || 'grid');
   const [showAddForm, setShowAddForm] = useState(false);
   const [refresh, setRefresh] = useState(false);
 
@@ -68,8 +72,8 @@ const Channels = () => {
   useEffect(() => {
     (async () => {
       if (
-        userConfig.view_style_channel !== view ||
-        userConfig.show_subed_only !== showSubscribedOnly
+        userMeConfig.view_style_channel !== view ||
+        userMeConfig.show_subed_only !== showSubscribedOnly
       ) {
         const userConfig: UserConfigType = {
           show_subed_only: showSubscribedOnly,
@@ -79,7 +83,7 @@ const Channels = () => {
         await updateUserConfig(userConfig);
       }
     })();
-  }, [showSubscribedOnly, userConfig.show_subed_only, userConfig.view_style_channel, view]);
+  }, [showSubscribedOnly, userMeConfig.show_subed_only, userMeConfig.view_style_channel, view]);
 
   useEffect(() => {
     (async () => {

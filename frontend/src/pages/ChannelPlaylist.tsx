@@ -3,7 +3,6 @@ import Notifications from '../components/Notifications';
 import PlaylistList from '../components/PlaylistList';
 import { ViewLayoutType } from './Home';
 import { ViewStyles } from '../configuration/constants/ViewStyle';
-import { UserConfigType } from '../api/actions/updateUserConfig';
 import { useEffect, useState } from 'react';
 import { OutletContextType } from './Base';
 import Pagination from '../components/Pagination';
@@ -13,9 +12,10 @@ import loadPlaylistList from '../api/loader/loadPlaylistList';
 import { PlaylistsResponseType } from './Playlists';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
+import { UserMeType } from '../api/actions/updateUserConfig';
 
 type ChannelPlaylistLoaderDataType = {
-  userConfig: UserConfigType;
+  userConfig: UserMeType;
 };
 
 const ChannelPlaylist = () => {
@@ -23,9 +23,11 @@ const ChannelPlaylist = () => {
   const { userConfig } = useLoaderData() as ChannelPlaylistLoaderDataType;
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
-  const [showSubedOnly, setShowSubedOnly] = useState(userConfig.show_subed_only || false);
-  const [view, setView] = useState<ViewLayoutType>(userConfig.view_style_playlist || 'grid');
-  const [gridItems, setGridItems] = useState(userConfig.grid_items || 3);
+  const userMeConfig = userConfig.config;
+
+  const [showSubedOnly, setShowSubedOnly] = useState(userMeConfig.show_subed_only || false);
+  const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_playlist || 'grid');
+  const [gridItems, setGridItems] = useState(userMeConfig.grid_items || 3);
   const [refreshPlaylists, setRefreshPlaylists] = useState(false);
 
   const [playlistsResponse, setPlaylistsResponse] = useState<PlaylistsResponseType>();

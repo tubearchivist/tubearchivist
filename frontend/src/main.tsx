@@ -19,7 +19,7 @@ import SettingsActions from './pages/SettingsActions';
 import SettingsApplication from './pages/SettingsApplication';
 import SettingsScheduling from './pages/SettingsScheduling';
 import SettingsUser from './pages/SettingsUser';
-import loadUserConfig from './api/loader/loadUserConfig';
+import loadUserMeConfig from './api/loader/loadUserConfig';
 import loadAuth from './api/loader/loadAuth';
 import ChannelBase from './pages/ChannelBase';
 import ChannelVideo from './pages/ChannelVideo';
@@ -43,7 +43,7 @@ const router = createBrowserRouter(
 
         const authData = await auth.json();
 
-        const userConfig = await loadUserConfig();
+        const userConfig = await loadUserMeConfig();
 
         return { userConfig, auth: authData };
       },
@@ -59,7 +59,7 @@ const router = createBrowserRouter(
               return redirect(Routes.Login);
             }
 
-            const userConfig = await loadUserConfig();
+            const userConfig = await loadUserMeConfig();
 
             return { userConfig };
           },
@@ -85,7 +85,7 @@ const router = createBrowserRouter(
               return redirect(Routes.Login);
             }
 
-            const userConfig = await loadUserConfig();
+            const userConfig = await loadUserMeConfig();
 
             return { userConfig };
           },
@@ -112,7 +112,7 @@ const router = createBrowserRouter(
                   return redirect(Routes.Login);
                 }
 
-                const userConfig = await loadUserConfig();
+                const userConfig = await loadUserMeConfig();
 
                 return { userConfig };
               },
@@ -150,7 +150,7 @@ const router = createBrowserRouter(
                   return redirect(Routes.Login);
                 }
 
-                const userConfig = await loadUserConfig();
+                const userConfig = await loadUserMeConfig();
 
                 return { userConfig };
               },
@@ -178,7 +178,7 @@ const router = createBrowserRouter(
               return redirect(Routes.Login);
             }
 
-            const userConfig = await loadUserConfig();
+            const userConfig = await loadUserMeConfig();
 
             return { userConfig };
           },
@@ -192,7 +192,7 @@ const router = createBrowserRouter(
               return redirect(Routes.Login);
             }
 
-            const userConfig = await loadUserConfig();
+            const userConfig = await loadUserMeConfig();
 
             return { userConfig };
           },
@@ -206,7 +206,7 @@ const router = createBrowserRouter(
               return redirect(Routes.Login);
             }
 
-            const userConfig = await loadUserConfig();
+            const userConfig = await loadUserMeConfig();
 
             return { userConfig };
           },
@@ -220,7 +220,7 @@ const router = createBrowserRouter(
               return redirect(Routes.Login);
             }
 
-            const userConfig = await loadUserConfig();
+            const userConfig = await loadUserMeConfig();
 
             return { userConfig };
           },
@@ -282,7 +282,7 @@ const router = createBrowserRouter(
               return redirect(Routes.Login);
             }
 
-            const userConfig = await loadUserConfig();
+            const userConfig = await loadUserMeConfig();
 
             return { userConfig };
           },
