@@ -1,5 +1,6 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
 import getCookie from '../../functions/getCookie';
 
 export type LoginResponseType = {
@@ -20,6 +21,7 @@ const signIn = async (username: string, password: string, saveLogin: boolean) =>
       ...defaultHeaders,
       'X-CSRFToken': csrfCookie || '',
     },
+    credentials: getFetchCredentials(),
     body: JSON.stringify({
       username,
       password,
