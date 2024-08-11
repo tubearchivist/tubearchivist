@@ -6,7 +6,7 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom';
-import { SortByType, SortOrderType, VideoResponseType, ViewLayoutType } from './Home';
+import { SortByType, SortOrderType, ViewLayoutType } from './Home';
 import { OutletContextType } from './Base';
 import { UserMeType } from '../api/actions/updateUserConfig';
 import VideoList from '../components/VideoList';
@@ -22,7 +22,9 @@ import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import updateWatchedState from '../api/actions/updateWatchedState';
 import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
-import loadVideoListByFilter from '../api/loader/loadVideoListByPage';
+import loadVideoListByFilter, {
+  VideoListByFilterResponseType,
+} from '../api/loader/loadVideoListByPage';
 
 type ChannelParams = {
   channelId: string;
@@ -49,7 +51,7 @@ const ChannelVideo = () => {
   const [refresh, setRefresh] = useState(false);
 
   const [channelResponse, setChannelResponse] = useState<ChannelResponseType>();
-  const [videoResponse, setVideoReponse] = useState<VideoResponseType>();
+  const [videoResponse, setVideoReponse] = useState<VideoListByFilterResponseType>();
 
   const channel = channelResponse?.data;
   const videoList = videoResponse?.data;

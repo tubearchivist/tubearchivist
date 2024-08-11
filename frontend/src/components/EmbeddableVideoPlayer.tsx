@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { SponsorBlockType, VideoResponseType } from '../pages/Video';
+import { VideoResponseType } from '../pages/Video';
 import VideoPlayer, { VideoProgressType } from './VideoPlayer';
 import loadVideoById from '../api/loader/loadVideoById';
 import loadVideoProgressById from '../api/loader/loadVideoProgressById';
-import loadSponsorblockByVideoId from '../api/loader/loadSponsorblockByVideoId';
 import iconClose from '/img/icon-close.svg';
 import iconEye from '/img/icon-eye.svg';
 import iconThumb from '/img/icon-thumb.svg';
@@ -33,18 +32,16 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
   const [videoResponse, setVideoResponse] = useState<VideoResponseType>();
   const [videoProgress, setVideoProgress] = useState<VideoProgressType>();
   const [playlists, setPlaylists] = useState<PlaylistList>();
-  const [sponsorblockResponse, setSponsorblockResponse] = useState<SponsorBlockType>();
 
   useEffect(() => {
     (async () => {
       const videoResponse = await loadVideoById(videoId);
       const videoProgress = await loadVideoProgressById(videoId);
-      const sponsorblockReponse = await loadSponsorblockByVideoId(videoId);
 
       const playlistIds = videoResponse.data.playlist;
       if (playlistIds !== undefined) {
         const playlists = await Promise.all(
-          playlistIds.map(async (playlistid: string) => {
+          playlistIds.map(async playlistid => {
             const playlistResponse = await loadPlaylistById(playlistid);
 
             return playlistResponse.data;
@@ -67,7 +64,6 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
 
       setVideoResponse(videoResponse);
       setVideoProgress(videoProgress);
-      setSponsorblockResponse(sponsorblockReponse);
 
       setRefresh(false);
     })();
@@ -82,6 +78,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
   const channelId = video.channel.channel_id;
   const channelName = video.channel.channel_name;
   const watched = video.player.watched;
+  const sponsorblock = video.sponsorblock;
   const views = formatNumbers(video.stats.view_count);
   const hasLikes = video.stats.like_count;
   const likes = formatNumbers(video.stats.like_count);
@@ -97,7 +94,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
           <VideoPlayer
             video={videoResponse}
             videoProgress={videoProgress}
-            sponsorBlock={sponsorblockResponse}
+            sponsorBlock={sponsorblock}
             embed={true}
           />
 

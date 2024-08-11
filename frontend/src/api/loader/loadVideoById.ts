@@ -2,8 +2,9 @@ import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
 import getFetchCredentials from '../../configuration/getFetchCredentials';
 import isDevEnvironment from '../../functions/isDevEnvironment';
+import { VideoResponseType } from '../../pages/Video';
 
-const loadVideoById = async (youtubeId: string) => {
+const loadVideoById = async (youtubeId: string): Promise<VideoResponseType> => {
   const apiUrl = getApiUrl();
 
   const response = await fetch(`${apiUrl}/api/video/${youtubeId}/`, {

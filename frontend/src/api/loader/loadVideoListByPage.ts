@@ -2,7 +2,14 @@ import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
 import getFetchCredentials from '../../configuration/getFetchCredentials';
 import isDevEnvironment from '../../functions/isDevEnvironment';
-import { SortByType, SortOrderType } from '../../pages/Home';
+import { ConfigType, SortByType, SortOrderType, VideoType } from '../../pages/Home';
+import { PaginationType } from '../../components/Pagination';
+
+export type VideoListByFilterResponseType = {
+  data?: VideoType[];
+  config?: ConfigType;
+  paginate?: PaginationType;
+};
 
 type WatchTypes = 'watched' | 'unwatched' | 'continue';
 type VideoTypes = 'videos' | 'streams' | 'shorts';
@@ -17,7 +24,9 @@ type FilterType = {
   type?: VideoTypes;
 };
 
-const loadVideoListByFilter = async (filter: FilterType) => {
+const loadVideoListByFilter = async (
+  filter: FilterType,
+): Promise<VideoListByFilterResponseType> => {
   const apiUrl = getApiUrl();
 
   const searchParams = new URLSearchParams();
