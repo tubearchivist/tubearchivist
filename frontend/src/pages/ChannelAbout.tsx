@@ -12,6 +12,10 @@ import PaginationDummy from '../components/PaginationDummy';
 import FormattedNumber from '../components/FormattedNumber';
 import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
+import updateChannelSettings, {
+  ChannelAboutConfigType,
+} from '../api/actions/updateChannelSettings';
+import loadChannelConfig from '../api/loader/loadChannelConfig';
 
 const handleSponsorBlockIntegrationOverwrite = (integration: boolean | undefined) => {
   if (integration === undefined) {
@@ -23,6 +27,26 @@ const handleSponsorBlockIntegrationOverwrite = (integration: boolean | undefined
   } else {
     return 'Disabled';
   }
+};
+
+const sponsorBlockToSelectValue = (integration: boolean | string | undefined) => {
+  if (typeof integration === 'undefined') {
+    return '';
+  }
+
+  if (integration === true) {
+    return '1';
+  }
+
+  if (integration === false) {
+    return '0';
+  }
+
+  if (integration === 'disable') {
+    return 'disable';
+  }
+
+  return integration;
 };
 
 export type ChannelBaseOutletContextType = {
@@ -51,9 +75,24 @@ const ChannelAbout = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [reindex, setReindex] = useState(false);
-  const [refresh, setRefresh] = useState(false);
+  const [refresh, setRefresh] = useState(true);
 
   const [channelResponse, setChannelResponse] = useState<ChannelResponseType>();
+  const [channelConfig, setChannelConfig] = useState<ChannelAboutConfigType>();
+
+  const [downloadFormat, setDownloadFormat] = useState(channelConfig?.download_format);
+  const [autoDeleteAfter, setAutoDeleteAfter] = useState(channelConfig?.autodelete_days);
+  const [indexPlaylists, setIndexPlaylists] = useState(channelConfig?.index_playlists);
+  const [enableSponsorblock, setEnableSponsorblock] = useState(
+    channelConfig?.integrate_sponsorblock,
+  );
+  const [pageSizeVideo, setPageSizeVideo] = useState(channelConfig?.subscriptions_channel_size);
+  const [pageSizeStreams, setPageSizeStreams] = useState(
+    channelConfig?.subscriptions_live_channel_size,
+  );
+  const [pageSizeShorts, setPageSizeShorts] = useState(
+    channelConfig?.subscriptions_shorts_channel_size,
+  );
 
   const channel = channelResponse?.data;
 
@@ -64,14 +103,30 @@ const ChannelAbout = () => {
 
     //TODO: implement request to about api endpoint ( when implemented )
     // `/api/channel/${channel.channel_id}/about/`
+
+    await updateChannelSettings(channelId, {
+      index_playlists: indexPlaylists,
+      download_format: downloadFormat,
+      autodelete_days: autoDeleteAfter,
+      integrate_sponsorblock: enableSponsorblock,
+      subscriptions_channel_size: pageSizeVideo,
+      subscriptions_live_channel_size: pageSizeStreams,
+      subscriptions_shorts_channel_size: pageSizeShorts,
+    });
+
+    setRefresh(true);
   };
 
   useEffect(() => {
     (async () => {
-      const channelResponse = await loadChannelById(channelId);
+      if (refresh) {
+        const channelResponse = await loadChannelById(channelId);
+        const channelConfig = await loadChannelConfig(channelId);
 
-      setChannelResponse(channelResponse);
-      setRefresh(false);
+        setChannelResponse(channelResponse);
+        setChannelConfig(channelConfig);
+        setRefresh(false);
+      }
     })();
   }, [refresh, channelId]);
 
@@ -224,7 +279,22 @@ const ChannelAbout = () => {
                       {channelOverwrites?.download_format || 'False'}
                     </span>
                   </p>
-                  <input type="text" name="download_format" id="id_download_format" />
+                  <input
+                    type="text"
+                    name="download_format"
+                    id="id_download_format"
+                    onChange={event => {
+                      const value = event.currentTarget.value;
+
+                      setDownloadFormat(value);
+                    }}
+                  />
+                  <Button
+                    label="Reset"
+                    onClick={() => {
+                      setDownloadFormat(false);
+                    }}
+                  />
                   <br />
                 </div>
                 <div className="overwrite-form-item">
@@ -234,7 +304,20 @@ const ChannelAbout = () => {
                       {channelOverwrites?.autodelete_days || 'False'}
                     </span>
                   </p>
-                  <input type="number" name="autodelete_days" id="id_autodelete_days" />
+                  <input
+                    type="number"
+                    name="autodelete_days"
+                    id="id_autodelete_days"
+                    onChange={event => {
+                      const value = Number(event.currentTarget.value);
+
+                      if (value === 0) {
+                        setAutoDeleteAfter(false);
+                      } else {
+                        setAutoDeleteAfter(Number(value));
+                      }
+                    }}
+                  />
 
                   <br />
                 </div>
@@ -247,10 +330,20 @@ const ChannelAbout = () => {
                     </span>
                   </p>
 
-                  <select name="index_playlists" id="id_index_playlists" defaultValue="">
+                  <select
+                    name="index_playlists"
+                    id="id_index_playlists"
+                    defaultValue=""
+                    value={indexPlaylists ? '1' : '0'}
+                    onChange={event => {
+                      const value = event.currentTarget.value;
+
+                      setIndexPlaylists(value);
+                    }}
+                  >
                     <option value="">-- change playlist index --</option>
-                    <option value="false">Disable playlist index</option>
-                    <option value="true">Enable playlist index</option>
+                    <option value="0">Disable playlist index</option>
+                    <option value="1">Enable playlist index</option>
                   </select>
 
                   <br />
@@ -273,11 +366,17 @@ const ChannelAbout = () => {
                     name="integrate_sponsorblock"
                     id="id_integrate_sponsorblock"
                     defaultValue=""
+                    value={sponsorBlockToSelectValue(enableSponsorblock)}
+                    onChange={event => {
+                      const value = event.currentTarget.value;
+
+                      setEnableSponsorblock(value);
+                    }}
                   >
                     <option value="">-- change sponsorblock integrations</option>
                     <option value="disable">disable sponsorblock integration</option>
-                    <option value="true">enable sponsorblock integration</option>
-                    <option value="false">unset sponsorblock integration</option>
+                    <option value="1">enable sponsorblock integration</option>
+                    <option value="0">unset sponsorblock integration</option>
                   </select>
                 </div>
                 <h3>Page Size Overrides</h3>
@@ -301,7 +400,14 @@ const ChannelAbout = () => {
                     recommended 50.
                   </i>
                   <br />
-                  <input type="number" name="channel_size" id="id_channel_size" />
+                  <input
+                    type="number"
+                    name="channel_size"
+                    id="id_channel_size"
+                    onChange={event => {
+                      setPageSizeVideo(Number(event.currentTarget.value));
+                    }}
+                  />
                   <br />
                 </div>
                 <div className="overwrite-form-item">
@@ -316,7 +422,14 @@ const ChannelAbout = () => {
                     max recommended 50.
                   </i>
                   <br />
-                  <input type="number" name="live_channel_size" id="id_live_channel_size" />
+                  <input
+                    type="number"
+                    name="live_channel_size"
+                    id="id_live_channel_size"
+                    onChange={event => {
+                      setPageSizeStreams(Number(event.currentTarget.value));
+                    }}
+                  />
                   <br />
                 </div>
                 <div className="overwrite-form-item">
@@ -331,7 +444,14 @@ const ChannelAbout = () => {
                     task, max recommended 50.
                   </i>
                   <br />
-                  <input type="number" name="shorts_channel_size" id="id_shorts_channel_size" />
+                  <input
+                    type="number"
+                    name="shorts_channel_size"
+                    id="id_shorts_channel_size"
+                    onChange={event => {
+                      setPageSizeShorts(Number(event.currentTarget.value));
+                    }}
+                  />
                 </div>
                 <br />
 
