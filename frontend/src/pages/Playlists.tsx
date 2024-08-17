@@ -68,6 +68,7 @@ const Playlists = () => {
         };
 
         await updateUserConfig(userConfig);
+        setRefresh(true);
       }
     })();
   }, [showSubedOnly, userMeConfig.show_subed_only, userMeConfig.view_style_playlist, view]);
@@ -79,13 +80,18 @@ const Playlists = () => {
         pagination?.current_page === undefined ||
         currentPage !== pagination?.current_page
       ) {
-        const playlist = await loadPlaylistList({ page: currentPage });
+        const playlist = await loadPlaylistList({
+          page: currentPage,
+          subscribed: showSubedOnly,
+        });
 
         setPlaylistReponse(playlist);
         setRefresh(false);
       }
     })();
-  }, [refresh, currentPage, showSubedOnly, view, pagination?.current_page]);
+    // Do not add showSubedOnly, view this will not work as expected!
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refresh, currentPage, pagination?.current_page]);
 
   return (
     <>
