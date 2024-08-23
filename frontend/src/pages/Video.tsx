@@ -25,7 +25,6 @@ import capitalizeFirstLetter from '../functions/capitalizeFirstLetter';
 import formatDate from '../functions/formatDates';
 import formatNumbers from '../functions/formatNumbers';
 import queueReindex from '../api/actions/queueReindex';
-import loadSponsorblockByVideoId from '../api/loader/loadSponsorblockByVideoId';
 import GoogleCast from '../components/GoogleCast';
 import WatchedCheckBox from '../components/WatchedCheckBox';
 import convertStarRating from '../functions/convertStarRating';
@@ -105,7 +104,6 @@ export type SimilarVideosResponseType = {
 export type VideoResponseType = {
   data: VideoType;
   config: ConfigType;
-  playlist_nav: PlaylistNavType;
 };
 
 type CommentsResponseType = {
@@ -134,7 +132,6 @@ const Video = () => {
   const [simmilarVideos, setSimmilarVideos] = useState<SimilarVideosResponseType>();
   const [videoProgress, setVideoProgress] = useState<VideoProgressType>();
   const [videoPlaylistNav, setVideoPlaylistNav] = useState<VideoNavResponseType[]>();
-  const [sponsorblockResponse, setSponsorblockResponse] = useState<SponsorBlockType>();
   const [customPlaylistsResponse, setCustomPlaylistsResponse] = useState<PlaylistsResponseType>();
   const [commentsResponse, setCommentsResponse] = useState<CommentsResponseType>();
 
@@ -143,7 +140,6 @@ const Video = () => {
       const videoResponse = await loadVideoById(videoId);
       const simmilarVideosResponse = await loadSimmilarVideosById(videoId);
       const videoProgressResponse = await loadVideoProgressById(videoId);
-      // const sponsorblockReponse = await loadSponsorblockByVideoId(videoId);
       const customPlaylistsResponse = await loadPlaylistList({ type: 'custom' });
       const commentsResponse = await loadCommentsbyVideoId(videoId);
       const videoNavResponse = await loadVideoNav(videoId);
@@ -151,7 +147,6 @@ const Video = () => {
       setVideoResponse(videoResponse);
       setSimmilarVideos(simmilarVideosResponse);
       setVideoProgress(videoProgressResponse);
-      // setSponsorblockResponse(sponsorblockReponse);
       setVideoPlaylistNav(videoNavResponse);
       setCustomPlaylistsResponse(customPlaylistsResponse);
       setCommentsResponse(commentsResponse);
@@ -167,7 +162,7 @@ const Video = () => {
   const watched = videoResponse.data.player.watched;
   const config = videoResponse.config;
   const playlistNav = videoPlaylistNav;
-  const sponsorBlock = sponsorblockResponse;
+  const sponsorBlock = videoResponse.data.sponsorblock;
   const customPlaylists = customPlaylistsResponse?.data;
   const starRating = convertStarRating(video?.stats?.average_rating);
   const comments = commentsResponse?.data;

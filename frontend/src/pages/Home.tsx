@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useLoaderData, useOutletContext, useSearchParams } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
-import Pagination, { PaginationType } from '../components/Pagination';
-import loadVideoListByFilter from '../api/loader/loadVideoListByPage';
+import Pagination from '../components/Pagination';
+import loadVideoListByFilter, {
+  VideoListByFilterResponseType,
+} from '../api/loader/loadVideoListByPage';
 import { UserMeType } from '../api/actions/updateUserConfig';
 import VideoList from '../components/VideoList';
 import { ChannelType } from './Channels';
@@ -12,6 +14,7 @@ import { ViewStyleNames, ViewStyles } from '../configuration/constants/ViewStyle
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import { Helmet } from 'react-helmet';
+import { SponsorBlockType } from './Video';
 
 export type PlayerType = {
   watched: boolean;
@@ -56,6 +59,8 @@ export type VideoType = {
   media_url: string;
   player: PlayerType;
   published: string;
+  sponsorblock?: SponsorBlockType;
+  playlist?: string[];
   stats: StatsType;
   streams: StreamType[];
   subtitles: Subtitles[];
@@ -93,18 +98,6 @@ export type ConfigType = {
   downloads: DownloadsType;
 };
 
-export type VideoResponseType = {
-  data?: VideoType[];
-  config?: ConfigType;
-  paginate?: PaginationType;
-};
-
-type ContinueVidsType = {
-  data?: VideoType[];
-  config?: ConfigType;
-  paginate?: PaginationType;
-};
-
 type HomeLoaderDataType = {
   userConfig: UserMeType;
 };
@@ -129,8 +122,9 @@ const Home = () => {
   const [showHidden, setShowHidden] = useState(false);
   const [refreshVideoList, setRefreshVideoList] = useState(false);
 
-  const [videoResponse, setVideoReponse] = useState<VideoResponseType>();
-  const [continueVideoResponse, setContinueVideoResponse] = useState<ContinueVidsType>();
+  const [videoResponse, setVideoReponse] = useState<VideoListByFilterResponseType>();
+  const [continueVideoResponse, setContinueVideoResponse] =
+    useState<VideoListByFilterResponseType>();
 
   const videoList = videoResponse?.data;
   const pagination = videoResponse?.paginate;
