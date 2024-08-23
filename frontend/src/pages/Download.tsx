@@ -339,7 +339,7 @@ const Download = () => {
           {downloadList &&
             downloadList?.map(download => {
               return (
-                <Fragment key={download.channel_id}>
+                <Fragment key={download.timestamp}>
                   <DownloadListItem
                     download={download}
                     view={view}
