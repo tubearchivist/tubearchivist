@@ -20,6 +20,11 @@ urlpatterns = [
         name="api-task-id",
     ),
     path(
+        "schedule/",
+        views.ScheduleListView.as_view(),
+        name="api-schedule-list",
+    ),
+    path(
         "schedule/<slug:task_name>/",
         views.ScheduleView.as_view(),
         name="api-schedule",
