@@ -32,7 +32,7 @@ export type UserConfigType = {
   sponsorblock_id?: number;
 };
 
-const updateUserConfig = async (config: UserConfigType): Promise<UserMeType> => {
+const updateUserConfig = async (config: UserConfigType): Promise<UserConfigType> => {
   const apiUrl = getApiUrl();
   const csrfCookie = getCookie('csrftoken');
 
