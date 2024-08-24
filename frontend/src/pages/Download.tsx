@@ -65,6 +65,8 @@ const Download = () => {
   const [downloadPending, setDownloadPending] = useState(false);
   const [rescanPending, setRescanPending] = useState(false);
 
+  const [lastVideoCount, setLastVideoCount] = useState(0);
+
   const [downloadQueueText, setDownloadQueueText] = useState('');
 
   const [downloadResponse, setDownloadResponse] = useState<DownloadResponseType>();
@@ -120,10 +122,14 @@ const Download = () => {
         currentPage !== pagination?.current_page
       ) {
         const videos = await loadDownloadQueue(currentPage, channelFilterFromUrl, showIgnored);
-        const downloadAggs = await loadDownloadAggs();
+
+        const videoCount = videos?.paginate?.total_hits;
+
+        if (videoCount && lastVideoCount !== videoCount) {
+          setLastVideoCount(videoCount);
+        }
 
         setDownloadResponse(videos);
-        setDownloadAggsResponse(downloadAggs);
         setRefresh(false);
       }
     })();
@@ -131,6 +137,14 @@ const Download = () => {
     // Do not add showIgnored otherwise it will not update the userconfig first.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh, currentPage, downloadPending]);
+
+  useEffect(() => {
+    (async () => {
+      const downloadAggs = await loadDownloadAggs();
+
+      setDownloadAggsResponse(downloadAggs);
+    })();
+  }, [lastVideoCount]);
 
   useEffect(() => {
     setRefresh(true);
@@ -339,7 +353,7 @@ const Download = () => {
           {downloadList &&
             downloadList?.map(download => {
               return (
-                <Fragment key={download.channel_id}>
+                <Fragment key={`${download.channel_id}_${download.timestamp}`}>
                   <DownloadListItem
                     download={download}
                     view={view}
