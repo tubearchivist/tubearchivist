@@ -22,7 +22,7 @@ const queueReindex = async (id: string, type: ReindexType, reindexVideos = false
   }
 
   const body = JSON.stringify({
-    [type]: id,
+    [type]: [id],
   });
 
   const response = await fetch(`${apiUrl}/api/refresh/${params}`, {
