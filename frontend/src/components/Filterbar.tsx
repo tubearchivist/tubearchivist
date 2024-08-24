@@ -48,24 +48,16 @@ const Filterbar = ({
 }: FilterbarProps) => {
   useEffect(() => {
     (async () => {
-      if (
-        userMeConfig.hide_watched !== hideWatched ||
-        userMeConfig[viewStyleName.toString() as keyof typeof userMeConfig] !== view ||
-        userMeConfig.grid_items !== gridItems ||
-        userMeConfig.sort_by !== sortBy ||
-        userMeConfig.sort_order !== sortOrder
-      ) {
-        const userConfig: UserConfigType = {
-          hide_watched: hideWatched,
-          [viewStyleName.toString()]: view,
-          grid_items: gridItems,
-          sort_by: sortBy,
-          sort_order: sortOrder,
-        };
+      const userConfig: UserConfigType = {
+        hide_watched: hideWatched,
+        [viewStyleName.toString()]: view,
+        grid_items: gridItems,
+        sort_by: sortBy,
+        sort_order: sortOrder,
+      };
 
-        await updateUserConfig(userConfig);
-        setRefresh?.(true);
-      }
+      await updateUserConfig(userConfig);
+      setRefresh?.(true);
     })();
   }, [hideWatched, view, gridItems, sortBy, sortOrder, viewStyleName, setRefresh, userMeConfig]);
 
