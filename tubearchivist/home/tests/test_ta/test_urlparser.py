@@ -96,6 +96,20 @@ PERSONAL_PLAYLISTS_TEST_CASES = [
     ("https://www.youtube.com/playlist?list=LL", EXPECTED_LL),
 ]
 
+# externally managed playlists
+ORG_PLAYLIST_URL_IN = [
+    "OLAK5uy_mMdR_4JhLvaBUm_r3r4HfnrkIbZM59eDI",
+    "https://www.youtube.com/playlist?list=OLAK5uy_mMdR_4JhLvaBUm_r3r4HfnrkIbZM59eDI",
+]
+ORG_PLAYLIST_OUT = [
+    {
+        "type": "playlist",
+        "url": "OLAK5uy_mMdR_4JhLvaBUm_r3r4HfnrkIbZM59eDI",
+        "vid_type": "unknown",
+    }
+]
+ORG_PLAYLIST_TEST_CASES = [(i, ORG_PLAYLIST_OUT) for i in ORG_PLAYLIST_URL_IN]
+
 # collect tests expected to pass
 PASSTING_TESTS = []
 PASSTING_TESTS.extend(VIDEO_TEST_CASES)
@@ -104,7 +118,7 @@ PASSTING_TESTS.extend(CHANNEL_TEST_CASES)
 PASSTING_TESTS.extend(CHANNEL_VID_TYPES)
 PASSTING_TESTS.extend(PLAYLIST_TEST_CASES)
 PASSTING_TESTS.extend(PERSONAL_PLAYLISTS_TEST_CASES)
-
+PASSTING_TESTS.extend(ORG_PLAYLIST_TEST_CASES)
 
 @pytest.mark.parametrize("url_str, expected_result", PASSTING_TESTS)
 def test_passing_parse(url_str, expected_result):

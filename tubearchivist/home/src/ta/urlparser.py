@@ -98,6 +98,8 @@ class Parser:
             item_type = "channel"
         elif len_id_str in (34, 26, 18) or id_str.startswith("TA_playlist_"):
             item_type = "playlist"
+        elif id_str.startswith("OLAK"): # 
+            item_type = "playlist"
         else:
             raise ValueError(f"not a valid id_str: {id_str}")
 
