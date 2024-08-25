@@ -31,7 +31,7 @@ class YouTubeItem:
 
     def build_yt_url(self):
         """build youtube url"""
-        print(f"[build_yt_url] - self null? {self is None}; self.yt_base is None? {self.yt_base is None}; self.youtube_id is None? {self.youtube_id};")
+        print(f"[build_yt_url] - self null? {self is None}; self.yt_base is None? {self.yt_base is None}; self.youtube_id is None? {self.youtube_id is None};")
         return self.yt_base + self.youtube_id
 
     def get_from_youtube(self):
