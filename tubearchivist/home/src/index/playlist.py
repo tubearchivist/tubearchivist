@@ -80,7 +80,7 @@ class YoutubePlaylist(YouTubeItem):
         playlist_id = self.json_data["playlist_id"]
         channel_id = self.json_data["playlist_channel_id"]
         if channel_id is None:
-            print(raise ValueError(f"channel_id is None for playlist_id={playlist_id}")
+            raise ValueError(f"channel_id is None for playlist_id={playlist_id}")
         
         channel_handler = channel.YoutubeChannel(channel_id)
         channel_handler.build_json(upload=True)
