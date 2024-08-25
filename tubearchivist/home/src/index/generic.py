@@ -23,6 +23,8 @@ class YouTubeItem:
     }
 
     def __init__(self, youtube_id):
+        if youtube_id is None:
+            raise ValueError("youtube_id must not be None as an input")
         self.youtube_id = youtube_id
         self.es_path = f"{self.index_name}/_doc/{youtube_id}"
         self.config = AppConfig().config
