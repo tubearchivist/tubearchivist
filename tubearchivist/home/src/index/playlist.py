@@ -59,7 +59,7 @@ class YoutubePlaylist(YouTubeItem):
             print(f"{self.youtube_id}: thumbnail extraction failed")
             playlist_thumbnail = False
 
-        if self.youtube_meta("channel_id",None) is None:
+        if self.youtube_meta.get("channel_id",None) is None:
             print(f"process_youtube_meta - channel_id is None for youtube_id={self.youtube_id}. youtube_meta = {json.dumps(self.youtube_meta)}")
             
 
