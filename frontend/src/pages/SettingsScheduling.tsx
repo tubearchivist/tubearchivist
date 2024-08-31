@@ -2,6 +2,7 @@ import { Helmet } from 'react-helmet';
 import Notifications from '../components/Notifications';
 import SettingsNavigation from '../components/SettingsNavigation';
 import Button from '../components/Button';
+import PaginationDummy from '../components/PaginationDummy';
 
 type CronTabType = {
   minute: number;
@@ -453,6 +454,8 @@ const SettingsScheduling = () => {
           </div>
 
           <Button type="submit" name="scheduler-settings" label="Update Scheduler Settings" />
+
+          <PaginationDummy />
         </form>
       </div>
     </>

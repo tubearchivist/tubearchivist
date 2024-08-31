@@ -1,7 +1,7 @@
 const PaginationDummy = () => {
   return (
     <div className="boxed-content">
-      <div className="pagination">{/** dummy pagination for padding */}</div>
+      <div className="pagination">{/** dummy pagination for consistant padding */}</div>
     </div>
   );
 };
