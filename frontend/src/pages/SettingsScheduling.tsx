@@ -3,6 +3,9 @@ import Notifications from '../components/Notifications';
 import SettingsNavigation from '../components/SettingsNavigation';
 import Button from '../components/Button';
 import PaginationDummy from '../components/PaginationDummy';
+import { useEffect, useState } from 'react';
+import loadSchedule, { ScheduleResponseType } from '../api/loader/loadSchedule';
+import loadAppriseNotification from '../api/loader/loadAppriseNotification';
 
 type CronTabType = {
   minute: number;
@@ -57,6 +60,37 @@ type SettingsSchedulingResponseType = {
 };
 
 const SettingsScheduling = () => {
+  const [refresh, setRefresh] = useState(false);
+
+  const [scheduleResponse, setScheduleResponse] = useState<ScheduleResponseType>([]);
+  const [appriseNotification, setAppriseNotification] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      if (refresh) {
+        const scheduleResponse = await loadSchedule();
+        const appriseNotificationResponse = await loadAppriseNotification();
+
+        setScheduleResponse(scheduleResponse);
+        setAppriseNotification(appriseNotificationResponse);
+
+        setRefresh(false);
+      }
+    })();
+  }, [refresh]);
+
+  useEffect(() => {
+    setRefresh(true);
+  }, []);
+
+  const groupedSchedules = Object.groupBy(scheduleResponse, ({ name }) => name);
+
+  console.log(groupedSchedules);
+
+  const { check_reindex, thumbnail_check } = groupedSchedules;
+  const check_reindex_schedule = check_reindex?.pop();
+  const thumbnail_check_schedule = thumbnail_check?.pop();
+
   const response: SettingsSchedulingResponseType = {
     update_subscribed: {
       crontab: {
@@ -129,15 +163,8 @@ const SettingsScheduling = () => {
     },
   };
 
-  const {
-    check_reindex,
-    download_pending,
-    notifications,
-    run_backup,
-    scheduler_form,
-    thumbnail_check,
-    update_subscribed,
-  } = response;
+  const { download_pending, notifications, run_backup, scheduler_form, update_subscribed } =
+    response;
 
   return (
     <>
@@ -256,26 +283,21 @@ const SettingsScheduling = () => {
               <input type="text" name="download_pending" id="id_download_pending" />
             </div>
           </div>
+
           <div className="settings-group">
             <h2>Refresh Metadata</h2>
             <div className="settings-item">
               <p>
                 Current Metadata refresh schedule:{' '}
                 <span className="settings-current">
-                  {check_reindex && (
-                    <>
-                      {check_reindex.crontab.minute} {check_reindex.crontab.hour}{' '}
-                      {check_reindex.crontab.day_of_week}
-                      <Button
-                        label="Delete"
-                        data-schedule="check_reindex"
-                        onclick="deleteSchedule(this)"
-                        className="danger-button"
-                      />
-                    </>
-                  )}
-
-                  {!check_reindex && 'False'}
+                  {check_reindex_schedule?.schedule}
+                  <Button
+                    label="Delete"
+                    data-schedule="check_reindex"
+                    onclick="deleteSchedule(this)"
+                    className="danger-button"
+                  />
+                  {!check_reindex_schedule && 'False'}
                 </span>
               </p>
               <p>Daily schedule to refresh metadata from YouTube:</p>
@@ -285,7 +307,7 @@ const SettingsScheduling = () => {
             <div className="settings-item">
               <p>
                 Current refresh for metadata older than x days:{' '}
-                <span className="settings-current">{check_reindex.task_config.days}</span>
+                <span className="settings-current">{check_reindex_schedule?.config?.days}</span>
               </p>
               <p>Refresh older than x days, recommended 90:</p>
               {scheduler_form.check_reindex.errors.map(error => {
@@ -299,26 +321,22 @@ const SettingsScheduling = () => {
               <input type="number" name="check_reindex_days" id="id_check_reindex_days" />
             </div>
           </div>
+
           <div className="settings-group">
             <h2>Thumbnail Check</h2>
             <div className="settings-item">
               <p>
                 Current thumbnail check schedule:{' '}
                 <span className="settings-current">
-                  {thumbnail_check && (
-                    <>
-                      {thumbnail_check.crontab.minute} {thumbnail_check.crontab.hour}{' '}
-                      {thumbnail_check.crontab.day_of_week}
-                      <Button
-                        label="Delete"
-                        data-schedule="thumbnail_check"
-                        onclick="deleteSchedule(this)"
-                        className="danger-button"
-                      />
-                    </>
-                  )}
+                  {thumbnail_check_schedule?.schedule}
+                  <Button
+                    label="Delete"
+                    data-schedule="thumbnail_check"
+                    onclick="deleteSchedule(this)"
+                    className="danger-button"
+                  />
 
-                  {!thumbnail_check && 'False'}
+                  {!thumbnail_check_schedule && 'False'}
                 </span>
               </p>
               <p>Periodically check and cleanup thumbnails:</p>
