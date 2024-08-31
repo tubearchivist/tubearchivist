@@ -87,84 +87,14 @@ const SettingsScheduling = () => {
 
   console.log(groupedSchedules);
 
-  const { check_reindex, thumbnail_check } = groupedSchedules;
-  const check_reindex_schedule = check_reindex?.pop();
-  const thumbnail_check_schedule = thumbnail_check?.pop();
+  const { update_subscribed, download_pending, run_backup, check_reindex, thumbnail_check } =
+    groupedSchedules;
 
-  const response: SettingsSchedulingResponseType = {
-    update_subscribed: {
-      crontab: {
-        minute: 0,
-        hour: 0,
-        day_of_week: 0,
-      },
-    },
-    check_reindex: {
-      crontab: {
-        minute: 0,
-        hour: 0,
-        day_of_week: 0,
-      },
-      task_config: {
-        days: 0,
-      },
-    },
-    thumbnail_check: {
-      crontab: {
-        minute: 0,
-        hour: 0,
-        day_of_week: 0,
-      },
-    },
-    download_pending: {
-      crontab: {
-        minute: 0,
-        hour: 0,
-        day_of_week: 0,
-      },
-    },
-    run_backup: {
-      crontab: {
-        minute: 0,
-        hour: 0,
-        day_of_week: 0,
-      },
-      task_config: {
-        rotate: false,
-      },
-    },
-    notifications: {
-      items: [
-        {
-          task: '',
-          notification: {
-            title: '',
-            urls: [''],
-          },
-        },
-      ],
-    },
-    scheduler_form: {
-      update_subscribed: {
-        errors: ['error?'],
-      },
-      download_pending: {
-        errors: ['error?'],
-      },
-      check_reindex: {
-        errors: ['error?'],
-      },
-      thumbnail_check: {
-        errors: ['error?'],
-      },
-      run_backup: {
-        errors: ['error?'],
-      },
-    },
-  };
-
-  const { download_pending, notifications, run_backup, scheduler_form, update_subscribed } =
-    response;
+  const updateSubscribedSchedule = update_subscribed?.pop();
+  const downloadPendingSchedule = download_pending?.pop();
+  const runBackup = run_backup?.pop();
+  const checkReindexSchedule = check_reindex?.pop();
+  const thumbnailCheckSchedule = thumbnail_check?.pop();
 
   return (
     <>
@@ -221,10 +151,9 @@ const SettingsScheduling = () => {
               <p>
                 Current rescan schedule:{' '}
                 <span className="settings-current">
-                  {update_subscribed && (
+                  {updateSubscribedSchedule && (
                     <>
-                      {update_subscribed.crontab.minute} {update_subscribed.crontab.hour}{' '}
-                      {update_subscribed.crontab.day_of_week}
+                      {updateSubscribedSchedule?.schedule}
                       <Button
                         label="Delete"
                         data-schedule="update_subscribed"
@@ -234,17 +163,10 @@ const SettingsScheduling = () => {
                     </>
                   )}
 
-                  {!update_subscribed && 'False'}
+                  {!updateSubscribedSchedule && 'False'}
                 </span>
               </p>
               <p>Periodically rescan your subscriptions:</p>
-              {scheduler_form.update_subscribed.errors.map(error => {
-                return (
-                  <p key={error} className="danger-zone">
-                    {error}
-                  </p>
-                );
-              })}
 
               <input type="text" name="update_subscribed" id="id_update_subscribed" />
             </div>
@@ -255,10 +177,9 @@ const SettingsScheduling = () => {
               <p>
                 Current Download schedule:{' '}
                 <span className="settings-current">
-                  {download_pending && (
+                  {downloadPendingSchedule && (
                     <>
-                      {download_pending.crontab.minute} {download_pending.crontab.hour}{' '}
-                      {download_pending.crontab.day_of_week}
+                      {downloadPendingSchedule.schedule}
                       <Button
                         label="Delete"
                         data-schedule="download_pending"
@@ -272,13 +193,6 @@ const SettingsScheduling = () => {
                 </span>
               </p>
               <p>Automatic video download schedule:</p>
-              {scheduler_form.download_pending.errors.map(error => {
-                return (
-                  <p key={error} className="danger-zone">
-                    {error}
-                  </p>
-                );
-              })}
 
               <input type="text" name="download_pending" id="id_download_pending" />
             </div>
@@ -290,14 +204,14 @@ const SettingsScheduling = () => {
               <p>
                 Current Metadata refresh schedule:{' '}
                 <span className="settings-current">
-                  {check_reindex_schedule?.schedule}
+                  {checkReindexSchedule?.schedule}
                   <Button
                     label="Delete"
                     data-schedule="check_reindex"
                     onclick="deleteSchedule(this)"
                     className="danger-button"
                   />
-                  {!check_reindex_schedule && 'False'}
+                  {!checkReindexSchedule && 'False'}
                 </span>
               </p>
               <p>Daily schedule to refresh metadata from YouTube:</p>
@@ -307,16 +221,9 @@ const SettingsScheduling = () => {
             <div className="settings-item">
               <p>
                 Current refresh for metadata older than x days:{' '}
-                <span className="settings-current">{check_reindex_schedule?.config?.days}</span>
+                <span className="settings-current">{checkReindexSchedule?.config?.days}</span>
               </p>
               <p>Refresh older than x days, recommended 90:</p>
-              {scheduler_form.check_reindex.errors.map(error => {
-                return (
-                  <p key={error} className="danger-zone">
-                    {error}
-                  </p>
-                );
-              })}
 
               <input type="number" name="check_reindex_days" id="id_check_reindex_days" />
             </div>
@@ -328,7 +235,7 @@ const SettingsScheduling = () => {
               <p>
                 Current thumbnail check schedule:{' '}
                 <span className="settings-current">
-                  {thumbnail_check_schedule?.schedule}
+                  {thumbnailCheckSchedule?.schedule}
                   <Button
                     label="Delete"
                     data-schedule="thumbnail_check"
@@ -336,17 +243,10 @@ const SettingsScheduling = () => {
                     className="danger-button"
                   />
 
-                  {!thumbnail_check_schedule && 'False'}
+                  {!thumbnailCheckSchedule && 'False'}
                 </span>
               </p>
               <p>Periodically check and cleanup thumbnails:</p>
-              {scheduler_form.thumbnail_check.errors.map(error => {
-                return (
-                  <p key={error} className="danger-zone">
-                    {error}
-                  </p>
-                );
-              })}
 
               <input type="text" name="thumbnail_check" id="id_thumbnail_check" />
             </div>
@@ -364,10 +264,9 @@ const SettingsScheduling = () => {
               <p>
                 Current index backup schedule:{' '}
                 <span className="settings-current">
-                  {run_backup && (
+                  {runBackup && (
                     <>
-                      {run_backup.crontab.minute} {run_backup.crontab.hour}{' '}
-                      {run_backup.crontab.day_of_week}
+                      {runBackup.schedule}
                       <Button
                         label="Delete"
                         data-schedule="run_backup"
@@ -377,24 +276,17 @@ const SettingsScheduling = () => {
                     </>
                   )}
 
-                  {!run_backup && 'False'}
+                  {!runBackup && 'False'}
                 </span>
               </p>
               <p>Automatically backup metadata to a zip file:</p>
-              {scheduler_form.run_backup.errors.map(error => {
-                return (
-                  <p key={error} className="danger-zone">
-                    {error}
-                  </p>
-                );
-              })}
 
               <input type="text" name="run_backup" id="id_run_backup" />
             </div>
             <div className="settings-item">
               <p>
                 Current backup files to keep:{' '}
-                <span className="settings-current">{run_backup.task_config.rotate}</span>
+                <span className="settings-current">{runBackup?.config.days}</span>
               </p>
               <p>Max auto backups to keep:</p>
 
@@ -404,7 +296,7 @@ const SettingsScheduling = () => {
           <div className="settings-group">
             <h2>Add Notification URL</h2>
             <div className="settings-item">
-              {notifications && (
+              {appriseNotification && (
                 <>
                   <p>
                     <Button
@@ -416,7 +308,7 @@ const SettingsScheduling = () => {
                     stored notification links
                   </p>
                   <div id="text-reveal" className="description-text">
-                    {notifications.items.map(({ task, notification }) => {
+                    {appriseNotification?.items?.map(({ task, notification }) => {
                       return (
                         <>
                           <h3 key={task}>{notification.title}</h3>
@@ -442,7 +334,7 @@ const SettingsScheduling = () => {
                 </>
               )}
 
-              {!notifications && <p>No notifications stored</p>}
+              {!appriseNotification && <p>No notifications stored</p>}
             </div>
             <div className="settings-item">
               <p>
