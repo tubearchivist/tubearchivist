@@ -5,15 +5,21 @@ import Button from '../components/Button';
 import PaginationDummy from '../components/PaginationDummy';
 import { useEffect, useState } from 'react';
 import loadSchedule, { ScheduleResponseType } from '../api/loader/loadSchedule';
-import loadAppriseNotification from '../api/loader/loadAppriseNotification';
+import loadAppriseNotification, {
+  AppriseNotificationType,
+} from '../api/loader/loadAppriseNotification';
 import deleteTaskSchedule from '../api/actions/deleteTaskSchedule';
 import createTaskSchedule from '../api/actions/createTaskSchedule';
+import createAppriseNotificationUrl, {
+  AppriseTaskNameType,
+} from '../api/actions/createAppriseNotificationUrl';
+import deleteAppriseNotificationUrl from '../api/actions/deleteAppriseNotificationUrl';
 
 const SettingsScheduling = () => {
   const [refresh, setRefresh] = useState(false);
 
   const [scheduleResponse, setScheduleResponse] = useState<ScheduleResponseType>([]);
-  const [appriseNotification, setAppriseNotification] = useState([]);
+  const [appriseNotification, setAppriseNotification] = useState<AppriseNotificationType>();
 
   const [updateSubscribed, setUpdateSubscribed] = useState<string | undefined>();
   const [downloadPending, setDownloadPending] = useState<string | undefined>();
@@ -22,6 +28,8 @@ const SettingsScheduling = () => {
   const [thumbnailCheck, setThumbnailCheck] = useState<string | undefined>();
   const [zipBackup, setZipBackup] = useState<string | undefined>();
   const [zipBackupDays, setZipBackupDays] = useState<number | undefined>(undefined);
+  const [notificationUrl, setNotificationUrl] = useState<string | undefined>(undefined);
+  const [notificationTask, setNotificationTask] = useState<AppriseTaskNameType | string>('');
 
   useEffect(() => {
     (async () => {
@@ -404,34 +412,28 @@ const SettingsScheduling = () => {
         <div className="settings-group">
           <h2>Add Notification URL</h2>
           <div className="settings-item">
+            {!appriseNotification && <p>No notifications stored</p>}
             {appriseNotification && (
               <>
-                <p>
-                  <Button
-                    label="Show"
-                    type="button"
-                    onclick="textReveal(this)"
-                    id="text-reveal-button"
-                  />{' '}
-                  stored notification links
-                </p>
-                <div id="text-reveal" className="description-text">
-                  {appriseNotification?.items?.map(({ task, notification }) => {
+                <div className="description-text">
+                  {Object.entries(appriseNotification)?.map(([key, { urls, title }]) => {
                     return (
                       <>
-                        <h3 key={task}>{notification.title}</h3>
-                        {notification.urls.map((url: string) => {
+                        <h3 key={key}>{title}</h3>
+                        {urls.map((url: string) => {
                           return (
                             <p>
+                              <span>{url} </span>
                               <Button
                                 type="button"
                                 className="danger-button"
                                 label="Delete"
-                                data-url={url}
-                                data-task={task}
-                                onclick="deleteNotificationUrl(this)"
+                                onClick={async () => {
+                                  await deleteAppriseNotificationUrl(key as AppriseTaskNameType);
+
+                                  setRefresh(true);
+                                }}
                               />
-                              <span> {url}</span>
                             </p>
                           );
                         })}
@@ -441,8 +443,6 @@ const SettingsScheduling = () => {
                 </div>
               </>
             )}
-
-            {!appriseNotification && <p>No notifications stored</p>}
           </div>
           <div className="settings-item">
             <p>
@@ -454,7 +454,13 @@ const SettingsScheduling = () => {
                 library.
               </i>
             </p>
-            <select name="task" id="id_task" defaultValue="">
+            <select
+              defaultValue=""
+              value={notificationTask}
+              onChange={e => {
+                setNotificationTask(e.currentTarget.value);
+              }}
+            >
               <option value="">-- select task --</option>
               <option value="update_subscribed">Rescan your Subscriptions</option>
               <option value="extract_download">Add to download queue</option>
@@ -464,14 +470,25 @@ const SettingsScheduling = () => {
 
             <input
               type="text"
-              name="notification_url"
               placeholder="Apprise notification URL"
-              id="id_notification_url"
+              value={notificationUrl}
+              onChange={e => {
+                setNotificationUrl(e.currentTarget.value);
+              }}
+            />
+            <Button
+              label="Save"
+              onClick={async () => {
+                await createAppriseNotificationUrl(
+                  notificationTask as AppriseTaskNameType,
+                  notificationUrl || '',
+                );
+
+                setRefresh(true);
+              }}
             />
           </div>
         </div>
-
-        <Button type="submit" name="scheduler-settings" label="Update Scheduler Settings" />
 
         <PaginationDummy />
       </div>
