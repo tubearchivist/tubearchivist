@@ -10,6 +10,7 @@ type ScheduleType = {
   last_run_at: string;
   config: {
     days?: number;
+    rotate?: number;
   };
 };
 
