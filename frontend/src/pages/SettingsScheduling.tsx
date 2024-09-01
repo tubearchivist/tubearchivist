@@ -15,12 +15,12 @@ const SettingsScheduling = () => {
   const [scheduleResponse, setScheduleResponse] = useState<ScheduleResponseType>([]);
   const [appriseNotification, setAppriseNotification] = useState([]);
 
-  const [updateSubscribed, setUpdateSubscribed] = useState('');
-  const [downloadPending, setDownloadPending] = useState('');
-  const [checkReindex, setCheckReindex] = useState('');
+  const [updateSubscribed, setUpdateSubscribed] = useState<string | undefined>();
+  const [downloadPending, setDownloadPending] = useState<string | undefined>();
+  const [checkReindex, setCheckReindex] = useState<string | undefined>();
   const [checkReindexDays, setCheckReindexDays] = useState<number | undefined>(undefined);
-  const [thumbnailCheck, setThumbnailCheck] = useState('');
-  const [zipBackup, setZipBackup] = useState('');
+  const [thumbnailCheck, setThumbnailCheck] = useState<string | undefined>();
+  const [zipBackup, setZipBackup] = useState<string | undefined>();
   const [zipBackupDays, setZipBackupDays] = useState<number | undefined>(undefined);
 
   useEffect(() => {
@@ -131,7 +131,7 @@ const SettingsScheduling = () => {
 
             <input
               type="text"
-              value={updateSubscribed}
+              value={updateSubscribed || updateSubscribedSchedule?.schedule}
               onChange={e => {
                 setUpdateSubscribed(e.currentTarget.value);
               }}
@@ -159,12 +159,14 @@ const SettingsScheduling = () => {
                 {!download_pending && 'False'}
                 {downloadPendingSchedule && (
                   <>
-                    {downloadPendingSchedule.schedule}{' '}
+                    {downloadPendingSchedule?.schedule}{' '}
                     <Button
                       label="Delete"
                       className="danger-button"
                       onClick={async () => {
                         await deleteTaskSchedule('download_pending');
+
+                        setRefresh(true);
                       }}
                     />
                   </>
@@ -175,7 +177,7 @@ const SettingsScheduling = () => {
 
             <input
               type="text"
-              value={downloadPending}
+              value={downloadPending || downloadPendingSchedule?.schedule}
               onChange={e => {
                 setDownloadPending(e.currentTarget.value);
               }}
@@ -222,7 +224,7 @@ const SettingsScheduling = () => {
 
             <input
               type="text"
-              value={checkReindex}
+              value={checkReindex || checkReindexSchedule?.schedule}
               onChange={e => {
                 setCheckReindex(e.currentTarget.value);
               }}
@@ -249,7 +251,7 @@ const SettingsScheduling = () => {
 
             <input
               type="number"
-              value={checkReindexDays}
+              value={checkReindexDays || checkReindexSchedule?.config?.days}
               onChange={e => {
                 setCheckReindexDays(Number(e.currentTarget.value));
               }}
@@ -298,7 +300,7 @@ const SettingsScheduling = () => {
 
             <input
               type="text"
-              value={thumbnailCheck}
+              value={thumbnailCheck || thumbnailCheckSchedule?.schedule}
               onChange={e => {
                 setThumbnailCheck(e.currentTarget.value);
               }}
@@ -351,7 +353,7 @@ const SettingsScheduling = () => {
 
             <input
               type="text"
-              value={zipBackup}
+              value={zipBackup || runBackup?.schedule}
               onChange={e => {
                 setZipBackup(e.currentTarget.value);
               }}
@@ -378,7 +380,7 @@ const SettingsScheduling = () => {
 
             <input
               type="number"
-              value={zipBackupDays?.toString()}
+              value={(zipBackupDays || runBackup?.config?.rotate)?.toString()}
               onChange={e => {
                 setZipBackupDays(Number(e.currentTarget.value));
               }}
