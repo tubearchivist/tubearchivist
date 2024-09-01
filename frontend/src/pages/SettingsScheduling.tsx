@@ -9,7 +9,6 @@ import loadAppriseNotification from '../api/loader/loadAppriseNotification';
 import deleteTaskSchedule from '../api/actions/deleteTaskSchedule';
 import createTaskSchedule from '../api/actions/createTaskSchedule';
 
-
 const SettingsScheduling = () => {
   const [refresh, setRefresh] = useState(false);
 
@@ -160,7 +159,7 @@ const SettingsScheduling = () => {
                 {!download_pending && 'False'}
                 {downloadPendingSchedule && (
                   <>
-                    {downloadPendingSchedule.schedule}
+                    {downloadPendingSchedule.schedule}{' '}
                     <Button
                       label="Delete"
                       className="danger-button"
