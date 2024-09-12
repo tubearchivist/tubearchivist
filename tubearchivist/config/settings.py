@@ -87,6 +87,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+global BASE_URL
+if bool(environ.get("BASE_URL")):
+    BASE_URL = environ.get("BASE_URL")
+    if not environ.get("BASE_URL").endswith("/"):
+        BASE_URL += "/"
+else:
+    BASE_URL = ""
+
 if bool(environ.get("TA_LDAP")):
     # pylint: disable=global-at-module-level
     global AUTH_LDAP_SERVER_URI
