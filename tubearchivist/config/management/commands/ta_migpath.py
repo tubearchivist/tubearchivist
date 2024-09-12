@@ -1,4 +1,8 @@
-"""filepath migration from v0.3.6 to v0.3.7"""
+"""
+filepath migration from v0.3.6 to v0.3.7
+not getting called at startup any more, to run manually if needed:
+python manage.py ta_migpath
+"""
 
 import json
 import os

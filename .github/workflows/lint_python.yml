@@ -1,14 +1,42 @@
 name: lint_python
-on: [pull_request, push]
+
+on:
+  push:
+    paths:
+      - '**/*.py'
+  pull_request:
+    paths:
+      - '**/*.py'
+
 jobs:
   lint_python:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc libldap2-dev libsasl2-dev libssl-dev
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-      - run: pip install --upgrade pip wheel
-      - run: pip install bandit black codespell flake8 flake8-bugbear
-                         flake8-comprehensions isort requests
-      - run: ./deploy.sh validate
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tubearchivist/requirements-dev.txt
+
+      - name: Run Linter
+        run: ./deploy.sh validate

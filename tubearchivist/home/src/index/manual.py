@@ -147,7 +147,9 @@ class ImportFolderScanner:
             ManualImport(current_video, self.CONFIG).run()
 
         video_ids = [i["video_id"] for i in self.to_import]
-        CommentList(video_ids, task=self.task).index()
+        comment_list = CommentList(task=self.task)
+        comment_list.add(video_ids=video_ids)
+        comment_list.index()
 
     def _notify(self, idx, current_video):
         """send notification back to task"""

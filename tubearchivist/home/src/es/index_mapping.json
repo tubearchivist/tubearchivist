@@ -75,6 +75,15 @@
                         },
                         "integrate_sponsorblock": {
                             "type": "boolean"
+                        },
+                        "subscriptions_channel_size": {
+                            "type": "long"
+                        },
+                        "subscriptions_live_channel_size": {
+                            "type": "long"
+                        },
+                        "subscriptions_shorts_channel_size": {
+                            "type": "long"
                         }
                     }
                 }
@@ -169,6 +178,15 @@
                                 },
                                 "integrate_sponsorblock": {
                                     "type": "boolean"
+                                },
+                                "subscriptions_channel_size": {
+                                    "type": "long"
+                                },
+                                "subscriptions_live_channel_size": {
+                                    "type": "long"
+                                },
+                                "subscriptions_shorts_channel_size": {
+                                    "type": "long"
                                 }
                             }
                         }

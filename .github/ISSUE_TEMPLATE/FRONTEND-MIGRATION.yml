@@ -1,0 +1,23 @@
+name: Frontend Migration
+description: Tracking our new React based frontend
+title: "[Frontend Migration]: "
+labels: ["react migration"]
+
+body:
+  - type: dropdown
+    id: domain
+    attributes:
+      label: Domain
+      options:
+        - Frontend
+        - Backend
+        - Combined
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: Organizing our React frontend migration
+    validations:
+      required: true

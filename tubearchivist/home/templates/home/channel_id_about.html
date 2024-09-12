@@ -107,16 +107,20 @@
                                 {{ channel_info.channel_overwrites.download_format }}
                             {% else %}
                                 False
-                            {% endif %}</span></p>
+                            {% endif %}</span><br>
+                            Enter "disable" to disable this override.
+                        </p>
                         {{ channel_overwrite_form.download_format }}<br>
                     </div>
                     <div class="overwrite-form-item">
                         <p>Auto delete watched videos after x days: <span class="settings-current">
-                            {% if channel_info.channel_overwrites.autodelete_days %}
+                            {% if channel_info.channel_overwrites.autodelete_days is not None %}
                                 {{ channel_info.channel_overwrites.autodelete_days }}
                             {% else %}
                                 False
-                            {% endif %}</span></p>
+                            {% endif %}</span><br>
+                            Enter a negative number to disable this override.
+                        </p>
                         {{ channel_overwrite_form.autodelete_days }}<br>
                     </div>
                     <div class="overwrite-form-item">
@@ -139,6 +143,39 @@
                             {% endif %}</span></p>
                         {{ channel_overwrite_form.integrate_sponsorblock }}<br>
                     </div>
+                    <h3>Page Size Overrides</h3><br>
+                    <p>Disable standard videos, shorts, or streams for this channel by setting their page size to 0 (zero).</p><br>
+                    <p>Disable page size overwrite for channel by setting to negative value.</p><br>
+                    <div class="overwrite-form-item">
+                        <p>YouTube page size: <span class="settings-current">
+                            {% if channel_info.channel_overwrites.subscriptions_channel_size is not None %}
+                                {{ channel_info.channel_overwrites.subscriptions_channel_size }}
+                            {% else %}
+                                False
+                            {% endif %}</span></p>
+                        <i>Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max recommended 50.</i><br>
+                        {{ channel_overwrite_form.subscriptions_channel_size }}<br>
+                    </div>
+                    <div class="overwrite-form-item">
+                        <p>YouTube Live page size: <span class="settings-current">
+                            {% if channel_info.channel_overwrites.subscriptions_live_channel_size is not None %}
+                                {{ channel_info.channel_overwrites.subscriptions_live_channel_size }}
+                            {% else %}
+                                False
+                            {% endif %}</span></p>
+                        <i>Live Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max recommended 50.</i><br>
+                        {{ channel_overwrite_form.subscriptions_live_channel_size }}<br>
+                    </div>
+                    <div class="overwrite-form-item">
+                        <p>YouTube Shorts page size: <span class="settings-current">
+                            {% if channel_info.channel_overwrites.subscriptions_shorts_channel_size is not None %}
+                                {{ channel_info.channel_overwrites.subscriptions_shorts_channel_size }}
+                            {% else %}
+                                False
+                            {% endif %}</span></p>
+                        <i>Shorts Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max recommended 50.</i><br>
+                        {{ channel_overwrite_form.subscriptions_shorts_channel_size }}<br>
+                    </div><br>
                     <button type="submit">Save Channel Overwrites</button>
                 </form>
             </div>

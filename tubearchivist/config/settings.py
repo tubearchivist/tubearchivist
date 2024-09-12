@@ -33,11 +33,14 @@ SECRET_KEY = PW_HASH.hexdigest()
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(environ.get("DJANGO_DEBUG"))
 
-ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS = ta_host_parser(environ["TA_HOST"])
+ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS = ta_host_parser(
+    environ.get("TA_HOST", "localhost")
+)
 
 # Application definition
 
 INSTALLED_APPS = [
+    "django_celery_beat",
     "home.apps.HomeConfig",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -248,7 +251,11 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = (str(BASE_DIR.joinpath("static")),)
 STATIC_ROOT = str(BASE_DIR.joinpath("staticfiles"))
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -277,4 +284,4 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 
 # TA application settings
 TA_UPSTREAM = "https://github.com/tubearchivist/tubearchivist"
-TA_VERSION = "v0.4.6"
+TA_VERSION = "v0.4.11-unstable"

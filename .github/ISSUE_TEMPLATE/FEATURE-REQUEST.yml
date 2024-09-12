@@ -1,34 +1,12 @@
 name: Feature Request
-description: I have an idea for a great addition to this project
+description: This Project currently doesn't take any new feature requests.
 title: "[Feature Request]: "
 
 body:
-  - type: markdown
-    attributes:
-      value: |
-        Thanks for taking the time to help improve this project! This project is *very* selective with accepting new feature requests. Please read the [how to open an issue](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#how-to-open-an-issue) guide carefully before continuing.
-
   - type: checkboxes
-    id: already
+    id: block
     attributes:
-      label: "I've read the documentation"
+      label: "This project doesn't accept any new feature requests for the forseeable future. There is no shortage of ideas and the next development steps are clear for years to come."
       options:
-        - label: I have read the [how to open an issue](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#how-to-open-an-issue) guide, particularly the [feature request](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#feature-request) section.
+        - label: I understand that this issue will be closed without comment.
           required: true
-
-  - type: textarea
-    id: description
-    attributes:
-      label: Your Feature Request
-      value: "## Is your feature request related to a problem? Please describe.\n\n## Describe the solution you'd like\n\n## Additional context"
-      placeholder: Tell us what you see!
-    validations:
-      required: true
-
-  - type: checkboxes
-    id: help
-    attributes:
-      label: Your help is needed!
-      description: This project is ambitious as it is, please contribute.
-      options:
-        - label: Yes I will work on this in the next few days or weeks.

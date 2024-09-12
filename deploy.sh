@@ -50,6 +50,7 @@ function sync_test {
         --exclude ".gitignore" \
         --exclude "**/cache" \
         --exclude "**/__pycache__/" \
+        --exclude "**/.pytest_cache/" \
         --exclude ".venv" \
         --exclude "db.sqlite3" \
         --exclude ".mypy_cache" \

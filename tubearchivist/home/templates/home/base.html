@@ -60,7 +60,10 @@
                     <a href="{% url 'settings' %}">
                         <img src="{% static 'img/icon-gear.svg' %}" alt="gear-icon" title="Settings">
                     </a>
-                    <a href="{% url 'logout' %}">
+                    <form id="logout-form" action="{% url 'logout' %}" method="post" style="display:none;">
+                        {% csrf_token %}
+                    </form>
+                    <a href="#" onclick="document.getElementById('logout-form').submit();">
                         <img class="alert-hover" src="{% static 'img/icon-exit.svg' %}" alt="exit-icon" title="Logout">
                     </a>
                 </div>

@@ -6,6 +6,7 @@ Functionality:
 
 import enum
 import urllib.parse
+import uuid
 from time import sleep
 
 from api.src.search_processor import SearchProcess, process_aggs
@@ -18,6 +19,7 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views import View
+from home.models import CustomPeriodicTask
 from home.src.download.queue import PendingInteract
 from home.src.download.yt_dlp_base import CookieHandler
 from home.src.es.backup import ElasticBackup
@@ -27,20 +29,26 @@ from home.src.frontend.forms import (
     AddToQueueForm,
     ApplicationSettingsForm,
     ChannelOverwriteForm,
+    CreatePlaylistForm,
     CustomAuthForm,
     MultiSearchForm,
-    SchedulerSettingsForm,
     SubscribeToChannelForm,
     SubscribeToPlaylistForm,
     UserSettingsForm,
+)
+from home.src.frontend.forms_schedule import (
+    NotificationSettingsForm,
+    SchedulerSettingsForm,
 )
 from home.src.index.channel import channel_overwrites
 from home.src.index.generic import Pagination
 from home.src.index.playlist import YoutubePlaylist
 from home.src.index.reindex import ReindexProgress
 from home.src.index.video_constants import VideoTypeEnum
-from home.src.ta.config import AppConfig, ReleaseVersion, ScheduleBuilder
+from home.src.ta.config import AppConfig, ReleaseVersion
+from home.src.ta.config_schedule import ScheduleBuilder
 from home.src.ta.helper import check_stylesheet, time_parser
+from home.src.ta.notify import Notifications, get_all_notifications
 from home.src.ta.settings import EnvironmentSettings
 from home.src.ta.ta_redis import RedisArchivist
 from home.src.ta.users import UserConfig
@@ -423,6 +431,8 @@ class ChannelIdBaseView(ArchivistResultsView):
         path = f"ta_channel/_doc/{channel_id}"
         response, _ = ElasticWrap(path).get()
         channel_info = SearchProcess(response).process()
+        if not channel_info:
+            raise Http404
 
         return channel_info
 
@@ -522,7 +532,7 @@ class ChannelIdView(ChannelIdBaseView):
 
         self.context.update(
             {
-                "title": "Channel: " + channel_name,
+                "title": f"Channel: {channel_name}",
                 "channel_info": channel_info,
             }
         )
@@ -716,6 +726,9 @@ class PlaylistIdView(ArchivistResultsView):
         """handle get request"""
         self.initiate_vars(request)
         playlist_info, channel_info = self._get_info(playlist_id)
+        if not playlist_info:
+            raise Http404
+
         playlist_name = playlist_info["playlist_name"]
         self._update_view_data(playlist_id, playlist_info)
         self.find_results()
@@ -740,12 +753,12 @@ class PlaylistIdView(ArchivistResultsView):
         # playlist details
         es_path = f"ta_playlist/_doc/{playlist_id}"
         playlist_info = self.single_lookup(es_path)
-
-        # channel details
-        channel_id = playlist_info["playlist_channel_id"]
-        es_path = f"ta_channel/_doc/{channel_id}"
-        channel_info = self.single_lookup(es_path)
-
+        channel_info = None
+        if playlist_info["playlist_type"] != "custom":
+            # channel details
+            channel_id = playlist_info["playlist_channel_id"]
+            es_path = f"ta_channel/_doc/{channel_id}"
+            channel_info = self.single_lookup(es_path)
         return playlist_info, channel_info
 
     def _update_view_data(self, playlist_id, playlist_info):
@@ -803,6 +816,7 @@ class PlaylistView(ArchivistResultsView):
             {
                 "title": "Playlists",
                 "subscribe_form": SubscribeToPlaylistForm(),
+                "create_form": CreatePlaylistForm(),
             }
         )
 
@@ -837,12 +851,19 @@ class PlaylistView(ArchivistResultsView):
     @method_decorator(user_passes_test(check_admin), name="dispatch")
     @staticmethod
     def post(request):
-        """handle post from search form"""
-        subscribe_form = SubscribeToPlaylistForm(data=request.POST)
-        if subscribe_form.is_valid():
-            url_str = request.POST.get("subscribe")
-            print(url_str)
-            subscribe_to.delay(url_str, expected_type="playlist")
+        """handle post from subscribe or create form"""
+        if request.POST.get("create") is not None:
+            create_form = CreatePlaylistForm(data=request.POST)
+            if create_form.is_valid():
+                name = request.POST.get("create")
+                playlist_id = f"TA_playlist_{uuid.uuid4()}"
+                YoutubePlaylist(playlist_id).create(name)
+        else:
+            subscribe_form = SubscribeToPlaylistForm(data=request.POST)
+            if subscribe_form.is_valid():
+                url_str = request.POST.get("subscribe")
+                print(url_str)
+                subscribe_to.delay(url_str, expected_type="playlist")
 
         sleep(1)
         return redirect("playlist")
@@ -858,6 +879,8 @@ class VideoView(MinView):
         config_handler = AppConfig()
         response, _ = ElasticWrap(f"ta_video/_doc/{video_id}").get()
         video_data = SearchProcess(response).process()
+        if not video_data:
+            raise Http404
 
         try:
             rating = video_data["stats"]["average_rating"]
@@ -1097,28 +1120,64 @@ class SettingsSchedulingView(MinView):
 
     def get(self, request):
         """read and display current settings"""
-        context = self.get_min_context(request)
-        context.update(
-            {
-                "title": "Scheduling Settings",
-                "config": AppConfig().config,
-                "scheduler_form": SchedulerSettingsForm(),
-            }
-        )
+        context = self.get_context(request, SchedulerSettingsForm())
 
         return render(request, "home/settings_scheduling.html", context)
 
     def post(self, request):
         """handle form post to update settings"""
         scheduler_form = SchedulerSettingsForm(request.POST)
+        notification_form = NotificationSettingsForm(request.POST)
+
+        if notification_form.is_valid():
+            notification_form_post = notification_form.cleaned_data
+            print(notification_form_post)
+            if any(notification_form_post.values()):
+                task_name = notification_form_post.get("task")
+                url = notification_form_post.get("notification_url")
+                Notifications(task_name).add_url(url)
+
         if scheduler_form.is_valid():
             scheduler_form_post = scheduler_form.cleaned_data
             if any(scheduler_form_post.values()):
                 print(scheduler_form_post)
                 ScheduleBuilder().update_schedule_conf(scheduler_form_post)
+        else:
+            self.fail_message()
+            context = self.get_context(request, scheduler_form)
+            return render(request, "home/settings_scheduling.html", context)
 
         sleep(1)
         return redirect("settings_scheduling", permanent=True)
+
+    def get_context(self, request, scheduler_form):
+        """get context"""
+        context = self.get_min_context(request)
+        all_tasks = CustomPeriodicTask.objects.all()
+        context.update(
+            {
+                "title": "Scheduling Settings",
+                "scheduler_form": scheduler_form,
+                "notification_form": NotificationSettingsForm(),
+                "notifications": get_all_notifications(),
+            }
+        )
+        for task in all_tasks:
+            context.update({task.name: task})
+
+        return context
+
+    @staticmethod
+    def fail_message():
+        """send failure message"""
+        mess_dict = {
+            "group": "setting:schedule",
+            "level": "error",
+            "title": "Scheduler update failed.",
+            "messages": ["Invalid schedule input"],
+            "id": "0000",
+        }
+        RedisArchivist().set_message("message:setting", mess_dict, expire=True)
 
 
 @method_decorator(user_passes_test(check_admin), name="dispatch")

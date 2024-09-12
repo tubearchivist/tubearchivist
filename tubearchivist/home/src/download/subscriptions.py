@@ -4,14 +4,15 @@ Functionality:
 - handle playlist subscriptions
 """
 
-from home.src.download import queue  # partial import
 from home.src.download.thumbnails import ThumbManager
 from home.src.download.yt_dlp_base import YtWrap
 from home.src.es.connect import IndexPaginate
 from home.src.index.channel import YoutubeChannel
 from home.src.index.playlist import YoutubePlaylist
+from home.src.index.video import YoutubeVideo
 from home.src.index.video_constants import VideoTypeEnum
 from home.src.ta.config import AppConfig
+from home.src.ta.helper import is_missing
 from home.src.ta.urlparser import Parser
 
 
@@ -38,11 +39,15 @@ class ChannelSubscription:
         return all_channels
 
     def get_last_youtube_videos(
-        self, channel_id, limit=True, query_filter=VideoTypeEnum.UNKNOWN
+        self,
+        channel_id,
+        limit=True,
+        query_filter=None,
+        channel_overwrites=None,
     ):
         """get a list of last videos from channel"""
-        queries = self._build_queries(query_filter, limit)
-
+        query_handler = VideoQueryBuilder(self.config, channel_overwrites)
+        queries = query_handler.build_queries(query_filter)
         last_videos = []
 
         for vid_type_enum, limit_amount in queries:
@@ -50,54 +55,24 @@ class ChannelSubscription:
                 "skip_download": True,
                 "extract_flat": True,
             }
+            vid_type = vid_type_enum.value
+
             if limit:
                 obs["playlistend"] = limit_amount
 
-            vid_type = vid_type_enum.value
-            channel = YtWrap(obs, self.config).extract(
-                f"https://www.youtube.com/channel/{channel_id}/{vid_type}"
-            )
-            if not channel:
+            url = f"https://www.youtube.com/channel/{channel_id}/{vid_type}"
+            channel_query = YtWrap(obs, self.config).extract(url)
+            if not channel_query:
                 continue
+
             last_videos.extend(
-                [(i["id"], i["title"], vid_type) for i in channel["entries"]]
+                [
+                    (i["id"], i["title"], vid_type)
+                    for i in channel_query["entries"]
+                ]
             )
 
         return last_videos
-
-    def _build_queries(self, query_filter, limit):
-        """build query list for vid_type"""
-        limit_map = {
-            "videos": self.config["subscriptions"]["channel_size"],
-            "streams": self.config["subscriptions"]["live_channel_size"],
-            "shorts": self.config["subscriptions"]["shorts_channel_size"],
-        }
-
-        queries = []
-
-        if query_filter and query_filter.value != "unknown":
-            if limit:
-                query_limit = limit_map.get(query_filter.value)
-            else:
-                query_limit = False
-
-            queries.append((query_filter, query_limit))
-
-            return queries
-
-        for query_item, default_limit in limit_map.items():
-            if not default_limit:
-                # is deactivated in config
-                continue
-
-            if limit:
-                query_limit = default_limit
-            else:
-                query_limit = False
-
-            queries.append((VideoTypeEnum(query_item), query_limit))
-
-        return queries
 
     def find_missing(self):
         """add missing videos from subscribed channels to pending"""
@@ -105,35 +80,34 @@ class ChannelSubscription:
         if not all_channels:
             return False
 
-        pending = queue.PendingList()
-        pending.get_download()
-        pending.get_indexed()
-
         missing_videos = []
 
         total = len(all_channels)
         for idx, channel in enumerate(all_channels):
             channel_id = channel["channel_id"]
             print(f"{channel_id}: find missing videos.")
-            last_videos = self.get_last_youtube_videos(channel_id)
+            last_videos = self.get_last_youtube_videos(
+                channel_id,
+                channel_overwrites=channel.get("channel_overwrites"),
+            )
 
             if last_videos:
+                ids_to_add = is_missing([i[0] for i in last_videos])
                 for video_id, _, vid_type in last_videos:
-                    if video_id not in pending.to_skip:
+                    if video_id in ids_to_add:
                         missing_videos.append((video_id, vid_type))
 
             if not self.task:
                 continue
 
-            if self.task:
-                if self.task.is_stopped():
-                    self.task.send_progress(["Received Stop signal."])
-                    break
+            if self.task.is_stopped():
+                self.task.send_progress(["Received Stop signal."])
+                break
 
-                self.task.send_progress(
-                    message_lines=[f"Scanning Channel {idx + 1}/{total}"],
-                    progress=(idx + 1) / total,
-                )
+            self.task.send_progress(
+                message_lines=[f"Scanning Channel {idx + 1}/{total}"],
+                progress=(idx + 1) / total,
+            )
 
         return missing_videos
 
@@ -145,6 +119,92 @@ class ChannelSubscription:
         channel.json_data["channel_subscribed"] = channel_subscribed
         channel.upload_to_es()
         channel.sync_to_videos()
+
+
+class VideoQueryBuilder:
+    """Build queries for yt-dlp."""
+
+    def __init__(self, config: dict, channel_overwrites: dict | None = None):
+        self.config = config
+        self.channel_overwrites = channel_overwrites or {}
+
+    def build_queries(
+        self, video_type: VideoTypeEnum | None, limit: bool = True
+    ) -> list[tuple[VideoTypeEnum, int | None]]:
+        """Build queries for all or specific video type."""
+        query_methods = {
+            VideoTypeEnum.VIDEOS: self.videos_query,
+            VideoTypeEnum.STREAMS: self.streams_query,
+            VideoTypeEnum.SHORTS: self.shorts_query,
+        }
+
+        if video_type:
+            # build query for specific type
+            query_method = query_methods.get(video_type)
+            if query_method:
+                query = query_method(limit)
+                if query[1] != 0:
+                    return [query]
+                return []
+
+        # Build and return queries for all video types
+        queries = []
+        for build_query in query_methods.values():
+            query = build_query(limit)
+            if query[1] != 0:
+                queries.append(query)
+
+        return queries
+
+    def videos_query(self, limit: bool) -> tuple[VideoTypeEnum, int | None]:
+        """Build query for videos."""
+        return self._build_generic_query(
+            video_type=VideoTypeEnum.VIDEOS,
+            overwrite_key="subscriptions_channel_size",
+            config_key="channel_size",
+            limit=limit,
+        )
+
+    def streams_query(self, limit: bool) -> tuple[VideoTypeEnum, int | None]:
+        """Build query for streams."""
+        return self._build_generic_query(
+            video_type=VideoTypeEnum.STREAMS,
+            overwrite_key="subscriptions_live_channel_size",
+            config_key="live_channel_size",
+            limit=limit,
+        )
+
+    def shorts_query(self, limit: bool) -> tuple[VideoTypeEnum, int | None]:
+        """Build query for shorts."""
+        return self._build_generic_query(
+            video_type=VideoTypeEnum.SHORTS,
+            overwrite_key="subscriptions_shorts_channel_size",
+            config_key="shorts_channel_size",
+            limit=limit,
+        )
+
+    def _build_generic_query(
+        self,
+        video_type: VideoTypeEnum,
+        overwrite_key: str,
+        config_key: str,
+        limit: bool,
+    ) -> tuple[VideoTypeEnum, int | None]:
+        """Generic query for video page scraping."""
+        if not limit:
+            return (video_type, None)
+
+        if (
+            overwrite_key in self.channel_overwrites
+            and self.channel_overwrites[overwrite_key] is not None
+        ):
+            overwrite = self.channel_overwrites[overwrite_key]
+            return (video_type, overwrite)
+
+        if overwrite := self.config["subscriptions"].get(config_key):
+            return (video_type, overwrite)
+
+        return (video_type, 0)
 
 
 class PlaylistSubscription:
@@ -174,10 +234,6 @@ class PlaylistSubscription:
 
     def process_url_str(self, new_playlists, subscribed=True):
         """process playlist subscribe form url_str"""
-        data = {"query": {"match_all": {}}, "_source": ["youtube_id"]}
-        all_indexed = IndexPaginate("ta_video", data).get_results()
-        all_youtube_ids = [i["youtube_id"] for i in all_indexed]
-
         for idx, playlist in enumerate(new_playlists):
             playlist_id = playlist["url"]
             if not playlist["type"] == "playlist":
@@ -185,7 +241,6 @@ class PlaylistSubscription:
                 continue
 
             playlist_h = YoutubePlaylist(playlist_id)
-            playlist_h.all_youtube_ids = all_youtube_ids
             playlist_h.build_json()
             if not playlist_h.json_data:
                 message = f"{playlist_h.youtube_id}: failed to extract data"
@@ -223,27 +278,15 @@ class PlaylistSubscription:
         playlist.json_data["playlist_subscribed"] = subscribe_status
         playlist.upload_to_es()
 
-    @staticmethod
-    def get_to_ignore():
-        """get all youtube_ids already downloaded or ignored"""
-        pending = queue.PendingList()
-        pending.get_download()
-        pending.get_indexed()
-
-        return pending.to_skip
-
     def find_missing(self):
         """find videos in subscribed playlists not downloaded yet"""
         all_playlists = [i["playlist_id"] for i in self.get_playlists()]
         if not all_playlists:
             return False
 
-        to_ignore = self.get_to_ignore()
-
         missing_videos = []
         total = len(all_playlists)
         for idx, playlist_id in enumerate(all_playlists):
-            size_limit = self.config["subscriptions"]["channel_size"]
             playlist = YoutubePlaylist(playlist_id)
             is_active = playlist.update_playlist()
             if not is_active:
@@ -251,27 +294,29 @@ class PlaylistSubscription:
                 continue
 
             playlist_entries = playlist.json_data["playlist_entries"]
+            size_limit = self.config["subscriptions"]["channel_size"]
             if size_limit:
                 del playlist_entries[size_limit:]
 
-            all_missing = [i for i in playlist_entries if not i["downloaded"]]
-
-            for video in all_missing:
-                youtube_id = video["youtube_id"]
-                if youtube_id not in to_ignore:
-                    missing_videos.append(youtube_id)
+            to_check = [
+                i["youtube_id"]
+                for i in playlist_entries
+                if i["downloaded"] is False
+            ]
+            needs_downloading = is_missing(to_check)
+            missing_videos.extend(needs_downloading)
 
             if not self.task:
                 continue
 
-            if self.task:
-                self.task.send_progress(
-                    message_lines=[f"Scanning Playlists {idx + 1}/{total}"],
-                    progress=(idx + 1) / total,
-                )
-                if self.task.is_stopped():
-                    self.task.send_progress(["Received Stop signal."])
-                    break
+            if self.task.is_stopped():
+                self.task.send_progress(["Received Stop signal."])
+                break
+
+            self.task.send_progress(
+                message_lines=[f"Scanning Playlists {idx + 1}/{total}"],
+                progress=(idx + 1) / total,
+            )
 
         return missing_videos
 
@@ -359,8 +404,10 @@ class SubscriptionHandler:
 
         if item["type"] == "video":
             # extract channel id from video
-            vid = queue.PendingList().get_youtube_details(item["url"])
-            channel_id = vid["channel_id"]
+            video = YoutubeVideo(item["url"])
+            video.get_from_youtube()
+            video.process_youtube_meta()
+            channel_id = video.channel_id
         elif item["type"] == "channel":
             channel_id = item["url"]
         else:
