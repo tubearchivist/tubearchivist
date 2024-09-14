@@ -27,7 +27,7 @@ const ChannelPlaylist = () => {
 
   const [showSubedOnly, setShowSubedOnly] = useState(userMeConfig.show_subed_only || false);
   const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_playlist || 'grid');
-  const [gridItems, setGridItems] = useState(userMeConfig.grid_items || 3);
+  const [gridItems] = useState(userMeConfig.grid_items || 3);
   const [refreshPlaylists, setRefreshPlaylists] = useState(false);
 
   const [playlistsResponse, setPlaylistsResponse] = useState<PlaylistsResponseType>();
