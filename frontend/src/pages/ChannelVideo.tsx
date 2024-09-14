@@ -24,6 +24,7 @@ import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
 import loadVideoListByFilter, {
   VideoListByFilterResponseType,
+  VideoTypes,
 } from '../api/loader/loadVideoListByPage';
 import loadChannelAggs, { ChannelAggsType } from '../api/loader/loadChannelAggs';
 import humanFileSize from '../functions/humanFileSize';
@@ -36,7 +37,11 @@ type ChannelVideoLoaderType = {
   userConfig: UserMeType;
 };
 
-const ChannelVideo = () => {
+type ChannelVideoProps = {
+  videoType: VideoTypes;
+};
+
+const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const { channelId } = useParams() as ChannelParams;
   const { userConfig } = useLoaderData() as ChannelVideoLoaderType;
   const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
@@ -81,6 +86,7 @@ const ChannelVideo = () => {
           watch: hideWatched ? 'unwatched' : undefined,
           sort: sortBy,
           order: sortOrder,
+          type: videoType,
         });
         const channelAggs = await loadChannelAggs(channelId);
 
