@@ -106,7 +106,7 @@ const Search = () => {
           <div>
             <input
               type="text"
-              name="searchInput"
+              autoFocus
               autoComplete="off"
               value={searchQuery}
               onChange={event => {
