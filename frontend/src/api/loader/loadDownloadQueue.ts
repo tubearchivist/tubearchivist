@@ -2,8 +2,13 @@ import defaultHeaders from '../../configuration/defaultHeaders';
 import getApiUrl from '../../configuration/getApiUrl';
 import getFetchCredentials from '../../configuration/getFetchCredentials';
 import isDevEnvironment from '../../functions/isDevEnvironment';
+import { DownloadResponseType } from '../../pages/Download';
 
-const loadDownloadQueue = async (page: number, channelId: string | null, showIgnored: boolean) => {
+const loadDownloadQueue = async (
+  page: number,
+  channelId: string | null,
+  showIgnored: boolean,
+): Promise<DownloadResponseType> => {
   const apiUrl = getApiUrl();
 
   const searchParams = new URLSearchParams();
