@@ -67,6 +67,9 @@ class Parser:
         if all_paths[0] == "channel":
             return self._validate_expected(all_paths[1], "channel")
 
+        if all_paths[0] == "live":
+            return self._validate_expected(all_paths[1], "video")
+
         # detect channel
         channel_id = self._extract_channel_name(parsed.geturl())
         return {"type": "channel", "url": channel_id}
