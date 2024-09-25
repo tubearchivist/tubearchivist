@@ -25,9 +25,7 @@ import ChannelBase from './pages/ChannelBase';
 import ChannelVideo from './pages/ChannelVideo';
 import ChannelPlaylist from './pages/ChannelPlaylist';
 import ChannelAbout from './pages/ChannelAbout';
-import ChannelStream from './pages/ChannelStream';
 import Download from './pages/Download';
-import ChannelShorts from './pages/ChannelShorts';
 
 const router = createBrowserRouter(
   [
@@ -105,7 +103,7 @@ const router = createBrowserRouter(
             {
               index: true,
               path: Routes.ChannelVideo(':channelId'),
-              element: <ChannelVideo />,
+              element: <ChannelVideo videoType="videos" />,
               loader: async () => {
                 const authResponse = await loadAuth();
                 if (authResponse.status === 403) {
@@ -119,26 +117,30 @@ const router = createBrowserRouter(
             },
             {
               path: Routes.ChannelStream(':channelId'),
-              element: <ChannelStream />,
+              element: <ChannelVideo videoType="streams" />,
               loader: async () => {
                 const authResponse = await loadAuth();
                 if (authResponse.status === 403) {
                   return redirect(Routes.Login);
                 }
 
-                return {};
+                const userConfig = await loadUserMeConfig();
+
+                return { userConfig };
               },
             },
             {
               path: Routes.ChannelShorts(':channelId'),
-              element: <ChannelShorts />,
+              element: <ChannelVideo videoType="shorts" />,
               loader: async () => {
                 const authResponse = await loadAuth();
                 if (authResponse.status === 403) {
                   return redirect(Routes.Login);
                 }
 
-                return {};
+                const userConfig = await loadUserMeConfig();
+
+                return { userConfig };
               },
             },
             {

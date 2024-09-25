@@ -24,7 +24,10 @@ import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
 import loadVideoListByFilter, {
   VideoListByFilterResponseType,
+  VideoTypes,
 } from '../api/loader/loadVideoListByPage';
+import loadChannelAggs, { ChannelAggsType } from '../api/loader/loadChannelAggs';
+import humanFileSize from '../functions/humanFileSize';
 
 type ChannelParams = {
   channelId: string;
@@ -34,7 +37,11 @@ type ChannelVideoLoaderType = {
   userConfig: UserMeType;
 };
 
-const ChannelVideo = () => {
+type ChannelVideoProps = {
+  videoType: VideoTypes;
+};
+
+const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const { channelId } = useParams() as ChannelParams;
   const { userConfig } = useLoaderData() as ChannelVideoLoaderType;
   const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
@@ -52,6 +59,7 @@ const ChannelVideo = () => {
 
   const [channelResponse, setChannelResponse] = useState<ChannelResponseType>();
   const [videoResponse, setVideoReponse] = useState<VideoListByFilterResponseType>();
+  const [videoAggsResponse, setVideoAggsResponse] = useState<ChannelAggsType>();
 
   const channel = channelResponse?.data;
   const videoList = videoResponse?.data;
@@ -78,22 +86,19 @@ const ChannelVideo = () => {
           watch: hideWatched ? 'unwatched' : undefined,
           sort: sortBy,
           order: sortOrder,
+          type: videoType,
         });
+        const channelAggs = await loadChannelAggs(channelId);
 
         setChannelResponse(channelResponse);
         setVideoReponse(videos);
+        setVideoAggsResponse(channelAggs);
         setRefresh(false);
       }
     })();
     // Do not add sort, order, hideWatched this will not work as expected!
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh, currentPage, channelId, pagination?.current_page]);
-
-  const aggs = {
-    total_items: { value: '<debug>' },
-    total_duration: { value_str: '<debug>' },
-    total_size: { value: '<debug>' },
-  };
 
   if (!channel) {
     return (
@@ -122,12 +127,14 @@ const ChannelVideo = () => {
             setRefresh={setRefresh}
           />
           <div className="info-box-item">
-            {aggs && (
+            {videoAggsResponse && (
               <>
                 <p>
-                  {aggs.total_items.value} videos <span className="space-carrot">|</span>{' '}
-                  {aggs.total_duration.value_str} playback <span className="space-carrot">|</span>{' '}
-                  Total size {aggs.total_size.value}
+                  {videoAggsResponse.total_items.value} videos{' '}
+                  <span className="space-carrot">|</span>{' '}
+                  {videoAggsResponse.total_duration.value_str} playback{' '}
+                  <span className="space-carrot">|</span> Total size{' '}
+                  {humanFileSize(videoAggsResponse.total_size.value, true)}
                 </p>
                 <div className="button-box">
                   <Button

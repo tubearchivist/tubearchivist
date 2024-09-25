@@ -12,7 +12,7 @@ export type VideoListByFilterResponseType = {
 };
 
 type WatchTypes = 'watched' | 'unwatched' | 'continue';
-type VideoTypes = 'videos' | 'streams' | 'shorts';
+export type VideoTypes = 'videos' | 'streams' | 'shorts';
 
 type FilterType = {
   page?: number;
