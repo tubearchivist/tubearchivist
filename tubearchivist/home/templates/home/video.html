@@ -29,7 +29,7 @@
         <div class="info-box-item">
             <div class="round-img">
                 <a href="{% url 'channel_id' video.channel.channel_id %}">
-                    <img src="/cache/channels/{{ video.channel.channel_id }}_thumb.jpg" alt="channel-thumb">
+                    <img src="{{ base_url_w_slash }}/cache/channels/{{ video.channel.channel_id }}_thumb.jpg" alt="channel-thumb">
                 </a>
             </div>
             <div>
@@ -69,7 +69,7 @@
                 {% if video.stats.average_rating %}
                     <div class="rating-stars">
                         {% for star in video.stats.average_rating %}
-                            <img src="/static/img/icon-star-{{ star }}.svg" alt="{{ star }}">
+                            <img src="{{ base_url_w_slash }}/static/img/icon-star-{{ star }}.svg" alt="{{ star }}">
                         {% endfor %}
                     </div>
                 {% endif %}
@@ -88,7 +88,7 @@
                     </div>
                   {% endif %}
                 {% endif %}
-                <a download="" href="{{ video.media_url }}"><button id="download-item">Download File</button></a>
+                <a download="" href="{{ base_url_w_slash }}{{ video.media_url }}"><button id="download-item">Download File</button></a>
                 {% if request.user|has_group:"admin" or request.user.is_staff %}
                 <button onclick="deleteConfirm()" id="delete-item">Delete Video</button>
                 <div class="delete-confirm" id="delete-button">
@@ -139,7 +139,7 @@
                     <div class="playlist-nav-item">
                         {% if playlist_item.playlist_previous %}
                             <a href="{% url 'video' playlist_item.playlist_previous.youtube_id %}">
-                                <img src="/cache/{{ playlist_item.playlist_previous.vid_thumb }}" alt="previous thumbnail">
+                                <img src="{{ base_url_w_slash }}/cache/{{ playlist_item.playlist_previous.vid_thumb }}" alt="previous thumbnail">
                             </a>
                             <div class="playlist-desc">
                                 <p>Previous:</p>
@@ -158,7 +158,7 @@
                                 </a>
                             </div>
                             <a href="{% url 'video' playlist_item.playlist_next.youtube_id %}">
-                                <img src="/cache/{{ playlist_item.playlist_next.vid_thumb }}" alt="previous thumbnail">
+                                <img src="{{ base_url_w_slash }}/cache/{{ playlist_item.playlist_next.vid_thumb }}" alt="previous thumbnail">
                             </a>
                         {% endif %}
                     </div>

@@ -28,7 +28,7 @@
         {% if form_error %}
             <p class="danger-zone">Failed to login.</p>
         {% endif %}
-        <form action="/login/" method="POST" name="login">
+        <form action="{{ base_url }}/login/" method="POST" name="login">
             {% csrf_token %}
             {{ form.username }}<br>
             {{ form.password }}<br>

@@ -5,7 +5,7 @@
 {% load auth_extras %}
 <div class="boxed-content">
     <div class="channel-banner">
-        <a href="{% url 'channel_id' channel_info.channel_id %}"><img src="{{ channel_info.channel_banner_url }}" alt="channel_banner"></a>
+        <a href="{% url 'channel_id' channel_info.channel_id %}"><img src="{{ base_url_w_slash }}{{ channel_info.channel_banner_url }}" alt="channel_banner"></a>
     </div>
     <div class="info-box-item child-page-nav">
         <a href="{% url 'channel_id' channel_info.channel_id %}"><h3>Videos</h3></a>
@@ -30,7 +30,7 @@
         <div class="info-box-item">
             <div class="round-img">
                 <a href="{% url 'channel_id' channel_info.channel_id %}">
-                    <img src="{{ channel_info.channel_thumb_url }}" alt="channel-thumb">
+                    <img src="{{ base_url_w_slash }}{{ channel_info.channel_thumb_url }}" alt="channel-thumb">
                 </a>
             </div>
             <div>
