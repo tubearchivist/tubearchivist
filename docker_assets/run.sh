@@ -3,6 +3,17 @@
 
 set -e
 
+# replace environment variables in nginx site configuration
+if [ -n "${BASE_URL}" ]; then
+    if [[ ${BASE_URL:0:1} == "/" ]]; then
+        BASE_URL=${BASE_URL:1}
+    fi
+    if [[ ${BASE_URL: -1} != "/" ]]; then
+        BASE_URL="$BASE_URL/"
+    fi
+fi
+envsubst < /etc/nginx/sites-available/default.template > /etc/nginx/sites-available/default
+
 # django setup
 python manage.py migrate
 

@@ -41,6 +41,8 @@ RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recomm
     atomicparsley \
     curl && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get -y update && apt-get -y install gettext
+
 # install debug tools for testing environment
 RUN if [ "$INSTALL_DEBUG" ] ; then \
         apt-get -y update && apt-get -y install --no-install-recommends \
@@ -52,7 +54,8 @@ RUN if [ "$INSTALL_DEBUG" ] ; then \
 RUN mkdir /cache /youtube /app
 
 # copy config files
-COPY docker_assets/nginx.conf /etc/nginx/sites-available/default
+COPY docker_assets/nginx.conf.template /etc/nginx/sites-available/default.template
+# COPY docker_assets/nginx.conf /etc/nginx/sites-available/default
 RUN sed -i 's/^user www\-data\;$/user root\;/' /etc/nginx/nginx.conf
 
 # copy application into container

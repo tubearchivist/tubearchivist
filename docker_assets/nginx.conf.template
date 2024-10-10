@@ -1,0 +1,33 @@
+server {
+
+    listen 8000;
+    
+    location /${BASE_URL}cache/videos/ {
+        auth_request /${BASE_URL}api/ping/;
+        alias /cache/videos/;
+    }
+    
+    location /${BASE_URL}cache/channels/ {
+        auth_request /${BASE_URL}api/ping/;
+        alias /cache/channels/;
+    }
+    
+    location /${BASE_URL}cache/playlists/ {
+        auth_request /${BASE_URL}api/ping/;
+        alias /cache/playlists/;
+    }
+    
+    location /${BASE_URL}media/ {
+        auth_request /${BASE_URL}api/ping/;
+        alias /youtube/;
+        types {
+            text/vtt vtt;
+        }
+    }
+    
+    location /${BASE_URL} {
+        include uwsgi_params;
+        uwsgi_pass localhost:8080;
+    }
+    
+}
