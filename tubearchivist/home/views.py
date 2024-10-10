@@ -18,6 +18,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
+from django.http import HttpResponse
+from django.template.loader import render_to_string
 from django.views import View
 from home.models import CustomPeriodicTask
 from home.src.download.queue import PendingInteract
@@ -97,6 +99,8 @@ class ArchivistViewConfig(View):
             "show_subed_only": self.user_conf.get_value("show_subed_only"),
             "version": settings.TA_VERSION,
             "ta_update": ReleaseVersion().get_update(),
+            "base_url": settings.BASE_URL,
+            'base_url_w_slash': "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
         }
 
 
@@ -281,6 +285,24 @@ class HomeView(ArchivistResultsView):
             }
             self.data["query"] = query
 
+    def render_script_js(request):
+        context = {
+            'base_url': "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
+            'base_url_w_slash': "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
+        }
+        js_content = render_to_string('script.js.html', context)
+        
+        return HttpResponse(js_content, content_type="application/javascript")
+    
+    def render_progress_js(request):
+        context = {
+            'base_url': "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
+            'base_url_w_slash': "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
+        }
+        js_content = render_to_string('progress.js.html', context)
+        
+        return HttpResponse(js_content, content_type="application/javascript")
+
 
 class LoginView(MinView):
     """resolves to /login/
@@ -296,6 +318,8 @@ class LoginView(MinView):
             {
                 "form": CustomAuthForm(),
                 "form_error": bool(request.GET.get("failed")),
+                "base_url": "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
+                'base_url_w_slash': "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
             }
         )
 
@@ -317,7 +341,7 @@ class LoginView(MinView):
             login(request, user)
             return redirect(next_url)
 
-        return redirect("/login?failed=true")
+        return redirect("/" + settings.BASE_URL + "/login?failed=true")
 
 
 class AboutView(MinView):
@@ -534,6 +558,8 @@ class ChannelIdView(ChannelIdBaseView):
             {
                 "title": f"Channel: {channel_name}",
                 "channel_info": channel_info,
+                "base_url": settings.BASE_URL,
+                'base_url_w_slash': "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
             }
         )
 
@@ -610,6 +636,8 @@ class ChannelIdAboutView(ChannelIdBaseView):
                 "channel_info": channel_info,
                 "channel_overwrite_form": ChannelOverwriteForm,
                 "reindex": reindex.get("state"),
+                "base_url": settings.BASE_URL,
+                'base_url_w_slash': "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
             }
         )
 
@@ -653,6 +681,8 @@ class ChannelIdPlaylistView(ChannelIdBaseView):
             {
                 "title": "Channel: Playlists " + channel_name,
                 "channel_info": channel_info,
+                "base_url": settings.BASE_URL,
+                'base_url_w_slash': "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
             }
         )
 
@@ -687,6 +717,8 @@ class ChannelView(ArchivistResultsView):
             {
                 "title": "Channels",
                 "subscribe_form": SubscribeToChannelForm(),
+                "base_url": settings.BASE_URL,
+                'base_url_w_slash': "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
             }
         )
 
@@ -744,6 +776,8 @@ class PlaylistIdView(ArchivistResultsView):
                 "playlist_name": playlist_name,
                 "channel_info": channel_info,
                 "reindex": reindex.get("state"),
+                "base_url": settings.BASE_URL,
+                'base_url_w_slash': "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
             }
         )
         return render(request, "home/playlist_id.html", self.context)
@@ -817,6 +851,8 @@ class PlaylistView(ArchivistResultsView):
                 "title": "Playlists",
                 "subscribe_form": SubscribeToPlaylistForm(),
                 "create_form": CreatePlaylistForm(),
+                "base_url": settings.BASE_URL,
+                'base_url_w_slash': "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
             }
         )
 
@@ -908,6 +944,8 @@ class VideoView(MinView):
                 "config": config_handler.config,
                 "position": time_parser(request.GET.get("t")),
                 "reindex": reindex.get("state"),
+                "base_url": settings.BASE_URL,
+                'base_url_w_slash': "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
             }
         )
         return render(request, "home/video.html", context)
@@ -996,6 +1034,8 @@ class SettingsUserView(MinView):
                     "page_size"
                 ),
                 "user_form": UserSettingsForm(),
+                "base_url": settings.BASE_URL,
+                'base_url_w_slash': "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
             }
         )
 

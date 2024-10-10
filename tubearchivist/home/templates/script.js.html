@@ -1,3 +1,4 @@
+{% load static %}
 'use strict';
 
 /* globals checkMessages */
@@ -53,7 +54,7 @@ function createWatchStatusIndicator(videoId, videoWatchStatus) {
     seen = 'unseen';
     title = 'Mark as watched';
   }
-  let watchStatusIndicator = `<img src="/static/img/icon-${seen}.svg" alt="${seen}-icon" data-id="${videoId}" data-status="${videoWatchStatus}" onclick="updateVideoWatchStatus(this)" class="watch-button" title="${title}">`;
+  let watchStatusIndicator = `<img src="{% static 'img/icon-${seen}.svg' %}" alt="${seen}-icon" data-id="${videoId}" data-status="${videoWatchStatus}" onclick="updateVideoWatchStatus(this)" class="watch-button" title="${title}">`;
   return watchStatusIndicator;
 }
 
@@ -209,7 +210,7 @@ function showAddToPlaylistMenu(input1) {
 
   //show the form
   form_code =
-    '<div class="video-popup-menu"><img src="/static/img/icon-close.svg" class="video-popup-menu-close-button" title="Close menu" onclick="removeDotMenu(this, \'' +
+    `<div class="video-popup-menu"><img src="{% static 'img/icon-close.svg' %}" class="video-popup-menu-close-button" title="Close menu" onclick="removeDotMenu(this, \'` +
     buttonId +
     '\')"/><h3>Add video to...</h3>';
 
@@ -220,12 +221,12 @@ function showAddToPlaylistMenu(input1) {
       dataId +
       "','" +
       obj.playlist_id +
-      '\')"><img class="p-button" src="/static/img/icon-unseen.svg"/>' +
+      `\')"><img class="p-button" src="{% static 'img/icon-unseen.svg' %}"/>` +
       obj.playlist_name +
       '</p>';
   }
 
-  form_code += '<p><a href="/playlist">Create playlist</a></p></div>';
+  form_code += '<p><a href="{{ base_url_w_slash }}/playlist">Create playlist</a></p></div>';
   input1.parentNode.parentNode.innerHTML += form_code;
 }
 
@@ -236,7 +237,7 @@ function addToCustomPlaylist(input, video_id, playlist_id) {
   apiRequest(apiEndpoint, 'POST', data);
 
   //mark the item added in the ui
-  input.firstChild.src = '/static/img/icon-seen.svg';
+  input.firstChild.src = '{{ base_url_w_slash }}/static/img/icon-seen.svg';
 }
 
 function removeDotMenu(input1, button_id) {
@@ -258,7 +259,7 @@ function showCustomPlaylistMenu(input1, playlist_id, current_page, last_page) {
 
   //show the form
   form_code =
-    '<div class="video-popup-menu"><img src="/static/img/icon-close.svg" class="video-popup-menu-close-button" title="Close menu" onclick="removeDotMenu(this, \'' +
+    `<div class="video-popup-menu"><img src="{% static 'img/icon-close.svg' %}" class="video-popup-menu-close-button" title="Close menu" onclick="removeDotMenu(this, \'` +
     buttonId +
     '\')"/><h3>Move Video</h3>';
 
@@ -271,7 +272,7 @@ function showCustomPlaylistMenu(input1, playlist_id, current_page, last_page) {
     current_page +
     ',' +
     last_page +
-    ')" src="/static/img/icon-arrow-top.svg" title="Move to top"/>';
+    `)" src="{% static 'img/icon-arrow-top.svg' %}" title="Move to top"/>`;
   form_code +=
     '<img class="move-video-button" data-id="' +
     dataId +
@@ -281,7 +282,7 @@ function showCustomPlaylistMenu(input1, playlist_id, current_page, last_page) {
     current_page +
     ',' +
     last_page +
-    ')" src="/static/img/icon-arrow-up.svg" title="Move up"/>';
+    `)" src="{% static 'img/icon-arrow-up.svg' %}" title="Move up"/>`;
   form_code +=
     '<img class="move-video-button" data-id="' +
     dataId +
@@ -291,7 +292,7 @@ function showCustomPlaylistMenu(input1, playlist_id, current_page, last_page) {
     current_page +
     ',' +
     last_page +
-    ')" src="/static/img/icon-arrow-down.svg" title="Move down"/>';
+    `)" src="{% static 'img/icon-arrow-down.svg' %}" title="Move down"/>`;
   form_code +=
     '<img class="move-video-button" data-id="' +
     dataId +
@@ -301,7 +302,7 @@ function showCustomPlaylistMenu(input1, playlist_id, current_page, last_page) {
     current_page +
     ',' +
     last_page +
-    ')" src="/static/img/icon-arrow-bottom.svg" title="Move to bottom"/>';
+    `)" src="{% static 'img/icon-arrow-bottom.svg' %}" title="Move to bottom"/>`;
   form_code +=
     '<img class="move-video-button" data-id="' +
     dataId +
@@ -311,7 +312,7 @@ function showCustomPlaylistMenu(input1, playlist_id, current_page, last_page) {
     current_page +
     ',' +
     last_page +
-    ')" src="/static/img/icon-remove.svg" title="Remove from playlist"/>';
+    `)" src="{% static 'img/icon-remove.svg' %}" title="Remove from playlist"/>`;
 
   form_code += '</div>';
   input1.parentNode.parentNode.innerHTML += form_code;
@@ -573,7 +574,7 @@ function deleteVideo(button) {
   }
 
   setTimeout(function () {
-    let redirect = '/channel/' + to_redirect;
+    let redirect = '{{ base_url }}/channel/' + to_redirect;
     window.location.replace(redirect);
   }, 1000);
 }
@@ -583,7 +584,7 @@ function deleteChannel(button) {
   let apiEndpoint = '/api/channel/' + to_delete + '/';
   apiRequest(apiEndpoint, 'DELETE');
   setTimeout(function () {
-    window.location.replace('/channel/');
+    window.location.replace('{{ base_url }}/channel/');
   }, 1000);
 }
 
@@ -596,7 +597,7 @@ function deletePlaylist(button) {
   }
   apiRequest(apiEndpoint, 'DELETE');
   setTimeout(function () {
-    window.location.replace('/playlist/');
+    window.location.replace('{{ base_url }}/playlist/');
   }, 1000);
 }
 
@@ -658,7 +659,7 @@ function createPlayer(button) {
       let playlistData = getPlaylistData(subbedPlaylists[0]); // Playlist data for first subscribed playlist
       let playlistId = playlistData.playlist_id;
       let playlistName = playlistData.playlist_name;
-      playlist = `<h5><a href="/playlist/${playlistId}/">${playlistName}</a></h5>`;
+      playlist = `<h5><a href="{{ base_url }}/playlist/${playlistId}/">${playlistName}</a></h5>`;
     }
   }
 
@@ -683,14 +684,14 @@ function createPlayer(button) {
     watchStatusIndicator = createWatchStatusIndicator(videoId, 'unwatched');
   }
 
-  let playerStats = `<div class="thumb-icon player-stats"><img src="/static/img/icon-eye.svg" alt="views icon"><span>${videoViews}</span>`;
+  let playerStats = `<div class="thumb-icon player-stats"><img src="{% static 'img/icon-eye.svg' %}" alt="views icon"><span>${videoViews}</span>`;
   if (videoData.data.stats.like_count) {
     let likes = formatNumbers(videoData.data.stats.like_count);
-    playerStats += `<span>|</span><img src="/static/img/icon-thumb.svg" alt="thumbs-up"><span>${likes}</span>`;
+    playerStats += `<span>|</span><img src="{% static 'img/icon-thumb.svg' %}" alt="thumbs-up"><span>${likes}</span>`;
   }
   if (videoData.data.stats.dislike_count && videoData.config.downloads.integrate_ryd) {
     let dislikes = formatNumbers(videoData.data.stats.dislike_count);
-    playerStats += `<span>|</span><img class="dislike" src="/static/img/icon-thumb.svg" alt="thumbs-down"><span>${dislikes}</span>`;
+    playerStats += `<span>|</span><img class="dislike" src="{% static 'img/icon-thumb.svg' %}" alt="thumbs-down"><span>${dislikes}</span>`;
   }
   playerStats += '</div>';
 
@@ -701,15 +702,15 @@ function createPlayer(button) {
         <div class="notifications" id="notifications"></div>
         ${sponsorBlockElements}
         <div class="player-title boxed-content">
-            <img class="close-button" src="/static/img/icon-close.svg" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
+            <img class="close-button" src="{% static 'img/icon-close.svg' %}" alt="close-icon" data="${videoId}" onclick="removePlayer()" title="Close player">
             ${watchStatusIndicator}
             ${castButton}
             ${playerStats}
             <div class="player-channel-playlist">
-                <h3><a href="/channel/${channelId}/">${channelName}</a></h3>
+                <h3><a href="{{ base_url }}/channel/${channelId}/">${channelName}</a></h3>
                 ${playlist}
             </div>
-            <a href="/video/${videoId}/"><h2 id="video-title">${videoName}</h2></a>
+            <a href="{{ base_url }}/video/${videoId}/"><h2 id="video-title">${videoName}</h2></a>
         </div>
     </div>
     `;
@@ -743,10 +744,9 @@ function createVideoTag(videoData, videoProgress, autoplay = false) {
   }
 
   let videoTag = `
-    <video poster="${videoThumbUrl}" onvolumechange="onVolumeChange(this)" onloadstart="this.volume=getPlayerVolume()" ontimeupdate="onVideoProgress()" onpause="onVideoPause()" onended="onVideoEnded()" ${
-    autoplay ? 'autoplay' : ''
-  } controls width="100%" playsinline id="video-item">
-        <source src="${videoUrl}#t=${videoProgress}" type="video/mp4" id="video-source" videoid="${videoId}">
+    <video poster="{{ base_url_w_slash }}${videoThumbUrl}" onvolumechange="onVolumeChange(this)" onloadstart="this.volume=getPlayerVolume()" ontimeupdate="onVideoProgress()" onpause="onVideoPause()" onended="onVideoEnded()" ${autoplay ? 'autoplay' : ''
+    } controls width="100%" playsinline id="video-item">
+        <source src="{{ base_url_w_slash }}${videoUrl}#t=${videoProgress}" type="video/mp4" id="video-source" videoid="${videoId}">
         ${subtitles}
     </video>
     `;
@@ -832,11 +832,10 @@ function onVideoProgress() {
           'notification-' + sponsorBlock.segments[i].UUID
         );
         if (!notificationElement) {
-          notificationsElement.innerHTML += `<h3 id="notification-${
-            sponsorBlock.segments[i].UUID
-          }">Skipped sponsor segment from ${formatTime(
-            sponsorBlock.segments[i].segment[0]
-          )} to ${formatTime(sponsorBlock.segments[i].segment[1])}.</h3>`;
+          notificationsElement.innerHTML += `<h3 id="notification-${sponsorBlock.segments[i].UUID
+            }">Skipped sponsor segment from ${formatTime(
+              sponsorBlock.segments[i].segment[0]
+            )} to ${formatTime(sponsorBlock.segments[i].segment[1])}.</h3>`;
         }
       }
       if (currentTime > sponsorBlock.segments[i].segment[1] + 10) {
@@ -1057,9 +1056,10 @@ function postCookieValidate() {
 
 // Makes api requests when passed an endpoint and method ("GET", "POST", "DELETE")
 function apiRequest(apiEndpoint, method, data) {
+  let baseUrl = "{{ base_url }}";
   const xhttp = new XMLHttpRequest();
   let sessionToken = getCookie('sessionid');
-  xhttp.open(method, apiEndpoint, false);
+  xhttp.open(method, baseUrl.concat(apiEndpoint), false);
   xhttp.setRequestHeader('X-CSRFToken', getCookie('csrftoken')); // Used for video progress POST requests
   xhttp.setRequestHeader('Authorization', 'Token ' + sessionToken);
   xhttp.setRequestHeader('Content-Type', 'application/json');
@@ -1133,7 +1133,7 @@ function searchMulti(query) {
           populateMultiSearchResults(response.results, response.queryType);
         }
       };
-      searchHttpRequest.open('GET', `/api/search/?query=${query}`, true);
+      searchHttpRequest.open('GET', `{{ base_url_w_slash }}/api/search/?query=${query}`, true);
       searchHttpRequest.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
       searchHttpRequest.setRequestHeader('Content-type', 'application/json');
       searchHttpRequest.send();
@@ -1258,10 +1258,10 @@ function createVideo(video, viewStyle) {
     <a href="#player" data-id="${videoId}" onclick="createPlayer(this)">
         <div class="video-thumb-wrap ${viewStyle}">
             <div class="video-thumb">
-                <img src="${video.vid_thumb_url}" alt="video-thumb">
+                <img src="{{ base_url_w_slash }}${video.vid_thumb_url}" alt="video-thumb">
             </div>
             <div class="video-play">
-                <img src="/static/img/icon-play.svg" alt="play-icon">
+                <img src="{% static 'img/icon-play.svg' %}" alt="play-icon">
             </div>
         </div>
     </a>
@@ -1271,8 +1271,8 @@ function createVideo(video, viewStyle) {
             <span>${videoPublished} | ${videoDuration}</span>
         </div>
         <div>
-            <a href="/channel/${channelId}/"><h3>${channelName}</h3></a>
-            <a class="video-more" href="/video/${videoId}/"><h2>${videoTitle}</h2></a>
+            <a href="{{ base_url_w_slash }}/channel/${channelId}/"><h3>${channelName}</h3></a>
+            <a class="video-more" href="{{ base_url_w_slash }}/video/${videoId}/"><h2>${videoTitle}</h2></a>
         </div>
     </div>
     `;
@@ -1297,19 +1297,19 @@ function createChannel(channel, viewStyle) {
   // build markup
   const markup = `
     <div class="channel-banner ${viewStyle}">
-        <a href="/channel/${channelId}/">
-            <img src="/cache/channels/${channelId}_banner.jpg" alt="${channelId}-banner">
+        <a href="{{ base_url_w_slash }}/channel/${channelId}/">
+            <img src="{{ base_url_w_slash }}/cache/channels/${channelId}_banner.jpg" alt="${channelId}-banner">
         </a>
     </div>
     <div class="info-box info-box-2 ${viewStyle}">
         <div class="info-box-item">
             <div class="round-img">
-                <a href="/channel/${channelId}/">
-                    <img src="/cache/channels/${channelId}_thumb.jpg" alt="channel-thumb">
+                <a href="{{ base_url_w_slash }}/channel/${channelId}/">
+                    <img src="{{ base_url_w_slash }}/cache/channels/${channelId}_thumb.jpg" alt="channel-thumb">
                 </a>
             </div>
             <div>
-                <h3><a href="/channel/${channelId}/">${channelName}</a></h3>
+                <h3><a href="{{ base_url_w_slash }}/channel/${channelId}/">${channelName}</a></h3>
                 <p>Subscribers: ${channelSubs}</p>
             </div>
         </div>
@@ -1342,13 +1342,13 @@ function createPlaylist(playlist, viewStyle) {
   }
   const markup = `
     <div class="playlist-thumbnail">
-        <a href="/playlist/${playlistId}/">
-            <img src="/cache/playlists/${playlistId}.jpg" alt="${playlistId}-thumbnail">
+        <a href="{{ base_url_w_slash }}/playlist/${playlistId}/">
+            <img src="{{ base_url_w_slash }}/cache/playlists/${playlistId}.jpg" alt="${playlistId}-thumbnail">
         </a>
     </div>
     <div class="playlist-desc ${viewStyle}">
-        <a href="/channel/${playlistChannelId}/"><h3>${playlistChannel}</h3></a>
-        <a href="/playlist/${playlistId}/"><h2>${playlistName}</h2></a>
+        <a href="{{ base_url_w_slash }}/channel/${playlistChannelId}/"><h3>${playlistChannel}</h3></a>
+        <a href="{{ base_url_w_slash }}/playlist/${playlistId}/"><h2>${playlistName}</h2></a>
         <p>Last refreshed: ${playlistLastRefresh}</p>
         ${button}
     </div>
@@ -1367,17 +1367,17 @@ function createFulltext(fullText) {
     <a href="#player" data-id="${videoId}" data-position="${subtitle_start}" onclick="createPlayer(this)">
         <div class="video-thumb-wrap list">
             <div class="video-thumb">
-                <img src="${fullText.vid_thumb_url}" alt="video-thumb">
+                <img src="{{ base_url_w_slash }}${fullText.vid_thumb_url}" alt="video-thumb">
             </div>
             <div class="video-play">
-                <img src="/static/img/icon-play.svg" alt="play-icon">
+                <img src="{% static 'img/icon-play.svg' %}" alt="play-icon">
             </div>
         </div>
     </a>
     <div class="video-desc list">
         <div>
-          <a href="/channel/${fullText.subtitle_channel_id}/"><h3>${fullText.subtitle_channel}</h3></a>
-          <a class="video-more" href="/video/${videoId}/?t=${subtitle_start}"><h2>${fullText.title}</h2></a>
+          <a href="{{ base_url_w_slash }}/channel/${fullText.subtitle_channel_id}/"><h3>${fullText.subtitle_channel}</h3></a>
+          <a class="video-more" href="{{ base_url_w_slash }}/video/${videoId}/?t=${subtitle_start}"><h2>${fullText.title}</h2></a>
         </div>
         <p>${subtitle_start} - ${subtitle_end}</p>
         <p>${fullText.subtitle_line}</p>
@@ -1481,11 +1481,11 @@ function createCommentBox(comment, isRoot) {
 
   if (comment.comment_likecount > 0) {
     let numberFormatted = formatNumbers(comment.comment_likecount);
-    commentMeta.innerHTML += `${spacer}<span class="thumb-icon"><img src="/static/img/icon-thumb.svg"> ${numberFormatted}</span>`;
+    commentMeta.innerHTML += `${spacer}<span class="thumb-icon"><img src="{% static 'img/icon-thumb.svg' %}"> ${numberFormatted}</span>`;
   }
 
   if (comment.comment_is_favorited) {
-    commentMeta.innerHTML += `${spacer}<span class="comment-like"><img src="/static/img/icon-heart.svg"></span>`;
+    commentMeta.innerHTML += `${spacer}<span class="comment-like"><img src="{% static 'img/icon-heart.svg' %}"></span>`;
   }
 
   commentBox.appendChild(commentMeta);

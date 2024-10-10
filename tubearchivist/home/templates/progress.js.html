@@ -115,7 +115,7 @@ function buildStopIcon(taskId) {
   stopIcon.setAttribute('id', 'stop-icon');
   stopIcon.setAttribute('data', taskId);
   stopIcon.setAttribute('title', 'Stop Task');
-  stopIcon.setAttribute('src', '/static/img/icon-stop.svg');
+  stopIcon.setAttribute('src', '{{ base_url_w_slash}}/static/img/icon-stop.svg');
   stopIcon.setAttribute('alt', 'stop icon');
   stopIcon.setAttribute('onclick', 'stopTask(this)');
   return stopIcon;
@@ -126,7 +126,7 @@ function buildKillIcon(taskId) {
   killIcon.setAttribute('id', 'kill-icon');
   killIcon.setAttribute('data', taskId);
   killIcon.setAttribute('title', 'Kill Task');
-  killIcon.setAttribute('src', '/static/img/icon-close.svg');
+  killIcon.setAttribute('src', '{{ base_url_w_slash}}/static/img/icon-close.svg');
   killIcon.setAttribute('alt', 'kill icon');
   killIcon.setAttribute('onclick', 'killTask(this)');
   return killIcon;
