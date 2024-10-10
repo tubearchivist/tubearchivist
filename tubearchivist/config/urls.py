@@ -18,8 +18,9 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 
+base_url = settings.BASE_URL+ "/" if settings.BASE_URL != "" else ""
 urlpatterns = [
-    path(settings.BASE_URL, include("home.urls")),
-    path(settings.BASE_URL + "api/", include("api.urls")),
-    path(settings.BASE_URL + "admin/", admin.site.urls),
+    path(base_url, include("home.urls")),
+    path(base_url + "api/", include("api.urls")),
+    path(base_url + "admin/", admin.site.urls),
 ]
