@@ -93,8 +93,11 @@ WSGI_APPLICATION = "config.wsgi.application"
 global BASE_URL
 if bool(environ.get("BASE_URL")):
     BASE_URL = environ.get("BASE_URL")
-    if not environ.get("BASE_URL").endswith("/"):
-        BASE_URL += "/"
+    BASE_URL = BASE_URL.strip(" ")
+    if environ.get("BASE_URL").startswith("/"):
+        BASE_URL = BASE_URL[1:]
+    if environ.get("BASE_URL").endswith("/"):
+        BASE_URL = BASE_URL[:-1]
 else:
     BASE_URL = ""
 
@@ -248,7 +251,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = "/static/"
+STATIC_URL = BASE_URL + "/static/"
 STATICFILES_DIRS = (str(BASE_DIR.joinpath("static")),)
 STATIC_ROOT = str(BASE_DIR.joinpath("staticfiles"))
 STORAGES = {
@@ -262,8 +265,8 @@ STORAGES = {
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-LOGIN_URL = "/login/"
-LOGOUT_REDIRECT_URL = "/login/"
+LOGIN_URL = "/" + BASE_URL + "/login/" if BASE_URL != "" else "/login/"
+LOGOUT_REDIRECT_URL = "/" + BASE_URL + "/login/" if BASE_URL != "" else "/login/"
 
 # Cors needed for browser extension
 # background.js makes the request so HTTP_ORIGIN will be from extension
