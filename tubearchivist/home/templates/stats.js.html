@@ -266,7 +266,7 @@ function buildChannelRow(id, name, value) {
   let tableRow = document.createElement('tr');
 
   tableRow.innerHTML = `
-    <td class="agg-channel-name"><a href="/channel/${id}/">${name}</a></td>
+    <td class="agg-channel-name"><a href="{{ base_url_w_slash }}/channel/${id}/">${name}</a></td>
     <td class="agg-channel-right-align">${value}</td>
   `;
 

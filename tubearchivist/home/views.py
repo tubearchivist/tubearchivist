@@ -302,6 +302,15 @@ class HomeView(ArchivistResultsView):
         js_content = render_to_string('progress.js.html', context)
         
         return HttpResponse(js_content, content_type="application/javascript")
+    
+    def render_stats_js(request):
+        context = {
+            'base_url': "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
+            'base_url_w_slash': "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
+        }
+        js_content = render_to_string('stats.js.html', context)
+        
+        return HttpResponse(js_content, content_type="application/javascript")
 
 
 class LoginView(MinView):
