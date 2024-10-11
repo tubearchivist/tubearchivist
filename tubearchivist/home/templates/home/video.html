@@ -52,11 +52,11 @@
                         <img src="{% static 'img/icon-unseen.svg' %}" alt="unseen-icon" data-id="{{ video.youtube_id }}" data-status="unwatched" onclick="updateVideoWatchStatus(this)" class="watch-button" title="Mark as watched">
                     {% endif %}
                 </p>
-                {% if video.active %}
-                    <p>Youtube: <a href="https://www.youtube.com/watch?v={{ video.youtube_id }}" target="_blank">Active</a></p>
-                {% else %}
-                    <p>Youtube: Deactivated</p>
-                {% endif %}
+                <p>YouTube:
+                    <a href="https://www.youtube.com/watch?v={{ video.youtube_id }}" target="_blank">
+                        {% if video.active %}Active{% else %}Deactivated{% endif %}
+                    </a>
+                </p>
             </div>
         </div>
         <div class="info-box-item">

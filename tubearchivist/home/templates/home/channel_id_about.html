@@ -45,11 +45,11 @@
         <div class="info-box-item">
             <div>
                 <p>Last refreshed: {{ channel_info.channel_last_refresh }}</p>
-                {% if channel_info.channel_active %}
-                    <p>Youtube: <a href="https://www.youtube.com/channel/{{ channel_info.channel_id }}" target="_blank">Active</a></p>
-                {% else %}
-                    <p>Youtube: Deactivated</p>
-                {% endif %}
+                <p>YouTube:
+                    <a href="https://www.youtube.com/channel/{{ channel_info.channel_id }}" target="_blank">
+                        {% if channel_info.channel_active %}Active{% else %}Deactivated{% endif %}
+                    </a>
+                </p>
             </div>
         </div>
         <div class="info-box-item">
