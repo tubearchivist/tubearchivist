@@ -129,7 +129,9 @@ class YoutubeChannel(YouTubeItem):
     def _info_json_fallback(self):
         """read channel info.json for additional metadata"""
         info_json = os.path.join(
-            EnvironmentSettings.CACHE_DIR, "import", f"{self.youtube_id}.info.json",
+            EnvironmentSettings.CACHE_DIR,
+            "import",
+            f"{self.youtube_id}.info.json",
         )
         if os.path.exists(info_json):
             print(f"{self.youtube_id}: read info.json file")
@@ -177,17 +179,29 @@ class YoutubeChannel(YouTubeItem):
 
     def delete_es_videos(self):
         """delete all channel documents from elasticsearch"""
-        data = {"query": {"term": {"channel.channel_id": {"value": self.youtube_id}}}}
+        data = {
+            "query": {
+                "term": {"channel.channel_id": {"value": self.youtube_id}}
+            }
+        }
         _, _ = ElasticWrap("ta_video/_delete_by_query").post(data)
 
     def delete_es_comments(self):
         """delete all comments from this channel"""
-        data = {"query": {"term": {"comment_channel_id": {"value": self.youtube_id}}}}
+        data = {
+            "query": {
+                "term": {"comment_channel_id": {"value": self.youtube_id}}
+            }
+        }
         _, _ = ElasticWrap("ta_comment/_delete_by_query").post(data)
 
     def delete_es_subtitles(self):
         """delete all subtitles from this channel"""
-        data = {"query": {"term": {"subtitle_channel_id": {"value": self.youtube_id}}}}
+        data = {
+            "query": {
+                "term": {"subtitle_channel_id": {"value": self.youtube_id}}
+            }
+        }
         _, _ = ElasticWrap("ta_subtitle/_delete_by_query").post(data)
 
     def delete_playlists(self):
@@ -259,7 +273,9 @@ class YoutubeChannel(YouTubeItem):
     def get_channel_videos(self):
         """get all videos from channel"""
         data = {
-            "query": {"term": {"channel.channel_id": {"value": self.youtube_id}}},
+            "query": {
+                "term": {"channel.channel_id": {"value": self.youtube_id}}
+            },
             "_source": ["youtube_id", "vid_type"],
         }
         all_videos = IndexPaginate("ta_video", data).get_results()
@@ -278,7 +294,9 @@ class YoutubeChannel(YouTubeItem):
 
     def get_indexed_playlists(self, active_only=False):
         """get all indexed playlists from channel"""
-        must_list = [{"term": {"playlist_channel_id": {"value": self.youtube_id}}}]
+        must_list = [
+            {"term": {"playlist_channel_id": {"value": self.youtube_id}}}
+        ]
         if active_only:
             must_list.append({"term": {"playlist_active": {"value": True}}})
 

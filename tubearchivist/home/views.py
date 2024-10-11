@@ -84,11 +84,15 @@ class ArchivistViewConfig(View):
         self.user_conf = UserConfig(self.user_id)
 
         self.context = {
-            "stylesheet": check_stylesheet(self.user_conf.get_value("stylesheet")),
+            "stylesheet": check_stylesheet(
+                self.user_conf.get_value("stylesheet")
+            ),
             "cast": EnvironmentSettings.ENABLE_CAST,
             "sort_by": self.user_conf.get_value("sort_by"),
             "sort_order": self.user_conf.get_value("sort_order"),
-            "view_style": self.user_conf.get_value(f"view_style_{self.view_origin}"),
+            "view_style": self.user_conf.get_value(
+                f"view_style_{self.view_origin}"
+            ),
             "grid_items": self.user_conf.get_value("grid_items"),
             "hide_watched": self.user_conf.get_value("hide_watched"),
             "show_ignored_only": self.user_conf.get_value("show_ignored_only"),
@@ -285,7 +289,9 @@ class HomeView(ArchivistResultsView):
 
     def render_script_js(request):
         context = {
-            "base_url": "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
+            "base_url": "/" + settings.BASE_URL
+            if settings.BASE_URL != ""
+            else "",
             "base_url_w_slash": "/" + settings.BASE_URL
             if settings.BASE_URL != ""
             else "",
@@ -296,7 +302,9 @@ class HomeView(ArchivistResultsView):
 
     def render_progress_js(request):
         context = {
-            "base_url": "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
+            "base_url": "/" + settings.BASE_URL
+            if settings.BASE_URL != ""
+            else "",
             "base_url_w_slash": "/" + settings.BASE_URL
             if settings.BASE_URL != ""
             else "",
@@ -307,7 +315,9 @@ class HomeView(ArchivistResultsView):
 
     def render_stats_js(request):
         context = {
-            "base_url": "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
+            "base_url": "/" + settings.BASE_URL
+            if settings.BASE_URL != ""
+            else "",
             "base_url_w_slash": "/" + settings.BASE_URL
             if settings.BASE_URL != ""
             else "",
@@ -331,7 +341,9 @@ class LoginView(MinView):
             {
                 "form": CustomAuthForm(),
                 "form_error": bool(request.GET.get("failed")),
-                "base_url": "/" + settings.BASE_URL if settings.BASE_URL != "" else "",
+                "base_url": "/" + settings.BASE_URL
+                if settings.BASE_URL != ""
+                else "",
                 "base_url_w_slash": "/" + settings.BASE_URL
                 if settings.BASE_URL != ""
                 else "",
@@ -405,7 +417,9 @@ class DownloadView(ArchivistResultsView):
 
         channel_filter = request.GET.get("channel", False)
         if channel_filter:
-            must_list.append({"term": {"channel_id": {"value": channel_filter}}})
+            must_list.append(
+                {"term": {"channel_id": {"value": channel_filter}}}
+            )
 
             channel = PendingInteract(channel_filter).get_channel()
             self.context.update(
@@ -588,7 +602,8 @@ class ChannelIdView(ChannelIdBaseView):
                 vid_type_terms.append(t.value)
             else:
                 print(
-                    "Invalid value passed into video_types on " + f"ChannelIdView: {t}"
+                    "Invalid value passed into video_types on "
+                    + f"ChannelIdView: {t}"
                 )
         self.data["query"] = {
             "bool": {
@@ -748,7 +763,9 @@ class ChannelView(ArchivistResultsView):
         """update view data dict"""
         self.data["sort"] = [{"channel_name.keyword": {"order": "asc"}}]
         if self.context["show_subed_only"]:
-            self.data["query"] = {"term": {"channel_subscribed": {"value": True}}}
+            self.data["query"] = {
+                "term": {"channel_subscribed": {"value": True}}
+            }
 
     @method_decorator(user_passes_test(check_admin), name="dispatch")
     @staticmethod
@@ -817,7 +834,10 @@ class PlaylistIdView(ArchivistResultsView):
 
     def _update_view_data(self, playlist_id, playlist_info):
         """update view specific data dict"""
-        sort = {i["youtube_id"]: i["idx"] for i in playlist_info["playlist_entries"]}
+        sort = {
+            i["youtube_id"]: i["idx"]
+            for i in playlist_info["playlist_entries"]
+        }
         script = (
             "if(params.scores.containsKey(doc['youtube_id'].value)) "
             + "{return params.scores[doc['youtube_id'].value];} "
@@ -826,7 +846,9 @@ class PlaylistIdView(ArchivistResultsView):
         self.data.update(
             {
                 "query": {
-                    "bool": {"must": [{"match": {"playlist.keyword": playlist_id}}]}
+                    "bool": {
+                        "must": [{"match": {"playlist.keyword": playlist_id}}]
+                    }
                 },
                 "sort": [
                     {
@@ -879,7 +901,9 @@ class PlaylistView(ArchivistResultsView):
         """update view specific data dict"""
         self.data["sort"] = [{"playlist_name.keyword": {"order": "asc"}}]
         if self.context["show_subed_only"]:
-            self.data["query"] = {"term": {"playlist_subscribed": {"value": True}}}
+            self.data["query"] = {
+                "term": {"playlist_subscribed": {"value": True}}
+            }
         if self.search_get:
             self.data["query"] = {
                 "bool": {
@@ -1047,7 +1071,9 @@ class SettingsUserView(MinView):
         context.update(
             {
                 "title": "User Settings",
-                "page_size": UserConfig(request.user.id).get_value("page_size"),
+                "page_size": UserConfig(request.user.id).get_value(
+                    "page_size"
+                ),
                 "user_form": UserSettingsForm(),
                 "base_url": settings.BASE_URL,
                 "base_url_w_slash": "/" + settings.BASE_URL
@@ -1065,9 +1091,13 @@ class SettingsUserView(MinView):
         if user_form.is_valid():
             user_form_post = user_form.cleaned_data
             if user_form_post.get("stylesheet"):
-                config_handler.set_value("stylesheet", user_form_post.get("stylesheet"))
+                config_handler.set_value(
+                    "stylesheet", user_form_post.get("stylesheet")
+                )
             if user_form_post.get("page_size"):
-                config_handler.set_value("page_size", user_form_post.get("page_size"))
+                config_handler.set_value(
+                    "page_size", user_form_post.get("page_size")
+                )
 
         sleep(1)
         return redirect("settings_user", permanent=True)

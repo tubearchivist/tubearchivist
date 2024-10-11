@@ -48,7 +48,9 @@ class Command(BaseCommand):
         src = "params['_source']['comment_comments'].length"
         data = {
             "script_fields": {
-                "comments_length": {"script": {"source": src, "lang": "painless"}}
+                "comments_length": {
+                    "script": {"source": src, "lang": "painless"}
+                }
             }
         }
         all_comments = IndexPaginate(
@@ -65,7 +67,9 @@ class Command(BaseCommand):
         """get videos without comment_count"""
         self.stdout.write("get videos")
         data = {
-            "query": {"bool": {"must_not": [{"exists": {"field": "comment_count"}}]}}
+            "query": {
+                "bool": {"must_not": [{"exists": {"field": "comment_count"}}]}
+            }
         }
         all_videos = IndexPaginate("ta_video", data).get_results()
 

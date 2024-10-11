@@ -42,7 +42,12 @@ class WatchState:
         """change watched state of video"""
         path = f"ta_video/_update/{self.youtube_id}"
         data = {
-            "doc": {"player": {"watched": self.is_watched, "watched_date": self.stamp,}}
+            "doc": {
+                "player": {
+                    "watched": self.is_watched,
+                    "watched_date": self.stamp,
+                }
+            }
         }
         response, status_code = ElasticWrap(path).post(data=data)
         if status_code != 200:
@@ -62,7 +67,13 @@ class WatchState:
                 "bool": {
                     "must": [
                         {"term": {term_key: {"value": self.youtube_id}}},
-                        {"term": {"player.watched": {"value": not self.is_watched}}},
+                        {
+                            "term": {
+                                "player.watched": {
+                                    "value": not self.is_watched
+                                }
+                            }
+                        },
                     ],
                 }
             }
@@ -73,8 +84,18 @@ class WatchState:
         data = {
             "description": f"{self.youtube_id}: watched {self.is_watched}",
             "processors": [
-                {"set": {"field": "player.watched", "value": self.is_watched,}},
-                {"set": {"field": "player.watched_date", "value": self.stamp,}},
+                {
+                    "set": {
+                        "field": "player.watched",
+                        "value": self.is_watched,
+                    }
+                },
+                {
+                    "set": {
+                        "field": "player.watched_date",
+                        "value": self.stamp,
+                    }
+                },
             ],
         }
         _, _ = ElasticWrap(self.pipeline).put(data)

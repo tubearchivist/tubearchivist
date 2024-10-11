@@ -229,7 +229,9 @@ class ImportFolderScanner:
     def _get_mkv_thumb_stream(self, media_path):
         """get stream idx of thumbnail for mkv files"""
         streams = self._get_streams(media_path)
-        attachments = [i for i in streams["streams"] if i["codec_type"] == "attachment"]
+        attachments = [
+            i for i in streams["streams"] if i["codec_type"] == "attachment"
+        ]
 
         for idx, stream in enumerate(attachments):
             tags = stream["tags"]
@@ -311,7 +313,8 @@ class ImportFolderScanner:
     def _dump_subtitle(idx, media_path, sub_path):
         """extract subtitle from media file"""
         subprocess.run(
-            ["ffmpeg", "-i", media_path, "-map", f"0:{idx}", sub_path], check=True,
+            ["ffmpeg", "-i", media_path, "-map", f"0:{idx}", sub_path],
+            check=True,
         )
 
     @staticmethod
@@ -367,7 +370,15 @@ class ImportFolderScanner:
 
         new_path = base_path + ".mp4"
         subprocess.run(
-            ["ffmpeg", "-i", current_path, new_path, "-loglevel", "warning", "-stats",],
+            [
+                "ffmpeg",
+                "-i",
+                current_path,
+                new_path,
+                "-loglevel",
+                "warning",
+                "-stats",
+            ],
             check=True,
         )
         current_video["media"] = new_path

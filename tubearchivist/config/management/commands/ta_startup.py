@@ -63,7 +63,9 @@ class Command(BaseCommand):
         self.stdout.write("[1] set new config.json values")
         needs_update = AppConfig().load_new_defaults()
         if needs_update:
-            self.stdout.write(self.style.SUCCESS("    ✓ new config values set"))
+            self.stdout.write(
+                self.style.SUCCESS("    ✓ new config values set")
+            )
         else:
             self.stdout.write(self.style.SUCCESS("    no new config values"))
 
@@ -106,7 +108,9 @@ class Command(BaseCommand):
         has_changed = False
         for key in all_keys:
             if redis_con.del_message(key):
-                self.stdout.write(self.style.SUCCESS(f"    ✓ cleared key {key}"))
+                self.stdout.write(
+                    self.style.SUCCESS(f"    ✓ cleared key {key}")
+                )
                 has_changed = True
 
         if not has_changed:
@@ -175,7 +179,9 @@ class Command(BaseCommand):
         config = AppConfig().config
         current_schedules = config.get("scheduler")
         if not current_schedules:
-            self.stdout.write(self.style.SUCCESS("    no schedules to migrate"))
+            self.stdout.write(
+                self.style.SUCCESS("    no schedules to migrate")
+            )
             return
 
         self._mig_update_subscribed(current_schedules)
@@ -258,13 +264,18 @@ class Command(BaseCommand):
         schedule.save()
 
         task, _ = CustomPeriodicTask.objects.get_or_create(
-            crontab=schedule, name=task_name, description=description, task=task_name,
+            crontab=schedule,
+            name=task_name,
+            description=description,
+            task=task_name,
         )
         if task_config:
             task.task_config = task_config
             task.save()
 
-        self.stdout.write(self.style.SUCCESS(f"    ✓ new task created: '{task}'"))
+        self.stdout.write(
+            self.style.SUCCESS(f"    ✓ new task created: '{task}'")
+        )
 
     def _create_notifications(self, task_name, current_schedules):
         """migrate notifications of task"""
@@ -276,7 +287,9 @@ class Command(BaseCommand):
         if not urls:
             return
 
-        self.stdout.write(self.style.SUCCESS(f"    ✓ migrate notifications: '{urls}'"))
+        self.stdout.write(
+            self.style.SUCCESS(f"    ✓ migrate notifications: '{urls}'")
+        )
         handler = Notifications(task_name)
         for url in urls:
             handler.add_url(url)
@@ -285,7 +298,9 @@ class Command(BaseCommand):
         """add playlist_type for migration from v0.4.6 to v0.4.7"""
         self.stdout.write("[MIGRATION] custom playlist")
         data = {
-            "query": {"bool": {"must_not": [{"exists": {"field": "playlist_type"}}]}},
+            "query": {
+                "bool": {"must_not": [{"exists": {"field": "playlist_type"}}]}
+            },
             "script": {"source": "ctx._source['playlist_type'] = 'regular'"},
         }
         path = "ta_playlist/_update_by_query"
@@ -334,11 +349,15 @@ class Command(BaseCommand):
         needs to be called after _mig_schedule_store
         """
         self.stdout.write("[7] create initial schedules")
-        init_has_run = CustomPeriodicTask.objects.filter(name="version_check").exists()
+        init_has_run = CustomPeriodicTask.objects.filter(
+            name="version_check"
+        ).exists()
 
         if init_has_run:
             self.stdout.write(
-                self.style.SUCCESS("    schedule init already done, skipping...")
+                self.style.SUCCESS(
+                    "    schedule init already done, skipping..."
+                )
             )
             return
 
@@ -350,7 +369,9 @@ class Command(BaseCommand):
         check_reindex.last_run_at = dateformat.make_aware(datetime.now())
         check_reindex.save()
         self.stdout.write(
-            self.style.SUCCESS(f"    ✓ created new default schedule: {check_reindex}")
+            self.style.SUCCESS(
+                f"    ✓ created new default schedule: {check_reindex}"
+            )
         )
 
         thumbnail_check = builder.get_set_task(
@@ -359,7 +380,9 @@ class Command(BaseCommand):
         thumbnail_check.last_run_at = dateformat.make_aware(datetime.now())
         thumbnail_check.save()
         self.stdout.write(
-            self.style.SUCCESS(f"    ✓ created new default schedule: {thumbnail_check}")
+            self.style.SUCCESS(
+                f"    ✓ created new default schedule: {thumbnail_check}"
+            )
         )
         daily_random = f"{randint(0, 59)} {randint(0, 23)} *"
         version_check_task = builder.get_set_task(
@@ -370,7 +393,9 @@ class Command(BaseCommand):
                 f"    ✓ created new default schedule: {version_check_task}"
             )
         )
-        self.stdout.write(self.style.SUCCESS("    ✓ all default schedules created"))
+        self.stdout.write(
+            self.style.SUCCESS("    ✓ all default schedules created")
+        )
 
     def _update_schedule_tz(self) -> None:
         """update timezone for Schedule instances"""
@@ -378,7 +403,9 @@ class Command(BaseCommand):
         to_update = CrontabSchedule.objects.exclude(timezone=tz)
 
         if not to_update.exists():
-            self.stdout.write(self.style.SUCCESS("    all schedules have correct TZ"))
+            self.stdout.write(
+                self.style.SUCCESS("    all schedules have correct TZ")
+            )
             return
 
         updated = to_update.update(timezone=tz)

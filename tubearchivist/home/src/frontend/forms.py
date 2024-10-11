@@ -15,7 +15,11 @@ class CustomAuthForm(AuthenticationForm):
 
     username = forms.CharField(
         widget=TextInput(
-            attrs={"placeholder": "Username", "autofocus": True, "autocomplete": True,}
+            attrs={
+                "placeholder": "Username",
+                "autofocus": True,
+                "autocomplete": True,
+            }
         ),
         label=False,
     )
@@ -105,9 +109,15 @@ class ApplicationSettingsForm(forms.Form):
         ("1", "import cookie"),
     ]
 
-    subscriptions_channel_size = forms.IntegerField(required=False, min_value=1)
-    subscriptions_live_channel_size = forms.IntegerField(required=False, min_value=0)
-    subscriptions_shorts_channel_size = forms.IntegerField(required=False, min_value=0)
+    subscriptions_channel_size = forms.IntegerField(
+        required=False, min_value=1
+    )
+    subscriptions_live_channel_size = forms.IntegerField(
+        required=False, min_value=0
+    )
+    subscriptions_shorts_channel_size = forms.IntegerField(
+        required=False, min_value=0
+    )
     subscriptions_auto_start = forms.ChoiceField(
         widget=forms.Select, choices=AUTOSTART_CHOICES, required=False
     )
@@ -208,7 +218,9 @@ class CreatePlaylistForm(forms.Form):
 
     create = forms.CharField(
         label="Or create custom playlist",
-        widget=forms.Textarea(attrs={"rows": 1, "placeholder": "Input playlist name",}),
+        widget=forms.Textarea(
+            attrs={"rows": 1, "placeholder": "Input playlist name",}
+        ),
     )
 
 
@@ -236,6 +248,12 @@ class ChannelOverwriteForm(forms.Form):
     integrate_sponsorblock = forms.ChoiceField(
         widget=forms.Select, choices=SP_CHOICES, required=False
     )
-    subscriptions_channel_size = forms.IntegerField(label=False, required=False)
-    subscriptions_live_channel_size = forms.IntegerField(label=False, required=False)
-    subscriptions_shorts_channel_size = forms.IntegerField(label=False, required=False)
+    subscriptions_channel_size = forms.IntegerField(
+        label=False, required=False
+    )
+    subscriptions_live_channel_size = forms.IntegerField(
+        label=False, required=False
+    )
+    subscriptions_shorts_channel_size = forms.IntegerField(
+        label=False, required=False
+    )

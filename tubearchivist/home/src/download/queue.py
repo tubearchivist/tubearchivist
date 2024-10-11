@@ -110,7 +110,13 @@ class PendingInteract:
     def update_status(self):
         """update status of pending item"""
         if self.status == "priority":
-            data = {"doc": {"status": "pending", "auto_start": True, "message": None,}}
+            data = {
+                "doc": {
+                    "status": "pending",
+                    "auto_start": True,
+                    "message": None,
+                }
+            }
         else:
             data = {"doc": {"status": self.status}}
 
@@ -337,7 +343,9 @@ class PendingList(PendingIndex):
     def _parse_youtube_details(self, vid, vid_type=VideoTypeEnum.VIDEOS):
         """parse response"""
         vid_id = vid.get("id")
-        published = datetime.strptime(vid["upload_date"], "%Y%m%d").strftime("%Y-%m-%d")
+        published = datetime.strptime(vid["upload_date"], "%Y%m%d").strftime(
+            "%Y-%m-%d"
+        )
 
         # build dict
         youtube_details = {

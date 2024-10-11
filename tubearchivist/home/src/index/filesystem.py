@@ -110,7 +110,9 @@ class Scanner:
         )
         data = {
             "query": {
-                "bool": {"must_not": [{"script": {"script": {"source": bool_must}}}]}
+                "bool": {
+                    "must_not": [{"script": {"script": {"source": bool_must}}}]
+                }
             },
             "script": {"source": to_update},
         }
@@ -119,4 +121,6 @@ class Scanner:
         if updated:
             print(f"updated {updated} bad media_url")
             if self.task:
-                self.task.send_progress([f"Updated {updated} wrong media urls."])
+                self.task.send_progress(
+                    [f"Updated {updated} wrong media urls."]
+                )

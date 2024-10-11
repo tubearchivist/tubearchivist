@@ -192,7 +192,9 @@ class ReindexManual(ReindexBase):
 
             self.process_index(reindex_config, values)
 
-    def process_index(self, index_config: ReindexConfigType, values: list[str]) -> None:
+    def process_index(
+        self, index_config: ReindexConfigType, values: list[str]
+    ) -> None:
         """process values per index"""
         index_name = index_config["index_name"]
         if index_name == "ta_video":
@@ -318,7 +320,9 @@ class Reindex(ReindexBase):
         es_meta = video.json_data.copy()
 
         # get new
-        media_url = os.path.join(EnvironmentSettings.MEDIA_DIR, es_meta["media_url"])
+        media_url = os.path.join(
+            EnvironmentSettings.MEDIA_DIR, es_meta["media_url"]
+        )
         video.build_json(media_path=media_url)
         if not video.youtube_meta:
             video.deactivate()
@@ -379,7 +383,10 @@ class Reindex(ReindexBase):
         """refresh playlist data"""
         playlist = YoutubePlaylist(playlist_id)
         playlist.get_from_es()
-        if not playlist.json_data or playlist.json_data["playlist_type"] == "custom":
+        if (
+            not playlist.json_data
+            or playlist.json_data["playlist_type"] == "custom"
+        ):
             return
 
         is_active = playlist.update_playlist()
@@ -519,7 +526,9 @@ class ChannelFullScan:
     def _get_all_remote(self):
         """get all channel videos"""
         sub = ChannelSubscription()
-        all_remote_videos = sub.get_last_youtube_videos(self.channel_id, limit=False)
+        all_remote_videos = sub.get_last_youtube_videos(
+            self.channel_id, limit=False
+        )
 
         return all_remote_videos
 
@@ -539,7 +548,9 @@ class ChannelFullScan:
         print(f"{self.channel_id}: fixing {len(self.to_update)} videos")
         bulk_list = []
         for video in self.to_update:
-            action = {"update": {"_id": video.get("video_id"), "_index": "ta_video"}}
+            action = {
+                "update": {"_id": video.get("video_id"), "_index": "ta_video"}
+            }
             source = {"doc": {"vid_type": video.get("vid_type")}}
             bulk_list.append(json.dumps(action))
             bulk_list.append(json.dumps(source))

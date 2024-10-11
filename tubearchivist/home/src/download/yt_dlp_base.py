@@ -97,7 +97,9 @@ class CookieHandler:
 
     def import_cookie(self):
         """import cookie from file"""
-        import_path = os.path.join(self.cache_dir, "import", "cookies.google.txt")
+        import_path = os.path.join(
+            self.cache_dir, "import", "cookies.google.txt"
+        )
 
         try:
             with open(import_path, encoding="utf-8") as cookie_file:
@@ -124,7 +126,9 @@ class CookieHandler:
         """revoke cookie"""
         RedisArchivist().del_message("cookie")
         RedisArchivist().del_message("cookie:valid")
-        RedisArchivist().set_message("config", False, path=".downloads.cookie_import")
+        RedisArchivist().set_message(
+            "config", False, path=".downloads.cookie_import"
+        )
         print("cookie: revoked")
 
     def validate(self):
@@ -150,7 +154,9 @@ class CookieHandler:
                 "title": "Cookie validation failed, exiting...",
                 "message": "",
             }
-            RedisArchivist().set_message("message:download", mess_dict, expire=4)
+            RedisArchivist().set_message(
+                "message:download", mess_dict, expire=4
+            )
             print("cookie validation failed, exiting...")
 
         return response

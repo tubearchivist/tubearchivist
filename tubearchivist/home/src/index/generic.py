@@ -65,7 +65,9 @@ class YouTubeItem:
             "ta_playlist": "playlist_active",
         }
         path = f"{self.index_name}/_update/{self.youtube_id}?refresh=true"
-        data = {"script": f"ctx._source.{key_match.get(self.index_name)} = false"}
+        data = {
+            "script": f"ctx._source.{key_match.get(self.index_name)} = false"
+        }
         _, _ = ElasticWrap(path).post(data)
 
     def del_in_es(self):
@@ -107,7 +109,9 @@ class Pagination:
             prev_pages = False
         elif page_get > 1:
             page_from = (page_get - 1) * self.page_size
-            prev_pages = [i for i in range(page_get - 1, page_get - 6, -1) if i > 1]
+            prev_pages = [
+                i for i in range(page_get - 1, page_get - 6, -1) if i > 1
+            ]
             prev_pages.reverse()
         pagination = {
             "page_size": self.page_size,
@@ -133,7 +137,9 @@ class Pagination:
             self.pagination["last_page"] = max_pages
         else:
             self.pagination["last_page"] = False
-        next_pages = [i for i in range(page_get + 1, page_get + 6) if 1 < i < max_pages]
+        next_pages = [
+            i for i in range(page_get + 1, page_get + 6) if 1 < i < max_pages
+        ]
 
         self.pagination["next_pages"] = next_pages
         self.pagination["total_hits"] = total_hits

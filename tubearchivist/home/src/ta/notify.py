@@ -32,7 +32,9 @@ class Notifications:
 
         apobj.notify(body=body, title=title)
 
-    def _build_message(self, task_id: str, task_title: str) -> tuple[str, str | None]:
+    def _build_message(
+        self, task_id: str, task_title: str
+    ) -> tuple[str, str | None]:
         """build message to send notification"""
         task = TaskManager().get_task(task_id)
         status = task.get("status")

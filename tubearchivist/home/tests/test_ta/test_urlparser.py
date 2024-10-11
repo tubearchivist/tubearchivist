@@ -30,7 +30,11 @@ CHANNEL_URL_IN = [
     "https://www.youtube.com/@TomScottGo",
 ]
 CHANNEL_OUT = [
-    {"type": "channel", "url": "UCBa659QWEk1AI4Tg--mrJ2A", "vid_type": "unknown",}
+    {
+        "type": "channel",
+        "url": "UCBa659QWEk1AI4Tg--mrJ2A",
+        "vid_type": "unknown",
+    }
 ]
 CHANNEL_TEST_CASES = [(i, CHANNEL_OUT) for i in CHANNEL_URL_IN]
 
@@ -38,11 +42,23 @@ CHANNEL_TEST_CASES = [(i, CHANNEL_OUT) for i in CHANNEL_URL_IN]
 CHANNEL_VID_TYPES = [
     (
         "https://www.youtube.com/@IBRACORP/videos",
-        [{"type": "channel", "url": "UC7aW7chIafJG6ECYAd3N5uQ", "vid_type": "videos",}],
+        [
+            {
+                "type": "channel",
+                "url": "UC7aW7chIafJG6ECYAd3N5uQ",
+                "vid_type": "videos",
+            }
+        ],
     ),
     (
         "https://www.youtube.com/@IBRACORP/shorts",
-        [{"type": "channel", "url": "UC7aW7chIafJG6ECYAd3N5uQ", "vid_type": "shorts",}],
+        [
+            {
+                "type": "channel",
+                "url": "UC7aW7chIafJG6ECYAd3N5uQ",
+                "vid_type": "shorts",
+            }
+        ],
     ),
     (
         "https://www.youtube.com/@IBRACORP/streams",

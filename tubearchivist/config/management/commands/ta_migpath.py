@@ -34,14 +34,20 @@ class Command(BaseCommand):
         handler = FolderMigration()
         to_migrate = handler.get_to_migrate()
         if not to_migrate:
-            self.stdout.write(self.style.SUCCESS("    no channel migration needed\n"))
+            self.stdout.write(
+                self.style.SUCCESS("    no channel migration needed\n")
+            )
             return
 
         self.stdout.write(self.style.SUCCESS("    migrating channels"))
         total_channels = handler.create_folders(to_migrate)
-        self.stdout.write(self.style.SUCCESS(f"    created {total_channels} channels"))
+        self.stdout.write(
+            self.style.SUCCESS(f"    created {total_channels} channels")
+        )
 
-        self.stdout.write(self.style.SUCCESS(f"    migrating {len(to_migrate)} videos"))
+        self.stdout.write(
+            self.style.SUCCESS(f"    migrating {len(to_migrate)} videos")
+        )
         handler.migrate_videos(to_migrate)
         self.stdout.write(self.style.SUCCESS("    update videos in index"))
         handler.send_bulk()
@@ -68,7 +74,12 @@ class FolderMigration:
         )
         data = {
             "query": {"bool": {"must_not": [{"script": {"script": script}}]}},
-            "_source": ["youtube_id", "media_url", "channel.channel_id", "subtitles",],
+            "_source": [
+                "youtube_id",
+                "media_url",
+                "channel.channel_id",
+                "subtitles",
+            ],
         }
         response = IndexPaginate("ta_video", data).get_results()
 
@@ -97,7 +108,9 @@ class FolderMigration:
                 continue
 
             all_subtitles = self._move_subtitles(video)
-            action = {"update": {"_id": video["youtube_id"], "_index": "ta_video"}}
+            action = {
+                "update": {"_id": video["youtube_id"], "_index": "ta_video"}
+            }
             source = {"doc": {"media_url": new_media_url}}
             if all_subtitles:
                 source["doc"].update({"subtitles": all_subtitles})

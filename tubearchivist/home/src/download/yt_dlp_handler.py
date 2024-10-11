@@ -167,7 +167,9 @@ class VideoDownloader(DownloaderBase):
             format_sort_list = [i.strip() for i in format_sort.split(",")]
             self.obs["format_sort"] = format_sort_list
         if self.config["downloads"]["limit_speed"]:
-            self.obs["ratelimit"] = self.config["downloads"]["limit_speed"] * 1024
+            self.obs["ratelimit"] = (
+                self.config["downloads"]["limit_speed"] * 1024
+            )
 
         throttle = self.config["downloads"]["throttledratelimit"]
         if throttle:
@@ -179,7 +181,11 @@ class VideoDownloader(DownloaderBase):
 
         if self.config["downloads"]["add_metadata"]:
             postprocessors.append(
-                {"key": "FFmpegMetadata", "add_chapters": True, "add_metadata": True,}
+                {
+                    "key": "FFmpegMetadata",
+                    "add_chapters": True,
+                    "add_metadata": True,
+                }
             )
             postprocessors.append(
                 {
@@ -238,7 +244,9 @@ class VideoDownloader(DownloaderBase):
         host_uid = EnvironmentSettings.HOST_UID
         host_gid = EnvironmentSettings.HOST_GID
         # make folder
-        folder = os.path.join(self.MEDIA_DIR, vid_dict["channel"]["channel_id"])
+        folder = os.path.join(
+            self.MEDIA_DIR, vid_dict["channel"]["channel_id"]
+        )
         if not os.path.exists(folder):
             os.makedirs(folder)
             if host_uid and host_gid:
@@ -263,7 +271,10 @@ class VideoDownloader(DownloaderBase):
         path = "ta_download/_update_by_query"
         data = {
             "query": {"term": {"auto_start": {"value": True}}},
-            "script": {"source": "ctx._source.auto_start = false", "lang": "painless",},
+            "script": {
+                "source": "ctx._source.auto_start = false",
+                "lang": "painless",
+            },
         }
         response, _ = ElasticWrap(path).post(data=data)
         updated = response.get("updated")
