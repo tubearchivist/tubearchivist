@@ -196,12 +196,7 @@ if bool(environ.get("TA_LDAP")):
 
 CACHE_DIR = EnvironmentSettings.CACHE_DIR
 DB_PATH = path.join(CACHE_DIR, "db.sqlite3")
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": DB_PATH,
-    }
-}
+DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": DB_PATH,}}
 
 
 # Password validation
@@ -233,9 +228,7 @@ if bool(environ.get("TA_ENABLE_AUTH_PROXY")):
 
     MIDDLEWARE.append("home.src.ta.auth.HttpRemoteUserMiddleware")
 
-    AUTHENTICATION_BACKENDS = (
-        "django.contrib.auth.backends.RemoteUserBackend",
-    )
+    AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.RemoteUserBackend",)
 
 
 # Internationalization

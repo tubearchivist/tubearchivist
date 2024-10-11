@@ -150,9 +150,7 @@ class YoutubePlaylist(YouTubeItem):
             "_source": ["youtube_id"],
         }
         result = IndexPaginate("ta_video", data).get_results()
-        to_remove = [
-            i["youtube_id"] for i in result if i["youtube_id"] not in needed
-        ]
+        to_remove = [i["youtube_id"] for i in result if i["youtube_id"] not in needed]
         s = "ctx._source.playlist.removeAll(Collections.singleton(params.rm))"
         for video_id in to_remove:
             query = {
@@ -232,9 +230,7 @@ class YoutubePlaylist(YouTubeItem):
             + "Collections.singleton(params.playlist)) "
         )
         data = {
-            "query": {
-                "term": {"playlist.keyword": {"value": self.youtube_id}}
-            },
+            "query": {"term": {"playlist.keyword": {"value": self.youtube_id}}},
             "script": {
                 "source": script,
                 "lang": "painless",
@@ -307,9 +303,7 @@ class YoutubePlaylist(YouTubeItem):
 
         if not self.playlist_entries_contains(video_id):
             self.json_data["playlist_entries"].append(video_metadata)
-            self.json_data["playlist_last_refresh"] = int(
-                datetime.now().timestamp()
-            )
+            self.json_data["playlist_last_refresh"] = int(datetime.now().timestamp())
             self.set_playlist_thumbnail()
             self.upload_to_es()
             video = YoutubeVideo(video_id)
@@ -367,9 +361,7 @@ class YoutubePlaylist(YouTubeItem):
             else:
                 video_index = len(playlist)
             playlist.insert(video_index, item)
-        self.json_data["playlist_last_refresh"] = int(
-            datetime.now().timestamp()
-        )
+        self.json_data["playlist_last_refresh"] = int(datetime.now().timestamp())
 
         for i, item in enumerate(playlist):
             item["idx"] = i

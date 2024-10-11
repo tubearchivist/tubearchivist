@@ -94,9 +94,7 @@ class UserConfig:
             raise ValueError("Unable to persist config for null user_id")
 
         if key not in self._DEFAULT_USER_SETTINGS:
-            raise KeyError(
-                f"Unable to persist config for an unknown key '{key}'"
-            )
+            raise KeyError(f"Unable to persist config for an unknown key '{key}'")
 
         valid_values = {
             "stylesheet": self.VALID_STYLESHEETS,

@@ -69,9 +69,7 @@ class YoutubeSubtitle:
             return False
 
         subtitle = subtitle_json3[0]
-        subtitle.update(
-            {"lang": lang, "source": "auto", "media_url": media_url}
-        )
+        subtitle.update({"lang": lang, "source": "auto", "media_url": media_url})
 
         return subtitle
 
@@ -106,9 +104,7 @@ class YoutubeSubtitle:
             return False
 
         subtitle = [i for i in all_formats if i["ext"] == "json3"][0]
-        subtitle.update(
-            {"lang": lang, "source": "user", "media_url": media_url}
-        )
+        subtitle.update({"lang": lang, "source": "user", "media_url": media_url})
 
         return subtitle
 

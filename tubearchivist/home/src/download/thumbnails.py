@@ -72,21 +72,11 @@ class ThumbManagerBase:
 
         app_root = EnvironmentSettings.APP_DIR
         default_map = {
-            "video": os.path.join(
-                app_root, "static/img/default-video-thumb.jpg"
-            ),
-            "playlist": os.path.join(
-                app_root, "static/img/default-playlist-thumb.jpg"
-            ),
-            "icon": os.path.join(
-                app_root, "static/img/default-channel-icon.jpg"
-            ),
-            "banner": os.path.join(
-                app_root, "static/img/default-channel-banner.jpg"
-            ),
-            "tvart": os.path.join(
-                app_root, "static/img/default-channel-art.jpg"
-            ),
+            "video": os.path.join(app_root, "static/img/default-video-thumb.jpg"),
+            "playlist": os.path.join(app_root, "static/img/default-playlist-thumb.jpg"),
+            "icon": os.path.join(app_root, "static/img/default-channel-icon.jpg"),
+            "banner": os.path.join(app_root, "static/img/default-channel-banner.jpg"),
+            "tvart": os.path.join(app_root, "static/img/default-channel-art.jpg"),
         }
 
         img_raw = Image.open(default_map[self.item_type])
@@ -163,9 +153,7 @@ class ThumbManager(ThumbManagerBase):
     def _download_channel_thumb(self, channel_thumb, skip_existing):
         """download channel thumbnail"""
 
-        thumb_path = os.path.join(
-            self.CHANNEL_DIR, f"{self.item_id}_thumb.jpg"
-        )
+        thumb_path = os.path.join(self.CHANNEL_DIR, f"{self.item_id}_thumb.jpg")
         self.item_type = "icon"
 
         if skip_existing and os.path.exists(thumb_path):
@@ -177,9 +165,7 @@ class ThumbManager(ThumbManagerBase):
     def _download_channel_banner(self, channel_banner, skip_existing):
         """download channel banner"""
 
-        banner_path = os.path.join(
-            self.CHANNEL_DIR, self.item_id + "_banner.jpg"
-        )
+        banner_path = os.path.join(self.CHANNEL_DIR, self.item_id + "_banner.jpg")
         self.item_type = "banner"
         if skip_existing and os.path.exists(banner_path):
             return
@@ -312,9 +298,7 @@ class ThumbValidator:
         {
             "data": {
                 "query": {"term": {"channel_active": {"value": True}}},
-                "_source": {
-                    "excludes": ["channel_description", "channel_overwrites"]
-                },
+                "_source": {"excludes": ["channel_description", "channel_overwrites"]},
             },
             "name": "ta_channel",
         },
@@ -404,8 +388,7 @@ class ThumbValidator:
 
         if to_delete:
             message = (
-                "[thumbs][channel] "
-                + f"delete {len(to_delete)} unused channel art"
+                "[thumbs][channel] " + f"delete {len(to_delete)} unused channel art"
             )
             print(message)
             if self.task:
@@ -423,8 +406,7 @@ class ThumbValidator:
 
         if to_delete:
             message = (
-                "[thumbs][playlist] "
-                + f"delete {len(to_delete)} unused playlist art"
+                "[thumbs][playlist] " + f"delete {len(to_delete)} unused playlist art"
             )
             print(message)
             if self.task:
@@ -487,9 +469,7 @@ class EmbedCallback:
         """run embed"""
         for video in self.source:
             video_id = video["_source"]["youtube_id"]
-            media_url = os.path.join(
-                self.MEDIA_DIR, video["_source"]["media_url"]
-            )
+            media_url = os.path.join(self.MEDIA_DIR, video["_source"]["media_url"])
             thumb_path = os.path.join(
                 self.CACHE_DIR, ThumbManager(video_id).vid_thumb_path()
             )

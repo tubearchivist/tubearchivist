@@ -39,11 +39,7 @@ class ChannelSubscription:
         return all_channels
 
     def get_last_youtube_videos(
-        self,
-        channel_id,
-        limit=True,
-        query_filter=None,
-        channel_overwrites=None,
+        self, channel_id, limit=True, query_filter=None, channel_overwrites=None,
     ):
         """get a list of last videos from channel"""
         query_handler = VideoQueryBuilder(self.config, channel_overwrites)
@@ -66,10 +62,7 @@ class ChannelSubscription:
                 continue
 
             last_videos.extend(
-                [
-                    (i["id"], i["title"], vid_type)
-                    for i in channel_query["entries"]
-                ]
+                [(i["id"], i["title"], vid_type) for i in channel_query["entries"]]
             )
 
         return last_videos
@@ -87,8 +80,7 @@ class ChannelSubscription:
             channel_id = channel["channel_id"]
             print(f"{channel_id}: find missing videos.")
             last_videos = self.get_last_youtube_videos(
-                channel_id,
-                channel_overwrites=channel.get("channel_overwrites"),
+                channel_id, channel_overwrites=channel.get("channel_overwrites"),
             )
 
             if last_videos:
@@ -258,9 +250,7 @@ class PlaylistSubscription:
 
             if self.task:
                 self.task.send_progress(
-                    message_lines=[
-                        f"Processing {idx + 1} of {len(new_playlists)}"
-                    ],
+                    message_lines=[f"Processing {idx + 1} of {len(new_playlists)}"],
                     progress=(idx + 1) / len(new_playlists),
                 )
 
@@ -299,9 +289,7 @@ class PlaylistSubscription:
                 del playlist_entries[size_limit:]
 
             to_check = [
-                i["youtube_id"]
-                for i in playlist_entries
-                if i["downloaded"] is False
+                i["youtube_id"] for i in playlist_entries if i["downloaded"] is False
             ]
             needs_downloading = is_missing(to_check)
             missing_videos.extend(needs_downloading)
@@ -362,11 +350,7 @@ class SubscriptionScanner:
 
         for i in missing:
             self.missing_videos.append(
-                {
-                    "type": "video",
-                    "vid_type": VideoTypeEnum.VIDEOS.value,
-                    "url": i,
-                }
+                {"type": "video", "vid_type": VideoTypeEnum.VIDEOS.value, "url": i,}
             )
 
 
@@ -414,17 +398,13 @@ class SubscriptionHandler:
             raise ValueError("failed to subscribe to: " + item["url"])
 
         if expected_type and expected_type != "channel":
-            raise TypeError(
-                f"expected {expected_type} url but got {item.get('type')}"
-            )
+            raise TypeError(f"expected {expected_type} url but got {item.get('type')}")
 
         self._subscribe(channel_id)
 
     def _subscribe(self, channel_id):
         """subscribe to channel"""
-        ChannelSubscription().change_subscribe(
-            channel_id, channel_subscribed=True
-        )
+        ChannelSubscription().change_subscribe(channel_id, channel_subscribed=True)
 
     def _notify(self, idx, item, total):
         """send notification message to redis"""

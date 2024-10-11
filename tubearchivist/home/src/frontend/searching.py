@@ -91,29 +91,11 @@ class SearchParser:
     def _get_map():
         """return map to build on"""
         return {
-            "simple": {
-                "index": "ta_video,ta_channel,ta_playlist",
-            },
-            "video": {
-                "index": "ta_video",
-                "channel": [],
-                "active": [],
-            },
-            "channel": {
-                "index": "ta_channel",
-                "active": [],
-                "subscribed": [],
-            },
-            "playlist": {
-                "index": "ta_playlist",
-                "active": [],
-                "subscribed": [],
-            },
-            "full": {
-                "index": "ta_subtitle",
-                "lang": [],
-                "source": [],
-            },
+            "simple": {"index": "ta_video,ta_channel,ta_playlist",},
+            "video": {"index": "ta_video", "channel": [], "active": [],},
+            "channel": {"index": "ta_channel", "active": [], "subscribed": [],},
+            "playlist": {"index": "ta_playlist", "active": [], "subscribed": [],},
+            "full": {"index": "ta_subtitle", "lang": [], "source": [],},
         }
 
     def _run_words(self):
@@ -303,9 +285,7 @@ class QueryBuilder:
             must_list.append({"term": {"channel_active": {"value": active}}})
 
         if (subscribed := self.query_map.get("subscribed")) is not None:
-            must_list.append(
-                {"term": {"channel_subscribed": {"value": subscribed}}}
-            )
+            must_list.append({"term": {"channel_subscribed": {"value": subscribed}}})
 
         return must_list
 
@@ -335,9 +315,7 @@ class QueryBuilder:
             must_list.append({"term": {"playlist_active": {"value": active}}})
 
         if (subscribed := self.query_map.get("subscribed")) is not None:
-            must_list.append(
-                {"term": {"playlist_subscribed": {"value": subscribed}}}
-            )
+            must_list.append({"term": {"playlist_subscribed": {"value": subscribed}}})
 
         return must_list
 
@@ -361,9 +339,7 @@ class QueryBuilder:
             must_list.append({"term": {"subtitle_lang": {"value": lang[0]}}})
 
         if (source := self.query_map.get("source")) is not None:
-            must_list.append(
-                {"term": {"subtitle_source": {"value": source[0]}}}
-            )
+            must_list.append({"term": {"subtitle_source": {"value": source[0]}}})
 
         query = {
             "size": 30,

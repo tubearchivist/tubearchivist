@@ -30,10 +30,7 @@ class ElasticWrap:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def get(
-        self,
-        data: bool | dict = False,
-        timeout: int = 10,
-        print_error: bool = True,
+        self, data: bool | dict = False, timeout: int = 10, print_error: bool = True,
     ) -> tuple[dict, int]:
         """get data from es"""
 
@@ -55,19 +52,14 @@ class ElasticWrap:
 
         return response.json(), response.status_code
 
-    def post(
-        self, data: bool | dict = False, ndjson: bool = False
-    ) -> tuple[dict, int]:
+    def post(self, data: bool | dict = False, ndjson: bool = False) -> tuple[dict, int]:
         """post data to es"""
 
         kwargs: dict[str, Any] = {"auth": self.auth}
 
         if ndjson and data:
             kwargs.update(
-                {
-                    "headers": {"Content-type": "application/x-ndjson"},
-                    "data": data,
-                }
+                {"headers": {"Content-type": "application/x-ndjson"}, "data": data,}
             )
         elif data:
             kwargs.update(
@@ -88,9 +80,7 @@ class ElasticWrap:
         return response.json(), response.status_code
 
     def put(
-        self,
-        data: bool | dict = False,
-        refresh: bool = False,
+        self, data: bool | dict = False, refresh: bool = False,
     ) -> tuple[dict, Any]:
         """put data to es"""
 
@@ -115,9 +105,7 @@ class ElasticWrap:
         return response.json(), response.status_code
 
     def delete(
-        self,
-        data: bool | dict = False,
-        refresh: bool = False,
+        self, data: bool | dict = False, refresh: bool = False,
     ) -> tuple[dict, Any]:
         """delete document from es"""
 

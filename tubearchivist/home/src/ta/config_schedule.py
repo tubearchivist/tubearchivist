@@ -59,9 +59,7 @@ class ScheduleBuilder:
         except CustomPeriodicTask.DoesNotExist:
             description = TASK_CONFIG[task_name].get("title")
             task = CustomPeriodicTask(
-                name=task_name,
-                task=task_name,
-                description=description,
+                name=task_name, task=task_name, description=description,
             )
 
         if schedule:

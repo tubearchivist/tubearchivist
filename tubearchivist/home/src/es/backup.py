@@ -113,9 +113,7 @@ class ElasticBackup:
         """build all available backup files for view"""
         all_backup_files = ignore_filelist(os.listdir(self.BACKUP_DIR))
         all_available_backups = [
-            i
-            for i in all_backup_files
-            if i.startswith("ta_") and i.endswith(".zip")
+            i for i in all_backup_files if i.startswith("ta_") and i.endswith(".zip")
         ]
         all_available_backups.sort(reverse=True)
 

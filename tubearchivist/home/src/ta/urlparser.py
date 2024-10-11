@@ -75,9 +75,7 @@ class Parser:
         """raise value error if not matching"""
         matched = self._find_valid_id(youtube_id)
         if matched["type"] != expected_type:
-            raise ValueError(
-                f"{youtube_id} not of expected type {expected_type}"
-            )
+            raise ValueError(f"{youtube_id} not of expected type {expected_type}")
 
         return {"type": expected_type, "url": youtube_id}
 

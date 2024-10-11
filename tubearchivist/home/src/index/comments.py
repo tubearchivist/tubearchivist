@@ -130,9 +130,7 @@ class Comments:
             "comment_author": comment["author"],
             "comment_author_id": comment["author_id"],
             "comment_author_thumbnail": comment["author_thumbnail"],
-            "comment_author_is_uploader": comment.get(
-                "author_is_uploader", False
-            ),
+            "comment_author_is_uploader": comment.get("author_is_uploader", False),
             "comment_parent": comment["parent"],
         }
 

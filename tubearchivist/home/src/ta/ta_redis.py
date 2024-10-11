@@ -77,9 +77,7 @@ class RedisArchivist(RedisBase):
 
     def list_keys(self, query: str) -> list:
         """return all key matches"""
-        reply = self.conn.execute_command(
-            "KEYS", self.NAME_SPACE + query + "*"
-        )
+        reply = self.conn.execute_command("KEYS", self.NAME_SPACE + query + "*")
         if not reply:
             return []
 
@@ -206,9 +204,7 @@ class TaskRedis(RedisBase):
 
         return json.loads(result)
 
-    def set_key(
-        self, task_id: str, message: dict, expire: bool | int = False
-    ) -> None:
+    def set_key(self, task_id: str, message: dict, expire: bool | int = False) -> None:
         """set value for lock, initial or update"""
         key: str = f"{self.BASE}{task_id}"
         self.conn.execute_command("SET", key, json.dumps(message))

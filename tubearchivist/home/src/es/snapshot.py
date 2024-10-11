@@ -120,11 +120,7 @@ class ElasticSnapshot:
                 "ignore_unavailable": True,
                 "include_global_state": True,
             },
-            "retention": {
-                "expire_after": "30d",
-                "min_count": 5,
-                "max_count": 50,
-            },
+            "retention": {"expire_after": "30d", "min_count": 5, "max_count": 50,},
         }
 
     def _needs_startup_snapshot(self):

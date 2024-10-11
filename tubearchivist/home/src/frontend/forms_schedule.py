@@ -61,17 +61,11 @@ def validate_cron(cron_expression):
 class SchedulerSettingsForm(forms.Form):
     """handle scheduler settings"""
 
-    update_subscribed = forms.CharField(
-        required=False, validators=[validate_cron]
-    )
-    download_pending = forms.CharField(
-        required=False, validators=[validate_cron]
-    )
+    update_subscribed = forms.CharField(required=False, validators=[validate_cron])
+    download_pending = forms.CharField(required=False, validators=[validate_cron])
     check_reindex = forms.CharField(required=False, validators=[validate_cron])
     check_reindex_days = forms.IntegerField(required=False)
-    thumbnail_check = forms.CharField(
-        required=False, validators=[validate_cron]
-    )
+    thumbnail_check = forms.CharField(required=False, validators=[validate_cron])
     run_backup = forms.CharField(required=False, validators=[validate_cron])
     run_backup_rotate = forms.IntegerField(required=False)
 
@@ -92,10 +86,7 @@ class NotificationSettingsForm(forms.Form):
 
     PLACEHOLDER = "Apprise notification URL"
 
-    task = forms.ChoiceField(
-        widget=forms.Select, choices=TASK_CHOICES, required=False
-    )
+    task = forms.ChoiceField(widget=forms.Select, choices=TASK_CHOICES, required=False)
     notification_url = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={"placeholder": PLACEHOLDER}),
+        required=False, widget=forms.TextInput(attrs={"placeholder": PLACEHOLDER}),
     )

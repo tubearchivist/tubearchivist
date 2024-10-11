@@ -263,10 +263,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         vid_path = media_path or self.build_dl_cache_path()
         media = MediaStreamExtractor(vid_path)
         self.json_data.update(
-            {
-                "streams": media.extract_metadata(),
-                "media_size": media.get_file_size(),
-            }
+            {"streams": media.extract_metadata(), "media_size": media.get_file_size(),}
         )
 
     def add_file_path(self):

@@ -254,9 +254,7 @@ def is_missing(
 def get_channel_overwrites() -> dict[str, dict[str, Any]]:
     """get overwrites indexed my channel_id"""
     data = {
-        "query": {
-            "bool": {"must": [{"exists": {"field": "channel_overwrites"}}]}
-        },
+        "query": {"bool": {"must": [{"exists": {"field": "channel_overwrites"}}]}},
         "_source": ["channel_id", "channel_overwrites"],
     }
     result = IndexPaginate("ta_channel", data).get_results()

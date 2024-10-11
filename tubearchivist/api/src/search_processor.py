@@ -54,10 +54,7 @@ class SearchProcess:
 
         if isinstance(processed, dict):
             processed.update(
-                {
-                    "_index": index,
-                    "_score": round(result.get("_score") or 0, 2),
-                }
+                {"_index": index, "_score": round(result.get("_score") or 0, 2),}
             )
 
         return processed
@@ -109,9 +106,7 @@ class SearchProcess:
     def _process_playlist(playlist_dict):
         """run on single playlist dict"""
         playlist_id = playlist_dict["playlist_id"]
-        playlist_last_refresh = date_parser(
-            playlist_dict["playlist_last_refresh"]
-        )
+        playlist_last_refresh = date_parser(playlist_dict["playlist_last_refresh"])
         playlist_dict.update(
             {
                 "playlist_thumbnail": f"/cache/playlists/{playlist_id}.jpg",
@@ -171,6 +166,4 @@ def process_aggs(response):
         aggs = response["aggregations"]
         if "total_duration" in aggs:
             duration_sec = int(aggs["total_duration"]["value"])
-            aggs["total_duration"].update(
-                {"value_str": get_duration_str(duration_sec)}
-            )
+            aggs["total_duration"].update({"value_str": get_duration_str(duration_sec)})

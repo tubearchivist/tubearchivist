@@ -79,9 +79,7 @@ class Command(BaseCommand):
         for i in range(total):
             self.stdout.write(f"    ... waiting for ES [{i}/{total}]")
             try:
-                _, status_code = ElasticWrap("/").get(
-                    timeout=1, print_error=False
-                )
+                _, status_code = ElasticWrap("/").get(timeout=1, print_error=False)
             except (
                 requests.exceptions.ConnectionError,
                 requests.exceptions.Timeout,
@@ -92,14 +90,10 @@ class Command(BaseCommand):
             if status_code and status_code == 200:
                 path = "_cluster/health?wait_for_status=yellow&timeout=60s"
                 _, _ = ElasticWrap(path).get(timeout=60)
-                self.stdout.write(
-                    self.style.SUCCESS("    ✓ ES connection established")
-                )
+                self.stdout.write(self.style.SUCCESS("    ✓ ES connection established"))
                 return
 
-        response, status_code = ElasticWrap("/").get(
-            timeout=1, print_error=False
-        )
+        response, status_code = ElasticWrap("/").get(timeout=1, print_error=False)
 
         message = "    🗙 ES connection failed"
         self.stdout.write(self.style.ERROR(f"{message}"))
@@ -116,9 +110,7 @@ class Command(BaseCommand):
         major = int(version.split(".")[0])
 
         if self.MIN_MAJOR <= major <= self.MAX_MAJOR:
-            self.stdout.write(
-                self.style.SUCCESS("    ✓ ES version check passed")
-            )
+            self.stdout.write(self.style.SUCCESS("    ✓ ES version check passed"))
             return
 
         message = (
@@ -147,9 +139,7 @@ class Command(BaseCommand):
                 continue
 
             if node["settings"]["path"].get("repo"):
-                self.stdout.write(
-                    self.style.SUCCESS("    ✓ path.repo env var is set")
-                )
+                self.stdout.write(self.style.SUCCESS("    ✓ path.repo env var is set"))
                 return
 
             message = (
