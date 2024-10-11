@@ -20,10 +20,7 @@ class HomeAdmin(BaseUserAdmin):
         ("Permissions", {"fields": ("user_permissions",)}),
     )
     add_fieldsets = (
-        (
-            None,
-            {"fields": ("is_staff", "is_superuser", "password1", "password2")},
-        ),
+        (None, {"fields": ("is_staff", "is_superuser", "password1", "password2")},),
         ("Personal info", {"fields": ("name",)}),
         ("Groups", {"fields": ("groups",)}),
         ("Permissions", {"fields": ("user_permissions",)}),

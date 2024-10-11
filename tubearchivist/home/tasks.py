@@ -65,10 +65,7 @@ class BaseTask(Task):
         """send progress message"""
         message, key = self._build_message()
         message.update(
-            {
-                "messages": message_lines,
-                "progress": progress,
-            }
+            {"messages": message_lines, "progress": progress,}
         )
         if title:
             message["title"] = title
@@ -160,9 +157,7 @@ def extrac_dl(self, youtube_ids, auto_start=False, status="pending"):
 
     pending_handler = PendingList(youtube_ids=to_add, task=self)
     pending_handler.parse_url_list()
-    videos_added = pending_handler.add_to_pending(
-        status=status, auto_start=auto_start
-    )
+    videos_added = pending_handler.add_to_pending(status=status, auto_start=auto_start)
 
     if auto_start:
         download_pending.delay(auto_only=True)
