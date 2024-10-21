@@ -213,6 +213,8 @@ Second best way to support the development is to provide for caffeinated beverag
 
 ## Notable mentions
 This is a selection of places where this project has been featured on reddit, in the news, blogs or any other online media, newest on top.
+* **xda-developers.com**: 5 obscure self-hosted services worth checking out - Tube Archivist - To save your essential YouTube videos, [2024-10-13][[link](https://www.xda-developers.com/obscure-self-hosted-services/)]
+* **selfhosted.show**: why we're trying Tube Archivist, [2024-06-14][[link](https://selfhosted.show/125)]
 * **ycombinator**: Tube Archivist on Hackernews front page, [2023-07-16][[link](https://news.ycombinator.com/item?id=36744395)]
 * **linux-community.de**: Tube Archivist bringt Ordnung in die Youtube-Sammlung, [German][2023-05-01][[link](https://www.linux-community.de/ausgaben/linuxuser/2023/05/tube-archivist-bringt-ordnung-in-die-youtube-sammlung/)]
 * **noted.lol**: Dev Debrief, An Interview With the Developer of Tube Archivist, [2023-03-30] [[link](https://noted.lol/dev-debrief-tube-archivist/)]
@@ -224,13 +226,3 @@ This is a selection of places where this project has been featured on reddit, in
 * **reddit.com**: Celebrating TubeArchivist v0.1, [2022-01-09] [[link](https://www.reddit.com/r/selfhosted/comments/rzh084/celebrating_tubearchivist_v01/)]
 * **linuxunplugged.com**: Pick: tubearchivist — Your self-hosted YouTube media server, [2021-09-11] [[link](https://linuxunplugged.com/425)] and [2021-10-05] [[link](https://linuxunplugged.com/426)]
 * **reddit.com**: Introducing Tube Archivist, your self hosted Youtube media server, [2021-09-12] [[link](https://www.reddit.com/r/selfhosted/comments/pmj07b/introducing_tube_archivist_your_self_hosted/)]
-
-
-## Sponsor
-Big thank you to [Digitalocean](https://www.digitalocean.com/) for generously donating credit for the tubearchivist.com VPS and buildserver. 
-<p>
-  <a href="https://www.digitalocean.com/">
-    <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/PoweredByDO/DO_Powered_by_Badge_blue.svg" width="201px">
-  </a>
-</p>
-
