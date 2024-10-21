@@ -211,7 +211,7 @@ const SettingsApplication = () => {
               <input
                 type="number"
                 name="subscriptions_channel_size"
-                min="1"
+                min="0"
                 id="id_subscriptions_channel_size"
                 value={videoPageSize}
                 onChange={event => {

@@ -219,7 +219,8 @@ const Video = () => {
                       id: videoId,
                       is_watched: status,
                     });
-
+                  }}
+                  onDone={() => {
                     setRefreshVideoList(true);
                   }}
                 />

@@ -88,20 +88,14 @@ const Download = () => {
 
   useEffect(() => {
     (async () => {
-      if (
-        userMeConfig.show_ignored_only !== showIgnored ||
-        userMeConfig.view_style_downloads !== view ||
-        userMeConfig.grid_items !== gridItems
-      ) {
-        const userConfig: UserConfigType = {
-          show_ignored_only: showIgnored,
-          [ViewStyleNames.downloads]: view,
-          grid_items: gridItems,
-        };
+      const userConfig: UserConfigType = {
+        show_ignored_only: showIgnored,
+        [ViewStyleNames.downloads]: view,
+        grid_items: gridItems,
+      };
 
-        await updateUserConfig(userConfig);
-        setRefresh(true);
-      }
+      await updateUserConfig(userConfig);
+      setRefresh(true);
     })();
   }, [
     view,
@@ -339,7 +333,7 @@ const Download = () => {
           {downloadList &&
             downloadList?.map(download => {
               return (
-                <Fragment key={download.channel_id}>
+                <Fragment key={download.timestamp}>
                   <DownloadListItem
                     download={download}
                     view={view}
