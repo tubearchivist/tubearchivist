@@ -201,6 +201,7 @@ This is your time to shine, [read this](https://github.com/tubearchivist/tubearc
 - [lamusmaser/create_info_json](https://gist.github.com/lamusmaser/837fb58f73ea0cad784a33497932e0dd): Script to generate `.info.json` files using `ffmpeg` collecting information from downloaded videos.
 - [lamusmaser/ta_fix_for_video_redirection](https://github.com/lamusmaser/ta_fix_for_video_redirection): Script to fix videos that were incorrectly indexed by YouTube's "Video is Unavailable" response. 
 - [RoninTech/ta-helper](https://github.com/RoninTech/ta-helper): Helper script to provide a symlink association to reference TubeArchivist videos with their original titles.
+- [Tautulli Motify TubeArchivist of Plex Watched State](https://github.com/tangyjoust/Tautulli-Notify-TubeArchivist-of-Plex-Watched-State) Mark videos watched in Plex (through streaming not manually) through Tautulli back to TubeArchivist
 
 ## Donate
 The best donation to **Tube Archivist** is your time, take a look at the [contribution page](CONTRIBUTING.md) to get started.  
