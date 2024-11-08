@@ -7,4 +7,5 @@ pylint
 pylint-django
 pytest
 pytest-django
+requirementscheck
 types-requests
