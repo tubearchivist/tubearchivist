@@ -9,4 +9,5 @@ pylint-django
 pytest
 pytest-django
 python-dotenv
+requirementscheck
 types-requests
