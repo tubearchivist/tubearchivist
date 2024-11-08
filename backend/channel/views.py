@@ -90,7 +90,7 @@ class ChannelApiView(ApiBaseView):
     def post(self, request, channel_id):
         """modify channel overwrites"""
         data = request.data
-        if not isinstance(data, dict) or not "channel_overwrites" in data:
+        if not isinstance(data, dict) or "channel_overwrites" not in data:
             return Response({"error": "invalid payload"}, status=400)
 
         overwrites = data["channel_overwrites"]
