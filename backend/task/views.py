@@ -4,6 +4,7 @@ from common.views_base import AdminOnly, ApiBaseView
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from task.models import CustomPeriodicTask
+from task.serializers import CustomPeriodicTaskSerializer
 from task.src.config_schedule import CrontabValidator, ScheduleBuilder
 from task.src.notify import Notifications, get_all_notifications
 from task.src.task_config import TASK_CONFIG
@@ -118,6 +119,20 @@ class TaskIDView(ApiBaseView):
         return f"message:{task_conf.get('group')}:{task_id.split('-')[0]}"
 
 
+class ScheduleListView(ApiBaseView):
+    """resolves to /api/task/schedule/
+    GET: list all schedules
+    """
+
+    permission_classes = [AdminOnly]
+
+    def get(self, request):
+        """get all schedules"""
+        tasks = CustomPeriodicTask.objects.all()
+        response = CustomPeriodicTaskSerializer(tasks, many=True).data
+        return Response(response)
+
+
 class ScheduleView(ApiBaseView):
     """resolves to /api/task/schedule/<task-name>/
     POST: create/update schedule for task with config
@@ -126,6 +141,12 @@ class ScheduleView(ApiBaseView):
     """
 
     permission_classes = [AdminOnly]
+
+    def get(self, request, task_name):
+        """get single schedule by task_name"""
+        task = get_object_or_404(CustomPeriodicTask, name=task_name)
+        response = CustomPeriodicTaskSerializer(task).data
+        return Response(response)
 
     def post(self, request, task_name):
         """create/update schedule for task"""

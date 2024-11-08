@@ -245,6 +245,11 @@ class TokenView(ApiBaseView):
     permission_classes = [AdminOnly]
 
     @staticmethod
+    def get(request):
+        """get token"""
+        return Response({"token": str(request.user.auth_token)})
+
+    @staticmethod
     def delete(request):
         """delete the token, new will get created automatically"""
         print("revoke API token")

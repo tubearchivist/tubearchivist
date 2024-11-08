@@ -93,12 +93,12 @@ function validate {
     echo "running black"
     black --force-exclude "migrations/*" --diff --color --check -l 79 "$check_path"
     echo "running codespell"
-    codespell --skip="./.git,./.venv,./package.json,./package-lock.json,./node_modules,./.mypy_cache,**/static/volume" "$check_path"
+    codespell --skip="./.git,./.venv,./package.json,./package-lock.json,**/node_modules,./.mypy_cache,**/static/volume" "$check_path"
     echo "running flake8"
-    flake8 "$check_path" --exclude "migrations,.venv" --count --max-complexity=10 \
+    flake8 "$check_path" --exclude "migrations,.venv,frontend" --count --max-complexity=10 \
         --max-line-length=79 --show-source --statistics
     echo "running isort"
-    isort --skip "migrations" --skip ".venv" --check-only --diff --profile black -l 79 "$check_path"
+    isort --skip "migrations" --skip ".venv" --skip "frontend" --check-only --diff --profile black -l 79 "$check_path"
     printf "    \n> all validations passed\n"
 
 }

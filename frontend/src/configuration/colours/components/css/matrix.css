@@ -1,0 +1,69 @@
+:root {
+  --main-bg: #000000;
+  --highlight-bg: #080808;
+  --highlight-error: #880000;
+  --highlight-error-light: #aa0000;
+  --highlight-bg-transparent: #0c0c0caf;
+  --main-font: #00aa00;
+  --accent-font-dark: #007700;
+  --accent-font-light: #00aa00;
+  --img-filter: brightness(0) saturate(100%) invert(45%) sepia(100%) saturate(3710%)
+    hue-rotate(96deg) brightness(100%) contrast(102%);
+  --img-filter-error: invert(16%) sepia(60%) saturate(3717%) hue-rotate(349deg) brightness(86%)
+    contrast(120%);
+  --banner: url('/img/banner-tube-archivist-dark.png');
+  --logo: url('/img/logo-tube-archivist-dark.png');
+  --outline: 1px solid green;
+  --filter: hue-rotate(310deg);
+}
+
+.settings-group {
+  outline: var(--outline);
+}
+
+.info-box-item {
+  outline: var(--outline);
+}
+
+.footer {
+  outline: var(--outline);
+}
+
+.top-banner img {
+  filter: var(--filter);
+}
+
+.icon-text {
+  outline: var(--outline);
+}
+
+.video-item {
+  outline: var(--outline);
+}
+
+.channel-banner {
+  outline: var(--outline);
+}
+
+.description-box {
+  outline: var(--outline);
+}
+
+.video-player {
+  outline: var(--outline);
+}
+
+#notification {
+  outline: var(--outline);
+}
+
+textarea {
+  background-color: var(--highlight-bg);
+  outline: var(--outline);
+  color: var(--main-font);
+}
+
+input {
+  background-color: var(--highlight-bg);
+  color: var(--main-font);
+}

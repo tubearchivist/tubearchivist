@@ -113,6 +113,9 @@ class Parser:
             "playlistend": 0,
         }
         url_info = YtWrap(obs_request).extract(url)
+        if not url_info:
+            raise ValueError(f"failed to retrieve content from URL: {url}")
+
         channel_id = url_info.get("channel_id", False)
         if channel_id:
             return channel_id
