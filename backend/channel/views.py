@@ -87,6 +87,21 @@ class ChannelApiView(ApiBaseView):
         self.get_document(channel_id)
         return Response(self.response, status=self.status_code)
 
+    def post(self, request, channel_id):
+        """modify channel overwrites"""
+        data = request.data
+        if not isinstance(data, dict) or not "channel_overwrites" in data:
+            return Response({"error": "invalid payload"}, status=400)
+
+        overwrites = data["channel_overwrites"]
+
+        try:
+            json_data = channel_overwrites(channel_id, overwrites)
+        except ValueError as err:
+            return Response({"error": str(err)}, status=400)
+
+        return Response(json_data, status=200)
+
     def delete(self, request, channel_id):
         # pylint: disable=unused-argument
         """delete channel"""
@@ -100,38 +115,6 @@ class ChannelApiView(ApiBaseView):
             message.update({"state": "not found"})
 
         return Response(message, status=status_code)
-
-
-class ChannelApiAboutView(ApiBaseView):
-    """resolves to /api/channel/<channel_id>/about/
-    GET: returns the channel specific settings
-    POST: sets the channel specific settings, returning current values
-    """
-
-    permission_classes = [AdminWriteOnly]
-
-    def get(self, request, channel_id):
-        """get channel overwrites"""
-        # pylint: disable=unused-argument
-        channel = YoutubeChannel(channel_id)
-        channel.get_from_es()
-        if not channel.json_data:
-            return Response({"error": "unknown channel id"}, status=404)
-
-        return Response(channel.get_overwrites())
-
-    def post(self, request, channel_id):
-        """modify channel overwrites"""
-        data = request.data
-        if not isinstance(data, dict):
-            return Response({"error": "invalid payload"}, status=400)
-
-        try:
-            new_channel_overwrites = channel_overwrites(channel_id, data)
-        except ValueError as err:
-            return Response({"error": str(err)}, status=400)
-
-        return Response(new_channel_overwrites, status=200)
 
 
 class ChannelAggsApiView(ApiBaseView):

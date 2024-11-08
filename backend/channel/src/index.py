@@ -344,4 +344,4 @@ def channel_overwrites(channel_id, overwrites):
     channel.upload_to_es()
     channel.sync_to_videos()
 
-    return channel.json_data["channel_overwrites"]
+    return channel.json_data
