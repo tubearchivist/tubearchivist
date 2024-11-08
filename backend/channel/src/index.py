@@ -326,22 +326,12 @@ class YoutubeChannel(YouTubeItem):
         for key, value in overwrites.items():
             if key not in valid_keys:
                 raise ValueError(f"invalid overwrite key: {key}")
-            elif value == "disable":
-                to_write[key] = False
+
+            if value is None and key in to_write:
+                to_write.pop(key)
                 continue
-            elif value == "0":
-                if key in to_write:
-                    del to_write[key]
-                continue
-            elif value == "1":
-                to_write[key] = True
-                continue
-            elif isinstance(value, int) and int(value) < 0:
-                if key in to_write:
-                    del to_write[key]
-                continue
-            elif value is not None and value != "":
-                to_write.update({key: value})
+
+            to_write.update({key: value})
 
         self.json_data["channel_overwrites"] = to_write
 
@@ -353,3 +343,5 @@ def channel_overwrites(channel_id, overwrites):
     channel.set_overwrites(overwrites)
     channel.upload_to_es()
     channel.sync_to_videos()
+
+    return channel.json_data["channel_overwrites"]
