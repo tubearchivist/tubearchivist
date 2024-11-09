@@ -10,6 +10,7 @@ VIDEO_URL_IN = [
     "https://www.youtube.com/watch?v=7DKv5H5Frt0&t=113&feature=shared",
     "https://www.youtube.com/watch?v=7DKv5H5Frt0&list=PL96C35uN7xGJu6skU4TBYrIWxggkZBrF5&index=1&pp=iAQB"  # noqa: E501
     "https://youtu.be/7DKv5H5Frt0",
+    "https://www.youtube.com/live/7DKv5H5Frt0",
 ]
 VIDEO_OUT = [{"type": "video", "url": "7DKv5H5Frt0", "vid_type": "unknown"}]
 VIDEO_TEST_CASES = [(i, VIDEO_OUT) for i in VIDEO_URL_IN]

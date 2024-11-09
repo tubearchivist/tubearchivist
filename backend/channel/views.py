@@ -1,6 +1,6 @@
 """all channel API views"""
 
-from channel.src.index import YoutubeChannel
+from channel.src.index import YoutubeChannel, channel_overwrites
 from channel.src.nav import ChannelNav
 from common.src.urlparser import Parser
 from common.views_base import AdminWriteOnly, ApiBaseView
@@ -86,6 +86,21 @@ class ChannelApiView(ApiBaseView):
         """get request"""
         self.get_document(channel_id)
         return Response(self.response, status=self.status_code)
+
+    def post(self, request, channel_id):
+        """modify channel overwrites"""
+        data = request.data
+        if not isinstance(data, dict) or "channel_overwrites" not in data:
+            return Response({"error": "invalid payload"}, status=400)
+
+        overwrites = data["channel_overwrites"]
+
+        try:
+            json_data = channel_overwrites(channel_id, overwrites)
+        except ValueError as err:
+            return Response({"error": str(err)}, status=400)
+
+        return Response(json_data, status=200)
 
     def delete(self, request, channel_id):
         # pylint: disable=unused-argument

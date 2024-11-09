@@ -67,6 +67,9 @@ class Parser:
         if all_paths[0] == "channel":
             return self._validate_expected(all_paths[1], "channel")
 
+        if all_paths[0] == "live":
+            return self._validate_expected(all_paths[1], "video")
+
         # detect channel
         channel_id = self._extract_channel_name(parsed.geturl())
         return {"type": "channel", "url": channel_id}
@@ -113,6 +116,9 @@ class Parser:
             "playlistend": 0,
         }
         url_info = YtWrap(obs_request).extract(url)
+        if not url_info:
+            raise ValueError(f"failed to retrieve content from URL: {url}")
+
         channel_id = url_info.get("channel_id", False)
         if channel_id:
             return channel_id
