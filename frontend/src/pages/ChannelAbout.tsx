@@ -15,38 +15,13 @@ import Button from '../components/Button';
 import updateChannelSettings, {
   ChannelAboutConfigType,
 } from '../api/actions/updateChannelSettings';
-import loadChannelConfig from '../api/loader/loadChannelConfig';
 
-const handleSponsorBlockIntegrationOverwrite = (integration: boolean | undefined) => {
-  if (integration === undefined) {
-    return 'False';
+const toStringToBool = (str: string) => {
+  try {
+    return JSON.parse(str);
+  } catch {
+    return null;
   }
-
-  if (integration) {
-    return integration;
-  } else {
-    return 'Disabled';
-  }
-};
-
-const sponsorBlockToSelectValue = (integration: boolean | string | undefined) => {
-  if (typeof integration === 'undefined') {
-    return '';
-  }
-
-  if (integration === true) {
-    return '1';
-  }
-
-  if (integration === false) {
-    return '0';
-  }
-
-  if (integration === 'disable') {
-    return 'disable';
-  }
-
-  return integration;
 };
 
 export type ChannelBaseOutletContextType = {
@@ -82,7 +57,9 @@ const ChannelAbout = () => {
 
   const [downloadFormat, setDownloadFormat] = useState(channelConfig?.download_format);
   const [autoDeleteAfter, setAutoDeleteAfter] = useState(channelConfig?.autodelete_days);
-  const [indexPlaylists, setIndexPlaylists] = useState(channelConfig?.index_playlists);
+  const [indexPlaylists, setIndexPlaylists] = useState(
+    channelConfig?.index_playlists ? 'true' : 'false',
+  );
   const [enableSponsorblock, setEnableSponsorblock] = useState(
     channelConfig?.integrate_sponsorblock,
   );
@@ -101,11 +78,8 @@ const ChannelAbout = () => {
   const handleSubmit = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
 
-    //TODO: implement request to about api endpoint ( when implemented )
-    // `/api/channel/${channel.channel_id}/about/`
-
     await updateChannelSettings(channelId, {
-      index_playlists: indexPlaylists,
+      index_playlists: toStringToBool(indexPlaylists),
       download_format: downloadFormat,
       autodelete_days: autoDeleteAfter,
       integrate_sponsorblock: enableSponsorblock,
@@ -121,10 +95,12 @@ const ChannelAbout = () => {
     (async () => {
       if (refresh) {
         const channelResponse = await loadChannelById(channelId);
-        const channelConfig = await loadChannelConfig(channelId);
 
         setChannelResponse(channelResponse);
-        setChannelConfig(channelConfig);
+        setChannelConfig(channelResponse?.data?.channel_overwrites);
+        console.log('channel_overwrites', channelResponse?.data);
+        console.log('channel_overwrites', channelResponse?.data?.channel_overwrites);
+        console.log('channel_overwrites', '--------');
         setRefresh(false);
       }
     })();
@@ -326,7 +302,7 @@ const ChannelAbout = () => {
                   <p>
                     Index playlists:{' '}
                     <span className="settings-current">
-                      {channelOverwrites?.index_playlists || 'False'}
+                      {JSON.stringify(channelOverwrites?.index_playlists)}
                     </span>
                   </p>
 
@@ -334,16 +310,16 @@ const ChannelAbout = () => {
                     name="index_playlists"
                     id="id_index_playlists"
                     defaultValue=""
-                    value={indexPlaylists ? '1' : '0'}
+                    value={indexPlaylists}
                     onChange={event => {
                       const value = event.currentTarget.value;
 
                       setIndexPlaylists(value);
                     }}
                   >
-                    <option value="">-- change playlist index --</option>
-                    <option value="0">Disable playlist index</option>
-                    <option value="1">Enable playlist index</option>
+                    <option value="null">-- change playlist index --</option>
+                    <option value="false">Disable playlist index</option>
+                    <option value="true">Enable playlist index</option>
                   </select>
 
                   <br />
@@ -357,26 +333,28 @@ const ChannelAbout = () => {
                     </a>
                     :{' '}
                     <span className="settings-current">
-                      {handleSponsorBlockIntegrationOverwrite(
-                        channelOverwrites?.integrate_sponsorblock,
-                      )}
+                      {JSON.stringify(channelOverwrites?.integrate_sponsorblock)}
                     </span>
                   </p>
                   <select
                     name="integrate_sponsorblock"
                     id="id_integrate_sponsorblock"
                     defaultValue=""
-                    value={sponsorBlockToSelectValue(enableSponsorblock)}
+                    value={enableSponsorblock?.toString() || ''}
                     onChange={event => {
                       const value = event.currentTarget.value;
 
-                      setEnableSponsorblock(value);
+                      if (value !== '') {
+                        setEnableSponsorblock(JSON.parse(value));
+                      } else {
+                        setEnableSponsorblock(undefined);
+                      }
                     }}
                   >
                     <option value="">-- change sponsorblock integrations</option>
-                    <option value="disable">disable sponsorblock integration</option>
-                    <option value="1">enable sponsorblock integration</option>
-                    <option value="0">unset sponsorblock integration</option>
+                    <option value="false">disable sponsorblock integration</option>
+                    <option value="true">enable sponsorblock integration</option>
+                    <option value="null">unset sponsorblock integration</option>
                   </select>
                 </div>
                 <h3>Page Size Overrides</h3>
