@@ -59,6 +59,7 @@ const ChannelList = ({ channelList, viewLayout, refreshChannelList }: ChannelLis
                       }}
                     />
                   )}
+
                   {!channel.channel_subscribed && (
                     <Button
                       label="Subscribe"
@@ -66,7 +67,10 @@ const ChannelList = ({ channelList, viewLayout, refreshChannelList }: ChannelLis
                       title={`Subscribe to ${channel.channel_name}`}
                       onClick={async () => {
                         await updateChannelSubscription(channel.channel_id, true);
-                        refreshChannelList(true);
+
+                        setTimeout(() => {
+                          refreshChannelList(true);
+                        }, 500);
                       }}
                     />
                   )}
