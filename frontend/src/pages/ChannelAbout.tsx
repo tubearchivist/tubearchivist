@@ -309,7 +309,6 @@ const ChannelAbout = () => {
                   <select
                     name="index_playlists"
                     id="id_index_playlists"
-                    defaultValue=""
                     value={indexPlaylists}
                     onChange={event => {
                       const value = event.currentTarget.value;
@@ -339,7 +338,6 @@ const ChannelAbout = () => {
                   <select
                     name="integrate_sponsorblock"
                     id="id_integrate_sponsorblock"
-                    defaultValue=""
                     value={enableSponsorblock?.toString() || ''}
                     onChange={event => {
                       const value = event.currentTarget.value;
