@@ -13,7 +13,6 @@ from typing import Any
 from urllib.parse import urlparse
 
 import requests
-from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import IndexPaginate
 
 
