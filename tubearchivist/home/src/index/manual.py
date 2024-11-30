@@ -306,6 +306,8 @@ class ImportFolderScanner:
             if stream["codec_type"] == "subtitle":
                 lang = ISO639Utils.long2short(stream["tags"]["language"])
                 sub_path = f"{base_path}.{lang}.vtt"
+                if sub_path in current_video["subtitle"]:
+                    continue
                 self._dump_subtitle(idx, media_path, sub_path)
                 current_video["subtitle"].append(sub_path)
 
