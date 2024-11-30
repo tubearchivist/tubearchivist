@@ -216,7 +216,7 @@ def ta_host_parser(ta_host: str) -> tuple[list[str], list[str]]:
 def get_stylesheets() -> list:
     """Get all valid stylesheets from /static/css"""
 
-    stylesheets = ['dark.css', 'light.css', 'matrix.css', 'midnight.css']
+    stylesheets = ["dark.css", "light.css", "matrix.css", "midnight.css"]
     return stylesheets
 
 
