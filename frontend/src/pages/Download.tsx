@@ -16,7 +16,6 @@ import updateDownloadQueue from '../api/actions/updateDownloadQueue';
 import updateTaskByName from '../api/actions/updateTaskByName';
 import Notifications from '../components/Notifications';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
-import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
 import DownloadListItem from '../components/DownloadListItem';
 import loadDownloadAggs, { DownloadAggsType } from '../api/loader/loadDownloadAggs';
@@ -146,9 +145,7 @@ const Download = () => {
 
   return (
     <>
-      <Helmet>
-        <title>TA | Downloads</title>
-      </Helmet>
+      <title>TA | Downloads</title>
       <ScrollToTopOnNavigate />
       <div className="boxed-content">
         <div className="title-bar">

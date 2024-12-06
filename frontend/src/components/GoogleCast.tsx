@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet';
 import { VideoType } from '../pages/Home';
 import updateWatchedState from '../api/actions/updateWatchedState';
 import updateVideoProgressById from '../api/actions/updateVideoProgressById';
@@ -214,12 +213,11 @@ const GoogleCast = ({ video, videoProgress, setRefresh }: GoogleCastProps) => {
   return (
     <>
       <>
-        <Helmet>
-          <script
-            type="text/javascript"
-            src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"
-          ></script>
-        </Helmet>
+        <script
+          type="text/javascript"
+          src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"
+        ></script>
+
         {/* @ts-expect-error React does not know what to do with the google-cast-launcher, but it works. */}
         <google-cast-launcher id="castbutton"></google-cast-launcher>
       </>

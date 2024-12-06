@@ -13,13 +13,11 @@
     "dompurify": "^3.2.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-helmet": "^6.1.0",
     "react-router-dom": "^7.0.2"
   },
   "devDependencies": {
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.1",
-    "@types/react-helmet": "^6.1.11",
     "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^8.17.0",
     "@vitejs/plugin-react-swc": "^3.7.2",

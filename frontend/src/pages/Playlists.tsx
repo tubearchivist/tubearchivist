@@ -15,7 +15,6 @@ import { PlaylistType } from './Playlist';
 import updatePlaylistSubscription from '../api/actions/updatePlaylistSubscription';
 import createCustomPlaylist from '../api/actions/createCustomPlaylist';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
-import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
 
 export type PlaylistEntryType = {
@@ -95,9 +94,7 @@ const Playlists = () => {
 
   return (
     <>
-      <Helmet>
-        <title>TA | Playlists</title>
-      </Helmet>
+      <title>TA | Playlists</title>
       <ScrollToTopOnNavigate />
       <div className="boxed-content">
         <div className="title-split">

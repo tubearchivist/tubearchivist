@@ -1,11 +1,7 @@
-import { Helmet } from 'react-helmet';
-
 const About = () => {
   return (
     <>
-      <Helmet>
-        <title>TA | About</title>
-      </Helmet>
+      <title>TA | About</title>
 
       <div className="boxed-content">
         <div className="title-bar">
