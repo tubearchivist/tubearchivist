@@ -17,7 +17,6 @@
     "react-router-dom": "^7.0.2"
   },
   "devDependencies": {
-    "@types/dompurify": "^3.2.0",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.1",
     "@types/react-helmet": "^6.1.11",
