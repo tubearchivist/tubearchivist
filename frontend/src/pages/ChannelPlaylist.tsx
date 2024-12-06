@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react';
 import { OutletContextType } from './Base';
 import Pagination from '../components/Pagination';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
-import { Helmet } from 'react-helmet';
 import loadPlaylistList from '../api/loader/loadPlaylistList';
 import { PlaylistsResponseType } from './Playlists';
 import iconGridView from '/img/icon-gridview.svg';
@@ -53,9 +52,7 @@ const ChannelPlaylist = () => {
 
   return (
     <>
-      <Helmet>
-        <title>TA | Channel: Playlists</title>
-      </Helmet>
+      <title>TA | Channel: Playlists</title>
       <ScrollToTopOnNavigate />
       <div className={`boxed-content ${gridView}`}>
         <Notifications pageName="channel" includeReindex={true} />

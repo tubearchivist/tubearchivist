@@ -1,4 +1,3 @@
-import { Helmet } from 'react-helmet';
 import { useRouteError } from 'react-router-dom';
 import importColours, { ColourConstant, ColourVariants } from '../configuration/colours/getColours';
 
@@ -16,9 +15,7 @@ const ErrorPage = () => {
 
   return (
     <>
-      <Helmet>
-        <title>TA | Oops!</title>
-      </Helmet>
+      <title>TA | Oops!</title>
 
       <div id="error-page" style={{ margin: '10%' }}>
         <h1>Oops!</h1>

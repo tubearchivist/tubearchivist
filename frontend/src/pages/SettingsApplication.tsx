@@ -7,7 +7,6 @@ import restoreSnapshot from '../api/actions/restoreSnapshot';
 import queueSnapshot from '../api/actions/queueSnapshot';
 import updateCookie, { ValidatedCookieType } from '../api/actions/updateCookie';
 import deleteApiToken from '../api/actions/deleteApiToken';
-import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
 import loadAppsettingsConfig, { AppSettingsConfigType } from '../api/loader/loadAppsettingsConfig';
 import updateAppsettingsConfig from '../api/actions/updateAppsettingsConfig';
@@ -176,9 +175,7 @@ const SettingsApplication = () => {
 
   return (
     <>
-      <Helmet>
-        <title>TA | Application Settings</title>
-      </Helmet>
+      <title>TA | Application Settings</title>
       <div className="boxed-content">
         <SettingsNavigation />
         <Notifications pageName={'all'} />

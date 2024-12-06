@@ -20,7 +20,6 @@ import { ChannelResponseType } from './ChannelBase';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import updateWatchedState from '../api/actions/updateWatchedState';
-import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
 import loadVideoListByFilter, {
   VideoListByFilterResponseType,
@@ -111,9 +110,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
 
   return (
     <>
-      <Helmet>
-        <title>TA | Channel: {channel.channel_name}</title>
-      </Helmet>
+      <title>{`TA | Channel: ${channel.channel_name}`}</title>
       <ScrollToTopOnNavigate />
       <div className="boxed-content">
         <div className="info-box info-box-2">

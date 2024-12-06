@@ -10,7 +10,6 @@ import queueReindex, { ReindexType, ReindexTypeEnum } from '../api/actions/queue
 import formatDate from '../functions/formatDates';
 import PaginationDummy from '../components/PaginationDummy';
 import FormattedNumber from '../components/FormattedNumber';
-import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
 import updateChannelSettings, {
   ChannelAboutConfigType,
@@ -112,9 +111,7 @@ const ChannelAbout = () => {
 
   return (
     <>
-      <Helmet>
-        <title>TA | Channel: About {channel.channel_name}</title>
-      </Helmet>
+      <title>{`TA | Channel: About ${channel.channel_name}`}</title>
       <div className="boxed-content">
         <div className="info-box info-box-3">
           <ChannelOverview
