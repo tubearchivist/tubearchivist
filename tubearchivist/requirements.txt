@@ -11,4 +11,4 @@ requests==2.32.3
 ryd-client==0.0.6
 uWSGI==2.0.28
 whitenoise==6.8.2
-yt-dlp[default]==2024.11.4
+yt-dlp[default]==2024.12.3
