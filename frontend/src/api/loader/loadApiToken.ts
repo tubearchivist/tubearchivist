@@ -12,21 +12,25 @@ const loadApiToken = async (): Promise<ApiTokenResponse> => {
   const apiUrl = getApiUrl();
   const csrfCookie = getCookie('csrftoken');
 
-  const response = await fetch(`${apiUrl}/api/appsettings/token/`, {
-    headers: {
-      ...defaultHeaders,
-      'X-CSRFToken': csrfCookie || '',
-    },
-    credentials: getFetchCredentials(),
-  });
+  try {
+    const response = await fetch(`${apiUrl}/api/appsettings/token/`, {
+      headers: {
+        ...defaultHeaders,
+        'X-CSRFToken': csrfCookie || '',
+      },
+      credentials: getFetchCredentials(),
+    });
 
-  const apiToken = await response.json();
+    const apiToken = await response.json();
 
-  if (isDevEnvironment()) {
-    console.log('loadApiToken', apiToken);
+    if (isDevEnvironment()) {
+      console.log('loadApiToken', apiToken);
+    }
+
+    return apiToken;
+  } catch (e) {
+    return { token: '' };
   }
-
-  return apiToken;
 };
 
 export default loadApiToken;

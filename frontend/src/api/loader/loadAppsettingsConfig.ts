@@ -11,20 +11,20 @@ export type AppSettingsConfigType = {
     auto_start: boolean;
   };
   downloads: {
-    limit_speed: boolean | number;
+    limit_speed: false | number;
     sleep_interval: number;
-    autodelete_days: boolean | number;
-    format: boolean | string;
+    autodelete_days: number;
+    format: number | string;
     format_sort: boolean | string;
     add_metadata: boolean;
     add_thumbnail: boolean;
     subtitle: boolean | string;
     subtitle_source: boolean | string;
     subtitle_index: boolean;
-    comment_max: boolean | number;
+    comment_max: string | number;
     comment_sort: string;
     cookie_import: boolean;
-    throttledratelimit: boolean | number;
+    throttledratelimit: false | number;
     extractor_lang: boolean | string;
     integrate_ryd: boolean;
     integrate_sponsorblock: boolean;

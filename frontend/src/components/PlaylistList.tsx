@@ -68,7 +68,9 @@ const PlaylistList = ({ playlistList, viewLayout, setRefresh }: PlaylistListProp
                       onClick={async () => {
                         await updatePlaylistSubscription(playlist.playlist_id, true);
 
-                        setRefresh(true);
+                        setTimeout(() => {
+                          setRefresh(true);
+                        }, 500);
                       }}
                     />
                   )}
