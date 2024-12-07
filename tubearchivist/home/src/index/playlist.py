@@ -93,13 +93,10 @@ class YoutubePlaylist(YouTubeItem):
         """get all videos in playlist, match downloaded with ids_found"""
         all_members = []
         for idx, entry in enumerate(self.youtube_meta["entries"]):
-            if not entry["channel"]:
-                continue
-
             to_append = {
                 "youtube_id": entry["id"],
                 "title": entry["title"],
-                "uploader": entry["channel"],
+                "uploader": entry.get("channel"),
                 "idx": idx,
                 "downloaded": entry["id"] in ids_found,
             }
