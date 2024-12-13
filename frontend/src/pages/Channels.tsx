@@ -11,7 +11,6 @@ import { OutletContextType } from './Base';
 import ChannelList from '../components/ChannelList';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import Notifications from '../components/Notifications';
-import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
 
 type ChannelOverwritesType = {
@@ -102,9 +101,7 @@ const Channels = () => {
 
   return (
     <>
-      <Helmet>
-        <title>TA | Channels</title>
-      </Helmet>
+      <title>TA | Channels</title>
       <ScrollToTopOnNavigate />
       <div className="boxed-content">
         <div className="title-split">
