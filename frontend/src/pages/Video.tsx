@@ -121,6 +121,14 @@ const Video = () => {
   const { videoId } = useParams() as VideoParams;
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(false);
+  const [videoEnded, setVideoEnded] = useState(false);
+  const [playlistAutoplay, setPlaylistAutoplay] = useState(
+    localStorage.getItem('playlistAutoplay') === 'true',
+  );
+  const [playlistIdForAutoplay, setPlaylistIDForAutoplay] = useState<string | undefined>(
+    localStorage.getItem('playlistIdForAutoplay') ?? '',
+  );
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showAddToPlaylist, setShowAddToPlaylist] = useState(false);
@@ -136,6 +144,8 @@ const Video = () => {
 
   useEffect(() => {
     (async () => {
+      setLoading(true);
+
       const videoResponse = await loadVideoById(videoId);
       const simmilarVideosResponse = await loadSimmilarVideosById(videoId);
       const videoProgressResponse = await loadVideoProgressById(videoId);
@@ -150,8 +160,39 @@ const Video = () => {
       setCustomPlaylistsResponse(customPlaylistsResponse);
       setCommentsResponse(commentsResponse);
       setRefreshVideoList(false);
+
+      setLoading(false);
     })();
   }, [videoId, refreshVideoList]);
+
+  useEffect(() => {
+    localStorage.setItem('playlistAutoplay', playlistAutoplay.toString());
+
+    if (!playlistAutoplay) {
+      localStorage.setItem('playlistIdForAutoplay', '');
+
+      return;
+    }
+
+    localStorage.setItem('playlistIdForAutoplay', playlistIdForAutoplay || '');
+  }, [playlistAutoplay, playlistIdForAutoplay]);
+
+  useEffect(() => {
+    if (videoEnded && playlistAutoplay) {
+      const playlist = videoPlaylistNav?.find(playlist => {
+        return playlist.playlist_meta.playlist_id === playlistIdForAutoplay;
+      });
+
+      if (playlist) {
+        const nextYoutubeId = playlist.playlist_next?.youtube_id;
+
+        if (nextYoutubeId) {
+          setVideoEnded(false);
+          navigate(Routes.Video(nextYoutubeId));
+        }
+      }
+    }
+  }, [videoEnded, playlistAutoplay]);
 
   if (videoResponse === undefined) {
     return [];
@@ -175,11 +216,17 @@ const Video = () => {
       <title>{`TA | ${video.title}`}</title>
       <ScrollToTopOnNavigate />
 
-      <VideoPlayer
-        video={videoResponse}
-        videoProgress={videoProgress}
-        sponsorBlock={sponsorBlock}
-      />
+      {!loading && (
+        <VideoPlayer
+          video={videoResponse}
+          videoProgress={videoProgress}
+          sponsorBlock={sponsorBlock}
+          autoplay={playlistAutoplay}
+          onVideoEnd={() => {
+            setVideoEnded(true);
+          }}
+        />
+      )}
 
       <div className="boxed-content">
         <div className="title-bar">
@@ -436,6 +483,34 @@ const Video = () => {
                       ]: {playlistItem.playlist_meta.playlist_name}
                     </h3>
                   </Link>
+
+                  <div className="toggle">
+                    <p>Autoplay:</p>
+                    <div className="toggleBox">
+                      <input
+                        checked={playlistAutoplay}
+                        onChange={() => {
+                          if (!playlistAutoplay) {
+                            setPlaylistIDForAutoplay(playlistItem.playlist_meta.playlist_id);
+                          }
+
+                          setPlaylistAutoplay(!playlistAutoplay);
+                        }}
+                        type="checkbox"
+                      />
+                      {!playlistAutoplay && (
+                        <label htmlFor="" className="ofbtn">
+                          Off
+                        </label>
+                      )}
+                      {playlistAutoplay && (
+                        <label htmlFor="" className="onbtn">
+                          On
+                        </label>
+                      )}
+                    </div>
+                  </div>
+
                   <div className="playlist-nav">
                     <div className="playlist-nav-item">
                       {playlistItem.playlist_previous && (
