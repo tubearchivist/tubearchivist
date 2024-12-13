@@ -99,29 +99,6 @@ const handleTimeUpdate =
     }
   };
 
-const handleVideoEnd =
-  (
-    youtubeId: string,
-    watched: boolean,
-    setSponsorSegmentSkipped?: Dispatch<SetStateAction<SponsorSegmentsSkippedType>>,
-  ) =>
-  async () => {
-    if (!watched) {
-      // Check if video is already marked as watched
-      await updateWatchedState({ id: youtubeId, is_watched: true });
-    }
-
-    setSponsorSegmentSkipped?.((segments: SponsorSegmentsSkippedType) => {
-      const keys = Object.keys(segments);
-
-      keys.forEach(uuid => {
-        segments[uuid] = { from: 0, to: 0 };
-      });
-
-      return segments;
-    });
-  };
-
 export type VideoProgressType = {
   youtube_id: string;
   user_id: number;
@@ -133,9 +110,18 @@ type VideoPlayerProps = {
   videoProgress?: VideoProgressType;
   sponsorBlock?: SponsorBlockType;
   embed?: boolean;
+  autoplay?: boolean;
+  onVideoEnd?: () => void;
 };
 
-const VideoPlayer = ({ video, videoProgress, sponsorBlock, embed }: VideoPlayerProps) => {
+const VideoPlayer = ({
+  video,
+  videoProgress,
+  sponsorBlock,
+  embed,
+  autoplay = false,
+  onVideoEnd,
+}: VideoPlayerProps) => {
   const [searchParams] = useSearchParams();
   const searchParamVideoProgress = searchParams.get('t');
 
@@ -154,7 +140,30 @@ const VideoPlayer = ({ video, videoProgress, sponsorBlock, embed }: VideoPlayerP
     videoSrcProgress = searchParamVideoProgress;
   }
 
-  const autoplay = false;
+  const handleVideoEnd =
+    (
+      youtubeId: string,
+      watched: boolean,
+      setSponsorSegmentSkipped?: Dispatch<SetStateAction<SponsorSegmentsSkippedType>>,
+    ) =>
+    async () => {
+      if (!watched) {
+        // Check if video is already marked as watched
+        await updateWatchedState({ id: youtubeId, is_watched: true });
+      }
+
+      setSponsorSegmentSkipped?.((segments: SponsorSegmentsSkippedType) => {
+        const keys = Object.keys(segments);
+
+        keys.forEach(uuid => {
+          segments[uuid] = { from: 0, to: 0 };
+        });
+
+        return segments;
+      });
+
+      onVideoEnd?.();
+    };
 
   return (
     <>
