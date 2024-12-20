@@ -157,7 +157,7 @@ function sync_docker {
     fi
 
     echo "latest tags:"
-    git tag | tail -n 5 | sort -r
+    git tag | sort -rV | head -n 5
 
     printf "\ncreate new version:\n"
     read -r VERSION
@@ -189,7 +189,7 @@ function sync_docker_old {
     fi
 
     echo "latest tags:"
-    git tag | tail -n 5 | sort -r
+    git tag | sort -rV | head -n 5
 
     printf "\ncreate new version:\n"
     read -r VERSION
