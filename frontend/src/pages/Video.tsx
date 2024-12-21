@@ -247,6 +247,7 @@ const Video = () => {
             channelname={video.channel.channel_name}
             channelSubs={video.channel.channel_subs}
             channelSubscribed={video.channel.channel_subscribed}
+            channelThumbUrl={video.channel.channel_thumb_url}
             setRefresh={setRefreshVideoList}
           />
 

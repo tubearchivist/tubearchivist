@@ -151,6 +151,7 @@ const Playlist = () => {
               channelname={channel?.channel_name}
               channelSubs={channel?.channel_subs}
               channelSubscribed={channel?.channel_subscribed}
+              channelThumbUrl={channel.channel_thumb_url}
               setRefresh={setRefresh}
             />
           )}
