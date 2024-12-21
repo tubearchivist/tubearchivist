@@ -7,6 +7,7 @@ import Notifications from '../components/Notifications';
 import { useEffect, useState } from 'react';
 import ChannelBanner from '../components/ChannelBanner';
 import loadChannelNav, { ChannelNavResponseType } from '../api/loader/loadChannelNav';
+import loadChannelById from '../api/loader/loadChannelById';
 
 type ChannelParams = {
   channelId: string;
@@ -21,15 +22,19 @@ const ChannelBase = () => {
   const { channelId } = useParams() as ChannelParams;
   const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
+  const [channelResponse, setChannelResponse] = useState<ChannelResponseType>();
   const [channelNav, setChannelNav] = useState<ChannelNavResponseType>();
   const [startNotification, setStartNotification] = useState(false);
 
+  const channel = channelResponse?.data;
   const { has_streams, has_shorts, has_playlists, has_pending } = channelNav || {};
 
   useEffect(() => {
     (async () => {
       const channelNavResponse = await loadChannelNav(channelId);
+      const channelResponse = await loadChannelById(channelId);
 
+      setChannelResponse(channelResponse);
       setChannelNav(channelNavResponse);
     })();
   }, [channelId]);
@@ -43,7 +48,7 @@ const ChannelBase = () => {
       <div className="boxed-content">
         <div className="channel-banner">
           <Link to={Routes.ChannelVideo(channelId)}>
-            <ChannelBanner channel_id={channelId} />
+            <ChannelBanner channelId={channelId} channelBannerUrl={channel?.channel_banner_url} />
           </Link>
         </div>
         <div className="info-box-item child-page-nav">

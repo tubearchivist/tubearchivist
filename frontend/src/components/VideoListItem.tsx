@@ -79,7 +79,8 @@ const VideoListItem = ({
                 id: video.youtube_id,
                 is_watched: status,
               });
-
+            }}
+            onDone={() => {
               refreshVideoList(true);
             }}
           />

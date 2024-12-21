@@ -10,6 +10,7 @@ type ChannelOverviewProps = {
   channelname: string;
   channelSubs: number;
   channelSubscribed: boolean;
+  channelThumbUrl: string;
   showSubscribeButton?: boolean;
   isUserAdmin?: boolean;
   setRefresh: (status: boolean) => void;
@@ -20,6 +21,7 @@ const ChannelOverview = ({
   channelSubs,
   channelSubscribed,
   channelname,
+  channelThumbUrl,
   showSubscribeButton = false,
   isUserAdmin,
   setRefresh,
@@ -29,7 +31,7 @@ const ChannelOverview = ({
       <div className="info-box-item">
         <div className="round-img">
           <Link to={Routes.Channel(channelId)}>
-            <ChannelIcon channel_id={channelId} />
+            <ChannelIcon channelId={channelId} channelThumbUrl={channelThumbUrl} />
           </Link>
         </div>
         <div>
