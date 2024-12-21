@@ -6,6 +6,7 @@ from appsettings.src.snapshot import ElasticSnapshot
 from common.src.ta_redis import RedisArchivist
 from common.views_base import AdminOnly, ApiBaseView
 from download.src.yt_dlp_base import CookieHandler
+from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from task.src.task_manager import TaskCommand
 from task.tasks import run_restore_backup
@@ -247,7 +248,8 @@ class TokenView(ApiBaseView):
     @staticmethod
     def get(request):
         """get token"""
-        return Response({"token": str(request.user.auth_token)})
+        token, _ = Token.objects.get_or_create(user=request.user)
+        return Response({"token": token.key})
 
     @staticmethod
     def delete(request):
