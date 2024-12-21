@@ -6,7 +6,7 @@ from common.src.urlparser import Parser
 from common.views_base import AdminWriteOnly, ApiBaseView
 from download.src.subscriptions import ChannelSubscription
 from rest_framework.response import Response
-from task.tasks import subscribe_to
+from task.tasks import index_channel_playlists, subscribe_to
 
 
 class ChannelApiListView(ApiBaseView):
@@ -97,6 +97,9 @@ class ChannelApiView(ApiBaseView):
 
         try:
             json_data = channel_overwrites(channel_id, overwrites)
+            if overwrites.get("index_playlists"):
+                index_channel_playlists.delay(channel_id)
+
         except ValueError as err:
             return Response({"error": str(err)}, status=400)
 
