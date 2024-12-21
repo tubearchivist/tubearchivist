@@ -3,8 +3,8 @@ __pycache__
 .venv
 
 # django testing
-**/static/volume
-**/.env
+backend/static
+backend/.env
 
 # vscode custom conf
 .vscode
