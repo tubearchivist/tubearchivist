@@ -78,8 +78,6 @@ class VideoApiNavView(ApiBaseView):
         if self.status_code != 200:
             return Response(status=self.status_code)
 
-        print(self.response)
-
         playlist_nav = []
 
         if not self.response["data"].get("playlist"):
