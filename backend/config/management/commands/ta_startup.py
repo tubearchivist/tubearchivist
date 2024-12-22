@@ -19,6 +19,7 @@ from common.src.ta_redis import RedisArchivist
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import dateformat
 from django_celery_beat.models import CrontabSchedule, PeriodicTasks
+from redis.exceptions import ResponseError
 from task.models import CustomPeriodicTask
 from task.src.config_schedule import ScheduleBuilder
 from task.src.task_manager import TaskManager
@@ -54,7 +55,14 @@ class Command(BaseCommand):
     def _mig_app_settings(self) -> None:
         """update from v0.4.10 to v0.5.0, migrate application settings"""
         self.stdout.write("[MIGRATION] move appconfig to ES")
-        config = RedisArchivist().get_message("config")
+        try:
+            config = RedisArchivist().get_message("config")
+        except ResponseError:
+            self.stdout.write(
+                self.style.SUCCESS("    Redis does not support JSON decoding")
+            )
+            return
+
         if not config:
             self.stdout.write(
                 self.style.SUCCESS("    no config values to migrate")

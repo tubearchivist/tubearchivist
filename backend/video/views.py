@@ -102,7 +102,7 @@ class VideoProgressView(ApiBaseView):
         """get progress for a single video"""
         user_id = request.user.id
         key = f"{user_id}:progress:{video_id}"
-        video_progress = RedisArchivist().get_message(key)
+        video_progress = RedisArchivist().get_message_dict(key)
         position = video_progress.get("position", 0)
 
         self.response = {

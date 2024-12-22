@@ -198,7 +198,7 @@ class CookieView(ApiBaseView):
         """handle get request"""
         # pylint: disable=unused-argument
         config = AppConfig().config
-        valid = RedisArchivist().get_message("cookie:valid")
+        valid = RedisArchivist().get_message_dict("cookie:valid")
         response = {"cookie_enabled": config["downloads"]["cookie_import"]}
         response.update(valid)
 

@@ -40,15 +40,15 @@ class RedisArchivist(RedisBase):
     def set_message(
         self,
         key: str,
-        message: dict,
-        path: str = ".",
+        message: dict | str,
         expire: bool | int = False,
         save: bool = False,
     ) -> None:
         """write new message to redis"""
-        self.conn.execute_command(
-            "JSON.SET", self.NAME_SPACE + key, path, json.dumps(message)
+        to_write = (
+            json.dumps(message) if isinstance(message, dict) else message
         )
+        self.conn.execute_command("SET", self.NAME_SPACE + key, to_write)
 
         if expire:
             if isinstance(expire, bool):
@@ -67,8 +67,24 @@ class RedisArchivist(RedisBase):
         except redis.exceptions.ResponseError:
             pass
 
-    def get_message(self, key: str) -> dict:
-        """get message dict from redis"""
+    def get_message_str(self, key: str) -> str | None:
+        """get message string"""
+        reply = self.conn.execute_command("GET", self.NAME_SPACE + key)
+        return reply
+
+    def get_message_dict(self, key: str) -> dict:
+        """get message dict"""
+        reply = self.conn.execute_command("GET", self.NAME_SPACE + key)
+        if not reply:
+            return {}
+
+        return json.loads(reply)
+
+    def get_message(self, key: str) -> dict | None:
+        """
+        get message dict from redis
+        old json get message, only used for migration, to be removed later
+        """
         reply = self.conn.execute_command("JSON.GET", self.NAME_SPACE + key)
         if reply:
             return json.loads(reply)
@@ -91,7 +107,7 @@ class RedisArchivist(RedisBase):
         if not all_matches:
             return []
 
-        return [self.get_message(i) for i in all_matches]
+        return [self.get_message_dict(i) for i in all_matches]
 
     def del_message(self, key: str) -> bool:
         """delete key from redis"""

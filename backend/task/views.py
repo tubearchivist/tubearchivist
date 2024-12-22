@@ -103,8 +103,7 @@ class TaskIDView(ApiBaseView):
                 message = {"message": "task can not be stopped"}
                 return Response(message, status=400)
 
-            message_key = self._build_message_key(task_conf, task_id)
-            TaskCommand().stop(task_id, message_key)
+            TaskCommand().stop(task_id)
         if command == "kill":
             if not task_conf.get("api_stop"):
                 message = {"message": "task can not be killed"}
@@ -113,10 +112,6 @@ class TaskIDView(ApiBaseView):
             TaskCommand().kill(task_id)
 
         return Response({"message": "command sent"})
-
-    def _build_message_key(self, task_conf, task_id):
-        """build message key to forward command to notification"""
-        return f"message:{task_conf.get('group')}:{task_id.split('-')[0]}"
 
 
 class ScheduleListView(ApiBaseView):
