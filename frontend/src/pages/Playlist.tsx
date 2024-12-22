@@ -28,7 +28,6 @@ import queueReindex from '../api/actions/queueReindex';
 import updateWatchedState from '../api/actions/updateWatchedState';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
-import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
 import loadVideoListByFilter from '../api/loader/loadVideoListByPage';
 
@@ -139,9 +138,7 @@ const Playlist = () => {
 
   return (
     <>
-      <Helmet>
-        <title>TA | Playlist: {playlist.playlist_name}</title>
-      </Helmet>
+      <title>{`TA | Playlist: ${playlist.playlist_name}`}</title>
       <ScrollToTopOnNavigate />
       <div className="boxed-content">
         <div className="title-bar">
@@ -154,6 +151,7 @@ const Playlist = () => {
               channelname={channel?.channel_name}
               channelSubs={channel?.channel_subs}
               channelSubscribed={channel?.channel_subscribed}
+              channelThumbUrl={channel.channel_thumb_url}
               setRefresh={setRefresh}
             />
           )}

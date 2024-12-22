@@ -115,7 +115,8 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
                   id: videoId,
                   is_watched: status,
                 });
-
+              }}
+              onDone={() => {
                 setRefresh(true);
               }}
             />

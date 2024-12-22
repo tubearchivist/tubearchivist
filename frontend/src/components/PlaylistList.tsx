@@ -5,7 +5,7 @@ import { PlaylistType } from '../pages/Playlist';
 import updatePlaylistSubscription from '../api/actions/updatePlaylistSubscription';
 import formatDate from '../functions/formatDates';
 import Button from './Button';
-import getApiUrl from '../configuration/getApiUrl';
+import PlaylistThumbnail from './PlaylistThumbnail';
 
 type PlaylistListProps = {
   playlistList: PlaylistType[] | undefined;
@@ -25,9 +25,9 @@ const PlaylistList = ({ playlistList, viewLayout, setRefresh }: PlaylistListProp
           <div key={playlist.playlist_id} className={`playlist-item ${viewLayout}`}>
             <div className="playlist-thumbnail">
               <Link to={Routes.Playlist(playlist.playlist_id)}>
-                <img
-                  src={`${getApiUrl()}/cache/playlists/${playlist.playlist_id}.jpg`}
-                  alt={`${playlist.playlist_id}-thumbnail`}
+                <PlaylistThumbnail
+                  playlistId={playlist.playlist_id}
+                  playlistThumbnail={playlist.playlist_thumbnail}
                 />
               </Link>
             </div>
@@ -68,7 +68,9 @@ const PlaylistList = ({ playlistList, viewLayout, setRefresh }: PlaylistListProp
                       onClick={async () => {
                         await updatePlaylistSubscription(playlist.playlist_id, true);
 
-                        setRefresh(true);
+                        setTimeout(() => {
+                          setRefresh(true);
+                        }, 500);
                       }}
                     />
                   )}

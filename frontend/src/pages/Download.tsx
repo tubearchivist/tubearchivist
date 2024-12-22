@@ -16,7 +16,6 @@ import updateDownloadQueue from '../api/actions/updateDownloadQueue';
 import updateTaskByName from '../api/actions/updateTaskByName';
 import Notifications from '../components/Notifications';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
-import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
 import DownloadListItem from '../components/DownloadListItem';
 import loadDownloadAggs, { DownloadAggsType } from '../api/loader/loadDownloadAggs';
@@ -90,20 +89,14 @@ const Download = () => {
 
   useEffect(() => {
     (async () => {
-      if (
-        userMeConfig.show_ignored_only !== showIgnored ||
-        userMeConfig.view_style_downloads !== view ||
-        userMeConfig.grid_items !== gridItems
-      ) {
-        const userConfig: UserConfigType = {
-          show_ignored_only: showIgnored,
-          [ViewStyleNames.downloads]: view,
-          grid_items: gridItems,
-        };
+      const userConfig: UserConfigType = {
+        show_ignored_only: showIgnored,
+        [ViewStyleNames.downloads]: view,
+        grid_items: gridItems,
+      };
 
-        await updateUserConfig(userConfig);
-        setRefresh(true);
-      }
+      await updateUserConfig(userConfig);
+      setRefresh(true);
     })();
   }, [
     view,
@@ -152,9 +145,7 @@ const Download = () => {
 
   return (
     <>
-      <Helmet>
-        <title>TA | Downloads</title>
-      </Helmet>
+      <title>TA | Downloads</title>
       <ScrollToTopOnNavigate />
       <div className="boxed-content">
         <div className="title-bar">

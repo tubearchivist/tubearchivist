@@ -2,7 +2,6 @@ import { useState } from 'react';
 import Routes from '../configuration/routes/RouteList';
 import { useNavigate } from 'react-router-dom';
 import importColours, { ColourConstant, ColourVariants } from '../configuration/colours/getColours';
-import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
 import signIn from '../api/actions/signIn';
 
@@ -32,9 +31,7 @@ const Login = () => {
 
   return (
     <>
-      <Helmet>
-        <title>TA | Welcome</title>
-      </Helmet>
+      <title>TA | Welcome</title>
       <div className="boxed-content login-page">
         <img alt="tube-archivist-logo" />
         <h1>Tube Archivist</h1>

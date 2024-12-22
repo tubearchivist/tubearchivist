@@ -13,7 +13,6 @@ import Filterbar from '../components/Filterbar';
 import { ViewStyleNames, ViewStyles } from '../configuration/constants/ViewStyle';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
-import { Helmet } from 'react-helmet';
 import { SponsorBlockType } from './Video';
 
 export type PlayerType = {
@@ -169,9 +168,7 @@ const Home = () => {
 
   return (
     <>
-      <Helmet>
-        <title>TubeArchivist</title>
-      </Helmet>
+      <title>TubeArchivist</title>
       <ScrollToTopOnNavigate />
       <div className={`boxed-content ${gridView}`}>
         {continueVideos && continueVideos.length > 0 && (

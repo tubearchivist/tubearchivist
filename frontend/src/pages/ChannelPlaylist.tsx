@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react';
 import { OutletContextType } from './Base';
 import Pagination from '../components/Pagination';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
-import { Helmet } from 'react-helmet';
 import loadPlaylistList from '../api/loader/loadPlaylistList';
 import { PlaylistsResponseType } from './Playlists';
 import iconGridView from '/img/icon-gridview.svg';
@@ -27,7 +26,7 @@ const ChannelPlaylist = () => {
 
   const [showSubedOnly, setShowSubedOnly] = useState(userMeConfig.show_subed_only || false);
   const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_playlist || 'grid');
-  const [gridItems, setGridItems] = useState(userMeConfig.grid_items || 3);
+  const [gridItems] = useState(userMeConfig.grid_items || 3);
   const [refreshPlaylists, setRefreshPlaylists] = useState(false);
 
   const [playlistsResponse, setPlaylistsResponse] = useState<PlaylistsResponseType>();
@@ -53,9 +52,7 @@ const ChannelPlaylist = () => {
 
   return (
     <>
-      <Helmet>
-        <title>TA | Channel: Playlists</title>
-      </Helmet>
+      <title>TA | Channel: Playlists</title>
       <ScrollToTopOnNavigate />
       <div className={`boxed-content ${gridView}`}>
         <Notifications pageName="channel" includeReindex={true} />

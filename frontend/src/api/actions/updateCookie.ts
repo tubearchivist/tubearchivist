@@ -8,6 +8,7 @@ export type ValidatedCookieType = {
   status: boolean;
   validated: number;
   validated_str: string;
+  cookie_validated?: boolean;
 };
 
 const updateCookie = async (): Promise<ValidatedCookieType> => {

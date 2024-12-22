@@ -5,7 +5,6 @@ import loadUserMeConfig from '../api/loader/loadUserConfig';
 import { ColourConstant, ColourVariants } from '../configuration/colours/getColours';
 import SettingsNavigation from '../components/SettingsNavigation';
 import Notifications from '../components/Notifications';
-import { Helmet } from 'react-helmet';
 import Button from '../components/Button';
 import { OutletContextType } from './Base';
 
@@ -45,9 +44,7 @@ const SettingsUser = () => {
 
   return (
     <>
-      <Helmet>
-        <title>TA | User Settings</title>
-      </Helmet>
+      <title>TA | User Settings</title>
       <div className="boxed-content">
         <SettingsNavigation />
         <Notifications pageName={'all'} />
