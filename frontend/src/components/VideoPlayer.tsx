@@ -3,7 +3,7 @@ import updateWatchedState from '../api/actions/updateWatchedState';
 import { SponsorBlockSegmentType, SponsorBlockType, VideoResponseType } from '../pages/Video';
 import watchedThreshold from '../functions/watchedThreshold';
 import Notifications from './Notifications';
-import { Dispatch, SetStateAction, SyntheticEvent, useState } from 'react';
+import { Dispatch, Fragment, SetStateAction, SyntheticEvent, useState } from 'react';
 import formatTime from '../functions/formatTime';
 import { useSearchParams } from 'react-router-dom';
 import getApiUrl from '../configuration/getApiUrl';
@@ -249,13 +249,13 @@ const VideoPlayer = ({
 
             {Object.values(skippedSegments).map(({ from, to }, index) => {
               return (
-                <div key={`${from}-${to}-${index}`}>
+                <Fragment key={`${from}-${to}-${index}`}>
                   {from !== 0 && to !== 0 && (
                     <h3>
                       Skipped sponsor segment from {formatTime(from)} to {formatTime(to)}.
                     </h3>
                   )}
-                </div>
+                </Fragment>
               );
             })}
           </>
