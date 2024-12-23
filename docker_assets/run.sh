@@ -20,4 +20,4 @@ nginx &
 celery -A task.celery worker --loglevel=INFO --max-tasks-per-child 10 &
 celery -A task beat --loglevel=INFO \
     --scheduler django_celery_beat.schedulers:DatabaseScheduler &
-uwsgi --ini uwsgi.ini
+python backend_start.py

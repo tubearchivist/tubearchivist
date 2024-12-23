@@ -69,7 +69,7 @@ RUN sed -i 's/^user www\-data\;$/user root\;/' /etc/nginx/nginx.conf
 # copy application into container
 COPY ./backend /app
 COPY ./docker_assets/run.sh /app
-COPY ./docker_assets/uwsgi.ini /app
+COPY ./docker_assets/backend_start.py /app
 
 COPY --from=node-builder ./frontend/dist /app/static
 

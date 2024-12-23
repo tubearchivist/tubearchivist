@@ -27,7 +27,7 @@ class EnvironmentSettings:
     ENABLE_CAST: bool = bool(environ.get("ENABLE_CAST"))
     TZ: str = str(environ.get("TZ", "UTC"))
     TA_PORT: int = int(environ.get("TA_PORT", False))
-    TA_UWSGI_PORT: int = int(environ.get("TA_UWSGI_PORT", False))
+    TA_BACKEND_PORT: int = int(environ.get("TA_BACKEND_PORT", False))
     TA_USERNAME: str = str(environ.get("TA_USERNAME"))
     TA_PASSWORD: str = str(environ.get("TA_PASSWORD"))
 
@@ -75,7 +75,7 @@ class EnvironmentSettings:
             TZ: {self.TZ}
             ENABLE_CAST: {self.ENABLE_CAST}
             TA_PORT: {self.TA_PORT}
-            TA_UWSGI_PORT: {self.TA_UWSGI_PORT}
+            TA_BACKEND_PORT: {self.TA_BACKEND_PORT}
             TA_USERNAME: {self.TA_USERNAME}
             TA_PASSWORD: *****"""
         )
