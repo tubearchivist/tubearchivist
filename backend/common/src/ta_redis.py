@@ -17,10 +17,8 @@ class RedisBase:
     NAME_SPACE: str = EnvironmentSettings.REDIS_NAME_SPACE
 
     def __init__(self):
-        self.conn = redis.Redis(
-            host=EnvironmentSettings.REDIS_HOST,
-            port=EnvironmentSettings.REDIS_PORT,
-            decode_responses=True,
+        self.conn = redis.from_url(
+            url=EnvironmentSettings.REDIS_CON, decode_responses=True
         )
 
 

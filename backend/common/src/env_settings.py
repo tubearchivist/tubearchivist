@@ -37,8 +37,7 @@ class EnvironmentSettings:
     CACHE_DIR: str = str(environ.get("TA_CACHE_DIR", "/cache"))
 
     # Redis
-    REDIS_HOST: str = str(environ.get("REDIS_HOST"))
-    REDIS_PORT: int = int(environ.get("REDIS_PORT", 6379))
+    REDIS_CON: str = str(environ.get("REDIS_CON"))
     REDIS_NAME_SPACE: str = str(environ.get("REDIS_NAME_SPACE", "ta:"))
 
     # ElasticSearch
@@ -93,8 +92,7 @@ class EnvironmentSettings:
         """debug redis conf paths"""
         print(
             f"""
-            REDIS_HOST: {self.REDIS_HOST}
-            REDIS_PORT: {self.REDIS_PORT}
+            REDIS_CON: {self.REDIS_CON}
             REDIS_NAME_SPACE: {self.REDIS_NAME_SPACE}"""
         )
 
