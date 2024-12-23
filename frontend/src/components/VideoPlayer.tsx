@@ -178,9 +178,9 @@ const VideoPlayer = ({
               localStorage.setItem('playerSpeed', videoTag.currentTarget.playbackRate.toString());
             }}
             onLoadStart={(videoTag: VideoTag) => {
-              videoTag.currentTarget.volume = Number(localStorage.getItem('playerVolume')) ?? 1;
+              videoTag.currentTarget.volume = Number(localStorage.getItem('playerVolume') ?? 1)
               videoTag.currentTarget.playbackRate =
-                Number(localStorage.getItem('playerSpeed')) ?? 1;
+                Number(localStorage.getItem('playerSpeed') ?? 1);
             }}
             onTimeUpdate={handleTimeUpdate(
               videoId,
@@ -247,7 +247,7 @@ const VideoPlayer = ({
               </h4>
             )}
 
-            {Object.values(skippedSegments).map(({ from, to }) => {
+            {/* {Object.values(skippedSegments).map(({ from, to }) => {
               return (
                 <>
                   {from !== 0 && to !== 0 && (
@@ -257,7 +257,7 @@ const VideoPlayer = ({
                   )}
                 </>
               );
-            })}
+            })} */}
           </>
         )}
       </div>
