@@ -10,7 +10,6 @@ from http import cookiejar
 from io import StringIO
 
 import yt_dlp
-from appsettings.src import config as ConfigApp
 from common.src.env_settings import EnvironmentSettings
 from common.src.ta_redis import RedisArchivist
 
@@ -116,17 +115,21 @@ class CookieHandler:
 
     def set_cookie(self, cookie):
         """set cookie str and activate in config"""
+        from appsettings.src.config import AppConfig
+
         RedisArchivist().set_message("cookie", cookie, save=True)
-        ConfigApp.AppConfig().update_config({"downloads.cookie_import": True})
+        AppConfig().update_config({"downloads.cookie_import": True})
         self.config["downloads"]["cookie_import"] = True
         print("cookie: activated and stored in Redis")
 
     @staticmethod
     def revoke():
         """revoke cookie"""
+        from appsettings.src.config import AppConfig
+
         RedisArchivist().del_message("cookie")
         RedisArchivist().del_message("cookie:valid")
-        ConfigApp.AppConfig().update_config({"downloads.cookie_import": False})
+        AppConfig().update_config({"downloads.cookie_import": False})
         print("cookie: revoked")
 
     def validate(self):
