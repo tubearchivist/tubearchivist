@@ -57,12 +57,14 @@ class ApiBaseView(APIView):
         self.context = False
         self.pagination_handler = False
 
-    def get_document(self, document_id):
+    def get_document(self, document_id, progress_match=None):
         """get single document from es"""
         path = f"{self.search_base}{document_id}"
         response, status_code = ElasticWrap(path).get()
         try:
-            self.response["data"] = SearchProcess(response).process()
+            self.response["data"] = SearchProcess(
+                response, match_video_user_progress=progress_match
+            ).process()
         except KeyError:
             print(f"item not found: {document_id}")
             self.response["data"] = False
@@ -78,14 +80,16 @@ class ApiBaseView(APIView):
             }
         )
 
-    def get_document_list(self, request, pagination=True):
+    def get_document_list(self, request, pagination=True, progress_match=None):
         """get a list of results"""
         if pagination:
             self.initiate_pagination(request)
 
         es_handler = ElasticWrap(self.search_base)
         response, status_code = es_handler.get(data=self.data)
-        self.response["data"] = SearchProcess(response).process()
+        self.response["data"] = SearchProcess(
+            response, match_video_user_progress=progress_match
+        ).process()
         if self.response["data"]:
             self.status_code = status_code
         else:

@@ -8,15 +8,17 @@ import urllib.parse
 
 from common.src.env_settings import EnvironmentSettings
 from common.src.helper import date_parser, get_duration_str
+from common.src.ta_redis import RedisArchivist
 from download.src.thumbnails import ThumbManager
 
 
 class SearchProcess:
     """process search results"""
 
-    def __init__(self, response):
+    def __init__(self, response, match_video_user_progress: None | int = None):
         self.response = response
         self.processed = False
+        self.position_index = self.get_user_progress(match_video_user_progress)
 
     def process(self):
         """detect type and process"""
@@ -32,6 +34,19 @@ class SearchProcess:
                 self.processed.append(self._process_result(result))
 
         return self.processed
+
+    def get_user_progress(self, match_video_user_progress) -> dict | None:
+        """get user video watch progress"""
+        if not match_video_user_progress:
+            return None
+
+        query = f"{match_video_user_progress}:progress:*"
+        all_positions = RedisArchivist().list_items(query)
+        if not all_positions:
+            return None
+
+        pos_index = {i["youtube_id"]: i["position"] for i in all_positions}
+        return pos_index
 
     def _process_result(self, result):
         """detect which type of data to process"""
@@ -104,6 +119,13 @@ class SearchProcess:
                 "vid_thumb_url": f"{cache_root}/{vid_thumb_url}",
             }
         )
+
+        if self.position_index:
+            player_position = self.position_index.get(video_id)
+            total = video_dict["player"].get("duration")
+            if player_position and total:
+                progress = 100 * (player_position / total)
+                video_dict["player"].update({"progress": progress})
 
         return dict(sorted(video_dict.items()))
 

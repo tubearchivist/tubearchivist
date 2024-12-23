@@ -30,7 +30,7 @@ class VideoApiListView(ApiBaseView):
             return Response({"error": str(err)}, status=400)
 
         self.data = data
-        self.get_document_list(request)
+        self.get_document_list(request, progress_match=request.user.id)
 
         return Response(self.response)
 
@@ -46,7 +46,7 @@ class VideoApiView(ApiBaseView):
     def get(self, request, video_id):
         # pylint: disable=unused-argument
         """get request"""
-        self.get_document(video_id)
+        self.get_document(video_id, progress_match=request.user.id)
         return Response(self.response, status=self.status_code)
 
     def delete(self, request, video_id):
