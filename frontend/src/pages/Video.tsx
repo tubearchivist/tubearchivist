@@ -2,7 +2,7 @@ import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom
 import loadVideoById from '../api/loader/loadVideoById';
 import { Fragment, useEffect, useState } from 'react';
 import { ConfigType, VideoType } from './Home';
-import VideoPlayer, { VideoProgressType } from '../components/VideoPlayer';
+import VideoPlayer from '../components/VideoPlayer';
 import iconEye from '/img/icon-eye.svg';
 import iconThumb from '/img/icon-thumb.svg';
 import iconStarFull from '/img/icon-star-full.svg';
@@ -18,7 +18,6 @@ import VideoList from '../components/VideoList';
 import updateWatchedState from '../api/actions/updateWatchedState';
 import humanFileSize from '../functions/humanFileSize';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
-import loadVideoProgressById from '../api/loader/loadVideoProgressById';
 import ChannelOverview from '../components/ChannelOverview';
 import deleteVideo from '../api/actions/deleteVideo';
 import capitalizeFirstLetter from '../functions/capitalizeFirstLetter';
@@ -137,7 +136,6 @@ const Video = () => {
 
   const [videoResponse, setVideoResponse] = useState<VideoResponseType>();
   const [simmilarVideos, setSimmilarVideos] = useState<SimilarVideosResponseType>();
-  const [videoProgress, setVideoProgress] = useState<VideoProgressType>();
   const [videoPlaylistNav, setVideoPlaylistNav] = useState<VideoNavResponseType[]>();
   const [customPlaylistsResponse, setCustomPlaylistsResponse] = useState<PlaylistsResponseType>();
   const [commentsResponse, setCommentsResponse] = useState<CommentsResponseType>();
@@ -148,14 +146,12 @@ const Video = () => {
 
       const videoResponse = await loadVideoById(videoId);
       const simmilarVideosResponse = await loadSimmilarVideosById(videoId);
-      const videoProgressResponse = await loadVideoProgressById(videoId);
       const customPlaylistsResponse = await loadPlaylistList({ type: 'custom' });
       const commentsResponse = await loadCommentsbyVideoId(videoId);
       const videoNavResponse = await loadVideoNav(videoId);
 
       setVideoResponse(videoResponse);
       setSimmilarVideos(simmilarVideosResponse);
-      setVideoProgress(videoProgressResponse);
       setVideoPlaylistNav(videoNavResponse);
       setCustomPlaylistsResponse(customPlaylistsResponse);
       setCommentsResponse(commentsResponse);
@@ -219,7 +215,6 @@ const Video = () => {
       {!loading && (
         <VideoPlayer
           video={videoResponse}
-          videoProgress={videoProgress}
           sponsorBlock={sponsorBlock}
           autoplay={playlistAutoplay}
           onVideoEnd={() => {
@@ -233,7 +228,6 @@ const Video = () => {
           {cast && (
             <GoogleCast
               video={video}
-              videoProgress={videoProgress}
               setRefresh={() => {
                 setRefreshVideoList(true);
               }}

@@ -99,15 +99,8 @@ const handleTimeUpdate =
     }
   };
 
-export type VideoProgressType = {
-  youtube_id: string;
-  user_id: number;
-  position: number;
-};
-
 type VideoPlayerProps = {
   video: VideoResponseType;
-  videoProgress?: VideoProgressType;
   sponsorBlock?: SponsorBlockType;
   embed?: boolean;
   autoplay?: boolean;
@@ -116,7 +109,6 @@ type VideoPlayerProps = {
 
 const VideoPlayer = ({
   video,
-  videoProgress,
   sponsorBlock,
   embed,
   autoplay = false,
@@ -134,7 +126,8 @@ const VideoPlayer = ({
   const duration = video.data.player.duration;
   const videoSubtitles = video.data.subtitles;
 
-  let videoSrcProgress = Number(videoProgress?.position) > 0 ? Number(videoProgress?.position) : '';
+  let videoSrcProgress =
+    Number(video.data.player?.position) > 0 ? Number(video.data.player?.position) : '';
 
   if (searchParamVideoProgress !== null) {
     videoSrcProgress = searchParamVideoProgress;
@@ -178,9 +171,10 @@ const VideoPlayer = ({
               localStorage.setItem('playerSpeed', videoTag.currentTarget.playbackRate.toString());
             }}
             onLoadStart={(videoTag: VideoTag) => {
-              videoTag.currentTarget.volume = Number(localStorage.getItem('playerVolume') ?? 1)
-              videoTag.currentTarget.playbackRate =
-                Number(localStorage.getItem('playerSpeed') ?? 1);
+              videoTag.currentTarget.volume = Number(localStorage.getItem('playerVolume') ?? 1);
+              videoTag.currentTarget.playbackRate = Number(
+                localStorage.getItem('playerSpeed') ?? 1,
+              );
             }}
             onTimeUpdate={handleTimeUpdate(
               videoId,

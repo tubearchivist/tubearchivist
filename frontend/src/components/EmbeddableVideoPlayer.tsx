@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { VideoResponseType } from '../pages/Video';
-import VideoPlayer, { VideoProgressType } from './VideoPlayer';
+import VideoPlayer from './VideoPlayer';
 import loadVideoById from '../api/loader/loadVideoById';
-import loadVideoProgressById from '../api/loader/loadVideoProgressById';
 import iconClose from '/img/icon-close.svg';
 import iconEye from '/img/icon-eye.svg';
 import iconThumb from '/img/icon-thumb.svg';
@@ -30,13 +29,11 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
   const [refresh, setRefresh] = useState(false);
 
   const [videoResponse, setVideoResponse] = useState<VideoResponseType>();
-  const [videoProgress, setVideoProgress] = useState<VideoProgressType>();
   const [playlists, setPlaylists] = useState<PlaylistList>();
 
   useEffect(() => {
     (async () => {
       const videoResponse = await loadVideoById(videoId);
-      const videoProgress = await loadVideoProgressById(videoId);
 
       const playlistIds = videoResponse.data.playlist;
       if (playlistIds !== undefined) {
@@ -63,7 +60,6 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
       }
 
       setVideoResponse(videoResponse);
-      setVideoProgress(videoProgress);
 
       setRefresh(false);
     })();
@@ -91,12 +87,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
     <>
       <div className="player-wrapper">
         <div className="video-player">
-          <VideoPlayer
-            video={videoResponse}
-            videoProgress={videoProgress}
-            sponsorBlock={sponsorblock}
-            embed={true}
-          />
+          <VideoPlayer video={videoResponse} sponsorBlock={sponsorblock} embed={true} />
 
           <div className="player-title boxed-content">
             <img
@@ -123,7 +114,6 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
             {cast && (
               <GoogleCast
                 video={video}
-                videoProgress={videoProgress}
                 setRefresh={() => {
                   setRefresh(true);
                 }}

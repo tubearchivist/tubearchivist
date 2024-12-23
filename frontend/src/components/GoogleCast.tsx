@@ -3,7 +3,6 @@ import { VideoType } from '../pages/Home';
 import updateWatchedState from '../api/actions/updateWatchedState';
 import updateVideoProgressById from '../api/actions/updateVideoProgressById';
 import watchedThreshold from '../functions/watchedThreshold';
-import { VideoProgressType } from './VideoPlayer';
 
 const getURL = () => {
   return window.location.origin;
@@ -93,11 +92,10 @@ async function castVideoPaused(
 
 type GoogleCastProps = {
   video?: VideoType;
-  videoProgress?: VideoProgressType;
   setRefresh?: () => void;
 };
 
-const GoogleCast = ({ video, videoProgress, setRefresh }: GoogleCastProps) => {
+const GoogleCast = ({ video, setRefresh }: GoogleCastProps) => {
   const [isConnected, setIsConnected] = useState(false);
 
   const setup = useCallback(() => {
@@ -174,7 +172,7 @@ const GoogleCast = ({ video, videoProgress, setRefresh }: GoogleCastProps) => {
 
     const request = new chrome.cast.media.LoadRequest(mediaInfo); // Create request with the previously set MediaInfo.
     // request.queueData = new chrome.cast.media.QueueData(); // See https://developers.google.com/cast/docs/reference/web_sender/chrome.cast.media.QueueData for playlist support.
-    request.currentTime = shiftCurrentTime(videoProgress?.position); // Set video start position based on the browser video position
+    request.currentTime = shiftCurrentTime(video?.player?.position); // Set video start position based on the browser video position
     // request.activeTrackIds = contentActiveSubtitle; // Set active subtitle based on video player
 
     castSession.loadMedia(request).then(

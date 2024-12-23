@@ -20,6 +20,7 @@ export type PlayerType = {
   duration: number;
   duration_str: string;
   progress: number;
+  position: number;
 };
 
 export type StatsType = {
