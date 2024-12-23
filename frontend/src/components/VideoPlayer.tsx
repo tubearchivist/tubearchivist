@@ -247,17 +247,17 @@ const VideoPlayer = ({
               </h4>
             )}
 
-            {/* {Object.values(skippedSegments).map(({ from, to }) => {
+            {Object.values(skippedSegments).map(({ from, to }, index) => {
               return (
-                <>
+                <div key={`${from}-${to}-${index}`}>
                   {from !== 0 && to !== 0 && (
                     <h3>
                       Skipped sponsor segment from {formatTime(from)} to {formatTime(to)}.
                     </h3>
                   )}
-                </>
+                </div>
               );
-            })} */}
+            })}
           </>
         )}
       </div>
