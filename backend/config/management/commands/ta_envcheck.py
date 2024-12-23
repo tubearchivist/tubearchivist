@@ -8,6 +8,7 @@ Functionality:
 
 import os
 import re
+from time import sleep
 
 from common.src.env_settings import EnvironmentSettings
 from django.core.management.base import BaseCommand, CommandError
@@ -60,9 +61,11 @@ EXPECTED_ENV_VARS = [
     "ES_URL",
     "TA_HOST",
 ]
+UNEXPECTED_ENV_VARS = {
+    "TA_UWSGI_PORT": "Has been replaced with 'TA_BACKEND_PORT'"
+}
 INST = "https://github.com/tubearchivist/tubearchivist#installing-and-updating"
 NGINX = "/etc/nginx/sites-available/default"
-UWSGI = "/app/uwsgi.ini"
 
 
 class Command(BaseCommand):
@@ -76,9 +79,10 @@ class Command(BaseCommand):
         self.stdout.write(LOGO)
         self.stdout.write(TOPIC)
         self._expected_vars()
+        self._unexpected_vars()
         self._elastic_user_overwrite()
         self._ta_port_overwrite()
-        self._ta_uwsgi_overwrite()
+        self._ta_backend_port_overwrite()
         self._enable_cast_overwrite()
         self._create_superuser()
 
@@ -90,20 +94,41 @@ class Command(BaseCommand):
             if not env.get(var):
                 message = f"    🗙 expected env var {var} not set\n    {INST}"
                 self.stdout.write(self.style.ERROR(message))
+                sleep(60)
                 raise CommandError(message)
 
         message = "    ✓ all expected env vars are set"
         self.stdout.write(self.style.SUCCESS(message))
 
+    def _unexpected_vars(self):
+        """check for unexpected env vars"""
+        self.stdout.write("[2] checking for unexpected env vars")
+        for var, message in UNEXPECTED_ENV_VARS.items():
+            if not os.environ.get(var):
+                continue
+
+            message = (
+                f"    🗙 unexpected env var {var} found\n"
+                f"    {message} \n"
+                "    see release notes for a list of all changes."
+            )
+
+            self.stdout.write(self.style.ERROR(message))
+            sleep(60)
+            raise CommandError(message)
+
+        message = "    ✓ no unexpected env vars found"
+        self.stdout.write(self.style.SUCCESS(message))
+
     def _elastic_user_overwrite(self):
         """check for ELASTIC_USER overwrite"""
-        self.stdout.write("[2] check ES user overwrite")
+        self.stdout.write("[3] check ES user overwrite")
         env = EnvironmentSettings.ES_USER
         self.stdout.write(self.style.SUCCESS(f"    ✓ ES user is set to {env}"))
 
     def _ta_port_overwrite(self):
         """set TA_PORT overwrite for nginx"""
-        self.stdout.write("[3] check TA_PORT overwrite")
+        self.stdout.write("[4] check TA_PORT overwrite")
         overwrite = EnvironmentSettings.TA_PORT
         if not overwrite:
             self.stdout.write(self.style.SUCCESS("    TA_PORT is not set"))
@@ -119,35 +144,30 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(message))
 
-    def _ta_uwsgi_overwrite(self):
-        """set TA_UWSGI_PORT overwrite"""
-        self.stdout.write("[4] check TA_UWSGI_PORT overwrite")
-        overwrite = EnvironmentSettings.TA_UWSGI_PORT
+    def _ta_backend_port_overwrite(self):
+        """set TA_BACKEND_PORT overwrite"""
+        self.stdout.write("[5] check TA_BACKEND_PORT overwrite")
+        overwrite = EnvironmentSettings.TA_BACKEND_PORT
         if not overwrite:
-            message = "    TA_UWSGI_PORT is not set"
+            message = "    TA_BACKEND_PORT is not set"
             self.stdout.write(self.style.SUCCESS(message))
             return
 
-        # nginx
-        regex = re.compile(r"uwsgi_pass localhost:[0-9]{1,5}")
-        to_overwrite = f"uwsgi_pass localhost:{overwrite}"
+        # modify nginx conf
+        regex = re.compile(r"proxy_pass http://localhost:[0-9]{1,5}")
+        to_overwrite = f"proxy_pass http://localhost:{overwrite}"
         changed = file_overwrite(NGINX, regex, to_overwrite)
 
-        # uwsgi
-        regex = re.compile(r"socket = :[0-9]{1,5}")
-        to_overwrite = f"socket = :{overwrite}"
-        changed = file_overwrite(UWSGI, regex, to_overwrite)
-
         if changed:
-            message = f"    ✓ TA_UWSGI_PORT changed to {overwrite}"
+            message = f"    ✓ TA_BACKEND_PORT changed to {overwrite}"
         else:
-            message = f"    ✓ TA_UWSGI_PORT already set to {overwrite}"
+            message = f"    ✓ TA_BACKEND_PORT already set to {overwrite}"
 
         self.stdout.write(self.style.SUCCESS(message))
 
     def _enable_cast_overwrite(self):
         """cast workaround, remove auth for static files in nginx"""
-        self.stdout.write("[5] check ENABLE_CAST overwrite")
+        self.stdout.write("[6] check ENABLE_CAST overwrite")
         overwrite = EnvironmentSettings.ENABLE_CAST
         if not overwrite:
             self.stdout.write(self.style.SUCCESS("    ENABLE_CAST is not set"))
@@ -164,7 +184,7 @@ class Command(BaseCommand):
 
     def _create_superuser(self):
         """create superuser if not exist"""
-        self.stdout.write("[6] create superuser")
+        self.stdout.write("[7] create superuser")
         is_created = Account.objects.filter(is_superuser=True)
         if is_created:
             message = "    superuser already created"

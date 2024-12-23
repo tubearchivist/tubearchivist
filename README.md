@@ -57,7 +57,7 @@ Take a look at the example [docker-compose.yml](https://github.com/tubearchivist
 | REDIS_HOST | Hostname for Redis | Required |
 | TZ | Set your timezone for the scheduler | Required |
 | TA_PORT | Overwrite Nginx port | Optional |
-| TA_UWSGI_PORT | Overwrite container internal uwsgi port | Optional |
+| TA_BACKEND_PORT | Overwrite container internal backend server port | Optional |
 | TA_ENABLE_AUTH_PROXY | Enables support for forwarding auth in reverse proxies | [Read more](https://docs.tubearchivist.com/configuration/forward-auth/) |
 | TA_AUTH_PROXY_USERNAME_HEADER | Header containing username to log in | Optional |
 | TA_AUTH_PROXY_LOGOUT_URL | Logout URL for forwarded auth | Optional |
