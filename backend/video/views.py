@@ -98,20 +98,6 @@ class VideoProgressView(ApiBaseView):
     handle progress status for video
     """
 
-    def get(self, request, video_id):
-        """get progress for a single video"""
-        user_id = request.user.id
-        key = f"{user_id}:progress:{video_id}"
-        video_progress = RedisArchivist().get_message_dict(key)
-        position = video_progress.get("position", 0)
-
-        self.response = {
-            "youtube_id": video_id,
-            "user_id": user_id,
-            "position": position,
-        }
-        return Response(self.response)
-
     def post(self, request, video_id):
         """set progress position in redis"""
         position = request.data.get("position", 0)

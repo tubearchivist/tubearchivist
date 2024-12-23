@@ -125,7 +125,12 @@ class SearchProcess:
             total = video_dict["player"].get("duration")
             if player_position and total:
                 progress = 100 * (player_position / total)
-                video_dict["player"].update({"progress": progress})
+                video_dict["player"].update(
+                    {
+                        "progress": progress,
+                        "position": player_position,
+                    }
+                )
 
         return dict(sorted(video_dict.items()))
 
