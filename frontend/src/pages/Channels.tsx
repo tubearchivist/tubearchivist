@@ -12,6 +12,7 @@ import ChannelList from '../components/ChannelList';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import Notifications from '../components/Notifications';
 import Button from '../components/Button';
+import updateChannelSubscription from '../api/actions/updateChannelSubscription';
 
 type ChannelOverwritesType = {
   download_format?: string;
@@ -62,6 +63,7 @@ const Channels = () => {
   const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_channel || 'grid');
   const [showAddForm, setShowAddForm] = useState(false);
   const [refresh, setRefresh] = useState(false);
+  const [channelsToSubscribeTo, setChannelsToSubscribeTo] = useState('');
 
   const channels = channelListResponse?.data;
   const pagination = channelListResponse?.paginate;
@@ -123,10 +125,25 @@ const Channels = () => {
                 <div className="show-form">
                   <div>
                     <label>Subscribe to channels:</label>
-                    <textarea rows={3} placeholder="Input channel ID, URL or Video of a channel" />
+                    <textarea
+                      value={channelsToSubscribeTo}
+                      onChange={e => {
+                        setChannelsToSubscribeTo(e.currentTarget.value);
+                      }}
+                      rows={3}
+                      placeholder="Input channel ID, URL or Video of a channel"
+                    />
                   </div>
 
-                  <Button label="Subscribe" type="submit" />
+                  <Button
+                    label="Subscribe"
+                    type="submit"
+                    onClick={async () => {
+                      await updateChannelSubscription(channelsToSubscribeTo, true);
+
+                      setRefresh(true);
+                    }}
+                  />
                 </div>
               )}
             </div>

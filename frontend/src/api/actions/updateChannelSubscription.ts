@@ -3,9 +3,22 @@ import getApiUrl from '../../configuration/getApiUrl';
 import getFetchCredentials from '../../configuration/getFetchCredentials';
 import getCookie from '../../functions/getCookie';
 
-const updateChannelSubscription = async (channelId: string, status: boolean) => {
+const updateChannelSubscription = async (channelIds: string, status: boolean) => {
   const apiUrl = getApiUrl();
   const csrfCookie = getCookie('csrftoken');
+
+  const channels = [];
+  const containsMultiple = channelIds.includes('\n');
+
+  if (containsMultiple) {
+    const youtubeChannelIds = channelIds.split('\n');
+
+    youtubeChannelIds.forEach(channelId => {
+      channels.push({ channel_id: channelId, channel_subscribed: status });
+    });
+  } else {
+    channels.push({ channel_id: channelIds, channel_subscribed: status });
+  }
 
   const response = await fetch(`${apiUrl}/api/channel/`, {
     method: 'POST',
@@ -16,7 +29,7 @@ const updateChannelSubscription = async (channelId: string, status: boolean) => 
     credentials: getFetchCredentials(),
 
     body: JSON.stringify({
-      data: [{ channel_id: channelId, channel_subscribed: status }],
+      data: [...channels],
     }),
   });
 
