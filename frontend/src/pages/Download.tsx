@@ -89,14 +89,21 @@ const Download = () => {
 
   useEffect(() => {
     (async () => {
-      const userConfig: UserConfigType = {
-        show_ignored_only: showIgnored,
-        [ViewStyleNames.downloads]: view,
-        grid_items: gridItems,
-      };
+      if (
+        userMeConfig.show_ignored_only !== showIgnored ||
+        userMeConfig.grid_items !== gridItems ||
+        // @ts-ignore
+        userMeConfig[ViewStyleNames.downloads] !== view
+      ) {
+        const userConfig: UserConfigType = {
+          show_ignored_only: showIgnored,
+          [ViewStyleNames.downloads]: view,
+          grid_items: gridItems,
+        };
 
-      await updateUserConfig(userConfig);
-      setRefresh(true);
+        await updateUserConfig(userConfig);
+        setRefresh(true);
+      }
     })();
   }, [
     view,

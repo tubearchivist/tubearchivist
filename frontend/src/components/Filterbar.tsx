@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useRevalidator } from 'react-router-dom';
 import iconSort from '/img/icon-sort.svg';
 import iconAdd from '/img/icon-add.svg';
 import iconSubstract from '/img/icon-substract.svg';
@@ -46,20 +47,33 @@ const Filterbar = ({
   setGridItems,
   setRefresh,
 }: FilterbarProps) => {
+  const revalidator = useRevalidator();
+
   useEffect(() => {
     (async () => {
-      const userConfig: UserConfigType = {
-        hide_watched: hideWatched,
-        [viewStyleName.toString()]: view,
-        grid_items: gridItems,
-        sort_by: sortBy,
-        sort_order: sortOrder,
-      };
+      if (
+        userMeConfig.hide_watched !== hideWatched ||
+        userMeConfig.grid_items !== gridItems ||
+        userMeConfig.sort_by !== sortBy ||
+        userMeConfig.sort_order !== sortOrder ||
+        // @ts-ignore
+        userMeConfig[viewStyleName.toString()] !== view
+      ) {
+        const userConfig: UserConfigType = {
+          hide_watched: hideWatched,
+          [viewStyleName.toString()]: view,
+          grid_items: gridItems,
+          sort_by: sortBy,
+          sort_order: sortOrder,
+        };
 
-      await updateUserConfig(userConfig);
-      setRefresh?.(true);
+        await updateUserConfig(userConfig);
+        setRefresh?.(true);
+
+        revalidator.revalidate();
+      }
     })();
-  }, [hideWatched, view, gridItems, sortBy, sortOrder, viewStyleName, setRefresh, userMeConfig]);
+  }, [hideWatched, view, gridItems, sortBy, sortOrder, viewStyleName]);
 
   return (
     <div className="view-controls three">
