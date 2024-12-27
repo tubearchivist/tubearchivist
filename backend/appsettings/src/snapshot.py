@@ -150,7 +150,7 @@ class ElasticSnapshot:
         if statuscode == 200:
             print(f"snapshot: executing now: {response}")
 
-        if wait:
+        if wait and "snapshot_name" in response:
             self._wait_for_snapshot(response["snapshot_name"])
 
         return response
