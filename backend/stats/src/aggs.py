@@ -55,6 +55,8 @@ class Video(AggBase):
     def process(self):
         """process aggregation"""
         aggregations = self.get()
+        if not aggregations:
+            return None
 
         duration = int(aggregations["duration"]["value"])
         response = {
@@ -109,6 +111,8 @@ class Channel(AggBase):
     def process(self):
         """process aggregation"""
         aggregations = self.get()
+        if not aggregations:
+            return None
 
         response = {
             "doc_count": aggregations["channel_count"].get("value"),
@@ -140,6 +144,9 @@ class Playlist(AggBase):
     def process(self):
         """process aggregation"""
         aggregations = self.get()
+        if not aggregations:
+            return None
+
         response = {"doc_count": aggregations["playlist_count"].get("value")}
         for bucket in aggregations["playlist_active"]["buckets"]:
             key = f"active_{bucket['key_as_string']}"
@@ -171,6 +178,9 @@ class Download(AggBase):
         """process aggregation"""
         aggregations = self.get()
         response = {}
+        if not aggregations:
+            return None
+
         for bucket in aggregations["status"]["buckets"]:
             response.update({bucket["key"]: bucket.get("doc_count")})
 
@@ -209,9 +219,11 @@ class WatchProgress(AggBase):
     def process(self):
         """make the call"""
         aggregations = self.get()
-        buckets = aggregations[self.name]["buckets"]
-
         response = {}
+        if not aggregations:
+            return None
+
+        buckets = aggregations[self.name]["buckets"]
         all_duration = int(aggregations["total_duration"].get("value"))
         response.update(
             {
@@ -287,6 +299,9 @@ class DownloadHist(AggBase):
     def process(self):
         """process query"""
         aggregations = self.get()
+        if not aggregations:
+            return None
+
         buckets = aggregations[self.name]["buckets"]
 
         response = [
@@ -334,6 +349,9 @@ class BiggestChannel(AggBase):
         """process aggregation, order_by validated in the view"""
 
         aggregations = self.get()
+        if not aggregations:
+            return None
+
         buckets = aggregations[self.name]["buckets"]
 
         response = [
