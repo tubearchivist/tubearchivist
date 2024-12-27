@@ -3,9 +3,22 @@ import getApiUrl from '../../configuration/getApiUrl';
 import getFetchCredentials from '../../configuration/getFetchCredentials';
 import getCookie from '../../functions/getCookie';
 
-const updatePlaylistSubscription = async (playlistId: string, status: boolean) => {
+const updatePlaylistSubscription = async (playlistIds: string, status: boolean) => {
   const apiUrl = getApiUrl();
   const csrfCookie = getCookie('csrftoken');
+
+  const playlists = [];
+  const containsMultiple = playlistIds.includes('\n');
+
+  if (containsMultiple) {
+    const youtubePlaylistIds = playlistIds.split('\n');
+
+    youtubePlaylistIds.forEach(playlistId => {
+      playlists.push({ playlist_id: playlistId, playlist_subscribed: status });
+    });
+  } else {
+    playlists.push({ playlist_id: playlistIds, playlist_subscribed: status });
+  }
 
   const response = await fetch(`${apiUrl}/api/playlist/`, {
     method: 'POST',
@@ -16,7 +29,7 @@ const updatePlaylistSubscription = async (playlistId: string, status: boolean) =
     credentials: getFetchCredentials(),
 
     body: JSON.stringify({
-      data: [{ playlist_id: playlistId, playlist_subscribed: status }],
+      data: [...playlists],
     }),
   });
 

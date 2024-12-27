@@ -130,6 +130,7 @@ const Playlists = () => {
                       type="submit"
                       onClick={async () => {
                         await updatePlaylistSubscription(playlistsToAddText, true);
+                        setRefresh(true);
                       }}
                     />
                   </div>
