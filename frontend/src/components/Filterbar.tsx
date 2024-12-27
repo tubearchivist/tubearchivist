@@ -52,10 +52,10 @@ const Filterbar = ({
   useEffect(() => {
     (async () => {
       if (
-        userMeConfig.hide_watched !== hideWatched ||
-        userMeConfig.grid_items !== gridItems ||
-        userMeConfig.sort_by !== sortBy ||
-        userMeConfig.sort_order !== sortOrder ||
+        (hideWatched !== undefined && userMeConfig.hide_watched !== hideWatched) ||
+        (gridItems !== undefined && userMeConfig.grid_items !== gridItems) ||
+        (sortBy !== undefined && userMeConfig.sort_by !== sortBy) ||
+        (sortOrder !== undefined && userMeConfig.sort_order !== sortOrder) ||
         // @ts-ignore
         userMeConfig[viewStyleName.toString()] !== view
       ) {
