@@ -27,12 +27,14 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
   const [, setSearchParams] = useSearchParams();
 
   const [refresh, setRefresh] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [videoResponse, setVideoResponse] = useState<VideoResponseType>();
   const [playlists, setPlaylists] = useState<PlaylistList>();
 
   useEffect(() => {
     (async () => {
+      setLoading(true);
       const videoResponse = await loadVideoById(videoId);
 
       const playlistIds = videoResponse.data.playlist;
@@ -62,6 +64,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
       setVideoResponse(videoResponse);
 
       setRefresh(false);
+      setLoading(false);
     })();
   }, [videoId, refresh]);
 
@@ -87,7 +90,14 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
     <>
       <div className="player-wrapper">
         <div className="video-player">
-          <VideoPlayer video={videoResponse} sponsorBlock={sponsorblock} embed={true} />
+          {!loading && (
+            <VideoPlayer
+              video={videoResponse}
+              sponsorBlock={sponsorblock}
+              embed={true}
+              autoplay={true}
+            />
+          )}
 
           <div className="player-title boxed-content">
             <img

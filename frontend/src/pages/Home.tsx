@@ -171,6 +171,9 @@ const Home = () => {
     <>
       <title>TubeArchivist</title>
       <ScrollToTopOnNavigate />
+
+      {showEmbeddedVideo && <EmbeddableVideoPlayer videoId={videoId} />}
+
       <div className={`boxed-content ${gridView}`}>
         {continueVideos && continueVideos.length > 0 && (
           <>
@@ -211,8 +214,6 @@ const Home = () => {
           setRefresh={setRefreshVideoList}
         />
       </div>
-
-      {showEmbeddedVideo && <EmbeddableVideoPlayer videoId={videoId} />}
 
       <div className={`boxed-content ${gridView}`}>
         <div className={`video-list ${view} ${gridViewGrid}`}>

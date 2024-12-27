@@ -39,6 +39,8 @@ const VideoListItem = ({
       <a
         onClick={() => {
           setSearchParams({ videoId: video.youtube_id });
+
+          window.scroll({ top: 0, left: 0, behavior: 'smooth' });
         }}
       >
         <div className={`video-thumb-wrap ${viewLayout}`}>
