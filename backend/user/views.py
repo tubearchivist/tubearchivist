@@ -1,7 +1,7 @@
 """all user api views"""
 
 from common.views import ApiBaseView
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import AllowAny
@@ -82,3 +82,14 @@ class LoginApiView(APIView):
             return Response({"message": "Login successful"}, status=200)
 
         return Response({"message": "Invalid credentials"}, status=400)
+
+
+class LogoutApiView(ApiBaseView):
+    """resolves to /api/user/logout/
+    POST: handle logout
+    """
+
+    def post(self, request, *args, **kwargs):
+        """logout on post request"""
+        logout(request)
+        return Response({"message": "Successfully logged out."}, status=200)

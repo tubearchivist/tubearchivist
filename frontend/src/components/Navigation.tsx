@@ -1,15 +1,24 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import iconSearch from '/img/icon-search.svg';
 import iconGear from '/img/icon-gear.svg';
 import iconExit from '/img/icon-exit.svg';
 import Routes from '../configuration/routes/RouteList';
 import NavigationItem from './NavigationItem';
+import logOut from '../api/actions/logOut';
 
 interface NavigationProps {
   isAdmin: boolean;
 }
 
 const Navigation = ({ isAdmin }: NavigationProps) => {
+
+  const navigate = useNavigate();
+  const handleLogout = async (event: { preventDefault: () => void }) => {
+    event.preventDefault();
+    await logOut();
+    navigate(Routes.Login)
+  }
+
   return (
     <div className="boxed-content">
       <Link to={Routes.Home}>
@@ -30,9 +39,7 @@ const Navigation = ({ isAdmin }: NavigationProps) => {
           <Link to={Routes.SettingsDashboard}>
             <img src={iconGear} alt="gear-icon" title="Settings" />
           </Link>
-          <Link to={Routes.Logout}>
-            <img className="alert-hover" src={iconExit} alt="exit-icon" title="Logout" />
-          </Link>
+          <img className="alert-hover" src={iconExit} alt="exit-icon" title="Logout" onClick={handleLogout} />
         </div>
       </div>
     </div>

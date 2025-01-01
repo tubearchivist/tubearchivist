@@ -319,6 +319,7 @@ button:hover {
 
 .alert-hover:hover {
   filter: var(--img-filter-error);
+  cursor: pointer;
 }
 
 /* top of page */
