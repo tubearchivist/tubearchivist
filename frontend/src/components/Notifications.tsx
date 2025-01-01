@@ -66,14 +66,14 @@ const Notifications = ({
         >
           <h3>{notification.title}</h3>
           <p>
-            {notification.messages.map(message => {
+            {notification.messages.map?.(message => {
               return (
                 <Fragment key={message}>
                   {message}
                   <br />
                 </Fragment>
               );
-            })}
+            }) || notification.messages}
           </p>
           <div className="task-control-icons">
             {notification['api_stop'] && notification.command !== 'STOP' && (
