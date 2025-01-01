@@ -73,7 +73,7 @@ const Filterbar = ({
         revalidator.revalidate();
       }
     })();
-  }, [hideWatched, view, gridItems, sortBy, sortOrder, viewStyleName]);
+  }, [hideWatched, view, gridItems, sortBy, sortOrder]);
 
   return (
     <div className="view-controls three">
