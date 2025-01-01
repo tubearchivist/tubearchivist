@@ -52,7 +52,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const [hideWatched, setHideWatched] = useState(userMeConfig.hide_watched || false);
   const [sortBy, setSortBy] = useState<SortByType>(userMeConfig.sort_by || 'published');
   const [sortOrder, setSortOrder] = useState<SortOrderType>(userMeConfig.sort_order || 'asc');
-  const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_home || 'grid');
+  const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_channel || 'grid');
   const [gridItems, setGridItems] = useState(userMeConfig.grid_items || 3);
   const [refresh, setRefresh] = useState(false);
 
