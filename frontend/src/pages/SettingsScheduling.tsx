@@ -23,11 +23,11 @@ const SettingsScheduling = () => {
   const [updateSubscribed, setUpdateSubscribed] = useState<string | undefined>();
   const [downloadPending, setDownloadPending] = useState<string | undefined>();
   const [checkReindex, setCheckReindex] = useState<string | undefined>();
-  const [checkReindexDays, setCheckReindexDays] = useState<number | undefined>(undefined);
+  const [checkReindexDays, setCheckReindexDays] = useState<number | undefined>();
   const [thumbnailCheck, setThumbnailCheck] = useState<string | undefined>();
   const [zipBackup, setZipBackup] = useState<string | undefined>();
-  const [zipBackupDays, setZipBackupDays] = useState<number | undefined>(undefined);
-  const [notificationUrl, setNotificationUrl] = useState<string | undefined>(undefined);
+  const [zipBackupDays, setZipBackupDays] = useState<number | undefined>();
+  const [notificationUrl, setNotificationUrl] = useState<string | undefined>();
   const [notificationTask, setNotificationTask] = useState<AppriseTaskNameType | string>('');
 
   useEffect(() => {
@@ -136,7 +136,7 @@ const SettingsScheduling = () => {
 
             <input
               type="text"
-              value={updateSubscribed || updateSubscribedSchedule?.schedule}
+              value={updateSubscribed || updateSubscribedSchedule?.schedule || ''}
               onChange={e => {
                 setUpdateSubscribed(e.currentTarget.value);
               }}
@@ -182,7 +182,7 @@ const SettingsScheduling = () => {
 
             <input
               type="text"
-              value={downloadPending || downloadPendingSchedule?.schedule}
+              value={downloadPending || downloadPendingSchedule?.schedule || ''}
               onChange={e => {
                 setDownloadPending(e.currentTarget.value);
               }}
@@ -229,7 +229,7 @@ const SettingsScheduling = () => {
 
             <input
               type="text"
-              value={checkReindex || checkReindexSchedule?.schedule}
+              value={checkReindex || checkReindexSchedule?.schedule || ''}
               onChange={e => {
                 setCheckReindex(e.currentTarget.value);
               }}
@@ -256,7 +256,7 @@ const SettingsScheduling = () => {
 
             <input
               type="number"
-              value={checkReindexDays || checkReindexSchedule?.config?.days}
+              value={checkReindexDays || checkReindexSchedule?.config?.days || 0}
               onChange={e => {
                 setCheckReindexDays(Number(e.currentTarget.value));
               }}
@@ -305,7 +305,7 @@ const SettingsScheduling = () => {
 
             <input
               type="text"
-              value={thumbnailCheck || thumbnailCheckSchedule?.schedule}
+              value={thumbnailCheck || thumbnailCheckSchedule?.schedule || ''}
               onChange={e => {
                 setThumbnailCheck(e.currentTarget.value);
               }}
@@ -358,7 +358,7 @@ const SettingsScheduling = () => {
 
             <input
               type="text"
-              value={zipBackup || runBackup?.schedule}
+              value={zipBackup || runBackup?.schedule || ''}
               onChange={e => {
                 setZipBackup(e.currentTarget.value);
               }}
@@ -385,7 +385,7 @@ const SettingsScheduling = () => {
 
             <input
               type="number"
-              value={(zipBackupDays || runBackup?.config?.rotate)?.toString()}
+              value={(zipBackupDays || runBackup?.config?.rotate)?.toString() || 0}
               onChange={e => {
                 setZipBackupDays(Number(e.currentTarget.value));
               }}
@@ -452,7 +452,6 @@ const SettingsScheduling = () => {
               </i>
             </p>
             <select
-              defaultValue=""
               value={notificationTask}
               onChange={e => {
                 setNotificationTask(e.currentTarget.value);
@@ -468,7 +467,7 @@ const SettingsScheduling = () => {
             <input
               type="text"
               placeholder="Apprise notification URL"
-              value={notificationUrl}
+              value={notificationUrl || ''}
               onChange={e => {
                 setNotificationUrl(e.currentTarget.value);
               }}
