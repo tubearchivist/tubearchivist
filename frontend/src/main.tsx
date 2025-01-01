@@ -300,11 +300,6 @@ const router = createBrowserRouter(
       element: <Login />,
       errorElement: <ErrorPage />,
     },
-    {
-      path: Routes.Logout,
-      element: <Logout />,
-      errorElement: <ErrorPage />,
-    },
   ],
   { basename: import.meta.env.BASE_URL },
 );
