@@ -4,7 +4,6 @@ Functionality:
 - linked with ta_dowload index
 """
 
-import json
 from datetime import datetime
 from time import sleep
 
@@ -242,7 +241,6 @@ class PendingList(PendingIndex):
     def add_to_pending(self, status="pending", auto_start=False):
         """add missing videos to pending list"""
         self.get_channels()
-        bulk_list = []
 
         total = len(self.missing_videos)
         videos_added = []
@@ -263,33 +261,16 @@ class PendingList(PendingIndex):
                 }
             )
 
-            action = {"create": {"_id": youtube_id, "_index": "ta_download"}}
-            bulk_list.append(json.dumps(action))
-            bulk_list.append(json.dumps(video_details))
-
             url = video_details["vid_thumb_url"]
             ThumbManager(youtube_id).download_video_thumb(url)
+            es_url = f"ta_download/_doc/{youtube_id}"
+            _, _ = ElasticWrap(es_url).put(video_details)
             videos_added.append(youtube_id)
 
-            if len(bulk_list) >= 20:
-                self._ingest_bulk(bulk_list)
-                bulk_list = []
-
-            sleep(get_sleep(self.config))
-
-        self._ingest_bulk(bulk_list)
+            if len(videos_added) != total:
+                sleep(get_sleep(self.config))
 
         return videos_added
-
-    def _ingest_bulk(self, bulk_list):
-        """add items to queue in bulk"""
-        if not bulk_list:
-            return
-
-        # add last newline
-        bulk_list.append("\n")
-        query_str = "\n".join(bulk_list)
-        _, _ = ElasticWrap("_bulk?refresh=true").post(query_str, ndjson=True)
 
     def _notify_add(self, idx, total):
         """send notification for adding videos to download queue"""
