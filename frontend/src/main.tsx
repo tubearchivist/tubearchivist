@@ -8,7 +8,6 @@ import About from './pages/About';
 import Channels from './pages/Channels';
 import ErrorPage from './pages/ErrorPage';
 import Home from './pages/Home';
-import Logout from './pages/Logout';
 import Playlist from './pages/Playlist';
 import Playlists from './pages/Playlists';
 import Search from './pages/Search';
