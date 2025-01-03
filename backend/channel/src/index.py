@@ -290,6 +290,9 @@ class YoutubeChannel(YouTubeItem):
         )
         obs = {"skip_download": True, "extract_flat": True}
         playlists = YtWrap(obs, self.config).extract(url)
+        if not playlists:
+            return
+
         all_entries = [(i["id"], i["title"]) for i in playlists["entries"]]
         self.all_playlists = all_entries
 
