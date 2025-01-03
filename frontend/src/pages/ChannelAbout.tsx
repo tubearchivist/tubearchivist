@@ -11,17 +11,7 @@ import formatDate from '../functions/formatDates';
 import PaginationDummy from '../components/PaginationDummy';
 import FormattedNumber from '../components/FormattedNumber';
 import Button from '../components/Button';
-import updateChannelSettings, {
-  ChannelAboutConfigType,
-} from '../api/actions/updateChannelSettings';
-
-const toStringToBool = (str: string) => {
-  try {
-    return JSON.parse(str);
-  } catch {
-    return null;
-  }
-};
+import updateChannelOverwrites from '../api/actions/updateChannelOverwrite';
 
 export type ChannelBaseOutletContextType = {
   isAdmin: boolean;
@@ -52,43 +42,16 @@ const ChannelAbout = () => {
   const [refresh, setRefresh] = useState(true);
 
   const [channelResponse, setChannelResponse] = useState<ChannelResponseType>();
-  const [channelConfig, setChannelConfig] = useState<ChannelAboutConfigType>();
 
-  const [downloadFormat, setDownloadFormat] = useState(channelConfig?.download_format);
-  const [autoDeleteAfter, setAutoDeleteAfter] = useState(channelConfig?.autodelete_days);
-  const [indexPlaylists, setIndexPlaylists] = useState(
-    channelConfig?.index_playlists ? 'true' : 'false',
-  );
-  const [enableSponsorblock, setEnableSponsorblock] = useState(
-    channelConfig?.integrate_sponsorblock,
-  );
-  const [pageSizeVideo, setPageSizeVideo] = useState(channelConfig?.subscriptions_channel_size);
-  const [pageSizeStreams, setPageSizeStreams] = useState(
-    channelConfig?.subscriptions_live_channel_size,
-  );
-  const [pageSizeShorts, setPageSizeShorts] = useState(
-    channelConfig?.subscriptions_shorts_channel_size,
-  );
+  const [downloadFormat, setDownloadFormat] = useState("");
+  const [autoDeleteAfter, setAutoDeleteAfter] = useState<number | null>(null);
+  const [indexPlaylists, setIndexPlaylists] = useState(false);
+  const [enableSponsorblock, setEnableSponsorblock] = useState<boolean | null>(null)
+  const [pageSizeVideo, setPageSizeVideo] = useState<number | null>(null)
+  const [pageSizeShorts, setPageSizeShorts] = useState<number | null>(null)
+  const [pageSizeStreams, setPageSizeStreams] = useState<number | null>(null)
 
   const channel = channelResponse?.data;
-
-  const channelOverwrites = channel?.channel_overwrites;
-
-  const handleSubmit = async (event: { preventDefault: () => void }) => {
-    event.preventDefault();
-
-    await updateChannelSettings(channelId, {
-      index_playlists: toStringToBool(indexPlaylists),
-      download_format: downloadFormat,
-      autodelete_days: autoDeleteAfter,
-      integrate_sponsorblock: enableSponsorblock,
-      subscriptions_channel_size: pageSizeVideo,
-      subscriptions_live_channel_size: pageSizeStreams,
-      subscriptions_shorts_channel_size: pageSizeShorts,
-    });
-
-    setRefresh(true);
-  };
 
   useEffect(() => {
     (async () => {
@@ -96,14 +59,47 @@ const ChannelAbout = () => {
         const channelResponse = await loadChannelById(channelId);
 
         setChannelResponse(channelResponse);
-        setChannelConfig(channelResponse?.data?.channel_overwrites);
-        console.log('channel_overwrites', channelResponse?.data);
-        console.log('channel_overwrites', channelResponse?.data?.channel_overwrites);
-        console.log('channel_overwrites', '--------');
+        setDownloadFormat(channelResponse?.data?.channel_overwrites?.download_format || "")
+        setAutoDeleteAfter(channelResponse?.data?.channel_overwrites?.autodelete_days)
+        setIndexPlaylists(channelResponse?.data?.channel_overwrites?.index_playlists || false)
+        setEnableSponsorblock(channelResponse?.data?.channel_overwrites?.integrate_sponsorblock)
+        setPageSizeVideo(channelResponse?.data?.channel_overwrites?.subscriptions_channel_size)
+        setPageSizeShorts(channelResponse?.data?.channel_overwrites?.subscriptions_shorts_channel_size)
+        setPageSizeStreams(channelResponse?.data?.channel_overwrites?.subscriptions_live_channel_size)
+
         setRefresh(false);
       }
     })();
   }, [refresh, channelId]);
+
+  const handleUpdateConfig = async (configKey: string, configValue: any) => {
+    if (!channel) return
+    await updateChannelOverwrites(channel.channel_id, configKey, configValue)
+    setRefresh(true)
+  }
+
+  const handleNumberChange = (
+    setValue: React.Dispatch<React.SetStateAction<number | null>>
+  ) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+
+    if (inputValue === "") {
+      setValue(null);
+    } else {
+      const numericValue = Number(inputValue);
+      setValue(isNaN(numericValue) ? null : numericValue);
+    }
+  };
+
+  const handleToggleSponsorBlock = async (isEnabled: boolean) => {
+    if (isEnabled) {
+      setEnableSponsorblock(true);
+      await handleUpdateConfig('integrate_sponsorblock', false);
+    } else {
+      await handleUpdateConfig('integrate_sponsorblock', null);
+      setEnableSponsorblock(null);
+    }
+  }
 
   if (!channel) {
     return 'Channel not found!';
@@ -242,195 +238,196 @@ const ChannelAbout = () => {
         )}
 
         {isAdmin && (
-          <div id="overwrite-form" className="info-box">
-            <div className="info-box-item">
-              <h2>Customize {channel.channel_name}</h2>
-              <form className="overwrite-form" onSubmit={handleSubmit}>
-                <div className="overwrite-form-item">
-                  <p>
-                    Download format:{' '}
-                    <span className="settings-current">
-                      {channelOverwrites?.download_format || 'False'}
-                    </span>
-                  </p>
+          <div className="info-box">
+            <div className='info-box-item'>
+              <h2>Channel Customization</h2>
+              <div className='settings-box-wrapper'>
+                <div>
+                  <p>Download Format</p>
+                </div>
+                <div>
                   <input
-                    type="text"
-                    name="download_format"
-                    id="id_download_format"
+                    type='text'
+                    name='download_format'
+                    value={downloadFormat}
                     onChange={event => {
-                      const value = event.currentTarget.value;
-
-                      setDownloadFormat(value);
+                      setDownloadFormat(event.target.value);
                     }}
                   />
-                  <Button
-                    label="Reset"
-                    onClick={() => {
-                      setDownloadFormat(false);
-                    }}
-                  />
-                  <br />
+                  <div className='button-box'>
+                    {downloadFormat && downloadFormat !== channel.channel_overwrites?.download_format && (
+                      <>
+                        <button onClick={() => handleUpdateConfig('download_format', downloadFormat)}>Update</button>
+                        <button onClick={() => setDownloadFormat(channel.channel_overwrites?.download_format || "")}>Cancel</button>
+                      </>
+                    )}
+                    {channel.channel_overwrites?.download_format !== undefined && (
+                      <button onClick={() => handleUpdateConfig('download_format', null)}>reset</button>
+                    )}
+                  </div>
                 </div>
-                <div className="overwrite-form-item">
-                  <p>
-                    Auto delete watched videos after x days:{' '}
-                    <span className="settings-current">
-                      {channelOverwrites?.autodelete_days || 'False'}
-                    </span>
-                  </p>
+              </div>
+              <div className='settings-box-wrapper'>
+                <div>
+                  <p>Auto delete watched videos after x days</p>
+                </div>
+                <div>
                   <input
-                    type="number"
-                    name="autodelete_days"
-                    id="id_autodelete_days"
-                    onChange={event => {
-                      const value = Number(event.currentTarget.value);
-
-                      if (value === 0) {
-                        setAutoDeleteAfter(false);
-                      } else {
-                        setAutoDeleteAfter(Number(value));
-                      }
-                    }}
+                    type='number'
+                    name='autodelete_days'
+                    value={autoDeleteAfter ?? ""}
+                    onChange={handleNumberChange(setAutoDeleteAfter)}
                   />
-
-                  <br />
+                  <div className='button-box'>
+                    {autoDeleteAfter !== null && autoDeleteAfter !== channel.channel_overwrites?.autodelete_days && (
+                      <>
+                        <button onClick={() => handleUpdateConfig('autodelete_days', autoDeleteAfter)}>Update</button>
+                        <button onClick={() => setAutoDeleteAfter(channel.channel_overwrites?.autodelete_days || null)}>Cancel</button>
+                      </>
+                    )}
+                    {channel.channel_overwrites?.autodelete_days !== undefined && (
+                      <button onClick={() => handleUpdateConfig('autodelete_days', null)}>Reset</button>
+                    )}
+                  </div>
                 </div>
-
-                <div className="overwrite-form-item">
-                  <p>
-                    Index playlists:{' '}
-                    <span className="settings-current">
-                      {JSON.stringify(channelOverwrites?.index_playlists)}
-                    </span>
-                  </p>
-
-                  <select
-                    name="index_playlists"
-                    id="id_index_playlists"
-                    value={indexPlaylists}
-                    onChange={event => {
-                      const value = event.currentTarget.value;
-
-                      setIndexPlaylists(value);
-                    }}
-                  >
-                    <option value="null">-- change playlist index --</option>
-                    <option value="false">Disable playlist index</option>
-                    <option value="true">Enable playlist index</option>
-                  </select>
-
-                  <br />
+              </div>
+              <div className='settings-box-wrapper'>
+                <div>
+                  <p>Index playlists</p>
                 </div>
-
-                <div className="overwrite-form-item">
-                  <p>
-                    Enable{' '}
-                    <a href="https://sponsor.ajay.app/" target="_blank">
-                      SponsorBlock
-                    </a>
-                    :{' '}
-                    <span className="settings-current">
-                      {JSON.stringify(channelOverwrites?.integrate_sponsorblock)}
-                    </span>
-                  </p>
-                  <select
-                    name="integrate_sponsorblock"
-                    id="id_integrate_sponsorblock"
-                    value={enableSponsorblock?.toString() || ''}
-                    onChange={event => {
-                      const value = event.currentTarget.value;
-
-                      if (value !== '') {
-                        setEnableSponsorblock(JSON.parse(value));
-                      } else {
-                        setEnableSponsorblock(undefined);
-                      }
-                    }}
-                  >
-                    <option value="">-- change sponsorblock integrations</option>
-                    <option value="false">disable sponsorblock integration</option>
-                    <option value="true">enable sponsorblock integration</option>
-                    <option value="null">unset sponsorblock integration</option>
-                  </select>
+                <div>
+                  <div className="toggle">
+                    <div className="toggleBox">
+                      <input
+                        name="index_playlists"
+                        type="checkbox"
+                        checked={indexPlaylists}
+                        onChange={event => {
+                          handleUpdateConfig('index_playlists', event.target.checked || null)
+                        }}
+                      />
+                      {!indexPlaylists && (
+                        <label htmlFor="" className="ofbtn">
+                          Off
+                        </label>
+                      )}
+                      {indexPlaylists && (
+                        <label htmlFor="" className="onbtn">
+                          On
+                        </label>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <h3>Page Size Overrides</h3>
-                <br />
-                <p>
-                  Disable standard videos, shorts, or streams for this channel by setting their page
-                  size to 0 (zero).
-                </p>
-                <br />
-                <p>Disable page size overwrite for channel by setting to negative value.</p>
-                <br />
-                <div className="overwrite-form-item">
-                  <p>
-                    YouTube page size:{' '}
-                    <span className="settings-current">
-                      {channelOverwrites?.subscriptions_channel_size || 'False'}
-                    </span>
-                  </p>
-                  <i>
-                    Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max
-                    recommended 50.
-                  </i>
-                  <br />
+              </div>
+              <div className='settings-box-wrapper'>
+                <div>
+                  <p>Overwrite <a href='https://sponsor.ajay.app/' target='_blank'>SponsorBlock</a></p>
+                </div>
+                <div>
+                  {enableSponsorblock !== undefined ? (
+                    <div className="toggle">
+                      <div className="toggleBox">
+                        <input
+                          name="enableSponsorblock"
+                          type="checkbox"
+                          checked={Boolean(enableSponsorblock)}
+                          onChange={event => {
+                            handleUpdateConfig('integrate_sponsorblock', event.target.checked)
+                          }}
+                        />
+                        {!enableSponsorblock && (
+                          <label htmlFor="" className="ofbtn">
+                            Off
+                          </label>
+                        )}
+                        {enableSponsorblock && (
+                          <label htmlFor="" className="onbtn">
+                            On
+                          </label>
+                        )}
+                      </div>
+                    <button onClick={() => handleToggleSponsorBlock(false)}>Reset</button>
+                  </div>
+                  ) : (
+                    <button onClick={() => handleToggleSponsorBlock(true)}>Configure</button>
+                  )}
+                </div>
+              </div>
+              <h2>Page Size Overrides</h2>
+              <p>Disable standard videos, shorts, or streams for this channel by setting their page size to 0 (zero).</p>
+              <div className='settings-box-wrapper'>
+                <div>
+                  <p>Videos page size</p>
+                </div>
+                <div>
                   <input
-                    type="number"
-                    name="channel_size"
-                    id="id_channel_size"
-                    onChange={event => {
-                      setPageSizeVideo(Number(event.currentTarget.value));
-                    }}
+                    type='number'
+                    name='subscriptions_channel_size'
+                    value={pageSizeVideo ?? ""}
+                    onChange={handleNumberChange(setPageSizeVideo)}
                   />
-                  <br />
+                  <div className='button-box'>
+                    {pageSizeVideo !== null && pageSizeVideo !== channel.channel_overwrites?.subscriptions_channel_size && (
+                      <>
+                        <button onClick={() => handleUpdateConfig('subscriptions_channel_size', pageSizeVideo)}>Update</button>
+                        <button onClick={() => setPageSizeVideo(channel.channel_overwrites?.subscriptions_channel_size || null)}>Cancel</button>
+                      </>
+                    )}
+                    {channel.channel_overwrites?.subscriptions_channel_size !== undefined && (
+                      <button onClick={() => handleUpdateConfig('subscriptions_channel_size', null)}>Reset</button>
+                    )}
+                  </div>
                 </div>
-                <div className="overwrite-form-item">
-                  <p>
-                    YouTube Live page size:{' '}
-                    <span className="settings-current">
-                      {channelOverwrites?.subscriptions_live_channel_size || 'False'}
-                    </span>
-                  </p>
-                  <i>
-                    Live Videos to scan to find new items for the <b>Rescan subscriptions</b> task,
-                    max recommended 50.
-                  </i>
-                  <br />
+              </div>
+              <div className='settings-box-wrapper'>
+                <div>
+                  <p>Shorts page size</p>
+                </div>
+                <div>
                   <input
-                    type="number"
-                    name="live_channel_size"
-                    id="id_live_channel_size"
-                    onChange={event => {
-                      setPageSizeStreams(Number(event.currentTarget.value));
-                    }}
+                    type='number'
+                    name='subscriptions_shorts_channel_size'
+                    value={pageSizeShorts ?? ""}
+                    onChange={handleNumberChange(setPageSizeShorts)}
                   />
-                  <br />
+                  <div className='button-box'>
+                    {pageSizeShorts !== null && pageSizeShorts !== channel.channel_overwrites?.subscriptions_shorts_channel_size && (
+                      <>
+                        <button onClick={() => handleUpdateConfig('subscriptions_shorts_channel_size', pageSizeShorts)}>Update</button>
+                        <button onClick={() => setPageSizeShorts(channel.channel_overwrites?.subscriptions_shorts_channel_size || null)}>Cancel</button>
+                      </>
+                    )}
+                    {channel.channel_overwrites?.subscriptions_shorts_channel_size !== undefined && (
+                      <button onClick={() => handleUpdateConfig('subscriptions_shorts_channel_size', null)}>Reset</button>
+                    )}
+                  </div>
                 </div>
-                <div className="overwrite-form-item">
-                  <p>
-                    YouTube Shorts page size:{' '}
-                    <span className="settings-current">
-                      {channelOverwrites?.subscriptions_shorts_channel_size || 'False'}
-                    </span>
-                  </p>
-                  <i>
-                    Shorts Videos to scan to find new items for the <b>Rescan subscriptions</b>{' '}
-                    task, max recommended 50.
-                  </i>
-                  <br />
+              </div>
+              <div className='settings-box-wrapper'>
+                <div>
+                  <p>Live streams page size</p>
+                </div>
+                <div>
                   <input
-                    type="number"
-                    name="shorts_channel_size"
-                    id="id_shorts_channel_size"
-                    onChange={event => {
-                      setPageSizeShorts(Number(event.currentTarget.value));
-                    }}
+                    type='number'
+                    name='subscriptions_live_channel_size'
+                    value={pageSizeStreams ?? ""}
+                    onChange={handleNumberChange(setPageSizeStreams)}
                   />
+                  <div className='button-box'>
+                    {pageSizeStreams !== null && pageSizeStreams !== channel.channel_overwrites?.subscriptions_live_channel_size && (
+                      <>
+                        <button onClick={() => handleUpdateConfig('subscriptions_live_channel_size', pageSizeStreams)}>Update</button>
+                        <button onClick={() => setPageSizeStreams(channel.channel_overwrites?.subscriptions_live_channel_size || null)}>Cancel</button>
+                      </>
+                    )}
+                    {channel.channel_overwrites?.subscriptions_live_channel_size !== undefined && (
+                      <button onClick={() => handleUpdateConfig('subscriptions_live_channel_size', null)}>Reset</button>
+                    )}
+                  </div>
                 </div>
-                <br />
-
-                <Button type="submit" label="Save Channel Overwrites" />
-              </form>
+              </div>
             </div>
           </div>
         )}
