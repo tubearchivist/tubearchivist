@@ -355,6 +355,8 @@ const ChannelAbout = () => {
                   )}
                 </div>
               </div>
+            </div>
+            <div className='info-box-item'>
               <h2>Page Size Overrides</h2>
               <p>Disable standard videos, shorts, or streams for this channel by setting their page size to 0 (zero).</p>
               <div className='settings-box-wrapper'>
