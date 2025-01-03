@@ -2,12 +2,12 @@
 black==24.10.0
 codespell==2.3.0
 flake8==7.1.1
-ipython==8.30.0
+ipython==8.31.0
 isort==5.13.2
 pylint-django==2.6.1
-pylint==3.3.2
+pylint==3.3.3
 pytest-django==4.9.0
-python-dotenv==1.0.1
 pytest==8.3.4
-requirementscheck==0.0.4
+python-dotenv==1.0.1
+requirementscheck==0.0.5
 types-requests==2.32.0.20241016
