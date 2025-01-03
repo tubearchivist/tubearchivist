@@ -1071,6 +1071,7 @@ video:-webkit-full-screen {
   grid-template-columns: 33% 1fr;
   width: 100%;
   align-items: center;
+  padding-bottom: 5px;
 }
 
 .settings-box-wrapper input:not([type='checkbox']) {

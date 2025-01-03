@@ -171,6 +171,7 @@ const ChannelAbout = () => {
                       </div>
                     )}
                   </div>
+                  <br></br>
                   {reindex && <p>Reindex scheduled</p>}
                   {!reindex && (
                     <div id="reindex-button" className="button-box">
