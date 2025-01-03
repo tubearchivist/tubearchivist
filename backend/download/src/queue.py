@@ -6,6 +6,7 @@ Functionality:
 
 import json
 from datetime import datetime
+from time import sleep
 
 from appsettings.src.config import AppConfig
 from common.src.es_connect import ElasticWrap, IndexPaginate
@@ -245,7 +246,9 @@ class PendingList(PendingIndex):
 
         total = len(self.missing_videos)
         videos_added = []
+        sleep_interval = self.config["downloads"].get("sleep_interval", 0)
         for idx, (youtube_id, vid_type) in enumerate(self.missing_videos):
+            sleep(sleep_interval)
             if self.task and self.task.is_stopped():
                 break
 
