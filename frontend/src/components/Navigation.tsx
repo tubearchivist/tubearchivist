@@ -11,13 +11,12 @@ interface NavigationProps {
 }
 
 const Navigation = ({ isAdmin }: NavigationProps) => {
-
   const navigate = useNavigate();
   const handleLogout = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
     await logOut();
-    navigate(Routes.Login)
-  }
+    navigate(Routes.Login);
+  };
 
   return (
     <div className="boxed-content">
@@ -39,7 +38,13 @@ const Navigation = ({ isAdmin }: NavigationProps) => {
           <Link to={Routes.SettingsDashboard}>
             <img src={iconGear} alt="gear-icon" title="Settings" />
           </Link>
-          <img className="alert-hover" src={iconExit} alt="exit-icon" title="Logout" onClick={handleLogout} />
+          <img
+            className="alert-hover"
+            src={iconExit}
+            alt="exit-icon"
+            title="Logout"
+            onClick={handleLogout}
+          />
         </div>
       </div>
     </div>

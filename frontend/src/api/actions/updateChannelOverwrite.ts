@@ -1,7 +1,7 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from "../../configuration/getApiUrl"
+import getApiUrl from '../../configuration/getApiUrl';
 import getFetchCredentials from '../../configuration/getFetchCredentials';
-import getCookie from "../../functions/getCookie";
+import getCookie from '../../functions/getCookie';
 
 const updateChannelOverwrites = async (channelId: string, configKey: string, configValue: any) => {
   const apiUrl = getApiUrl();
@@ -9,8 +9,8 @@ const updateChannelOverwrites = async (channelId: string, configKey: string, con
 
   const data = {
     channel_overwrites: {
-      [configKey]: configValue
-    }
+      [configKey]: configValue,
+    },
   };
 
   const response = await fetch(`${apiUrl}/api/channel/${channelId}/`, {
@@ -26,8 +26,8 @@ const updateChannelOverwrites = async (channelId: string, configKey: string, con
 
   const channelSubscription = await response.json();
   console.log('updateChannelOverwrites', channelSubscription);
- 
+
   return channelSubscription;
-}
+};
 
 export default updateChannelOverwrites;

@@ -1,7 +1,7 @@
 import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from "../../configuration/getApiUrl"
-import getFetchCredentials from "../../configuration/getFetchCredentials";
-import getCookie from "../../functions/getCookie";
+import getApiUrl from '../../configuration/getApiUrl';
+import getFetchCredentials from '../../configuration/getFetchCredentials';
+import getCookie from '../../functions/getCookie';
 
 const logOut = async () => {
   const apiUrl = getApiUrl();
@@ -14,9 +14,9 @@ const logOut = async () => {
       'X-CSRFToken': csrfCookie || '',
     },
     credentials: getFetchCredentials(),
-  })
-  
+  });
+
   return response;
-}
+};
 
 export default logOut;
