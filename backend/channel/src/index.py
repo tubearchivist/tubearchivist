@@ -59,20 +59,12 @@ class YoutubeChannel(YouTubeItem):
             "channel_name": self.youtube_meta["uploader"],
             "channel_subs": self.youtube_meta.get("channel_follower_count", 0),
             "channel_subscribed": False,
-            "channel_tags": self._parse_tags(self.youtube_meta.get("tags")),
+            "channel_tags": self.youtube_meta.get("tags", []),
             "channel_banner_url": self._get_banner_art(),
             "channel_thumb_url": self._get_thumb_art(),
             "channel_tvart_url": self._get_tv_art(),
             "channel_views": self.youtube_meta.get("view_count") or 0,
         }
-
-    def _parse_tags(self, tags):
-        """parse channel tags"""
-        if not tags:
-            return False
-
-        joined = " ".join(tags)
-        return [i.strip() for i in joined.split('"') if i and not i == " "]
 
     def _get_thumb_art(self):
         """extract thumb art"""
