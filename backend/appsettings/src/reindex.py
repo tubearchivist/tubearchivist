@@ -14,6 +14,7 @@ from appsettings.src.config import AppConfig
 from channel.src.index import YoutubeChannel
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
+from common.src.helper import get_sleep
 from common.src.ta_redis import RedisQueue
 from download.src.subscriptions import ChannelSubscription
 from download.src.thumbnails import ThumbManager
@@ -289,8 +290,7 @@ class Reindex(ReindexBase):
                 self._notify(name, total, idx)
 
             reindex(youtube_id)
-            sleep_interval = self.config["downloads"].get("sleep_interval", 0)
-            sleep(sleep_interval)
+            sleep(get_sleep(self.config))
 
     def _get_reindex_map(self, index_name: str) -> Callable:
         """return def to run for index"""

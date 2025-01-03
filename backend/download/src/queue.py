@@ -10,7 +10,7 @@ from time import sleep
 
 from appsettings.src.config import AppConfig
 from common.src.es_connect import ElasticWrap, IndexPaginate
-from common.src.helper import get_duration_str, is_shorts
+from common.src.helper import get_duration_str, get_sleep, is_shorts
 from download.src.subscriptions import ChannelSubscription
 from download.src.thumbnails import ThumbManager
 from download.src.yt_dlp_base import YtWrap
@@ -246,9 +246,7 @@ class PendingList(PendingIndex):
 
         total = len(self.missing_videos)
         videos_added = []
-        sleep_interval = self.config["downloads"].get("sleep_interval", 0)
         for idx, (youtube_id, vid_type) in enumerate(self.missing_videos):
-            sleep(sleep_interval)
             if self.task and self.task.is_stopped():
                 break
 
@@ -276,6 +274,8 @@ class PendingList(PendingIndex):
             if len(bulk_list) >= 20:
                 self._ingest_bulk(bulk_list)
                 bulk_list = []
+
+            sleep(get_sleep(self.config))
 
         self._ingest_bulk(bulk_list)
 

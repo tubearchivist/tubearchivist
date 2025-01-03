@@ -4,10 +4,12 @@ Functionality:
 - handle playlist subscriptions
 """
 
+from time import sleep
+
 from appsettings.src.config import AppConfig
 from channel.src.index import YoutubeChannel
 from common.src.es_connect import IndexPaginate
-from common.src.helper import is_missing
+from common.src.helper import get_sleep, is_missing
 from common.src.urlparser import Parser
 from download.src.thumbnails import ThumbManager
 from download.src.yt_dlp_base import YtWrap
@@ -108,6 +110,7 @@ class ChannelSubscription:
                 message_lines=[f"Scanning Channel {idx + 1}/{total}"],
                 progress=(idx + 1) / total,
             )
+            sleep(get_sleep(self.config))
 
         return missing_videos
 
@@ -317,6 +320,7 @@ class PlaylistSubscription:
                 message_lines=[f"Scanning Playlists {idx + 1}/{total}"],
                 progress=(idx + 1) / total,
             )
+            sleep(get_sleep(self.config))
 
         return missing_videos
 

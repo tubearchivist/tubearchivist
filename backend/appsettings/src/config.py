@@ -74,7 +74,7 @@ class AppConfig:
         },
         "downloads": {
             "limit_speed": False,
-            "sleep_interval": 3,
+            "sleep_interval": 10,
             "autodelete_days": False,
             "format": False,
             "format_sort": False,

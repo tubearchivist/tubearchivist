@@ -40,6 +40,18 @@ def randomizor(length: int) -> str:
     return "".join(random.choice(pool) for i in range(length))
 
 
+def get_sleep(config) -> int:
+    """get randomized sleep"""
+    sleep_config = config["downloads"].get("sleep_interval")
+    if not sleep_config:
+        return 0
+
+    rand_sleep = random.randrange(
+        int(sleep_config * 0.5), int(sleep_config * 1.5)
+    )
+    return rand_sleep
+
+
 def requests_headers() -> dict[str, str]:
     """build header with random user agent for requests outside of yt-dlp"""
 
