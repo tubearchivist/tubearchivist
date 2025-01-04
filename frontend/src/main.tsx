@@ -50,243 +50,77 @@ const router = createBrowserRouter(
         {
           index: true,
           element: <Home />,
-          loader: async () => {
-            const authResponse = await loadAuth();
-            if (authResponse.status === 403) {
-              return redirect(Routes.Login);
-            }
-
-            const userConfig = await loadUserMeConfig();
-
-            return { userConfig };
-          },
         },
         {
           path: Routes.Video(':videoId'),
           element: <Video />,
-          loader: async () => {
-            const authResponse = await loadAuth();
-            if (authResponse.status === 403) {
-              return redirect(Routes.Login);
-            }
-
-            return {};
-          },
         },
         {
           path: Routes.Channels,
           element: <Channels />,
-          loader: async () => {
-            const authResponse = await loadAuth();
-            if (authResponse.status === 403) {
-              return redirect(Routes.Login);
-            }
-
-            const userConfig = await loadUserMeConfig();
-
-            return { userConfig };
-          },
         },
         {
           path: Routes.Channel(':channelId'),
           element: <ChannelBase />,
-          loader: async () => {
-            const authResponse = await loadAuth();
-            if (authResponse.status === 403) {
-              return redirect(Routes.Login);
-            }
-
-            return {};
-          },
           children: [
             {
               index: true,
               path: Routes.ChannelVideo(':channelId'),
               element: <ChannelVideo videoType="videos" />,
-              loader: async () => {
-                const authResponse = await loadAuth();
-                if (authResponse.status === 403) {
-                  return redirect(Routes.Login);
-                }
-
-                const userConfig = await loadUserMeConfig();
-
-                return { userConfig };
-              },
             },
             {
               path: Routes.ChannelStream(':channelId'),
               element: <ChannelVideo videoType="streams" />,
-              loader: async () => {
-                const authResponse = await loadAuth();
-                if (authResponse.status === 403) {
-                  return redirect(Routes.Login);
-                }
-
-                const userConfig = await loadUserMeConfig();
-
-                return { userConfig };
-              },
             },
             {
               path: Routes.ChannelShorts(':channelId'),
               element: <ChannelVideo videoType="shorts" />,
-              loader: async () => {
-                const authResponse = await loadAuth();
-                if (authResponse.status === 403) {
-                  return redirect(Routes.Login);
-                }
-
-                const userConfig = await loadUserMeConfig();
-
-                return { userConfig };
-              },
             },
             {
               path: Routes.ChannelPlaylist(':channelId'),
               element: <ChannelPlaylist />,
-              loader: async () => {
-                const authResponse = await loadAuth();
-                if (authResponse.status === 403) {
-                  return redirect(Routes.Login);
-                }
-
-                const userConfig = await loadUserMeConfig();
-
-                return { userConfig };
-              },
             },
             {
               path: Routes.ChannelAbout(':channelId'),
               element: <ChannelAbout />,
-              loader: async () => {
-                const authResponse = await loadAuth();
-                if (authResponse.status === 403) {
-                  return redirect(Routes.Login);
-                }
-
-                return {};
-              },
             },
           ],
         },
         {
           path: Routes.Playlists,
           element: <Playlists />,
-          loader: async () => {
-            const authResponse = await loadAuth();
-            if (authResponse.status === 403) {
-              return redirect(Routes.Login);
-            }
-
-            const userConfig = await loadUserMeConfig();
-
-            return { userConfig };
-          },
         },
         {
           path: Routes.Playlist(':playlistId'),
           element: <Playlist />,
-          loader: async () => {
-            const authResponse = await loadAuth();
-            if (authResponse.status === 403) {
-              return redirect(Routes.Login);
-            }
-
-            const userConfig = await loadUserMeConfig();
-
-            return { userConfig };
-          },
         },
         {
           path: Routes.Downloads,
           element: <Download />,
-          loader: async () => {
-            const authResponse = await loadAuth();
-            if (authResponse.status === 403) {
-              return redirect(Routes.Login);
-            }
-
-            const userConfig = await loadUserMeConfig();
-
-            return { userConfig };
-          },
         },
         {
           path: Routes.Search,
           element: <Search />,
-          loader: async () => {
-            const authResponse = await loadAuth();
-            if (authResponse.status === 403) {
-              return redirect(Routes.Login);
-            }
-
-            const userConfig = await loadUserMeConfig();
-
-            return { userConfig };
-          },
         },
         {
           path: Routes.SettingsDashboard,
           element: <SettingsDashboard />,
-          loader: async () => {
-            const authResponse = await loadAuth();
-            if (authResponse.status === 403) {
-              return redirect(Routes.Login);
-            }
-
-            return {};
-          },
         },
         {
           path: Routes.SettingsActions,
           element: <SettingsActions />,
-          loader: async () => {
-            const authResponse = await loadAuth();
-            if (authResponse.status === 403) {
-              return redirect(Routes.Login);
-            }
-
-            return {};
-          },
         },
         {
           path: Routes.SettingsApplication,
           element: <SettingsApplication />,
-          loader: async () => {
-            const authResponse = await loadAuth();
-            if (authResponse.status === 403) {
-              return redirect(Routes.Login);
-            }
-
-            return {};
-          },
         },
         {
           path: Routes.SettingsScheduling,
           element: <SettingsScheduling />,
-          loader: async () => {
-            const authResponse = await loadAuth();
-            if (authResponse.status === 403) {
-              return redirect(Routes.Login);
-            }
-
-            return {};
-          },
         },
         {
           path: Routes.SettingsUser,
           element: <SettingsUser />,
-          loader: async () => {
-            const auth = await loadAuth();
-            if (auth.status === 403) {
-              return redirect(Routes.Login);
-            }
-
-            const userConfig = await loadUserMeConfig();
-
-            return { userConfig };
-          },
         },
         {
           path: Routes.About,

@@ -1,4 +1,4 @@
-import { useLoaderData, useOutletContext, useParams } from 'react-router-dom';
+import { useOutletContext, useParams } from 'react-router-dom';
 import Notifications from '../components/Notifications';
 import PlaylistList from '../components/PlaylistList';
 import { ViewLayoutType } from './Home';
@@ -11,15 +11,11 @@ import loadPlaylistList from '../api/loader/loadPlaylistList';
 import { PlaylistsResponseType } from './Playlists';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
-import { UserMeType } from '../api/actions/updateUserConfig';
-
-type ChannelPlaylistLoaderDataType = {
-  userConfig: UserMeType;
-};
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 const ChannelPlaylist = () => {
   const { channelId } = useParams();
-  const { userConfig } = useLoaderData() as ChannelPlaylistLoaderDataType;
+  const { userConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const userMeConfig = userConfig.config;

@@ -1,5 +1,5 @@
-import { useLoaderData, useNavigate } from 'react-router-dom';
-import updateUserConfig, { ColourVariants, UserConfigType, UserMeType } from '../api/actions/updateUserConfig';
+import { useNavigate } from 'react-router-dom';
+import updateUserConfig, { ColourVariants, UserConfigType } from '../api/actions/updateUserConfig';
 import { useEffect, useState } from 'react';
 import loadUserMeConfig from '../api/loader/loadUserConfig';
 import { ColourConstant } from '../configuration/colours/getColours';
@@ -7,13 +7,10 @@ import SettingsNavigation from '../components/SettingsNavigation';
 import Notifications from '../components/Notifications';
 import Button from '../components/Button';
 import loadIsAdmin from '../functions/getIsAdmin';
-
-type SettingsUserLoaderData = {
-  userConfig: UserMeType;
-};
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 const SettingsUser = () => {
-  const { userConfig } = useLoaderData() as SettingsUserLoaderData;
+  const { userConfig } = useUserConfigStore();
   const isAdmin = loadIsAdmin();
   const navigate = useNavigate();
 

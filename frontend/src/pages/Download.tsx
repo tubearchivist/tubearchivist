@@ -5,8 +5,8 @@ import iconSubstract from '/img/icon-substract.svg';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
 import { Fragment, useEffect, useState } from 'react';
-import { useLoaderData, useOutletContext, useSearchParams } from 'react-router-dom';
-import updateUserConfig, { UserConfigType, UserMeType } from '../api/actions/updateUserConfig';
+import { useOutletContext, useSearchParams } from 'react-router-dom';
+import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import { ConfigType, ViewLayoutType } from './Home';
 import loadDownloadQueue from '../api/loader/loadDownloadQueue';
 import { OutletContextType } from './Base';
@@ -19,6 +19,7 @@ import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import Button from '../components/Button';
 import DownloadListItem from '../components/DownloadListItem';
 import loadDownloadAggs, { DownloadAggsType } from '../api/loader/loadDownloadAggs';
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 type Download = {
   auto_start: boolean;
@@ -44,13 +45,9 @@ export type DownloadResponseType = {
   paginate?: PaginationType;
 };
 
-type DownloadLoaderDataType = {
-  userConfig: UserMeType;
-};
-
 const Download = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { userConfig } = useLoaderData() as DownloadLoaderDataType;
+  const { userConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const channelFilterFromUrl = searchParams.get('channel');

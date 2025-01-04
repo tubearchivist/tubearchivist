@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
 import {
   Link,
-  useLoaderData,
   useOutletContext,
   useParams,
   useSearchParams,
 } from 'react-router-dom';
 import { SortByType, SortOrderType, ViewLayoutType } from './Home';
 import { OutletContextType } from './Base';
-import { UserMeType } from '../api/actions/updateUserConfig';
 import VideoList from '../components/VideoList';
 import Routes from '../configuration/routes/RouteList';
 import Pagination from '../components/Pagination';
@@ -27,13 +25,10 @@ import loadVideoListByFilter, {
 } from '../api/loader/loadVideoListByPage';
 import loadChannelAggs, { ChannelAggsType } from '../api/loader/loadChannelAggs';
 import humanFileSize from '../functions/humanFileSize';
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 type ChannelParams = {
   channelId: string;
-};
-
-type ChannelVideoLoaderType = {
-  userConfig: UserMeType;
 };
 
 type ChannelVideoProps = {
@@ -42,7 +37,7 @@ type ChannelVideoProps = {
 
 const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const { channelId } = useParams() as ChannelParams;
-  const { userConfig } = useLoaderData() as ChannelVideoLoaderType;
+  const { userConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');

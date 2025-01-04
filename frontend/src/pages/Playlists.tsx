@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useLoaderData, useOutletContext } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
 
 import iconAdd from '/img/icon-add.svg';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
 
 import { OutletContextType } from './Base';
-import updateUserConfig, { UserConfigType, UserMeType } from '../api/actions/updateUserConfig';
+import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import loadPlaylistList from '../api/loader/loadPlaylistList';
 import { ConfigType, ViewLayoutType } from './Home';
 import Pagination, { PaginationType } from '../components/Pagination';
@@ -17,6 +17,7 @@ import createCustomPlaylist from '../api/actions/createCustomPlaylist';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import Button from '../components/Button';
 import loadIsAdmin from '../functions/getIsAdmin';
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 export type PlaylistEntryType = {
   youtube_id: string;
@@ -32,12 +33,8 @@ export type PlaylistsResponseType = {
   paginate?: PaginationType;
 };
 
-type PlaylistLoaderDataType = {
-  userConfig: UserMeType;
-};
-
 const Playlists = () => {
-  const { userConfig } = useLoaderData() as PlaylistLoaderDataType;
+  const { userConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
   const isAdmin = loadIsAdmin();
 

@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Link, useLoaderData, useOutletContext, useSearchParams } from 'react-router-dom';
+import { Link, useOutletContext, useSearchParams } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
 import Pagination from '../components/Pagination';
 import loadVideoListByFilter, {
   VideoListByFilterResponseType,
 } from '../api/loader/loadVideoListByPage';
-import { UserMeType } from '../api/actions/updateUserConfig';
 import VideoList from '../components/VideoList';
 import { ChannelType } from './Channels';
 import { OutletContextType } from './Base';
@@ -14,6 +13,7 @@ import { ViewStyleNames, ViewStyles } from '../configuration/constants/ViewStyle
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import { SponsorBlockType } from './Video';
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 export type PlayerType = {
   watched: boolean;
@@ -98,16 +98,12 @@ export type ConfigType = {
   downloads: DownloadsType;
 };
 
-type HomeLoaderDataType = {
-  userConfig: UserMeType;
-};
-
 export type SortByType = 'published' | 'downloaded' | 'views' | 'likes' | 'duration' | 'filesize';
 export type SortOrderType = 'asc' | 'desc';
 export type ViewLayoutType = 'grid' | 'list';
 
 const Home = () => {
-  const { userConfig } = useLoaderData() as HomeLoaderDataType;
+  const { userConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');

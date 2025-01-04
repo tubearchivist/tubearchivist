@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react';
 import {
   Link,
-  useLoaderData,
   useNavigate,
   useOutletContext,
   useParams,
   useSearchParams,
 } from 'react-router-dom';
-import { UserMeType } from '../api/actions/updateUserConfig';
 import loadPlaylistById from '../api/loader/loadPlaylistById';
 import { OutletContextType } from './Base';
 import { ConfigType, VideoType, ViewLayoutType } from './Home';
@@ -31,6 +29,7 @@ import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import Button from '../components/Button';
 import loadVideoListByFilter from '../api/loader/loadVideoListByPage';
 import loadIsAdmin from '../functions/getIsAdmin';
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 export type PlaylistType = {
   playlist_active: boolean;
@@ -46,10 +45,6 @@ export type PlaylistType = {
   playlist_type: string;
   _index: string;
   _score: number;
-};
-
-type PlaylistLoaderDataType = {
-  userConfig: UserMeType;
 };
 
 export type PlaylistResponseType = {
@@ -69,7 +64,7 @@ const Playlist = () => {
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');
 
-  const { userConfig } = useLoaderData() as PlaylistLoaderDataType;
+  const { userConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
   const isAdmin = loadIsAdmin();
 

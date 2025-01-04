@@ -1,5 +1,4 @@
-import { useLoaderData, useSearchParams } from 'react-router-dom';
-import { UserMeType } from '../api/actions/updateUserConfig';
+import { useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { VideoType, ViewLayoutType } from './Home';
 import loadSearch from '../api/loader/loadSearch';
@@ -12,6 +11,7 @@ import SubtitleList from '../components/SubtitleList';
 import { ViewStyles } from '../configuration/constants/ViewStyle';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import SearchExampleQueries from '../components/SearchExampleQueries';
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 const EmptySearchResponse: SearchResultsType = {
   results: {
@@ -35,12 +35,8 @@ type SearchResultsType = {
   queryType: string;
 };
 
-type SearchLoaderDataType = {
-  userConfig: UserMeType;
-};
-
 const Search = () => {
-  const { userConfig } = useLoaderData() as SearchLoaderDataType;
+  const { userConfig } = useUserConfigStore();
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');
   const userMeConfig = userConfig.config;

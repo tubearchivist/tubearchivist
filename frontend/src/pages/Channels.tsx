@@ -1,4 +1,4 @@
-import { useLoaderData, useOutletContext } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
 import loadChannelList from '../api/loader/loadChannelList';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
@@ -6,7 +6,7 @@ import iconAdd from '/img/icon-add.svg';
 import { useEffect, useState } from 'react';
 import Pagination, { PaginationType } from '../components/Pagination';
 import { ConfigType, ViewLayoutType } from './Home';
-import updateUserConfig, { UserConfigType, UserMeType } from '../api/actions/updateUserConfig';
+import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import { OutletContextType } from './Base';
 import ChannelList from '../components/ChannelList';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
@@ -14,6 +14,7 @@ import Notifications from '../components/Notifications';
 import Button from '../components/Button';
 import updateChannelSubscription from '../api/actions/updateChannelSubscription';
 import loadIsAdmin from '../functions/getIsAdmin';
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 type ChannelOverwritesType = {
   download_format?: string;
@@ -47,12 +48,8 @@ type ChannelsListResponse = {
   config?: ConfigType;
 };
 
-type ChannelsLoaderDataType = {
-  userConfig: UserMeType;
-};
-
 const Channels = () => {
-  const { userConfig } = useLoaderData() as ChannelsLoaderDataType;
+  const { userConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
   const isAdmin = loadIsAdmin();
 
