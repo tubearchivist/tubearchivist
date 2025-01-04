@@ -13,7 +13,8 @@
     "dompurify": "^3.2.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.0.2"
+    "react-router-dom": "^7.0.2",
+    "zustand": "^5.0.2"
   },
   "devDependencies": {
     "@types/react": "^19.0.1",
