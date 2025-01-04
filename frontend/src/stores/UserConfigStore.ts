@@ -4,7 +4,7 @@ import updateUserConfig, { UserMeType, UserConfigType } from '../api/actions/upd
 interface UserConfigState {
   userConfig: UserMeType;
   setUserConfig: (userConfig: UserMeType) => void;
-  updateUserConfig: (updates: UserConfigType) => void;
+  setPartialConfig: (updates: UserConfigType) => void;
 }
 
 export const useUserConfigStore = create<UserConfigState>((set) => ({
@@ -21,7 +21,7 @@ export const useUserConfigStore = create<UserConfigState>((set) => ({
   },
   setUserConfig: (userConfig) => set({ userConfig }),
 
-  updateUserConfig: async (updates: UserConfigType) => {
+  setPartialConfig: async (updates: UserConfigType) => {
     const userConfigResponse = await updateUserConfig(updates);
     set((state) => ({
       userConfig: state.userConfig ? { ...state.userConfig, config: userConfigResponse } : state.userConfig,
