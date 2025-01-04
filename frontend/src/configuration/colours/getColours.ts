@@ -7,8 +7,6 @@ export const ColourConstant = {
   Midnight: 'midnight.css',
 };
 
-export type ColourVariants = 'dark.css' | 'light.css' | 'matrix.css' | 'midnight.css';
-
 const importColours = () => {
 
   const { userConfig } = useUserConfigStore();

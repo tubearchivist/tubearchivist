@@ -1,8 +1,8 @@
 import { useLoaderData, useNavigate } from 'react-router-dom';
-import updateUserConfig, { UserConfigType, UserMeType } from '../api/actions/updateUserConfig';
+import updateUserConfig, { ColourVariants, UserConfigType, UserMeType } from '../api/actions/updateUserConfig';
 import { useEffect, useState } from 'react';
 import loadUserMeConfig from '../api/loader/loadUserConfig';
-import { ColourConstant, ColourVariants } from '../configuration/colours/getColours';
+import { ColourConstant } from '../configuration/colours/getColours';
 import SettingsNavigation from '../components/SettingsNavigation';
 import Notifications from '../components/Notifications';
 import Button from '../components/Button';

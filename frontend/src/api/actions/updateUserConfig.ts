@@ -1,4 +1,3 @@
-import { ColourVariants } from '../../configuration/colours/getColours';
 import { SortByType, SortOrderType, ViewLayoutType } from '../../pages/Home';
 import getApiUrl from '../../configuration/getApiUrl';
 import defaultHeaders from '../../configuration/defaultHeaders';
@@ -15,6 +14,8 @@ export type UserMeType = {
   last_login: string;
   config: UserConfigType;
 };
+
+export type ColourVariants = 'dark.css' | 'light.css' | 'matrix.css' | 'midnight.css';
 
 export type UserConfigType = {
   stylesheet?: ColourVariants;
