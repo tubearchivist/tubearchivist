@@ -1,4 +1,4 @@
-import { useLoaderData, useNavigate, useOutletContext } from 'react-router-dom';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import updateUserConfig, { UserConfigType, UserMeType } from '../api/actions/updateUserConfig';
 import { useEffect, useState } from 'react';
 import loadUserMeConfig from '../api/loader/loadUserConfig';
@@ -6,15 +6,15 @@ import { ColourConstant, ColourVariants } from '../configuration/colours/getColo
 import SettingsNavigation from '../components/SettingsNavigation';
 import Notifications from '../components/Notifications';
 import Button from '../components/Button';
-import { OutletContextType } from './Base';
+import loadIsAdmin from '../functions/getIsAdmin';
 
 type SettingsUserLoaderData = {
   userConfig: UserMeType;
 };
 
 const SettingsUser = () => {
-  const { isAdmin } = useOutletContext() as OutletContextType;
   const { userConfig } = useLoaderData() as SettingsUserLoaderData;
+  const isAdmin = loadIsAdmin();
   const navigate = useNavigate();
 
   const userMeConfig = userConfig.config;

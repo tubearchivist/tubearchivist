@@ -4,8 +4,8 @@ import importColours from '../configuration/colours/getColours';
 import { UserMeType } from '../api/actions/updateUserConfig';
 import { useEffect, useState } from 'react';
 import Navigation from '../components/Navigation';
-import loadIsAdmin from '../functions/getIsAdmin';
 import { useAuthStore } from '../stores/AuthDataStore';
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 export type TaUpdateType = {
   version?: string;
@@ -25,18 +25,16 @@ type BaseLoaderData = {
 };
 
 export type OutletContextType = {
-  isAdmin: boolean;
   currentPage: number;
   setCurrentPage: (page: number) => void;
 };
 
 const Base = () => {
   const { setAuth } = useAuthStore();
+  const { setUserConfig } = useUserConfigStore()
   const { userConfig, auth } = useLoaderData() as BaseLoaderData;
 
   const location = useLocation();
-
-  const userMeConfig = userConfig.config;
 
   const searchParams = new URLSearchParams(location.search);
 
@@ -45,10 +43,9 @@ const Base = () => {
   const [currentPage, setCurrentPage] = useState(currentPageFromUrl);
   const [, setSearchParams] = useSearchParams();
 
-  const isAdmin = loadIsAdmin(userConfig);
-
   useEffect(() => {
-    setAuth(auth)
+    setAuth(auth);
+    setUserConfig(userConfig);
   }, [])
 
   useEffect(() => {
@@ -82,14 +79,14 @@ const Base = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
-  importColours(userMeConfig.stylesheet);
+  importColours();
 
   return (
     <>
       <div className="main-content">
-        <Navigation isAdmin={isAdmin} />
+        <Navigation />
         {/** Outlet: https://reactrouter.com/en/main/components/outlet */}
-        <Outlet context={{ isAdmin, currentPage, setCurrentPage }} />
+        <Outlet context={{ currentPage, setCurrentPage }} />
       </div>
       <Footer />
     </>

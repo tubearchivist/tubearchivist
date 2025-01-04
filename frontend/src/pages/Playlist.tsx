@@ -30,6 +30,7 @@ import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import Button from '../components/Button';
 import loadVideoListByFilter from '../api/loader/loadVideoListByPage';
+import loadIsAdmin from '../functions/getIsAdmin';
 
 export type PlaylistType = {
   playlist_active: boolean;
@@ -69,7 +70,8 @@ const Playlist = () => {
   const videoId = searchParams.get('videoId');
 
   const { userConfig } = useLoaderData() as PlaylistLoaderDataType;
-  const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
+  const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
+  const isAdmin = loadIsAdmin();
 
   const userMeConfig = userConfig.config;
 

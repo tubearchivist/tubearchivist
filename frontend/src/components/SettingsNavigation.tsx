@@ -1,9 +1,9 @@
-import { Link, useOutletContext } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
-import { OutletContextType } from '../pages/Base';
+import loadIsAdmin from '../functions/getIsAdmin';
 
 const SettingsNavigation = () => {
-  const { isAdmin } = useOutletContext() as OutletContextType;
+  const isAdmin = loadIsAdmin();
 
   return (
     <>

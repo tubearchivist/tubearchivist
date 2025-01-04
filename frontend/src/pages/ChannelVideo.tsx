@@ -43,7 +43,7 @@ type ChannelVideoProps = {
 const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const { channelId } = useParams() as ChannelParams;
   const { userConfig } = useLoaderData() as ChannelVideoLoaderType;
-  const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
+  const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');
 
@@ -121,7 +121,6 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
             channelSubscribed={channel.channel_subscribed}
             channelThumbUrl={channel.channel_thumb_url}
             showSubscribeButton={true}
-            isUserAdmin={isAdmin}
             setRefresh={setRefresh}
           />
           <div className="info-box-item">

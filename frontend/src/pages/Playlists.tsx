@@ -16,6 +16,7 @@ import updatePlaylistSubscription from '../api/actions/updatePlaylistSubscriptio
 import createCustomPlaylist from '../api/actions/createCustomPlaylist';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import Button from '../components/Button';
+import loadIsAdmin from '../functions/getIsAdmin';
 
 export type PlaylistEntryType = {
   youtube_id: string;
@@ -37,7 +38,8 @@ type PlaylistLoaderDataType = {
 
 const Playlists = () => {
   const { userConfig } = useLoaderData() as PlaylistLoaderDataType;
-  const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
+  const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
+  const isAdmin = loadIsAdmin();
 
   const userMeConfig = userConfig.config;
 

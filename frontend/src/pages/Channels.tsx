@@ -13,6 +13,7 @@ import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import Notifications from '../components/Notifications';
 import Button from '../components/Button';
 import updateChannelSubscription from '../api/actions/updateChannelSubscription';
+import loadIsAdmin from '../functions/getIsAdmin';
 
 type ChannelOverwritesType = {
   download_format?: string;
@@ -52,7 +53,8 @@ type ChannelsLoaderDataType = {
 
 const Channels = () => {
   const { userConfig } = useLoaderData() as ChannelsLoaderDataType;
-  const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
+  const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
+  const isAdmin = loadIsAdmin();
 
   const userMeConfig = userConfig.config;
 
