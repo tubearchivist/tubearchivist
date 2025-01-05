@@ -5,7 +5,6 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom';
-import { SortByType, SortOrderType, ViewLayoutType } from './Home';
 import { OutletContextType } from './Base';
 import VideoList from '../components/VideoList';
 import Routes from '../configuration/routes/RouteList';
@@ -42,13 +41,6 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');
 
-  const userMeConfig = userConfig.config;
-
-  const [hideWatched, setHideWatched] = useState(userMeConfig.hide_watched || false);
-  const [sortBy, setSortBy] = useState<SortByType>(userMeConfig.sort_by || 'published');
-  const [sortOrder, setSortOrder] = useState<SortOrderType>(userMeConfig.sort_order || 'asc');
-  const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_home || 'grid');
-  const [gridItems, setGridItems] = useState(userMeConfig.grid_items || 3);
   const [refresh, setRefresh] = useState(false);
 
   const [channelResponse, setChannelResponse] = useState<ChannelResponseType>();
@@ -62,9 +54,10 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const hasVideos = videoResponse?.data?.length !== 0;
   const showEmbeddedVideo = videoId !== null;
 
+  const view = userConfig.config.view_style_home
   const isGridView = view === ViewStyles.grid;
-  const gridView = isGridView ? `boxed-${gridItems}` : '';
-  const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
+  const gridView = isGridView ? `boxed-${userConfig.config.grid_items}` : '';
+  const gridViewGrid = isGridView ? `grid-${userConfig.config.grid_items}` : '';
 
   useEffect(() => {
     (async () => {
@@ -77,9 +70,9 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
         const videos = await loadVideoListByFilter({
           channel: channelId,
           page: currentPage,
-          watch: hideWatched ? 'unwatched' : undefined,
-          sort: sortBy,
-          order: sortOrder,
+          watch: userConfig.config.hide_watched ? 'unwatched' : undefined,
+          sort: userConfig.config.sort_by,
+          order: userConfig.config.sort_order,
           type: videoType,
         });
         const channelAggs = await loadChannelAggs(channelId);
@@ -90,9 +83,16 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
         setRefresh(false);
       }
     })();
-    // Do not add sort, order, hideWatched this will not work as expected!
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refresh, currentPage, channelId, pagination?.current_page]);
+  }, [
+    refresh,
+    userConfig.config.sort_by,
+    userConfig.config.sort_order,
+    userConfig.config.hide_watched,
+    currentPage,
+    channelId,
+    pagination?.current_page
+  ]);
 
   if (!channel) {
     return (
@@ -166,18 +166,6 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
       <div className={`boxed-content ${gridView}`}>
         <Filterbar
           hideToggleText={'Hide watched videos:'}
-          view={view}
-          isGridView={isGridView}
-          hideWatched={hideWatched}
-          gridItems={gridItems}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          userMeConfig={userMeConfig}
-          setSortBy={setSortBy}
-          setSortOrder={setSortOrder}
-          setHideWatched={setHideWatched}
-          setView={setView}
-          setGridItems={setGridItems}
           viewStyleName={ViewStyleNames.home}
           setRefresh={setRefresh}
         />

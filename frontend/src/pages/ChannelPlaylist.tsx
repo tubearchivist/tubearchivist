@@ -1,8 +1,6 @@
 import { useOutletContext, useParams } from 'react-router-dom';
 import Notifications from '../components/Notifications';
 import PlaylistList from '../components/PlaylistList';
-import { ViewLayoutType } from './Home';
-import { ViewStyles } from '../configuration/constants/ViewStyle';
 import { useEffect, useState } from 'react';
 import { OutletContextType } from './Base';
 import Pagination from '../components/Pagination';
@@ -15,14 +13,9 @@ import { useUserConfigStore } from '../stores/UserConfigStore';
 
 const ChannelPlaylist = () => {
   const { channelId } = useParams();
-  const { userConfig } = useUserConfigStore();
+  const { userConfig, setPartialConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
-  const userMeConfig = userConfig.config;
-
-  const [showSubedOnly, setShowSubedOnly] = useState(userMeConfig.show_subed_only || false);
-  const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_playlist || 'grid');
-  const [gridItems] = useState(userMeConfig.grid_items || 3);
   const [refreshPlaylists, setRefreshPlaylists] = useState(false);
 
   const [playlistsResponse, setPlaylistsResponse] = useState<PlaylistsResponseType>();
@@ -30,9 +23,8 @@ const ChannelPlaylist = () => {
   const playlistList = playlistsResponse?.data;
   const pagination = playlistsResponse?.paginate;
 
-  const isGridView = view === ViewStyles.grid;
-  const gridView = isGridView ? `boxed-${gridItems}` : '';
-  const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
+  const view = userConfig.config.view_style_playlist;
+  const showSubedOnly = userConfig.config.show_subed_only;
 
   useEffect(() => {
     (async () => {
@@ -50,7 +42,7 @@ const ChannelPlaylist = () => {
     <>
       <title>TA | Channel: Playlists</title>
       <ScrollToTopOnNavigate />
-      <div className={`boxed-content ${gridView}`}>
+      <div className='boxed-content'>
         <Notifications pageName="channel" includeReindex={true} />
 
         <div className="view-controls">
@@ -60,7 +52,8 @@ const ChannelPlaylist = () => {
               <input
                 checked={showSubedOnly}
                 onChange={() => {
-                  setShowSubedOnly(!showSubedOnly);
+                  setPartialConfig({show_subed_only: !showSubedOnly});
+                  setRefreshPlaylists(true);
                 }}
                 type="checkbox"
               />
@@ -80,14 +73,14 @@ const ChannelPlaylist = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                setView('grid');
+                setPartialConfig({view_style_playlist: 'grid'});
               }}
               alt="grid view"
             />
             <img
               src={iconListView}
               onClick={() => {
-                setView('list');
+                setPartialConfig({view_style_playlist: 'list'});
               }}
               alt="list view"
             />
@@ -95,8 +88,8 @@ const ChannelPlaylist = () => {
         </div>
       </div>
 
-      <div className={`boxed-content ${gridView}`}>
-        <div className={`playlist-list ${view} ${gridViewGrid}`}>
+      <div className={`boxed-content`}>
+        <div className={`playlist-list ${view}`}>
           <PlaylistList
             playlistList={playlistList}
             viewLayout={view}
