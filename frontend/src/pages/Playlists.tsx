@@ -6,9 +6,8 @@ import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
 
 import { OutletContextType } from './Base';
-import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import loadPlaylistList from '../api/loader/loadPlaylistList';
-import { ConfigType, ViewLayoutType } from './Home';
+import { ConfigType } from './Home';
 import Pagination, { PaginationType } from '../components/Pagination';
 import PlaylistList from '../components/PlaylistList';
 import { PlaylistType } from './Playlist';
@@ -34,14 +33,10 @@ export type PlaylistsResponseType = {
 };
 
 const Playlists = () => {
-  const { userConfig } = useUserConfigStore();
+  const { userConfig, setPartialConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
   const isAdmin = loadIsAdmin();
 
-  const userMeConfig = userConfig.config;
-
-  const [showSubedOnly, setShowSubedOnly] = useState(userMeConfig.show_subed_only || false);
-  const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_playlist || 'grid');
   const [showAddForm, setShowAddForm] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [playlistsToAddText, setPlaylistsToAddText] = useState('');
@@ -54,42 +49,21 @@ const Playlists = () => {
 
   const hasPlaylists = playlistResponse?.data?.length !== 0;
 
-  useEffect(() => {
-    (async () => {
-      if (
-        userMeConfig.view_style_playlist !== view ||
-        userMeConfig.show_subed_only !== showSubedOnly
-      ) {
-        const userConfig: UserConfigType = {
-          show_subed_only: showSubedOnly,
-          view_style_playlist: view,
-        };
-
-        await updateUserConfig(userConfig);
-        setRefresh(true);
-      }
-    })();
-  }, [showSubedOnly, userMeConfig.show_subed_only, userMeConfig.view_style_playlist, view]);
+  const view = userConfig.config.view_style_playlist;
+  const showSubedOnly = userConfig.config.show_subed_only;
 
   useEffect(() => {
     (async () => {
-      if (
-        refresh ||
-        pagination?.current_page === undefined ||
-        currentPage !== pagination?.current_page
-      ) {
-        const playlist = await loadPlaylistList({
-          page: currentPage,
-          subscribed: showSubedOnly,
-        });
+      const playlist = await loadPlaylistList({
+        page: currentPage,
+        subscribed: showSubedOnly,
+      });
 
-        setPlaylistReponse(playlist);
-        setRefresh(false);
-      }
+      setPlaylistReponse(playlist);
+      setRefresh(false);
     })();
-    // Do not add showSubedOnly, view this will not work as expected!
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refresh, currentPage, pagination?.current_page]);
+  }, [refresh, userConfig.config.show_subed_only, currentPage, pagination?.current_page]);
 
   return (
     <>
@@ -169,7 +143,7 @@ const Playlists = () => {
               <input
                 checked={showSubedOnly}
                 onChange={() => {
-                  setShowSubedOnly(!showSubedOnly);
+                  setPartialConfig({show_subed_only: !showSubedOnly});
                 }}
                 type="checkbox"
               />
@@ -189,14 +163,14 @@ const Playlists = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                setView('grid');
+                setPartialConfig({view_style_playlist: 'grid'});
               }}
               alt="grid view"
             />
             <img
               src={iconListView}
               onClick={() => {
-                setView('list');
+                setPartialConfig({view_style_playlist: 'list'});
               }}
               alt="list view"
             />
@@ -207,7 +181,7 @@ const Playlists = () => {
           {!hasPlaylists && <h2>No playlists found...</h2>}
 
           {hasPlaylists && (
-            <PlaylistList playlistList={playlistList} viewLayout={view} setRefresh={setRefresh} />
+            <PlaylistList playlistList={playlistList} setRefresh={setRefresh} />
           )}
         </div>
       </div>

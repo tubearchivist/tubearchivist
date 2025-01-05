@@ -92,7 +92,6 @@ const ChannelPlaylist = () => {
         <div className={`playlist-list ${view}`}>
           <PlaylistList
             playlistList={playlistList}
-            viewLayout={view}
             setRefresh={setRefreshPlaylists}
           />
         </div>
