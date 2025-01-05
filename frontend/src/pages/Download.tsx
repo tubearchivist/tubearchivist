@@ -6,12 +6,11 @@ import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
 import { Fragment, useEffect, useState } from 'react';
 import { useOutletContext, useSearchParams } from 'react-router-dom';
-import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
-import { ConfigType, ViewLayoutType } from './Home';
+import { ConfigType } from './Home';
 import loadDownloadQueue from '../api/loader/loadDownloadQueue';
 import { OutletContextType } from './Base';
 import Pagination, { PaginationType } from '../components/Pagination';
-import { ViewStyleNames, ViewStyles } from '../configuration/constants/ViewStyle';
+import { ViewStyles } from '../configuration/constants/ViewStyle';
 import updateDownloadQueue from '../api/actions/updateDownloadQueue';
 import updateTaskByName from '../api/actions/updateTaskByName';
 import Notifications from '../components/Notifications';
@@ -47,15 +46,11 @@ export type DownloadResponseType = {
 
 const Download = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { userConfig } = useUserConfigStore();
+  const { userConfig, setPartialConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const channelFilterFromUrl = searchParams.get('channel');
-  const userMeConfig = userConfig.config;
 
-  const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_downloads || 'grid');
-  const [gridItems, setGridItems] = useState(userMeConfig.grid_items || 3);
-  const [showIgnored, setShowIgnored] = useState(userMeConfig.show_ignored_only || false);
   const [refresh, setRefresh] = useState(false);
   const [showHiddenForm, setShowHiddenForm] = useState(false);
   const [downloadPending, setDownloadPending] = useState(false);
@@ -80,60 +75,28 @@ const Download = () => {
       ? downloadResponse?.data[0].channel_name
       : '';
 
+  const view = userConfig.config.view_style_downloads;
+  const gridItems = userConfig.config.grid_items;
+  const showIgnored = userConfig.config.show_ignored_only;
   const isGridView = view === ViewStyles.grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
 
   useEffect(() => {
     (async () => {
-      if (
-        userMeConfig.show_ignored_only !== showIgnored ||
-        userMeConfig.grid_items !== gridItems ||
-        // @ts-ignore
-        userMeConfig[ViewStyleNames.downloads] !== view
-      ) {
-        const userConfig: UserConfigType = {
-          show_ignored_only: showIgnored,
-          [ViewStyleNames.downloads]: view,
-          grid_items: gridItems,
-        };
+      const videos = await loadDownloadQueue(currentPage, channelFilterFromUrl, showIgnored);
+      const videoCount = videos?.paginate?.total_hits;
 
-        await updateUserConfig(userConfig);
-        setRefresh(true);
+      if (videoCount && lastVideoCount !== videoCount) {
+        setLastVideoCount(videoCount);
       }
-    })();
-  }, [
-    view,
-    gridItems,
-    showIgnored,
-    userMeConfig.show_ignored_only,
-    userMeConfig.view_style_downloads,
-    userMeConfig.grid_items,
-  ]);
 
-  useEffect(() => {
-    (async () => {
-      if (
-        refresh ||
-        pagination?.current_page === undefined ||
-        currentPage !== pagination?.current_page
-      ) {
-        const videos = await loadDownloadQueue(currentPage, channelFilterFromUrl, showIgnored);
-
-        const videoCount = videos?.paginate?.total_hits;
-
-        if (videoCount && lastVideoCount !== videoCount) {
-          setLastVideoCount(videoCount);
-        }
-
-        setDownloadResponse(videos);
-        setRefresh(false);
-      }
+      setDownloadResponse(videos);
+      setRefresh(false);
     })();
 
-    // Do not add showIgnored otherwise it will not update the userconfig first.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refresh, currentPage, downloadPending]);
+  }, [refresh, showIgnored, currentPage, downloadPending]);
 
   useEffect(() => {
     (async () => {
@@ -243,7 +206,8 @@ const Download = () => {
               <input
                 id="showIgnored"
                 onChange={() => {
-                  setShowIgnored(!showIgnored);
+                  setPartialConfig({show_ignored_only: !showIgnored});
+                  setRefresh(true);
                 }}
                 type="checkbox"
                 checked={showIgnored}
@@ -298,7 +262,7 @@ const Download = () => {
                   <img
                     src={iconAdd}
                     onClick={() => {
-                      setGridItems(gridItems + 1);
+                      setPartialConfig({grid_items: gridItems + 1});
                     }}
                     alt="grid plus row"
                   />
@@ -307,7 +271,7 @@ const Download = () => {
                   <img
                     src={iconSubstract}
                     onClick={() => {
-                      setGridItems(gridItems - 1);
+                      setPartialConfig({grid_items: gridItems - 1});
                     }}
                     alt="grid minus row"
                   />
@@ -318,14 +282,14 @@ const Download = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                setView('grid');
+                setPartialConfig({view_style_downloads: 'grid'});
               }}
               alt="grid view"
             />
             <img
               src={iconListView}
               onClick={() => {
-                setView('list');
+                setPartialConfig({view_style_downloads: 'list'});
               }}
               alt="list view"
             />
@@ -351,8 +315,6 @@ const Download = () => {
                 <Fragment key={`${download.channel_id}_${download.timestamp}`}>
                   <DownloadListItem
                     download={download}
-                    view={view}
-                    showIgnored={showIgnored}
                     setRefresh={setRefresh}
                   />
                 </Fragment>
