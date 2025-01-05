@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { ChannelType } from '../pages/Channels';
-import { ViewLayoutType } from '../pages/Home';
 import Routes from '../configuration/routes/RouteList';
 import updateChannelSubscription from '../api/actions/updateChannelSubscription';
 import formatDate from '../functions/formatDates';
@@ -8,14 +7,18 @@ import FormattedNumber from './FormattedNumber';
 import Button from './Button';
 import ChannelIcon from './ChannelIcon';
 import ChannelBanner from './ChannelBanner';
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 type ChannelListProps = {
   channelList: ChannelType[] | undefined;
-  viewLayout: ViewLayoutType;
   refreshChannelList: (refresh: boolean) => void;
 };
 
-const ChannelList = ({ channelList, viewLayout, refreshChannelList }: ChannelListProps) => {
+const ChannelList = ({ channelList, refreshChannelList }: ChannelListProps) => {
+
+  const { userConfig } = useUserConfigStore();
+  const viewLayout = userConfig.config.view_style_channel;
+
   if (!channelList || channelList.length === 0) {
     return <p>No channels found.</p>;
   }
@@ -61,7 +64,9 @@ const ChannelList = ({ channelList, viewLayout, refreshChannelList }: ChannelLis
                       title={`Unsubscribe from ${channel.channel_name}`}
                       onClick={async () => {
                         await updateChannelSubscription(channel.channel_id, false);
-                        refreshChannelList(true);
+                        setTimeout(() => {
+                          refreshChannelList(true);
+                        }, 1000);
                       }}
                     />
                   )}
