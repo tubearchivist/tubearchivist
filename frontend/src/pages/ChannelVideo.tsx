@@ -61,27 +61,21 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
 
   useEffect(() => {
     (async () => {
-      if (
-        refresh ||
-        pagination?.current_page === undefined ||
-        currentPage !== pagination?.current_page
-      ) {
-        const channelResponse = await loadChannelById(channelId);
-        const videos = await loadVideoListByFilter({
-          channel: channelId,
-          page: currentPage,
-          watch: userConfig.config.hide_watched ? 'unwatched' : undefined,
-          sort: userConfig.config.sort_by,
-          order: userConfig.config.sort_order,
-          type: videoType,
-        });
-        const channelAggs = await loadChannelAggs(channelId);
+      const channelResponse = await loadChannelById(channelId);
+      const videos = await loadVideoListByFilter({
+        channel: channelId,
+        page: currentPage,
+        watch: userConfig.config.hide_watched ? 'unwatched' : undefined,
+        sort: userConfig.config.sort_by,
+        order: userConfig.config.sort_order,
+        type: videoType,
+      });
+      const channelAggs = await loadChannelAggs(channelId);
 
-        setChannelResponse(channelResponse);
-        setVideoReponse(videos);
-        setVideoAggsResponse(channelAggs);
-        setRefresh(false);
-      }
+      setChannelResponse(channelResponse);
+      setVideoReponse(videos);
+      setVideoAggsResponse(channelAggs);
+      setRefresh(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -91,7 +85,8 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
     userConfig.config.hide_watched,
     currentPage,
     channelId,
-    pagination?.current_page
+    pagination?.current_page,
+    videoType,
   ]);
 
   if (!channel) {
