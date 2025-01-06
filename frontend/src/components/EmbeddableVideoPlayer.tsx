@@ -63,6 +63,9 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
 
       setVideoResponse(videoResponse);
 
+      const inlinePlayer = document.getElementById('inline-player');
+      inlinePlayer?.scrollIntoView();
+
       setRefresh(false);
       setLoading(false);
     })();
@@ -88,7 +91,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
 
   return (
     <>
-      <div className="player-wrapper">
+      <div id="inline-player" className="player-wrapper">
         <div className="video-player">
           {!loading && (
             <VideoPlayer
