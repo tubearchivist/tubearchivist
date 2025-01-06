@@ -6,29 +6,31 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "build:deploy": "vite build",
-    "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
-    "prettier": "prettier --write .",
+    "lint": "eslint .",
+    "format": "prettier --write .",
     "preview": "vite preview"
   },
   "dependencies": {
     "dompurify": "^3.2.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.0.2",
+    "react-router-dom": "^7.1.1",
     "zustand": "^5.0.2"
   },
   "devDependencies": {
-    "@types/react": "^19.0.1",
+    "@types/react": "^19.0.3",
     "@types/react-dom": "^19.0.2",
-    "@typescript-eslint/eslint-plugin": "^8.18.0",
-    "@typescript-eslint/parser": "^8.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.19.1",
+    "@typescript-eslint/parser": "^8.19.1",
     "@vitejs/plugin-react-swc": "^3.7.2",
-    "eslint": "^9.16.0",
+    "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.14.0",
     "prettier": "3.4.2",
     "typescript": "^5.7.2",
-    "vite": "^6.0.3"
+    "typescript-eslint": "^8.19.1",
+    "vite": "^6.0.7"
   }
 }
