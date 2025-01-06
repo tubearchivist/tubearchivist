@@ -206,7 +206,7 @@ const Download = () => {
               <input
                 id="showIgnored"
                 onChange={() => {
-                  setPartialConfig({show_ignored_only: !showIgnored});
+                  setPartialConfig({ show_ignored_only: !showIgnored });
                   setRefresh(true);
                 }}
                 type="checkbox"
@@ -262,7 +262,7 @@ const Download = () => {
                   <img
                     src={iconAdd}
                     onClick={() => {
-                      setPartialConfig({grid_items: gridItems + 1});
+                      setPartialConfig({ grid_items: gridItems + 1 });
                     }}
                     alt="grid plus row"
                   />
@@ -271,7 +271,7 @@ const Download = () => {
                   <img
                     src={iconSubstract}
                     onClick={() => {
-                      setPartialConfig({grid_items: gridItems - 1});
+                      setPartialConfig({ grid_items: gridItems - 1 });
                     }}
                     alt="grid minus row"
                   />
@@ -282,14 +282,14 @@ const Download = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                setPartialConfig({view_style_downloads: 'grid'});
+                setPartialConfig({ view_style_downloads: 'grid' });
               }}
               alt="grid view"
             />
             <img
               src={iconListView}
               onClick={() => {
-                setPartialConfig({view_style_downloads: 'list'});
+                setPartialConfig({ view_style_downloads: 'list' });
               }}
               alt="list view"
             />
@@ -313,10 +313,7 @@ const Download = () => {
             downloadList?.map(download => {
               return (
                 <Fragment key={`${download.channel_id}_${download.timestamp}`}>
-                  <DownloadListItem
-                    download={download}
-                    setRefresh={setRefresh}
-                  />
+                  <DownloadListItem download={download} setRefresh={setRefresh} />
                 </Fragment>
               );
             })}

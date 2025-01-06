@@ -7,8 +7,7 @@ interface UserConfigState {
   setPartialConfig: (userConfig: Partial<UserConfigType>) => void;
 }
 
-export const useUserConfigStore = create<UserConfigState>((set) => ({
-
+export const useUserConfigStore = create<UserConfigState>(set => ({
   userConfig: {
     id: 0,
     name: '',
@@ -30,15 +29,16 @@ export const useUserConfigStore = create<UserConfigState>((set) => ({
       hide_watched: false,
       show_ignored_only: false,
       show_subed_only: false,
-    }
+    },
   },
-  setUserConfig: (userConfig) => set({ userConfig }),
+  setUserConfig: userConfig => set({ userConfig }),
 
   setPartialConfig: async (userConfig: Partial<UserConfigType>) => {
     const userConfigResponse = await updateUserConfig(userConfig);
-    set((state) => ({
-      userConfig: state.userConfig ? { ...state.userConfig, config: userConfigResponse } : state.userConfig,
+    set(state => ({
+      userConfig: state.userConfig
+        ? { ...state.userConfig, config: userConfigResponse }
+        : state.userConfig,
     }));
-  }
-
-}))
+  },
+}));

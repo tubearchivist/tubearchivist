@@ -115,7 +115,11 @@ const Search = () => {
             <div className="multi-search-result">
               <h2>Video Results</h2>
               <div id="video-results" className={`video-list ${viewVideos} ${gridViewGrid}`}>
-                <VideoList videoList={videoList} viewLayout={viewVideos} refreshVideoList={setRefresh} />
+                <VideoList
+                  videoList={videoList}
+                  viewLayout={viewVideos}
+                  refreshVideoList={setRefresh}
+                />
               </div>
             </div>
           )}
@@ -124,10 +128,7 @@ const Search = () => {
             <div className="multi-search-result">
               <h2>Channel Results</h2>
               <div id="channel-results" className={`channel-list ${viewChannels} ${gridViewGrid}`}>
-                <ChannelList
-                  channelList={channelList}
-                  refreshChannelList={setRefresh}
-                />
+                <ChannelList channelList={channelList} refreshChannelList={setRefresh} />
               </div>
             </div>
           )}
@@ -135,11 +136,11 @@ const Search = () => {
           {hasSearchQuery && isPlaylistQuery && (
             <div className="multi-search-result">
               <h2>Playlist Results</h2>
-              <div id="playlist-results" className={`playlist-list ${viewPlaylists} ${gridViewGrid}`}>
-                <PlaylistList
-                  playlistList={playlistList}
-                  setRefresh={setRefresh}
-                />
+              <div
+                id="playlist-results"
+                className={`playlist-list ${viewPlaylists} ${gridViewGrid}`}
+              >
+                <PlaylistList playlistList={playlistList} setRefresh={setRefresh} />
               </div>
             </div>
           )}

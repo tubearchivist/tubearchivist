@@ -1,11 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  Link,
-  useNavigate,
-  useOutletContext,
-  useParams,
-  useSearchParams,
-} from 'react-router-dom';
+import { Link, useNavigate, useOutletContext, useParams, useSearchParams } from 'react-router-dom';
 import loadPlaylistById from '../api/loader/loadPlaylistById';
 import { OutletContextType } from './Base';
 import { ConfigType, VideoType, ViewLayoutType } from './Home';

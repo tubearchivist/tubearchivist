@@ -15,7 +15,6 @@ type DownloadListItemProps = {
 };
 
 const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
-
   const { userConfig } = useUserConfigStore();
   const view = userConfig.config.view_style_downloads;
   const showIgnored = userConfig.config.show_ignored_only;

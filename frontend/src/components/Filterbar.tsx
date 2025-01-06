@@ -14,15 +14,10 @@ type FilterbarProps = {
   setRefresh?: (status: boolean) => void;
 };
 
-const Filterbar = ({
-  hideToggleText,
-  viewStyleName,
-  setRefresh,
-}: FilterbarProps) => {
-
+const Filterbar = ({ hideToggleText, viewStyleName, setRefresh }: FilterbarProps) => {
   const { userConfig, setPartialConfig } = useUserConfigStore();
   const [showHidden, setShowHidden] = useState(false);
-  const isGridView = userConfig.config.view_style_home === ViewStyles.grid
+  const isGridView = userConfig.config.view_style_home === ViewStyles.grid;
 
   return (
     <div className="view-controls three">
@@ -35,7 +30,7 @@ const Filterbar = ({
             checked={userConfig.config.hide_watched}
             onChange={() => {
               setRefresh?.(true);
-              setPartialConfig({hide_watched: !userConfig.config.hide_watched})
+              setPartialConfig({ hide_watched: !userConfig.config.hide_watched });
             }}
           />
 
@@ -48,7 +43,6 @@ const Filterbar = ({
               Off
             </label>
           )}
-
         </div>
       </div>
 
@@ -62,7 +56,7 @@ const Filterbar = ({
               value={userConfig.config.sort_by}
               onChange={event => {
                 setRefresh?.(true);
-                setPartialConfig({sort_by: event.target.value as SortByType});
+                setPartialConfig({ sort_by: event.target.value as SortByType });
               }}
             >
               <option value="published">date published</option>
@@ -78,7 +72,7 @@ const Filterbar = ({
               value={userConfig.config.sort_order}
               onChange={event => {
                 setRefresh?.(true);
-                setPartialConfig({sort_order: event.target.value as SortOrderType})
+                setPartialConfig({ sort_order: event.target.value as SortOrderType });
               }}
             >
               <option value="asc">asc</option>
@@ -106,7 +100,7 @@ const Filterbar = ({
               <img
                 src={iconAdd}
                 onClick={() => {
-                  setPartialConfig({grid_items: userConfig.config.grid_items + 1});
+                  setPartialConfig({ grid_items: userConfig.config.grid_items + 1 });
                 }}
                 alt="grid plus row"
               />
@@ -115,7 +109,7 @@ const Filterbar = ({
               <img
                 src={iconSubstract}
                 onClick={() => {
-                  setPartialConfig({grid_items: userConfig.config.grid_items - 1});
+                  setPartialConfig({ grid_items: userConfig.config.grid_items - 1 });
                 }}
                 alt="grid minus row"
               />
@@ -125,14 +119,14 @@ const Filterbar = ({
         <img
           src={iconGridView}
           onClick={() => {
-            setPartialConfig({[viewStyleName]: 'grid'});
+            setPartialConfig({ [viewStyleName]: 'grid' });
           }}
           alt="grid view"
         />
         <img
           src={iconListView}
           onClick={() => {
-            setPartialConfig({[viewStyleName]: 'list'});
+            setPartialConfig({ [viewStyleName]: 'list' });
           }}
           alt="list view"
         />

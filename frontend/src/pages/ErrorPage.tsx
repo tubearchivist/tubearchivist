@@ -1,7 +1,6 @@
 import { useRouteError } from 'react-router-dom';
 import importColours from '../configuration/colours/getColours';
 
-
 // This is not always the correct response
 type ErrorType = {
   statusText: string;

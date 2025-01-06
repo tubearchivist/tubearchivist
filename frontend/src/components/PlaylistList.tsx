@@ -13,7 +13,6 @@ type PlaylistListProps = {
 };
 
 const PlaylistList = ({ playlistList, setRefresh }: PlaylistListProps) => {
-
   const { userConfig } = useUserConfigStore();
   const viewLayout = userConfig.config.view_style_playlist;
 

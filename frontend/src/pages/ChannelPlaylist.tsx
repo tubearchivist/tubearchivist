@@ -42,7 +42,7 @@ const ChannelPlaylist = () => {
     <>
       <title>TA | Channel: Playlists</title>
       <ScrollToTopOnNavigate />
-      <div className='boxed-content'>
+      <div className="boxed-content">
         <Notifications pageName="channel" includeReindex={true} />
 
         <div className="view-controls">
@@ -52,7 +52,7 @@ const ChannelPlaylist = () => {
               <input
                 checked={showSubedOnly}
                 onChange={() => {
-                  setPartialConfig({show_subed_only: !showSubedOnly});
+                  setPartialConfig({ show_subed_only: !showSubedOnly });
                   setRefreshPlaylists(true);
                 }}
                 type="checkbox"
@@ -73,14 +73,14 @@ const ChannelPlaylist = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                setPartialConfig({view_style_playlist: 'grid'});
+                setPartialConfig({ view_style_playlist: 'grid' });
               }}
               alt="grid view"
             />
             <img
               src={iconListView}
               onClick={() => {
-                setPartialConfig({view_style_playlist: 'list'});
+                setPartialConfig({ view_style_playlist: 'list' });
               }}
               alt="list view"
             />
@@ -90,10 +90,7 @@ const ChannelPlaylist = () => {
 
       <div className={`boxed-content`}>
         <div className={`playlist-list ${view}`}>
-          <PlaylistList
-            playlistList={playlistList}
-            setRefresh={setRefreshPlaylists}
-          />
+          <PlaylistList playlistList={playlistList} setRefresh={setRefreshPlaylists} />
         </div>
       </div>
 

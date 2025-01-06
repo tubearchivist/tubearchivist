@@ -8,7 +8,6 @@ import logOut from '../api/actions/logOut';
 import loadIsAdmin from '../functions/getIsAdmin';
 
 const Navigation = () => {
-
   const isAdmin = loadIsAdmin();
   const navigate = useNavigate();
   const handleLogout = async (event: { preventDefault: () => void }) => {

@@ -6,7 +6,7 @@ interface AuthState {
   setAuth: (auth: AuthenticationType) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>(set => ({
   auth: null,
-  setAuth: (auth) => set({ auth }),
+  setAuth: auth => set({ auth }),
 }));

@@ -160,7 +160,7 @@ const Home = () => {
     userMeConfig.sort_order,
     userMeConfig.hide_watched,
     currentPage,
-    pagination?.current_page
+    pagination?.current_page,
   ]);
 
   return (

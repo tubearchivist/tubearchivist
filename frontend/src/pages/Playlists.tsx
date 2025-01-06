@@ -143,7 +143,7 @@ const Playlists = () => {
               <input
                 checked={showSubedOnly}
                 onChange={() => {
-                  setPartialConfig({show_subed_only: !showSubedOnly});
+                  setPartialConfig({ show_subed_only: !showSubedOnly });
                 }}
                 type="checkbox"
               />
@@ -163,14 +163,14 @@ const Playlists = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                setPartialConfig({view_style_playlist: 'grid'});
+                setPartialConfig({ view_style_playlist: 'grid' });
               }}
               alt="grid view"
             />
             <img
               src={iconListView}
               onClick={() => {
-                setPartialConfig({view_style_playlist: 'list'});
+                setPartialConfig({ view_style_playlist: 'list' });
               }}
               alt="list view"
             />
@@ -180,9 +180,7 @@ const Playlists = () => {
         <div className={`playlist-list ${view}`}>
           {!hasPlaylists && <h2>No playlists found...</h2>}
 
-          {hasPlaylists && (
-            <PlaylistList playlistList={playlistList} setRefresh={setRefresh} />
-          )}
+          {hasPlaylists && <PlaylistList playlistList={playlistList} setRefresh={setRefresh} />}
         </div>
       </div>
 

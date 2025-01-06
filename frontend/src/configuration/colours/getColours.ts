@@ -8,9 +8,8 @@ export const ColourConstant = {
 };
 
 const importColours = () => {
-
   const { userConfig } = useUserConfigStore();
-  const stylesheet = userConfig?.config.stylesheet
+  const stylesheet = userConfig?.config.stylesheet;
 
   switch (stylesheet) {
     case ColourConstant.Dark:

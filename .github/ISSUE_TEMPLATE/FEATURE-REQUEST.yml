@@ -6,7 +6,7 @@ body:
   - type: checkboxes
     id: block
     attributes:
-      label: "This project doesn't accept any new feature requests for the forseeable future. There is no shortage of ideas and the next development steps are clear for years to come."
+      label: "This project doesn't accept any new feature requests for the foreseeable future. There is no shortage of ideas and the next development steps are clear for years to come."
       options:
         - label: I understand that this issue will be closed without comment.
           required: true

@@ -15,7 +15,6 @@ type ChannelListProps = {
 };
 
 const ChannelList = ({ channelList, refreshChannelList }: ChannelListProps) => {
-
   const { userConfig } = useUserConfigStore();
   const viewLayout = userConfig.config.view_style_channel;
 

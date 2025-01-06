@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "build:deploy": "vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "prettier": "prettier --write .",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -1,10 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  Link,
-  useOutletContext,
-  useParams,
-  useSearchParams,
-} from 'react-router-dom';
+import { Link, useOutletContext, useParams, useSearchParams } from 'react-router-dom';
 import { OutletContextType } from './Base';
 import VideoList from '../components/VideoList';
 import Routes from '../configuration/routes/RouteList';
@@ -54,7 +49,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const hasVideos = videoResponse?.data?.length !== 0;
   const showEmbeddedVideo = videoId !== null;
 
-  const view = userConfig.config.view_style_home
+  const view = userConfig.config.view_style_home;
   const isGridView = view === ViewStyles.grid;
   const gridView = isGridView ? `boxed-${userConfig.config.grid_items}` : '';
   const gridViewGrid = isGridView ? `grid-${userConfig.config.grid_items}` : '';

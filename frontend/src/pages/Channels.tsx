@@ -64,7 +64,10 @@ const Channels = () => {
 
   useEffect(() => {
     (async () => {
-      const channelListResponse = await loadChannelList(currentPage, userConfig.config.show_subed_only);
+      const channelListResponse = await loadChannelList(
+        currentPage,
+        userConfig.config.show_subed_only,
+      );
       setChannelListResponse(channelListResponse);
     })();
   }, [refresh, userConfig.config.show_subed_only, currentPage, pagination?.current_page]);
@@ -127,7 +130,7 @@ const Channels = () => {
               <input
                 id="show_subed_only"
                 onChange={async () => {
-                  setPartialConfig({show_subed_only: !userConfig.config.show_subed_only});
+                  setPartialConfig({ show_subed_only: !userConfig.config.show_subed_only });
                   setRefresh(true);
                 }}
                 type="checkbox"
@@ -149,7 +152,7 @@ const Channels = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                setPartialConfig({view_style_channel: 'grid'});
+                setPartialConfig({ view_style_channel: 'grid' });
               }}
               data-origin="channel"
               data-value="grid"
@@ -158,7 +161,7 @@ const Channels = () => {
             <img
               src={iconListView}
               onClick={() => {
-                setPartialConfig({view_style_channel: 'list'});
+                setPartialConfig({ view_style_channel: 'list' });
               }}
               data-origin="channel"
               data-value="list"
@@ -171,9 +174,7 @@ const Channels = () => {
         <div className={`channel-list ${userConfig.config.view_style_channel}`}>
           {!hasChannels && <h2>No channels found...</h2>}
 
-          {hasChannels && (
-            <ChannelList channelList={channels} refreshChannelList={setRefresh} />
-          )}
+          {hasChannels && <ChannelList channelList={channels} refreshChannelList={setRefresh} />}
         </div>
 
         {pagination && (

@@ -25,19 +25,19 @@ const SettingsUser = () => {
   }, [userConfig.config.page_size, userConfig.config.stylesheet]);
 
   const handleStyleSheetChange = async (selectedStyleSheet: ColourVariants) => {
-    setPartialConfig({stylesheet: selectedStyleSheet});
+    setPartialConfig({ stylesheet: selectedStyleSheet });
     setStyleSheet(selectedStyleSheet);
     setStyleSheetRefresh(true);
-  }
+  };
 
   const handlePageSizeChange = async () => {
-    setPartialConfig({page_size: pageSize});
-  }
+    setPartialConfig({ page_size: pageSize });
+  };
 
   const handlePageRefresh = () => {
     navigate(0);
     setStyleSheetRefresh(false);
-  }
+  };
 
   return (
     <>
@@ -49,10 +49,10 @@ const SettingsUser = () => {
         <div className="title-bar">
           <h1>User Configurations</h1>
         </div>
-        <div className='info-box'>
-          <div className='info-box-item'>
+        <div className="info-box">
+          <div className="info-box-item">
             <h2>Customize user Interface</h2>
-            <div className='settings-box-wrapper'>
+            <div className="settings-box-wrapper">
               <div>
                 <p>Switch your color scheme</p>
               </div>
@@ -73,12 +73,10 @@ const SettingsUser = () => {
                     );
                   })}
                 </select>
-                {styleSheetRefresh && (
-                  <button onClick={handlePageRefresh}>Refresh</button>
-                )}
+                {styleSheetRefresh && <button onClick={handlePageRefresh}>Refresh</button>}
               </div>
             </div>
-            <div className='settings-box-wrapper'>
+            <div className="settings-box-wrapper">
               <div>
                 <p>Archive view page size</p>
               </div>
@@ -92,11 +90,13 @@ const SettingsUser = () => {
                     setPageSize(Number(event.target.value));
                   }}
                 />
-                <div className='button-box'>
+                <div className="button-box">
                   {userConfig.config.page_size !== pageSize && (
                     <>
                       <button onClick={handlePageSizeChange}>Update</button>
-                      <button onClick={() => setPageSize(userConfig.config.page_size)}>Cancel</button>
+                      <button onClick={() => setPageSize(userConfig.config.page_size)}>
+                        Cancel
+                      </button>
                     </>
                   )}
                 </div>

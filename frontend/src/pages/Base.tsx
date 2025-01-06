@@ -31,7 +31,7 @@ export type OutletContextType = {
 
 const Base = () => {
   const { setAuth } = useAuthStore();
-  const { setUserConfig } = useUserConfigStore()
+  const { setUserConfig } = useUserConfigStore();
   const { userConfig, auth } = useLoaderData() as BaseLoaderData;
 
   const location = useLocation();
@@ -46,7 +46,7 @@ const Base = () => {
   useEffect(() => {
     setAuth(auth);
     setUserConfig(userConfig);
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (currentPageFromUrl !== currentPage) {

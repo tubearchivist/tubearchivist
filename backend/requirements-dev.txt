@@ -1,9 +1,6 @@
 -r requirements.txt
-black==24.10.0
-codespell==2.3.0
-flake8==7.1.1
 ipython==8.31.0
-isort==5.13.2
+pre-commit==4.0.1
 pylint-django==2.6.1
 pylint==3.3.3
 pytest-django==4.9.0

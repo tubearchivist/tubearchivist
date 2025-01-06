@@ -5,8 +5,8 @@ import { useAuthStore } from '../stores/AuthDataStore';
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const { auth } = useAuthStore();
-  const version = auth?.version
-  const taUpdate = auth?.ta_update
+  const version = auth?.version;
+  const taUpdate = auth?.ta_update;
 
   return (
     <div className="footer">
