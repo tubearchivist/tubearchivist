@@ -63,7 +63,7 @@ class PlaylistApiListView(ApiBaseView):
     def _unsubscribe(playlist_id: str):
         """unsubscribe"""
         print(f"[{playlist_id}] unsubscribe from playlist")
-        PlaylistSubscription().change_subscribe(
+        _ = PlaylistSubscription().change_subscribe(
             playlist_id, subscribe_status=False
         )
 
@@ -85,8 +85,18 @@ class PlaylistApiView(ApiBaseView):
 
     def post(self, request, playlist_id):
         """post to custom playlist to add a video to list"""
-        playlist = YoutubePlaylist(playlist_id)
-        if not playlist.is_custom_playlist():
+        self.get_document(playlist_id)
+        if not self.response["data"]:
+            return Response({"error": "playlist not found"}, status=404)
+
+        data = request.data
+        subscribed = data.get("playlist_subscribed")
+        if subscribed is not None:
+            playlist_sub = PlaylistSubscription()
+            json_data = playlist_sub.change_subscribe(playlist_id, subscribed)
+            return Response(json_data, status=200)
+
+        if not self.response["data"]["playlist_type"] == "custom":
             message = f"playlist with ID {playlist_id} is not custom"
             return Response({"message": message}, status=400)
 
@@ -95,6 +105,7 @@ class PlaylistApiView(ApiBaseView):
             message = f"invalid action: {action}"
             return Response({"message": message}, status=400)
 
+        playlist = YoutubePlaylist(playlist_id)
         video_id = request.data.get("video_id")
         if action == "create":
             playlist.add_video_to_playlist(video_id)

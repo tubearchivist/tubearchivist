@@ -123,6 +123,8 @@ class ChannelSubscription:
         channel.upload_to_es()
         channel.sync_to_videos()
 
+        return channel.json_data
+
 
 class VideoQueryBuilder:
     """Build queries for yt-dlp."""
@@ -280,6 +282,7 @@ class PlaylistSubscription:
         playlist.build_json()
         playlist.json_data["playlist_subscribed"] = subscribe_status
         playlist.upload_to_es()
+        return playlist.json_data
 
     def find_missing(self):
         """find videos in subscribed playlists not downloaded yet"""
@@ -426,7 +429,7 @@ class SubscriptionHandler:
 
     def _subscribe(self, channel_id):
         """subscribe to channel"""
-        ChannelSubscription().change_subscribe(
+        _ = ChannelSubscription().change_subscribe(
             channel_id, channel_subscribed=True
         )
 

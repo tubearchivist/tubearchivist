@@ -89,8 +89,18 @@ class ChannelApiView(ApiBaseView):
 
     def post(self, request, channel_id):
         """modify channel overwrites"""
+        self.get_document(channel_id)
+        if not self.response["data"]:
+            return Response({"error": "channel not found"}, status=404)
+
         data = request.data
-        if not isinstance(data, dict) or "channel_overwrites" not in data:
+        subscribed = data.get("channel_subscribed")
+        if subscribed is not None:
+            channel_sub = ChannelSubscription()
+            json_data = channel_sub.change_subscribe(channel_id, subscribed)
+            return Response(json_data, status=200)
+
+        if "channel_overwrites" not in data:
             return Response({"error": "invalid payload"}, status=400)
 
         overwrites = data["channel_overwrites"]
