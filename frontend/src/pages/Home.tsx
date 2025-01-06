@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Link, useLoaderData, useOutletContext, useSearchParams } from 'react-router-dom';
+import { Link, useOutletContext, useSearchParams } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
 import Pagination from '../components/Pagination';
 import loadVideoListByFilter, {
   VideoListByFilterResponseType,
 } from '../api/loader/loadVideoListByPage';
-import { UserMeType } from '../api/actions/updateUserConfig';
 import VideoList from '../components/VideoList';
 import { ChannelType } from './Channels';
 import { OutletContextType } from './Base';
@@ -14,6 +13,7 @@ import { ViewStyleNames, ViewStyles } from '../configuration/constants/ViewStyle
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import { SponsorBlockType } from './Video';
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 export type PlayerType = {
   watched: boolean;
@@ -98,28 +98,18 @@ export type ConfigType = {
   downloads: DownloadsType;
 };
 
-type HomeLoaderDataType = {
-  userConfig: UserMeType;
-};
-
-export type SortByType = 'published' | 'downloaded' | 'views' | 'likes' | 'duration' | 'filesize';
+export type SortByType = 'published' | 'downloaded' | 'views' | 'likes' | 'duration' | 'mediasize';
 export type SortOrderType = 'asc' | 'desc';
 export type ViewLayoutType = 'grid' | 'list';
 
 const Home = () => {
-  const { userConfig } = useLoaderData() as HomeLoaderDataType;
+  const { userConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');
 
   const userMeConfig = userConfig.config;
 
-  const [hideWatched, setHideWatched] = useState(userMeConfig.hide_watched || false);
-  const [sortBy, setSortBy] = useState<SortByType>(userMeConfig.sort_by || 'published');
-  const [sortOrder, setSortOrder] = useState<SortOrderType>(userMeConfig.sort_order || 'asc');
-  const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_home || 'grid');
-  const [gridItems, setGridItems] = useState(userMeConfig.grid_items || 3);
-  const [showHidden, setShowHidden] = useState(false);
   const [refreshVideoList, setRefreshVideoList] = useState(false);
 
   const [videoResponse, setVideoReponse] = useState<VideoListByFilterResponseType>();
@@ -133,9 +123,9 @@ const Home = () => {
   const hasVideos = videoResponse?.data?.length !== 0;
   const showEmbeddedVideo = videoId !== null;
 
-  const isGridView = view === ViewStyles.grid;
-  const gridView = isGridView ? `boxed-${gridItems}` : '';
-  const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
+  const isGridView = userMeConfig.view_style_home === ViewStyles.grid;
+  const gridView = isGridView ? `boxed-${userMeConfig.grid_items}` : '';
+  const gridViewGrid = isGridView ? `grid-${userMeConfig.grid_items}` : '';
 
   useEffect(() => {
     (async () => {
@@ -146,9 +136,9 @@ const Home = () => {
       ) {
         const videos = await loadVideoListByFilter({
           page: currentPage,
-          watch: hideWatched ? 'unwatched' : undefined,
-          sort: sortBy,
-          order: sortOrder,
+          watch: userMeConfig.hide_watched ? 'unwatched' : undefined,
+          sort: userMeConfig.sort_by,
+          order: userMeConfig.sort_order,
         });
 
         try {
@@ -163,9 +153,15 @@ const Home = () => {
         setRefreshVideoList(false);
       }
     })();
-    // Do not add sort, order, hideWatched this will not work as expected!
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshVideoList, currentPage, pagination?.current_page]);
+  }, [
+    refreshVideoList,
+    userMeConfig.sort_by,
+    userMeConfig.sort_order,
+    userMeConfig.hide_watched,
+    currentPage,
+    pagination?.current_page
+  ]);
 
   return (
     <>
@@ -180,10 +176,10 @@ const Home = () => {
             <div className="title-bar">
               <h1>Continue Watching</h1>
             </div>
-            <div className={`video-list ${view} ${gridViewGrid}`}>
+            <div className={`video-list ${userMeConfig.view_style_home} ${gridViewGrid}`}>
               <VideoList
                 videoList={continueVideos}
-                viewLayout={view}
+                viewLayout={userMeConfig.view_style_home}
                 refreshVideoList={setRefreshVideoList}
               />
             </div>
@@ -196,27 +192,13 @@ const Home = () => {
 
         <Filterbar
           hideToggleText="Hide watched:"
-          showHidden={showHidden}
-          hideWatched={hideWatched}
-          isGridView={isGridView}
-          view={view}
-          gridItems={gridItems}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          userMeConfig={userMeConfig}
-          setShowHidden={setShowHidden}
-          setHideWatched={setHideWatched}
-          setView={setView}
-          setSortBy={setSortBy}
-          setSortOrder={setSortOrder}
-          setGridItems={setGridItems}
           viewStyleName={ViewStyleNames.home}
           setRefresh={setRefreshVideoList}
         />
       </div>
 
       <div className={`boxed-content ${gridView}`}>
-        <div className={`video-list ${view} ${gridViewGrid}`}>
+        <div className={`video-list ${userMeConfig.view_style_home} ${gridViewGrid}`}>
           {!hasVideos && (
             <>
               <h2>No videos found...</h2>
@@ -231,7 +213,7 @@ const Home = () => {
           {hasVideos && (
             <VideoList
               videoList={videoList}
-              viewLayout={view}
+              viewLayout={userMeConfig.view_style_home}
               refreshVideoList={setRefreshVideoList}
             />
           )}

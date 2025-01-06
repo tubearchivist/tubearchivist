@@ -1,4 +1,4 @@
-import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import loadVideoById from '../api/loader/loadVideoById';
 import { Fragment, useEffect, useState } from 'react';
 import { ConfigType, VideoType } from './Home';
@@ -35,9 +35,9 @@ import { PlaylistType } from './Playlist';
 import loadCommentsbyVideoId from '../api/loader/loadCommentsbyVideoId';
 import CommentBox, { CommentsType } from '../components/CommentBox';
 import Button from '../components/Button';
-import { OutletContextType } from './Base';
 import getApiUrl from '../configuration/getApiUrl';
 import loadVideoNav, { VideoNavResponseType } from '../api/loader/loadVideoNav';
+import loadIsAdmin from '../functions/getIsAdmin';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {
   return playlist.playlist_entries.some(entry => {
@@ -116,9 +116,9 @@ export type VideoCommentsResponseType = {
 };
 
 const Video = () => {
-  const { isAdmin } = useOutletContext() as OutletContextType;
   const { videoId } = useParams() as VideoParams;
   const navigate = useNavigate();
+  const isAdmin = loadIsAdmin();
 
   const [loading, setLoading] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);

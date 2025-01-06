@@ -12,9 +12,9 @@ import PaginationDummy from '../components/PaginationDummy';
 import FormattedNumber from '../components/FormattedNumber';
 import Button from '../components/Button';
 import updateChannelOverwrites from '../api/actions/updateChannelOverwrite';
+import loadIsAdmin from '../functions/getIsAdmin';
 
 export type ChannelBaseOutletContextType = {
-  isAdmin: boolean;
   currentPage: number;
   setCurrentPage: (page: number) => void;
   startNotification: boolean;
@@ -22,7 +22,6 @@ export type ChannelBaseOutletContextType = {
 };
 
 export type OutletContextType = {
-  isAdmin: boolean;
   currentPage: number;
   setCurrentPage: (page: number) => void;
 };
@@ -33,8 +32,9 @@ type ChannelAboutParams = {
 
 const ChannelAbout = () => {
   const { channelId } = useParams() as ChannelAboutParams;
-  const { isAdmin, setStartNotification } = useOutletContext() as ChannelBaseOutletContextType;
+  const { setStartNotification } = useOutletContext() as ChannelBaseOutletContextType;
   const navigate = useNavigate();
+  const isAdmin = loadIsAdmin();
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
@@ -121,7 +121,6 @@ const ChannelAbout = () => {
             channelSubscribed={channel.channel_subscribed}
             channelThumbUrl={channel.channel_thumb_url}
             showSubscribeButton={true}
-            isUserAdmin={isAdmin}
             setRefresh={setRefresh}
           />
 

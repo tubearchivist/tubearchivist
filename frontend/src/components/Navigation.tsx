@@ -5,12 +5,11 @@ import iconExit from '/img/icon-exit.svg';
 import Routes from '../configuration/routes/RouteList';
 import NavigationItem from './NavigationItem';
 import logOut from '../api/actions/logOut';
+import loadIsAdmin from '../functions/getIsAdmin';
 
-interface NavigationProps {
-  isAdmin: boolean;
-}
+const Navigation = () => {
 
-const Navigation = ({ isAdmin }: NavigationProps) => {
+  const isAdmin = loadIsAdmin();
   const navigate = useNavigate();
   const handleLogout = async (event: { preventDefault: () => void }) => {
     event.preventDefault();

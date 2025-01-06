@@ -1,79 +1,28 @@
-import { useEffect } from 'react';
-import { useRevalidator } from 'react-router-dom';
+import { useState } from 'react';
 import iconSort from '/img/icon-sort.svg';
 import iconAdd from '/img/icon-add.svg';
 import iconSubstract from '/img/icon-substract.svg';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
-import { SortByType, SortOrderType, ViewLayoutType } from '../pages/Home';
-import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
+import { SortByType, SortOrderType } from '../pages/Home';
+import { useUserConfigStore } from '../stores/UserConfigStore';
+import { ViewStyles } from '../configuration/constants/ViewStyle';
 
 type FilterbarProps = {
   hideToggleText: string;
-  showHidden?: boolean;
-  hideWatched?: boolean;
-  isGridView?: boolean;
-  view: ViewLayoutType;
   viewStyleName: string;
-  gridItems: number;
-  sortBy?: SortByType;
-  sortOrder?: SortOrderType;
-  userMeConfig: UserConfigType;
-  setShowHidden?: (showHidden: boolean) => void;
-  setHideWatched?: (hideWatched: boolean) => void;
-  setView: (view: ViewLayoutType) => void;
-  setSortBy?: (sortBy: SortByType) => void;
-  setSortOrder?: (sortOrder: SortOrderType) => void;
-  setGridItems: (gridItems: number) => void;
   setRefresh?: (status: boolean) => void;
 };
 
 const Filterbar = ({
   hideToggleText,
-  showHidden,
-  hideWatched,
-  isGridView,
-  view,
   viewStyleName,
-  gridItems,
-  sortBy,
-  sortOrder,
-  userMeConfig,
-  setShowHidden,
-  setHideWatched,
-  setView,
-  setSortBy,
-  setSortOrder,
-  setGridItems,
   setRefresh,
 }: FilterbarProps) => {
-  const revalidator = useRevalidator();
 
-  useEffect(() => {
-    (async () => {
-      if (
-        (hideWatched !== undefined && userMeConfig.hide_watched !== hideWatched) ||
-        (gridItems !== undefined && userMeConfig.grid_items !== gridItems) ||
-        (sortBy !== undefined && userMeConfig.sort_by !== sortBy) ||
-        (sortOrder !== undefined && userMeConfig.sort_order !== sortOrder) ||
-        // @ts-ignore
-        userMeConfig[viewStyleName.toString()] !== view
-      ) {
-        const userConfig: UserConfigType = {
-          hide_watched: hideWatched,
-          [viewStyleName.toString()]: view,
-          grid_items: gridItems,
-          sort_by: sortBy,
-          sort_order: sortOrder,
-        };
-
-        await updateUserConfig(userConfig);
-        setRefresh?.(true);
-
-        revalidator.revalidate();
-      }
-    })();
-  }, [hideWatched, view, gridItems, sortBy, sortOrder]);
+  const { userConfig, setPartialConfig } = useUserConfigStore();
+  const [showHidden, setShowHidden] = useState(false);
+  const isGridView = userConfig.config.view_style_home === ViewStyles.grid
 
   return (
     <div className="view-controls three">
@@ -83,22 +32,23 @@ const Filterbar = ({
           <input
             id="hide_watched"
             type="checkbox"
-            checked={hideWatched}
+            checked={userConfig.config.hide_watched}
             onChange={() => {
-              setHideWatched?.(!hideWatched);
+              setRefresh?.(true);
+              setPartialConfig({hide_watched: !userConfig.config.hide_watched})
             }}
           />
 
-          {!hideWatched && (
+          {userConfig.config.hide_watched ? (
+            <label htmlFor="" className="onbtn">
+              On
+            </label>
+          ) : (
             <label htmlFor="" className="ofbtn">
               Off
             </label>
           )}
-          {hideWatched && (
-            <label htmlFor="" className="onbtn">
-              On
-            </label>
-          )}
+
         </div>
       </div>
 
@@ -109,9 +59,10 @@ const Filterbar = ({
             <select
               name="sort_by"
               id="sort"
-              value={sortBy}
+              value={userConfig.config.sort_by}
               onChange={event => {
-                setSortBy?.(event.target.value as SortByType);
+                setRefresh?.(true);
+                setPartialConfig({sort_by: event.target.value as SortByType});
               }}
             >
               <option value="published">date published</option>
@@ -119,14 +70,15 @@ const Filterbar = ({
               <option value="views">views</option>
               <option value="likes">likes</option>
               <option value="duration">duration</option>
-              <option value="filesize">file size</option>
+              <option value="mediasize">media size</option>
             </select>
             <select
               name="sort_order"
               id="sort-order"
-              value={sortOrder}
+              value={userConfig.config.sort_order}
               onChange={event => {
-                setSortOrder?.(event.target.value as SortOrderType);
+                setRefresh?.(true);
+                setPartialConfig({sort_order: event.target.value as SortOrderType})
               }}
             >
               <option value="asc">asc</option>
@@ -148,22 +100,22 @@ const Filterbar = ({
           />
         )}
 
-        {isGridView && (
+        {userConfig.config.grid_items !== undefined && isGridView && (
           <div className="grid-count">
-            {gridItems < 7 && (
+            {userConfig.config.grid_items < 7 && (
               <img
                 src={iconAdd}
                 onClick={() => {
-                  setGridItems(gridItems + 1);
+                  setPartialConfig({grid_items: userConfig.config.grid_items + 1});
                 }}
                 alt="grid plus row"
               />
             )}
-            {gridItems > 3 && (
+            {userConfig.config.grid_items > 3 && (
               <img
                 src={iconSubstract}
                 onClick={() => {
-                  setGridItems(gridItems - 1);
+                  setPartialConfig({grid_items: userConfig.config.grid_items - 1});
                 }}
                 alt="grid minus row"
               />
@@ -173,14 +125,14 @@ const Filterbar = ({
         <img
           src={iconGridView}
           onClick={() => {
-            setView('grid');
+            setPartialConfig({[viewStyleName]: 'grid'});
           }}
           alt="grid view"
         />
         <img
           src={iconListView}
           onClick={() => {
-            setView('list');
+            setPartialConfig({[viewStyleName]: 'list'});
           }}
           alt="list view"
         />

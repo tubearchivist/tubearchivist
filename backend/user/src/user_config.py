@@ -25,7 +25,6 @@ class UserConfigType(TypedDict, total=False):
     hide_watched: bool
     show_ignored_only: bool
     show_subed_only: bool
-    sponsorblock_id: str
 
 
 class UserConfig:
@@ -44,7 +43,6 @@ class UserConfig:
         hide_watched=False,
         show_ignored_only=False,
         show_subed_only=False,
-        sponsorblock_id=None,
     )
 
     VALID_STYLESHEETS = get_stylesheets()
@@ -134,9 +132,15 @@ class UserConfig:
         es_document_path = f"ta_config/_doc/user_{self._user_id}"
         response, status = ElasticWrap(es_document_path).get(print_error=False)
         if status == 200 and "_source" in response.keys():
-            source = response.get("_source")
+            source = response.get("_source", {})
             if "config" in source.keys():
                 return source.get("config")
 
         # There is no config in ES
-        return {}
+        response, status_code = ElasticWrap(es_document_path).put(
+            {"config": dict(self._DEFAULT_USER_SETTINGS)}
+        )
+        if status_code == 200:
+            print(f"set default config for user {self._user_id}: {response}")
+
+        return self._DEFAULT_USER_SETTINGS

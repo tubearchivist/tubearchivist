@@ -1,7 +1,6 @@
-import { useLoaderData, useSearchParams } from 'react-router-dom';
-import { UserMeType } from '../api/actions/updateUserConfig';
+import { useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { VideoType, ViewLayoutType } from './Home';
+import { VideoType } from './Home';
 import loadSearch from '../api/loader/loadSearch';
 import { PlaylistType } from './Playlist';
 import { ChannelType } from './Channels';
@@ -12,6 +11,7 @@ import SubtitleList from '../components/SubtitleList';
 import { ViewStyles } from '../configuration/constants/ViewStyle';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import SearchExampleQueries from '../components/SearchExampleQueries';
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 const EmptySearchResponse: SearchResultsType = {
   results: {
@@ -35,17 +35,15 @@ type SearchResultsType = {
   queryType: string;
 };
 
-type SearchLoaderDataType = {
-  userConfig: UserMeType;
-};
-
 const Search = () => {
-  const { userConfig } = useLoaderData() as SearchLoaderDataType;
+  const { userConfig } = useUserConfigStore();
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');
   const userMeConfig = userConfig.config;
 
-  const view = (userMeConfig.view_style_home || ViewStyles.grid) as ViewLayoutType;
+  const viewVideos = userMeConfig.view_style_home;
+  const viewChannels = userMeConfig.view_style_channel;
+  const viewPlaylists = userMeConfig.view_style_playlist;
   const gridItems = userMeConfig.grid_items || 3;
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,7 +70,7 @@ const Search = () => {
   const isPlaylistQuery = queryType === 'playlist' || isSimpleQuery;
   const isFullTextQuery = queryType === 'full' || isSimpleQuery;
 
-  const isGridView = view === ViewStyles.grid;
+  const isGridView = viewVideos === ViewStyles.grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
 
@@ -116,8 +114,8 @@ const Search = () => {
           {hasSearchQuery && isVideoQuery && (
             <div className="multi-search-result">
               <h2>Video Results</h2>
-              <div id="video-results" className={`video-list ${view} ${gridViewGrid}`}>
-                <VideoList videoList={videoList} viewLayout={view} refreshVideoList={setRefresh} />
+              <div id="video-results" className={`video-list ${viewVideos} ${gridViewGrid}`}>
+                <VideoList videoList={videoList} viewLayout={viewVideos} refreshVideoList={setRefresh} />
               </div>
             </div>
           )}
@@ -125,10 +123,9 @@ const Search = () => {
           {hasSearchQuery && isChannelQuery && (
             <div className="multi-search-result">
               <h2>Channel Results</h2>
-              <div id="channel-results" className={`channel-list ${view} ${gridViewGrid}`}>
+              <div id="channel-results" className={`channel-list ${viewChannels} ${gridViewGrid}`}>
                 <ChannelList
                   channelList={channelList}
-                  viewLayout={view}
                   refreshChannelList={setRefresh}
                 />
               </div>
@@ -138,10 +135,9 @@ const Search = () => {
           {hasSearchQuery && isPlaylistQuery && (
             <div className="multi-search-result">
               <h2>Playlist Results</h2>
-              <div id="playlist-results" className={`playlist-list ${view} ${gridViewGrid}`}>
+              <div id="playlist-results" className={`playlist-list ${viewPlaylists} ${gridViewGrid}`}>
                 <PlaylistList
                   playlistList={playlistList}
-                  viewLayout={view}
                   setRefresh={setRefresh}
                 />
               </div>

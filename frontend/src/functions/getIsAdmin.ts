@@ -1,7 +1,8 @@
-import { UserMeType } from '../api/actions/updateUserConfig';
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
-const loadIsAdmin = (config: UserMeType) => {
-  const isAdmin = config.is_staff || config.is_superuser;
+const loadIsAdmin = () => {
+  const { userConfig } = useUserConfigStore()
+  const isAdmin = userConfig?.is_staff || userConfig?.is_superuser;
 
   return isAdmin;
 };

@@ -1,3 +1,5 @@
+import { useUserConfigStore } from '../../stores/UserConfigStore';
+
 export const ColourConstant = {
   Dark: 'dark.css',
   Light: 'light.css',
@@ -5,9 +7,11 @@ export const ColourConstant = {
   Midnight: 'midnight.css',
 };
 
-export type ColourVariants = 'dark.css' | 'light.css' | 'matrix.css' | 'midnight.css';
+const importColours = () => {
 
-const importColours = (stylesheet: ColourVariants | undefined) => {
+  const { userConfig } = useUserConfigStore();
+  const stylesheet = userConfig?.config.stylesheet
+
   switch (stylesheet) {
     case ColourConstant.Dark:
       return import('./components/Dark');

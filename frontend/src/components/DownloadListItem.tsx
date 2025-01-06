@@ -7,15 +7,19 @@ import deleteDownloadById from '../api/actions/deleteDownloadById';
 import updateDownloadQueueStatusById from '../api/actions/updateDownloadQueueStatusById';
 import { useState } from 'react';
 import getApiUrl from '../configuration/getApiUrl';
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 type DownloadListItemProps = {
-  view: string;
   download: Download;
-  showIgnored: boolean;
   setRefresh: (status: boolean) => void;
 };
 
-const DownloadListItem = ({ view, download, showIgnored, setRefresh }: DownloadListItemProps) => {
+const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
+
+  const { userConfig } = useUserConfigStore();
+  const view = userConfig.config.view_style_downloads;
+  const showIgnored = userConfig.config.show_ignored_only;
+
   const [hideDownload, setHideDownload] = useState(false);
 
   return (

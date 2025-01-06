@@ -1,18 +1,19 @@
-import { useLoaderData, useOutletContext } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
 import loadChannelList from '../api/loader/loadChannelList';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
 import iconAdd from '/img/icon-add.svg';
 import { useEffect, useState } from 'react';
 import Pagination, { PaginationType } from '../components/Pagination';
-import { ConfigType, ViewLayoutType } from './Home';
-import updateUserConfig, { UserConfigType, UserMeType } from '../api/actions/updateUserConfig';
+import { ConfigType } from './Home';
 import { OutletContextType } from './Base';
 import ChannelList from '../components/ChannelList';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import Notifications from '../components/Notifications';
 import Button from '../components/Button';
 import updateChannelSubscription from '../api/actions/updateChannelSubscription';
+import loadIsAdmin from '../functions/getIsAdmin';
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 type ChannelOverwritesType = {
   download_format?: string;
@@ -46,21 +47,12 @@ type ChannelsListResponse = {
   config?: ConfigType;
 };
 
-type ChannelsLoaderDataType = {
-  userConfig: UserMeType;
-};
-
 const Channels = () => {
-  const { userConfig } = useLoaderData() as ChannelsLoaderDataType;
-  const { isAdmin, currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
-
-  const userMeConfig = userConfig.config;
+  const { userConfig, setPartialConfig } = useUserConfigStore();
+  const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
+  const isAdmin = loadIsAdmin();
 
   const [channelListResponse, setChannelListResponse] = useState<ChannelsListResponse>();
-  const [showSubscribedOnly, setShowSubscribedOnly] = useState(
-    userMeConfig.show_subed_only || false,
-  );
-  const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_channel || 'grid');
   const [showAddForm, setShowAddForm] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [channelsToSubscribeTo, setChannelsToSubscribeTo] = useState('');
@@ -72,34 +64,10 @@ const Channels = () => {
 
   useEffect(() => {
     (async () => {
-      if (
-        userMeConfig.view_style_channel !== view ||
-        userMeConfig.show_subed_only !== showSubscribedOnly
-      ) {
-        const userConfig: UserConfigType = {
-          show_subed_only: showSubscribedOnly,
-          view_style_channel: view,
-        };
-
-        await updateUserConfig(userConfig);
-      }
+      const channelListResponse = await loadChannelList(currentPage, userConfig.config.show_subed_only);
+      setChannelListResponse(channelListResponse);
     })();
-  }, [showSubscribedOnly, userMeConfig.show_subed_only, userMeConfig.view_style_channel, view]);
-
-  useEffect(() => {
-    (async () => {
-      if (
-        refresh ||
-        pagination?.current_page === undefined ||
-        currentPage !== pagination?.current_page
-      ) {
-        const channelListResponse = await loadChannelList(currentPage, showSubscribedOnly);
-
-        setChannelListResponse(channelListResponse);
-        setRefresh(false);
-      }
-    })();
-  }, [currentPage, showSubscribedOnly, refresh, pagination?.current_page]);
+  }, [refresh, userConfig.config.show_subed_only, currentPage, pagination?.current_page]);
 
   return (
     <>
@@ -158,18 +126,19 @@ const Channels = () => {
             <div className="toggleBox">
               <input
                 id="show_subed_only"
-                onChange={() => {
-                  setShowSubscribedOnly(!showSubscribedOnly);
+                onChange={async () => {
+                  setPartialConfig({show_subed_only: !userConfig.config.show_subed_only});
+                  setRefresh(true);
                 }}
                 type="checkbox"
-                checked={showSubscribedOnly}
+                checked={userConfig.config.show_subed_only}
               />
-              {!showSubscribedOnly && (
+              {!userConfig.config.show_subed_only && (
                 <label htmlFor="" className="ofbtn">
                   Off
                 </label>
               )}
-              {showSubscribedOnly && (
+              {userConfig.config.show_subed_only && (
                 <label htmlFor="" className="onbtn">
                   On
                 </label>
@@ -180,7 +149,7 @@ const Channels = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                setView('grid');
+                setPartialConfig({view_style_channel: 'grid'});
               }}
               data-origin="channel"
               data-value="grid"
@@ -189,7 +158,7 @@ const Channels = () => {
             <img
               src={iconListView}
               onClick={() => {
-                setView('list');
+                setPartialConfig({view_style_channel: 'list'});
               }}
               data-origin="channel"
               data-value="list"
@@ -199,11 +168,11 @@ const Channels = () => {
         </div>
         {hasChannels && <h2>Total channels: {channelCount}</h2>}
 
-        <div className={`channel-list ${view}`}>
+        <div className={`channel-list ${userConfig.config.view_style_channel}`}>
           {!hasChannels && <h2>No channels found...</h2>}
 
           {hasChannels && (
-            <ChannelList channelList={channels} viewLayout={view} refreshChannelList={setRefresh} />
+            <ChannelList channelList={channels} refreshChannelList={setRefresh} />
           )}
         </div>
 

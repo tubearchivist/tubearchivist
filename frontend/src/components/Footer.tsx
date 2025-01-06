@@ -1,18 +1,12 @@
 import { Link } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
+import { useAuthStore } from '../stores/AuthDataStore';
 
-export type TaUpdateType = {
-  version?: string;
-  is_breaking?: boolean;
-};
-
-interface Props {
-  version: string;
-  taUpdate?: TaUpdateType;
-}
-
-const Footer = ({ version, taUpdate }: Props) => {
+const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const { auth } = useAuthStore();
+  const version = auth?.version
+  const taUpdate = auth?.ta_update
 
   return (
     <div className="footer">
