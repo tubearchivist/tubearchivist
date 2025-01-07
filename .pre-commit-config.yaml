@@ -35,6 +35,8 @@ repos:
     hooks:
       - id: eslint
         name: eslint
+        files: \.[jt]sx?$
+        types: [file]
         entry: npm run --prefix ./frontend lint
         pass_filenames: false
   - repo: https://github.com/pre-commit/mirrors-prettier

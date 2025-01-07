@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useOutletContext, useParams, useSearchParams } from 'react-router-dom';
 import loadPlaylistById from '../api/loader/loadPlaylistById';
 import { OutletContextType } from './Base';
-import { ConfigType, VideoType, ViewLayoutType } from './Home';
+import { ConfigType, VideoType } from './Home';
 import Filterbar from '../components/Filterbar';
 import { PlaylistEntryType } from './Playlists';
 import loadChannelById from '../api/loader/loadChannelById';
@@ -62,11 +62,6 @@ const Playlist = () => {
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
   const isAdmin = useIsAdmin();
 
-  const userMeConfig = userConfig.config;
-
-  const [hideWatched, setHideWatched] = useState(userMeConfig.hide_watched || false);
-  const [view, setView] = useState<ViewLayoutType>(userMeConfig.view_style_home || 'grid');
-  const [gridItems, setGridItems] = useState(userMeConfig.grid_items || 3);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -86,6 +81,9 @@ const Playlist = () => {
   const videoInPlaylistCount = pagination?.total_hits;
   const showEmbeddedVideo = videoId !== null;
 
+  const view = userConfig.config.view_style_home;
+  const gridItems = userConfig.config.grid_items;
+  const hideWatched = userConfig.config.hide_watched;
   const isGridView = view === ViewStyles.grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
@@ -322,14 +320,6 @@ const Playlist = () => {
       <div className={`boxed-content ${gridView}`}>
         <Filterbar
           hideToggleText="Hide watched videos:"
-          hideWatched={hideWatched}
-          isGridView={isGridView}
-          view={view}
-          gridItems={gridItems}
-          userMeConfig={userMeConfig}
-          setHideWatched={setHideWatched}
-          setView={setView}
-          setGridItems={setGridItems}
           viewStyleName={ViewStyleNames.playlist}
           setRefresh={setRefresh}
         />
