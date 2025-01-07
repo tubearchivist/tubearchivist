@@ -7,7 +7,7 @@ export const ColourConstant = {
   Midnight: 'midnight.css',
 };
 
-const importColours = () => {
+const useColours = () => {
   const { userConfig } = useUserConfigStore();
   const stylesheet = userConfig?.config.stylesheet;
 
@@ -29,4 +29,4 @@ const importColours = () => {
   }
 };
 
-export default importColours;
+export default useColours;

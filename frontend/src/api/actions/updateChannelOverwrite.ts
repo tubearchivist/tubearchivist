@@ -3,7 +3,11 @@ import getApiUrl from '../../configuration/getApiUrl';
 import getFetchCredentials from '../../configuration/getFetchCredentials';
 import getCookie from '../../functions/getCookie';
 
-const updateChannelOverwrites = async (channelId: string, configKey: string, configValue: any) => {
+const updateChannelOverwrites = async (
+  channelId: string,
+  configKey: string,
+  configValue: string | boolean | number | null,
+) => {
   const apiUrl = getApiUrl();
   const csrfCookie = getCookie('csrftoken');
 

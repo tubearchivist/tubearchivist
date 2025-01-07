@@ -1,5 +1,5 @@
 import { useRouteError } from 'react-router-dom';
-import importColours from '../configuration/colours/getColours';
+import useColours from '../configuration/colours/useColours';
 
 // This is not always the correct response
 type ErrorType = {
@@ -9,7 +9,7 @@ type ErrorType = {
 
 const ErrorPage = () => {
   const error = useRouteError() as ErrorType;
-  importColours();
+  useColours();
 
   console.error('ErrorPage', error);
 

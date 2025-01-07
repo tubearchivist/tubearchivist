@@ -146,6 +146,7 @@ const Home = () => {
           setContinueVideoResponse(continueVideoResponse);
         } catch (error) {
           console.log('Server error on continue vids?');
+          console.error(error);
         }
 
         setVideoReponse(videos);
@@ -153,7 +154,6 @@ const Home = () => {
         setRefreshVideoList(false);
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     refreshVideoList,
     userMeConfig.sort_by,

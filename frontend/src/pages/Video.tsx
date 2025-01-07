@@ -37,7 +37,7 @@ import CommentBox, { CommentsType } from '../components/CommentBox';
 import Button from '../components/Button';
 import getApiUrl from '../configuration/getApiUrl';
 import loadVideoNav, { VideoNavResponseType } from '../api/loader/loadVideoNav';
-import loadIsAdmin from '../functions/getIsAdmin';
+import useIsAdmin from '../functions/useIsAdmin';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {
   return playlist.playlist_entries.some(entry => {
@@ -118,7 +118,7 @@ export type VideoCommentsResponseType = {
 const Video = () => {
   const { videoId } = useParams() as VideoParams;
   const navigate = useNavigate();
-  const isAdmin = loadIsAdmin();
+  const isAdmin = useIsAdmin();
 
   const [loading, setLoading] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
@@ -188,6 +188,7 @@ const Video = () => {
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoEnded, playlistAutoplay]);
 
   if (videoResponse === undefined) {

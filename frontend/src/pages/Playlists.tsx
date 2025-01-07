@@ -15,7 +15,7 @@ import updatePlaylistSubscription from '../api/actions/updatePlaylistSubscriptio
 import createCustomPlaylist from '../api/actions/createCustomPlaylist';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import Button from '../components/Button';
-import loadIsAdmin from '../functions/getIsAdmin';
+import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 
 export type PlaylistEntryType = {
@@ -35,7 +35,7 @@ export type PlaylistsResponseType = {
 const Playlists = () => {
   const { userConfig, setPartialConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
-  const isAdmin = loadIsAdmin();
+  const isAdmin = useIsAdmin();
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [refresh, setRefresh] = useState(false);

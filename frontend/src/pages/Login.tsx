@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Routes from '../configuration/routes/RouteList';
 import { useNavigate } from 'react-router-dom';
-import importColours from '../configuration/colours/getColours';
+import useColours from '../configuration/colours/useColours';
 import Button from '../components/Button';
 import signIn from '../api/actions/signIn';
 
@@ -11,7 +11,7 @@ const Login = () => {
   const [saveLogin, setSaveLogin] = useState(false);
   const navigate = useNavigate();
 
-  importColours();
+  useColours();
 
   const form_error = false;
 

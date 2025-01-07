@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import ChannelBanner from '../components/ChannelBanner';
 import loadChannelNav, { ChannelNavResponseType } from '../api/loader/loadChannelNav';
 import loadChannelById from '../api/loader/loadChannelById';
-import loadIsAdmin from '../functions/getIsAdmin';
+import useIsAdmin from '../functions/useIsAdmin';
 
 type ChannelParams = {
   channelId: string;
@@ -22,7 +22,7 @@ export type ChannelResponseType = {
 const ChannelBase = () => {
   const { channelId } = useParams() as ChannelParams;
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
-  const isAdmin = loadIsAdmin();
+  const isAdmin = useIsAdmin();
 
   const [channelResponse, setChannelResponse] = useState<ChannelResponseType>();
   const [channelNav, setChannelNav] = useState<ChannelNavResponseType>();

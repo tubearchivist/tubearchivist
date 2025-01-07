@@ -1,16 +1,16 @@
 import { useNavigate } from 'react-router-dom';
 import { ColourVariants } from '../api/actions/updateUserConfig';
-import { ColourConstant } from '../configuration/colours/getColours';
+import { ColourConstant } from '../configuration/colours/useColours';
 import SettingsNavigation from '../components/SettingsNavigation';
 import Notifications from '../components/Notifications';
 import Button from '../components/Button';
-import loadIsAdmin from '../functions/getIsAdmin';
+import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { useEffect, useState } from 'react';
 
 const SettingsUser = () => {
   const { userConfig, setPartialConfig } = useUserConfigStore();
-  const isAdmin = loadIsAdmin();
+  const isAdmin = useIsAdmin();
   const navigate = useNavigate();
 
   const [styleSheet, setStyleSheet] = useState<ColourVariants>(userConfig.config.stylesheet);

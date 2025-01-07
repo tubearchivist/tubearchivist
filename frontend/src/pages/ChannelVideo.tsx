@@ -72,7 +72,6 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
       setVideoAggsResponse(channelAggs);
       setRefresh(false);
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     refresh,
     userConfig.config.sort_by,

@@ -28,7 +28,7 @@ const loadApiToken = async (): Promise<ApiTokenResponse> => {
     }
 
     return apiToken;
-  } catch (e) {
+  } catch {
     return { token: '' };
   }
 };

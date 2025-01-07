@@ -1,6 +1,6 @@
 import { Outlet, useLoaderData, useLocation, useSearchParams } from 'react-router-dom';
 import Footer from '../components/Footer';
-import importColours from '../configuration/colours/getColours';
+import useColours from '../configuration/colours/useColours';
 import { UserMeType } from '../api/actions/updateUserConfig';
 import { useEffect, useState } from 'react';
 import Navigation from '../components/Navigation';
@@ -46,6 +46,7 @@ const Base = () => {
   useEffect(() => {
     setAuth(auth);
     setUserConfig(userConfig);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -79,7 +80,7 @@ const Base = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
-  importColours();
+  useColours();
 
   return (
     <>

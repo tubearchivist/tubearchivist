@@ -12,7 +12,7 @@ import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import Notifications from '../components/Notifications';
 import Button from '../components/Button';
 import updateChannelSubscription from '../api/actions/updateChannelSubscription';
-import loadIsAdmin from '../functions/getIsAdmin';
+import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 
 type ChannelOverwritesType = {
@@ -50,7 +50,7 @@ type ChannelsListResponse = {
 const Channels = () => {
   const { userConfig, setPartialConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
-  const isAdmin = loadIsAdmin();
+  const isAdmin = useIsAdmin();
 
   const [channelListResponse, setChannelListResponse] = useState<ChannelsListResponse>();
   const [showAddForm, setShowAddForm] = useState(false);

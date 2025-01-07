@@ -22,7 +22,7 @@ import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import Button from '../components/Button';
 import loadVideoListByFilter from '../api/loader/loadVideoListByPage';
-import loadIsAdmin from '../functions/getIsAdmin';
+import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 
 export type PlaylistType = {
@@ -60,7 +60,7 @@ const Playlist = () => {
 
   const { userConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
-  const isAdmin = loadIsAdmin();
+  const isAdmin = useIsAdmin();
 
   const userMeConfig = userConfig.config;
 

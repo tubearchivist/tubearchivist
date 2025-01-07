@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
-import loadIsAdmin from '../functions/getIsAdmin';
+import useIsAdmin from '../functions/useIsAdmin';
 
 const SettingsNavigation = () => {
-  const isAdmin = loadIsAdmin();
+  const isAdmin = useIsAdmin();
 
   return (
     <>

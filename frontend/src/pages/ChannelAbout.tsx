@@ -12,7 +12,7 @@ import PaginationDummy from '../components/PaginationDummy';
 import FormattedNumber from '../components/FormattedNumber';
 import Button from '../components/Button';
 import updateChannelOverwrites from '../api/actions/updateChannelOverwrite';
-import loadIsAdmin from '../functions/getIsAdmin';
+import useIsAdmin from '../functions/useIsAdmin';
 
 export type ChannelBaseOutletContextType = {
   currentPage: number;
@@ -34,7 +34,7 @@ const ChannelAbout = () => {
   const { channelId } = useParams() as ChannelAboutParams;
   const { setStartNotification } = useOutletContext() as ChannelBaseOutletContextType;
   const navigate = useNavigate();
-  const isAdmin = loadIsAdmin();
+  const isAdmin = useIsAdmin();
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
@@ -76,7 +76,10 @@ const ChannelAbout = () => {
     })();
   }, [refresh, channelId]);
 
-  const handleUpdateConfig = async (configKey: string, configValue: any) => {
+  const handleUpdateConfig = async (
+    configKey: string,
+    configValue: string | boolean | number | null,
+  ) => {
     if (!channel) return;
     await updateChannelOverwrites(channel.channel_id, configKey, configValue);
     setRefresh(true);
