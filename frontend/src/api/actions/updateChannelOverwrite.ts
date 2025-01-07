@@ -1,37 +1,20 @@
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from '../../configuration/getApiUrl';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
-import getCookie from '../../functions/getCookie';
+import APIClient from '../../functions/APIClient';
 
 const updateChannelOverwrites = async (
   channelId: string,
   configKey: string,
   configValue: string | boolean | number | null,
 ) => {
-  const apiUrl = getApiUrl();
-  const csrfCookie = getCookie('csrftoken');
-
   const data = {
     channel_overwrites: {
       [configKey]: configValue,
     },
   };
 
-  const response = await fetch(`${apiUrl}/api/channel/${channelId}/`, {
+  return APIClient(`/api/channel/${channelId}/`, {
     method: 'POST',
-    headers: {
-      ...defaultHeaders,
-      'X-CSRFToken': csrfCookie || '',
-    },
-    credentials: getFetchCredentials(),
-
-    body: JSON.stringify(data),
+    body: data,
   });
-
-  const channelSubscription = await response.json();
-  console.log('updateChannelOverwrites', channelSubscription);
-
-  return channelSubscription;
 };
 
 export default updateChannelOverwrites;

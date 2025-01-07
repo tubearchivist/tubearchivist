@@ -12,6 +12,7 @@ export type LoginResponseType = {
 };
 
 const signIn = async (username: string, password: string, saveLogin: boolean) => {
+  // works differently, response status is checked
   const apiUrl = getApiUrl();
   const csrfCookie = getCookie('csrftoken');
 

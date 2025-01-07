@@ -1,7 +1,4 @@
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from '../../configuration/getApiUrl';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
-import isDevEnvironment from '../../functions/isDevEnvironment';
+import APIClient from '../../functions/APIClient';
 
 export type ChannelNavResponseType = {
   has_streams: boolean;
@@ -11,20 +8,7 @@ export type ChannelNavResponseType = {
 };
 
 const loadChannelNav = async (youtubeChannelId: string): Promise<ChannelNavResponseType> => {
-  const apiUrl = getApiUrl();
-
-  const response = await fetch(`${apiUrl}/api/channel/${youtubeChannelId}/nav/`, {
-    headers: defaultHeaders,
-    credentials: getFetchCredentials(),
-  });
-
-  const channel = await response.json();
-
-  if (isDevEnvironment()) {
-    console.log('loadChannelNav', channel);
-  }
-
-  return channel;
+  return APIClient(`/api/channel/${youtubeChannelId}/nav/`);
 };
 
 export default loadChannelNav;

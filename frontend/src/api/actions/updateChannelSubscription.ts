@@ -1,12 +1,6 @@
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from '../../configuration/getApiUrl';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
-import getCookie from '../../functions/getCookie';
+import APIClient from '../../functions/APIClient';
 
 const updateChannelSubscription = async (channelIds: string, status: boolean) => {
-  const apiUrl = getApiUrl();
-  const csrfCookie = getCookie('csrftoken');
-
   const channels = [];
   const containsMultiple = channelIds.includes('\n');
 
@@ -20,23 +14,10 @@ const updateChannelSubscription = async (channelIds: string, status: boolean) =>
     channels.push({ channel_id: channelIds, channel_subscribed: status });
   }
 
-  const response = await fetch(`${apiUrl}/api/channel/`, {
+  return APIClient('/api/channel/', {
     method: 'POST',
-    headers: {
-      ...defaultHeaders,
-      'X-CSRFToken': csrfCookie || '',
-    },
-    credentials: getFetchCredentials(),
-
-    body: JSON.stringify({
-      data: [...channels],
-    }),
+    body: { data: [...channels] },
   });
-
-  const channelSubscription = await response.json();
-  console.log('updateChannelSubscription', channelSubscription);
-
-  return channelSubscription;
 };
 
 export default updateChannelSubscription;

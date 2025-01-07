@@ -1,8 +1,4 @@
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from '../../configuration/getApiUrl';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
-import getCookie from '../../functions/getCookie';
-import isDevEnvironment from '../../functions/isDevEnvironment';
+import APIClient from '../../functions/APIClient';
 
 export type AppriseTaskNameType =
   | 'update_subscribed'
@@ -11,26 +7,10 @@ export type AppriseTaskNameType =
   | 'check_reindex';
 
 const createAppriseNotificationUrl = async (taskName: AppriseTaskNameType, url: string) => {
-  const apiUrl = getApiUrl();
-  const csrfCookie = getCookie('csrftoken');
-
-  const response = await fetch(`${apiUrl}/api/task/notification/`, {
+  return APIClient('/api/task/notification/', {
     method: 'POST',
-    headers: {
-      ...defaultHeaders,
-      'X-CSRFToken': csrfCookie || '',
-    },
-    credentials: getFetchCredentials(),
-    body: JSON.stringify({ task_name: taskName, url }),
+    body: { task_name: taskName, url },
   });
-
-  const appriseNotificationUrl = await response.json();
-
-  if (isDevEnvironment()) {
-    console.log('createAppriseNotificationUrl', appriseNotificationUrl);
-  }
-
-  return appriseNotificationUrl;
 };
 
 export default createAppriseNotificationUrl;

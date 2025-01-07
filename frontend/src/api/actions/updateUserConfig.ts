@@ -1,8 +1,5 @@
 import { SortByType, SortOrderType, ViewLayoutType } from '../../pages/Home';
-import getApiUrl from '../../configuration/getApiUrl';
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getCookie from '../../functions/getCookie';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
+import APIClient from '../../functions/APIClient';
 
 export type UserMeType = {
   id: number;
@@ -33,24 +30,10 @@ export type UserConfigType = {
 };
 
 const updateUserConfig = async (config: Partial<UserConfigType>): Promise<UserConfigType> => {
-  const apiUrl = getApiUrl();
-  const csrfCookie = getCookie('csrftoken');
-
-  const response = await fetch(`${apiUrl}/api/user/me/`, {
+  return APIClient('/api/user/me/', {
     method: 'POST',
-    headers: {
-      ...defaultHeaders,
-      'X-CSRFToken': csrfCookie || '',
-    },
-    credentials: getFetchCredentials(),
-
-    body: JSON.stringify({ config }),
+    body: { config: config },
   });
-
-  const userConfig = await response.json();
-  console.log('updateUserConfig', userConfig);
-
-  return userConfig;
 };
 
 export default updateUserConfig;

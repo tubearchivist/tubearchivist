@@ -129,7 +129,7 @@ class VideoCommentView(ApiBaseView):
         # pylint: disable=unused-argument
         self.get_document(video_id)
 
-        return Response(self.response, status=self.status_code)
+        return Response(self.response, status=200)
 
 
 class VideoSimilarView(ApiBaseView):
@@ -153,4 +153,4 @@ class VideoSimilarView(ApiBaseView):
             },
         }
         self.get_document_list(request, pagination=False)
-        return Response(self.response, status=self.status_code)
+        return Response(self.response, status=200)

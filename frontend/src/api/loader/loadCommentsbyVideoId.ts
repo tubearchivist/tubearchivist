@@ -1,23 +1,7 @@
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from '../../configuration/getApiUrl';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
-import isDevEnvironment from '../../functions/isDevEnvironment';
+import APIClient from '../../functions/APIClient';
 
 const loadCommentsbyVideoId = async (youtubeId: string) => {
-  const apiUrl = getApiUrl();
-
-  const response = await fetch(`${apiUrl}/api/video/${youtubeId}/comment/`, {
-    headers: defaultHeaders,
-    credentials: getFetchCredentials(),
-  });
-
-  const comments = await response.json();
-
-  if (isDevEnvironment()) {
-    console.log('loadCommentsbyVideoId', comments);
-  }
-
-  return comments;
+  return APIClient(`/api/video/${youtubeId}/comment/`);
 };
 
 export default loadCommentsbyVideoId;

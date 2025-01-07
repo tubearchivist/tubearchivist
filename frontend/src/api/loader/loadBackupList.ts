@@ -1,23 +1,7 @@
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from '../../configuration/getApiUrl';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
-import isDevEnvironment from '../../functions/isDevEnvironment';
+import APIClient from '../../functions/APIClient';
 
 const loadBackupList = async () => {
-  const apiUrl = getApiUrl();
-
-  const response = await fetch(`${apiUrl}/api/appsettings/backup/`, {
-    headers: defaultHeaders,
-    credentials: getFetchCredentials(),
-  });
-
-  const backupList = await response.json();
-
-  if (isDevEnvironment()) {
-    console.log('loadBackupList', backupList);
-  }
-
-  return backupList;
+  return APIClient('/api/appsettings/backup/');
 };
 
 export default loadBackupList;

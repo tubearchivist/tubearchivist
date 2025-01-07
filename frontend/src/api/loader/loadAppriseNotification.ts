@@ -1,7 +1,4 @@
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from '../../configuration/getApiUrl';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
-import isDevEnvironment from '../../functions/isDevEnvironment';
+import APIClient from '../../functions/APIClient';
 
 export type AppriseNotificationType = {
   check_reindex?: {
@@ -23,20 +20,7 @@ export type AppriseNotificationType = {
 };
 
 const loadAppriseNotification = async (): Promise<AppriseNotificationType> => {
-  const apiUrl = getApiUrl();
-
-  const response = await fetch(`${apiUrl}/api/task/notification/`, {
-    headers: defaultHeaders,
-    credentials: getFetchCredentials(),
-  });
-
-  const notification = await response.json();
-
-  if (isDevEnvironment()) {
-    console.log('loadAppriseNotification', notification);
-  }
-
-  return notification;
+  return APIClient('/api/task/notification/');
 };
 
 export default loadAppriseNotification;

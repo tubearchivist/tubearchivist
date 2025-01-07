@@ -1,23 +1,7 @@
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from '../../configuration/getApiUrl';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
-import isDevEnvironment from '../../functions/isDevEnvironment';
+import APIClient from '../../functions/APIClient';
 
 const loadStatsDownloadHistory = async () => {
-  const apiUrl = getApiUrl();
-
-  const response = await fetch(`${apiUrl}/api/stats/downloadhist/`, {
-    headers: defaultHeaders,
-    credentials: getFetchCredentials(),
-  });
-
-  const notifications = await response.json();
-
-  if (isDevEnvironment()) {
-    console.log('loadStatsDownloadHistory', notifications);
-  }
-
-  return notifications;
+  return APIClient('/api/stats/downloadhist/');
 };
 
 export default loadStatsDownloadHistory;

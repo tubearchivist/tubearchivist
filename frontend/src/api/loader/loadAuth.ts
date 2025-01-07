@@ -4,6 +4,7 @@ import getFetchCredentials from '../../configuration/getFetchCredentials';
 import getCookie from '../../functions/getCookie';
 
 const loadAuth = async () => {
+  // works differently, return response to check for status in main.tsx
   const apiUrl = getApiUrl();
   const csrfCookie = getCookie('csrftoken');
 

@@ -1,7 +1,4 @@
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from '../../configuration/getApiUrl';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
-import getCookie from '../../functions/getCookie';
+import APIClient from '../../functions/APIClient';
 
 type VideoProgressProp = {
   youtubeId: string;
@@ -9,26 +6,10 @@ type VideoProgressProp = {
 };
 
 const updateVideoProgressById = async ({ youtubeId, currentProgress }: VideoProgressProp) => {
-  const apiUrl = getApiUrl();
-  const csrfCookie = getCookie('csrftoken');
-
-  const response = await fetch(`${apiUrl}/api/video/${youtubeId}/progress/`, {
+  return APIClient(`/api/video/${youtubeId}/progress/`, {
     method: 'POST',
-    headers: {
-      ...defaultHeaders,
-      'X-CSRFToken': csrfCookie || '',
-    },
-    credentials: getFetchCredentials(),
-
-    body: JSON.stringify({
-      position: currentProgress,
-    }),
+    body: { position: currentProgress },
   });
-
-  const userConfig = await response.json();
-  console.log('updateVideoProgressById', userConfig);
-
-  return userConfig;
 };
 
 export default updateVideoProgressById;

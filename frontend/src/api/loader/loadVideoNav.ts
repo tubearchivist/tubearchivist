@@ -1,7 +1,4 @@
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from '../../configuration/getApiUrl';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
-import isDevEnvironment from '../../functions/isDevEnvironment';
+import APIClient from '../../functions/APIClient';
 
 export type VideoNavResponseType = {
   playlist_meta: {
@@ -29,20 +26,7 @@ export type VideoNavResponseType = {
 };
 
 const loadVideoNav = async (youtubeVideoId: string): Promise<VideoNavResponseType[]> => {
-  const apiUrl = getApiUrl();
-
-  const response = await fetch(`${apiUrl}/api/video/${youtubeVideoId}/nav/`, {
-    headers: defaultHeaders,
-    credentials: getFetchCredentials(),
-  });
-
-  const videoNav = await response.json();
-
-  if (isDevEnvironment()) {
-    console.log('loadVideoNav', videoNav);
-  }
-
-  return videoNav;
+  return APIClient(`/api/video/${youtubeVideoId}/nav/`);
 };
 
 export default loadVideoNav;

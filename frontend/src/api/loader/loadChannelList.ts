@@ -1,33 +1,14 @@
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from '../../configuration/getApiUrl';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
-import isDevEnvironment from '../../functions/isDevEnvironment';
+import APIClient from '../../functions/APIClient';
 
 const loadChannelList = async (page: number, showSubscribed: boolean) => {
-  const apiUrl = getApiUrl();
-
   const searchParams = new URLSearchParams();
 
-  if (page) {
-    searchParams.append('page', page.toString());
-  }
+  if (page) searchParams.append('page', page.toString());
+  if (showSubscribed) searchParams.append('filter', 'subscribed');
 
-  if (showSubscribed) {
-    searchParams.append('filter', 'subscribed');
-  }
+  const endpoint = `/api/channel/${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
-  const response = await fetch(`${apiUrl}/api/channel/?${searchParams.toString()}`, {
-    headers: defaultHeaders,
-    credentials: getFetchCredentials(),
-  });
-
-  const channels = await response.json();
-
-  if (isDevEnvironment()) {
-    console.log('loadChannelList', channels);
-  }
-
-  return channels;
+  return APIClient(endpoint);
 };
 
 export default loadChannelList;

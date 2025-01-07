@@ -1,7 +1,4 @@
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from '../../configuration/getApiUrl';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
-import isDevEnvironment from '../../functions/isDevEnvironment';
+import APIClient from '../../functions/APIClient';
 
 export type ChannelAggsType = {
   total_items: {
@@ -17,20 +14,7 @@ export type ChannelAggsType = {
 };
 
 const loadChannelAggs = async (channelId: string): Promise<ChannelAggsType> => {
-  const apiUrl = getApiUrl();
-
-  const response = await fetch(`${apiUrl}/api/channel/${channelId}/aggs/`, {
-    headers: defaultHeaders,
-    credentials: getFetchCredentials(),
-  });
-
-  const channel = await response.json();
-
-  if (isDevEnvironment()) {
-    console.log('loadChannelAggs', channel);
-  }
-
-  return channel;
+  return APIClient(`/api/channel/${channelId}/aggs/`);
 };
 
 export default loadChannelAggs;

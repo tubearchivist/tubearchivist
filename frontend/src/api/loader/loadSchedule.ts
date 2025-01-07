@@ -1,7 +1,4 @@
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from '../../configuration/getApiUrl';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
-import isDevEnvironment from '../../functions/isDevEnvironment';
+import APIClient from '../../functions/APIClient';
 
 type ScheduleType = {
   name: string;
@@ -17,20 +14,7 @@ type ScheduleType = {
 export type ScheduleResponseType = ScheduleType[];
 
 const loadSchedule = async (): Promise<ScheduleResponseType> => {
-  const apiUrl = getApiUrl();
-
-  const response = await fetch(`${apiUrl}/api/task/schedule/`, {
-    headers: defaultHeaders,
-    credentials: getFetchCredentials(),
-  });
-
-  const schedule = await response.json();
-
-  if (isDevEnvironment()) {
-    console.log('loadSchedule', schedule);
-  }
-
-  return schedule;
+  return APIClient('/api/task/schedule/');
 };
 
 export default loadSchedule;

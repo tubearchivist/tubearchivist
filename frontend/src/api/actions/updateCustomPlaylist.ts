@@ -1,7 +1,4 @@
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from '../../configuration/getApiUrl';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
-import getCookie from '../../functions/getCookie';
+import APIClient from '../../functions/APIClient';
 
 type CustomPlaylistActionType = 'create' | 'up' | 'down' | 'top' | 'bottom' | 'remove';
 
@@ -10,24 +7,10 @@ const updateCustomPlaylist = async (
   playlistId: string,
   videoId: string,
 ) => {
-  const apiUrl = getApiUrl();
-  const csrfCookie = getCookie('csrftoken');
-
-  const response = await fetch(`${apiUrl}/api/playlist/${playlistId}/`, {
+  return APIClient(`/api/playlist/${playlistId}/`, {
     method: 'POST',
-    headers: {
-      ...defaultHeaders,
-      'X-CSRFToken': csrfCookie || '',
-    },
-    credentials: getFetchCredentials(),
-
-    body: JSON.stringify({ action, video_id: videoId }),
+    body: { action, video_id: videoId },
   });
-
-  const customPlaylist = await response.json();
-  console.log('updateCustomPlaylist', action, customPlaylist);
-
-  return customPlaylist;
 };
 
 export default updateCustomPlaylist;

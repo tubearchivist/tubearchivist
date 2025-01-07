@@ -1,7 +1,4 @@
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from '../../configuration/getApiUrl';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
-import isDevEnvironment from '../../functions/isDevEnvironment';
+import APIClient from '../../functions/APIClient';
 
 export type AppSettingsConfigType = {
   subscriptions: {
@@ -35,20 +32,7 @@ export type AppSettingsConfigType = {
 };
 
 const loadAppsettingsConfig = async (): Promise<AppSettingsConfigType> => {
-  const apiUrl = getApiUrl();
-
-  const response = await fetch(`${apiUrl}/api/appsettings/config/`, {
-    headers: defaultHeaders,
-    credentials: getFetchCredentials(),
-  });
-
-  const appSettingsConfig = await response.json();
-
-  if (isDevEnvironment()) {
-    console.log('loadApplicationConfig', appSettingsConfig);
-  }
-
-  return appSettingsConfig;
+  return APIClient('/api/appsettings/config/');
 };
 
 export default loadAppsettingsConfig;

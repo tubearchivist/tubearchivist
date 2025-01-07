@@ -1,12 +1,6 @@
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from '../../configuration/getApiUrl';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
-import getCookie from '../../functions/getCookie';
+import APIClient from '../../functions/APIClient';
 
 const updateDownloadQueue = async (youtubeIdStrings: string, autostart: boolean) => {
-  const apiUrl = getApiUrl();
-  const csrfCookie = getCookie('csrftoken');
-
   const urls = [];
   const containsMultiple = youtubeIdStrings.includes('\n');
 
@@ -25,23 +19,10 @@ const updateDownloadQueue = async (youtubeIdStrings: string, autostart: boolean)
     params = '?autostart=true';
   }
 
-  const response = await fetch(`${apiUrl}/api/download/${params}`, {
+  return APIClient(`/api/download/${params}`, {
     method: 'POST',
-    headers: {
-      ...defaultHeaders,
-      'X-CSRFToken': csrfCookie || '',
-    },
-    credentials: getFetchCredentials(),
-
-    body: JSON.stringify({
-      data: [...urls],
-    }),
+    body: { data: [...urls] },
   });
-
-  const downloadState = await response.json();
-  console.log('updateDownloadQueue', downloadState);
-
-  return downloadState;
 };
 
 export default updateDownloadQueue;

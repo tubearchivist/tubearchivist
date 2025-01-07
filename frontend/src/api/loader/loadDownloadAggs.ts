@@ -1,7 +1,4 @@
-import defaultHeaders from '../../configuration/defaultHeaders';
-import getApiUrl from '../../configuration/getApiUrl';
-import getFetchCredentials from '../../configuration/getFetchCredentials';
-import isDevEnvironment from '../../functions/isDevEnvironment';
+import APIClient from '../../functions/APIClient';
 
 type DownloadAggsBucket = {
   key: string[];
@@ -18,20 +15,7 @@ export type DownloadAggsType = {
 };
 
 const loadDownloadAggs = async (): Promise<DownloadAggsType> => {
-  const apiUrl = getApiUrl();
-
-  const response = await fetch(`${apiUrl}/api/download/aggs/`, {
-    headers: defaultHeaders,
-    credentials: getFetchCredentials(),
-  });
-
-  const downloadAggs = await response.json();
-
-  if (isDevEnvironment()) {
-    console.log('loadDownloadAggs', downloadAggs);
-  }
-
-  return downloadAggs;
+  return APIClient('/api/download/aggs/');
 };
 
 export default loadDownloadAggs;
