@@ -18,10 +18,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          python-version: '3.x'
+          node-version: '23'
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
 
       - name: Cache pre-commit environment
         uses: actions/cache@v3
@@ -34,9 +39,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          npm install @eslint/js globals
           pip install pre-commit
+          pre-commit install
 
       - name: Run pre-commit
         run: |
