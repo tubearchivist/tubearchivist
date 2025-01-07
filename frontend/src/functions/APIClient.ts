@@ -3,6 +3,7 @@ import getApiUrl from '../configuration/getApiUrl';
 import getFetchCredentials from '../configuration/getFetchCredentials';
 import logOut from '../api/actions/logOut';
 import getCookie from './getCookie';
+import Routes from '../configuration/routes/RouteList';
 
 export interface ApiClientOptions extends Omit<RequestInit, 'body'> {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -31,13 +32,13 @@ const APIClient = async (
   // Handle common errors
   if (response.status === 401) {
     logOut();
-    window.location.href = '/login';
+    window.location.href = Routes.Login;
     throw new Error('Unauthorized: Redirecting to login.');
   }
 
   if (response.status === 403) {
     logOut();
-    window.location.href = '/login';
+    window.location.href = Routes.Login;
     throw new Error('Forbidden: Access denied.');
   }
 
