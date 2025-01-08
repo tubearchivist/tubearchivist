@@ -4,6 +4,7 @@ import updateChannelSubscription from '../api/actions/updateChannelSubscription'
 import FormattedNumber from './FormattedNumber';
 import Button from './Button';
 import ChannelIcon from './ChannelIcon';
+import useIsAdmin from '../functions/useIsAdmin';
 
 type ChannelOverviewProps = {
   channelId: string;
@@ -11,8 +12,6 @@ type ChannelOverviewProps = {
   channelSubs: number;
   channelSubscribed: boolean;
   channelThumbUrl: string;
-  showSubscribeButton?: boolean;
-  isUserAdmin?: boolean;
   setRefresh: (status: boolean) => void;
 };
 
@@ -22,10 +21,10 @@ const ChannelOverview = ({
   channelSubscribed,
   channelname,
   channelThumbUrl,
-  showSubscribeButton = false,
-  isUserAdmin,
   setRefresh,
 }: ChannelOverviewProps) => {
+  const isAdmin = useIsAdmin();
+
   return (
     <>
       <div className="info-box-item">
@@ -41,9 +40,9 @@ const ChannelOverview = ({
 
           <FormattedNumber text="Subscribers:" number={channelSubs} />
 
-          {showSubscribeButton && (
+          {isAdmin && (
             <>
-              {channelSubscribed && isUserAdmin && (
+              {channelSubscribed ? (
                 <Button
                   label="Unsubscribe"
                   className="unsubscribe"
@@ -54,9 +53,7 @@ const ChannelOverview = ({
                     setRefresh(true);
                   }}
                 />
-              )}
-
-              {!channelSubscribed && (
+              ) : (
                 <Button
                   label="Subscribe"
                   type="button"

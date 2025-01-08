@@ -63,9 +63,7 @@ const ChannelList = ({ channelList, refreshChannelList }: ChannelListProps) => {
                       title={`Unsubscribe from ${channel.channel_name}`}
                       onClick={async () => {
                         await updateChannelSubscription(channel.channel_id, false);
-                        setTimeout(() => {
-                          refreshChannelList(true);
-                        }, 1000);
+                        refreshChannelList(true);
                       }}
                     />
                   )}
@@ -77,10 +75,7 @@ const ChannelList = ({ channelList, refreshChannelList }: ChannelListProps) => {
                       title={`Subscribe to ${channel.channel_name}`}
                       onClick={async () => {
                         await updateChannelSubscription(channel.channel_id, true);
-
-                        setTimeout(() => {
-                          refreshChannelList(true);
-                        }, 500);
+                        refreshChannelList(true);
                       }}
                     />
                   )}

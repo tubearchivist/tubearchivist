@@ -11,7 +11,7 @@ import ChannelList from '../components/ChannelList';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import Notifications from '../components/Notifications';
 import Button from '../components/Button';
-import updateChannelSubscription from '../api/actions/updateChannelSubscription';
+import updateBulkChannelSubscriptions from '../api/actions/updateBulkChannelSubscriptions';
 import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 
@@ -110,7 +110,7 @@ const Channels = () => {
                     label="Subscribe"
                     type="submit"
                     onClick={async () => {
-                      await updateChannelSubscription(channelsToSubscribeTo, true);
+                      await updateBulkChannelSubscriptions(channelsToSubscribeTo, true);
 
                       setRefresh(true);
                     }}
