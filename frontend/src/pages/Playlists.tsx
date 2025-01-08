@@ -11,7 +11,7 @@ import { ConfigType } from './Home';
 import Pagination, { PaginationType } from '../components/Pagination';
 import PlaylistList from '../components/PlaylistList';
 import { PlaylistType } from './Playlist';
-import updatePlaylistSubscription from '../api/actions/updatePlaylistSubscription';
+import updateBulkPlaylistSubscriptions from '../api/actions/updateBulkPlaylistSubscriptions';
 import createCustomPlaylist from '../api/actions/createCustomPlaylist';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import Button from '../components/Button';
@@ -102,7 +102,7 @@ const Playlists = () => {
                       label="Subscribe"
                       type="submit"
                       onClick={async () => {
-                        await updatePlaylistSubscription(playlistsToAddText, true);
+                        await updateBulkPlaylistSubscriptions(playlistsToAddText, true);
                         setRefresh(true);
                       }}
                     />

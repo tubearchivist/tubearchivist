@@ -1,22 +1,9 @@
 import APIClient from '../../functions/APIClient';
 
-const updatePlaylistSubscription = async (playlistIds: string, status: boolean) => {
-  const playlists = [];
-  const containsMultiple = playlistIds.includes('\n');
-
-  if (containsMultiple) {
-    const youtubePlaylistIds = playlistIds.split('\n');
-
-    youtubePlaylistIds.forEach(playlistId => {
-      playlists.push({ playlist_id: playlistId, playlist_subscribed: status });
-    });
-  } else {
-    playlists.push({ playlist_id: playlistIds, playlist_subscribed: status });
-  }
-
-  return APIClient('/api/playlist/', {
+const updatePlaylistSubscription = async (playlistId: string, status: boolean) => {
+  return APIClient(`/api/playlist/${playlistId}/`, {
     method: 'POST',
-    body: { data: [...playlists] },
+    body: { playlist_subscribed: status },
   });
 };
 

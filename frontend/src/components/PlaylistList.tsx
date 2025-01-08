@@ -56,7 +56,6 @@ const PlaylistList = ({ playlistList, setRefresh }: PlaylistListProps) => {
                       title={`Unsubscribe from ${playlist.playlist_name}`}
                       onClick={async () => {
                         await updatePlaylistSubscription(playlist.playlist_id, false);
-
                         setRefresh(true);
                       }}
                     />
@@ -69,10 +68,7 @@ const PlaylistList = ({ playlistList, setRefresh }: PlaylistListProps) => {
                       title={`Subscribe to ${playlist.playlist_name}`}
                       onClick={async () => {
                         await updatePlaylistSubscription(playlist.playlist_id, true);
-
-                        setTimeout(() => {
-                          setRefresh(true);
-                        }, 500);
+                        setRefresh(true);
                       }}
                     />
                   )}
