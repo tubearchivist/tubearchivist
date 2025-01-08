@@ -315,7 +315,7 @@ const Video = () => {
               {!reindex && (
                 <>
                   {isAdmin && (
-                    <div id="reindex-button" className="button-box">
+                    <div id="reindex-button">
                       <Button
                         label="Reindex"
                         title={`Reindex ${video.title}`}
@@ -331,6 +331,8 @@ const Video = () => {
               <a download="" href={`${getApiUrl()}${video.media_url}`}>
                 <Button label="Download File" id="download-item" />
               </a>{' '}
+            </div>
+            <div className="button-box">
               {isAdmin && (
                 <>
                   {!showDeleteConfirm && (
@@ -360,6 +362,8 @@ const Video = () => {
                   )}
                 </>
               )}{' '}
+            </div>
+            <div className="button-box">
               {!showAddToPlaylist && (
                 <Button
                   label="Add To Playlist"
