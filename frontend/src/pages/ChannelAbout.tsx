@@ -13,6 +13,7 @@ import FormattedNumber from '../components/FormattedNumber';
 import Button from '../components/Button';
 import updateChannelOverwrites from '../api/actions/updateChannelOverwrite';
 import useIsAdmin from '../functions/useIsAdmin';
+import InputConfig from '../components/InputConfig';
 
 export type ChannelBaseOutletContextType = {
   currentPage: number;
@@ -43,7 +44,7 @@ const ChannelAbout = () => {
 
   const [channelResponse, setChannelResponse] = useState<ChannelResponseType>();
 
-  const [downloadFormat, setDownloadFormat] = useState('');
+  const [downloadFormat, setDownloadFormat] = useState<string | null>(null);
   const [autoDeleteAfter, setAutoDeleteAfter] = useState<number | null>(null);
   const [indexPlaylists, setIndexPlaylists] = useState(false);
   const [enableSponsorblock, setEnableSponsorblock] = useState<boolean | null>(null);
@@ -59,7 +60,7 @@ const ChannelAbout = () => {
         const channelResponse = await loadChannelById(channelId);
 
         setChannelResponse(channelResponse);
-        setDownloadFormat(channelResponse?.data?.channel_overwrites?.download_format || '');
+        setDownloadFormat(channelResponse?.data?.channel_overwrites?.download_format || null);
         setAutoDeleteAfter(channelResponse?.data?.channel_overwrites?.autodelete_days);
         setIndexPlaylists(channelResponse?.data?.channel_overwrites?.index_playlists || false);
         setEnableSponsorblock(channelResponse?.data?.channel_overwrites?.integrate_sponsorblock);
@@ -84,19 +85,6 @@ const ChannelAbout = () => {
     await updateChannelOverwrites(channel.channel_id, configKey, configValue);
     setRefresh(true);
   };
-
-  const handleNumberChange =
-    (setValue: React.Dispatch<React.SetStateAction<number | null>>) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const inputValue = e.target.value;
-
-      if (inputValue === '') {
-        setValue(null);
-      } else {
-        const numericValue = Number(inputValue);
-        setValue(isNaN(numericValue) ? null : numericValue);
-      }
-    };
 
   const handleToggleSponsorBlock = async (isEnabled: boolean) => {
     if (isEnabled) {
@@ -251,79 +239,27 @@ const ChannelAbout = () => {
                 <div>
                   <p>Download Format</p>
                 </div>
-                <div>
-                  <input
-                    type="text"
-                    name="download_format"
-                    value={downloadFormat}
-                    onChange={event => {
-                      setDownloadFormat(event.target.value);
-                    }}
-                  />
-                  <div className="button-box">
-                    {downloadFormat &&
-                      downloadFormat !== channel.channel_overwrites?.download_format && (
-                        <>
-                          <button
-                            onClick={() => handleUpdateConfig('download_format', downloadFormat)}
-                          >
-                            Update
-                          </button>
-                          <button
-                            onClick={() =>
-                              setDownloadFormat(channel.channel_overwrites?.download_format || '')
-                            }
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      )}
-                    {channel.channel_overwrites?.download_format !== undefined && (
-                      <button onClick={() => handleUpdateConfig('download_format', null)}>
-                        reset
-                      </button>
-                    )}
-                  </div>
-                </div>
+                <InputConfig
+                  type="text"
+                  name="download_format"
+                  value={downloadFormat}
+                  setValue={setDownloadFormat}
+                  oldValue={channel.channel_overwrites?.download_format}
+                  updateCallback={handleUpdateConfig}
+                />
               </div>
               <div className="settings-box-wrapper">
                 <div>
                   <p>Auto delete watched videos after x days</p>
                 </div>
-                <div>
-                  <input
-                    type="number"
-                    name="autodelete_days"
-                    value={autoDeleteAfter ?? ''}
-                    onChange={handleNumberChange(setAutoDeleteAfter)}
-                  />
-                  <div className="button-box">
-                    {autoDeleteAfter !== null &&
-                      autoDeleteAfter !== channel.channel_overwrites?.autodelete_days && (
-                        <>
-                          <button
-                            onClick={() => handleUpdateConfig('autodelete_days', autoDeleteAfter)}
-                          >
-                            Update
-                          </button>
-                          <button
-                            onClick={() =>
-                              setAutoDeleteAfter(
-                                channel.channel_overwrites?.autodelete_days || null,
-                              )
-                            }
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      )}
-                    {channel.channel_overwrites?.autodelete_days !== undefined && (
-                      <button onClick={() => handleUpdateConfig('autodelete_days', null)}>
-                        Reset
-                      </button>
-                    )}
-                  </div>
-                </div>
+                <InputConfig
+                  type="number"
+                  name="autodelete_days"
+                  value={autoDeleteAfter}
+                  setValue={setAutoDeleteAfter}
+                  oldValue={channel.channel_overwrites?.autodelete_days}
+                  updateCallback={handleUpdateConfig}
+                />
               </div>
               <div className="settings-box-wrapper">
                 <div>
@@ -404,139 +340,40 @@ const ChannelAbout = () => {
                 <div>
                   <p>Videos page size</p>
                 </div>
-                <div>
-                  <input
-                    type="number"
-                    name="subscriptions_channel_size"
-                    value={pageSizeVideo ?? ''}
-                    onChange={handleNumberChange(setPageSizeVideo)}
-                  />
-                  <div className="button-box">
-                    {pageSizeVideo !== null &&
-                      pageSizeVideo !== channel.channel_overwrites?.subscriptions_channel_size && (
-                        <>
-                          <button
-                            onClick={() =>
-                              handleUpdateConfig('subscriptions_channel_size', pageSizeVideo)
-                            }
-                          >
-                            Update
-                          </button>
-                          <button
-                            onClick={() =>
-                              setPageSizeVideo(
-                                channel.channel_overwrites?.subscriptions_channel_size || null,
-                              )
-                            }
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      )}
-                    {channel.channel_overwrites?.subscriptions_channel_size !== undefined && (
-                      <button
-                        onClick={() => handleUpdateConfig('subscriptions_channel_size', null)}
-                      >
-                        Reset
-                      </button>
-                    )}
-                  </div>
-                </div>
+                <InputConfig
+                  type="number"
+                  name="subscriptions_channel_size"
+                  value={pageSizeVideo}
+                  setValue={setPageSizeVideo}
+                  oldValue={channel.channel_overwrites?.subscriptions_channel_size}
+                  updateCallback={handleUpdateConfig}
+                />
               </div>
               <div className="settings-box-wrapper">
                 <div>
                   <p>Shorts page size</p>
                 </div>
-                <div>
-                  <input
-                    type="number"
-                    name="subscriptions_shorts_channel_size"
-                    value={pageSizeShorts ?? ''}
-                    onChange={handleNumberChange(setPageSizeShorts)}
-                  />
-                  <div className="button-box">
-                    {pageSizeShorts !== null &&
-                      pageSizeShorts !==
-                        channel.channel_overwrites?.subscriptions_shorts_channel_size && (
-                        <>
-                          <button
-                            onClick={() =>
-                              handleUpdateConfig(
-                                'subscriptions_shorts_channel_size',
-                                pageSizeShorts,
-                              )
-                            }
-                          >
-                            Update
-                          </button>
-                          <button
-                            onClick={() =>
-                              setPageSizeShorts(
-                                channel.channel_overwrites?.subscriptions_shorts_channel_size ||
-                                  null,
-                              )
-                            }
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      )}
-                    {channel.channel_overwrites?.subscriptions_shorts_channel_size !==
-                      undefined && (
-                      <button
-                        onClick={() =>
-                          handleUpdateConfig('subscriptions_shorts_channel_size', null)
-                        }
-                      >
-                        Reset
-                      </button>
-                    )}
-                  </div>
-                </div>
+                <InputConfig
+                  type="number"
+                  name="subscriptions_shorts_channel_size"
+                  value={pageSizeShorts}
+                  setValue={setPageSizeShorts}
+                  oldValue={channel.channel_overwrites?.subscriptions_shorts_channel_size}
+                  updateCallback={handleUpdateConfig}
+                />
               </div>
               <div className="settings-box-wrapper">
                 <div>
                   <p>Live streams page size</p>
                 </div>
-                <div>
-                  <input
-                    type="number"
-                    name="subscriptions_live_channel_size"
-                    value={pageSizeStreams ?? ''}
-                    onChange={handleNumberChange(setPageSizeStreams)}
-                  />
-                  <div className="button-box">
-                    {pageSizeStreams !== null &&
-                      pageSizeStreams !==
-                        channel.channel_overwrites?.subscriptions_live_channel_size && (
-                        <>
-                          <button
-                            onClick={() =>
-                              handleUpdateConfig('subscriptions_live_channel_size', pageSizeStreams)
-                            }
-                          >
-                            Update
-                          </button>
-                          <button
-                            onClick={() =>
-                              setPageSizeStreams(
-                                channel.channel_overwrites?.subscriptions_live_channel_size || null,
-                              )
-                            }
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      )}
-                    {channel.channel_overwrites?.subscriptions_live_channel_size !== undefined && (
-                      <button
-                        onClick={() => handleUpdateConfig('subscriptions_live_channel_size', null)}
-                      >
-                        Reset
-                      </button>
-                    )}
-                  </div>
-                </div>
+                <InputConfig
+                  type="number"
+                  name="subscriptions_live_channel_size"
+                  value={pageSizeStreams}
+                  setValue={setPageSizeStreams}
+                  oldValue={channel.channel_overwrites?.subscriptions_live_channel_size}
+                  updateCallback={handleUpdateConfig}
+                />
               </div>
             </div>
           </div>

@@ -131,7 +131,6 @@ button:hover {
   padding: 5px 0;
   display: inline-flex;
   gap: 5px;
-  width: 100%;
 }
 
 .unsubscribe {
