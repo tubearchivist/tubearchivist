@@ -8,21 +8,21 @@ export type AppSettingsConfigType = {
     auto_start: boolean;
   };
   downloads: {
-    limit_speed: false | number;
+    limit_speed: number | undefined;
     sleep_interval: number;
     autodelete_days: number;
-    format: number | string;
-    format_sort: boolean | string;
+    format: string | undefined;
+    format_sort: string | undefined;
     add_metadata: boolean;
     add_thumbnail: boolean;
-    subtitle: boolean | string;
+    subtitle: string | undefined;
     subtitle_source: boolean | string;
     subtitle_index: boolean;
-    comment_max: string | number;
+    comment_max: string | undefined;
     comment_sort: string;
     cookie_import: boolean;
-    throttledratelimit: false | number;
-    extractor_lang: boolean | string;
+    throttledratelimit: number | undefined;
+    extractor_lang: string | undefined;
     integrate_ryd: boolean;
     integrate_sponsorblock: boolean;
   };

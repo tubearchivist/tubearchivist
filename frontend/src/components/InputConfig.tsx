@@ -6,7 +6,7 @@ type InputTextProps = {
     | React.Dispatch<React.SetStateAction<string | null>>
     | React.Dispatch<React.SetStateAction<number | null>>;
   oldValue: string | number | undefined;
-  updateCallback: (arg0: string, arg1: string | number | null) => void;
+  updateCallback: (arg0: string, arg1: string | boolean | number | null) => void;
 };
 
 const InputConfig = ({ type, name, value, setValue, oldValue, updateCallback }: InputTextProps) => {

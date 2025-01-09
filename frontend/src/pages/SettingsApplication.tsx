@@ -5,12 +5,13 @@ import PaginationDummy from '../components/PaginationDummy';
 import SettingsNavigation from '../components/SettingsNavigation';
 import restoreSnapshot from '../api/actions/restoreSnapshot';
 import queueSnapshot from '../api/actions/queueSnapshot';
-import updateCookie, { ValidatedCookieType } from '../api/actions/updateCookie';
+// import updateCookie, { ValidatedCookieType } from '../api/actions/updateCookie';
 import deleteApiToken from '../api/actions/deleteApiToken';
 import Button from '../components/Button';
 import loadAppsettingsConfig, { AppSettingsConfigType } from '../api/loader/loadAppsettingsConfig';
 import updateAppsettingsConfig from '../api/actions/updateAppsettingsConfig';
 import loadApiToken from '../api/loader/loadApiToken';
+import InputConfig from '../components/InputConfig';
 
 type SnapshotType = {
   id: string;
@@ -44,83 +45,47 @@ const SettingsApplication = () => {
   const apiToken = response?.apiToken;
 
   // Subscriptions
-  const [videoPageSize, setVideoPageSize] = useState(0);
-  const [livePageSize, setLivePageSize] = useState(0);
-  const [shortPageSize, setShortPageSize] = useState(0);
-  const [isAutostart, setIsAutostart] = useState(false);
+  const [videoPageSize, setVideoPageSize] = useState<number | null>(null);
+  const [livePageSize, setLivePageSize] = useState<number | null>(null);
+  const [shortPageSize, setShortPageSize] = useState<number | null>(null);
+  const [isAutostart, setIsAutostart] = useState<boolean>(false);
 
   // Downloads
-  const [currentDownloadSpeed, setCurrentDownloadSpeed] = useState(0);
-  const [currentThrottledRate, setCurrentThrottledRate] = useState(0);
-  const [currentScrapingSleep, setCurrentScrapingSleep] = useState(0);
-  const [currentAutodelete, setCurrentAutodelete] = useState(0);
+  const [currentDownloadSpeed, setCurrentDownloadSpeed] = useState<number | null>(null);
+  const [currentThrottledRate, setCurrentThrottledRate] = useState<number | null>(null);
+  const [currentScrapingSleep, setCurrentScrapingSleep] = useState<number | null>(null);
+  const [currentAutodelete, setCurrentAutodelete] = useState<number | null>(null);
 
   // Download Format
-  const [downloadsFormat, setDownloadsFormat] = useState('');
-  const [downloadsFormatSort, setDownloadsFormatSort] = useState('');
-  const [downloadsExtractorLang, setDownloadsExtractorLang] = useState('');
+  const [downloadsFormat, setDownloadsFormat] = useState<string | null>(null);
+  const [downloadsFormatSort, setDownloadsFormatSort] = useState<string | null>(null);
+  const [downloadsExtractorLang, setDownloadsExtractorLang] = useState<string | null>(null);
   const [embedMetadata, setEmbedMetadata] = useState(false);
   const [embedThumbnail, setEmbedThumbnail] = useState(false);
 
   // Subtitles
-  const [subtitleLang, setSubtitleLang] = useState('');
+  const [subtitleLang, setSubtitleLang] = useState<string | null>(null);
   const [subtitleSource, setSubtitleSource] = useState('');
   const [indexSubtitles, setIndexSubtitles] = useState(false);
 
   // Comments
-  const [commentsMax, setCommentsMax] = useState('');
+  const [commentsMax, setCommentsMax] = useState<string | null>(null);
   const [commentsSort, setCommentsSort] = useState('');
 
   // Cookie
-  const [cookieImport, setCookieImport] = useState(false);
-  const [validatingCookie, setValidatingCookie] = useState(false);
-  const [cookieResponse, setCookieResponse] = useState<ValidatedCookieType>();
+  // const [cookieImport, setCookieImport] = useState(false);
+  // const [validatingCookie, setValidatingCookie] = useState(false);
+  // const [cookieResponse, setCookieResponse] = useState<ValidatedCookieType>();
 
   // Integrations
   const [showApiToken, setShowApiToken] = useState(false);
   const [downloadDislikes, setDownloadDislikes] = useState(false);
   const [enableSponsorBlock, setEnableSponsorBlock] = useState(false);
-  const [resetTokenResponse, setResetTokenResponse] = useState({});
 
   // Snapshots
   const [enableSnapshots, setEnableSnapshots] = useState(false);
   const [isSnapshotQueued, setIsSnapshotQueued] = useState(false);
   const [restoringSnapshot, setRestoringSnapshot] = useState(false);
-
-  const onSubmit = async () => {
-    await updateAppsettingsConfig({
-      application: {
-        enable_snapshot: enableSnapshots,
-      },
-      downloads: {
-        limit_speed: currentDownloadSpeed,
-        sleep_interval: currentScrapingSleep,
-        autodelete_days: currentAutodelete,
-        format: downloadsFormat,
-        format_sort: downloadsFormatSort,
-        add_metadata: embedMetadata,
-        add_thumbnail: embedThumbnail,
-        subtitle: subtitleLang,
-        subtitle_source: subtitleSource,
-        subtitle_index: indexSubtitles,
-        comment_max: commentsMax,
-        comment_sort: commentsSort,
-        cookie_import: cookieImport,
-        throttledratelimit: currentThrottledRate,
-        extractor_lang: downloadsExtractorLang,
-        integrate_ryd: downloadDislikes,
-        integrate_sponsorblock: enableSponsorBlock,
-      },
-      subscriptions: {
-        auto_start: isAutostart,
-        channel_size: videoPageSize,
-        live_channel_size: livePageSize,
-        shorts_channel_size: shortPageSize,
-      },
-    });
-
-    setRefresh(true);
-  };
 
   const fetchData = async () => {
     const snapshotResponse = await loadSnapshots();
@@ -134,29 +99,29 @@ const SettingsApplication = () => {
     setIsAutostart(appSettingsConfig?.subscriptions.auto_start);
 
     // Downloads
-    setCurrentDownloadSpeed(appSettingsConfig?.downloads.limit_speed || 0);
-    setCurrentThrottledRate(appSettingsConfig?.downloads.throttledratelimit || 0);
+    setCurrentDownloadSpeed(appSettingsConfig?.downloads.limit_speed || null);
+    setCurrentThrottledRate(appSettingsConfig?.downloads.throttledratelimit || null);
     setCurrentScrapingSleep(appSettingsConfig?.downloads.sleep_interval);
     setCurrentAutodelete(appSettingsConfig?.downloads.autodelete_days);
 
     // Download Format
-    setDownloadsFormat(appSettingsConfig?.downloads.format.toString());
-    setDownloadsFormatSort(appSettingsConfig?.downloads.format_sort.toString());
-    setDownloadsExtractorLang(appSettingsConfig?.downloads.extractor_lang.toString());
+    setDownloadsFormat(appSettingsConfig?.downloads.format || null);
+    setDownloadsFormatSort(appSettingsConfig?.downloads.format_sort || null);
+    setDownloadsExtractorLang(appSettingsConfig?.downloads.extractor_lang || null);
     setEmbedMetadata(appSettingsConfig?.downloads.add_metadata);
     setEmbedThumbnail(appSettingsConfig?.downloads.add_thumbnail);
 
     // Subtitles
-    setSubtitleLang(appSettingsConfig?.downloads.subtitle.toString());
+    setSubtitleLang(appSettingsConfig?.downloads.subtitle || null);
     setSubtitleSource(appSettingsConfig?.downloads.subtitle_source.toString());
     setIndexSubtitles(appSettingsConfig?.downloads.subtitle_index);
 
     // Comments
-    setCommentsMax(appSettingsConfig?.downloads.comment_max.toString());
+    setCommentsMax(appSettingsConfig?.downloads.comment_max || null);
     setCommentsSort(appSettingsConfig?.downloads.comment_sort);
 
     // Cookie
-    setCookieImport(appSettingsConfig?.downloads.cookie_import);
+    // setCookieImport(appSettingsConfig?.downloads.cookie_import);
 
     // Integrations
     setDownloadDislikes(appSettingsConfig?.downloads.integrate_ryd);
@@ -170,6 +135,14 @@ const SettingsApplication = () => {
       appSettingsConfig,
       apiToken: apiToken.token,
     });
+  };
+
+  const handleUpdateConfig = async (
+    configKey: string,
+    configValue: string | boolean | number | null,
+  ) => {
+    await updateAppsettingsConfig(configKey, configValue);
+    setRefresh(true);
   };
 
   useEffect(() => {
@@ -193,768 +166,507 @@ const SettingsApplication = () => {
         <div className="title-bar">
           <h1>Application Configurations</h1>
         </div>
-        <form
-          name="application-update"
-          onSubmit={event => {
-            event.preventDefault();
-          }}
-        >
-          <div className="settings-group">
+        <div className="info-box">
+          <div className="info-box-item">
             <h2 id="subscriptions">Subscriptions</h2>
             <p>Disable shorts or streams by setting their page size to 0 (zero).</p>
-
-            <div className="settings-item">
-              <p>
-                YouTube page size:{' '}
-                <span className="settings-current">
-                  {appSettingsConfig?.subscriptions.channel_size}
-                </span>
-              </p>
-              <i>
-                Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max
-                recommended 50.
-              </i>
-              <br />
-              <input
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Videos page size</p>
+              </div>
+              <InputConfig
                 type="number"
-                name="subscriptions_channel_size"
-                min="0"
-                id="id_subscriptions_channel_size"
+                name="subscriptions.channel_size"
                 value={videoPageSize}
-                onChange={event => {
-                  setVideoPageSize(Number(event.target.value));
-                }}
+                setValue={setVideoPageSize}
+                oldValue={appSettingsConfig?.subscriptions.channel_size}
+                updateCallback={handleUpdateConfig}
               />
             </div>
-
-            <div className="settings-item">
-              <p>
-                YouTube Live page size:{' '}
-                <span className="settings-current">
-                  {appSettingsConfig?.subscriptions.live_channel_size}
-                </span>
-              </p>
-              <i>
-                Live Videos to scan to find new items for the <b>Rescan subscriptions</b> task, max
-                recommended 50.
-              </i>
-              <br />
-              <input
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Live Streams page size</p>
+              </div>
+              <InputConfig
                 type="number"
-                name="subscriptions_live_channel_size"
-                min="0"
-                id="id_subscriptions_live_channel_size"
+                name="subscriptions.live_channel_size"
                 value={livePageSize}
-                onChange={event => {
-                  setLivePageSize(Number(event.target.value));
-                }}
+                setValue={setLivePageSize}
+                oldValue={appSettingsConfig?.subscriptions.live_channel_size}
+                updateCallback={handleUpdateConfig}
               />
             </div>
-
-            <div className="settings-item">
-              <p>
-                YouTube Shorts page size:{' '}
-                <span className="settings-current">
-                  {appSettingsConfig?.subscriptions.shorts_channel_size}
-                </span>
-              </p>
-              <i>
-                Shorts Videos to scan to find new items for the <b>Rescan subscriptions</b> task,
-                max recommended 50.
-              </i>
-              <br />
-              <input
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Shorts page size</p>
+              </div>
+              <InputConfig
                 type="number"
-                name="subscriptions_shorts_channel_size"
-                min="0"
-                id="id_subscriptions_shorts_channel_size"
+                name="subscriptions.shorts_channel_size"
                 value={shortPageSize}
-                onChange={event => {
-                  setShortPageSize(Number(event.target.value));
-                }}
+                setValue={setShortPageSize}
+                oldValue={appSettingsConfig?.subscriptions.shorts_channel_size}
+                updateCallback={handleUpdateConfig}
               />
             </div>
-
-            <div className="settings-item">
-              <p>
-                Auto start download from your subscriptions:{' '}
-                <span className="settings-current">
-                  {appSettingsConfig?.subscriptions.auto_start.toString()}
-                </span>
-              </p>
-              <i>
-                Enable this will automatically start and prioritize videos from your subscriptions.
-              </i>
-              <br />
-              <select
-                name="subscriptions_auto_start"
-                id="id_subscriptions_auto_start"
-                value={isAutostart.toString()}
-                onChange={event => {
-                  setIsAutostart(event.target.value === 'true');
-                }}
-              >
-                <option value="">-- change subscription autostart --</option>
-                <option value="false">disable auto start</option>
-                <option value="true">enable auto start</option>
-              </select>
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Autostart download subscriptions</p>
+              </div>
+              <div className="toggle">
+                <div className="toggleBox">
+                  <input
+                    name="index_playlists"
+                    type="checkbox"
+                    checked={isAutostart}
+                    onChange={event => {
+                      handleUpdateConfig('subscriptions.auto_start', event.target.checked || false);
+                    }}
+                  />
+                  {!isAutostart && (
+                    <label htmlFor="" className="ofbtn">
+                      Off
+                    </label>
+                  )}
+                  {isAutostart && (
+                    <label htmlFor="" className="onbtn">
+                      On
+                    </label>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-          <div className="settings-group">
+          <div className="info-box-item">
             <h2 id="downloads">Downloads</h2>
-
-            <div className="settings-item">
-              <p>
-                Current download speed limit in KB/s:{' '}
-                <span className="settings-current">{appSettingsConfig?.downloads.limit_speed}</span>
-              </p>
-              <i>
-                Limit download speed. 0 (zero) to deactivate, e.g. 1000 (1MB/s). Speeds are in KB/s.
-                Setting takes effect on new download jobs or application restart.
-              </i>
-              <br />
-              <input
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Download Speed limit</p>
+              </div>
+              <InputConfig
                 type="number"
-                name="downloads_limit_speed"
-                id="id_downloads_limit_speed"
-                value={currentDownloadSpeed.toString()}
-                onChange={event => {
-                  setCurrentDownloadSpeed(Number(event.target.value));
-                }}
+                name="downloads.limit_speed"
+                value={currentDownloadSpeed}
+                setValue={setCurrentDownloadSpeed}
+                oldValue={appSettingsConfig?.downloads.limit_speed}
+                updateCallback={handleUpdateConfig}
               />
             </div>
-
-            <div className="settings-item">
-              <p>
-                Current throttled rate limit in KB/s:{' '}
-                <span className="settings-current">
-                  {appSettingsConfig?.downloads.throttledratelimit}
-                </span>
-              </p>
-              <i>
-                Download will restart if speeds drop below specified amount. 0 (zero) to deactivate,
-                e.g. 100. Speeds are in KB/s.
-              </i>
-              <br />
-              <input
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Throttled rate limit</p>
+              </div>
+              <InputConfig
                 type="number"
-                name="downloads_throttledratelimit"
-                id="id_downloads_throttledratelimit"
-                value={currentThrottledRate.toString()}
-                onChange={event => {
-                  setCurrentThrottledRate(Number(event.target.value));
-                }}
+                name="downloads.throttledratelimit"
+                value={currentThrottledRate}
+                setValue={setCurrentThrottledRate}
+                oldValue={appSettingsConfig?.downloads.throttledratelimit}
+                updateCallback={handleUpdateConfig}
               />
             </div>
-
-            <div className="settings-item">
-              <p>
-                Current scraping sleep interval:{' '}
-                <span className="settings-current">
-                  {appSettingsConfig?.downloads.sleep_interval}
-                </span>
-              </p>
-              <i>
-                Seconds to sleep between calls to YouTube. Might be necessary to avoid throttling.
-                Recommended 3.
-              </i>
-              <br />
-              <input
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Sleep interval</p>
+              </div>
+              <InputConfig
                 type="number"
-                name="downloads_sleep_interval"
-                id="id_downloads_sleep_interval"
+                name="downloads.sleep_interval"
                 value={currentScrapingSleep}
-                onChange={event => {
-                  setCurrentScrapingSleep(Number(event.target.value));
-                }}
+                setValue={setCurrentScrapingSleep}
+                oldValue={appSettingsConfig?.downloads.sleep_interval}
+                updateCallback={handleUpdateConfig}
               />
             </div>
-
-            <div className="settings-item">
-              <p>
-                <span className="danger-zone">Danger Zone</span>: Current auto delete watched
-                videos:{' '}
-                <span className="settings-current">
-                  {appSettingsConfig?.downloads.autodelete_days}
-                </span>
-              </p>
-              <i>Auto delete watched videos after x days, 0 (zero) to deactivate:</i>
-              <br />
-              <input
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Auto delete watched videos after x days</p>
+              </div>
+              <InputConfig
                 type="number"
-                name="downloads_autodelete_days"
-                id="id_downloads_autodelete_days"
-                value={currentAutodelete.toString()}
-                onChange={event => {
-                  setCurrentAutodelete(Number(event.target.value));
-                }}
+                name="downloads.autodelete_days"
+                value={currentAutodelete}
+                setValue={setCurrentAutodelete}
+                oldValue={appSettingsConfig?.downloads.autodelete_days}
+                updateCallback={handleUpdateConfig}
               />
             </div>
           </div>
-          <div className="settings-group">
+          <div className="info-box-item">
             <h2 id="format">Download Format</h2>
-
-            <div className="settings-item">
-              <p>
-                Limit video and audio quality format for yt-dlp.
-                <br />
-                Currently:{' '}
-                <span className="settings-current">{appSettingsConfig?.downloads.format}</span>
-              </p>
-              <p>Example configurations:</p>
-              <ul>
-                <li>
-                  <span className="settings-current">
-                    bestvideo[height{'<='}720]+bestaudio/best[height{'<='}720]
-                  </span>
-                  : best audio and max video height of 720p.
-                </li>
-                <li>
-                  <span className="settings-current">
-                    bestvideo[height{'<='}1080]+bestaudio/best[height{'<='}1080]
-                  </span>
-                  : best audio and max video height of 1080p.
-                </li>
-                <li>
-                  <span className="settings-current">
-                    bestvideo[height{'<='}
-                    1080][vcodec*=avc1]+bestaudio[acodec*=mp4a]/mp4
-                  </span>
-                  : Max 1080p video height with iOS compatible video and audio codecs.
-                </li>
-                <li>
-                  <span className="settings-current">0</span>: deactivate and download the best
-                  quality possible as decided by yt-dlp.
-                </li>
-              </ul>
-              <i>
-                Make sure your custom format gets merged into a single file. Check out the{' '}
-                <a href="https://github.com/yt-dlp/yt-dlp#format-selection" target="_blank">
-                  documentation
-                </a>{' '}
-                for valid configurations.
-              </i>
-              <br />
-              <input
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Limit video and audio quality format</p>
+              </div>
+              <InputConfig
                 type="text"
-                name="downloads_format"
-                id="id_downloads_format"
-                value={downloadsFormat.toString()}
-                onChange={event => {
-                  setDownloadsFormat(event.target.value);
-                }}
-              />
-              <br />
-            </div>
-
-            <div className="settings-item">
-              <p>
-                Force sort order to have precedence over all yt-dlp fields.
-                <br />
-                Currently:{' '}
-                <span className="settings-current">{appSettingsConfig?.downloads.format_sort}</span>
-              </p>
-              <p>Example configurations:</p>
-              <ul>
-                <li>
-                  <span className="settings-current">res,codec:av1</span>: prefer AV1 over all other
-                  video codecs.
-                </li>
-                <li>
-                  <span className="settings-current">0</span>: deactivate and keep the default as
-                  decided by yt-dlp.
-                </li>
-              </ul>
-              <i>
-                Not all codecs are supported by all browsers. The default value ensures best
-                compatibility. Check out the{' '}
-                <a href="https://github.com/yt-dlp/yt-dlp#sorting-formats" target="_blank">
-                  documentation
-                </a>{' '}
-                for valid configurations.
-              </i>
-              <br />
-              <input
-                type="text"
-                name="downloads_format_sort"
-                id="id_downloads_format_sort"
-                value={downloadsFormatSort.toString()}
-                onChange={event => {
-                  setDownloadsFormatSort(event.target.value);
-                }}
-              />
-              <br />
-            </div>
-
-            <div className="settings-item">
-              <p>
-                Prefer translated metadata language:{' '}
-                <span className="settings-current">
-                  {appSettingsConfig?.downloads.extractor_lang}
-                </span>
-              </p>
-              <i>
-                This will change the language this video gets indexed as. That will only be
-                available if the uploader provides translations. Add as two letter ISO language
-                code, check the{' '}
-                <a href="https://github.com/yt-dlp/yt-dlp#youtube" target="_blank">
-                  documentation
-                </a>{' '}
-                which languages are available.
-              </i>
-              <br />
-              <input
-                type="text"
-                name="downloads_extractor_lang"
-                id="id_downloads_extractor_lang"
-                value={downloadsExtractorLang.toString()}
-                onChange={event => {
-                  setDownloadsExtractorLang(event.target.value);
-                }}
+                name="downloads.format"
+                value={downloadsFormat}
+                setValue={setDownloadsFormat}
+                oldValue={appSettingsConfig?.downloads.format}
+                updateCallback={handleUpdateConfig}
               />
             </div>
-
-            <div className="settings-item">
-              <p>
-                Current metadata embed setting:{' '}
-                <span className="settings-current">
-                  {appSettingsConfig?.downloads.add_metadata.toString()}
-                </span>
-              </p>
-              <i>Metadata is not embedded into the downloaded files by default.</i>
-              <br />
-              <select
-                name="downloads_add_metadata"
-                id="id_downloads_add_metadata"
-                value={embedMetadata.toString()}
-                onChange={event => {
-                  setEmbedMetadata(event.target.value === 'true');
-                }}
-              >
-                <option value="">-- change metadata embed --</option>
-                <option value="false">don't embed metadata</option>
-                <option value="true">embed metadata</option>
-              </select>
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Sort download formats</p>
+              </div>
+              <InputConfig
+                type="text"
+                name="downloads.format_sort"
+                value={downloadsFormatSort}
+                setValue={setDownloadsFormatSort}
+                oldValue={appSettingsConfig?.downloads.format_sort}
+                updateCallback={handleUpdateConfig}
+              />
             </div>
-
-            <div className="settings-item">
-              <p>
-                Current thumbnail embed setting:{' '}
-                <span className="settings-current">
-                  {appSettingsConfig?.downloads.add_thumbnail.toString()}
-                </span>
-              </p>
-              <i>Embed thumbnail into the mediafile.</i>
-              <br />
-              <select
-                name="downloads_add_thumbnail"
-                id="id_downloads_add_thumbnail"
-                defaultValue=""
-                value={embedThumbnail.toString()}
-                onChange={event => {
-                  setEmbedThumbnail(event.target.value === 'true');
-                }}
-              >
-                <option value="">-- change thumbnail embed --</option>
-                <option value="false">don't embed thumbnail</option>
-                <option value="true">embed thumbnail</option>
-              </select>
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Extractor Language</p>
+              </div>
+              <InputConfig
+                type="text"
+                name="downloads.extractor_lang"
+                value={downloadsExtractorLang}
+                setValue={setDownloadsExtractorLang}
+                oldValue={appSettingsConfig?.downloads.extractor_lang}
+                updateCallback={handleUpdateConfig}
+              />
             </div>
-          </div>
-
-          <div className="settings-group">
-            <h2 id="format">Subtitles</h2>
-            <div className="settings-item">
-              <p>
-                Subtitles download setting:{' '}
-                <span className="settings-current">{appSettingsConfig?.downloads.subtitle}</span>
-                <br />
-                <i>
-                  Choose which subtitles to download, add comma separated language codes,
-                  <br />
-                  e.g. <span className="settings-current">en, de, zh-Hans</span>
-                </i>
-                <br />
-                <input
-                  type="text"
-                  name="downloads_subtitle"
-                  id="id_downloads_subtitle"
-                  value={subtitleLang.toString()}
-                  onChange={event => {
-                    setSubtitleLang(event.target.value);
-                  }}
-                />
-              </p>
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Embed metadata</p>
+              </div>
+              <div className="toggle">
+                <div className="toggleBox">
+                  <input
+                    name="add_metadata"
+                    type="checkbox"
+                    checked={embedMetadata}
+                    onChange={event => {
+                      handleUpdateConfig('downloads.add_metadata', event.target.checked || false);
+                    }}
+                  />
+                  {!embedMetadata && (
+                    <label htmlFor="" className="ofbtn">
+                      Off
+                    </label>
+                  )}
+                  {embedMetadata && (
+                    <label htmlFor="" className="onbtn">
+                      On
+                    </label>
+                  )}
+                </div>
+              </div>
             </div>
-            <div className="settings-item">
-              <p>
-                Subtitle source settings:{' '}
-                <span className="settings-current">
-                  {appSettingsConfig?.downloads.subtitle_source}
-                </span>
-              </p>
-              <i>Download only user generated, or also less accurate auto generated subtitles.</i>
-              <br />
-              <select
-                name="downloads_subtitle_source"
-                id="id_downloads_subtitle_source"
-                defaultValue=""
-                value={subtitleSource.toString()}
-                onChange={event => {
-                  setSubtitleSource(event.target.value);
-                }}
-              >
-                <option value="">-- change subtitle source settings</option>
-                <option value="user">only download user created</option>
-                <option value="auto">also download auto generated</option>
-              </select>
-            </div>
-            <div className="settings-item">
-              <p>
-                Index and make subtitles searchable:{' '}
-                <span className="settings-current">
-                  {appSettingsConfig?.downloads.subtitle_index.toString()}
-                </span>
-              </p>
-              <i>Store subtitle lines in Elasticsearch. Not recommended for low-end hardware.</i>
-              <br />
-              <select
-                name="downloads_subtitle_index"
-                id="id_downloads_subtitle_index"
-                defaultValue=""
-                value={indexSubtitles.toString()}
-                onChange={event => {
-                  setIndexSubtitles(event.target.value === 'true');
-                }}
-              >
-                <option value="">-- change subtitle index settings --</option>
-                <option value="false">disable subtitle index</option>
-                <option value="true">enable subtitle index</option>
-              </select>
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Embed Thumbnail</p>
+              </div>
+              <div className="toggle">
+                <div className="toggleBox">
+                  <input
+                    name="add_thumbnail"
+                    type="checkbox"
+                    checked={embedThumbnail}
+                    onChange={event => {
+                      handleUpdateConfig('downloads.add_thumbnail', event.target.checked || false);
+                    }}
+                  />
+                  {!embedThumbnail && (
+                    <label htmlFor="" className="ofbtn">
+                      Off
+                    </label>
+                  )}
+                  {embedThumbnail && (
+                    <label htmlFor="" className="onbtn">
+                      On
+                    </label>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-
-          <div className="settings-group">
-            <h2 id="comments">Comments</h2>
-            <div className="settings-item">
-              <p>
-                Download and index comments:{' '}
-                <span className="settings-current">{appSettingsConfig?.downloads.comment_max}</span>
-                <br />
-                <i>
-                  Follow the yt-dlp max_comments documentation,{' '}
-                  <a href="https://github.com/yt-dlp/yt-dlp#youtube" target="_blank">
-                    max-comments,max-parents,max-replies,max-replies-per-thread
-                  </a>
-                  :
-                </i>
-                <br />
-                <p>Example configurations:</p>
-                <ul>
-                  <li>
-                    <span className="settings-current">all,100,all,30</span>: Get 100 max-parents
-                    and 30 max-replies-per-thread.
-                  </li>
-                  <li>
-                    <span className="settings-current">1000,all,all,50</span>: Get a total of 1000
-                    comments over all, 50 replies per thread.
-                  </li>
-                </ul>
-                <input
-                  type="text"
-                  name="downloads_comment_max"
-                  id="id_downloads_comment_max"
-                  value={commentsMax}
-                  onChange={event => {
-                    setCommentsMax(event.target.value);
-                  }}
-                />
-              </p>
+          <div className="info-box-item">
+            <h2 id="subtitles">Subtitles</h2>
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Choose subtitle language</p>
+              </div>
+              <InputConfig
+                type="text"
+                name="downloads.subtitle"
+                value={subtitleLang}
+                setValue={setSubtitleLang}
+                oldValue={appSettingsConfig?.downloads.subtitle}
+                updateCallback={handleUpdateConfig}
+              />
             </div>
-            <div className="settings-item">
-              <p>
-                Selected comment sort method:{' '}
-                <span className="settings-current">
-                  {appSettingsConfig?.downloads.comment_sort}
-                </span>
-                <br />
-                <i>Select how many comments and threads to download:</i>
-                <br />
-                <select
-                  name="downloads_comment_sort"
-                  id="id_downloads_comment_sort"
-                  defaultValue=""
-                  value={commentsSort}
-                  onChange={event => {
-                    setCommentsSort(event.target.value);
-                  }}
-                >
-                  <option value="">-- change comments sort settings --</option>
-                  <option value="top">sort comments by top</option>
-                  <option value="new">sort comments by new</option>
-                </select>
-              </p>
-            </div>
-          </div>
-
-          <div className="settings-group">
-            <h2 id="format">Cookie</h2>
-            <div className="settings-item">
-              <p>
-                Import YouTube cookie:{' '}
-                <span className="settings-current">
-                  {appSettingsConfig?.downloads.cookie_import}
-                </span>
-                <br />
-              </p>
-              <p>
-                For automatic cookie import use <b>Tube Archivist Companion</b>{' '}
-                <a href="https://github.com/tubearchivist/browser-extension" target="_blank">
-                  browser extension
-                </a>
-                .
-              </p>
-              <i>
-                For manual cookie import, place your cookie file named{' '}
-                <span className="settings-current">cookies.google.txt</span> in{' '}
-                <span className="settings-current">cache/import</span> before enabling. Instructions
-                in the{' '}
-                <a
-                  href="https://docs.tubearchivist.com/settings/application/#cookie"
-                  target="_blank"
-                >
-                  Wiki.
-                </a>
-              </i>
-              <br />
-              <select
-                name="downloads_cookie_import"
-                id="id_downloads_cookie_import"
-                defaultValue=""
-                value={cookieImport.toString()}
-                onChange={event => {
-                  setCookieImport(event.target.value === 'true');
-                }}
-              >
-                <option value="">-- change cookie settings</option>
-                <option value="false">remove cookie</option>
-                <option value="true">import cookie</option>
-              </select>
-              <br />
-              {validatingCookie && <span>Processing.</span>}
-              {validatingCookie && cookieResponse?.cookie_validated && (
-                <span>The cookie file is valid.</span>
-              )}
-              {validatingCookie && !cookieResponse?.cookie_validated && (
-                <span className="danger-zone">Warning, the cookie file is invalid.</span>
-              )}
-              {!validatingCookie && (
-                <>
-                  {appSettingsConfig?.downloads.cookie_import && (
-                    <div id="cookieMessage">
-                      <Button
-                        id="cookieButton"
-                        label="Validate Cookie File"
-                        type="button"
-                        onClick={async () => {
-                          setValidatingCookie(true);
-                          const response = await updateCookie();
-                          setCookieResponse(response);
+            {appSettingsConfig?.downloads.subtitle && (
+              <>
+                <div className="settings-box-wrapper">
+                  <div>
+                    <p>Enable auto generated subtitles</p>
+                  </div>
+                  <div className="toggle">
+                    <div className="toggleBox">
+                      <input
+                        name="subtitle_source"
+                        type="checkbox"
+                        checked={subtitleSource === 'auto'}
+                        onChange={event => {
+                          handleUpdateConfig(
+                            'downloads.subtitle_source',
+                            event.target.checked ? 'auto' : 'user',
+                          );
                         }}
                       />
+                      {subtitleSource === 'user' && (
+                        <label htmlFor="" className="ofbtn">
+                          Off
+                        </label>
+                      )}
+                      {subtitleSource === 'auto' && (
+                        <label htmlFor="" className="onbtn">
+                          On
+                        </label>
+                      )}
                     </div>
-                  )}
-                </>
-              )}
-            </div>
+                  </div>
+                </div>
+                <div className="settings-box-wrapper">
+                  <div>
+                    <p>Enable subtitle index</p>
+                  </div>
+                  <div className="toggle">
+                    <div className="toggleBox">
+                      <input
+                        name="subtitle_index"
+                        type="checkbox"
+                        checked={indexSubtitles}
+                        onChange={event => {
+                          handleUpdateConfig('downloads.subtitle_index', event.target.checked);
+                        }}
+                      />
+                      {!indexSubtitles && (
+                        <label htmlFor="" className="ofbtn">
+                          Off
+                        </label>
+                      )}
+                      {indexSubtitles && (
+                        <label htmlFor="" className="onbtn">
+                          On
+                        </label>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
-
-          <div className="settings-group">
-            <h2 id="integrations">Integrations</h2>
-            <div className="settings-item">
-              <p>
-                API token:{' '}
-                <Button
-                  id="text-reveal-button"
-                  label="Show"
-                  type="button"
-                  onClick={() => {
-                    setShowApiToken(!showApiToken);
-                  }}
-                />
-              </p>
-              {resetTokenResponse && resetTokenResponse?.success && <p>Token revoked</p>}
-              {showApiToken && !resetTokenResponse?.success && (
-                <div className="description-text">
-                  <p>{apiToken}</p>
+          <div className="info-box-item">
+            <h2 id="comments">Comments</h2>
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Index comments</p>
+              </div>
+              <InputConfig
+                type="text"
+                name="downloads.comment_max"
+                value={commentsMax}
+                setValue={setCommentsMax}
+                oldValue={appSettingsConfig?.downloads.comment_max}
+                updateCallback={handleUpdateConfig}
+              />
+            </div>
+            {appSettingsConfig?.downloads.comment_max && (
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Comment sort method</p>
+                </div>
+                <div>
+                  <select
+                    name="downloads.comment_sort"
+                    value={commentsSort}
+                    onChange={event => {
+                      handleUpdateConfig('downloads.comment_sort', event.target.value);
+                    }}
+                  >
+                    <option value="top">sort comments by top</option>
+                    <option value="new">sort comments by new</option>
+                  </select>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="info-box-item">
+            <h2 id="cookie">Cookie</h2>
+            <div className="settings-box-wrapper"></div>
+          </div>
+          <div className="info-box-item">
+            <h2 id="sntegrations">Integrations</h2>
+            <div className="settings-box-wrapper">
+              <div>
+                <p>API token</p>
+              </div>
+              <div>
+                {showApiToken && <input readOnly value={apiToken} />}
+                <button onClick={() => setShowApiToken(!showApiToken)}>
+                  {showApiToken ? 'Hide' : 'Show'}
+                </button>
+                {showApiToken && (
                   <Button
                     className="danger-button"
                     label="Revoke"
                     type="button"
                     onClick={async () => {
-                      const response = await deleteApiToken();
-                      setResetTokenResponse(response);
+                      await deleteApiToken();
+                      setShowApiToken(false);
+                      setRefresh(true);
                     }}
                   />
+                )}
+              </div>
+            </div>
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Enable returnyoutubedislike</p>
+              </div>
+              <div className="toggle">
+                <div className="toggleBox">
+                  <input
+                    name="downloads.integrate_ryd"
+                    type="checkbox"
+                    checked={downloadDislikes}
+                    onChange={event => {
+                      handleUpdateConfig('downloads.integrate_ryd', event.target.checked);
+                    }}
+                  />
+                  {!downloadDislikes && (
+                    <label htmlFor="" className="ofbtn">
+                      Off
+                    </label>
+                  )}
+                  {downloadDislikes && (
+                    <label htmlFor="" className="onbtn">
+                      On
+                    </label>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
-
-            <div className="settings-item">
-              <p>
-                Integrate with{' '}
-                <a href="https://returnyoutubedislike.com/" target="_blank">
-                  returnyoutubedislike.com
-                </a>{' '}
-                to get dislikes and average ratings back:{' '}
-                <span className="settings-current">
-                  {appSettingsConfig?.downloads.integrate_ryd.toString()}
-                </span>
-              </p>
-              <i>
-                Before activating that, make sure you have a scraping sleep interval of at least 3
-                secs set to avoid ratelimiting issues.
-              </i>
-              <br />
-              <select
-                name="downloads_integrate_ryd"
-                id="id_downloads_integrate_ryd"
-                defaultValue=""
-                value={downloadDislikes.toString()}
-                onChange={event => {
-                  setDownloadDislikes(event.target.value === 'true');
-                }}
-              >
-                <option value="">-- change ryd integrations</option>
-                <option value="false">disable ryd integration</option>
-                <option value="true">enable ryd integration</option>
-              </select>
-            </div>
-
-            <div className="settings-item">
-              <p>
-                Integrate with{' '}
-                <a href="https://sponsor.ajay.app/" target="_blank">
-                  SponsorBlock
-                </a>{' '}
-                to get sponsored timestamps:{' '}
-                <span className="settings-current">
-                  {appSettingsConfig?.downloads.integrate_sponsorblock.toString()}
-                </span>
-              </p>
-              <i>
-                Before activating that, make sure you have a scraping sleep interval of at least 3
-                secs set to avoid ratelimiting issues.
-              </i>
-              <br />
-              <select
-                name="downloads_integrate_sponsorblock"
-                id="id_downloads_integrate_sponsorblock"
-                defaultValue=""
-                value={enableSponsorBlock.toString()}
-                onChange={event => {
-                  setEnableSponsorBlock(event.target.value === 'true');
-                }}
-              >
-                <option value="">-- change sponsorblock integrations</option>
-                <option value="false">disable sponsorblock integration</option>
-                <option value="true">enable sponsorblock integration</option>
-              </select>
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Enable Sponsorblock</p>
+              </div>
+              <div className="toggle">
+                <div className="toggleBox">
+                  <input
+                    name="downloads.integrate_sponsorblock"
+                    type="checkbox"
+                    checked={enableSponsorBlock}
+                    onChange={event => {
+                      handleUpdateConfig('downloads.integrate_sponsorblock', event.target.checked);
+                    }}
+                  />
+                  {!enableSponsorBlock && (
+                    <label htmlFor="" className="ofbtn">
+                      Off
+                    </label>
+                  )}
+                  {enableSponsorBlock && (
+                    <label htmlFor="" className="onbtn">
+                      On
+                    </label>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-
-          <div className="settings-group">
-            <h2 id="snapshots">Snapshots</h2>
-            <div className="settings-item">
-              <p>
-                Current system snapshot:{' '}
-                <span className="settings-current">
-                  {appSettingsConfig?.application.enable_snapshot}
-                </span>
-              </p>
-              <i>
-                Automatically create daily deduplicated snapshots of the index, stored in
-                Elasticsearch. Read first before activating:{' '}
-                <a
-                  target="_blank"
-                  href="https://docs.tubearchivist.com/settings/application/#snapshots"
-                >
-                  Wiki
-                </a>
-                .
-              </i>
-              <br />
-              <select
-                name="application_enable_snapshot"
-                id="id_application_enable_snapshot"
-                defaultValue=""
-                value={enableSnapshots.toString()}
-                onChange={event => {
-                  setEnableSnapshots(event.target.value === 'true');
-                }}
-              >
-                <option value="">-- change snapshot settings --</option>
-                <option value="false">disable system snapshots</option>
-                <option value="true">enable system snapshots</option>
-              </select>
-            </div>
-
-            <div>
-              {snapshots && (
-                <>
-                  <p>
-                    Create next snapshot:{' '}
-                    <span className="settings-current">{snapshots.next_exec_str}</span>, snapshots
-                    expire after <span className="settings-current">{snapshots.expire_after}</span>
-                    . <br />
-                    {isSnapshotQueued && <span>Snapshot in progress</span>}
-                    {!isSnapshotQueued && (
-                      <Button
-                        label="Create snapshot now"
-                        id="createButton"
-                        onClick={async () => {
-                          setIsSnapshotQueued(true);
-                          await queueSnapshot();
-                        }}
-                      />
+          <div className="info-box-item">
+            <h2>Snapshots</h2>
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Enable Index Snapshot</p>
+              </div>
+              <div>
+                <div className="toggle">
+                  <div className="toggleBox">
+                    <input
+                      name="application.enable_snapshot"
+                      type="checkbox"
+                      checked={enableSnapshots}
+                      onChange={event => {
+                        handleUpdateConfig('application.enable_snapshot', event.target.checked);
+                      }}
+                    />
+                    {!enableSnapshots && (
+                      <label htmlFor="" className="ofbtn">
+                        Off
+                      </label>
                     )}
-                  </p>
-                  <br />
-                  {restoringSnapshot && <p>Snapshot restore started</p>}
-                  {!restoringSnapshot &&
-                    snapshots.snapshots &&
-                    snapshots.snapshots.map(snapshot => {
-                      return (
-                        <p key={snapshot.id}>
+                    {enableSnapshots && (
+                      <label htmlFor="" className="onbtn">
+                        On
+                      </label>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="settings-box-wrapper">
+              <div></div>
+              <div>
+                <div>
+                  {appSettingsConfig?.application.enable_snapshot && snapshots && (
+                    <>
+                      <p>
+                        Create next snapshot:{' '}
+                        <span className="settings-current">{snapshots.next_exec_str}</span>,
+                        snapshots expire after{' '}
+                        <span className="settings-current">{snapshots.expire_after}</span>
+                        . <br />
+                        {isSnapshotQueued && <span>Snapshot in progress</span>}
+                        {!isSnapshotQueued && (
                           <Button
-                            label="Restore"
+                            label="Create snapshot now"
+                            id="createButton"
                             onClick={async () => {
-                              setRestoringSnapshot(true);
-                              await restoreSnapshot(snapshot.id);
+                              setIsSnapshotQueued(true);
+                              await queueSnapshot();
                             }}
-                          />{' '}
-                          Snapshot created on:{' '}
-                          <span className="settings-current">{snapshot.start_date}</span>, took{' '}
-                          <span className="settings-current">{snapshot.duration_s}s</span> to
-                          create. State: <i>{snapshot.state}</i>
-                        </p>
-                      );
-                    })}
-                </>
-              )}
+                          />
+                        )}
+                      </p>
+                      <br />
+                      {restoringSnapshot && <p>Snapshot restore started</p>}
+                      {!restoringSnapshot &&
+                        snapshots.snapshots &&
+                        snapshots.snapshots.map(snapshot => {
+                          return (
+                            <p key={snapshot.id}>
+                              <Button
+                                label="Restore"
+                                onClick={async () => {
+                                  setRestoringSnapshot(true);
+                                  await restoreSnapshot(snapshot.id);
+                                }}
+                              />{' '}
+                              Snapshot created on:{' '}
+                              <span className="settings-current">{snapshot.start_date}</span>, took{' '}
+                              <span className="settings-current">{snapshot.duration_s}s</span> to
+                              create. State: <i>{snapshot.state}</i>
+                            </p>
+                          );
+                        })}
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-
-          <Button
-            type="submit"
-            name="application-settings"
-            label="Update Application Configurations"
-            onClick={async () => {
-              window.scrollTo(0, 0);
-              await onSubmit();
-            }}
-          />
-        </form>
+        </div>
       </div>
 
       <PaginationDummy />

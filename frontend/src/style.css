@@ -108,6 +108,10 @@ input {
   border: solid 1px var(--main-font);
 }
 
+input[readonly] {
+  background-color: var(--main-font);
+}
+
 textarea {
   width: 100%;
 }
