@@ -19,7 +19,7 @@ type ChannelOverwritesType = {
   download_format?: string;
   autodelete_days?: number;
   index_playlists?: boolean;
-  integrate_sponsorblock?: boolean;
+  integrate_sponsorblock?: boolean | null;
   subscriptions_channel_size?: number;
   subscriptions_live_channel_size?: number;
   subscriptions_shorts_channel_size?: number;

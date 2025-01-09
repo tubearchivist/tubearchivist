@@ -5,7 +5,7 @@ type InputTextProps = {
   setValue:
     | React.Dispatch<React.SetStateAction<string | null>>
     | React.Dispatch<React.SetStateAction<number | null>>;
-  oldValue: string | number | undefined;
+  oldValue: string | number | null;
   updateCallback: (arg0: string, arg1: string | boolean | number | null) => void;
 };
 
@@ -36,9 +36,7 @@ const InputConfig = ({ type, name, value, setValue, oldValue, updateCallback }: 
             <button onClick={() => setValue(oldValue as any)}>Cancel</button>
           </>
         )}
-        {oldValue !== undefined && (
-          <button onClick={() => updateCallback(name, null)}>reset</button>
-        )}
+        {oldValue !== null && <button onClick={() => updateCallback(name, null)}>reset</button>}
       </div>
     </div>
   );

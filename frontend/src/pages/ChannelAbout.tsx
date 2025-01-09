@@ -60,16 +60,20 @@ const ChannelAbout = () => {
         const channelResponse = await loadChannelById(channelId);
 
         setChannelResponse(channelResponse);
-        setDownloadFormat(channelResponse?.data?.channel_overwrites?.download_format || null);
-        setAutoDeleteAfter(channelResponse?.data?.channel_overwrites?.autodelete_days);
-        setIndexPlaylists(channelResponse?.data?.channel_overwrites?.index_playlists || false);
-        setEnableSponsorblock(channelResponse?.data?.channel_overwrites?.integrate_sponsorblock);
-        setPageSizeVideo(channelResponse?.data?.channel_overwrites?.subscriptions_channel_size);
+        setDownloadFormat(channelResponse?.data?.channel_overwrites?.download_format ?? null);
+        setAutoDeleteAfter(channelResponse?.data?.channel_overwrites?.autodelete_days ?? null);
+        setIndexPlaylists(channelResponse?.data?.channel_overwrites?.index_playlists ?? null);
+        setEnableSponsorblock(
+          channelResponse?.data?.channel_overwrites?.integrate_sponsorblock ?? null,
+        );
+        setPageSizeVideo(
+          channelResponse?.data?.channel_overwrites?.subscriptions_channel_size ?? null,
+        );
         setPageSizeShorts(
-          channelResponse?.data?.channel_overwrites?.subscriptions_shorts_channel_size,
+          channelResponse?.data?.channel_overwrites?.subscriptions_shorts_channel_size ?? null,
         );
         setPageSizeStreams(
-          channelResponse?.data?.channel_overwrites?.subscriptions_live_channel_size,
+          channelResponse?.data?.channel_overwrites?.subscriptions_live_channel_size ?? null,
         );
 
         setRefresh(false);
@@ -244,7 +248,7 @@ const ChannelAbout = () => {
                   name="download_format"
                   value={downloadFormat}
                   setValue={setDownloadFormat}
-                  oldValue={channel.channel_overwrites?.download_format}
+                  oldValue={channel.channel_overwrites?.download_format ?? null}
                   updateCallback={handleUpdateConfig}
                 />
               </div>
@@ -257,7 +261,7 @@ const ChannelAbout = () => {
                   name="autodelete_days"
                   value={autoDeleteAfter}
                   setValue={setAutoDeleteAfter}
-                  oldValue={channel.channel_overwrites?.autodelete_days}
+                  oldValue={channel.channel_overwrites?.autodelete_days ?? null}
                   updateCallback={handleUpdateConfig}
                 />
               </div>
@@ -300,7 +304,7 @@ const ChannelAbout = () => {
                   </p>
                 </div>
                 <div>
-                  {enableSponsorblock !== undefined ? (
+                  {enableSponsorblock !== null ? (
                     <div className="toggle">
                       <div className="toggleBox">
                         <input
@@ -345,7 +349,7 @@ const ChannelAbout = () => {
                   name="subscriptions_channel_size"
                   value={pageSizeVideo}
                   setValue={setPageSizeVideo}
-                  oldValue={channel.channel_overwrites?.subscriptions_channel_size}
+                  oldValue={channel.channel_overwrites?.subscriptions_channel_size ?? null}
                   updateCallback={handleUpdateConfig}
                 />
               </div>
@@ -358,7 +362,7 @@ const ChannelAbout = () => {
                   name="subscriptions_shorts_channel_size"
                   value={pageSizeShorts}
                   setValue={setPageSizeShorts}
-                  oldValue={channel.channel_overwrites?.subscriptions_shorts_channel_size}
+                  oldValue={channel.channel_overwrites?.subscriptions_shorts_channel_size ?? null}
                   updateCallback={handleUpdateConfig}
                 />
               </div>
@@ -371,7 +375,7 @@ const ChannelAbout = () => {
                   name="subscriptions_live_channel_size"
                   value={pageSizeStreams}
                   setValue={setPageSizeStreams}
-                  oldValue={channel.channel_overwrites?.subscriptions_live_channel_size}
+                  oldValue={channel.channel_overwrites?.subscriptions_live_channel_size ?? null}
                   updateCallback={handleUpdateConfig}
                 />
               </div>
