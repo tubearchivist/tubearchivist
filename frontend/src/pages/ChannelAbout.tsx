@@ -14,6 +14,7 @@ import Button from '../components/Button';
 import updateChannelOverwrites from '../api/actions/updateChannelOverwrite';
 import useIsAdmin from '../functions/useIsAdmin';
 import InputConfig from '../components/InputConfig';
+import ToggleConfig from '../components/ToggleConfig';
 
 export type ChannelBaseOutletContextType = {
   currentPage: number;
@@ -269,30 +270,11 @@ const ChannelAbout = () => {
                 <div>
                   <p>Index playlists</p>
                 </div>
-                <div>
-                  <div className="toggle">
-                    <div className="toggleBox">
-                      <input
-                        name="index_playlists"
-                        type="checkbox"
-                        checked={indexPlaylists}
-                        onChange={event => {
-                          handleUpdateConfig('index_playlists', event.target.checked || null);
-                        }}
-                      />
-                      {!indexPlaylists && (
-                        <label htmlFor="" className="ofbtn">
-                          Off
-                        </label>
-                      )}
-                      {indexPlaylists && (
-                        <label htmlFor="" className="onbtn">
-                          On
-                        </label>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <ToggleConfig
+                  name="index_playlists"
+                  value={indexPlaylists}
+                  updateCallback={handleUpdateConfig}
+                />
               </div>
               <div className="settings-box-wrapper">
                 <div>
@@ -305,29 +287,12 @@ const ChannelAbout = () => {
                 </div>
                 <div>
                   {enableSponsorblock !== null ? (
-                    <div className="toggle">
-                      <div className="toggleBox">
-                        <input
-                          name="enableSponsorblock"
-                          type="checkbox"
-                          checked={Boolean(enableSponsorblock)}
-                          onChange={event => {
-                            handleUpdateConfig('integrate_sponsorblock', event.target.checked);
-                          }}
-                        />
-                        {!enableSponsorblock && (
-                          <label htmlFor="" className="ofbtn">
-                            Off
-                          </label>
-                        )}
-                        {enableSponsorblock && (
-                          <label htmlFor="" className="onbtn">
-                            On
-                          </label>
-                        )}
-                      </div>
-                      <button onClick={() => handleToggleSponsorBlock(false)}>Reset</button>
-                    </div>
+                    <ToggleConfig
+                      name="integrate_sponsorblock"
+                      value={enableSponsorblock}
+                      updateCallback={handleUpdateConfig}
+                      resetCallback={handleToggleSponsorBlock}
+                    />
                   ) : (
                     <button onClick={() => handleToggleSponsorBlock(true)}>Configure</button>
                   )}

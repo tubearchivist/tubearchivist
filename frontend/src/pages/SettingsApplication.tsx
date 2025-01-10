@@ -12,6 +12,7 @@ import loadAppsettingsConfig, { AppSettingsConfigType } from '../api/loader/load
 import updateAppsettingsConfig from '../api/actions/updateAppsettingsConfig';
 import loadApiToken from '../api/loader/loadApiToken';
 import InputConfig from '../components/InputConfig';
+import ToggleConfig from '../components/ToggleConfig';
 
 type SnapshotType = {
   id: string;
@@ -214,31 +215,11 @@ const SettingsApplication = () => {
                 <div>
                   <p>Autostart download subscriptions</p>
                 </div>
-                <div className="toggle">
-                  <div className="toggleBox">
-                    <input
-                      name="index_playlists"
-                      type="checkbox"
-                      checked={isAutostart}
-                      onChange={event => {
-                        handleUpdateConfig(
-                          'subscriptions.auto_start',
-                          event.target.checked || false,
-                        );
-                      }}
-                    />
-                    {!isAutostart && (
-                      <label htmlFor="" className="ofbtn">
-                        Off
-                      </label>
-                    )}
-                    {isAutostart && (
-                      <label htmlFor="" className="onbtn">
-                        On
-                      </label>
-                    )}
-                  </div>
-                </div>
+                <ToggleConfig
+                  name="subscriptions.auto_start"
+                  value={isAutostart}
+                  updateCallback={handleUpdateConfig}
+                />
               </div>
             </div>
             <div className="info-box-item">
@@ -341,58 +322,21 @@ const SettingsApplication = () => {
                 <div>
                   <p>Embed metadata</p>
                 </div>
-                <div className="toggle">
-                  <div className="toggleBox">
-                    <input
-                      name="add_metadata"
-                      type="checkbox"
-                      checked={embedMetadata}
-                      onChange={event => {
-                        handleUpdateConfig('downloads.add_metadata', event.target.checked || false);
-                      }}
-                    />
-                    {!embedMetadata && (
-                      <label htmlFor="" className="ofbtn">
-                        Off
-                      </label>
-                    )}
-                    {embedMetadata && (
-                      <label htmlFor="" className="onbtn">
-                        On
-                      </label>
-                    )}
-                  </div>
-                </div>
+                <ToggleConfig
+                  name="downloads.add_metadata"
+                  value={embedMetadata}
+                  updateCallback={handleUpdateConfig}
+                />
               </div>
               <div className="settings-box-wrapper">
                 <div>
                   <p>Embed Thumbnail</p>
                 </div>
-                <div className="toggle">
-                  <div className="toggleBox">
-                    <input
-                      name="add_thumbnail"
-                      type="checkbox"
-                      checked={embedThumbnail}
-                      onChange={event => {
-                        handleUpdateConfig(
-                          'downloads.add_thumbnail',
-                          event.target.checked || false,
-                        );
-                      }}
-                    />
-                    {!embedThumbnail && (
-                      <label htmlFor="" className="ofbtn">
-                        Off
-                      </label>
-                    )}
-                    {embedThumbnail && (
-                      <label htmlFor="" className="onbtn">
-                        On
-                      </label>
-                    )}
-                  </div>
-                </div>
+                <ToggleConfig
+                  name="downloads.add_thumbnail"
+                  value={embedThumbnail}
+                  updateCallback={handleUpdateConfig}
+                />
               </div>
             </div>
             <div className="info-box-item">
@@ -446,28 +390,11 @@ const SettingsApplication = () => {
                     <div>
                       <p>Enable subtitle index</p>
                     </div>
-                    <div className="toggle">
-                      <div className="toggleBox">
-                        <input
-                          name="subtitle_index"
-                          type="checkbox"
-                          checked={indexSubtitles}
-                          onChange={event => {
-                            handleUpdateConfig('downloads.subtitle_index', event.target.checked);
-                          }}
-                        />
-                        {!indexSubtitles && (
-                          <label htmlFor="" className="ofbtn">
-                            Off
-                          </label>
-                        )}
-                        {indexSubtitles && (
-                          <label htmlFor="" className="onbtn">
-                            On
-                          </label>
-                        )}
-                      </div>
-                    </div>
+                    <ToggleConfig
+                      name="downloads.subtitle_index"
+                      value={indexSubtitles}
+                      updateCallback={handleUpdateConfig}
+                    />
                   </div>
                 </>
               )}
@@ -540,58 +467,21 @@ const SettingsApplication = () => {
                 <div>
                   <p>Enable returnyoutubedislike</p>
                 </div>
-                <div className="toggle">
-                  <div className="toggleBox">
-                    <input
-                      name="downloads.integrate_ryd"
-                      type="checkbox"
-                      checked={downloadDislikes}
-                      onChange={event => {
-                        handleUpdateConfig('downloads.integrate_ryd', event.target.checked);
-                      }}
-                    />
-                    {!downloadDislikes && (
-                      <label htmlFor="" className="ofbtn">
-                        Off
-                      </label>
-                    )}
-                    {downloadDislikes && (
-                      <label htmlFor="" className="onbtn">
-                        On
-                      </label>
-                    )}
-                  </div>
-                </div>
+                <ToggleConfig
+                  name="downloads.integrate_ryd"
+                  value={downloadDislikes}
+                  updateCallback={handleUpdateConfig}
+                />
               </div>
               <div className="settings-box-wrapper">
                 <div>
                   <p>Enable Sponsorblock</p>
                 </div>
-                <div className="toggle">
-                  <div className="toggleBox">
-                    <input
-                      name="downloads.integrate_sponsorblock"
-                      type="checkbox"
-                      checked={enableSponsorBlock}
-                      onChange={event => {
-                        handleUpdateConfig(
-                          'downloads.integrate_sponsorblock',
-                          event.target.checked,
-                        );
-                      }}
-                    />
-                    {!enableSponsorBlock && (
-                      <label htmlFor="" className="ofbtn">
-                        Off
-                      </label>
-                    )}
-                    {enableSponsorBlock && (
-                      <label htmlFor="" className="onbtn">
-                        On
-                      </label>
-                    )}
-                  </div>
-                </div>
+                <ToggleConfig
+                  name="downloads.integrate_sponsorblock"
+                  value={enableSponsorBlock}
+                  updateCallback={handleUpdateConfig}
+                />
               </div>
             </div>
             <div className="info-box-item">
@@ -600,30 +490,11 @@ const SettingsApplication = () => {
                 <div>
                   <p>Enable Index Snapshot</p>
                 </div>
-                <div>
-                  <div className="toggle">
-                    <div className="toggleBox">
-                      <input
-                        name="application.enable_snapshot"
-                        type="checkbox"
-                        checked={enableSnapshots}
-                        onChange={event => {
-                          handleUpdateConfig('application.enable_snapshot', event.target.checked);
-                        }}
-                      />
-                      {!enableSnapshots && (
-                        <label htmlFor="" className="ofbtn">
-                          Off
-                        </label>
-                      )}
-                      {enableSnapshots && (
-                        <label htmlFor="" className="onbtn">
-                          On
-                        </label>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <ToggleConfig
+                  name="application.enable_snapshot"
+                  value={enableSnapshots}
+                  updateCallback={handleUpdateConfig}
+                />
               </div>
               <div className="settings-box-wrapper">
                 <div></div>
