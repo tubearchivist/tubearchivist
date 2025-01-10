@@ -1,11 +1,10 @@
 import APIClient from '../../functions/APIClient';
 import { CookieStateType } from '../loader/loadCookie';
 
-const updateCookie = async (cookie: string): Promise<CookieStateType> => {
+const deleteCookie = async (): Promise<CookieStateType> => {
   return APIClient('/api/appsettings/cookie/', {
-    method: 'PUT',
-    body: { cookie },
+    method: 'DELETE',
   });
 };
 
-export default updateCookie;
+export default deleteCookie;

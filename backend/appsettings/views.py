@@ -189,32 +189,28 @@ class CookieView(ApiBaseView):
     GET: check if cookie is enabled
     POST: verify validity of cookie
     PUT: import cookie
+    DELETE: revoke the cookie
     """
 
     permission_classes = [AdminOnly]
 
-    @staticmethod
-    def get(request):
+    def get(self, request):
         """handle get request"""
         # pylint: disable=unused-argument
-        config = AppConfig().config
-        valid = RedisArchivist().get_message_dict("cookie:valid")
-        response = {"cookie_enabled": config["downloads"]["cookie_import"]}
-        response.update(valid)
+        validation = self._get_cookie_validation()
 
-        return Response(response)
+        return Response(validation)
 
-    @staticmethod
-    def post(request):
-        """handle post request"""
+    def post(self, request):
+        """handle cookie validation request"""
         # pylint: disable=unused-argument
         config = AppConfig().config
-        validated = CookieHandler(config).validate()
+        _ = CookieHandler(config).validate()
+        validation = self._get_cookie_validation()
 
-        return Response({"cookie_validated": validated})
+        return Response(validation)
 
-    @staticmethod
-    def put(request):
+    def put(self, request):
         """handle put request"""
         # pylint: disable=unused-argument
         config = AppConfig().config
@@ -230,12 +226,30 @@ class CookieView(ApiBaseView):
         validated = handler.validate()
         if not validated:
             handler.revoke()
-            message = {"cookie_import": "fail", "cookie_validated": validated}
-            print(f"cookie: {message}")
-            return Response({"message": message}, status=400)
+            print("cookie import failed, not valid")
+            status = 400
+        else:
+            status = 200
 
-        message = {"cookie_import": "done", "cookie_validated": validated}
-        return Response(message)
+        validation = self._get_cookie_validation()
+        return Response(validation, status=status)
+
+    def delete(self, request):
+        """delete the cookie"""
+        config = AppConfig().config
+        handler = CookieHandler(config)
+        handler.revoke()
+        return Response({"cookie_enabled": False})
+
+    @staticmethod
+    def _get_cookie_validation():
+        """get current cookie validation"""
+        config = AppConfig().config
+        validation = RedisArchivist().get_message_dict("cookie:valid")
+        is_enabled = {"cookie_enabled": config["downloads"]["cookie_import"]}
+        validation.update(is_enabled)
+
+        return validation
 
 
 class TokenView(ApiBaseView):

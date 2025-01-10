@@ -13,6 +13,10 @@ import updateAppsettingsConfig from '../api/actions/updateAppsettingsConfig';
 import loadApiToken from '../api/loader/loadApiToken';
 import InputConfig from '../components/InputConfig';
 import ToggleConfig from '../components/ToggleConfig';
+import updateCookie from '../api/actions/updateCookie';
+import loadCookie, { CookieStateType } from '../api/loader/loadCookie';
+import deleteCookie from '../api/actions/deleteCookie';
+import validateCookie from '../api/actions/validateCookie';
 
 type SnapshotType = {
   id: string;
@@ -35,6 +39,7 @@ type SettingsApplicationReponses = {
   snapshots?: SnapshotListType;
   appSettingsConfig?: AppSettingsConfigType;
   apiToken?: string;
+  cookieState: CookieStateType;
 };
 
 const SettingsApplication = () => {
@@ -74,6 +79,8 @@ const SettingsApplication = () => {
   const [commentsSort, setCommentsSort] = useState<string>('');
 
   // Cookie
+  const [cookieFormData, setCookieFormData] = useState<string>('');
+  const [showCookieForm, setShowCookieForm] = useState<boolean>(false);
   // const [cookieImport, setCookieImport] = useState(false);
   // const [validatingCookie, setValidatingCookie] = useState(false);
   // const [cookieResponse, setCookieResponse] = useState<ValidatedCookieType>();
@@ -92,6 +99,7 @@ const SettingsApplication = () => {
     const snapshotResponse = await loadSnapshots();
     const appSettingsConfig = await loadAppsettingsConfig();
     const apiToken = await loadApiToken();
+    const cookieState = await loadCookie();
 
     // Subscriptions
     setVideoPageSize(appSettingsConfig.subscriptions.channel_size);
@@ -135,6 +143,7 @@ const SettingsApplication = () => {
       snapshots: snapshotResponse,
       appSettingsConfig,
       apiToken: apiToken.token,
+      cookieState,
     });
   };
 
@@ -143,6 +152,23 @@ const SettingsApplication = () => {
     configValue: string | boolean | number | null,
   ) => {
     await updateAppsettingsConfig(configKey, configValue);
+    setRefresh(true);
+  };
+
+  const handleCookieUpdate = async () => {
+    await updateCookie(cookieFormData);
+    setCookieFormData('');
+    setShowCookieForm(false);
+    setRefresh(true);
+  };
+
+  const handleCookieRevoke = async () => {
+    await deleteCookie();
+    setRefresh(true);
+  };
+
+  const handleCookieValidate = async () => {
+    await validateCookie();
     setRefresh(true);
   };
 
@@ -436,7 +462,52 @@ const SettingsApplication = () => {
             </div>
             <div className="info-box-item">
               <h2 id="cookie">Cookie</h2>
-              <div className="settings-box-wrapper"></div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Use your cookie for yt-dlp</p>
+                </div>
+                <div>
+                  {response?.cookieState?.cookie_enabled ? (
+                    <>
+                      <p>
+                        Cookie enabled. Last validation:{' '}
+                        <span className="settings-current">
+                          {response.cookieState.validated_str}
+                        </span>
+                        .
+                      </p>
+                      <div className="button-box">
+                        <button className="danger-button" onClick={handleCookieRevoke}>
+                          Revoke
+                        </button>
+                        <button onClick={handleCookieValidate}>Validate</button>
+                      </div>
+                    </>
+                  ) : (
+                    <p>Cookie disabled</p>
+                  )}
+                  {showCookieForm ? (
+                    <>
+                      <textarea
+                        value={cookieFormData}
+                        onChange={e => {
+                          setCookieFormData(e.currentTarget.value);
+                        }}
+                      />
+                      <div className="button-box">
+                        <button onClick={handleCookieUpdate} type="submit">
+                          Submit
+                        </button>
+                        <button onClick={() => setShowCookieForm(false)}>Cancel</button>
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <button onClick={() => setShowCookieForm(true)}>Update Cookie</button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
             <div className="info-box-item">
               <h2 id="sntegrations">Integrations</h2>
