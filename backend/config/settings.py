@@ -18,7 +18,6 @@ import ldap
 from common.src.env_settings import EnvironmentSettings
 from common.src.helper import ta_host_parser
 from corsheaders.defaults import default_headers
-from django_auth_ldap.config import LDAPSearch
 
 try:
     from dotenv import load_dotenv
@@ -107,6 +106,8 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 if bool(environ.get("TA_LDAP")):
     # pylint: disable=global-at-module-level
+    from django_auth_ldap.config import LDAPSearch
+
     global AUTH_LDAP_SERVER_URI
     AUTH_LDAP_SERVER_URI = environ.get("TA_LDAP_SERVER_URI")
 
