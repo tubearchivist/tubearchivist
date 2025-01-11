@@ -229,6 +229,7 @@ const Download = () => {
               <select
                 name="channel_filter"
                 id="channel_filter"
+                value={channelFilterFromUrl || 'all'}
                 onChange={async event => {
                   const value = event.currentTarget.value;
 
@@ -240,15 +241,13 @@ const Download = () => {
                   setSearchParams(params);
                 }}
               >
-                <option value="all" selected={!channelFilterFromUrl}>
-                  all
-                </option>
+                <option value="all">all</option>
                 {channelAggsList.map(channel => {
                   const [name, id] = channel.key;
                   const count = channel.doc_count;
 
                   return (
-                    <option key={id} selected={channelFilterFromUrl == id} value={id}>
+                    <option key={id} value={id}>
                       {name} ({count})
                     </option>
                   );
