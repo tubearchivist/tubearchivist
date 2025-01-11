@@ -14,7 +14,6 @@ import hashlib
 from os import environ, path
 from pathlib import Path
 
-import ldap
 from common.src.env_settings import EnvironmentSettings
 from common.src.helper import ta_host_parser
 from corsheaders.defaults import default_headers
@@ -106,6 +105,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 if bool(environ.get("TA_LDAP")):
     # pylint: disable=global-at-module-level
+    import ldap
     from django_auth_ldap.config import LDAPSearch
 
     global AUTH_LDAP_SERVER_URI
