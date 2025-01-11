@@ -14,7 +14,11 @@ from appsettings.src.config import AppConfig
 from channel.src.index import YoutubeChannel
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
-from common.src.helper import get_channel_overwrites, ignore_filelist
+from common.src.helper import (
+    get_channel_overwrites,
+    ignore_filelist,
+    rand_sleep,
+)
 from common.src.ta_redis import RedisQueue
 from download.src.queue import PendingList
 from download.src.subscriptions import PlaylistSubscription
@@ -370,6 +374,7 @@ class DownloadPostProcess(DownloaderBase):
             ]
             progress = idx / total
             self.task.send_progress(message, progress=progress)
+            rand_sleep(self.config)
 
     def add_playlists_to_refresh(self) -> None:
         """add playlists to refresh"""
