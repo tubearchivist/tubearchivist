@@ -29,6 +29,10 @@ class VideoApiListView(ApiBaseView):
         except ValueError as err:
             return Response({"error": str(err)}, status=400)
 
+        if data == {"query": {"bool": {"must": [None]}}}:
+            # skip empty lookup
+            return Response([])
+
         self.data = data
         self.get_document_list(request, progress_match=request.user.id)
 
