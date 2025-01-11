@@ -2,7 +2,6 @@ import updateVideoProgressById from '../api/actions/updateVideoProgressById';
 import updateWatchedState from '../api/actions/updateWatchedState';
 import { SponsorBlockSegmentType, SponsorBlockType, VideoResponseType } from '../pages/Video';
 import watchedThreshold from '../functions/watchedThreshold';
-import Notifications from './Notifications';
 import { Dispatch, Fragment, SetStateAction, SyntheticEvent, useState } from 'react';
 import formatTime from '../functions/formatTime';
 import { useSearchParams } from 'react-router-dom';
@@ -209,8 +208,6 @@ const VideoPlayer = ({
           </video>
         </div>
       </div>
-
-      <Notifications pageName="all" />
       <div className="sponsorblock" id="sponsorblock">
         {sponsorBlock?.is_enabled && (
           <>
