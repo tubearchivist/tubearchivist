@@ -36,19 +36,19 @@ class YtWrap:
         self.obs = self.OBS_BASE.copy()
         self.obs.update(self.obs_request)
         if self.config:
-            self.add_cookie()
-            self.add_potoken()
+            self._add_cookie()
+            self._add_potoken()
 
         if getattr(settings, "DEBUG", False):
             print(self.obs)
 
-    def add_cookie(self):
+    def _add_cookie(self):
         """add cookie if enabled"""
         if self.config["downloads"]["cookie_import"]:
             cookie_io = CookieHandler(self.config).get()
             self.obs["cookiefile"] = cookie_io
 
-    def add_potoken(self):
+    def _add_potoken(self):
         """add potoken if enabled"""
         if self.config["downloads"].get("potoken"):
             potoken = POTokenHandler(self.config).get()
@@ -75,6 +75,8 @@ class YtWrap:
 
                 return False, str(err)
 
+        self._validate_cookie()
+
         return True, True
 
     def extract(self, url):
@@ -97,7 +99,20 @@ class YtWrap:
 
             return False
 
+        self._validate_cookie()
+
         return response
+
+    def _validate_cookie(self):
+        """check cookie and write it back for next use"""
+        if not self.obs.get("cookiefile"):
+            return
+
+        new_cookie = self.obs["cookiefile"].read()
+        old_cookie = RedisArchivist().get_message_str("cookie")
+        if new_cookie and old_cookie != new_cookie:
+            print("refreshed stored cookie")
+            RedisArchivist().set_message("cookie", new_cookie, save=True)
 
 
 class CookieHandler:
