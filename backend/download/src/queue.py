@@ -5,11 +5,10 @@ Functionality:
 """
 
 from datetime import datetime
-from time import sleep
 
 from appsettings.src.config import AppConfig
 from common.src.es_connect import ElasticWrap, IndexPaginate
-from common.src.helper import get_duration_str, get_sleep, is_shorts
+from common.src.helper import get_duration_str, is_shorts, rand_sleep
 from download.src.subscriptions import ChannelSubscription
 from download.src.thumbnails import ThumbManager
 from download.src.yt_dlp_base import YtWrap
@@ -267,8 +266,8 @@ class PendingList(PendingIndex):
             _, _ = ElasticWrap(es_url).put(video_details)
             videos_added.append(youtube_id)
 
-            if len(videos_added) != total:
-                sleep(get_sleep(self.config))
+            if idx != total:
+                rand_sleep(self.config)
 
         return videos_added
 

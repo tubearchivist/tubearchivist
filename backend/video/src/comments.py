@@ -6,11 +6,10 @@ Functionality:
 """
 
 from datetime import datetime
-from time import sleep
 
 from appsettings.src.config import AppConfig
 from common.src.es_connect import ElasticWrap
-from common.src.helper import get_sleep
+from common.src.helper import rand_sleep
 from common.src.ta_redis import RedisQueue
 from download.src.yt_dlp_base import YtWrap
 
@@ -221,7 +220,7 @@ class CommentList:
             if comment.json_data:
                 comment.upload_comments()
 
-            sleep(get_sleep(self.config))
+            rand_sleep(self.config)
 
     def notify(self, idx, total_videos):
         """send notification on task"""
