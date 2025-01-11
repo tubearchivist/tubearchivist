@@ -21,6 +21,7 @@ export type AppSettingsConfigType = {
     comment_max: string | null;
     comment_sort: string;
     cookie_import: boolean;
+    potoken: boolean;
     throttledratelimit: number | null;
     extractor_lang: string | null;
     integrate_ryd: boolean;

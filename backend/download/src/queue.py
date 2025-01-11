@@ -251,6 +251,7 @@ class PendingList(PendingIndex):
             self._notify_add(idx, total)
             video_details = self.get_youtube_details(youtube_id, vid_type)
             if not video_details:
+                rand_sleep(self.config)
                 continue
 
             video_details.update(

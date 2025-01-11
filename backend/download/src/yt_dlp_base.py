@@ -11,6 +11,7 @@ from io import StringIO
 import yt_dlp
 from appsettings.src.config import AppConfig
 from common.src.ta_redis import RedisArchivist
+from django.conf import settings
 
 
 class YtWrap:
@@ -36,12 +37,31 @@ class YtWrap:
         self.obs.update(self.obs_request)
         if self.config:
             self.add_cookie()
+            self.add_potoken()
+
+        if getattr(settings, "DEBUG", False):
+            print(self.obs)
 
     def add_cookie(self):
         """add cookie if enabled"""
         if self.config["downloads"]["cookie_import"]:
             cookie_io = CookieHandler(self.config).get()
             self.obs["cookiefile"] = cookie_io
+
+    def add_potoken(self):
+        """add potoken if enabled"""
+        if self.config["downloads"].get("potoken"):
+            potoken = POTokenHandler(self.config).get()
+            self.obs.update(
+                {
+                    "extractor_args": {
+                        "youtube": {
+                            "po_token": [potoken],
+                            "player-client": ["web", "default"],
+                        },
+                    }
+                }
+            )
 
     def download(self, url):
         """make download request"""
@@ -148,3 +168,27 @@ class CookieHandler:
             "validated_str": now.strftime("%Y-%m-%d %H:%M"),
         }
         RedisArchivist().set_message("cookie:valid", message)
+
+
+class POTokenHandler:
+    """handle po token"""
+
+    REDIS_KEY = "potoken"
+
+    def __init__(self, config):
+        self.config = config
+
+    def get(self) -> str | None:
+        """get PO token"""
+        potoken = RedisArchivist().get_message_str(self.REDIS_KEY)
+        return potoken
+
+    def set_token(self, new_token: str) -> None:
+        """set new PO token"""
+        RedisArchivist().set_message(self.REDIS_KEY, new_token)
+        AppConfig().update_config({"downloads.potoken": True})
+
+    def revoke_token(self) -> None:
+        """revoke token"""
+        RedisArchivist().del_message(self.REDIS_KEY)
+        AppConfig().update_config({"downloads.potoken": False})

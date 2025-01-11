@@ -40,6 +40,7 @@ class DownloadsConfigType(TypedDict):
     comment_max: str | bool
     comment_sort: Literal["top", "new"]
     cookie_import: bool
+    potoken: bool
     throttledratelimit: int
     extractor_lang: str | bool
     integrate_ryd: bool
@@ -85,6 +86,7 @@ class AppConfig:
             "comment_max": False,
             "comment_sort": "top",
             "cookie_import": False,
+            "potoken": False,
             "throttledratelimit": False,
             "extractor_lang": False,
             "integrate_ryd": False,

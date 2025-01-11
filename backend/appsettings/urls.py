@@ -35,6 +35,11 @@ urlpatterns = [
         name="api-cookie",
     ),
     path(
+        "potoken/",
+        views.POTokenView.as_view(),
+        name="api-potoken",
+    ),
+    path(
         "token/",
         views.TokenView.as_view(),
         name="api-token",

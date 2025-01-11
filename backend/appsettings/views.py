@@ -5,7 +5,7 @@ from appsettings.src.config import AppConfig
 from appsettings.src.snapshot import ElasticSnapshot
 from common.src.ta_redis import RedisArchivist
 from common.views_base import AdminOnly, ApiBaseView
-from download.src.yt_dlp_base import CookieHandler
+from download.src.yt_dlp_base import CookieHandler, POTokenHandler
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from task.src.task_manager import TaskCommand
@@ -250,6 +250,36 @@ class CookieView(ApiBaseView):
         validation.update(is_enabled)
 
         return validation
+
+
+class POTokenView(ApiBaseView):
+    """handle PO token"""
+
+    permission_classes = [AdminOnly]
+
+    def get(self, request):
+        """get token"""
+        config = AppConfig().config
+        potoken = POTokenHandler(config).get()
+        return Response({"potoken": potoken})
+
+    def post(self, request):
+        """post token"""
+        config = AppConfig().config
+        new_token = request.data.get("potoken")
+        if not new_token:
+            message = "missing potoken key in request data"
+            print(message)
+            return Response({"message": message}, status=400)
+
+        POTokenHandler(config).set_token(new_token)
+        return Response({"potoken": new_token})
+
+    def delete(self, request):
+        """delete token"""
+        config = AppConfig().config
+        POTokenHandler(config).revoke_token()
+        return Response({"potoken": None})
 
 
 class TokenView(ApiBaseView):
