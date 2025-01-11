@@ -4,13 +4,12 @@ functionality:
 - handle yt-dlp errors
 """
 
-import os
 from datetime import datetime
 from http import cookiejar
 from io import StringIO
 
 import yt_dlp
-from common.src.env_settings import EnvironmentSettings
+from appsettings.src.config import AppConfig
 from common.src.ta_redis import RedisArchivist
 
 
@@ -87,7 +86,6 @@ class CookieHandler:
     def __init__(self, config):
         self.cookie_io = False
         self.config = config
-        self.cache_dir = EnvironmentSettings.CACHE_DIR
 
     def get(self):
         """get cookie io stream"""
@@ -95,28 +93,8 @@ class CookieHandler:
         self.cookie_io = StringIO(cookie)
         return self.cookie_io
 
-    def import_cookie(self):
-        """import cookie from file"""
-        import_path = os.path.join(
-            self.cache_dir, "import", "cookies.google.txt"
-        )
-
-        try:
-            with open(import_path, encoding="utf-8") as cookie_file:
-                cookie = cookie_file.read()
-        except FileNotFoundError as err:
-            print(f"cookie: {import_path} file not found")
-            raise err
-
-        self.set_cookie(cookie)
-
-        os.remove(import_path)
-        print("cookie: import successful")
-
     def set_cookie(self, cookie):
         """set cookie str and activate in config"""
-        from appsettings.src.config import AppConfig
-
         RedisArchivist().set_message("cookie", cookie, save=True)
         AppConfig().update_config({"downloads.cookie_import": True})
         self.config["downloads"]["cookie_import"] = True
@@ -125,8 +103,6 @@ class CookieHandler:
     @staticmethod
     def revoke():
         """revoke cookie"""
-        from appsettings.src.config import AppConfig
-
         RedisArchivist().del_message("cookie")
         RedisArchivist().del_message("cookie:valid")
         AppConfig().update_config({"downloads.cookie_import": False})

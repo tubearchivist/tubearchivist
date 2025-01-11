@@ -489,6 +489,7 @@ const SettingsApplication = () => {
                   {showCookieForm ? (
                     <>
                       <textarea
+                        rows={4}
                         value={cookieFormData}
                         onChange={e => {
                           setCookieFormData(e.currentTarget.value);

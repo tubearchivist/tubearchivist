@@ -13,7 +13,6 @@ from appsettings.src.snapshot import ElasticSnapshot
 from common.src.es_connect import ElasticWrap
 from common.src.ta_redis import RedisArchivist
 from django.conf import settings
-from download.src.yt_dlp_base import CookieHandler
 
 
 class SubscriptionsConfigType(TypedDict):
@@ -127,29 +126,8 @@ class AppConfig:
     def post_process_updated(self, data: dict) -> None:
         """apply hooks for some config keys"""
         for config_value, updated_value in data:
-            if config_value == "downloads.cookie_import":
-                self.process_cookie(updated_value)
             if config_value == "application.enable_snapshot" and updated_value:
                 ElasticSnapshot().setup()
-
-    def process_cookie(self, updated_value):
-        """import and validate cookie"""
-        handler = CookieHandler(self.config)
-        if updated_value:
-            try:
-                handler.import_cookie()
-            except FileNotFoundError:
-                print("cookie: import failed, file not found")
-                handler.revoke()
-                self._fail_message("Cookie file not found.")
-                return
-
-            valid = handler.validate()
-            if not valid:
-                handler.revoke()
-                self._fail_message("Failed to validate cookie file.")
-        else:
-            handler.revoke()
 
     @staticmethod
     def _fail_message(message_line):
