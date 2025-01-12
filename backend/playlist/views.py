@@ -47,12 +47,14 @@ class PlaylistApiListView(ApiBaseView):
             print(message)
             return Response({"message": message}, status=400)
 
-        custom_name = data["data"].get("create")
-        if custom_name:
-            playlist_id = f"TA_playlist_{uuid.uuid4()}"
-            custom_playlist = YoutubePlaylist(playlist_id)
-            custom_playlist.create(custom_name)
-            return Response(custom_playlist.json_data)
+        data = data["data"]
+        if isinstance(data, dict):
+            custom_name = data.get("create")
+            if custom_name:
+                playlist_id = f"TA_playlist_{uuid.uuid4()}"
+                custom_playlist = YoutubePlaylist(playlist_id)
+                custom_playlist.create(custom_name)
+                return Response(custom_playlist.json_data)
 
         pending = []
         for playlist_item in to_add:
