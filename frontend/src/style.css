@@ -132,7 +132,7 @@ button:hover {
 }
 
 .button-box {
-  padding: 5px 0;
+  padding: 5px 2px;
   display: inline-flex;
   gap: 5px;
 }

@@ -90,6 +90,7 @@ const SettingsUser = () => {
                     setPageSize(Number(event.target.value));
                   }}
                 />
+
                 <div className="button-box">
                   {userConfig.config.page_size !== pageSize && (
                     <>

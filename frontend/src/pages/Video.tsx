@@ -329,10 +329,14 @@ const Video = () => {
                   )}
                 </>
               )}
+            </div>
+
+            <div className="button-box">
               <a download="" href={`${getApiUrl()}${video.media_url}`}>
                 <Button label="Download File" id="download-item" />
-              </a>{' '}
+              </a>
             </div>
+
             <div className="button-box">
               {isAdmin && (
                 <>
@@ -364,6 +368,7 @@ const Video = () => {
                 </>
               )}{' '}
             </div>
+
             <div className="button-box">
               {!showAddToPlaylist && (
                 <Button
@@ -376,6 +381,7 @@ const Video = () => {
                   }}
                 />
               )}
+
               {showAddToPlaylist && (
                 <>
                   <div className="video-popup-menu">
