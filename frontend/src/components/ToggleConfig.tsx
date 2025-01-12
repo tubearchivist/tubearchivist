@@ -24,17 +24,20 @@ const ToggleConfig = ({
             updateCallback(name, event.target.checked);
           }}
         />
+
         {!value && (
           <label htmlFor="" className="ofbtn">
             Off
           </label>
         )}
+
         {value && (
           <label htmlFor="" className="onbtn">
             On
           </label>
         )}
       </div>
+
       {resetCallback !== undefined && <button onClick={() => resetCallback(false)}>Reset</button>}
     </div>
   );

@@ -38,6 +38,7 @@ import Button from '../components/Button';
 import getApiUrl from '../configuration/getApiUrl';
 import loadVideoNav, { VideoNavResponseType } from '../api/loader/loadVideoNav';
 import useIsAdmin from '../functions/useIsAdmin';
+import ToggleConfig from '../components/ToggleConfig';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {
   return playlist.playlist_entries.some(entry => {
@@ -484,32 +485,25 @@ const Video = () => {
                     </h3>
                   </Link>
 
-                  <div className="toggle">
-                    <p>Autoplay:</p>
-                    <div className="toggleBox">
-                      <input
-                        checked={playlistAutoplay}
-                        onChange={() => {
-                          if (!playlistAutoplay) {
-                            setPlaylistIDForAutoplay(playlistItem.playlist_meta.playlist_id);
-                          }
+                  <p>Autoplay:</p>
+                  <ToggleConfig
+                    name="Autoplay:"
+                    value={
+                      playlistAutoplay &&
+                      playlistIdForAutoplay === playlistItem.playlist_meta.playlist_id
+                    }
+                    updateCallback={(_, checked) => {
+                      if (checked) {
+                        setPlaylistIDForAutoplay(playlistItem.playlist_meta.playlist_id);
+                        setPlaylistAutoplay(true);
 
-                          setPlaylistAutoplay(!playlistAutoplay);
-                        }}
-                        type="checkbox"
-                      />
-                      {!playlistAutoplay && (
-                        <label htmlFor="" className="ofbtn">
-                          Off
-                        </label>
-                      )}
-                      {playlistAutoplay && (
-                        <label htmlFor="" className="onbtn">
-                          On
-                        </label>
-                      )}
-                    </div>
-                  </div>
+                        return;
+                      }
+
+                      setPlaylistIDForAutoplay('');
+                      setPlaylistAutoplay(false);
+                    }}
+                  />
 
                   <div className="playlist-nav">
                     <div className="playlist-nav-item">
