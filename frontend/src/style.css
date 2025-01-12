@@ -268,6 +268,7 @@ button:hover {
 
 /* delete button */
 .delete-confirm button {
+  display: flex;
   margin: 3px 0;
 }
 

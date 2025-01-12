@@ -68,6 +68,7 @@ const Channels = () => {
         currentPage,
         userConfig.config.show_subed_only,
       );
+
       setChannelListResponse(channelListResponse);
     })();
   }, [refresh, userConfig.config.show_subed_only, currentPage, pagination?.current_page]);
@@ -92,10 +93,12 @@ const Channels = () => {
                 alt="add-icon"
                 title="Subscribe to Channels"
               />
+
               {showAddForm && (
                 <div className="show-form">
                   <div>
                     <label>Subscribe to channels:</label>
+
                     <textarea
                       value={channelsToSubscribeTo}
                       onChange={e => {

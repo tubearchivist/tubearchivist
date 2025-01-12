@@ -152,8 +152,9 @@ const ChannelAbout = () => {
                     )}
 
                     {showDeleteConfirm && (
-                      <div className="delete-confirm" id="delete-button">
+                      <div className="delete-confirm">
                         <span>Delete {channel.channel_name} including all videos? </span>
+
                         <Button
                           label="Delete"
                           className="danger-button"
@@ -161,7 +162,8 @@ const ChannelAbout = () => {
                             await deleteChannel(channelId);
                             navigate(Routes.Channels);
                           }}
-                        />{' '}
+                        />
+
                         <Button
                           label="Cancel"
                           onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}

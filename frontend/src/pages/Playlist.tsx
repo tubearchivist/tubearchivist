@@ -206,7 +206,7 @@ const Playlist = () => {
               )}
 
               {showDeleteConfirm && (
-                <div className="delete-confirm" id="delete-button">
+                <div className="delete-confirm">
                   <span>Delete {playlist.playlist_name}?</span>
 
                   <Button
@@ -226,7 +226,6 @@ const Playlist = () => {
                     }}
                   />
 
-                  <br />
                   <Button label="Cancel" onClick={() => setShowDeleteConfirm(!showDeleteConfirm)} />
                 </div>
               )}
