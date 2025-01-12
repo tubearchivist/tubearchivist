@@ -26,14 +26,19 @@ const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
       <div className={`video-thumb-wrap ${view}`}>
         <div className="video-thumb">
           <img src={`${getApiUrl()}${download.vid_thumb_url}`} alt="video_thumb" />
+
           <div className="video-tags">
             {showIgnored && <span>ignored</span>}
+
             {!showIgnored && <span>queued</span>}
+
             <span>{download.vid_type}</span>
+
             {download.auto_start && <span>auto</span>}
           </div>
         </div>
       </div>
+
       <div className={`video-desc ${view}`}>
         <div>
           {download.channel_indexed && (
@@ -44,63 +49,79 @@ const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
             <h3>{download.title}</h3>
           </a>
         </div>
+
         <p>
           Published: {formatDate(download.published)} | Duration: {download.duration} |{' '}
           {download.youtube_id}
         </p>
+
         {download.message && <p className="danger-zone">{download.message}</p>}
+
         <div>
           {showIgnored && (
             <>
-              <Button
-                label="Forget"
-                onClick={async () => {
-                  await deleteDownloadById(download.youtube_id);
-                  setRefresh(true);
-                }}
-              />{' '}
-              <Button
-                label="Add to queue"
-                onClick={async () => {
-                  await updateDownloadQueueStatusById(download.youtube_id, 'pending');
-                  setRefresh(true);
-                }}
-              />
+              <div className="button-box">
+                <Button
+                  label="Forget"
+                  onClick={async () => {
+                    await deleteDownloadById(download.youtube_id);
+                    setRefresh(true);
+                  }}
+                />
+              </div>
+
+              <div className="button-box">
+                <Button
+                  label="Add to queue"
+                  onClick={async () => {
+                    await updateDownloadQueueStatusById(download.youtube_id, 'pending');
+                    setRefresh(true);
+                  }}
+                />
+              </div>
             </>
           )}
           {!showIgnored && (
             <>
-              <Button
-                label="Ignore"
-                onClick={async () => {
-                  await updateDownloadQueueStatusById(download.youtube_id, 'ignore');
-
-                  setRefresh(true);
-                }}
-              />{' '}
-              {!hideDownload && (
+              <div className="button-box">
                 <Button
-                  label="Download now"
+                  label="Ignore"
                   onClick={async () => {
-                    setHideDownload(true);
-
-                    await updateDownloadQueueStatusById(download.youtube_id, 'priority');
+                    await updateDownloadQueueStatusById(download.youtube_id, 'ignore');
 
                     setRefresh(true);
                   }}
                 />
+              </div>
+
+              {!hideDownload && (
+                <div className="button-box">
+                  <Button
+                    label="Download now"
+                    onClick={async () => {
+                      setHideDownload(true);
+
+                      await updateDownloadQueueStatusById(download.youtube_id, 'priority');
+
+                      setRefresh(true);
+                    }}
+                  />
+                </div>
               )}
             </>
           )}
+
           {download.message && (
-            <Button
-              label="Delete"
-              className="danger-button"
-              onClick={async () => {
-                await deleteDownloadById(download.youtube_id);
-                setRefresh(true);
-              }}
-            />
+            <div className="button-box">
+              <Button
+                label="Delete"
+                className="danger-button"
+                onClick={async () => {
+                  await deleteDownloadById(download.youtube_id);
+                  setRefresh(true);
+                }}
+              />
+            </div>
           )}
         </div>
       </div>
