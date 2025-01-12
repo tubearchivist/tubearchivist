@@ -125,6 +125,7 @@ const Playlists = () => {
                       type="submit"
                       onClick={async () => {
                         await createCustomPlaylist(customPlaylistsToAddText);
+                        setRefresh(true);
                       }}
                     />
                   </div>
