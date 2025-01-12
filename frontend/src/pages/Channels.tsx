@@ -120,7 +120,8 @@ const Channels = () => {
                     onClick={async () => {
                       await updateBulkChannelSubscriptions(channelsToSubscribeTo, true);
 
-                      setRefresh(true);
+                      setShowNotification(true);
+                      setShowAddForm(false);
                     }}
                   />
                 </div>

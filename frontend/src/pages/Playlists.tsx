@@ -107,6 +107,7 @@ const Playlists = () => {
                       onClick={async () => {
                         await updateBulkPlaylistSubscriptions(playlistsToAddText, true);
                         setShowNotification(true);
+                        setShowAddForm(false);
                       }}
                     />
                   </div>
