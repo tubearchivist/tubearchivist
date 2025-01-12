@@ -54,7 +54,8 @@ const Channels = () => {
 
   const [channelListResponse, setChannelListResponse] = useState<ChannelsListResponse>();
   const [showAddForm, setShowAddForm] = useState(false);
-  const [refresh, setRefresh] = useState(false);
+  const [refresh, setRefresh] = useState(true);
+  const [showNotification, setShowNotification] = useState(false);
   const [channelsToSubscribeTo, setChannelsToSubscribeTo] = useState('');
 
   const channels = channelListResponse?.data;
@@ -64,12 +65,16 @@ const Channels = () => {
 
   useEffect(() => {
     (async () => {
-      const channelListResponse = await loadChannelList(
-        currentPage,
-        userConfig.config.show_subed_only,
-      );
+      if (refresh) {
+        const channelListResponse = await loadChannelList(
+          currentPage,
+          userConfig.config.show_subed_only,
+        );
 
-      setChannelListResponse(channelListResponse);
+        setChannelListResponse(channelListResponse);
+        setShowNotification(false);
+        setRefresh(false);
+      }
     })();
   }, [refresh, userConfig.config.show_subed_only, currentPage, pagination?.current_page]);
 
@@ -124,7 +129,15 @@ const Channels = () => {
           )}
         </div>
 
-        <Notifications pageName="all" />
+        <Notifications
+          pageName="all"
+          update={showNotification}
+          setShouldRefresh={isDone => {
+            if (!isDone) {
+              setRefresh(true);
+            }
+          }}
+        />
 
         <div className="view-controls">
           <div className="toggle">

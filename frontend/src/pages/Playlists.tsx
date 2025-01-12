@@ -17,6 +17,7 @@ import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import Button from '../components/Button';
 import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import Notifications from '../components/Notifications';
 
 export type PlaylistEntryType = {
   youtube_id: string;
@@ -39,6 +40,7 @@ const Playlists = () => {
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [refresh, setRefresh] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
   const [playlistsToAddText, setPlaylistsToAddText] = useState('');
   const [customPlaylistsToAddText, setCustomPlaylistsToAddText] = useState('');
 
@@ -61,6 +63,7 @@ const Playlists = () => {
 
       setPlaylistReponse(playlist);
       setRefresh(false);
+      setShowNotification(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh, userConfig.config.show_subed_only, currentPage, pagination?.current_page]);
@@ -103,7 +106,7 @@ const Playlists = () => {
                       type="submit"
                       onClick={async () => {
                         await updateBulkPlaylistSubscriptions(playlistsToAddText, true);
-                        setRefresh(true);
+                        setShowNotification(true);
                       }}
                     />
                   </div>
@@ -135,7 +138,15 @@ const Playlists = () => {
           )}
         </div>
 
-        <div id="notifications"></div>
+        <Notifications
+          pageName="all"
+          update={showNotification}
+          setShouldRefresh={isDone => {
+            if (!isDone) {
+              setRefresh(true);
+            }
+          }}
+        />
 
         <div className="view-controls">
           <div className="toggle">
