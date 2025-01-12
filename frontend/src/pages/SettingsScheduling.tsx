@@ -2,7 +2,7 @@ import Notifications from '../components/Notifications';
 import SettingsNavigation from '../components/SettingsNavigation';
 import Button from '../components/Button';
 import PaginationDummy from '../components/PaginationDummy';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import loadSchedule, { ScheduleResponseType } from '../api/loader/loadSchedule';
 import loadAppriseNotification, {
   AppriseNotificationType,
@@ -415,11 +415,12 @@ const SettingsScheduling = () => {
                 <div className="description-text">
                   {Object.entries(appriseNotification)?.map(([key, { urls, title }]) => {
                     return (
-                      <>
-                        <h3 key={key}>{title}</h3>
+                      <Fragment key={key}>
+                        <h3>{title}</h3>
+
                         {urls.map((url: string) => {
                           return (
-                            <p>
+                            <p key={`${key}_${url}`}>
                               <span>{url} </span>
                               <Button
                                 type="button"
@@ -434,13 +435,14 @@ const SettingsScheduling = () => {
                             </p>
                           );
                         })}
-                      </>
+                      </Fragment>
                     );
                   })}
                 </div>
               </>
             )}
           </div>
+
           <div className="settings-item">
             <p>
               <i>
@@ -451,6 +453,7 @@ const SettingsScheduling = () => {
                 library.
               </i>
             </p>
+
             <select
               value={notificationTask}
               onChange={e => {
@@ -472,6 +475,7 @@ const SettingsScheduling = () => {
                 setNotificationUrl(e.currentTarget.value);
               }}
             />
+
             <Button
               label="Save"
               onClick={async () => {
