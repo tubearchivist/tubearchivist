@@ -44,7 +44,9 @@ const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
           {download.channel_indexed && (
             <Link to={Routes.Channel(download.channel_id)}>{download.channel_name}</Link>
           )}
+
           {!download.channel_indexed && <span>{download.channel_name}</span>}
+
           <a href={`https://www.youtube.com/watch?v=${download.youtube_id}`} target="_blank">
             <h3>{download.title}</h3>
           </a>
