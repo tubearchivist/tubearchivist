@@ -485,9 +485,9 @@ const Video = () => {
                     </h3>
                   </Link>
 
-                  <p>Autoplay:</p>
                   <ToggleConfig
-                    name="Autoplay:"
+                    name="playlist-autoplay"
+                    text="Autoplay:"
                     value={
                       playlistAutoplay &&
                       playlistIdForAutoplay === playlistItem.playlist_meta.playlist_id

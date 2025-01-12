@@ -1,6 +1,7 @@
 type ToggleConfigProps = {
   name: string;
   value: boolean;
+  text?: string;
   updateCallback: (name: string, value: boolean) => void;
   resetCallback?: (arg0: boolean) => void;
   onValue?: boolean | string;
@@ -10,11 +11,13 @@ type ToggleConfigProps = {
 const ToggleConfig = ({
   name,
   value,
+  text,
   updateCallback,
   resetCallback = undefined,
 }: ToggleConfigProps) => {
   return (
     <div className="toggle">
+      {text && <p>{text}</p>}
       <div className="toggleBox">
         <input
           name={name}
