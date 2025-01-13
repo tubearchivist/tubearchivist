@@ -28,7 +28,6 @@ class ImportFolderScanner:
     - convert if needed
     """
 
-    CONFIG = AppConfig().config
     CACHE_DIR = EnvironmentSettings.CACHE_DIR
     IMPORT_DIR = os.path.join(CACHE_DIR, "import")
 
@@ -129,6 +128,7 @@ class ImportFolderScanner:
 
     def process_videos(self):
         """loop through all videos"""
+        config = AppConfig().config
         for idx, current_video in enumerate(self.to_import):
             if not current_video["media"]:
                 print(f"{current_video}: no matching media file found.")
@@ -144,7 +144,7 @@ class ImportFolderScanner:
             self._convert_video(current_video)
             print(f"manual import: {current_video}")
 
-            ManualImport(current_video, self.CONFIG).run()
+            ManualImport(current_video, config).run()
 
         video_ids = [i["video_id"] for i in self.to_import]
         comment_list = CommentList(task=self.task)
