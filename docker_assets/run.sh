@@ -3,6 +3,9 @@
 
 set -e
 
+# stop on pending manual migration
+python manage.py ta_stop_on_error
+
 # django setup
 python manage.py migrate
 
