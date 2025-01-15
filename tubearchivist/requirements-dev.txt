@@ -4,8 +4,8 @@ codespell==2.3.0
 flake8==7.1.1
 isort==5.13.2
 pylint-django==2.6.1
-pylint==3.3.2
+pylint==3.3.3
 pytest-django==4.9.0
 pytest==8.3.4
-requirementscheck==0.0.4
+requirementscheck==0.0.5
 types-requests==2.32.0.20241016
