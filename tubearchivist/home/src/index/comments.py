@@ -69,7 +69,6 @@ class Comments:
                 "youtube": {
                     "max_comments": max_comments_list,
                     "comment_sort": [comment_sort],
-                    "player_client": ["ios", "web"],  # workaround yt-dlp #9554
                 }
             },
         }
