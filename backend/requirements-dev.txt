@@ -1,6 +1,6 @@
 -r requirements.txt
 ipython==8.31.0
-pre-commit==4.0.1
+pre-commit==4.1.0
 pylint-django==2.6.1
 pylint==3.3.3
 pytest-django==4.9.0

@@ -407,8 +407,11 @@ class ManualImport:
             media_path=self.current_video["media"],
         )
         if not video.json_data:
-            print(f"{video_id}: manual import failed, and no metadata found.")
-            raise ValueError
+            message = (
+                f"{video_id}: manual import failed, and no metadata found."
+            )
+            print(message)
+            raise ValueError(message)
 
         video.check_subtitles(subtitle_files=self.current_video["subtitle"])
         video.upload_to_es()
