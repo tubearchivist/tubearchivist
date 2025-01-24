@@ -9,7 +9,7 @@ from datetime import datetime
 from random import randint
 from time import sleep
 
-from appsettings.src.config import ReleaseVersion
+from appsettings.src.config import AppConfig, ReleaseVersion
 from appsettings.src.index_setup import ElasitIndexWrap
 from appsettings.src.snapshot import ElasticSnapshot
 from common.src.env_settings import EnvironmentSettings
@@ -51,9 +51,10 @@ class Command(BaseCommand):
         self._snapshot_check()
         self._create_default_schedules()
         self._update_schedule_tz()
+        self._init_app_config()
 
     def _mig_app_settings(self) -> None:
-        """update from v0.4.10 to v0.5.0, migrate application settings"""
+        """update from v0.4.13 to v0.5.0, migrate application settings"""
         self.stdout.write("[MIGRATION] move appconfig to ES")
         try:
             config = RedisArchivist().get_message("config")
@@ -187,10 +188,7 @@ class Command(BaseCommand):
         ElasticSnapshot().setup()
 
     def _create_default_schedules(self) -> None:
-        """
-        create default schedules for new installations
-        needs to be called after _mig_schedule_store
-        """
+        """create default schedules for new installations"""
         self.stdout.write("[9] create initial schedules")
         init_has_run = CustomPeriodicTask.objects.filter(
             name="version_check"
@@ -242,7 +240,7 @@ class Command(BaseCommand):
 
     def _update_schedule_tz(self) -> None:
         """update timezone for Schedule instances"""
-        self.stdout.write("[9] validate schedules TZ")
+        self.stdout.write("[10] validate schedules TZ")
         tz = EnvironmentSettings.TZ
         to_update = CrontabSchedule.objects.exclude(timezone=tz)
 
@@ -257,3 +255,27 @@ class Command(BaseCommand):
             self.style.SUCCESS(f"    ✓ updated {updated} schedules to {tz}.")
         )
         PeriodicTasks.update_changed()
+
+    def _init_app_config(self) -> None:
+        """init default app config to ES"""
+        self.stdout.write("[11] Check AppConfig")
+        try:
+            _ = AppConfig().config
+            self.stdout.write(
+                self.style.SUCCESS("    skip completed appsettings init")
+            )
+            updated_defaults = AppConfig().add_new_defaults()
+            for new_default in updated_defaults:
+                self.stdout.write(
+                    self.style.SUCCESS(f"    added new default: {new_default}")
+                )
+
+        except ValueError:
+            handler = AppConfig.__new__(AppConfig)
+            _, status_code = handler.sync_defaults()
+            self.stdout.write(
+                self.style.SUCCESS("    ✓ Created default appsettings.")
+            )
+            self.stdout.write(
+                self.style.SUCCESS(f"      Status code: {status_code}")
+            )

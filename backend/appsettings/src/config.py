@@ -27,22 +27,22 @@ class SubscriptionsConfigType(TypedDict):
 class DownloadsConfigType(TypedDict):
     """describes downloads config"""
 
-    limit_speed: int
-    sleep_interval: int
-    autodelete_days: int
-    format: str | bool
-    format_sort: str | bool
+    limit_speed: int | None
+    sleep_interval: int | None
+    autodelete_days: int | None
+    format: str | None
+    format_sort: str | None
     add_metadata: bool
     add_thumbnail: bool
-    subtitle: str | bool
-    subtitle_source: Literal["user", "auto"] | bool
+    subtitle: str | None
+    subtitle_source: Literal["user", "auto"] | None
     subtitle_index: bool
-    comment_max: str | bool
-    comment_sort: Literal["top", "new"]
+    comment_max: str | None
+    comment_sort: Literal["top", "new"] | None
     cookie_import: bool
     potoken: bool
-    throttledratelimit: int
-    extractor_lang: str | bool
+    throttledratelimit: int | None
+    extractor_lang: str | None
     integrate_ryd: bool
     integrate_sponsorblock: bool
 
@@ -65,30 +65,32 @@ class AppConfig:
     """handle application variables"""
 
     ES_PATH = "ta_config/_doc/appsettings"
+    ES_UPDATE_PATH = "ta_config/_update/appsettings"
     CONFIG_DEFAULTS: AppConfigType = {
         "subscriptions": {
             "channel_size": 50,
             "live_channel_size": 50,
             "shorts_channel_size": 50,
             "auto_start": False,
+            "new_config": 100,
         },
         "downloads": {
-            "limit_speed": False,
+            "limit_speed": None,
             "sleep_interval": 10,
-            "autodelete_days": False,
-            "format": False,
-            "format_sort": False,
+            "autodelete_days": None,
+            "format": None,
+            "format_sort": None,
             "add_metadata": False,
             "add_thumbnail": False,
-            "subtitle": False,
-            "subtitle_source": False,
+            "subtitle": None,
+            "subtitle_source": None,
             "subtitle_index": False,
-            "comment_max": False,
+            "comment_max": None,
             "comment_sort": "top",
             "cookie_import": False,
             "potoken": False,
-            "throttledratelimit": False,
-            "extractor_lang": False,
+            "throttledratelimit": None,
+            "extractor_lang": None,
             "integrate_ryd": False,
             "integrate_sponsorblock": False,
         },
@@ -102,7 +104,7 @@ class AppConfig:
         """get config from ES"""
         response, status_code = ElasticWrap(self.ES_PATH).get()
         if not status_code == 200:
-            return self.CONFIG_DEFAULTS
+            raise ValueError(f"no config found at {self.ES_PATH}")
 
         return response["_source"]
 
@@ -118,6 +120,13 @@ class AppConfig:
             print(response)
 
         return self.config
+
+    def _update_config_dict(self, to_update) -> None:
+        """none validated partial update for defaults sync"""
+        data = {"doc": to_update}
+        response, status_code = ElasticWrap(self.ES_UPDATE_PATH).post(data)
+        if not status_code == 200:
+            print(f"update failed: {response}, {status_code}")
 
     def _validate_key(self, key_map: list[str]) -> None:
         """raise valueerror on invalid key"""
@@ -144,6 +153,29 @@ class AppConfig:
             "id": "0000",
         }
         RedisArchivist().set_message(key, message=message, expire=True)
+
+    def sync_defaults(self):
+        """sync defaults at startup, needs to be called with __new__"""
+        return ElasticWrap(self.ES_PATH).post(self.CONFIG_DEFAULTS)
+
+    def add_new_defaults(self) -> list[str]:
+        """add new default config values to ES, called at startup"""
+        updated = []
+        for key, value in self.CONFIG_DEFAULTS.items():
+            if key not in self.config:
+                # complete new key
+                self._update_config_dict({key: value})
+                updated.append(str({key: value}))
+                continue
+
+            for sub_key, sub_value in value.items():  # type: ignore
+                if sub_key not in self.config[key]:
+                    # new partial key
+                    to_update = {key: {sub_key: sub_value}}
+                    self._update_config_dict(to_update)
+                    updated.append(str(to_update))
+
+        return updated
 
 
 class ReleaseVersion:
