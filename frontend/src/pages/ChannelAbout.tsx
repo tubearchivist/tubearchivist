@@ -15,6 +15,7 @@ import updateChannelOverwrites from '../api/actions/updateChannelOverwrite';
 import useIsAdmin from '../functions/useIsAdmin';
 import InputConfig from '../components/InputConfig';
 import ToggleConfig from '../components/ToggleConfig';
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 export type ChannelBaseOutletContextType = {
   currentPage: number;
@@ -34,6 +35,7 @@ type ChannelAboutParams = {
 
 const ChannelAbout = () => {
   const { channelId } = useParams() as ChannelAboutParams;
+  const { userConfig } = useUserConfigStore();
   const { setStartNotification } = useOutletContext() as ChannelBaseOutletContextType;
   const navigate = useNavigate();
   const isAdmin = useIsAdmin();
@@ -242,6 +244,33 @@ const ChannelAbout = () => {
           <div className="info-box">
             <div className="info-box-item">
               <h2>Channel Customization</h2>
+              {userConfig.config.show_help_text && (
+                <div className="help-text">
+                  <ul>
+                    <li>Overwrite the download format over the format set globally.</li>
+                    <li>Autodelete watched after x days overwrites the global setting.</li>
+                    <li>
+                      Indexing playlists indexes all playlists from that channel.
+                      <ul>
+                        <li>
+                          Only activate that for channels you care about the playlists. This is
+                          slow.
+                        </li>
+                        <li>
+                          More details{' '}
+                          <a target="_blank" href="https://docs.tubearchivist.com/channels/#about">
+                            here
+                          </a>
+                          .
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      Once you click on <i>Configure</i>, this will activate sponsorblock settings.
+                    </li>
+                  </ul>
+                </div>
+              )}
               <div className="settings-box-wrapper">
                 <div>
                   <p>Download Format</p>
@@ -257,7 +286,9 @@ const ChannelAbout = () => {
               </div>
               <div className="settings-box-wrapper">
                 <div>
-                  <p>Auto delete watched videos after x days</p>
+                  <p>
+                    <span className="danger-zone">Danger Zone</span>: Auto delete watched
+                  </p>
                 </div>
                 <InputConfig
                   type="number"
@@ -303,10 +334,14 @@ const ChannelAbout = () => {
             </div>
             <div className="info-box-item">
               <h2>Page Size Overrides</h2>
-              <p>
-                Disable standard videos, shorts, or streams for this channel by setting their page
-                size to 0 (zero).
-              </p>
+              {userConfig.config.show_help_text && (
+                <div className="help-text">
+                  <p>
+                    Disable standard videos, shorts, or streams for this channel by setting their
+                    page size to 0 (zero).
+                  </p>
+                </div>
+              )}
               <div className="settings-box-wrapper">
                 <div>
                   <p>Videos page size</p>
