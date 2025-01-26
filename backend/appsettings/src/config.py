@@ -129,7 +129,7 @@ class AppConfig:
 
     def _validate_key(self, key_map: list[str]) -> None:
         """raise valueerror on invalid key"""
-        exists = self.CONFIG_DEFAULTS.get(key_map[0], {}).get(key_map[1])  # type: ignore  # noqa: E501
+        exists = key_map[1] in self.CONFIG_DEFAULTS.get(key_map[0], {})  # type: ignore  # noqa: E501
         if exists is None:
             raise ValueError(f"trying to access invalid config key: {key_map}")
 
