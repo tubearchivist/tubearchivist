@@ -27,6 +27,7 @@ export type UserConfigType = {
   hide_watched: boolean;
   show_ignored_only: boolean;
   show_subed_only: boolean;
+  show_help_text: boolean;
 };
 
 const updateUserConfig = async (config: Partial<UserConfigType>): Promise<UserConfigType> => {

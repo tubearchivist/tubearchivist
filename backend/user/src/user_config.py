@@ -25,6 +25,7 @@ class UserConfigType(TypedDict, total=False):
     hide_watched: bool
     show_ignored_only: bool
     show_subed_only: bool
+    show_help_text: bool
 
 
 class UserConfig:
@@ -43,6 +44,7 @@ class UserConfig:
         hide_watched=False,
         show_ignored_only=False,
         show_subed_only=False,
+        show_help_text=True,
     )
 
     VALID_STYLESHEETS = get_stylesheets()
@@ -83,14 +85,12 @@ class UserConfig:
     def set_value(self, key: str, value: str | bool | int):
         """Set or replace a configuration value for the user"""
         self._validate(key, value)
-        old = self.get_value(key)
-
         data = {"doc": {"config": {key: value}}}
         response, status = ElasticWrap(self.es_update_url).post(data)
         if status < 200 or status > 299:
             raise ValueError(f"Failed storing user value {status}: {response}")
 
-        print(f"User {self._user_id} value '{key}' change: {old} -> {value}")
+        print(f"User {self._user_id} value '{key}' change: to {value}")
 
     def _validate(self, key, value):
         """validate key and value"""
@@ -115,6 +115,7 @@ class UserConfig:
             "hide_watched": bool,
             "show_ignored_only": bool,
             "show_subed_only": bool,
+            "show_help_text": bool,
         }
         validation_value = valid_values.get(key)
 
@@ -138,7 +139,7 @@ class UserConfig:
             self.sync_defaults()
             config = self._DEFAULT_USER_SETTINGS
         else:
-            config = response["_source"]["config"]
+            config = self.sync_new_defaults(response["_source"]["config"])
 
         return config
 
@@ -148,3 +149,12 @@ class UserConfig:
             {"config": self._DEFAULT_USER_SETTINGS}
         )
         print(f"set default config for user {self._user_id}: {response}")
+
+    def sync_new_defaults(self, config):
+        """sync new defaults"""
+        for key, value in self._DEFAULT_USER_SETTINGS.items():
+            if key not in config:
+                self.set_value(key, value)
+                config.update({key: value})
+
+        return config

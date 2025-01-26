@@ -29,6 +29,7 @@ export const useUserConfigStore = create<UserConfigState>(set => ({
       hide_watched: false,
       show_ignored_only: false,
       show_subed_only: false,
+      show_help_text: true,
     },
   },
   setUserConfig: userConfig => set({ userConfig }),

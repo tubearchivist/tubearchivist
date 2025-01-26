@@ -7,6 +7,7 @@ import Button from '../components/Button';
 import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { useEffect, useState } from 'react';
+import ToggleConfig from '../components/ToggleConfig';
 
 const SettingsUser = () => {
   const { userConfig, setPartialConfig } = useUserConfigStore();
@@ -16,13 +17,15 @@ const SettingsUser = () => {
   const [styleSheet, setStyleSheet] = useState<ColourVariants>(userConfig.config.stylesheet);
   const [styleSheetRefresh, setStyleSheetRefresh] = useState(false);
   const [pageSize, setPageSize] = useState<number>(userConfig.config.page_size);
+  const [showHelpText, setShowHelpText] = useState(userConfig.config.show_help_text);
 
   useEffect(() => {
     (async () => {
       setStyleSheet(userConfig.config.stylesheet);
       setPageSize(userConfig.config.page_size);
+      setShowHelpText(userConfig.config.show_help_text);
     })();
-  }, [userConfig.config.page_size, userConfig.config.stylesheet]);
+  }, [userConfig.config.page_size, userConfig.config.stylesheet, userConfig.config.show_help_text]);
 
   const handleStyleSheetChange = async (selectedStyleSheet: ColourVariants) => {
     setPartialConfig({ stylesheet: selectedStyleSheet });
@@ -32,6 +35,10 @@ const SettingsUser = () => {
 
   const handlePageSizeChange = async () => {
     setPartialConfig({ page_size: pageSize });
+  };
+
+  const handleShowHelpTextChange = async (configKey: string, configValue: boolean) => {
+    setPartialConfig({ [configKey]: configValue });
   };
 
   const handlePageRefresh = () => {
@@ -102,6 +109,16 @@ const SettingsUser = () => {
                   )}
                 </div>
               </div>
+            </div>
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Show help text</p>
+              </div>
+              <ToggleConfig
+                name="show_help_text"
+                value={showHelpText}
+                updateCallback={handleShowHelpTextChange}
+              />
             </div>
           </div>
         </div>
