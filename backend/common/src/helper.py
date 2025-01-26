@@ -218,7 +218,13 @@ def ta_host_parser(ta_host: str) -> tuple[list[str], list[str]]:
 
         parsed = urlparse(host_clean)
         allowed_hosts.append(f"{parsed.hostname}")
-        csrf_trusted_origins.append(f"{parsed.scheme}://{parsed.hostname}")
+
+        cors_url = f"{parsed.scheme}://{parsed.hostname}"
+        
+        if parsed.port:
+            cors_url = f"{cors_url}:{parsed.port}"
+
+        csrf_trusted_origins.append(cors_url)
 
     return allowed_hosts, csrf_trusted_origins
 
