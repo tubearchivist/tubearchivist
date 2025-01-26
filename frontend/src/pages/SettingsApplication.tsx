@@ -19,6 +19,7 @@ import deleteCookie from '../api/actions/deleteCookie';
 import validateCookie from '../api/actions/validateCookie';
 import deletePoToken from '../api/actions/deletePoToken';
 import updatePoToken from '../api/actions/updatePoToken';
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 type SnapshotType = {
   id: string;
@@ -45,6 +46,7 @@ type SettingsApplicationReponses = {
 };
 
 const SettingsApplication = () => {
+  const { userConfig } = useUserConfigStore();
   const [response, setResponse] = useState<SettingsApplicationReponses>();
   const [refresh, setRefresh] = useState(false);
 
@@ -206,8 +208,21 @@ const SettingsApplication = () => {
         {appSettingsConfig && (
           <div className="info-box">
             <div className="info-box-item">
-              <h2 id="subscriptions">Subscriptions</h2>
-              <p>Disable shorts or streams by setting their page size to 0 (zero).</p>
+              <h2 id="subscriptions">Subscription Scan</h2>
+              {userConfig.config.show_help_text && (
+                <div className="help-text">
+                  <p>Configure how a subscription Scan tracks videos.</p>
+                  <ul>
+                    <li>The pagesize configures how many videos are checked.</li>
+                    <li>Max recommended page size is 50.</li>
+                    <li>Disable shorts or streams by setting their page size to 0 (zero).</li>
+                    <li>
+                      Autostart automatically starts downloading videos from subscriptions with
+                      priority.
+                    </li>
+                  </ul>
+                </div>
+              )}
               <div className="settings-box-wrapper">
                 <div>
                   <p>Videos page size</p>
@@ -260,6 +275,36 @@ const SettingsApplication = () => {
             </div>
             <div className="info-box-item">
               <h2 id="downloads">Downloads</h2>
+              {userConfig.config.show_help_text && (
+                <div className="help-text">
+                  <ul>
+                    <li>
+                      Limit download speed, in KB/s. Can be helpful to avoid getting blocked by YT.
+                    </li>
+                    <li>
+                      Throttle rate limit restarts a download if the speed falls below the defined
+                      limit.
+                    </li>
+                    <li>
+                      The sleep interval slows down requests to YT.
+                      <ul>
+                        <li>That reduces the likelihood of getting blocked by YT.</li>
+                        <li>
+                          The number in seconds is randomized +/- 50% from the value you enter.
+                        </li>
+                        <li>Minimal recommended is 10.</li>
+                      </ul>
+                    </li>
+                    <li>
+                      Auto delete deletes videos marked as watched after x days.
+                      <ul>
+                        <li>The cleanup task triggers after the download finishes.</li>
+                        <li>Can also be configured on a per channel basis.</li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
+              )}
               <div className="settings-box-wrapper">
                 <div>
                   <p>Download Speed limit</p>
@@ -301,7 +346,9 @@ const SettingsApplication = () => {
               </div>
               <div className="settings-box-wrapper">
                 <div>
-                  <p>Auto delete watched videos after x days</p>
+                  <p>
+                    <span className="danger-zone">Danger Zone</span>: Auto delete watched
+                  </p>
                 </div>
                 <InputConfig
                   type="number"
@@ -315,9 +362,92 @@ const SettingsApplication = () => {
             </div>
             <div className="info-box-item">
               <h2 id="format">Download Format</h2>
+              {userConfig.config.show_help_text && (
+                <div className="help-text">
+                  <ul>
+                    <li>
+                      The download format is equivalent to <i>-f</i> yt-dlp argument. Examples:
+                      <ul>
+                        <li>
+                          <span className="settings-current">
+                            {'bestvideo[height<=720]+bestaudio/best[height<=720]'}
+                          </span>
+                          : best audio and max video height of 720p.
+                        </li>
+                        <li>
+                          <span className="settings-current">
+                            {'bestvideo[height<=1080]+bestaudio/best[height<=1080]'}
+                          </span>
+                          : best audio and max video height of 1080p.
+                        </li>
+                        <li>
+                          <span className="settings-current">
+                            {'bestvideo[height<=1080][vcodec*=avc1]+bestaudio[acodec*=mp4a]/mp4'}
+                          </span>
+                          : Max 1080p video height with iOS compatible video and audio codecs.
+                        </li>
+                        <li>This can also be configured on a per channel basis.</li>
+                        <li>
+                          More details{' '}
+                          <a
+                            target="_blank"
+                            href="https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#format-selection"
+                          >
+                            here
+                          </a>
+                          .
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      Change the criteria what is considered <i>best</i> by yt-dlp. That is
+                      equivalent to <i>--format-sort</i> argument. Examples:
+                      <ul>
+                        <li>
+                          <span className="settings-current">res,codec:av1</span>: prefer AV1 over
+                          all other video codecs.
+                        </li>
+                        <li>Not all codecs are supported by all browsers.</li>
+                        <li>
+                          More details{' '}
+                          <a
+                            target="_blank"
+                            href="https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#sorting-formats"
+                          >
+                            here
+                          </a>
+                          .
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      Extractor language will change how a video gets indexed. Index language
+                      configuration
+                      <ul>
+                        <li>
+                          That will only have an effect if the uploader provides translations.
+                        </li>
+                        <li>Add as two letter ISO language code.</li>
+                        <li>
+                          More details{' '}
+                          <a target="_blank" href="https://github.com/yt-dlp/yt-dlp#youtube">
+                            here
+                          </a>
+                          .
+                        </li>
+                      </ul>
+                    </li>
+                    <li>Embedding metadata adds additional metadata directly to the mp4 file.</li>
+                    <li>
+                      Embedding the thumbnail embeds the video thumbnail as a cover.jpg to the mp4
+                      file.
+                    </li>
+                  </ul>
+                </div>
+              )}
               <div className="settings-box-wrapper">
                 <div>
-                  <p>Limit video and audio quality format</p>
+                  <p>Select download format for yt-dlp.</p>
                 </div>
                 <InputConfig
                   type="text"
@@ -377,6 +507,25 @@ const SettingsApplication = () => {
             </div>
             <div className="info-box-item">
               <h2 id="subtitles">Subtitles</h2>
+              {userConfig.config.show_help_text && (
+                <div className="help-text">
+                  <p>Additional subtitle options show once you choose a language.</p>
+                  <ul>
+                    <li>
+                      Choose which subtitles to download, add comma separated language codes, e.g.{' '}
+                      <span className="settings-current">en, de, zh-Hans</span>
+                    </li>
+                    <li>
+                      Enabling auto generated subtitles adds fallback to less accurate auto
+                      generated subtitles from YT.
+                    </li>
+                    <li>
+                      Indexing subtitles add the fulltext to the ES index. Not recommended on low
+                      end hardware.
+                    </li>
+                  </ul>
+                </div>
+              )}
               <div className="settings-box-wrapper">
                 <div>
                   <p>Choose subtitle language</p>
@@ -437,6 +586,35 @@ const SettingsApplication = () => {
             </div>
             <div className="info-box-item">
               <h2 id="comments">Comments</h2>
+              {userConfig.config.show_help_text && (
+                <div className="help-text">
+                  <p>Additional options show once you set a comment index option.</p>
+                  <ul>
+                    <li>
+                      Download and index comments. Browsable on the video detail page. Example:
+                      <ul>
+                        <li>
+                          <span className="settings-current">all,100,all,30</span>: Get 100
+                          max-parents and 30 max-replies-per-thread.
+                        </li>
+                        <li>
+                          <span className="settings-current">1000,all,all,50</span>: Get a total of
+                          1000 comments over all, 50 replies per thread.
+                        </li>
+                        <li>
+                          Values are in the format:{' '}
+                          <span className="settings-current">
+                            max-comments,max-parents,max-replies,max-replies-per-thread
+                          </span>
+                          .
+                        </li>
+                        <li>Choose wisely, as extracting comments is slow.</li>
+                      </ul>
+                    </li>
+                    <li>The sort order changes how comments are indexed.</li>
+                  </ul>
+                </div>
+              )}
               <div className="settings-box-wrapper">
                 <div>
                   <p>Index comments</p>
@@ -472,6 +650,34 @@ const SettingsApplication = () => {
             </div>
             <div className="info-box-item">
               <h2 id="cookie">Cookie</h2>
+              {userConfig.config.show_help_text && (
+                <div className="help-text">
+                  <p>
+                    Importing your cookie will authenticate requests to YT with your user account.
+                  </p>
+                  <ul>
+                    <li>Adding your cookie can avoid your requests getting blocked.</li>
+                    <li>This expects your cookie in Netscape format.</li>
+                    <li>
+                      For automatic cookie import use Tube Archivist Companion{' '}
+                      <a href="https://github.com/tubearchivist/browser-extension" target="_blank">
+                        browser extension
+                      </a>
+                      .
+                    </li>
+                    <li>
+                      The PO Token <i>(Proof of origin token)</i> can authenticate your request.
+                      Make sure to read the{' '}
+                      <a
+                        target="_blank"
+                        href="https://github.com/yt-dlp/yt-dlp/wiki/PO-Token-Guide"
+                      >
+                        PO guide
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              )}
               <div className="settings-box-wrapper">
                 <div>
                   <p>Use your cookie for yt-dlp</p>
@@ -571,6 +777,41 @@ const SettingsApplication = () => {
             </div>
             <div className="info-box-item">
               <h2 id="sntegrations">Integrations</h2>
+              {userConfig.config.show_help_text && (
+                <div className="help-text">
+                  <ul>
+                    <li>The API token is used to make automater requests to TA through the API.</li>
+                    <li>
+                      Return Youtube Dislike is a crowdsourced database of dislikes.
+                      <ul>
+                        <li>Make sure to contribute to this excellent project.</li>
+                        <li>
+                          More details{' '}
+                          <a target="_blank" href="https://returnyoutubedislike.com/">
+                            here
+                          </a>
+                          .
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      Sponsorblock is a crowdsourced database of timestamps marking sponsored slots
+                      for a video.
+                      <ul>
+                        <li>This can also be configured on a per channel basis.</li>
+                        <li>Make sure to contribute to this excellent project.</li>
+                        <li>
+                          More details{' '}
+                          <a target="_blank" href="https://sponsor.ajay.app/">
+                            here
+                          </a>
+                          .
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
+              )}
               <div className="settings-box-wrapper">
                 <div>
                   <p>API token</p>
@@ -596,7 +837,12 @@ const SettingsApplication = () => {
               </div>
               <div className="settings-box-wrapper">
                 <div>
-                  <p>Enable returnyoutubedislike</p>
+                  <p>
+                    Enable{' '}
+                    <a target="_blank" href="https://returnyoutubedislike.com/">
+                      returnyoutubedislike
+                    </a>
+                  </p>
                 </div>
                 <ToggleConfig
                   name="downloads.integrate_ryd"
@@ -606,7 +852,12 @@ const SettingsApplication = () => {
               </div>
               <div className="settings-box-wrapper">
                 <div>
-                  <p>Enable Sponsorblock</p>
+                  <p>
+                    Enable{' '}
+                    <a href="https://sponsor.ajay.app/" target="_blank">
+                      Sponsorblock
+                    </a>
+                  </p>
                 </div>
                 <ToggleConfig
                   name="downloads.integrate_sponsorblock"
@@ -617,6 +868,15 @@ const SettingsApplication = () => {
             </div>
             <div className="info-box-item">
               <h2>Snapshots</h2>
+              {userConfig.config.show_help_text && (
+                <div className="help-text">
+                  <p>
+                    Automatically create daily deduplicated snapshots of the index, stored in
+                    Elasticsearch. Restoring from snapshot replaced your current index with the
+                    index from the snapshot.
+                  </p>
+                </div>
+              )}
               <div className="settings-box-wrapper">
                 <div>
                   <p>Enable Index Snapshot</p>

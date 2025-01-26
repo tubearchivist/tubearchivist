@@ -171,6 +171,25 @@ button:hover {
   color: var(--accent-font-light);
 }
 
+.help-text {
+  width: 100%;
+  border-left: 1px solid var(--accent-font-light);
+  padding: 5px 0 5px 1rem;
+}
+
+.help-text::before {
+  content: '?';
+  font-size: 1.5em;
+  font-family: Sen-Bold, sans-serif;
+  color: var(--main-font);
+  background-color: var(--accent-font-dark);
+  border-radius: 50%;
+  width: 30px;
+  display: block;
+  height: 30px;
+  text-align: center;
+}
+
 .top-banner {
   background-image: var(--banner);
   background-repeat: no-repeat;
