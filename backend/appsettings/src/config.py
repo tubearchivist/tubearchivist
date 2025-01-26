@@ -72,7 +72,6 @@ class AppConfig:
             "live_channel_size": 50,
             "shorts_channel_size": 50,
             "auto_start": False,
-            "new_config": 100,
         },
         "downloads": {
             "limit_speed": None,
