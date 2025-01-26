@@ -42,6 +42,7 @@ DEBUG = bool(environ.get("DJANGO_DEBUG"))
 ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS = ta_host_parser(
     environ.get("TA_HOST", "localhost")
 )
+CORS_ALLOWED_ORIGINS = CSRF_TRUSTED_ORIGINS
 
 # Application definition
 
@@ -283,9 +284,6 @@ else:
         r"moz-extension://*",
         r"chrome-extension://*",
     ]
-    CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://localhost:8000"]
-    CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "http://localhost:8000"]
-    CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
 
 CORS_ALLOW_CREDENTIALS = True
 
