@@ -5,7 +5,6 @@ Functionality:
 
 from datetime import datetime
 
-from appsettings.src.config import AppConfig
 from celery.schedules import crontab
 from common.src.env_settings import EnvironmentSettings
 from django.utils import dateformat
@@ -26,9 +25,6 @@ class ScheduleBuilder:
         "version_check": "0 11 *",
     }
     MSG = "message:setting"
-
-    def __init__(self):
-        self.config = AppConfig().config
 
     def update_schedule(
         self, task_name: str, cron_schedule: str, schedule_conf: dict | None
