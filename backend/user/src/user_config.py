@@ -62,25 +62,31 @@ class UserConfig:
         self._user_id: str = user_id
         self._config: UserConfigType = self.get_config()
 
+    @property
+    def es_url(self) -> str:
+        """es URL"""
+        return f"ta_config/_doc/user_{self._user_id}"
+
+    @property
+    def es_update_url(self) -> str:
+        """es update URL"""
+        return f"ta_config/_update/user_{self._user_id}"
+
     def get_value(self, key: str):
         """Get the given key from the users configuration
-
         Throws a KeyError if the requested Key is not a permitted value"""
         if key not in self._DEFAULT_USER_SETTINGS:
             raise KeyError(f"Unable to read config for unknown key '{key}'")
 
-        return self._config.get(key) or self._DEFAULT_USER_SETTINGS.get(key)
+        return self._config.get(key)
 
     def set_value(self, key: str, value: str | bool | int):
         """Set or replace a configuration value for the user"""
         self._validate(key, value)
         old = self.get_value(key)
-        self._config[key] = value
 
-        # Upsert this property (creating a record if not exists)
-        es_payload = {"doc": {"config": {key: value}}, "doc_as_upsert": True}
-        es_document_path = f"ta_config/_update/user_{self._user_id}"
-        response, status = ElasticWrap(es_document_path).post(es_payload)
+        data = {"doc": {"config": {key: value}}}
+        response, status = ElasticWrap(self.es_update_url).post(data)
         if status < 200 or status > 299:
             raise ValueError(f"Failed storing user value {status}: {response}")
 
@@ -125,22 +131,20 @@ class UserConfig:
     def get_config(self) -> UserConfigType:
         """get config from ES or load from the application defaults"""
         if not self._user_id:
-            # this is for a non logged-in user so use all the defaults
-            return {}
+            raise ValueError("no user_id passed")
 
-        # Does this user have configuration stored in ES
-        es_document_path = f"ta_config/_doc/user_{self._user_id}"
-        response, status = ElasticWrap(es_document_path).get(print_error=False)
-        if status == 200 and "_source" in response.keys():
-            source = response.get("_source", {})
-            if "config" in source.keys():
-                return source.get("config")
+        response, status = ElasticWrap(self.es_url).get(print_error=False)
+        if status == 404:
+            self.sync_defaults()
+            config = self._DEFAULT_USER_SETTINGS
+        else:
+            config = response["_source"]["config"]
 
-        # There is no config in ES
-        response, status_code = ElasticWrap(es_document_path).put(
-            {"config": dict(self._DEFAULT_USER_SETTINGS)}
+        return config
+
+    def sync_defaults(self):
+        """set initial defaults on 404"""
+        response, _ = ElasticWrap(self.es_url).post(
+            {"config": self._DEFAULT_USER_SETTINGS}
         )
-        if status_code == 200:
-            print(f"set default config for user {self._user_id}: {response}")
-
-        return self._DEFAULT_USER_SETTINGS
+        print(f"set default config for user {self._user_id}: {response}")
