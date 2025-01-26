@@ -1,0 +1,26 @@
+const Routes = {
+  Home: '/',
+  Channels: '/channel/',
+  Channel: (id: string) => `/channel/${id}`,
+  ChannelVideo: (id: string) => `/channel/${id}`,
+  ChannelStream: (id: string) => `/channel/${id}/streams/`,
+  ChannelShorts: (id: string) => `/channel/${id}/shorts/`,
+  ChannelPlaylist: (id: string) => `/channel/${id}/playlist/`,
+  ChannelAbout: (id: string) => `/channel/${id}/about/`,
+  Playlists: '/playlist/',
+  Playlist: (id: string) => `/playlist/${id}`,
+  Downloads: '/downloads/',
+  DownloadsByChannelId: (channelId: string) => `/downloads/?channel=${channelId}`,
+  Search: '/search/',
+  SettingsDashboard: '/settings/',
+  SettingsUser: '/settings/user/',
+  SettingsApplication: '/settings/application/',
+  SettingsScheduling: '/settings/scheduling/',
+  SettingsActions: '/settings/actions/',
+  Login: '/login/',
+  Video: (id: string) => `/video/${id}`,
+  VideoAtTimestamp: (id: string, timestamp: string) => `/video/${id}/?t=${timestamp}`,
+  About: '/about/',
+};
+
+export default Routes;

@@ -2,8 +2,9 @@
 __pycache__
 .venv
 
-# django testing db
-db.sqlite3
+# django testing
+backend/static
+backend/.env
 
 # vscode custom conf
 .vscode

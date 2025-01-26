@@ -138,9 +138,55 @@ The documentation available at [docs.tubearchivist.com](https://docs.tubearchivi
 
 ## Development Environment
 
-I have learned the hard way, that working on a dockerized application outside of docker is very error prone and in general not a good idea. So if you want to test your changes, it's best to run them in a docker testing environment. You might be able to run the application directly, but this document assumes you're using docker.
+This codebase is set up to be developed natively outside of docker as well as in a docker container. Developing outside of a docker container can be convenient, as IDE and hot reload usually works out of the box. But testing inside of a container is still essential, as there are subtle differences, especially when working with the filesystem and networking between containers.
 
-### Instructions
+### Native Instruction
+
+For convenience, it's recommended to still run Redis and ES in a docker container. Make sure both containers can be reachable over the network.
+
+Set up your virtual environment and install the requirements defined in `requirements-dev.txt`.
+
+There are options built in to load environment variables from a file using `load_dotenv`. Example `.env` file to place in the same folder as `manage.py`:
+
+```
+TA_HOST="localhost"
+TA_USERNAME=tubearchivist
+TA_PASSWORD=verysecret
+TA_MEDIA_DIR="static/volume/media"
+TA_CACHE_DIR="static"
+TA_APP_DIR="."
+REDIS_CON=redis://localhost:6379
+ES_URL="http://localhost:9200"
+ELASTIC_PASSWORD=verysecret
+TZ=America/New_York
+DJANGO_DEBUG=True
+```
+
+Than from look at the container startup script `run.sh`, make sure all needed migrations and startup checks ran, then to start the dev backend server from the same folder as `manage.py` run:
+
+```bash
+python manage.py runserver
+```
+
+The backend will be available on [localhost:8000/api/](localhost:8000/api/).
+
+You'll probably also want to have a Celery worker instance running, refer to `run.sh` for that. The Beat Scheduler might not be needed.
+
+Then from the frontend folder, install the dependencies with:
+
+```bash
+npm install
+```
+
+Then to start the developlent server:
+
+```bash
+npm run dev
+```
+
+And the frontend should be available at [localhost:3000](localhost:3000).
+
+### Docker Instructions
 
 Set up docker on your development machine.
 

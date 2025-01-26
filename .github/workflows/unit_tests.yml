@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r tubearchivist/requirements-dev.txt
+          pip install -r backend/requirements-dev.txt
 
       - name: Run unit tests
-        run: pytest tubearchivist
+        run: pytest backend

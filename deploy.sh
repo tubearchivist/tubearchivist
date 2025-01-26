@@ -51,6 +51,9 @@ function sync_test {
         --exclude "**/cache" \
         --exclude "**/__pycache__/" \
         --exclude "**/.pytest_cache/" \
+        --exclude "**/static/" \
+        --exclude "**/node_modules/" \
+        --exclude "**/.env" \
         --exclude ".venv" \
         --exclude "db.sqlite3" \
         --exclude ".mypy_cache" \
@@ -92,12 +95,12 @@ function validate {
     echo "running black"
     black --force-exclude "migrations/*" --diff --color --check -l 79 "$check_path"
     echo "running codespell"
-    codespell --skip="./.git,./.venv,./package.json,./package-lock.json,./node_modules,./.mypy_cache" "$check_path"
+    codespell --skip="./.git,./.venv,./package.json,./package-lock.json,**/node_modules,./.mypy_cache,**/static/volume" "$check_path"
     echo "running flake8"
-    flake8 "$check_path" --exclude "migrations,.venv" --count --max-complexity=10 \
+    flake8 "$check_path" --exclude "migrations,.venv,frontend" --count --max-complexity=10 \
         --max-line-length=79 --show-source --statistics
     echo "running isort"
-    isort --skip "migrations" --skip ".venv" --check-only --diff --profile black -l 79 "$check_path"
+    isort --skip "migrations" --skip ".venv" --skip "frontend" --check-only --diff --profile black -l 79 "$check_path"
     printf "    \n> all validations passed\n"
 
 }
@@ -157,7 +160,7 @@ function sync_docker {
     fi
 
     echo "latest tags:"
-    git tag | tail -n 5 | sort -r
+    git tag | sort -rV | head -n 5
 
     printf "\ncreate new version:\n"
     read -r VERSION
@@ -189,7 +192,7 @@ function sync_docker_old {
     fi
 
     echo "latest tags:"
-    git tag | tail -n 5 | sort -r
+    git tag | sort -rV | head -n 5
 
     printf "\ncreate new version:\n"
     read -r VERSION

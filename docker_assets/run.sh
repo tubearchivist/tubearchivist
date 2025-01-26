@@ -3,6 +3,9 @@
 
 set -e
 
+# stop on pending manual migration
+python manage.py ta_stop_on_error
+
 # django setup
 python manage.py migrate
 
@@ -17,7 +20,7 @@ python manage.py ta_startup
 
 # start all tasks
 nginx &
-celery -A home.celery worker --loglevel=INFO --max-tasks-per-child 10 &
-celery -A home beat --loglevel=INFO \
+celery -A task.celery worker --loglevel=INFO --max-tasks-per-child 10 &
+celery -A task beat --loglevel=INFO \
     --scheduler django_celery_beat.schedulers:DatabaseScheduler &
-uwsgi --ini uwsgi.ini
+python backend_start.py

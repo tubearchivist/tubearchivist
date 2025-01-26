@@ -1,0 +1,14 @@
+apprise==1.9.2
+celery==5.4.0
+django-auth-ldap==5.1.0
+django-celery-beat==2.7.0
+django-cors-headers==4.6.0
+Django==5.1.5
+djangorestframework==3.15.2
+Pillow==11.1.0
+redis==5.2.1
+requests==2.32.3
+ryd-client==0.0.6
+uvicorn==0.34.0
+whitenoise==6.8.2
+yt-dlp[default]==2025.1.26
