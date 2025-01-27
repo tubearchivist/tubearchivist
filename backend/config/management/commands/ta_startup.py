@@ -42,6 +42,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """run all commands"""
         self.stdout.write(TOPIC)
+        self._mig_app_settings()
         self._make_folders()
         self._clear_redis_keys()
         self._clear_tasks()
