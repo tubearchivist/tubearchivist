@@ -129,30 +129,24 @@ const Home = () => {
 
   useEffect(() => {
     (async () => {
-      if (
-        refreshVideoList ||
-        pagination?.current_page === undefined ||
-        currentPage !== pagination?.current_page
-      ) {
-        const videos = await loadVideoListByFilter({
-          page: currentPage,
-          watch: userMeConfig.hide_watched ? 'unwatched' : undefined,
-          sort: userMeConfig.sort_by,
-          order: userMeConfig.sort_order,
-        });
+      const videos = await loadVideoListByFilter({
+        page: currentPage,
+        watch: userMeConfig.hide_watched ? 'unwatched' : undefined,
+        sort: userMeConfig.sort_by,
+        order: userMeConfig.sort_order,
+      });
 
-        try {
-          const continueVideoResponse = await loadVideoListByFilter({ watch: 'continue' });
-          setContinueVideoResponse(continueVideoResponse);
-        } catch (error) {
-          console.log('Server error on continue vids?');
-          console.error(error);
-        }
-
-        setVideoReponse(videos);
-
-        setRefreshVideoList(false);
+      try {
+        const continueVideoResponse = await loadVideoListByFilter({ watch: 'continue' });
+        setContinueVideoResponse(continueVideoResponse);
+      } catch (error) {
+        console.log('Server error on continue vids?');
+        console.error(error);
       }
+
+      setVideoReponse(videos);
+
+      setRefreshVideoList(false);
     })();
   }, [
     refreshVideoList,
@@ -190,11 +184,7 @@ const Home = () => {
           <h1>Recent Videos</h1>
         </div>
 
-        <Filterbar
-          hideToggleText="Hide watched:"
-          viewStyleName={ViewStyleNames.home}
-          setRefresh={setRefreshVideoList}
-        />
+        <Filterbar hideToggleText="Hide watched:" viewStyleName={ViewStyleNames.home} />
       </div>
 
       <div className={`boxed-content ${gridView}`}>

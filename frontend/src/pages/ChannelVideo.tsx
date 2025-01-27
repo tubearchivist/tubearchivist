@@ -152,11 +152,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
         </div>
       </div>
       <div className={`boxed-content ${gridView}`}>
-        <Filterbar
-          hideToggleText={'Hide watched videos:'}
-          viewStyleName={ViewStyleNames.home}
-          setRefresh={setRefresh}
-        />
+        <Filterbar hideToggleText={'Hide watched videos:'} viewStyleName={ViewStyleNames.home} />
       </div>
       {showEmbeddedVideo && <EmbeddableVideoPlayer videoId={videoId} />}
       <div className={`boxed-content ${gridView}`}>

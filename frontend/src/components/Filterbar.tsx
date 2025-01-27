@@ -11,10 +11,10 @@ import { ViewStyles } from '../configuration/constants/ViewStyle';
 type FilterbarProps = {
   hideToggleText: string;
   viewStyleName: string;
-  setRefresh?: (status: boolean) => void;
+  showSort?: boolean;
 };
 
-const Filterbar = ({ hideToggleText, viewStyleName, setRefresh }: FilterbarProps) => {
+const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: FilterbarProps) => {
   const { userConfig, setPartialConfig } = useUserConfigStore();
   const [showHidden, setShowHidden] = useState(false);
   const isGridView = userConfig.config.view_style_home === ViewStyles.grid;
@@ -29,7 +29,6 @@ const Filterbar = ({ hideToggleText, viewStyleName, setRefresh }: FilterbarProps
             type="checkbox"
             checked={userConfig.config.hide_watched}
             onChange={() => {
-              setRefresh?.(true);
               setPartialConfig({ hide_watched: !userConfig.config.hide_watched });
             }}
           />
@@ -46,7 +45,7 @@ const Filterbar = ({ hideToggleText, viewStyleName, setRefresh }: FilterbarProps
         </div>
       </div>
 
-      {showHidden && (
+      {showHidden && showSort && (
         <div className="sort">
           <div id="form">
             <span>Sort by:</span>
@@ -55,7 +54,6 @@ const Filterbar = ({ hideToggleText, viewStyleName, setRefresh }: FilterbarProps
               id="sort"
               value={userConfig.config.sort_by}
               onChange={event => {
-                setRefresh?.(true);
                 setPartialConfig({ sort_by: event.target.value as SortByType });
               }}
             >
@@ -71,7 +69,6 @@ const Filterbar = ({ hideToggleText, viewStyleName, setRefresh }: FilterbarProps
               id="sort-order"
               value={userConfig.config.sort_order}
               onChange={event => {
-                setRefresh?.(true);
                 setPartialConfig({ sort_order: event.target.value as SortOrderType });
               }}
             >
@@ -81,9 +78,8 @@ const Filterbar = ({ hideToggleText, viewStyleName, setRefresh }: FilterbarProps
           </div>
         </div>
       )}
-
       <div className="view-icons">
-        {setShowHidden && (
+        {setShowHidden && showSort && (
           <img
             src={iconSort}
             alt="sort-icon"

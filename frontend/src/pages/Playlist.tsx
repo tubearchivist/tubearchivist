@@ -90,34 +90,27 @@ const Playlist = () => {
 
   useEffect(() => {
     (async () => {
-      if (
-        refresh ||
-        pagination?.current_page === undefined ||
-        currentPage !== pagination?.current_page
-      ) {
-        const playlist = await loadPlaylistById(playlistId);
-        const video = await loadVideoListByFilter({
-          playlist: playlistId,
-          page: currentPage,
-          watch: hideWatched ? 'unwatched' : undefined,
-          sort: 'downloaded', // downloaded or published? or playlist sort order?
-        });
+      const playlist = await loadPlaylistById(playlistId);
+      const video = await loadVideoListByFilter({
+        playlist: playlistId,
+        page: currentPage,
+        watch: hideWatched ? 'unwatched' : undefined,
+        sort: 'downloaded', // downloaded or published? or playlist sort order?
+      });
 
-        const isCustomPlaylist = playlist?.data?.playlist_type === 'custom';
-        if (!isCustomPlaylist) {
-          const channel = await loadChannelById(playlist.data.playlist_channel_id);
+      const isCustomPlaylist = playlist?.data?.playlist_type === 'custom';
+      if (!isCustomPlaylist) {
+        const channel = await loadChannelById(playlist.data.playlist_channel_id);
 
-          setChannelResponse(channel);
-        }
-
-        setPlaylistResponse(playlist);
-        setVideoResponse(video);
-        setRefresh(false);
+        setChannelResponse(channel);
       }
+
+      setPlaylistResponse(playlist);
+      setVideoResponse(video);
+      setRefresh(false);
     })();
-    // Do not add hideWatched this will not work as expected!
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playlistId, refresh, currentPage, pagination?.current_page]);
+  }, [playlistId, userConfig.config.hide_watched, refresh, currentPage, pagination?.current_page]);
 
   if (!playlistId || !playlist) {
     return `Playlist ${playlistId} not found!`;
@@ -320,7 +313,7 @@ const Playlist = () => {
         <Filterbar
           hideToggleText="Hide watched videos:"
           viewStyleName={ViewStyleNames.playlist}
-          setRefresh={setRefresh}
+          showSort={false}
         />
       </div>
 
