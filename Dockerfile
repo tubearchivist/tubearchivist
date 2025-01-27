@@ -1,7 +1,7 @@
 # multi stage to build tube archivist
 # build python wheel, download and extract ffmpeg, copy into final image
 
-FROM node:lts-alpine as node-builder
+FROM node:lts-alpine AS node-builder
 
 # RUN npm config set registry https://registry.npmjs.org/
 
@@ -24,7 +24,7 @@ COPY ./backend/requirements.txt /requirements.txt
 RUN pip install --user -r requirements.txt
 
 # build ffmpeg
-FROM python:3.11.8-slim-bookworm as ffmpeg-builder
+FROM python:3.11.8-slim-bookworm AS ffmpeg-builder
 
 ARG TARGETPLATFORM
 
@@ -32,7 +32,7 @@ COPY docker_assets/ffmpeg_download.py ffmpeg_download.py
 RUN python ffmpeg_download.py $TARGETPLATFORM
 
 # build final image
-FROM python:3.11.8-slim-bookworm as tubearchivist
+FROM python:3.11.8-slim-bookworm AS tubearchivist
 
 ARG INSTALL_DEBUG
 
