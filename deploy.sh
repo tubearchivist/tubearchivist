@@ -18,20 +18,24 @@ set -e
 
 function sync_blackhole {
 
-    host="blackhole.local"
+    host="blackhole.lan"
     
     rsync -a --progress --delete-after \
         --exclude ".git" \
         --exclude ".gitignore" \
         --exclude "**/cache" \
         --exclude "**/__pycache__/" \
+        --exclude "**/.pytest_cache/" \
+        --exclude "**/static/" \
+        --exclude "**/node_modules/" \
+        --exclude "**/.env" \
         --exclude ".venv" \
         --exclude "db.sqlite3" \
         --exclude ".mypy_cache" \
         . -e ssh "$host":tubearchivist
 
-    ssh "$host" 'docker build -t bbilly1/tubearchivist --build-arg TARGETPLATFORM="linux/amd64" tubearchivist'
-    ssh "$host" 'docker compose up -d'
+    ssh "$host" 'docker build -t bbilly1/tubearchivist:unstable tubearchivist'
+    ssh "$host" 'docker compose up -d -f docker/docker-compose.yml'
 
 }
 
