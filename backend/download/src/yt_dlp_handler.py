@@ -64,6 +64,9 @@ class VideoDownloader(DownloaderBase):
                 self._reset_auto()
                 break
 
+            if downloaded > 0:
+                rand_sleep(self.config)
+
             youtube_id = video_data["youtube_id"]
             channel_id = video_data["channel_id"]
             print(f"{youtube_id}: Downloading video")

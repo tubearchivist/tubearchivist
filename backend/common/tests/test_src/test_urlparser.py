@@ -110,7 +110,7 @@ PASSTING_TESTS.extend(PERSONAL_PLAYLISTS_TEST_CASES)
 @pytest.mark.parametrize("url_str, expected_result", PASSTING_TESTS)
 def test_passing_parse(url_str, expected_result):
     """test parser"""
-    parser = Parser(url_str)
+    parser = Parser(url_str, use_cache=False)
     parsed = parser.parse()
     assert parsed == expected_result
 
@@ -127,7 +127,7 @@ INVALID_IDS_ERRORS = [
 def test_invalid_ids(invalid_value):
     """test for invalid IDs"""
     with pytest.raises(ValueError, match="not a valid id_str"):
-        parser = Parser(invalid_value)
+        parser = Parser(invalid_value, use_cache=False)
         parser.parse()
 
 
@@ -140,6 +140,6 @@ INVALID_DOMAINS = [
 @pytest.mark.parametrize("invalid_value", INVALID_DOMAINS)
 def test_invalid_domains(invalid_value):
     """raise error on none YT domains"""
-    parser = Parser(invalid_value)
+    parser = Parser(invalid_value, use_cache=False)
     with pytest.raises(ValueError, match="invalid domain"):
         parser.parse()

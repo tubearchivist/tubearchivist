@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { VideoResponseType } from '../pages/Video';
 import VideoPlayer from './VideoPlayer';
 import loadVideoById from '../api/loader/loadVideoById';
@@ -24,6 +24,8 @@ type EmbeddableVideoPlayerProps = {
 };
 
 const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
+  const inlinePlayerRef = useRef<HTMLDivElement>(null);
+
   const [, setSearchParams] = useSearchParams();
 
   const [refresh, setRefresh] = useState(false);
@@ -63,8 +65,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
 
       setVideoResponse(videoResponse);
 
-      const inlinePlayer = document.getElementById('inline-player');
-      inlinePlayer?.scrollIntoView();
+      inlinePlayerRef.current?.scrollIntoView();
 
       setRefresh(false);
       setLoading(false);
@@ -91,7 +92,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
 
   return (
     <>
-      <div id="inline-player" className="player-wrapper">
+      <div ref={inlinePlayerRef} className="player-wrapper">
         <div className="video-player">
           {!loading && (
             <VideoPlayer

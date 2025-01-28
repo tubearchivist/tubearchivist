@@ -1258,6 +1258,10 @@ video:-webkit-full-screen {
   .video-player video {
     width: 90%;
   }
+  .info-box-3,
+  .info-box-4 {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* phone */
@@ -1275,10 +1279,12 @@ video:-webkit-full-screen {
   .playlist-list.list,
   .playlist-list.grid,
   .info-box-2,
-  .info-box-3,
-  .info-box-4,
   .overwrite-form {
     grid-template-columns: 1fr;
+  }
+  .settings-box-wrapper {
+    grid-template-columns: 1fr;
+    padding: 1.2rem 0;
   }
   .playlist-item.list {
     display: block;

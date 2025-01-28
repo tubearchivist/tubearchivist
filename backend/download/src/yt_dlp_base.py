@@ -40,6 +40,7 @@ class YtWrap:
             self._add_potoken()
 
         if getattr(settings, "DEBUG", False):
+            del self.obs["quiet"]
             print(self.obs)
 
     def _add_cookie(self):
@@ -133,7 +134,7 @@ class CookieHandler:
         RedisArchivist().set_message("cookie", cookie, save=True)
         AppConfig().update_config({"downloads.cookie_import": True})
         self.config["downloads"]["cookie_import"] = True
-        print("cookie: activated and stored in Redis")
+        print("[cookie]: activated and stored in Redis")
 
     @staticmethod
     def revoke():
@@ -141,11 +142,16 @@ class CookieHandler:
         RedisArchivist().del_message("cookie")
         RedisArchivist().del_message("cookie:valid")
         AppConfig().update_config({"downloads.cookie_import": False})
-        print("cookie: revoked")
+        print("[cookie]: revoked")
 
     def validate(self):
         """validate cookie using the liked videos playlist"""
-        print("validating cookie")
+        validation = RedisArchivist().get_message_dict("cookie:valid")
+        if validation:
+            print("[cookie]: used cached cookie validation")
+            return True
+
+        print("[cookie] validating cookie")
         obs_request = {
             "skip_download": True,
             "extract_flat": True,
@@ -169,8 +175,9 @@ class CookieHandler:
             RedisArchivist().set_message(
                 "message:download", mess_dict, expire=4
             )
-            print("cookie validation failed, exiting...")
+            print("[cookie]: validation failed, exiting...")
 
+        print(f"[cookie]: validation success: {response}")
         return response
 
     @staticmethod
@@ -182,7 +189,7 @@ class CookieHandler:
             "validated": int(now.timestamp()),
             "validated_str": now.strftime("%Y-%m-%d %H:%M"),
         }
-        RedisArchivist().set_message("cookie:valid", message)
+        RedisArchivist().set_message("cookie:valid", message, expire=3600)
 
 
 class POTokenHandler:

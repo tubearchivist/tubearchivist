@@ -6,15 +6,20 @@ Functionality:
 
 from urllib.parse import parse_qs, urlparse
 
+from common.src.ta_redis import RedisArchivist
 from download.src.yt_dlp_base import YtWrap
 from video.src.constants import VideoTypeEnum
 
 
 class Parser:
-    """take a multi line string and detect valid youtube ids"""
+    """
+    take a multi line string and detect valid youtube ids
+    channel handle lookup is cached, can be disabled for unittests
+    """
 
-    def __init__(self, url_str):
+    def __init__(self, url_str, use_cache=True):
         self.url_list = [i.strip() for i in url_str.split()]
+        self.use_cache = use_cache
 
     def parse(self):
         """parse the list"""
@@ -106,9 +111,13 @@ class Parser:
 
         return {"type": item_type, "url": id_str}
 
-    @staticmethod
-    def _extract_channel_name(url):
-        """find channel id from channel name with yt-dlp help"""
+    def _extract_channel_name(self, url):
+        """find channel id from channel name with yt-dlp help, cache result"""
+        if self.use_cache:
+            cached = self._get_cached(url)
+            if cached:
+                return cached
+
         obs_request = {
             "check_formats": None,
             "skip_download": True,
@@ -121,6 +130,9 @@ class Parser:
 
         channel_id = url_info.get("channel_id", False)
         if channel_id:
+            if self.use_cache:
+                self._set_cache(url, channel_id)
+
             return channel_id
 
         url = url_info.get("url", False)
@@ -132,6 +144,42 @@ class Parser:
 
         print(f"failed to extract channel id from {url}")
         raise ValueError
+
+    @staticmethod
+    def _get_cached(url) -> str | None:
+        """get cached channel ID, if available"""
+        path = urlparse(url).path.lstrip("/")
+        if not path.startswith("@"):
+            return None
+
+        handle = path.split("/")[0]
+        if not handle:
+            return None
+
+        cache_key = f"channel:handlesearch:{handle.lower()}"
+        cached = RedisArchivist().get_message_dict(cache_key)
+        if cached:
+            return cached["channel_id"]
+
+        return None
+
+    @staticmethod
+    def _set_cache(url, channel_id) -> None:
+        """set cache"""
+        path = urlparse(url).path.lstrip("/")
+        if not path.startswith("@"):
+            return
+
+        handle = path.split("/")[0]
+        if not handle:
+            return
+
+        cache_key = f"channel:handlesearch:{handle.lower()}"
+        message = {
+            "channel_id": channel_id,
+            "handle": handle,
+        }
+        RedisArchivist().set_message(cache_key, message, expire=3600 * 24 * 7)
 
     def _detect_vid_type(self, path):
         """try to match enum from path, needs to be serializable"""

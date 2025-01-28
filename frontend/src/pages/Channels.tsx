@@ -65,16 +65,14 @@ const Channels = () => {
 
   useEffect(() => {
     (async () => {
-      if (refresh) {
-        const channelListResponse = await loadChannelList(
-          currentPage,
-          userConfig.config.show_subed_only,
-        );
+      const channelListResponse = await loadChannelList(
+        currentPage,
+        userConfig.config.show_subed_only,
+      );
 
-        setChannelListResponse(channelListResponse);
-        setShowNotification(false);
-        setRefresh(false);
-      }
+      setChannelListResponse(channelListResponse);
+      setShowNotification(false);
+      setRefresh(false);
     })();
   }, [refresh, userConfig.config.show_subed_only, currentPage, pagination?.current_page]);
 
