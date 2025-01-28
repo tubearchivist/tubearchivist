@@ -100,11 +100,11 @@ const Download = () => {
 
   useEffect(() => {
     (async () => {
-      const downloadAggs = await loadDownloadAggs();
+      const downloadAggs = await loadDownloadAggs(showIgnored);
 
       setDownloadAggsResponse(downloadAggs);
     })();
-  }, [lastVideoCount]);
+  }, [lastVideoCount, showIgnored]);
 
   useEffect(() => {
     setRefresh(true);
