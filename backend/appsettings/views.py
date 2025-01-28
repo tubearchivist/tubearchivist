@@ -5,6 +5,7 @@ from appsettings.src.config import AppConfig
 from appsettings.src.snapshot import ElasticSnapshot
 from common.src.ta_redis import RedisArchivist
 from common.views_base import AdminOnly, ApiBaseView
+from django.conf import settings
 from download.src.yt_dlp_base import CookieHandler, POTokenHandler
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -220,13 +221,15 @@ class CookieView(ApiBaseView):
             print(message)
             return Response({"message": message}, status=400)
 
-        print(f"cookie preview:\n\n{cookie[:300]}")
+        if settings.DEBUG:
+            print(f"[cookie] preview:\n\n{cookie[:300]}")
+
         handler = CookieHandler(config)
         handler.set_cookie(cookie)
         validated = handler.validate()
         if not validated:
             handler.revoke()
-            print("cookie import failed, not valid")
+            print("[cookie]: import failed, not valid")
             status = 400
         else:
             status = 200
