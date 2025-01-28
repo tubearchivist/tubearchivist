@@ -57,12 +57,15 @@ const CommentBox = ({ comment }: CommentBoxProps) => {
       <div className="comment-meta">
         <span>{formatDate(comment.comment_timestamp * 1000)}</span>
 
-        <span className="space-carrot">|</span>
-
-        <span className="thumb-icon">
-          <img src={iconThumb} />{' '}
-          {formatNumbers(comment.comment_likecount, { notation: 'compact' })}
-        </span>
+        {comment.comment_likecount > 0 && (
+          <>
+            <span className="space-carrot">|</span>
+            <span className="thumb-icon">
+              <img src={iconThumb} />{' '}
+              {formatNumbers(comment.comment_likecount, { notation: 'compact' })}
+            </span>
+          </>
+        )}
 
         {comment.comment_is_favorited && (
           <>
