@@ -35,7 +35,7 @@ function sync_blackhole {
         . -e ssh "$host":tubearchivist
 
     ssh "$host" 'docker build -t bbilly1/tubearchivist:unstable tubearchivist'
-    ssh "$host" 'docker compose up -d -f docker/docker-compose.yml'
+    ssh "$host" 'docker compose -f docker/docker-compose.yml up -d'
 
 }
 
