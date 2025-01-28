@@ -28,7 +28,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
 
   const [, setSearchParams] = useSearchParams();
 
-  const [refresh, setRefresh] = useState(false);
+  const [refresh, setRefresh] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const [videoResponse, setVideoResponse] = useState<VideoResponseType>();
@@ -72,8 +72,12 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
     })();
   }, [videoId, refresh]);
 
+  useEffect(() => {
+    inlinePlayerRef.current?.scrollIntoView();
+  }, []);
+
   if (videoResponse === undefined) {
-    return [];
+    return <div ref={inlinePlayerRef} className="player-wrapper" />;
   }
 
   const video = videoResponse.data;
