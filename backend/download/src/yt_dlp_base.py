@@ -40,6 +40,7 @@ class YtWrap:
             self._add_potoken()
 
         if getattr(settings, "DEBUG", False):
+            del self.obs["quiet"]
             print(self.obs)
 
     def _add_cookie(self):
