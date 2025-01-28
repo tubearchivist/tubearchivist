@@ -42,7 +42,7 @@ class YoutubeChannel(YouTubeItem):
         if not self.youtube_meta and fallback:
             self._video_fallback(fallback)
         else:
-            if not self.json_data:
+            if not self.youtube_meta:
                 message = f"{self.youtube_id}: Failed to get metadata"
                 raise ValueError(message)
 
