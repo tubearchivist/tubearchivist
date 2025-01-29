@@ -16,6 +16,8 @@
 }
 
 html {
+  width: 100vw;
+  overflow-x: hidden;
   height: 100%;
   scrollbar-color: var(--accent-font-dark) #0000;
 }
