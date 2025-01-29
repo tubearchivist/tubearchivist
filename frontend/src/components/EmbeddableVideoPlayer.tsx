@@ -98,14 +98,12 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
     <>
       <div ref={inlinePlayerRef} className="player-wrapper">
         <div className="video-player">
-          {!loading && (
-            <VideoPlayer
-              video={videoResponse}
-              sponsorBlock={sponsorblock}
-              embed={true}
-              autoplay={true}
-            />
-          )}
+          <VideoPlayer
+            video={videoResponse}
+            sponsorBlock={sponsorblock}
+            embed={true}
+            autoplay={true}
+          />
 
           <div className="player-title boxed-content">
             <img

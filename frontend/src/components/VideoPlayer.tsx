@@ -162,6 +162,7 @@ const VideoPlayer = ({
       <div id="player" className={embed ? '' : 'player-wrapper'}>
         <div className={embed ? '' : 'video-main'}>
           <video
+            key={`${getApiUrl()}${videoUrl}`}
             poster={`${getApiUrl()}${videoThumbUrl}`}
             onVolumeChange={(videoTag: VideoTag) => {
               localStorage.setItem('playerVolume', videoTag.currentTarget.volume.toString());

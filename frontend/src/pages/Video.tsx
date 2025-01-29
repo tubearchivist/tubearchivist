@@ -214,16 +214,14 @@ const Video = () => {
       <title>{`TA | ${video.title}`}</title>
       <ScrollToTopOnNavigate />
 
-      {!loading && (
-        <VideoPlayer
-          video={videoResponse}
-          sponsorBlock={sponsorBlock}
-          autoplay={playlistAutoplay}
-          onVideoEnd={() => {
-            setVideoEnded(true);
-          }}
-        />
-      )}
+      <VideoPlayer
+        video={videoResponse}
+        sponsorBlock={sponsorBlock}
+        autoplay={playlistAutoplay}
+        onVideoEnd={() => {
+          setVideoEnded(true);
+        }}
+      />
 
       <div className="boxed-content">
         <div className="title-bar">
