@@ -54,6 +54,7 @@ const handleTimeUpdate =
     watched: boolean,
     sponsorBlock?: SponsorBlockType,
     setSponsorSegmentSkipped?: Dispatch<SetStateAction<SponsorSegmentsSkippedType>>,
+    onWatchStateChanged?: (status: boolean) => void,
   ) =>
   async (videoTag: VideoTag) => {
     const currentTime = Number(videoTag.currentTarget.currentTime);
@@ -93,6 +94,8 @@ const handleTimeUpdate =
             id: youtubeId,
             is_watched: true,
           });
+
+          onWatchStateChanged?.(true);
         }
       }
     }
@@ -103,6 +106,7 @@ type VideoPlayerProps = {
   sponsorBlock?: SponsorBlockType;
   embed?: boolean;
   autoplay?: boolean;
+  onWatchStateChanged?: (status: boolean) => void;
   onVideoEnd?: () => void;
 };
 
@@ -111,6 +115,7 @@ const VideoPlayer = ({
   sponsorBlock,
   embed,
   autoplay = false,
+  onWatchStateChanged,
   onVideoEnd,
 }: VideoPlayerProps) => {
   const [searchParams] = useSearchParams();
@@ -182,6 +187,7 @@ const VideoPlayer = ({
               watched,
               sponsorBlock,
               setSkippedSegments,
+              onWatchStateChanged,
             )}
             onPause={async (videoTag: VideoTag) => {
               const currentTime = Number(videoTag.currentTarget.currentTime);

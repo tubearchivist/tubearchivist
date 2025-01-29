@@ -29,14 +29,12 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
   const [, setSearchParams] = useSearchParams();
 
   const [refresh, setRefresh] = useState(true);
-  const [loading, setLoading] = useState(false);
 
   const [videoResponse, setVideoResponse] = useState<VideoResponseType>();
   const [playlists, setPlaylists] = useState<PlaylistList>();
 
   useEffect(() => {
     (async () => {
-      setLoading(true);
       const videoResponse = await loadVideoById(videoId);
 
       const playlistIds = videoResponse.data.playlist;
@@ -68,7 +66,6 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
       inlinePlayerRef.current?.scrollIntoView();
 
       setRefresh(false);
-      setLoading(false);
     })();
   }, [videoId, refresh]);
 
@@ -103,6 +100,9 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
             sponsorBlock={sponsorblock}
             embed={true}
             autoplay={true}
+            onWatchStateChanged={() => {
+              setRefresh(true);
+            }}
           />
 
           <div className="player-title boxed-content">

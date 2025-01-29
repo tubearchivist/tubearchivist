@@ -121,7 +121,6 @@ const Video = () => {
   const navigate = useNavigate();
   const isAdmin = useIsAdmin();
 
-  const [loading, setLoading] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
   const [playlistAutoplay, setPlaylistAutoplay] = useState(
     localStorage.getItem('playlistAutoplay') === 'true',
@@ -143,8 +142,6 @@ const Video = () => {
 
   useEffect(() => {
     (async () => {
-      setLoading(true);
-
       const videoResponse = await loadVideoById(videoId);
       const simmilarVideosResponse = await loadSimmilarVideosById(videoId);
       const customPlaylistsResponse = await loadPlaylistList({ type: 'custom' });
@@ -157,8 +154,6 @@ const Video = () => {
       setCustomPlaylistsResponse(customPlaylistsResponse);
       setCommentsResponse(commentsResponse);
       setRefreshVideoList(false);
-
-      setLoading(false);
     })();
   }, [videoId, refreshVideoList]);
 
@@ -218,6 +213,9 @@ const Video = () => {
         video={videoResponse}
         sponsorBlock={sponsorBlock}
         autoplay={playlistAutoplay}
+        onWatchStateChanged={() => {
+          setRefreshVideoList(true);
+        }}
         onVideoEnd={() => {
           setVideoEnded(true);
         }}
