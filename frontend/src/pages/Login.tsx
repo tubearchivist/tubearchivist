@@ -6,17 +6,19 @@ import Button from '../components/Button';
 import signIn from '../api/actions/signIn';
 
 const Login = () => {
+  useColours();
+
+  const navigate = useNavigate();
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [saveLogin, setSaveLogin] = useState(false);
-  const navigate = useNavigate();
-
-  useColours();
-
-  const form_error = false;
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
+
+    setErrorMessage(null);
 
     const loginResponse = await signIn(username, password, saveLogin);
 
@@ -25,6 +27,8 @@ const Login = () => {
     if (signedIn) {
       navigate(Routes.Home);
     } else {
+      const data = await loginResponse.json();
+      setErrorMessage(data?.message || 'Unknown Error');
       navigate(Routes.Login);
     }
   };
@@ -37,7 +41,13 @@ const Login = () => {
         <h1>Tube Archivist</h1>
         <h2>Your Self Hosted YouTube Media Server</h2>
 
-        {form_error && <p className="danger-zone">Failed to login.</p>}
+        {errorMessage !== null && (
+          <p className="danger-zone">
+            Failed to login.
+            <br />
+            {errorMessage}
+          </p>
+        )}
 
         <form onSubmit={handleSubmit}>
           <input
@@ -51,7 +61,9 @@ const Login = () => {
             value={username}
             onChange={event => setUsername(event.target.value)}
           />
+
           <br />
+
           <input
             type="password"
             name="password"
@@ -62,7 +74,9 @@ const Login = () => {
             value={password}
             onChange={event => setPassword(event.target.value)}
           />
+
           <br />
+
           <p>
             Remember me:{' '}
             <input
@@ -75,7 +89,9 @@ const Login = () => {
               }}
             />
           </p>
+
           <input type="hidden" name="next" value={Routes.Home} />
+
           <Button label="Login" type="submit" />
         </form>
         <p className="login-links">
