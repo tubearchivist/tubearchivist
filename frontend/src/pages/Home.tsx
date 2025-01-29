@@ -184,7 +184,7 @@ const Home = () => {
           <h1>Recent Videos</h1>
         </div>
 
-        <Filterbar hideToggleText="Hide watched:" viewStyleName={ViewStyleNames.home} />
+        <Filterbar hideToggleText="Show unwatched only:" viewStyleName={ViewStyleNames.home} />
       </div>
 
       <div className={`boxed-content ${gridView}`}>
