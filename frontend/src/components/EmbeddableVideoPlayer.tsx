@@ -115,6 +115,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
                 setSearchParams({});
               }}
             />
+
             <WatchedCheckBox
               watched={watched}
               onClick={async status => {
@@ -127,10 +128,14 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
                 setRefresh(true);
               }}
             />
+
             {cast && (
               <GoogleCast
                 video={video}
                 setRefresh={() => {
+                  setRefresh(true);
+                }}
+                onWatchStateChanged={() => {
                   setRefresh(true);
                 }}
               />

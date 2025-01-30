@@ -229,6 +229,9 @@ const Video = () => {
               setRefresh={() => {
                 setRefreshVideoList(true);
               }}
+              onWatchStateChanged={() => {
+                setRefreshVideoList(true);
+              }}
             />
           )}
           <h1 id="video-title">{video.title}</h1>

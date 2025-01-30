@@ -1,7 +1,6 @@
 import updateVideoProgressById from '../api/actions/updateVideoProgressById';
 import updateWatchedState from '../api/actions/updateWatchedState';
 import { SponsorBlockSegmentType, SponsorBlockType, VideoResponseType } from '../pages/Video';
-import watchedThreshold from '../functions/watchedThreshold';
 import { Dispatch, Fragment, SetStateAction, SyntheticEvent, useState } from 'react';
 import formatTime from '../functions/formatTime';
 import { useSearchParams } from 'react-router-dom';
@@ -82,21 +81,13 @@ const handleTimeUpdate =
     if (currentTime < 10) return;
     if (Number((currentTime % 10).toFixed(1)) <= 0.2) {
       // Check progress every 10 seconds or else progress is checked a few times a second
-      await updateVideoProgressById({
+      const videoProgressResponse = await updateVideoProgressById({
         youtubeId,
         currentProgress: currentTime,
       });
 
-      if (!watched) {
-        // Check if video is already marked as watched
-        if (watchedThreshold(currentTime, duration)) {
-          await updateWatchedState({
-            id: youtubeId,
-            is_watched: true,
-          });
-
-          onWatchStateChanged?.(true);
-        }
+      if (videoProgressResponse.watched && watched !== videoProgressResponse.watched) {
+        onWatchStateChanged?.(true);
       }
     }
   };
