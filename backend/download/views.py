@@ -20,7 +20,14 @@ class DownloadApiListView(ApiBaseView):
     def get(self, request):
         """get request"""
         query_filter = request.GET.get("filter", False)
-        self.data.update({"sort": [{"timestamp": {"order": "asc"}}]})
+        self.data.update(
+            {
+                "sort": [
+                    {"auto_start": {"order": "desc"}},
+                    {"timestamp": {"order": "asc"}},
+                ],
+            }
+        )
 
         must_list = []
         if query_filter:
