@@ -287,7 +287,7 @@ const Video = () => {
               {video.stats.dislike_count > 0 && (
                 <p className="thumb-icon">
                   <img className="dislike" src={iconThumb} alt="thumbs-down" />:{' '}
-                  {video.stats.dislike_count}
+                  {formatNumbers(video.stats.dislike_count)}
                 </p>
               )}
               {video?.stats && starRating && (
