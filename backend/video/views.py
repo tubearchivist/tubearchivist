@@ -1,6 +1,8 @@
 """all API views for video endpoints"""
 
+from common.src.helper import calc_is_watched
 from common.src.ta_redis import RedisArchivist
+from common.src.watched import WatchState
 from common.views_base import AdminWriteOnly, ApiBaseView
 from playlist.src.index import YoutubePlaylist
 from rest_framework.response import Response
@@ -102,18 +104,56 @@ class VideoProgressView(ApiBaseView):
     handle progress status for video
     """
 
+    search_base = "ta_video/_doc/"
+
+    @staticmethod
+    def _get_key(user_id: int, video_id: str) -> str:
+        """redis key"""
+        return f"{user_id}:progress:{video_id}"
+
     def post(self, request, video_id):
         """set progress position in redis"""
         position = request.data.get("position", 0)
-        key = f"{request.user.id}:progress:{video_id}"
-        message = {"position": position, "youtube_id": video_id}
-        RedisArchivist().set_message(key, message)
-        self.response = request.data
-        return Response(self.response)
+        key = self._get_key(request.user.id, video_id)
+        redis_con = RedisArchivist()
+        current_progress = redis_con.get_message_dict(key)
+
+        if not current_progress:
+            self.get_document(video_id)
+            if self.status_code != 200:
+                return Response(status=self.status_code)
+
+            current_progress = self.response["data"]["player"]
+
+        current_progress.update({"position": position, "youtube_id": video_id})
+        watched = self._check_watched_state(video_id, current_progress)
+        if watched:
+            redis_con.del_message(key)
+            expire = 360
+        else:
+            expire = False
+
+        current_progress.update({"watched": watched})
+        redis_con.set_message(key, current_progress, expire=expire)
+
+        return Response(current_progress)
+
+    def _check_watched_state(self, video_id, current_progress) -> bool:
+        """check watched state"""
+        if current_progress["watched"]:
+            return True
+
+        watched = calc_is_watched(
+            current_progress["duration"], current_progress["position"]
+        )
+        if watched:
+            WatchState(video_id, watched).change()
+
+        return watched
 
     def delete(self, request, video_id):
         """delete progress position"""
-        key = f"{request.user.id}:progress:{video_id}"
+        key = self._get_key(request.user.id, video_id)
         RedisArchivist().del_message(key)
         self.response = {"progress-reset": video_id}
 

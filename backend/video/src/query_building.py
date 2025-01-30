@@ -63,7 +63,11 @@ class QueryBuilder:
         if not results:
             return None
 
-        ids = [{"match": {"youtube_id": i.get("youtube_id")}} for i in results]
+        ids = [
+            {"match": {"youtube_id": i.get("youtube_id")}}
+            for i in results
+            if not i.get("watched")
+        ]
         continue_ids = {"bool": {"should": ids}}
 
         return continue_ids

@@ -45,7 +45,11 @@ class SearchProcess:
         if not all_positions:
             return None
 
-        pos_index = {i["youtube_id"]: i["position"] for i in all_positions}
+        pos_index = {
+            i["youtube_id"]: i["position"]
+            for i in all_positions
+            if not i.get("watched")
+        }
         return pos_index
 
     def _process_result(self, result):
