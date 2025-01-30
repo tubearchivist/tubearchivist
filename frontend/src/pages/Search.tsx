@@ -47,6 +47,7 @@ const Search = () => {
   const gridItems = userMeConfig.grid_items || 3;
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');
   const [searchResults, setSearchResults] = useState<SearchResultsType>();
 
   const [refresh, setRefresh] = useState(false);
@@ -75,19 +76,28 @@ const Search = () => {
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
 
   useEffect(() => {
-    (async () => {
-      if (!hasSearchQuery) {
-        setSearchResults(EmptySearchResponse);
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchQuery);
+    }, 500);
 
-        return;
-      }
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
 
-      const searchResults = await loadSearch(searchQuery);
+  useEffect(() => {
+    if (debouncedSearchTerm.trim() !== '') {
+      fetchResults();
+    } else {
+      setSearchResults(EmptySearchResponse);
+    }
+  }, [debouncedSearchTerm, refresh]);
 
-      setSearchResults(searchResults);
-      setRefresh(false);
-    })();
-  }, [searchQuery, refresh, hasSearchQuery]);
+  const fetchResults = async () => {
+    const searchResults = await loadSearch(debouncedSearchTerm);
+    setSearchResults(searchResults);
+    setRefresh(false);
+  };
 
   return (
     <>
