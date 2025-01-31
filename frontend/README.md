@@ -12,6 +12,7 @@ src ┐
     │   ├───colours   // Css loader for themes
     │   ├───constants // global constants that have no good place
     │   └───routes    // Routes definitions used in Links and react-router-dom configuration
-    ├───functions     // Useful functions
-    └───pages         // React components that define a page/route
+    ├───functions     // Useful functions and hooks
+    ├───pages         // React components that define a page/route
+    └───stores        // zustand stores
 ```
