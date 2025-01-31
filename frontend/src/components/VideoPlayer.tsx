@@ -158,10 +158,16 @@ const VideoPlayer = ({
       watched: boolean,
       setSponsorSegmentSkipped?: Dispatch<SetStateAction<SponsorSegmentsSkippedType>>,
     ) =>
-    async () => {
-      if (!watched) {
-        // Check if video is already marked as watched
-        await updateWatchedState({ id: youtubeId, is_watched: true });
+    async (videoTag: VideoTag) => {
+      const currentTime = Number(videoTag.currentTarget.currentTime);
+
+      const videoProgressResponse = await updateVideoProgressById({
+        youtubeId,
+        currentProgress: currentTime,
+      });
+
+      if (videoProgressResponse.watched && watched !== videoProgressResponse.watched) {
+        onWatchStateChanged?.(true);
       }
 
       setSponsorSegmentSkipped?.((segments: SponsorSegmentsSkippedType) => {
