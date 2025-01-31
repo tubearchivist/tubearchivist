@@ -178,7 +178,7 @@ Then from the frontend folder, install the dependencies with:
 npm install
 ```
 
-Then to start the developlent server:
+Then to start the frontend development server:
 
 ```bash
 npm run dev
