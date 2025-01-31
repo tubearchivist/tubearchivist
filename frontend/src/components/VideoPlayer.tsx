@@ -1,5 +1,4 @@
 import updateVideoProgressById from '../api/actions/updateVideoProgressById';
-import updateWatchedState from '../api/actions/updateWatchedState';
 import { SponsorBlockSegmentType, SponsorBlockType, VideoResponseType } from '../pages/Video';
 import {
   Dispatch,
