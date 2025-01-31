@@ -110,7 +110,14 @@ const Playlist = () => {
       setRefresh(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playlistId, userConfig.config.hide_watched, refresh, currentPage, pagination?.current_page]);
+  }, [
+    playlistId,
+    userConfig.config.hide_watched,
+    refresh,
+    currentPage,
+    pagination?.current_page,
+    showEmbeddedVideo,
+  ]);
 
   if (!playlistId || !playlist) {
     return `Playlist ${playlistId} not found!`;

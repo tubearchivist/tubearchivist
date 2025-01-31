@@ -91,7 +91,7 @@ const Search = () => {
     } else {
       setSearchResults(EmptySearchResponse);
     }
-  }, [debouncedSearchTerm, refresh]);
+  }, [debouncedSearchTerm, refresh, showEmbeddedVideo]);
 
   const fetchResults = async (searchQuery: string) => {
     const searchResults = await loadSearch(searchQuery);

@@ -68,9 +68,10 @@ class QueryBuilder:
             for i in results
             if not i.get("watched")
         ]
-        continue_ids = {"bool": {"should": ids}}
+        if not ids:
+            return None
 
-        return continue_ids
+        return {"bool": {"should": ids}}
 
     def parse_type(self, video_type: str):
         """parse video type"""

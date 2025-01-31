@@ -155,6 +155,7 @@ const Home = () => {
     userMeConfig.hide_watched,
     currentPage,
     pagination?.current_page,
+    showEmbeddedVideo,
   ]);
 
   return (
