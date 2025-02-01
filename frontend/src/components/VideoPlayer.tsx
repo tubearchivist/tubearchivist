@@ -346,7 +346,7 @@ const VideoPlayer = ({
             onPause={async (videoTag: VideoTag) => {
               const currentTime = Number(videoTag.currentTarget.currentTime);
 
-              if (currentTime < 10) return;
+              if (currentTime < 10 || currentTime > duration * 0.95) return;
 
               await updateVideoProgressById({
                 youtubeId: videoId,
