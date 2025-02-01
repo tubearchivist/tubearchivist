@@ -142,19 +142,22 @@ const Video = () => {
 
   useEffect(() => {
     (async () => {
-      const videoResponse = await loadVideoById(videoId);
-      const simmilarVideosResponse = await loadSimmilarVideosById(videoId);
-      const customPlaylistsResponse = await loadPlaylistList({ type: 'custom' });
-      const commentsResponse = await loadCommentsbyVideoId(videoId);
-      const videoNavResponse = await loadVideoNav(videoId);
+      if (refreshVideoList || videoId !== videoResponse?.data?.youtube_id) {
+        const videoByIdResponse = await loadVideoById(videoId);
+        const simmilarVideosResponse = await loadSimmilarVideosById(videoId);
+        const customPlaylistsResponse = await loadPlaylistList({ type: 'custom' });
+        const commentsResponse = await loadCommentsbyVideoId(videoId);
+        const videoNavResponse = await loadVideoNav(videoId);
 
-      setVideoResponse(videoResponse);
-      setSimmilarVideos(simmilarVideosResponse);
-      setVideoPlaylistNav(videoNavResponse);
-      setCustomPlaylistsResponse(customPlaylistsResponse);
-      setCommentsResponse(commentsResponse);
-      setRefreshVideoList(false);
+        setVideoResponse(videoByIdResponse);
+        setSimmilarVideos(simmilarVideosResponse);
+        setVideoPlaylistNav(videoNavResponse);
+        setCustomPlaylistsResponse(customPlaylistsResponse);
+        setCommentsResponse(commentsResponse);
+        setRefreshVideoList(false);
+      }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId, refreshVideoList]);
 
   useEffect(() => {
