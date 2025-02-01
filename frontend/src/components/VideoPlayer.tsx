@@ -128,14 +128,19 @@ const VideoPlayer = ({
   const [isMuted, setIsMuted] = useState(false);
   const [playbackSpeedIndex, setPlaybackSpeedIndex] = useState(3);
   const [lastSubtitleTack, setLastSubtitleTack] = useState(0);
+  const [showHelpDialog, setShowHelpDialog] = useState(false);
+  const [showInfoDialog, setShowInfoDialog] = useState(false);
+  const [infoDialogContent, setInfoDialogContent] = useState('');
 
-  // const questionmarkPressed = useKeyPress('?');
+  const questionmarkPressed = useKeyPress('?');
   const mutePressed = useKeyPress('m');
   const fullscreenPressed = useKeyPress('f');
   const subtitlesPressed = useKeyPress('c');
   const increasePlaybackSpeedPressed = useKeyPress('>');
   const decreasePlaybackSpeedPressed = useKeyPress('<');
   const resetPlaybackSpeedPressed = useKeyPress('=');
+  const arrowRightPressed = useKeyPress('ArrowRight');
+  const arrowLeftPressed = useKeyPress('ArrowLeft');
 
   const videoId = video.data.youtube_id;
   const videoUrl = video.data.media_url;
@@ -150,6 +155,16 @@ const VideoPlayer = ({
   if (searchParamVideoProgress !== null) {
     videoSrcProgress = searchParamVideoProgress;
   }
+
+  const infoDialog = (content: string) => {
+    setInfoDialogContent(content);
+    setShowInfoDialog(true);
+
+    setTimeout(() => {
+      setShowInfoDialog(false);
+      setInfoDialogContent('');
+    }, 500);
+  };
 
   const handleVideoEnd =
     (
@@ -194,9 +209,11 @@ const VideoPlayer = ({
       const newSpeed = playbackSpeedIndex + 1;
 
       if (videoRef.current && VIDEO_PLAYBACK_SPEEDS[newSpeed]) {
-        videoRef.current.playbackRate = VIDEO_PLAYBACK_SPEEDS[newSpeed];
+        const speed = VIDEO_PLAYBACK_SPEEDS[newSpeed];
+        videoRef.current.playbackRate = speed;
 
         setPlaybackSpeedIndex(newSpeed);
+        infoDialog(`${speed}x`);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -207,9 +224,11 @@ const VideoPlayer = ({
       const newSpeedIndex = playbackSpeedIndex - 1;
 
       if (videoRef.current && VIDEO_PLAYBACK_SPEEDS[newSpeedIndex]) {
-        videoRef.current.playbackRate = VIDEO_PLAYBACK_SPEEDS[newSpeedIndex];
+        const speed = VIDEO_PLAYBACK_SPEEDS[newSpeedIndex];
+        videoRef.current.playbackRate = speed;
 
         setPlaybackSpeedIndex(newSpeedIndex);
+        infoDialog(`${speed}x`);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -220,9 +239,11 @@ const VideoPlayer = ({
       const newSpeedIndex = 3;
 
       if (videoRef.current && VIDEO_PLAYBACK_SPEEDS[newSpeedIndex]) {
-        videoRef.current.playbackRate = VIDEO_PLAYBACK_SPEEDS[newSpeedIndex];
+        const speed = VIDEO_PLAYBACK_SPEEDS[newSpeedIndex];
+        videoRef.current.playbackRate = speed;
 
         setPlaybackSpeedIndex(newSpeedIndex);
+        infoDialog(`${speed}x`);
       }
     }
   }, [resetPlaybackSpeedPressed]);
@@ -230,10 +251,14 @@ const VideoPlayer = ({
   useEffect(() => {
     if (fullscreenPressed) {
       if (videoRef.current && videoRef.current.requestFullscreen && !document.fullscreenElement) {
-        videoRef.current.requestFullscreen();
+        videoRef.current.requestFullscreen().catch(e => {
+          console.error(e);
+          infoDialog('Unable to enter fullscreen');
+        });
       } else {
         document.exitFullscreen().catch(e => {
           console.error(e);
+          infoDialog('Unable to exit fullscreen');
         });
       }
     }
@@ -264,6 +289,31 @@ const VideoPlayer = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subtitlesPressed]);
+
+  useEffect(() => {
+    if (arrowLeftPressed) {
+      infoDialog('- 5 seconds');
+    }
+  }, [arrowLeftPressed]);
+
+  useEffect(() => {
+    if (arrowRightPressed) {
+      infoDialog('+ 5 seconds');
+    }
+  }, [arrowRightPressed]);
+
+  useEffect(() => {
+    if (questionmarkPressed) {
+      if (!showHelpDialog) {
+        setTimeout(() => {
+          setShowHelpDialog(false);
+        }, 3000);
+      }
+
+      setShowHelpDialog(!showHelpDialog);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questionmarkPressed]);
 
   return (
     <>
@@ -320,6 +370,60 @@ const VideoPlayer = ({
           </video>
         </div>
       </div>
+
+      <dialog className="video-modal" open={showHelpDialog}>
+        <div className="video-modal-text">
+          <table className="video-modal-table">
+            <tbody>
+              <tr>
+                <td>Show help</td>
+                <td>?</td>
+              </tr>
+              <tr>
+                <td>Toggle mute</td>
+                <td>m</td>
+              </tr>
+              <tr>
+                <td>Toggle fullscreen</td>
+                <td>f</td>
+              </tr>
+              <tr>
+                <td>Toggle subtitles (if available)</td>
+                <td>c</td>
+              </tr>
+              <tr>
+                <td>Increase speed</td>
+                <td>&gt;</td>
+              </tr>
+              <tr>
+                <td>Decrease speed</td>
+                <td>&lt;</td>
+              </tr>
+              <tr>
+                <td>Reset speed</td>
+                <td>=</td>
+              </tr>
+              <tr>
+                <td>Back 5 seconds</td>
+                <td>←</td>
+              </tr>
+              <tr>
+                <td>Forward 5 seconds</td>
+                <td>→</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <form className="video-modal-form" method="dialog">
+            <button>Close</button>
+          </form>
+        </div>
+      </dialog>
+
+      <dialog className="video-modal" open={showInfoDialog}>
+        <div className="video-modal-text">{infoDialogContent}</div>
+      </dialog>
+
       <div className="sponsorblock" id="sponsorblock">
         {sponsorBlock?.is_enabled && (
           <>

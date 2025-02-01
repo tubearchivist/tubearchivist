@@ -790,7 +790,8 @@ video:-webkit-full-screen {
   position: absolute;
   z-index: 1;
   top: 20%;
-  width: 100%;
+  transform: translateX(-50%);
+  left: 50%;
   text-align: center;
 }
 
@@ -798,7 +799,16 @@ video:-webkit-full-screen {
   background: rgba(0, 0, 0, 0.5);
   color: #eeeeee;
   font-size: 1.3em;
-  display: none;
+}
+
+.video-modal-table {
+  margin: auto;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.video-modal-form {
+  margin: auto;
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .video-main video {
