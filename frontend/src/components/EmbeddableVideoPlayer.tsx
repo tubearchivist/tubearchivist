@@ -35,37 +35,39 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
 
   useEffect(() => {
     (async () => {
-      const videoResponse = await loadVideoById(videoId);
+      if (refresh || videoId !== videoResponse?.data.youtube_id) {
+        const videoResponse = await loadVideoById(videoId);
 
-      const playlistIds = videoResponse.data.playlist;
-      if (playlistIds !== undefined) {
-        const playlists = await Promise.all(
-          playlistIds.map(async playlistid => {
-            const playlistResponse = await loadPlaylistById(playlistid);
+        const playlistIds = videoResponse.data.playlist;
+        if (playlistIds !== undefined) {
+          const playlists = await Promise.all(
+            playlistIds.map(async playlistid => {
+              const playlistResponse = await loadPlaylistById(playlistid);
 
-            return playlistResponse.data;
-          }),
-        );
+              return playlistResponse.data;
+            }),
+          );
 
-        const playlistsFiltered = playlists
-          .filter(playlist => {
-            return playlist.playlist_subscribed;
-          })
-          .map(playlist => {
-            return {
-              id: playlist.playlist_id,
-              name: playlist.playlist_name,
-            };
-          });
+          const playlistsFiltered = playlists
+            .filter(playlist => {
+              return playlist.playlist_subscribed;
+            })
+            .map(playlist => {
+              return {
+                id: playlist.playlist_id,
+                name: playlist.playlist_name,
+              };
+            });
 
-        setPlaylists(playlistsFiltered);
+          setPlaylists(playlistsFiltered);
+        }
+
+        setVideoResponse(videoResponse);
+
+        inlinePlayerRef.current?.scrollIntoView();
+
+        setRefresh(false);
       }
-
-      setVideoResponse(videoResponse);
-
-      inlinePlayerRef.current?.scrollIntoView();
-
-      setRefresh(false);
     })();
   }, [videoId, refresh]);
 
