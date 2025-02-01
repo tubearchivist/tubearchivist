@@ -106,13 +106,15 @@ class SearchProcess:
         vid_thumb_url = ThumbManager(video_id).vid_thumb_path()
         channel = self._process_channel(video_dict["channel"])
 
+        cache_root = EnvironmentSettings().get_cache_root()
+        media_root = EnvironmentSettings().get_media_root()
+
         if "subtitles" in video_dict:
             for idx, _ in enumerate(video_dict["subtitles"]):
                 url = video_dict["subtitles"][idx]["media_url"]
-                video_dict["subtitles"][idx]["media_url"] = f"/media/{url}"
-
-        cache_root = EnvironmentSettings().get_cache_root()
-        media_root = EnvironmentSettings().get_media_root()
+                video_dict["subtitles"][idx][
+                    "media_url"
+                ] = f"{media_root}/{url}"
 
         video_dict.update(
             {
