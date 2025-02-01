@@ -88,7 +88,7 @@ const handleTimeUpdate =
       });
     }
 
-    if (currentTime < 10) return;
+    if (currentTime < 10 && currentTime === Number(videoTag.currentTarget.duration)) return;
     if (Number((currentTime % 10).toFixed(1)) <= 0.2) {
       // Check progress every 10 seconds or else progress is checked a few times a second
       const videoProgressResponse = await updateVideoProgressById({
