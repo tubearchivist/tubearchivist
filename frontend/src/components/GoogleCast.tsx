@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { VideoType } from '../pages/Home';
-import updateWatchedState from '../api/actions/updateWatchedState';
 import updateVideoProgressById from '../api/actions/updateVideoProgressById';
-import watchedThreshold from '../functions/watchedThreshold';
 
 const getURL = () => {
   return window.location.origin;
@@ -29,6 +27,7 @@ async function castVideoProgress(
     duration: number;
   },
   video: VideoType | undefined,
+  onWatchStateChanged?: (status: boolean) => void,
 ) {
   if (!video) {
     console.log('castVideoProgress: Video to cast not found...');
@@ -42,19 +41,13 @@ async function castVideoProgress(
 
     if (currentTime % 10 <= 1.0 && currentTime !== 0 && duration !== 0) {
       // Check progress every 10 seconds or else progress is checked a few times a second
-      await updateVideoProgressById({
+      const videoProgressResponse = await updateVideoProgressById({
         youtubeId: videoId,
         currentProgress: currentTime,
       });
 
-      if (!video.player.watched) {
-        // Check if video is already marked as watched
-        if (watchedThreshold(currentTime, duration)) {
-          await updateWatchedState({
-            id: videoId,
-            is_watched: true,
-          });
-        }
+      if (videoProgressResponse.watched && video.player.watched !== videoProgressResponse.watched) {
+        onWatchStateChanged?.(true);
       }
     }
   }
@@ -93,9 +86,10 @@ async function castVideoPaused(
 type GoogleCastProps = {
   video?: VideoType;
   setRefresh?: () => void;
+  onWatchStateChanged?: (status: boolean) => void;
 };
 
-const GoogleCast = ({ video, setRefresh }: GoogleCastProps) => {
+const GoogleCast = ({ video, setRefresh, onWatchStateChanged }: GoogleCastProps) => {
   const [isConnected, setIsConnected] = useState(false);
 
   const setup = useCallback(() => {
@@ -118,12 +112,14 @@ const GoogleCast = ({ video, setRefresh }: GoogleCastProps) => {
         setIsConnected(player.isConnected);
       },
     );
+
     playerController.addEventListener(
       cast.framework.RemotePlayerEventType.CURRENT_TIME_CHANGED,
       function () {
-        castVideoProgress(player, video);
+        castVideoProgress(player, video, onWatchStateChanged);
       },
     );
+
     playerController.addEventListener(
       cast.framework.RemotePlayerEventType.IS_PAUSED_CHANGED,
       function () {
@@ -131,6 +127,8 @@ const GoogleCast = ({ video, setRefresh }: GoogleCastProps) => {
         setRefresh?.();
       },
     );
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setRefresh, video]);
 
   const startPlayback = useCallback(() => {

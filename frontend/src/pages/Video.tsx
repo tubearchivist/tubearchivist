@@ -121,7 +121,6 @@ const Video = () => {
   const navigate = useNavigate();
   const isAdmin = useIsAdmin();
 
-  const [loading, setLoading] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
   const [playlistAutoplay, setPlaylistAutoplay] = useState(
     localStorage.getItem('playlistAutoplay') === 'true',
@@ -143,23 +142,22 @@ const Video = () => {
 
   useEffect(() => {
     (async () => {
-      setLoading(true);
+      if (refreshVideoList || videoId !== videoResponse?.data?.youtube_id) {
+        const videoByIdResponse = await loadVideoById(videoId);
+        const simmilarVideosResponse = await loadSimmilarVideosById(videoId);
+        const customPlaylistsResponse = await loadPlaylistList({ type: 'custom' });
+        const commentsResponse = await loadCommentsbyVideoId(videoId);
+        const videoNavResponse = await loadVideoNav(videoId);
 
-      const videoResponse = await loadVideoById(videoId);
-      const simmilarVideosResponse = await loadSimmilarVideosById(videoId);
-      const customPlaylistsResponse = await loadPlaylistList({ type: 'custom' });
-      const commentsResponse = await loadCommentsbyVideoId(videoId);
-      const videoNavResponse = await loadVideoNav(videoId);
-
-      setVideoResponse(videoResponse);
-      setSimmilarVideos(simmilarVideosResponse);
-      setVideoPlaylistNav(videoNavResponse);
-      setCustomPlaylistsResponse(customPlaylistsResponse);
-      setCommentsResponse(commentsResponse);
-      setRefreshVideoList(false);
-
-      setLoading(false);
+        setVideoResponse(videoByIdResponse);
+        setSimmilarVideos(simmilarVideosResponse);
+        setVideoPlaylistNav(videoNavResponse);
+        setCustomPlaylistsResponse(customPlaylistsResponse);
+        setCommentsResponse(commentsResponse);
+        setRefreshVideoList(false);
+      }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId, refreshVideoList]);
 
   useEffect(() => {
@@ -214,16 +212,17 @@ const Video = () => {
       <title>{`TA | ${video.title}`}</title>
       <ScrollToTopOnNavigate />
 
-      {!loading && (
-        <VideoPlayer
-          video={videoResponse}
-          sponsorBlock={sponsorBlock}
-          autoplay={playlistAutoplay}
-          onVideoEnd={() => {
-            setVideoEnded(true);
-          }}
-        />
-      )}
+      <VideoPlayer
+        video={videoResponse}
+        sponsorBlock={sponsorBlock}
+        autoplay={playlistAutoplay}
+        onWatchStateChanged={() => {
+          setRefreshVideoList(true);
+        }}
+        onVideoEnd={() => {
+          setVideoEnded(true);
+        }}
+      />
 
       <div className="boxed-content">
         <div className="title-bar">
@@ -231,6 +230,9 @@ const Video = () => {
             <GoogleCast
               video={video}
               setRefresh={() => {
+                setRefreshVideoList(true);
+              }}
+              onWatchStateChanged={() => {
                 setRefreshVideoList(true);
               }}
             />
@@ -288,7 +290,7 @@ const Video = () => {
               {video.stats.dislike_count > 0 && (
                 <p className="thumb-icon">
                   <img className="dislike" src={iconThumb} alt="thumbs-down" />:{' '}
-                  {video.stats.dislike_count}
+                  {formatNumbers(video.stats.dislike_count)}
                 </p>
               )}
               {video?.stats && starRating && (

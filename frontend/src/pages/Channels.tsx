@@ -60,7 +60,7 @@ const Channels = () => {
 
   const channels = channelListResponse?.data;
   const pagination = channelListResponse?.paginate;
-  const channelCount = pagination?.total_hits;
+  // const channelCount = pagination?.total_hits;
   const hasChannels = channels?.length !== 0;
 
   useEffect(() => {
@@ -184,7 +184,7 @@ const Channels = () => {
             />
           </div>
         </div>
-        {hasChannels && <h2>Total channels: {channelCount}</h2>}
+        {/* {hasChannels && <h2>Total channels: {channelCount}</h2>} */}
 
         <div className={`channel-list ${userConfig.config.view_style_channel}`}>
           {!hasChannels && <h2>No channels found...</h2>}

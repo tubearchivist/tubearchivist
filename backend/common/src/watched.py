@@ -6,15 +6,17 @@ functionality:
 from datetime import datetime
 
 from common.src.es_connect import ElasticWrap
+from common.src.ta_redis import RedisArchivist
 from common.src.urlparser import Parser
 
 
 class WatchState:
     """handle watched checkbox for videos and channels"""
 
-    def __init__(self, youtube_id, is_watched):
+    def __init__(self, youtube_id: str, is_watched: bool, user_id: int):
         self.youtube_id = youtube_id
         self.is_watched = is_watched
+        self.user_id = user_id
         self.stamp = int(datetime.now().timestamp())
         self.pipeline = f"_ingest/pipeline/watch_{youtube_id}"
 
@@ -50,6 +52,8 @@ class WatchState:
             }
         }
         response, status_code = ElasticWrap(path).post(data=data)
+        key = f"{self.user_id}:progress:{self.youtube_id}"
+        RedisArchivist().del_message(key)
         if status_code != 200:
             print(response)
             raise ValueError("failed to mark video as watched")

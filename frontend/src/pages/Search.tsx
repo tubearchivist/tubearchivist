@@ -46,7 +46,8 @@ const Search = () => {
   const viewPlaylists = userMeConfig.view_style_playlist;
   const gridItems = userMeConfig.grid_items || 3;
 
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');
   const [searchResults, setSearchResults] = useState<SearchResultsType>();
 
   const [refresh, setRefresh] = useState(false);
@@ -58,7 +59,7 @@ const Search = () => {
   const queryType = searchResults?.queryType;
   const showEmbeddedVideo = videoId !== null;
 
-  const hasSearchQuery = searchQuery.length > 0;
+  const hasSearchQuery = searchTerm.length > 0;
   const hasVideos = Number(videoList?.length) > 0;
   const hasChannels = Number(channelList?.length) > 0;
   const hasPlaylist = Number(playlistList?.length) > 0;
@@ -75,19 +76,29 @@ const Search = () => {
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
 
   useEffect(() => {
-    (async () => {
-      if (!hasSearchQuery) {
-        setSearchResults(EmptySearchResponse);
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
 
-        return;
-      }
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
 
-      const searchResults = await loadSearch(searchQuery);
+  useEffect(() => {
+    if (debouncedSearchTerm.trim() !== '') {
+      fetchResults(debouncedSearchTerm);
+    } else {
+      setSearchResults(EmptySearchResponse);
+    }
+  }, [debouncedSearchTerm, refresh, showEmbeddedVideo]);
 
-      setSearchResults(searchResults);
-      setRefresh(false);
-    })();
-  }, [searchQuery, refresh, hasSearchQuery]);
+  const fetchResults = async (searchQuery: string) => {
+    const searchResults = await loadSearch(searchQuery);
+
+    setSearchResults(searchResults);
+    setRefresh(false);
+  };
 
   return (
     <>
@@ -103,9 +114,14 @@ const Search = () => {
               type="text"
               autoFocus
               autoComplete="off"
-              value={searchQuery}
+              value={searchTerm}
               onChange={event => {
-                setSearchQuery(event.target.value);
+                setSearchTerm(event.currentTarget.value);
+              }}
+              onKeyDown={event => {
+                if (event.key === 'Enter') {
+                  fetchResults(searchTerm);
+                }
               }}
             />
           </div>

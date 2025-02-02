@@ -1,11 +1,20 @@
 import updateVideoProgressById from '../api/actions/updateVideoProgressById';
-import updateWatchedState from '../api/actions/updateWatchedState';
 import { SponsorBlockSegmentType, SponsorBlockType, VideoResponseType } from '../pages/Video';
-import watchedThreshold from '../functions/watchedThreshold';
-import { Dispatch, Fragment, SetStateAction, SyntheticEvent, useState } from 'react';
+import {
+  Dispatch,
+  Fragment,
+  SetStateAction,
+  SyntheticEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import formatTime from '../functions/formatTime';
 import { useSearchParams } from 'react-router-dom';
 import getApiUrl from '../configuration/getApiUrl';
+import { useKeyPress } from '../functions/useKeypressHook';
+
+const VIDEO_PLAYBACK_SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3];
 
 type VideoTag = SyntheticEvent<HTMLVideoElement, Event>;
 
@@ -54,6 +63,7 @@ const handleTimeUpdate =
     watched: boolean,
     sponsorBlock?: SponsorBlockType,
     setSponsorSegmentSkipped?: Dispatch<SetStateAction<SponsorSegmentsSkippedType>>,
+    onWatchStateChanged?: (status: boolean) => void,
   ) =>
   async (videoTag: VideoTag) => {
     const currentTime = Number(videoTag.currentTarget.currentTime);
@@ -78,22 +88,16 @@ const handleTimeUpdate =
       });
     }
 
-    if (currentTime < 10) return;
+    if (currentTime < 10 && currentTime === Number(videoTag.currentTarget.duration)) return;
     if (Number((currentTime % 10).toFixed(1)) <= 0.2) {
       // Check progress every 10 seconds or else progress is checked a few times a second
-      await updateVideoProgressById({
+      const videoProgressResponse = await updateVideoProgressById({
         youtubeId,
         currentProgress: currentTime,
       });
 
-      if (!watched) {
-        // Check if video is already marked as watched
-        if (watchedThreshold(currentTime, duration)) {
-          await updateWatchedState({
-            id: youtubeId,
-            is_watched: true,
-          });
-        }
+      if (videoProgressResponse.watched && watched !== videoProgressResponse.watched) {
+        onWatchStateChanged?.(true);
       }
     }
   };
@@ -103,6 +107,7 @@ type VideoPlayerProps = {
   sponsorBlock?: SponsorBlockType;
   embed?: boolean;
   autoplay?: boolean;
+  onWatchStateChanged?: (status: boolean) => void;
   onVideoEnd?: () => void;
 };
 
@@ -111,12 +116,31 @@ const VideoPlayer = ({
   sponsorBlock,
   embed,
   autoplay = false,
+  onWatchStateChanged,
   onVideoEnd,
 }: VideoPlayerProps) => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
   const [searchParams] = useSearchParams();
   const searchParamVideoProgress = searchParams.get('t');
 
   const [skippedSegments, setSkippedSegments] = useState<SponsorSegmentsSkippedType>({});
+  const [isMuted, setIsMuted] = useState(false);
+  const [playbackSpeedIndex, setPlaybackSpeedIndex] = useState(3);
+  const [lastSubtitleTack, setLastSubtitleTack] = useState(0);
+  const [showHelpDialog, setShowHelpDialog] = useState(false);
+  const [showInfoDialog, setShowInfoDialog] = useState(false);
+  const [infoDialogContent, setInfoDialogContent] = useState('');
+
+  const questionmarkPressed = useKeyPress('?');
+  const mutePressed = useKeyPress('m');
+  const fullscreenPressed = useKeyPress('f');
+  const subtitlesPressed = useKeyPress('c');
+  const increasePlaybackSpeedPressed = useKeyPress('>');
+  const decreasePlaybackSpeedPressed = useKeyPress('<');
+  const resetPlaybackSpeedPressed = useKeyPress('=');
+  const arrowRightPressed = useKeyPress('ArrowRight');
+  const arrowLeftPressed = useKeyPress('ArrowLeft');
 
   const videoId = video.data.youtube_id;
   const videoUrl = video.data.media_url;
@@ -132,16 +156,32 @@ const VideoPlayer = ({
     videoSrcProgress = searchParamVideoProgress;
   }
 
+  const infoDialog = (content: string) => {
+    setInfoDialogContent(content);
+    setShowInfoDialog(true);
+
+    setTimeout(() => {
+      setShowInfoDialog(false);
+      setInfoDialogContent('');
+    }, 500);
+  };
+
   const handleVideoEnd =
     (
       youtubeId: string,
       watched: boolean,
       setSponsorSegmentSkipped?: Dispatch<SetStateAction<SponsorSegmentsSkippedType>>,
     ) =>
-    async () => {
-      if (!watched) {
-        // Check if video is already marked as watched
-        await updateWatchedState({ id: youtubeId, is_watched: true });
+    async (videoTag: VideoTag) => {
+      const currentTime = Number(videoTag.currentTarget.currentTime);
+
+      const videoProgressResponse = await updateVideoProgressById({
+        youtubeId,
+        currentProgress: currentTime,
+      });
+
+      if (videoProgressResponse.watched && watched !== videoProgressResponse.watched) {
+        onWatchStateChanged?.(true);
       }
 
       setSponsorSegmentSkipped?.((segments: SponsorSegmentsSkippedType) => {
@@ -157,11 +197,131 @@ const VideoPlayer = ({
       onVideoEnd?.();
     };
 
+  useEffect(() => {
+    if (mutePressed) {
+      setIsMuted(!isMuted);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mutePressed]);
+
+  useEffect(() => {
+    if (increasePlaybackSpeedPressed) {
+      const newSpeed = playbackSpeedIndex + 1;
+
+      if (videoRef.current && VIDEO_PLAYBACK_SPEEDS[newSpeed]) {
+        const speed = VIDEO_PLAYBACK_SPEEDS[newSpeed];
+        videoRef.current.playbackRate = speed;
+
+        setPlaybackSpeedIndex(newSpeed);
+        infoDialog(`${speed}x`);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [increasePlaybackSpeedPressed]);
+
+  useEffect(() => {
+    if (decreasePlaybackSpeedPressed) {
+      const newSpeedIndex = playbackSpeedIndex - 1;
+
+      if (videoRef.current && VIDEO_PLAYBACK_SPEEDS[newSpeedIndex]) {
+        const speed = VIDEO_PLAYBACK_SPEEDS[newSpeedIndex];
+        videoRef.current.playbackRate = speed;
+
+        setPlaybackSpeedIndex(newSpeedIndex);
+        infoDialog(`${speed}x`);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [decreasePlaybackSpeedPressed]);
+
+  useEffect(() => {
+    if (resetPlaybackSpeedPressed) {
+      const newSpeedIndex = 3;
+
+      if (videoRef.current && VIDEO_PLAYBACK_SPEEDS[newSpeedIndex]) {
+        const speed = VIDEO_PLAYBACK_SPEEDS[newSpeedIndex];
+        videoRef.current.playbackRate = speed;
+
+        setPlaybackSpeedIndex(newSpeedIndex);
+        infoDialog(`${speed}x`);
+      }
+    }
+  }, [resetPlaybackSpeedPressed]);
+
+  useEffect(() => {
+    if (fullscreenPressed) {
+      if (videoRef.current && videoRef.current.requestFullscreen && !document.fullscreenElement) {
+        videoRef.current.requestFullscreen().catch(e => {
+          console.error(e);
+          infoDialog('Unable to enter fullscreen');
+        });
+      } else {
+        document.exitFullscreen().catch(e => {
+          console.error(e);
+          infoDialog('Unable to exit fullscreen');
+        });
+      }
+    }
+  }, [fullscreenPressed]);
+
+  useEffect(() => {
+    if (subtitlesPressed) {
+      if (videoRef.current) {
+        const tracks = [...videoRef.current.textTracks];
+
+        if (tracks.length === 0) {
+          return;
+        }
+
+        const lastIndex = tracks.findIndex(x => x.mode === 'showing');
+        const active = tracks[lastIndex];
+
+        if (!active && lastSubtitleTack !== 0) {
+          tracks[lastSubtitleTack - 1].mode = 'showing';
+        } else {
+          if (active) {
+            active.mode = 'hidden';
+
+            setLastSubtitleTack(lastIndex + 1);
+          }
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subtitlesPressed]);
+
+  useEffect(() => {
+    if (arrowLeftPressed) {
+      infoDialog('- 5 seconds');
+    }
+  }, [arrowLeftPressed]);
+
+  useEffect(() => {
+    if (arrowRightPressed) {
+      infoDialog('+ 5 seconds');
+    }
+  }, [arrowRightPressed]);
+
+  useEffect(() => {
+    if (questionmarkPressed) {
+      if (!showHelpDialog) {
+        setTimeout(() => {
+          setShowHelpDialog(false);
+        }, 3000);
+      }
+
+      setShowHelpDialog(!showHelpDialog);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questionmarkPressed]);
+
   return (
     <>
       <div id="player" className={embed ? '' : 'player-wrapper'}>
         <div className={embed ? '' : 'video-main'}>
           <video
+            ref={videoRef}
+            key={`${getApiUrl()}${videoUrl}`}
             poster={`${getApiUrl()}${videoThumbUrl}`}
             onVolumeChange={(videoTag: VideoTag) => {
               localStorage.setItem('playerVolume', videoTag.currentTarget.volume.toString());
@@ -181,11 +341,12 @@ const VideoPlayer = ({
               watched,
               sponsorBlock,
               setSkippedSegments,
+              onWatchStateChanged,
             )}
             onPause={async (videoTag: VideoTag) => {
               const currentTime = Number(videoTag.currentTarget.currentTime);
 
-              if (currentTime < 10) return;
+              if (currentTime < 10 || currentTime > duration * 0.95) return;
 
               await updateVideoProgressById({
                 youtubeId: videoId,
@@ -198,6 +359,7 @@ const VideoPlayer = ({
             width="100%"
             playsInline
             id="video-item"
+            muted={isMuted}
           >
             <source
               src={`${getApiUrl()}${videoUrl}#t=${videoSrcProgress}`}
@@ -208,6 +370,60 @@ const VideoPlayer = ({
           </video>
         </div>
       </div>
+
+      <dialog className="video-modal" open={showHelpDialog}>
+        <div className="video-modal-text">
+          <table className="video-modal-table">
+            <tbody>
+              <tr>
+                <td>Show help</td>
+                <td>?</td>
+              </tr>
+              <tr>
+                <td>Toggle mute</td>
+                <td>m</td>
+              </tr>
+              <tr>
+                <td>Toggle fullscreen</td>
+                <td>f</td>
+              </tr>
+              <tr>
+                <td>Toggle subtitles (if available)</td>
+                <td>c</td>
+              </tr>
+              <tr>
+                <td>Increase speed</td>
+                <td>&gt;</td>
+              </tr>
+              <tr>
+                <td>Decrease speed</td>
+                <td>&lt;</td>
+              </tr>
+              <tr>
+                <td>Reset speed</td>
+                <td>=</td>
+              </tr>
+              <tr>
+                <td>Back 5 seconds</td>
+                <td>←</td>
+              </tr>
+              <tr>
+                <td>Forward 5 seconds</td>
+                <td>→</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <form className="video-modal-form" method="dialog">
+            <button>Close</button>
+          </form>
+        </div>
+      </dialog>
+
+      <dialog className="video-modal" open={showInfoDialog}>
+        <div className="video-modal-text">{infoDialogContent}</div>
+      </dialog>
+
       <div className="sponsorblock" id="sponsorblock">
         {sponsorBlock?.is_enabled && (
           <>

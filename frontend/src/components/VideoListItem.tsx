@@ -3,6 +3,7 @@ import Routes from '../configuration/routes/RouteList';
 import { VideoType, ViewLayoutType } from '../pages/Home';
 import iconPlay from '/img/icon-play.svg';
 import iconDotMenu from '/img/icon-dot-menu.svg';
+import iconClose from '/img/icon-close.svg';
 import defaultVideoThumb from '/img/default-video-thumb.jpg';
 import updateWatchedState from '../api/actions/updateWatchedState';
 import formatDate from '../functions/formatDates';
@@ -10,6 +11,7 @@ import WatchedCheckBox from './WatchedCheckBox';
 import MoveVideoMenu from './MoveVideoMenu';
 import { useState } from 'react';
 import getApiUrl from '../configuration/getApiUrl';
+import deleteVideoProgressById from '../api/actions/deleteVideoProgressById';
 
 type VideoListItemProps = {
   video: VideoType;
@@ -84,6 +86,17 @@ const VideoListItem = ({
               refreshVideoList(true);
             }}
           />
+          {video.player.progress && (
+            <img
+              src={iconClose}
+              className="video-popup-menu-close-button"
+              title="Delete watch progress"
+              onClick={async () => {
+                await deleteVideoProgressById(video.youtube_id);
+                refreshVideoList(true);
+              }}
+            />
+          )}
           <span>
             {formatDate(video.published)} | {video.player.duration_str}
           </span>

@@ -82,23 +82,24 @@ class YtWrap:
 
     def extract(self, url):
         """make extract request"""
-        try:
-            response = yt_dlp.YoutubeDL(self.obs).extract_info(url)
-        except cookiejar.LoadError as err:
-            print(f"cookie file is invalid: {err}")
-            return False
-        except yt_dlp.utils.ExtractorError as err:
-            print(f"{url}: failed to extract with message: {err}, continue...")
-            return False
-        except yt_dlp.utils.DownloadError as err:
-            if "This channel does not have a" in str(err):
+        with yt_dlp.YoutubeDL(self.obs) as ydl:
+            try:
+                response = ydl.extract_info(url)
+            except cookiejar.LoadError as err:
+                print(f"cookie file is invalid: {err}")
                 return False
+            except yt_dlp.utils.ExtractorError as err:
+                print(f"{url}: failed to extract: {err}, continue...")
+                return False
+            except yt_dlp.utils.DownloadError as err:
+                if "This channel does not have a" in str(err):
+                    return False
 
-            print(f"{url}: failed to get info from youtube with message {err}")
-            if "Temporary failure in name resolution" in str(err):
-                raise ConnectionError("lost the internet, abort!") from err
+                print(f"{url}: failed to get info from youtube: {err}")
+                if "Temporary failure in name resolution" in str(err):
+                    raise ConnectionError("lost the internet, abort!") from err
 
-            return False
+                return False
 
         self._validate_cookie()
 
@@ -131,7 +132,8 @@ class CookieHandler:
 
     def set_cookie(self, cookie):
         """set cookie str and activate in config"""
-        RedisArchivist().set_message("cookie", cookie, save=True)
+        cookie_clean = cookie.strip("\x00")
+        RedisArchivist().set_message("cookie", cookie_clean, save=True)
         AppConfig().update_config({"downloads.cookie_import": True})
         self.config["downloads"]["cookie_import"] = True
         print("[cookie]: activated and stored in Redis")
@@ -161,9 +163,10 @@ class CookieHandler:
         self.store_validation(response)
 
         # update in redis to avoid expiring
-        modified = validator.obs["cookiefile"].getvalue()
+        modified = validator.obs["cookiefile"].getvalue().strip("\x00")
         if modified:
-            RedisArchivist().set_message("cookie", modified)
+            cookie_clean = modified.strip("\x00")
+            RedisArchivist().set_message("cookie", cookie_clean)
 
         if not response:
             mess_dict = {

@@ -13,6 +13,7 @@ import createAppriseNotificationUrl, {
   AppriseTaskNameType,
 } from '../api/actions/createAppriseNotificationUrl';
 import deleteAppriseNotificationUrl from '../api/actions/deleteAppriseNotificationUrl';
+import { ApiError } from '../functions/APIClient';
 
 const SettingsScheduling = () => {
   const [refresh, setRefresh] = useState(false);
@@ -29,6 +30,11 @@ const SettingsScheduling = () => {
   const [zipBackupDays, setZipBackupDays] = useState<number | undefined>();
   const [notificationUrl, setNotificationUrl] = useState<string | undefined>();
   const [notificationTask, setNotificationTask] = useState<AppriseTaskNameType | string>('');
+  const [checkReindexError, setCheckReindexError] = useState<string | null>(null);
+  const [updateSubscribedError, setUpdateSubscribedError] = useState<string | null>(null);
+  const [downloadPendingError, setDownloadPendingError] = useState<string | null>(null);
+  const [thumnailCheckError, setThumnailCheckError] = useState<string | null>(null);
+  const [zipBackupError, setZipBackupError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -144,15 +150,24 @@ const SettingsScheduling = () => {
             <Button
               label="Save"
               onClick={async () => {
-                await createTaskSchedule('update_subscribed', {
-                  schedule: updateSubscribed,
-                });
-
+                try {
+                  await createTaskSchedule('update_subscribed', {
+                    schedule: updateSubscribed,
+                  });
+                  setUpdateSubscribedError('');
+                } catch (error) {
+                  const apiError = error as ApiError;
+                  if (apiError.status && apiError.message) {
+                    setUpdateSubscribedError(`Error ${apiError.status}: ${apiError.message}`);
+                  } else {
+                    setUpdateSubscribedError('An unexpected error occurred.');
+                  }
+                }
                 setUpdateSubscribed('');
-
                 setRefresh(true);
               }}
             />
+            {updateSubscribedError && <p className="danger-zone">{updateSubscribedError}</p>}
           </div>
         </div>
         <div className="settings-group">
@@ -190,15 +205,24 @@ const SettingsScheduling = () => {
             <Button
               label="Save"
               onClick={async () => {
-                await createTaskSchedule('download_pending', {
-                  schedule: downloadPending,
-                });
-
+                try {
+                  await createTaskSchedule('download_pending', {
+                    schedule: downloadPending,
+                  });
+                  setDownloadPendingError('');
+                } catch (error) {
+                  const apiError = error as ApiError;
+                  if (apiError.status && apiError.message) {
+                    setDownloadPendingError(`Error ${apiError.status}: ${apiError.message}`);
+                  } else {
+                    setDownloadPendingError('An unexpected error occurred.');
+                  }
+                }
                 setDownloadPending('');
-
                 setRefresh(true);
               }}
             />
+            {downloadPendingError && <p className="danger-zone">{downloadPendingError}</p>}
           </div>
         </div>
 
@@ -237,15 +261,24 @@ const SettingsScheduling = () => {
             <Button
               label="Save"
               onClick={async () => {
-                await createTaskSchedule('check_reindex', {
-                  schedule: checkReindex,
-                });
-
+                try {
+                  await createTaskSchedule('check_reindex', {
+                    schedule: checkReindex,
+                  });
+                  setCheckReindexError('');
+                } catch (error) {
+                  const apiError = error as ApiError;
+                  if (apiError.status && apiError.message) {
+                    setCheckReindexError(`Error ${apiError.status}: ${apiError.message}`);
+                  } else {
+                    setCheckReindexError('An unexpected error occurred.');
+                  }
+                }
                 setCheckReindex('');
-
                 setRefresh(true);
               }}
             />
+            {checkReindexError && <p className="danger-zone">{checkReindexError}</p>}
           </div>
           <div className="settings-item">
             <p>
@@ -313,15 +346,24 @@ const SettingsScheduling = () => {
             <Button
               label="Save"
               onClick={async () => {
-                await createTaskSchedule('thumbnail_check', {
-                  schedule: thumbnailCheck,
-                });
-
+                try {
+                  await createTaskSchedule('thumbnail_check', {
+                    schedule: thumbnailCheck,
+                  });
+                  setThumnailCheckError('');
+                } catch (error) {
+                  const apiError = error as ApiError;
+                  if (apiError.status && apiError.message) {
+                    setThumnailCheckError(`Error ${apiError.status}: ${apiError.message}`);
+                  } else {
+                    setThumnailCheckError('An unexpected error occurred.');
+                  }
+                }
                 setThumbnailCheck('');
-
                 setRefresh(true);
               }}
             />
+            {thumnailCheckError && <p className="danger-zone">{thumnailCheckError}</p>}
           </div>
         </div>
         <div className="settings-group">
@@ -366,15 +408,24 @@ const SettingsScheduling = () => {
             <Button
               label="Save"
               onClick={async () => {
-                await createTaskSchedule('run_backup', {
-                  schedule: zipBackup,
-                });
-
+                try {
+                  await createTaskSchedule('run_backup', {
+                    schedule: zipBackup,
+                  });
+                  setZipBackupError('');
+                } catch (error) {
+                  const apiError = error as ApiError;
+                  if (apiError.status && apiError.message) {
+                    setZipBackupError(`Error ${apiError.status}: ${apiError.message}`);
+                  } else {
+                    setZipBackupError('An unexpected error occurred.');
+                  }
+                }
                 setZipBackup('');
-
                 setRefresh(true);
               }}
             />
+            {zipBackupError && <p className="danger-zone">{zipBackupError}</p>}
           </div>
           <div className="settings-item">
             <p>

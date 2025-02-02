@@ -81,6 +81,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
     channelId,
     pagination?.current_page,
     videoType,
+    showEmbeddedVideo,
   ]);
 
   if (!channel) {

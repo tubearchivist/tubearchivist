@@ -28,52 +28,55 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
 
   const [, setSearchParams] = useSearchParams();
 
-  const [refresh, setRefresh] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [refresh, setRefresh] = useState(true);
 
   const [videoResponse, setVideoResponse] = useState<VideoResponseType>();
   const [playlists, setPlaylists] = useState<PlaylistList>();
 
   useEffect(() => {
     (async () => {
-      setLoading(true);
-      const videoResponse = await loadVideoById(videoId);
+      if (refresh || videoId !== videoResponse?.data.youtube_id) {
+        const videoResponse = await loadVideoById(videoId);
 
-      const playlistIds = videoResponse.data.playlist;
-      if (playlistIds !== undefined) {
-        const playlists = await Promise.all(
-          playlistIds.map(async playlistid => {
-            const playlistResponse = await loadPlaylistById(playlistid);
+        const playlistIds = videoResponse.data.playlist;
+        if (playlistIds !== undefined) {
+          const playlists = await Promise.all(
+            playlistIds.map(async playlistid => {
+              const playlistResponse = await loadPlaylistById(playlistid);
 
-            return playlistResponse.data;
-          }),
-        );
+              return playlistResponse.data;
+            }),
+          );
 
-        const playlistsFiltered = playlists
-          .filter(playlist => {
-            return playlist.playlist_subscribed;
-          })
-          .map(playlist => {
-            return {
-              id: playlist.playlist_id,
-              name: playlist.playlist_name,
-            };
-          });
+          const playlistsFiltered = playlists
+            .filter(playlist => {
+              return playlist.playlist_subscribed;
+            })
+            .map(playlist => {
+              return {
+                id: playlist.playlist_id,
+                name: playlist.playlist_name,
+              };
+            });
 
-        setPlaylists(playlistsFiltered);
+          setPlaylists(playlistsFiltered);
+        }
+
+        setVideoResponse(videoResponse);
+
+        inlinePlayerRef.current?.scrollIntoView();
+
+        setRefresh(false);
       }
-
-      setVideoResponse(videoResponse);
-
-      inlinePlayerRef.current?.scrollIntoView();
-
-      setRefresh(false);
-      setLoading(false);
     })();
   }, [videoId, refresh]);
 
+  useEffect(() => {
+    inlinePlayerRef.current?.scrollIntoView();
+  }, []);
+
   if (videoResponse === undefined) {
-    return [];
+    return <div ref={inlinePlayerRef} className="player-wrapper" />;
   }
 
   const video = videoResponse.data;
@@ -94,14 +97,15 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
     <>
       <div ref={inlinePlayerRef} className="player-wrapper">
         <div className="video-player">
-          {!loading && (
-            <VideoPlayer
-              video={videoResponse}
-              sponsorBlock={sponsorblock}
-              embed={true}
-              autoplay={true}
-            />
-          )}
+          <VideoPlayer
+            video={videoResponse}
+            sponsorBlock={sponsorblock}
+            embed={true}
+            autoplay={true}
+            onWatchStateChanged={() => {
+              setRefresh(true);
+            }}
+          />
 
           <div className="player-title boxed-content">
             <img
@@ -113,6 +117,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
                 setSearchParams({});
               }}
             />
+
             <WatchedCheckBox
               watched={watched}
               onClick={async status => {
@@ -125,10 +130,14 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
                 setRefresh(true);
               }}
             />
+
             {cast && (
               <GoogleCast
                 video={video}
                 setRefresh={() => {
+                  setRefresh(true);
+                }}
+                onWatchStateChanged={() => {
                   setRefresh(true);
                 }}
               />

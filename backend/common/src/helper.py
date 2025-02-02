@@ -275,3 +275,19 @@ def get_channel_overwrites() -> dict[str, dict[str, Any]]:
     overwrites = {i["channel_id"]: i["channel_overwrites"] for i in result}
 
     return overwrites
+
+
+def calc_is_watched(duration: float, position: float) -> bool:
+    """considered watched based on duration position"""
+
+    if not duration or duration <= 0:
+        return False
+
+    if duration < 60:
+        threshold = 0.5
+    elif duration > 900:
+        threshold = 1 - (180 / duration)
+    else:
+        threshold = 0.9
+
+    return position >= duration * threshold
