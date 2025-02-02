@@ -34,7 +34,7 @@ function sync_blackhole {
         --exclude ".mypy_cache" \
         . -e ssh "$host":tubearchivist
 
-    ssh "$host" 'docker build -t bbilly1/tubearchivist:unstable tubearchivist'
+    ssh "$host" 'docker build --build-arg INSTALL_DEBUG=1 -t bbilly1/tubearchivist:unstable tubearchivist'
     ssh "$host" 'docker compose -f docker/docker-compose.yml up -d'
 
 }
