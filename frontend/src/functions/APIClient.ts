@@ -10,6 +10,11 @@ export interface ApiClientOptions extends Omit<RequestInit, 'body'> {
   body?: Record<string, unknown> | string;
 }
 
+export interface ApiError {
+  status: number;
+  message: string;
+}
+
 const APIClient = async (
   endpoint: string,
   { method = 'GET', body, headers = {}, ...options }: ApiClientOptions = {},
@@ -30,6 +35,14 @@ const APIClient = async (
   });
 
   // Handle common errors
+  if (response.status === 400) {
+    const data = await response.json();
+    throw {
+      status: response.status,
+      message: data?.message || 'An error occurred while processing the request.',
+    } as ApiError;
+  }
+
   if (response.status === 401) {
     logOut();
     window.location.href = Routes.Login;
