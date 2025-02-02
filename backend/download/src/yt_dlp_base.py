@@ -163,9 +163,10 @@ class CookieHandler:
         self.store_validation(response)
 
         # update in redis to avoid expiring
-        modified = validator.obs["cookiefile"].getvalue()
+        modified = validator.obs["cookiefile"].getvalue().strip("\x00")
         if modified:
-            RedisArchivist().set_message("cookie", modified)
+            cookie_clean = modified.strip("\x00")
+            RedisArchivist().set_message("cookie", cookie_clean)
 
         if not response:
             mess_dict = {
