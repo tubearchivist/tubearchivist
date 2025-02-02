@@ -132,7 +132,8 @@ class CookieHandler:
 
     def set_cookie(self, cookie):
         """set cookie str and activate in config"""
-        RedisArchivist().set_message("cookie", cookie, save=True)
+        cookie_clean = cookie.strip("\x00")
+        RedisArchivist().set_message("cookie", cookie_clean, save=True)
         AppConfig().update_config({"downloads.cookie_import": True})
         self.config["downloads"]["cookie_import"] = True
         print("[cookie]: activated and stored in Redis")
