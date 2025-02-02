@@ -126,10 +126,9 @@ class VideoProgressView(ApiBaseView):
             current_progress = self.response["data"]["player"]
 
         current_progress.update({"position": position, "youtube_id": video_id})
-        watched = self._check_watched_state(video_id, current_progress)
+        watched = self._check_watched(request, video_id, current_progress)
         if watched:
-            redis_con.del_message(key)
-            expire = 360
+            expire = 60
         else:
             expire = False
 
@@ -138,7 +137,7 @@ class VideoProgressView(ApiBaseView):
 
         return Response(current_progress)
 
-    def _check_watched_state(self, video_id, current_progress) -> bool:
+    def _check_watched(self, request, video_id, current_progress) -> bool:
         """check watched state"""
         if current_progress["watched"]:
             return True
@@ -147,7 +146,7 @@ class VideoProgressView(ApiBaseView):
             current_progress["duration"], current_progress["position"]
         )
         if watched:
-            WatchState(video_id, watched).change()
+            WatchState(video_id, watched, request.user.id).change()
 
         return watched
 

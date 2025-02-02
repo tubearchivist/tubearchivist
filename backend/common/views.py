@@ -75,7 +75,7 @@ class WatchedView(ApiBaseView):
             message = {"message": "missing id or is_watched"}
             return Response(message, status=400)
 
-        WatchState(youtube_id, is_watched).change()
+        WatchState(youtube_id, is_watched, request.user.id).change()
         return Response({"message": "success"}, status=200)
 
 
