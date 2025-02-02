@@ -82,23 +82,24 @@ class YtWrap:
 
     def extract(self, url):
         """make extract request"""
-        try:
-            response = yt_dlp.YoutubeDL(self.obs).extract_info(url)
-        except cookiejar.LoadError as err:
-            print(f"cookie file is invalid: {err}")
-            return False
-        except yt_dlp.utils.ExtractorError as err:
-            print(f"{url}: failed to extract with message: {err}, continue...")
-            return False
-        except yt_dlp.utils.DownloadError as err:
-            if "This channel does not have a" in str(err):
+        with yt_dlp.YoutubeDL(self.obs) as ydl:
+            try:
+                response = ydl.extract_info(url)
+            except cookiejar.LoadError as err:
+                print(f"cookie file is invalid: {err}")
                 return False
+            except yt_dlp.utils.ExtractorError as err:
+                print(f"{url}: failed to extract: {err}, continue...")
+                return False
+            except yt_dlp.utils.DownloadError as err:
+                if "This channel does not have a" in str(err):
+                    return False
 
-            print(f"{url}: failed to get info from youtube with message {err}")
-            if "Temporary failure in name resolution" in str(err):
-                raise ConnectionError("lost the internet, abort!") from err
+                print(f"{url}: failed to get info from youtube: {err}")
+                if "Temporary failure in name resolution" in str(err):
+                    raise ConnectionError("lost the internet, abort!") from err
 
-            return False
+                return False
 
         self._validate_cookie()
 

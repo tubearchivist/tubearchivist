@@ -20,7 +20,11 @@ python manage.py ta_startup
 
 # start all tasks
 nginx &
-celery -A task.celery worker --loglevel=INFO --max-tasks-per-child 10 &
+celery -A task.celery worker \
+    --loglevel=INFO \
+    --concurrency 4 \
+    --max-tasks-per-child 5 \
+    --max-memory-per-child 150000 &
 celery -A task beat --loglevel=INFO \
     --scheduler django_celery_beat.schedulers:DatabaseScheduler &
 python backend_start.py
