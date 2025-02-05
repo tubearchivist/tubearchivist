@@ -23,7 +23,7 @@ class YoutubeChannel(YouTubeItem):
     index_name = "ta_channel"
     yt_base = "https://www.youtube.com/channel/"
     yt_obs = {
-        "playlist_items": "1,0",
+        "playlist_items": "0,0",
         "skip_download": True,
     }
 
