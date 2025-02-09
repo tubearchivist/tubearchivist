@@ -2,11 +2,13 @@
 
 # pylint: disable=abstract-method
 
-from common.serializers import PaginationSerializer
+from common.serializers import PaginationSerializer, ValidateUnknownFieldsMixin
 from rest_framework import serializers
 
 
-class ChannelOverwriteSerializer(serializers.Serializer):
+class ChannelOverwriteSerializer(
+    ValidateUnknownFieldsMixin, serializers.Serializer
+):
     """serialize channel overwrites"""
 
     download_format = serializers.CharField(required=False, allow_null=True)
@@ -24,20 +26,6 @@ class ChannelOverwriteSerializer(serializers.Serializer):
     subscriptions_shorts_channel_size = serializers.IntegerField(
         required=False, allow_null=True
     )
-
-    def to_internal_value(self, data):
-        """Override this method to detect unknown fields."""
-        allowed_fields = set(self.fields.keys())
-        input_fields = set(data.keys())
-
-        unknown_fields = input_fields - allowed_fields
-
-        if unknown_fields:
-            raise serializers.ValidationError(
-                {"error": f"Unknown fields: {', '.join(unknown_fields)}"}
-            )
-
-        return super().to_internal_value(data)
 
 
 class ChannelSerializer(serializers.Serializer):

@@ -134,7 +134,7 @@ class CookieHandler:
         """set cookie str and activate in config"""
         cookie_clean = cookie.strip("\x00")
         RedisArchivist().set_message("cookie", cookie_clean, save=True)
-        AppConfig().update_config({"downloads.cookie_import": True})
+        AppConfig().update_config({"downloads": {"cookie_import": True}})
         self.config["downloads"]["cookie_import"] = True
         print("[cookie]: activated and stored in Redis")
 
@@ -143,7 +143,7 @@ class CookieHandler:
         """revoke cookie"""
         RedisArchivist().del_message("cookie")
         RedisArchivist().del_message("cookie:valid")
-        AppConfig().update_config({"downloads.cookie_import": False})
+        AppConfig().update_config({"downloads": {"cookie_import": False}})
         print("[cookie]: revoked")
 
     def validate(self):
@@ -211,9 +211,9 @@ class POTokenHandler:
     def set_token(self, new_token: str) -> None:
         """set new PO token"""
         RedisArchivist().set_message(self.REDIS_KEY, new_token)
-        AppConfig().update_config({"downloads.potoken": True})
+        AppConfig().update_config({"downloads": {"potoken": True}})
 
     def revoke_token(self) -> None:
         """revoke token"""
         RedisArchivist().del_message(self.REDIS_KEY)
-        AppConfig().update_config({"downloads.potoken": False})
+        AppConfig().update_config({"downloads": {"potoken": False}})

@@ -109,29 +109,24 @@ class AppConfig:
 
     def update_config(self, data: dict) -> AppConfigType:
         """update single config value"""
+        new_config = self.config.copy()
         for key, value in data.items():
-            key_map = key.split(".")
-            self._validate_key(key_map)
-            self.config[key_map[0]][key_map[1]] = value
+            if (
+                isinstance(value, dict)
+                and key in new_config
+                and isinstance(new_config[key], dict)
+            ):
+                new_config[key].update(value)
+            else:
+                new_config[key] = value
 
-        response, status_code = ElasticWrap(self.ES_PATH).post(self.config)
+        response, status_code = ElasticWrap(self.ES_PATH).post(new_config)
         if not status_code == 200:
             print(response)
 
-        return self.config
+        self.config = new_config
 
-    def _update_config_dict(self, to_update) -> None:
-        """none validated partial update for defaults sync"""
-        data = {"doc": to_update}
-        response, status_code = ElasticWrap(self.ES_UPDATE_PATH).post(data)
-        if not status_code == 200:
-            print(f"update failed: {response}, {status_code}")
-
-    def _validate_key(self, key_map: list[str]) -> None:
-        """raise valueerror on invalid key"""
-        exists = key_map[1] in self.CONFIG_DEFAULTS.get(key_map[0], {})  # type: ignore  # noqa: E501
-        if exists is None:
-            raise ValueError(f"trying to access invalid config key: {key_map}")
+        return new_config
 
     def post_process_updated(self, data: dict) -> None:
         """apply hooks for some config keys"""
@@ -163,7 +158,7 @@ class AppConfig:
         for key, value in self.CONFIG_DEFAULTS.items():
             if key not in self.config:
                 # complete new key
-                self._update_config_dict({key: value})
+                self.update_config({key: value})
                 updated.append(str({key: value}))
                 continue
 
@@ -171,7 +166,7 @@ class AppConfig:
                 if sub_key not in self.config[key]:
                     # new partial key
                     to_update = {key: {sub_key: sub_value}}
-                    self._update_config_dict(to_update)
+                    self.update_config(to_update)
                     updated.append(str(to_update))
 
         return updated
