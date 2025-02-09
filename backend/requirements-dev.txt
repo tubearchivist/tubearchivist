@@ -1,8 +1,8 @@
 -r requirements.txt
-ipython==8.31.0
+ipython==8.32.0
 pre-commit==4.1.0
 pylint-django==2.6.1
-pylint==3.3.3
+pylint==3.3.4
 pytest-django==4.9.0
 pytest==8.3.4
 python-dotenv==1.0.1

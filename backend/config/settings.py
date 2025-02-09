@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "django.contrib.humanize",
     "rest_framework",
     "rest_framework.authtoken",
+    "drf_spectacular",
     "common",
     "video",
     "channel",
@@ -295,3 +296,15 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 # TA application settings
 TA_UPSTREAM = "https://github.com/tubearchivist/tubearchivist"
 TA_VERSION = "v0.5.0-unstable"
+
+# API
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Tube Archivist API",
+    "DESCRIPTION": "API documentation for Tube Archivist backend.",
+    "VERSION": TA_VERSION,
+    "SERVE_INCLUDE_SCHEMA": False,
+}
