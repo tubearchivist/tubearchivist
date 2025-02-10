@@ -2,8 +2,15 @@
 
 import uuid
 
+from common.serializers import ErrorResponseSerializer
 from common.views_base import AdminWriteOnly, ApiBaseView
 from download.src.subscriptions import PlaylistSubscription
+from drf_spectacular.utils import OpenApiResponse, extend_schema
+from playlist.serializers import (
+    PlaylistListQuerySerializer,
+    PlaylistListSerializer,
+    PlaylistSerializer,
+)
 from playlist.src.index import YoutubePlaylist
 from playlist.src.query_building import QueryBuilder
 from rest_framework import status
@@ -25,17 +32,34 @@ class PlaylistApiListView(ApiBaseView):
     search_base = "ta_playlist/_search/"
     permission_classes = [AdminWriteOnly]
 
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(PlaylistListSerializer()),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="Bad request"
+            ),
+        },
+        parameters=[PlaylistListQuerySerializer],
+    )
     def get(self, request):
-        """get request"""
+        """get playlist list"""
+        query_serializer = PlaylistListQuerySerializer(
+            data=request.query_params
+        )
+        query_serializer.is_valid(raise_exception=True)
+        validated_query = query_serializer.validated_data
         try:
-            data = QueryBuilder(**request.GET).build_data()
+            data = QueryBuilder(**validated_query).build_data()
         except ValueError as err:
-            return Response({"error": str(err)}, status=400)
+            error = ErrorResponseSerializer({"error": str(err)})
+            return Response(error.data, status=400)
 
         self.data = data
         self.get_document_list(request)
 
-        return Response(self.response)
+        response_serializer = PlaylistListSerializer(self.response)
+
+        return Response(response_serializer.data)
 
     def post(self, request):
         """subscribe/unsubscribe to list of playlists"""
@@ -88,11 +112,25 @@ class PlaylistApiView(ApiBaseView):
     permission_classes = [AdminWriteOnly]
     valid_custom_actions = ["create", "remove", "up", "down", "top", "bottom"]
 
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(PlaylistSerializer()),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="playlist not found"
+            ),
+        },
+    )
     def get(self, request, playlist_id):
         # pylint: disable=unused-argument
-        """get request"""
+        """get playlist"""
         self.get_document(playlist_id)
-        return Response(self.response, status=self.status_code)
+        if not self.response:
+            error = ErrorResponseSerializer({"error": "playlist not found"})
+            return Response(error.data, status=404)
+
+        response_serializer = PlaylistSerializer(self.response)
+
+        return Response(response_serializer.data)
 
     def post(self, request, playlist_id):
         """post to custom playlist to add a video to list"""
