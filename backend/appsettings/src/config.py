@@ -242,7 +242,7 @@ class ReleaseVersion:
 
         return False
 
-    def get_update(self) -> dict:
+    def get_update(self) -> dict | None:
         """return new version dict if available"""
         message = RedisArchivist().get_message_dict(self.NEW_KEY)
-        return message
+        return message or None

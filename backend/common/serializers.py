@@ -55,3 +55,86 @@ class AsyncTaskResponseSerializer(serializers.Serializer):
     message = serializers.CharField()
     task_id = serializers.CharField()
     filename = serializers.CharField(required=False)
+
+
+class NotificationSerializer(serializers.Serializer):
+    """serialize notification messages"""
+
+    title = serializers.CharField()
+    group = serializers.CharField()
+    api_start = serializers.BooleanField()
+    api_stop = serializers.BooleanField()
+    level = serializers.ChoiceField(choices=["info", "error"])
+    messages = serializers.ListField(child=serializers.CharField())
+    progress = serializers.FloatField(required=False)
+
+
+class NotificationQueryFilterSerializer(serializers.Serializer):
+    """serialize notification query filter"""
+
+    filter = serializers.ChoiceField(
+        choices=["download", "settings", "channel"], required=False
+    )
+
+
+class PingUpdateSerializer(serializers.Serializer):
+    """serialize update notification"""
+
+    status = serializers.BooleanField()
+    version = serializers.CharField()
+    is_breaking = serializers.BooleanField()
+
+
+class PingSerializer(serializers.Serializer):
+    """serialize ping response"""
+
+    response = serializers.ChoiceField(choices=["pong"])
+    user = serializers.IntegerField()
+    version = serializers.CharField()
+    ta_update = PingUpdateSerializer(required=False)
+
+
+class WatchedDataSerializer(serializers.Serializer):
+    """mark as watched serializer"""
+
+    id = serializers.CharField()
+    is_watched = serializers.BooleanField()
+
+
+class RefreshQuerySerializer(serializers.Serializer):
+    """refresh query filtering"""
+
+    type = serializers.ChoiceField(
+        choices=["video", "channel", "playlist"], required=False
+    )
+    id = serializers.CharField(required=False)
+
+
+class RefreshResponseSerializer(serializers.Serializer):
+    """serialize refresh response"""
+
+    state = serializers.ChoiceField(
+        choices=["running", "queued", "empty", False]
+    )
+    total_queued = serializers.IntegerField()
+    in_queue_name = serializers.CharField(required=False)
+
+
+class RefreshAddQuerySerializer(serializers.Serializer):
+    """serialize add to refresh queue"""
+
+    extract_videos = serializers.BooleanField(required=False)
+
+
+class RefreshAddDataSerializer(serializers.Serializer):
+    """add to refresh queue serializer"""
+
+    video = serializers.ListField(
+        child=serializers.CharField(), required=False
+    )
+    channel = serializers.ListField(
+        child=serializers.CharField(), required=False
+    )
+    playlist = serializers.ListField(
+        child=serializers.CharField(), required=False
+    )
