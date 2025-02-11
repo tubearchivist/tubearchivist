@@ -49,3 +49,43 @@ class PlaylistListQuerySerializer(serializers.Serializer):
     type = serializers.ChoiceField(
         choices=["regular", "custom"], required=False
     )
+
+
+class PlaylistSingleAddSerializer(serializers.Serializer):
+    """single item to add"""
+
+    playlist_id = serializers.CharField()
+    playlist_subscribed = serializers.ChoiceField(choices=[True])
+
+
+class PlaylistBulkAddSerializer(serializers.Serializer):
+    """bulk add playlists serializers"""
+
+    data = PlaylistSingleAddSerializer(many=True)
+
+
+class PlaylistSingleUpdate(serializers.Serializer):
+    """update state of single playlist"""
+
+    playlist_subscribed = serializers.BooleanField()
+
+
+class PlaylistListCustomPostSerializer(serializers.Serializer):
+    """serialize list post custom playlist"""
+
+    playlist_name = serializers.CharField()
+
+
+class PlaylistCustomPostSerializer(serializers.Serializer):
+    """serialize playlist custom action"""
+
+    action = serializers.ChoiceField(
+        choices=["create", "remove", "up", "down", "top", "bottom"]
+    )
+    video_id = serializers.CharField()
+
+
+class PlaylistDeleteQuerySerializer(serializers.Serializer):
+    """serialize playlist delete query params"""
+
+    delete_videos = serializers.BooleanField(required=False)

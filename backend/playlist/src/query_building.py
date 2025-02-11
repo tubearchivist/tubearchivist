@@ -27,8 +27,7 @@ class QueryBuilder:
 
         subscribed = self.request_params.get("subscribed")
         if subscribed:
-            subed_bool = subscribed[0] == "true"
-            must_list.append({"match": {"playlist_subscribed": subed_bool}})
+            must_list.append({"match": {"playlist_subscribed": subscribed}})
 
         playlist_type = self.request_params.get("type")
         if playlist_type:
