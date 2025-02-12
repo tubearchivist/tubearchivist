@@ -201,7 +201,7 @@ class YoutubePlaylist(YouTubeItem):
 
         current_idx = all_entries.index(current[0])
         if current_idx == 0:
-            previous_item = False
+            previous_item = None
         else:
             previous_item = all_entries[current_idx - 1]
             prev_id = previous_item["youtube_id"]
@@ -209,7 +209,7 @@ class YoutubePlaylist(YouTubeItem):
             previous_item["vid_thumb"] = f"{cache_root}/{prev_thumb_path}"
 
         if current_idx == len(all_entries) - 1:
-            next_item = False
+            next_item = None
         else:
             next_item = all_entries[current_idx + 1]
             next_id = next_item["youtube_id"]

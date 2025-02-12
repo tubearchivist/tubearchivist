@@ -27,20 +27,20 @@ class QueryBuilder:
         must_list = []
         channel = self.request_params.get("channel")
         if channel:
-            must_list.append({"match": {"channel.channel_id": channel[0]}})
+            must_list.append({"match": {"channel.channel_id": channel}})
 
         playlist = self.request_params.get("playlist")
         if playlist:
-            must_list.append({"match": {"playlist.keyword": playlist[0]}})
+            must_list.append({"match": {"playlist.keyword": playlist}})
 
         watch = self.request_params.get("watch")
         if watch:
-            watch_must_list = self.parse_watch(watch[0])
+            watch_must_list = self.parse_watch(watch)
             must_list.append(watch_must_list)
 
         video_type = self.request_params.get("type")
         if video_type:
-            type_list_list = self.parse_type(video_type[0])
+            type_list_list = self.parse_type(video_type)
             must_list.append(type_list_list)
 
         query = {"bool": {"must": must_list}}
@@ -88,14 +88,12 @@ class QueryBuilder:
         if not sort:
             return None
 
-        sort = sort[0]
         if not hasattr(SortEnum, sort.upper()):
             raise ValueError(f"'{sort}' not in SortEnum")
 
         sort_field = getattr(SortEnum, sort.upper()).value
 
         order = self.request_params.get("order", ["desc"])
-        order = order[0]
         if not hasattr(OrderEnum, order.upper()):
             raise ValueError(f"'{order}' not in OrderEnum")
 
