@@ -28,17 +28,18 @@ class ScheduleBuilder:
 
     def update_schedule(
         self, task_name: str, cron_schedule: str, schedule_conf: dict | None
-    ) -> None:
+    ) -> CustomPeriodicTask:
         """update schedule"""
         if cron_schedule == "auto":
             cron_schedule = self.SCHEDULES[task_name]
 
-        if cron_schedule:
-            _ = self.get_set_task(task_name, cron_schedule)
+        task = self.get_set_task(task_name, cron_schedule)
 
         if schedule_conf:
             for key, value in schedule_conf.items():
                 self.set_config(task_name, key, value)
+
+        return task
 
     def get_set_task(self, task_name, schedule=False):
         """get task"""
@@ -69,14 +70,15 @@ class ScheduleBuilder:
 
         return task_crontab
 
-    def set_config(self, task_name: str, key: str, value) -> None:
+    def set_config(
+        self, task_name: str, key: str, value
+    ) -> CustomPeriodicTask:
         """set task_config, validate before"""
-        try:
-            task = CustomPeriodicTask.objects.get(name=task_name)
-            task.task_config.update({key: value})
-            task.save()
-        except CustomPeriodicTask.DoesNotExist:
-            pass
+        task = CustomPeriodicTask.objects.get(name=task_name)
+        task.task_config.update({key: value})
+        task.save()
+
+        return task
 
 
 class CrontabValidator:

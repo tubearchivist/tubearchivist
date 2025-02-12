@@ -1,10 +1,22 @@
 """all task API views"""
 
+from common.serializers import (
+    AsyncTaskResponseSerializer,
+    ErrorResponseSerializer,
+)
 from common.views_base import AdminOnly, ApiBaseView
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.response import Response
 from task.models import CustomPeriodicTask
-from task.serializers import CustomPeriodicTaskSerializer
+from task.serializers import (
+    CustomPeriodicTaskSerializer,
+    TaskCreateDataSerializer,
+    TaskIDDataSerializer,
+    TaskNotificationPostSerializer,
+    TaskNotificationSerializer,
+    TaskResultSerializer,
+)
 from task.src.config_schedule import CrontabValidator, ScheduleBuilder
 from task.src.notify import Notifications, get_all_notifications
 from task.src.task_config import TASK_CONFIG
@@ -18,12 +30,14 @@ class TaskListView(ApiBaseView):
 
     permission_classes = [AdminOnly]
 
+    @extend_schema(responses=TaskResultSerializer(many=True))
     def get(self, request):
-        """handle get request"""
+        """get all stored task results"""
         # pylint: disable=unused-argument
         all_results = TaskManager().get_all_results()
+        serializer = TaskResultSerializer(all_results, many=True)
 
-        return Response(all_results)
+        return Response(serializer.data)
 
 
 class TaskNameListView(ApiBaseView):
@@ -34,36 +48,55 @@ class TaskNameListView(ApiBaseView):
 
     permission_classes = [AdminOnly]
 
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(TaskResultSerializer(many=True)),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="task name not found"
+            ),
+        },
+    )
     def get(self, request, task_name):
-        """handle get request"""
+        """get stored task by name"""
         # pylint: disable=unused-argument
         if task_name not in TASK_CONFIG:
-            message = {"message": "invalid task name"}
-            return Response(message, status=404)
+            error = ErrorResponseSerializer({"error": "task name not found"})
+            return Response(error.data, status=404)
 
         all_results = TaskManager().get_tasks_by_name(task_name)
+        serializer = TaskResultSerializer(all_results, many=True)
 
-        return Response(all_results)
+        return Response(serializer.data)
 
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(AsyncTaskResponseSerializer()),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="bad request"
+            ),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="task name not found"
+            ),
+        }
+    )
     def post(self, request, task_name):
-        """
-        handle post request
-        404 for invalid task_name
-        400 if task can't be started here without argument
-        """
+        """start new task without args"""
         # pylint: disable=unused-argument
         task_config = TASK_CONFIG.get(task_name)
         if not task_config:
-            message = {"message": "invalid task name"}
-            return Response(message, status=404)
+            error = ErrorResponseSerializer({"error": "task name not found"})
+            return Response(error.data, status=404)
 
         if not task_config.get("api_start"):
-            message = {"message": "can not start task through this endpoint"}
-            return Response(message, status=400)
+            error = ErrorResponseSerializer(
+                {"error": "can not start task through this endpoint"}
+            )
+            return Response(error.data, status=404)
 
         message = TaskCommand().start(task_name)
+        serializer = AsyncTaskResponseSerializer(message)
 
-        return Response({"message": message})
+        return Response(serializer.data)
 
 
 class TaskIDView(ApiBaseView):
@@ -75,43 +108,70 @@ class TaskIDView(ApiBaseView):
     valid_commands = ["stop", "kill"]
     permission_classes = [AdminOnly]
 
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(TaskResultSerializer()),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="task not found"
+            ),
+        },
+    )
     def get(self, request, task_id):
-        """handle get request"""
+        """get task by ID"""
         # pylint: disable=unused-argument
         task_result = TaskManager().get_task(task_id)
         if not task_result:
-            message = {"message": "task id not found"}
-            return Response(message, status=404)
+            error = ErrorResponseSerializer({"error": "task ID not found"})
+            return Response(error.data, status=404)
 
-        return Response(task_result)
+        serializer = TaskResultSerializer(task_result)
 
+        return Response(serializer.data)
+
+    @extend_schema(
+        request=TaskIDDataSerializer(),
+        responses={
+            204: OpenApiResponse(description="task command sent"),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="bad request"
+            ),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="task not found"
+            ),
+        },
+    )
     def post(self, request, task_id):
         """post command to task"""
-        command = request.data.get("command")
-        if not command or command not in self.valid_commands:
-            message = {"message": "no valid command found"}
-            return Response(message, status=400)
+        data_serializer = TaskIDDataSerializer(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+
+        command = validated_data["command"]
 
         task_result = TaskManager().get_task(task_id)
         if not task_result:
-            message = {"message": "task id not found"}
-            return Response(message, status=404)
+            error = ErrorResponseSerializer({"error": "task ID not found"})
+            return Response(error.data, status=404)
 
         task_conf = TASK_CONFIG.get(task_result.get("name"))
         if command == "stop":
             if not task_conf.get("api_stop"):
-                message = {"message": "task can not be stopped"}
-                return Response(message, status=400)
+                error = ErrorResponseSerializer(
+                    {"error": "task can not be stopped"}
+                )
+                return Response(error.data, status=400)
 
             TaskCommand().stop(task_id)
         if command == "kill":
             if not task_conf.get("api_stop"):
-                message = {"message": "task can not be killed"}
-                return Response(message, status=400)
+                error = ErrorResponseSerializer(
+                    {"error": "task can not be killed"}
+                )
+                return Response(error.data, status=400)
 
             TaskCommand().kill(task_id)
 
-        return Response({"message": "command sent"})
+        return Response(status=204)
 
 
 class ScheduleListView(ApiBaseView):
@@ -121,11 +181,16 @@ class ScheduleListView(ApiBaseView):
 
     permission_classes = [AdminOnly]
 
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(CustomPeriodicTaskSerializer(many=True)),
+        },
+    )
     def get(self, request):
         """get all schedules"""
         tasks = CustomPeriodicTask.objects.all()
-        response = CustomPeriodicTaskSerializer(tasks, many=True).data
-        return Response(response)
+        serializer = CustomPeriodicTaskSerializer(tasks, many=True)
+        return Response(serializer.data)
 
 
 class ScheduleView(ApiBaseView):
@@ -137,42 +202,77 @@ class ScheduleView(ApiBaseView):
 
     permission_classes = [AdminOnly]
 
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(CustomPeriodicTaskSerializer()),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="schedule not found"
+            ),
+        },
+    )
     def get(self, request, task_name):
         """get single schedule by task_name"""
         task = get_object_or_404(CustomPeriodicTask, name=task_name)
-        response = CustomPeriodicTaskSerializer(task).data
-        return Response(response)
+        serializer = CustomPeriodicTaskSerializer(task)
+        return Response(serializer.data)
 
+    @extend_schema(
+        request=TaskCreateDataSerializer(),
+        responses={
+            200: OpenApiResponse(CustomPeriodicTaskSerializer()),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="bad request"
+            ),
+        },
+    )
     def post(self, request, task_name):
         """create/update schedule for task"""
-        cron_schedule = request.data.get("schedule")
-        schedule_config = request.data.get("config")
+        data_serializer = TaskCreateDataSerializer(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+
+        cron_schedule = validated_data.get("schedule")
+        schedule_config = validated_data.get("config")
         if not cron_schedule and not schedule_config:
-            message = {"message": "expected schedule or config key"}
-            return Response(message, status=400)
+            error = ErrorResponseSerializer(
+                {"error": "expected schedule or config key"}
+            )
+            return Response(error.data, status=400)
 
         try:
             validator = CrontabValidator()
             validator.validate_cron(cron_schedule)
             validator.validate_config(task_name, schedule_config)
         except ValueError as err:
-            return Response({"message": str(err)}, status=400)
+            error = ErrorResponseSerializer({"error": str(err)})
+            return Response(error.data, status=400)
 
-        ScheduleBuilder().update_schedule(
+        task = ScheduleBuilder().update_schedule(
             task_name, cron_schedule, schedule_config
         )
         message = f"update schedule for task {task_name}"
         if schedule_config:
             message += f" with config {schedule_config}"
 
-        return Response({"message": message})
+        print(message)
 
+        serializer = CustomPeriodicTaskSerializer(task)
+        return Response(serializer.data)
+
+    @extend_schema(
+        responses={
+            204: OpenApiResponse(description="schedule deleted"),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="schedule not found"
+            ),
+        },
+    )
     def delete(self, request, task_name):
-        """delete schedule by task_name query"""
+        """delete schedule by task_name"""
         task = get_object_or_404(CustomPeriodicTask, name=task_name)
         _ = task.delete()
 
-        return Response({"success": True})
+        return Response(status=204)
 
 
 class ScheduleNotification(ApiBaseView):
@@ -182,42 +282,64 @@ class ScheduleNotification(ApiBaseView):
     DEL: delete notification
     """
 
+    @extend_schema(
+        responses=TaskNotificationSerializer(),
+    )
     def get(self, request):
         """handle get request"""
+        serializer = TaskNotificationSerializer(get_all_notifications())
 
-        return Response(get_all_notifications())
+        return Response(serializer.data)
 
+    @extend_schema(
+        request=TaskNotificationPostSerializer(),
+        responses={
+            200: OpenApiResponse(TaskNotificationSerializer()),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="bad request"
+            ),
+        },
+    )
     def post(self, request):
-        """handle create notification"""
-        task_name = request.data.get("task_name")
-        url = request.data.get("url")
+        """create notification"""
+        data_serializer = TaskNotificationPostSerializer(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
 
-        if not TASK_CONFIG.get(task_name):
-            message = {"message": "task_name not found"}
-            return Response(message, status=404)
-
+        task_name = validated_data["task_name"]
+        url = validated_data["url"]
         if not url:
-            message = {"message": "missing url key"}
-            return Response(message, status=400)
+            error = ErrorResponseSerializer({"error": "missing url"})
+            return Response(error.data, status=400)
 
         Notifications(task_name).add_url(url)
-        message = {"task_name": task_name, "url": url}
 
-        return Response(message)
+        serializer = TaskNotificationSerializer(get_all_notifications())
 
+        return Response(serializer.data)
+
+    @extend_schema(
+        request=TaskNotificationPostSerializer(),
+        responses={
+            204: OpenApiResponse(description="notification url deleted"),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="bad request"
+            ),
+        },
+    )
     def delete(self, request):
-        """handle delete"""
+        """delete notification"""
 
-        task_name = request.data.get("task_name")
-        url = request.data.get("url")
+        data_serializer = TaskNotificationPostSerializer(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
 
-        if not TASK_CONFIG.get(task_name):
-            message = {"message": "task_name not found"}
-            return Response(message, status=404)
+        task_name = validated_data["task_name"]
+        url = validated_data.get("url")
 
         if url:
-            response, status_code = Notifications(task_name).remove_url(url)
+            Notifications(task_name).remove_url(url)
         else:
-            response, status_code = Notifications(task_name).remove_task()
+            Notifications(task_name).remove_task()
 
-        return Response({"response": response, "status_code": status_code})
+        return Response(status=204)

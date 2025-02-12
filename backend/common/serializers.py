@@ -52,8 +52,9 @@ class PaginationSerializer(serializers.Serializer):
 class AsyncTaskResponseSerializer(serializers.Serializer):
     """serialize new async task"""
 
-    message = serializers.CharField()
+    message = serializers.CharField(required=False)
     task_id = serializers.CharField()
+    status = serializers.CharField(required=False)
     filename = serializers.CharField(required=False)
 
 
