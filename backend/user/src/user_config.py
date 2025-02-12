@@ -143,6 +143,16 @@ class UserConfig:
 
         return config
 
+    def update_config(self, to_update: dict) -> None:
+        """update config object"""
+        data = {"doc": {"config": to_update}}
+        response, status = ElasticWrap(self.es_update_url).post(data)
+        if status < 200 or status > 299:
+            raise ValueError(f"Failed storing user value {status}: {response}")
+
+        for key, value in to_update.items():
+            print(f"User {self._user_id} value '{key}' change: to {value}")
+
     def sync_defaults(self):
         """set initial defaults on 404"""
         response, _ = ElasticWrap(self.es_url).post(
