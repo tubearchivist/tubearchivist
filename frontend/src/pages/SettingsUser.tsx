@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ColourVariants } from '../api/actions/updateUserConfig';
+import updateUserConfig, { ColourVariants, UserConfigType } from '../api/actions/updateUserConfig';
 import { ColourConstant } from '../configuration/colours/useColours';
 import SettingsNavigation from '../components/SettingsNavigation';
 import Notifications from '../components/Notifications';
@@ -10,35 +10,40 @@ import { useEffect, useState } from 'react';
 import ToggleConfig from '../components/ToggleConfig';
 
 const SettingsUser = () => {
-  const { userConfig, setPartialConfig } = useUserConfigStore();
+  const { userConfig, setUserConfig } = useUserConfigStore();
   const isAdmin = useIsAdmin();
   const navigate = useNavigate();
 
-  const [styleSheet, setStyleSheet] = useState<ColourVariants>(userConfig.config.stylesheet);
+  const [styleSheet, setStyleSheet] = useState<ColourVariants>(userConfig.stylesheet);
   const [styleSheetRefresh, setStyleSheetRefresh] = useState(false);
-  const [pageSize, setPageSize] = useState<number>(userConfig.config.page_size);
-  const [showHelpText, setShowHelpText] = useState(userConfig.config.show_help_text);
+  const [pageSize, setPageSize] = useState<number>(userConfig.page_size);
+  const [showHelpText, setShowHelpText] = useState(userConfig.show_help_text);
 
   useEffect(() => {
     (async () => {
-      setStyleSheet(userConfig.config.stylesheet);
-      setPageSize(userConfig.config.page_size);
-      setShowHelpText(userConfig.config.show_help_text);
+      setStyleSheet(userConfig.stylesheet);
+      setPageSize(userConfig.page_size);
+      setShowHelpText(userConfig.show_help_text);
     })();
-  }, [userConfig.config.page_size, userConfig.config.stylesheet, userConfig.config.show_help_text]);
+  }, [userConfig.page_size, userConfig.stylesheet, userConfig.show_help_text]);
 
   const handleStyleSheetChange = async (selectedStyleSheet: ColourVariants) => {
-    setPartialConfig({ stylesheet: selectedStyleSheet });
+    handleUserConfigUpdate({ stylesheet: selectedStyleSheet });
     setStyleSheet(selectedStyleSheet);
     setStyleSheetRefresh(true);
   };
 
   const handlePageSizeChange = async () => {
-    setPartialConfig({ page_size: pageSize });
+    handleUserConfigUpdate({ page_size: pageSize });
   };
 
   const handleShowHelpTextChange = async (configKey: string, configValue: boolean) => {
-    setPartialConfig({ [configKey]: configValue });
+    handleUserConfigUpdate({ [configKey]: configValue });
+  };
+
+  const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
+    const updatedUserConfig = await updateUserConfig(config);
+    setUserConfig(updatedUserConfig);
   };
 
   const handlePageRefresh = () => {
@@ -99,12 +104,10 @@ const SettingsUser = () => {
                 />
 
                 <div className="button-box">
-                  {userConfig.config.page_size !== pageSize && (
+                  {userConfig.page_size !== pageSize && (
                     <>
                       <button onClick={handlePageSizeChange}>Update</button>
-                      <button onClick={() => setPageSize(userConfig.config.page_size)}>
-                        Cancel
-                      </button>
+                      <button onClick={() => setPageSize(userConfig.page_size)}>Cancel</button>
                     </>
                   )}
                 </div>

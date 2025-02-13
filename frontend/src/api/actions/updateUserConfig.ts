@@ -1,17 +1,6 @@
 import { SortByType, SortOrderType, ViewLayoutType } from '../../pages/Home';
 import APIClient from '../../functions/APIClient';
 
-export type UserMeType = {
-  id: number;
-  name: string;
-  is_superuser: boolean;
-  is_staff: boolean;
-  groups: [];
-  user_permissions: [];
-  last_login: string;
-  config: UserConfigType;
-};
-
 export type ColourVariants = 'dark.css' | 'light.css' | 'matrix.css' | 'midnight.css';
 
 export type UserConfigType = {
@@ -33,7 +22,7 @@ export type UserConfigType = {
 const updateUserConfig = async (config: Partial<UserConfigType>): Promise<UserConfigType> => {
   return APIClient('/api/user/me/', {
     method: 'POST',
-    body: { config: config },
+    body: config,
   });
 };
 

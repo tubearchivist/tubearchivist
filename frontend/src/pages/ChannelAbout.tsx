@@ -244,7 +244,7 @@ const ChannelAbout = () => {
           <div className="info-box">
             <div className="info-box-item">
               <h2>Channel Customization</h2>
-              {userConfig.config.show_help_text && (
+              {userConfig.show_help_text && (
                 <div className="help-text">
                   <ul>
                     <li>Overwrite the download format over the format set globally.</li>
@@ -334,7 +334,7 @@ const ChannelAbout = () => {
             </div>
             <div className="info-box-item">
               <h2>Page Size Overrides</h2>
-              {userConfig.config.show_help_text && (
+              {userConfig.show_help_text && (
                 <div className="help-text">
                   <p>
                     Disable standard videos, shorts, or streams for this channel by setting their

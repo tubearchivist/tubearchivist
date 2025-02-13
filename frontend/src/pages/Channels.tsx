@@ -14,6 +14,7 @@ import Button from '../components/Button';
 import updateBulkChannelSubscriptions from '../api/actions/updateBulkChannelSubscriptions';
 import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 
 type ChannelOverwritesType = {
   download_format?: string;
@@ -48,7 +49,7 @@ type ChannelsListResponse = {
 };
 
 const Channels = () => {
-  const { userConfig, setPartialConfig } = useUserConfigStore();
+  const { userConfig, setUserConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
   const isAdmin = useIsAdmin();
 
@@ -63,18 +64,20 @@ const Channels = () => {
   // const channelCount = pagination?.total_hits;
   const hasChannels = channels?.length !== 0;
 
+  const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
+    const updatedUserConfig = await updateUserConfig(config);
+    setUserConfig(updatedUserConfig);
+  };
+
   useEffect(() => {
     (async () => {
-      const channelListResponse = await loadChannelList(
-        currentPage,
-        userConfig.config.show_subed_only,
-      );
+      const channelListResponse = await loadChannelList(currentPage, userConfig.show_subed_only);
 
       setChannelListResponse(channelListResponse);
       setShowNotification(false);
       setRefresh(false);
     })();
-  }, [refresh, userConfig.config.show_subed_only, currentPage, pagination?.current_page]);
+  }, [refresh, userConfig.show_subed_only, currentPage, pagination?.current_page]);
 
   return (
     <>
@@ -145,18 +148,18 @@ const Channels = () => {
               <input
                 id="show_subed_only"
                 onChange={async () => {
-                  setPartialConfig({ show_subed_only: !userConfig.config.show_subed_only });
+                  handleUserConfigUpdate({ show_subed_only: !userConfig.show_subed_only });
                   setRefresh(true);
                 }}
                 type="checkbox"
-                checked={userConfig.config.show_subed_only}
+                checked={userConfig.show_subed_only}
               />
-              {!userConfig.config.show_subed_only && (
+              {!userConfig.show_subed_only && (
                 <label htmlFor="" className="ofbtn">
                   Off
                 </label>
               )}
-              {userConfig.config.show_subed_only && (
+              {userConfig.show_subed_only && (
                 <label htmlFor="" className="onbtn">
                   On
                 </label>
@@ -167,7 +170,7 @@ const Channels = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                setPartialConfig({ view_style_channel: 'grid' });
+                handleUserConfigUpdate({ view_style_channel: 'grid' });
               }}
               data-origin="channel"
               data-value="grid"
@@ -176,7 +179,7 @@ const Channels = () => {
             <img
               src={iconListView}
               onClick={() => {
-                setPartialConfig({ view_style_channel: 'list' });
+                handleUserConfigUpdate({ view_style_channel: 'list' });
               }}
               data-origin="channel"
               data-value="list"
@@ -186,7 +189,7 @@ const Channels = () => {
         </div>
         {/* {hasChannels && <h2>Total channels: {channelCount}</h2>} */}
 
-        <div className={`channel-list ${userConfig.config.view_style_channel}`}>
+        <div className={`channel-list ${userConfig.view_style_channel}`}>
           {!hasChannels && <h2>No channels found...</h2>}
 
           {hasChannels && <ChannelList channelList={channels} refreshChannelList={setRefresh} />}

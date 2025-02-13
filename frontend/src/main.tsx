@@ -25,6 +25,7 @@ import ChannelVideo from './pages/ChannelVideo';
 import ChannelPlaylist from './pages/ChannelPlaylist';
 import ChannelAbout from './pages/ChannelAbout';
 import Download from './pages/Download';
+import loadUserAccount from './api/loader/loadUserAccount';
 
 const router = createBrowserRouter(
   [
@@ -41,8 +42,9 @@ const router = createBrowserRouter(
         const authData = await auth.json();
 
         const userConfig = await loadUserMeConfig();
+        const userAccount = await loadUserAccount();
 
-        return { userConfig, auth: authData };
+        return { userConfig, userAccount, auth: authData };
       },
       element: <Base />,
       errorElement: <ErrorPage />,

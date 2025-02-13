@@ -69,6 +69,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
         setRefresh(false);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId, refresh]);
 
   useEffect(() => {

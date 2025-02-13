@@ -14,7 +14,7 @@ type PlaylistListProps = {
 
 const PlaylistList = ({ playlistList, setRefresh }: PlaylistListProps) => {
   const { userConfig } = useUserConfigStore();
-  const viewLayout = userConfig.config.view_style_playlist;
+  const viewLayout = userConfig.view_style_playlist;
 
   if (!playlistList || playlistList.length === 0) {
     return <p>No playlists found.</p>;

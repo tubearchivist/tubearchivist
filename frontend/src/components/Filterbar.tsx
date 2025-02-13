@@ -7,6 +7,7 @@ import iconListView from '/img/icon-listview.svg';
 import { SortByType, SortOrderType } from '../pages/Home';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { ViewStyles } from '../configuration/constants/ViewStyle';
+import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 
 type FilterbarProps = {
   hideToggleText: string;
@@ -15,9 +16,14 @@ type FilterbarProps = {
 };
 
 const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: FilterbarProps) => {
-  const { userConfig, setPartialConfig } = useUserConfigStore();
+  const { userConfig, setUserConfig } = useUserConfigStore();
   const [showHidden, setShowHidden] = useState(false);
-  const isGridView = userConfig.config.view_style_home === ViewStyles.grid;
+  const isGridView = userConfig.view_style_home === ViewStyles.grid;
+
+  const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
+    const updatedUserConfig = await updateUserConfig(config);
+    setUserConfig(updatedUserConfig);
+  };
 
   return (
     <div className="view-controls three">
@@ -27,13 +33,13 @@ const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: Filterbar
           <input
             id="hide_watched"
             type="checkbox"
-            checked={userConfig.config.hide_watched}
+            checked={userConfig.hide_watched}
             onChange={() => {
-              setPartialConfig({ hide_watched: !userConfig.config.hide_watched });
+              handleUserConfigUpdate({ hide_watched: !userConfig.hide_watched });
             }}
           />
 
-          {userConfig.config.hide_watched ? (
+          {userConfig.hide_watched ? (
             <label htmlFor="" className="onbtn">
               On
             </label>
@@ -52,9 +58,9 @@ const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: Filterbar
             <select
               name="sort_by"
               id="sort"
-              value={userConfig.config.sort_by}
+              value={userConfig.sort_by}
               onChange={event => {
-                setPartialConfig({ sort_by: event.target.value as SortByType });
+                handleUserConfigUpdate({ sort_by: event.target.value as SortByType });
               }}
             >
               <option value="published">date published</option>
@@ -67,9 +73,9 @@ const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: Filterbar
             <select
               name="sort_order"
               id="sort-order"
-              value={userConfig.config.sort_order}
+              value={userConfig.sort_order}
               onChange={event => {
-                setPartialConfig({ sort_order: event.target.value as SortOrderType });
+                handleUserConfigUpdate({ sort_order: event.target.value as SortOrderType });
               }}
             >
               <option value="asc">asc</option>
@@ -90,22 +96,22 @@ const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: Filterbar
           />
         )}
 
-        {userConfig.config.grid_items !== undefined && isGridView && (
+        {userConfig.grid_items !== undefined && isGridView && (
           <div className="grid-count">
-            {userConfig.config.grid_items < 7 && (
+            {userConfig.grid_items < 7 && (
               <img
                 src={iconAdd}
                 onClick={() => {
-                  setPartialConfig({ grid_items: userConfig.config.grid_items + 1 });
+                  handleUserConfigUpdate({ grid_items: userConfig.grid_items + 1 });
                 }}
                 alt="grid plus row"
               />
             )}
-            {userConfig.config.grid_items > 3 && (
+            {userConfig.grid_items > 3 && (
               <img
                 src={iconSubstract}
                 onClick={() => {
-                  setPartialConfig({ grid_items: userConfig.config.grid_items - 1 });
+                  handleUserConfigUpdate({ grid_items: userConfig.grid_items - 1 });
                 }}
                 alt="grid minus row"
               />
@@ -115,14 +121,14 @@ const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: Filterbar
         <img
           src={iconGridView}
           onClick={() => {
-            setPartialConfig({ [viewStyleName]: 'grid' });
+            handleUserConfigUpdate({ [viewStyleName]: 'grid' });
           }}
           alt="grid view"
         />
         <img
           src={iconListView}
           onClick={() => {
-            setPartialConfig({ [viewStyleName]: 'list' });
+            handleUserConfigUpdate({ [viewStyleName]: 'list' });
           }}
           alt="list view"
         />

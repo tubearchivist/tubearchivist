@@ -9,7 +9,7 @@ export const ColourConstant = {
 
 const useColours = () => {
   const { userConfig } = useUserConfigStore();
-  const stylesheet = userConfig?.config.stylesheet;
+  const stylesheet = userConfig?.stylesheet;
 
   switch (stylesheet) {
     case ColourConstant.Dark:

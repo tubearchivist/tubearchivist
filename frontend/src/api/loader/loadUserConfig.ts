@@ -1,7 +1,7 @@
-import { UserMeType } from '../actions/updateUserConfig';
+import { UserConfigType } from '../actions/updateUserConfig';
 import APIClient from '../../functions/APIClient';
 
-const loadUserMeConfig = async (): Promise<UserMeType> => {
+const loadUserMeConfig = async (): Promise<UserConfigType> => {
   return APIClient('/api/user/me/');
 };
 

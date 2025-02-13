@@ -49,10 +49,10 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const hasVideos = videoResponse?.data?.length !== 0;
   const showEmbeddedVideo = videoId !== null;
 
-  const view = userConfig.config.view_style_home;
+  const view = userConfig.view_style_home;
   const isGridView = view === ViewStyles.grid;
-  const gridView = isGridView ? `boxed-${userConfig.config.grid_items}` : '';
-  const gridViewGrid = isGridView ? `grid-${userConfig.config.grid_items}` : '';
+  const gridView = isGridView ? `boxed-${userConfig.grid_items}` : '';
+  const gridViewGrid = isGridView ? `grid-${userConfig.grid_items}` : '';
 
   useEffect(() => {
     (async () => {
@@ -60,9 +60,9 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
       const videos = await loadVideoListByFilter({
         channel: channelId,
         page: currentPage,
-        watch: userConfig.config.hide_watched ? 'unwatched' : undefined,
-        sort: userConfig.config.sort_by,
-        order: userConfig.config.sort_order,
+        watch: userConfig.hide_watched ? 'unwatched' : undefined,
+        sort: userConfig.sort_by,
+        order: userConfig.sort_order,
         type: videoType,
       });
       const channelAggs = await loadChannelAggs(channelId);
@@ -74,9 +74,9 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
     })();
   }, [
     refresh,
-    userConfig.config.sort_by,
-    userConfig.config.sort_order,
-    userConfig.config.hide_watched,
+    userConfig.sort_by,
+    userConfig.sort_order,
+    userConfig.hide_watched,
     currentPage,
     channelId,
     pagination?.current_page,

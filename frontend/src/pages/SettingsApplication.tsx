@@ -209,7 +209,7 @@ const SettingsApplication = () => {
           <div className="info-box">
             <div className="info-box-item">
               <h2 id="subscriptions">Subscription Scan</h2>
-              {userConfig.config.show_help_text && (
+              {userConfig.show_help_text && (
                 <div className="help-text">
                   <p>Configure how a subscription Scan tracks videos.</p>
                   <ul>
@@ -275,7 +275,7 @@ const SettingsApplication = () => {
             </div>
             <div className="info-box-item">
               <h2 id="downloads">Downloads</h2>
-              {userConfig.config.show_help_text && (
+              {userConfig.show_help_text && (
                 <div className="help-text">
                   <ul>
                     <li>
@@ -362,7 +362,7 @@ const SettingsApplication = () => {
             </div>
             <div className="info-box-item">
               <h2 id="format">Download Format</h2>
-              {userConfig.config.show_help_text && (
+              {userConfig.show_help_text && (
                 <div className="help-text">
                   <ul>
                     <li>
@@ -507,7 +507,7 @@ const SettingsApplication = () => {
             </div>
             <div className="info-box-item">
               <h2 id="subtitles">Subtitles</h2>
-              {userConfig.config.show_help_text && (
+              {userConfig.show_help_text && (
                 <div className="help-text">
                   <p>Additional subtitle options show once you choose a language.</p>
                   <ul>
@@ -586,7 +586,7 @@ const SettingsApplication = () => {
             </div>
             <div className="info-box-item">
               <h2 id="comments">Comments</h2>
-              {userConfig.config.show_help_text && (
+              {userConfig.show_help_text && (
                 <div className="help-text">
                   <p>Additional options show once you set a comment index option.</p>
                   <ul>
@@ -650,7 +650,7 @@ const SettingsApplication = () => {
             </div>
             <div className="info-box-item">
               <h2 id="cookie">Cookie</h2>
-              {userConfig.config.show_help_text && (
+              {userConfig.show_help_text && (
                 <div className="help-text">
                   <p>
                     Importing your cookie will authenticate requests to YT with your user account.
@@ -777,7 +777,7 @@ const SettingsApplication = () => {
             </div>
             <div className="info-box-item">
               <h2 id="sntegrations">Integrations</h2>
-              {userConfig.config.show_help_text && (
+              {userConfig.show_help_text && (
                 <div className="help-text">
                   <ul>
                     <li>The API token is used to make automater requests to TA through the API.</li>
@@ -868,7 +868,7 @@ const SettingsApplication = () => {
             </div>
             <div className="info-box-item">
               <h2>Snapshots</h2>
-              {userConfig.config.show_help_text && (
+              {userConfig.show_help_text && (
                 <div className="help-text">
                   <p>
                     Automatically create daily deduplicated snapshots of the index, stored in

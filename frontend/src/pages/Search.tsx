@@ -39,12 +39,11 @@ const Search = () => {
   const { userConfig } = useUserConfigStore();
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');
-  const userMeConfig = userConfig.config;
 
-  const viewVideos = userMeConfig.view_style_home;
-  const viewChannels = userMeConfig.view_style_channel;
-  const viewPlaylists = userMeConfig.view_style_playlist;
-  const gridItems = userMeConfig.grid_items || 3;
+  const viewVideos = userConfig.view_style_home;
+  const viewChannels = userConfig.view_style_channel;
+  const viewPlaylists = userConfig.view_style_playlist;
+  const gridItems = userConfig.grid_items || 3;
 
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');

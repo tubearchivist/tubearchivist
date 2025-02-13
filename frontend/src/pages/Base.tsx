@@ -1,11 +1,12 @@
 import { Outlet, useLoaderData, useLocation, useSearchParams } from 'react-router-dom';
 import Footer from '../components/Footer';
 import useColours from '../configuration/colours/useColours';
-import { UserMeType } from '../api/actions/updateUserConfig';
+import { UserConfigType } from '../api/actions/updateUserConfig';
 import { useEffect, useState } from 'react';
 import Navigation from '../components/Navigation';
 import { useAuthStore } from '../stores/AuthDataStore';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import { useUserAccountStore } from '../stores/UserAccountStore';
 
 export type TaUpdateType = {
   version?: string;
@@ -19,8 +20,19 @@ export type AuthenticationType = {
   ta_update: TaUpdateType;
 };
 
+export type UserAccountType = {
+  id: number;
+  name: string;
+  is_superuser: boolean;
+  is_staff: boolean;
+  groups: [];
+  user_permissions: [];
+  last_login: string;
+};
+
 type BaseLoaderData = {
-  userConfig: UserMeType;
+  userConfig: UserConfigType;
+  userAccount: UserAccountType;
   auth: AuthenticationType;
 };
 
@@ -32,7 +44,8 @@ export type OutletContextType = {
 const Base = () => {
   const { setAuth } = useAuthStore();
   const { setUserConfig } = useUserConfigStore();
-  const { userConfig, auth } = useLoaderData() as BaseLoaderData;
+  const { setUserAccount } = useUserAccountStore();
+  const { userConfig, userAccount, auth } = useLoaderData() as BaseLoaderData;
 
   const location = useLocation();
 
@@ -46,6 +59,7 @@ const Base = () => {
   useEffect(() => {
     setAuth(auth);
     setUserConfig(userConfig);
+    setUserAccount(userAccount);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

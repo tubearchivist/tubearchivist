@@ -81,9 +81,9 @@ const Playlist = () => {
   const videoInPlaylistCount = pagination?.total_hits;
   const showEmbeddedVideo = videoId !== null;
 
-  const view = userConfig.config.view_style_home;
-  const gridItems = userConfig.config.grid_items;
-  const hideWatched = userConfig.config.hide_watched;
+  const view = userConfig.view_style_home;
+  const gridItems = userConfig.grid_items;
+  const hideWatched = userConfig.hide_watched;
   const isGridView = view === ViewStyles.grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
@@ -112,7 +112,7 @@ const Playlist = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     playlistId,
-    userConfig.config.hide_watched,
+    userConfig.hide_watched,
     refresh,
     currentPage,
     pagination?.current_page,

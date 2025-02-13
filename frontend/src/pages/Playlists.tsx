@@ -18,6 +18,7 @@ import Button from '../components/Button';
 import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import Notifications from '../components/Notifications';
+import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 
 export type PlaylistEntryType = {
   youtube_id: string;
@@ -34,7 +35,7 @@ export type PlaylistsResponseType = {
 };
 
 const Playlists = () => {
-  const { userConfig, setPartialConfig } = useUserConfigStore();
+  const { userConfig, setUserConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
   const isAdmin = useIsAdmin();
 
@@ -51,8 +52,8 @@ const Playlists = () => {
 
   const hasPlaylists = playlistResponse?.data?.length !== 0;
 
-  const view = userConfig.config.view_style_playlist;
-  const showSubedOnly = userConfig.config.show_subed_only;
+  const view = userConfig.view_style_playlist;
+  const showSubedOnly = userConfig.show_subed_only;
 
   useEffect(() => {
     (async () => {
@@ -66,7 +67,12 @@ const Playlists = () => {
       setShowNotification(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refresh, userConfig.config.show_subed_only, currentPage, pagination?.current_page]);
+  }, [refresh, userConfig.show_subed_only, currentPage, pagination?.current_page]);
+
+  const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
+    const updatedUserConfig = await updateUserConfig(config);
+    setUserConfig(updatedUserConfig);
+  };
 
   return (
     <>
@@ -156,7 +162,7 @@ const Playlists = () => {
               <input
                 checked={showSubedOnly}
                 onChange={() => {
-                  setPartialConfig({ show_subed_only: !showSubedOnly });
+                  handleUserConfigUpdate({ show_subed_only: !showSubedOnly });
                 }}
                 type="checkbox"
               />
@@ -176,14 +182,14 @@ const Playlists = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                setPartialConfig({ view_style_playlist: 'grid' });
+                handleUserConfigUpdate({ view_style_playlist: 'grid' });
               }}
               alt="grid view"
             />
             <img
               src={iconListView}
               onClick={() => {
-                setPartialConfig({ view_style_playlist: 'list' });
+                handleUserConfigUpdate({ view_style_playlist: 'list' });
               }}
               alt="list view"
             />

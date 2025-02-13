@@ -19,6 +19,7 @@ import Button from '../components/Button';
 import DownloadListItem from '../components/DownloadListItem';
 import loadDownloadAggs, { DownloadAggsType } from '../api/loader/loadDownloadAggs';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 
 type Download = {
   auto_start: boolean;
@@ -46,7 +47,7 @@ export type DownloadResponseType = {
 
 const Download = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { userConfig, setPartialConfig } = useUserConfigStore();
+  const { userConfig, setUserConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const channelFilterFromUrl = searchParams.get('channel');
@@ -75,12 +76,17 @@ const Download = () => {
       ? downloadResponse?.data[0].channel_name
       : '';
 
-  const view = userConfig.config.view_style_downloads;
-  const gridItems = userConfig.config.grid_items;
-  const showIgnored = userConfig.config.show_ignored_only;
+  const view = userConfig.view_style_downloads;
+  const gridItems = userConfig.grid_items;
+  const showIgnored = userConfig.show_ignored_only;
   const isGridView = view === ViewStyles.grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
+
+  const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
+    const updatedUserConfig = await updateUserConfig(config);
+    setUserConfig(updatedUserConfig);
+  };
 
   useEffect(() => {
     (async () => {
@@ -208,7 +214,7 @@ const Download = () => {
               <input
                 id="showIgnored"
                 onChange={() => {
-                  setPartialConfig({ show_ignored_only: !showIgnored });
+                  handleUserConfigUpdate({ show_ignored_only: !showIgnored });
                   setRefresh(true);
                 }}
                 type="checkbox"
@@ -263,7 +269,7 @@ const Download = () => {
                   <img
                     src={iconAdd}
                     onClick={() => {
-                      setPartialConfig({ grid_items: gridItems + 1 });
+                      handleUserConfigUpdate({ grid_items: gridItems + 1 });
                     }}
                     alt="grid plus row"
                   />
@@ -272,7 +278,7 @@ const Download = () => {
                   <img
                     src={iconSubstract}
                     onClick={() => {
-                      setPartialConfig({ grid_items: gridItems - 1 });
+                      handleUserConfigUpdate({ grid_items: gridItems - 1 });
                     }}
                     alt="grid minus row"
                   />
@@ -283,14 +289,14 @@ const Download = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                setPartialConfig({ view_style_downloads: 'grid' });
+                handleUserConfigUpdate({ view_style_downloads: 'grid' });
               }}
               alt="grid view"
             />
             <img
               src={iconListView}
               onClick={() => {
-                setPartialConfig({ view_style_downloads: 'list' });
+                handleUserConfigUpdate({ view_style_downloads: 'list' });
               }}
               alt="list view"
             />

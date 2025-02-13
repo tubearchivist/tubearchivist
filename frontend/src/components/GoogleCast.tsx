@@ -93,8 +93,10 @@ const GoogleCast = ({ video, setRefresh, onWatchStateChanged }: GoogleCastProps)
   const [isConnected, setIsConnected] = useState(false);
 
   const setup = useCallback(() => {
-    const cast = globalThis.cast;
-    const chrome = globalThis.chrome;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cast = (globalThis as any).cast;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const chrome = (globalThis as any).chrome;
 
     cast.framework.CastContext.getInstance().setOptions({
       receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID, // Use built in receiver app on cast device, see https://developers.google.com/cast/docs/styled_receiver if you want to be able to add a theme, splash screen or watermark. Has a $5 one time fee.
@@ -132,8 +134,10 @@ const GoogleCast = ({ video, setRefresh, onWatchStateChanged }: GoogleCastProps)
   }, [setRefresh, video]);
 
   const startPlayback = useCallback(() => {
-    const chrome = globalThis.chrome;
-    const cast = globalThis.cast;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const chrome = (globalThis as any).chrome;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cast = (globalThis as any).cast;
     const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
 
     const mediaUrl = video?.media_url;

@@ -59,7 +59,6 @@ const Subtitles = ({ subtitles }: SubtitlesProp) => {
 const handleTimeUpdate =
   (
     youtubeId: string,
-    duration: number,
     watched: boolean,
     sponsorBlock?: SponsorBlockType,
     setSponsorSegmentSkipped?: Dispatch<SetStateAction<SponsorSegmentsSkippedType>>,
@@ -337,7 +336,6 @@ const VideoPlayer = ({
             }}
             onTimeUpdate={handleTimeUpdate(
               videoId,
-              duration,
               watched,
               sponsorBlock,
               setSkippedSegments,
