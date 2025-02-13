@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { UserAccountType } from '../pages/Base';
+import { UserAccountType } from '../api/loader/loadUserAccount';
 
 interface AccountState {
   userAccount: UserAccountType | null;

@@ -7,8 +7,9 @@ import Navigation from '../components/Navigation';
 import { useAuthStore } from '../stores/AuthDataStore';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { useUserAccountStore } from '../stores/UserAccountStore';
+import { UserAccountType } from '../api/loader/loadUserAccount';
 
-export type TaUpdateType = {
+type TaUpdateType = {
   version?: string;
   is_breaking?: boolean;
 };
@@ -18,16 +19,6 @@ export type AuthenticationType = {
   user: number;
   version: string;
   ta_update: TaUpdateType;
-};
-
-export type UserAccountType = {
-  id: number;
-  name: string;
-  is_superuser: boolean;
-  is_staff: boolean;
-  groups: [];
-  user_permissions: [];
-  last_login: string;
 };
 
 type BaseLoaderData = {
