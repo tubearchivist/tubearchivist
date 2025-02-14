@@ -88,7 +88,7 @@ class VideoSerializer(serializers.Serializer):
     sponsorblock = SponsorBlockSerializer(allow_null=True)
     stats = StatsSerializer()
     streams = StreamItemSerializer(many=True)
-    subtitles = SubtitleItemSerializer(many=True)
+    subtitles = SubtitleItemSerializer(many=True, allow_null=True)
     tags = serializers.ListField(child=serializers.CharField())
     title = serializers.CharField()
     vid_last_refresh = serializers.CharField()
