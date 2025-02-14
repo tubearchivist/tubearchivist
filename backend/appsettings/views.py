@@ -177,8 +177,8 @@ class AppConfigApiView(ApiBaseView):
         },
     )
     def post(request):
-        """update config values, partial"""
-        serializer = AppConfigSerializer(data=request.data)
+        """update config values, allows partial update"""
+        serializer = AppConfigSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
         updated_config = AppConfig().update_config(validated_data)

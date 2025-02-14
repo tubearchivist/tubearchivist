@@ -151,7 +151,9 @@ const SettingsApplication = () => {
     configKey: string,
     configValue: string | boolean | number | null,
   ) => {
-    await updateAppsettingsConfig(configKey, configValue);
+    const [group, key] = configKey.split('.');
+    const updatedConfig = { [group]: { [key]: configValue } } as Partial<AppSettingsConfigType>;
+    await updateAppsettingsConfig(updatedConfig);
     setRefresh(true);
   };
 

@@ -61,7 +61,7 @@ class UserConfigView(ApiBaseView):
         """update config, allows partial update"""
 
         data_serializer = UserMeConfigSerializer(
-            data=request.data, required=False
+            data=request.data, partial=True
         )
         data_serializer.is_valid(raise_exception=True)
         validated_data = data_serializer.validated_data

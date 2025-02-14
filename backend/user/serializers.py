@@ -48,13 +48,6 @@ class UserMeConfigSerializer(serializers.Serializer):
     show_subed_only = serializers.BooleanField()
     show_help_text = serializers.BooleanField()
 
-    def __init__(self, *args, required=True, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Override 'required' for all fields if provided
-        for field in self.fields.values():
-            field.required = required
-
 
 class LoginSerializer(serializers.Serializer):
     """serialize login"""
