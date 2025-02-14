@@ -7,9 +7,9 @@ from playlist.src.query_building import QueryBuilder
 def test_build_data():
     """test for correct key building"""
     qb = QueryBuilder(
-        channel=["test_channel"],
-        subscribed=["true"],
-        type=["regular"],
+        channel="test_channel",
+        subscribed=True,
+        type="regular",
     )
     result = qb.build_data()
     must_list = result["query"]["bool"]["must"]
@@ -22,7 +22,7 @@ def test_build_data():
 
 def test_parse_type():
     """validate type"""
-    qb = QueryBuilder(type=["regular"])
+    qb = QueryBuilder(type="regular")
     with pytest.raises(ValueError):
         qb.parse_type("invalid")
 
