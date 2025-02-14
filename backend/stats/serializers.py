@@ -78,9 +78,9 @@ class WatchItemStatsSerializer(serializers.Serializer):
 class WatchStatsSerializer(serializers.Serializer):
     """serialize watch stats"""
 
-    total = WatchTotalStatsSerializer()
-    unwatched = WatchItemStatsSerializer()
-    watched = WatchItemStatsSerializer()
+    total = WatchTotalStatsSerializer(allow_null=True)
+    unwatched = WatchItemStatsSerializer(allow_null=True)
+    watched = WatchItemStatsSerializer(allow_null=True)
 
 
 class DownloadHistItemSerializer(serializers.Serializer):
