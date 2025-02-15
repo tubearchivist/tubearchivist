@@ -45,10 +45,14 @@ const VideoListItem = ({
       >
         <div className={`video-thumb-wrap ${viewLayout}`}>
           <div className="video-thumb">
-            <picture>
-              <img src={`${getApiUrl()}${video.vid_thumb_url}`} alt="video-thumb" />
-              <source srcSet={defaultVideoThumb} />
-            </picture>
+            <img
+              src={`${getApiUrl()}${video.vid_thumb_url}`}
+              alt="video-thumb"
+              onError={({ currentTarget }) => {
+                currentTarget.onerror = null; // prevents looping
+                currentTarget.src = defaultVideoThumb;
+              }}
+            />
 
             {video.player.progress && (
               <div
