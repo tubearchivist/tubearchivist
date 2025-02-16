@@ -12,6 +12,7 @@ import formatNumbers from '../functions/formatNumbers';
 import { Link, useSearchParams } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
 import loadPlaylistById from '../api/loader/loadPlaylistById';
+import { useAppSettingsStore } from '../stores/AppSettingsStore';
 
 type Playlist = {
   id: string;
@@ -25,6 +26,7 @@ type EmbeddableVideoPlayerProps = {
 
 const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
   const inlinePlayerRef = useRef<HTMLDivElement>(null);
+  const { appSettingsConfig } = useAppSettingsStore();
 
   const [, setSearchParams] = useSearchParams();
 
@@ -35,10 +37,10 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
 
   useEffect(() => {
     (async () => {
-      if (refresh || videoId !== videoResponse?.data.youtube_id) {
+      if (refresh || videoId !== videoResponse?.youtube_id) {
         const videoResponse = await loadVideoById(videoId);
 
-        const playlistIds = videoResponse.data.playlist;
+        const playlistIds = videoResponse.playlist;
         if (playlistIds !== undefined) {
           const playlists = await Promise.all(
             playlistIds.map(async playlistid => {
@@ -80,7 +82,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
     return <div ref={inlinePlayerRef} className="player-wrapper" />;
   }
 
-  const video = videoResponse.data;
+  const video = videoResponse;
   const name = video.title;
   const channelId = video.channel.channel_id;
   const channelName = video.channel.channel_name;
@@ -89,10 +91,10 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
   const views = formatNumbers(video.stats.view_count);
   const hasLikes = video.stats.like_count;
   const likes = formatNumbers(video.stats.like_count);
-  const hasDislikes = video.stats.dislike_count > 0 && videoResponse.config.downloads.integrate_ryd;
+  const hasDislikes = video.stats.dislike_count > 0 && appSettingsConfig.downloads.integrate_ryd;
   const dislikes = formatNumbers(video.stats.dislike_count);
-  const config = videoResponse.config;
-  const cast = config.enable_cast;
+  // const config = videoResponse.config;
+  const cast = false; // config.enable_cast;
 
   return (
     <>

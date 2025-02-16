@@ -8,6 +8,8 @@ import { useAuthStore } from '../stores/AuthDataStore';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { useUserAccountStore } from '../stores/UserAccountStore';
 import { UserAccountType } from '../api/loader/loadUserAccount';
+import { useAppSettingsStore } from '../stores/AppSettingsStore';
+import { AppSettingsConfigType } from '../api/loader/loadAppsettingsConfig';
 
 type TaUpdateType = {
   version?: string;
@@ -24,6 +26,7 @@ export type AuthenticationType = {
 type BaseLoaderData = {
   userConfig: UserConfigType;
   userAccount: UserAccountType;
+  appSettings: AppSettingsConfigType;
   auth: AuthenticationType;
 };
 
@@ -36,7 +39,9 @@ const Base = () => {
   const { setAuth } = useAuthStore();
   const { setUserConfig } = useUserConfigStore();
   const { setUserAccount } = useUserAccountStore();
-  const { userConfig, userAccount, auth } = useLoaderData() as BaseLoaderData;
+  const { setAppSettingsConfig } = useAppSettingsStore();
+
+  const { userConfig, userAccount, appSettings, auth } = useLoaderData() as BaseLoaderData;
 
   const location = useLocation();
 
@@ -51,6 +56,8 @@ const Base = () => {
     setAuth(auth);
     setUserConfig(userConfig);
     setUserAccount(userAccount);
+    setAppSettingsConfig(appSettings);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

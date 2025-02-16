@@ -1,7 +1,6 @@
 import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
 import { ChannelType } from './Channels';
-import { ConfigType } from './Home';
 import { OutletContextType } from './Base';
 import Notifications from '../components/Notifications';
 import { useEffect, useState } from 'react';
@@ -14,10 +13,7 @@ type ChannelParams = {
   channelId: string;
 };
 
-export type ChannelResponseType = {
-  data: ChannelType;
-  config: ConfigType;
-};
+export type ChannelResponseType = ChannelType;
 
 const ChannelBase = () => {
   const { channelId } = useParams() as ChannelParams;
@@ -28,7 +24,7 @@ const ChannelBase = () => {
   const [channelNav, setChannelNav] = useState<ChannelNavResponseType>();
   const [startNotification, setStartNotification] = useState(false);
 
-  const channel = channelResponse?.data;
+  const channel = channelResponse;
   const { has_streams, has_shorts, has_playlists, has_pending } = channelNav || {};
 
   useEffect(() => {

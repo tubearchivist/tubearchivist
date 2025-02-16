@@ -55,7 +55,7 @@ const ChannelAbout = () => {
   const [pageSizeShorts, setPageSizeShorts] = useState<number | null>(null);
   const [pageSizeStreams, setPageSizeStreams] = useState<number | null>(null);
 
-  const channel = channelResponse?.data;
+  const channel = channelResponse;
 
   useEffect(() => {
     (async () => {

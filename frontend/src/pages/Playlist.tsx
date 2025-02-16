@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useOutletContext, useParams, useSearchParams } from 'react-router-dom';
 import loadPlaylistById from '../api/loader/loadPlaylistById';
 import { OutletContextType } from './Base';
-import { ConfigType, VideoType } from './Home';
+import { VideoType } from './Home';
 import Filterbar from '../components/Filterbar';
 import { PlaylistEntryType } from './Playlists';
 import loadChannelById from '../api/loader/loadChannelById';
@@ -41,14 +41,10 @@ export type PlaylistType = {
   _score: number;
 };
 
-export type PlaylistResponseType = {
-  data?: PlaylistType;
-  config?: ConfigType;
-};
+export type PlaylistResponseType = PlaylistType;
 
 export type VideoResponseType = {
   data?: VideoType[];
-  config?: ConfigType;
   paginate?: PaginationType;
 };
 
@@ -71,12 +67,12 @@ const Playlist = () => {
   const [channelResponse, setChannelResponse] = useState<ChannelResponseType>();
   const [videoResponse, setVideoResponse] = useState<VideoResponseType>();
 
-  const playlist = playlistResponse?.data;
-  const channel = channelResponse?.data;
+  const playlist = playlistResponse;
+  const channel = channelResponse;
   const videos = videoResponse?.data;
   const pagination = videoResponse?.paginate;
 
-  const palylistEntries = playlistResponse?.data?.playlist_entries;
+  const palylistEntries = playlistResponse?.playlist_entries;
   const videoArchivedCount = Number(palylistEntries?.filter(video => video.downloaded).length);
   const videoInPlaylistCount = pagination?.total_hits;
   const showEmbeddedVideo = videoId !== null;

@@ -7,7 +7,6 @@ import iconListView from '/img/icon-listview.svg';
 
 import { OutletContextType } from './Base';
 import loadPlaylistList from '../api/loader/loadPlaylistList';
-import { ConfigType } from './Home';
 import Pagination, { PaginationType } from '../components/Pagination';
 import PlaylistList from '../components/PlaylistList';
 import { PlaylistType } from './Playlist';
@@ -30,7 +29,6 @@ export type PlaylistEntryType = {
 
 export type PlaylistsResponseType = {
   data?: PlaylistType[];
-  config?: ConfigType;
   paginate?: PaginationType;
 };
 

@@ -39,6 +39,7 @@ import getApiUrl from '../configuration/getApiUrl';
 import loadVideoNav, { VideoNavResponseType } from '../api/loader/loadVideoNav';
 import useIsAdmin from '../functions/useIsAdmin';
 import ToggleConfig from '../components/ToggleConfig';
+// import { useAppSettingsStore } from '../stores/AppSettingsStore';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {
   return playlist.playlist_entries.some(entry => {
@@ -100,15 +101,9 @@ export type SimilarVideosResponseType = {
   config: ConfigType;
 };
 
-export type VideoResponseType = {
-  data: VideoType;
-  config: ConfigType;
-};
+export type VideoResponseType = VideoType;
 
-type CommentsResponseType = {
-  data: CommentsType[];
-  config: ConfigType;
-};
+type CommentsResponseType = CommentsType[];
 
 export type VideoCommentsResponseType = {
   data: VideoType;
@@ -120,6 +115,7 @@ const Video = () => {
   const { videoId } = useParams() as VideoParams;
   const navigate = useNavigate();
   const isAdmin = useIsAdmin();
+  // const { appSettingsConfig } = useAppSettingsStore();
 
   const [videoEnded, setVideoEnded] = useState(false);
   const [playlistAutoplay, setPlaylistAutoplay] = useState(
@@ -142,18 +138,24 @@ const Video = () => {
 
   useEffect(() => {
     (async () => {
-      if (refreshVideoList || videoId !== videoResponse?.data?.youtube_id) {
+      if (refreshVideoList || videoId !== videoResponse?.youtube_id) {
         const videoByIdResponse = await loadVideoById(videoId);
         const simmilarVideosResponse = await loadSimmilarVideosById(videoId);
         const customPlaylistsResponse = await loadPlaylistList({ type: 'custom' });
-        const commentsResponse = await loadCommentsbyVideoId(videoId);
         const videoNavResponse = await loadVideoNav(videoId);
+
+        try {
+          const commentsResponse = await loadCommentsbyVideoId(videoId);
+          setCommentsResponse(commentsResponse);
+        } catch (e) {
+          console.log('Comments not found', e);
+        }
 
         setVideoResponse(videoByIdResponse);
         setSimmilarVideos(simmilarVideosResponse);
         setVideoPlaylistNav(videoNavResponse);
         setCustomPlaylistsResponse(customPlaylistsResponse);
-        setCommentsResponse(commentsResponse);
+
         setRefreshVideoList(false);
       }
     })();
@@ -194,18 +196,18 @@ const Video = () => {
     return [];
   }
 
-  const video = videoResponse.data;
-  const watched = videoResponse.data.player.watched;
-  const config = videoResponse.config;
+  const video = videoResponse;
+  const watched = videoResponse.player.watched;
+  // const config = appSettingsConfig;
   const playlistNav = videoPlaylistNav;
-  const sponsorBlock = videoResponse.data.sponsorblock;
+  const sponsorBlock = videoResponse.sponsorblock;
   const customPlaylists = customPlaylistsResponse?.data;
   const starRating = convertStarRating(video?.stats?.average_rating);
-  const comments = commentsResponse?.data;
+  const comments = commentsResponse;
 
   console.log('playlistNav', playlistNav);
 
-  const cast = config.enable_cast;
+  const cast = false; // config.enable_cast;
 
   return (
     <>

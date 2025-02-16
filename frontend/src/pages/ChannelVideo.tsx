@@ -42,7 +42,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const [videoResponse, setVideoReponse] = useState<VideoListByFilterResponseType>();
   const [videoAggsResponse, setVideoAggsResponse] = useState<ChannelAggsType>();
 
-  const channel = channelResponse?.data;
+  const channel = channelResponse;
   const videoList = videoResponse?.data;
   const pagination = videoResponse?.paginate;
 
