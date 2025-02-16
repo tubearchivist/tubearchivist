@@ -31,7 +31,6 @@ import loadPlaylistList from '../api/loader/loadPlaylistList';
 import { PlaylistsResponseType } from './Playlists';
 import PaginationDummy from '../components/PaginationDummy';
 import updateCustomPlaylist from '../api/actions/updateCustomPlaylist';
-import { PlaylistType } from './Playlist';
 import loadCommentsbyVideoId from '../api/loader/loadCommentsbyVideoId';
 import CommentBox, { CommentsType } from '../components/CommentBox';
 import Button from '../components/Button';
@@ -39,6 +38,7 @@ import getApiUrl from '../configuration/getApiUrl';
 import loadVideoNav, { VideoNavResponseType } from '../api/loader/loadVideoNav';
 import useIsAdmin from '../functions/useIsAdmin';
 import ToggleConfig from '../components/ToggleConfig';
+import { PlaylistType } from '../api/loader/loadPlaylistById';
 // import { useAppSettingsStore } from '../stores/AppSettingsStore';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {

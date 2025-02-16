@@ -2,7 +2,6 @@ import { useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { VideoType } from './Home';
 import loadSearch from '../api/loader/loadSearch';
-import { PlaylistType } from './Playlist';
 import { ChannelType } from './Channels';
 import VideoList from '../components/VideoList';
 import ChannelList from '../components/ChannelList';
@@ -12,6 +11,7 @@ import { ViewStyles } from '../configuration/constants/ViewStyle';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import SearchExampleQueries from '../components/SearchExampleQueries';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import { PlaylistType } from '../api/loader/loadPlaylistById';
 
 const EmptySearchResponse: SearchResultsType = {
   results: {

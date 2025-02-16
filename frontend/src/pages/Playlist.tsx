@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useOutletContext, useParams, useSearchParams } from 'react-router-dom';
-import loadPlaylistById from '../api/loader/loadPlaylistById';
+import loadPlaylistById, { PlaylistResponseType } from '../api/loader/loadPlaylistById';
 import { OutletContextType } from './Base';
 import { VideoType } from './Home';
 import Filterbar from '../components/Filterbar';
-import { PlaylistEntryType } from './Playlists';
 import loadChannelById from '../api/loader/loadChannelById';
 import VideoList from '../components/VideoList';
 import Pagination, { PaginationType } from '../components/Pagination';
@@ -24,24 +23,6 @@ import Button from '../components/Button';
 import loadVideoListByFilter from '../api/loader/loadVideoListByPage';
 import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
-
-export type PlaylistType = {
-  playlist_active: boolean;
-  playlist_channel: string;
-  playlist_channel_id: string;
-  playlist_description: string;
-  playlist_entries: PlaylistEntryType[];
-  playlist_id: string;
-  playlist_last_refresh: string;
-  playlist_name: string;
-  playlist_subscribed: boolean;
-  playlist_thumbnail: string;
-  playlist_type: string;
-  _index: string;
-  _score: number;
-};
-
-export type PlaylistResponseType = PlaylistType;
 
 export type VideoResponseType = {
   data?: VideoType[];
@@ -94,9 +75,9 @@ const Playlist = () => {
         sort: 'downloaded', // downloaded or published? or playlist sort order?
       });
 
-      const isCustomPlaylist = playlist?.data?.playlist_type === 'custom';
+      const isCustomPlaylist = playlist?.playlist_type === 'custom';
       if (!isCustomPlaylist) {
-        const channel = await loadChannelById(playlist.data.playlist_channel_id);
+        const channel = await loadChannelById(playlist.playlist_channel_id);
 
         setChannelResponse(channel);
       }
@@ -294,7 +275,7 @@ const Playlist = () => {
           </div>
         </div>
 
-        {playlist.playlist_description && (
+        {playlist.playlist_description !== 'False' && (
           <div className="description-box">
             <p
               id={descriptionExpanded ? 'text-expand-expanded' : 'text-expand'}

@@ -9,7 +9,6 @@ import { OutletContextType } from './Base';
 import loadPlaylistList from '../api/loader/loadPlaylistList';
 import Pagination, { PaginationType } from '../components/Pagination';
 import PlaylistList from '../components/PlaylistList';
-import { PlaylistType } from './Playlist';
 import updateBulkPlaylistSubscriptions from '../api/actions/updateBulkPlaylistSubscriptions';
 import createCustomPlaylist from '../api/actions/createCustomPlaylist';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
@@ -18,14 +17,7 @@ import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import Notifications from '../components/Notifications';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
-
-export type PlaylistEntryType = {
-  youtube_id: string;
-  title: string;
-  uploader: string;
-  idx: number;
-  downloaded: boolean;
-};
+import { PlaylistType } from '../api/loader/loadPlaylistById';
 
 export type PlaylistsResponseType = {
   data?: PlaylistType[];

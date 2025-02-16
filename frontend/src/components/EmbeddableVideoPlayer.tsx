@@ -46,7 +46,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
             playlistIds.map(async playlistid => {
               const playlistResponse = await loadPlaylistById(playlistid);
 
-              return playlistResponse.data;
+              return playlistResponse;
             }),
           );
 
