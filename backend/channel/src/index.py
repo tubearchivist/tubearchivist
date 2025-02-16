@@ -115,7 +115,7 @@ class YoutubeChannel(YouTubeItem):
             "channel_tvart_url": False,
             "channel_id": self.youtube_id,
             "channel_subscribed": False,
-            "channel_tags": False,
+            "channel_tags": [],
             "channel_description": False,
             "channel_thumb_url": False,
             "channel_views": 0,
