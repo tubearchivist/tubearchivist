@@ -61,6 +61,7 @@ class AsyncTaskResponseSerializer(serializers.Serializer):
 class NotificationSerializer(serializers.Serializer):
     """serialize notification messages"""
 
+    id = serializers.CharField()
     title = serializers.CharField()
     group = serializers.CharField()
     api_start = serializers.BooleanField()
