@@ -127,7 +127,7 @@ class VideoListQuerySerializer(serializers.Serializer):
     )
     order = serializers.ChoiceField(choices=["asc", "desc"], required=False)
     type = serializers.ChoiceField(
-        choices=["videos", "stream", "short"], required=False
+        choices=["videos", "streams", "shorts"], required=False
     )
 
 
