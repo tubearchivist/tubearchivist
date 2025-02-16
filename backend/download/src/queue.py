@@ -322,7 +322,7 @@ class PendingList(PendingIndex):
 
         duration = vid.get("duration")
         if duration and isinstance(duration, int):
-            if duration > 60:
+            if duration > 3 * 60:
                 return False
 
         return is_shorts(vid["id"])
