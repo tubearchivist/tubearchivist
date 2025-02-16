@@ -93,7 +93,7 @@ class QueryBuilder:
 
         sort_field = getattr(SortEnum, sort.upper()).value
 
-        order = self.request_params.get("order", ["desc"])
+        order = self.request_params.get("order", "desc")
         if not hasattr(OrderEnum, order.upper()):
             raise ValueError(f"'{order}' not in OrderEnum")
 
