@@ -96,11 +96,6 @@ export type SponsorBlockType = {
   message?: string;
 };
 
-export type SimilarVideosResponseType = {
-  data: VideoType[];
-  config: ConfigType;
-};
-
 export type VideoResponseType = VideoType;
 
 type CommentsResponseType = CommentsType[];
@@ -131,7 +126,7 @@ const Video = () => {
   const [reindex, setReindex] = useState(false);
 
   const [videoResponse, setVideoResponse] = useState<VideoResponseType>();
-  const [simmilarVideos, setSimmilarVideos] = useState<SimilarVideosResponseType>();
+  const [simmilarVideos, setSimmilarVideos] = useState<VideoResponseType[]>();
   const [videoPlaylistNav, setVideoPlaylistNav] = useState<VideoNavResponseType[]>();
   const [customPlaylistsResponse, setCustomPlaylistsResponse] = useState<PlaylistsResponseType>();
   const [commentsResponse, setCommentsResponse] = useState<CommentsResponseType>();
@@ -571,7 +566,7 @@ const Video = () => {
           <h3>Similar Videos</h3>
           <div className="video-list grid grid-3" id="similar-videos">
             <VideoList
-              videoList={simmilarVideos?.data}
+              videoList={simmilarVideos}
               viewLayout="grid"
               refreshVideoList={setRefreshVideoList}
             />
