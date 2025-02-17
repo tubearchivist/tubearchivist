@@ -55,8 +55,15 @@ const APIClient = async (
     throw new Error('Forbidden: Access denied.');
   }
 
-  // Try parsing response data
   let data;
+
+  // expected empty response
+  if (response.status === 204) {
+    data = null;
+    return data;
+  }
+
+  // Try parsing response data
   try {
     data = await response.json();
   } catch (error) {
