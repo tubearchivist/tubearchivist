@@ -66,8 +66,7 @@ const Download = () => {
 
   const downloadList = downloadResponse?.data;
   const pagination = downloadResponse?.paginate;
-  const channelDownloads = downloadAggsResponse?.channel_downloads;
-  const channelAggsList = channelDownloads?.buckets;
+  const channelAggsList = downloadAggsResponse?.buckets;
 
   const downloadCount = pagination?.total_hits;
 
