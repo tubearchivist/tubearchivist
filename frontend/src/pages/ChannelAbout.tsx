@@ -226,7 +226,7 @@ const ChannelAbout = () => {
           </div>
         )}
 
-        {channel.channel_tags && (
+        {channel.channel_tags.length > 0 && (
           <div className="description-box">
             <div className="video-tag-box">
               {channel.channel_tags.map(tag => {
