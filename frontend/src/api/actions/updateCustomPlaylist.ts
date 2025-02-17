@@ -7,7 +7,7 @@ const updateCustomPlaylist = async (
   playlistId: string,
   videoId: string,
 ) => {
-  return APIClient(`/api/playlist/${playlistId}/`, {
+  return APIClient(`/api/playlist/custom/${playlistId}/`, {
     method: 'POST',
     body: { action, video_id: videoId },
   });
