@@ -60,7 +60,7 @@ export type VideoType = {
   player: PlayerType;
   published: string;
   sponsorblock?: SponsorBlockType;
-  playlist?: string[];
+  playlist: string[];
   stats: StatsType;
   streams: StreamType[];
   subtitles: Subtitles[];

@@ -81,14 +81,12 @@ class VideoSerializer(serializers.Serializer):
     media_size = serializers.IntegerField()
     media_url = serializers.CharField()
     player = PlayerSerializer()
-    playlist = serializers.ListField(
-        child=serializers.CharField(), allow_null=True
-    )
+    playlist = serializers.ListField(child=serializers.CharField())
     published = serializers.CharField()
     sponsorblock = SponsorBlockSerializer(allow_null=True)
     stats = StatsSerializer()
     streams = StreamItemSerializer(many=True)
-    subtitles = SubtitleItemSerializer(many=True, allow_null=True)
+    subtitles = SubtitleItemSerializer(many=True)
     tags = serializers.ListField(child=serializers.CharField())
     title = serializers.CharField()
     vid_last_refresh = serializers.CharField()
