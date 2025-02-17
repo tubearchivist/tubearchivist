@@ -7,7 +7,6 @@ Functionality:
 from typing import TypedDict
 
 from common.src.es_connect import ElasticWrap
-from common.src.helper import get_stylesheets
 
 
 class UserConfigType(TypedDict, total=False):
@@ -29,7 +28,10 @@ class UserConfigType(TypedDict, total=False):
 
 
 class UserConfig:
-    """Handle settings for an individual user"""
+    """
+    Handle settings for an individual user
+    items are expected to be validated in the serializer
+    """
 
     _DEFAULT_USER_SETTINGS = UserConfigType(
         stylesheet="dark.css",
@@ -46,19 +48,6 @@ class UserConfig:
         show_subed_only=False,
         show_help_text=True,
     )
-
-    VALID_STYLESHEETS = get_stylesheets()
-    VALID_VIEW_STYLE = ["grid", "list"]
-    VALID_SORT_ORDER = ["asc", "desc"]
-    VALID_SORT_BY = [
-        "published",
-        "downloaded",
-        "views",
-        "likes",
-        "duration",
-        "filesize",
-    ]
-    VALID_GRID_ITEMS = range(3, 8)
 
     def __init__(self, user_id: str):
         self._user_id: str = user_id
@@ -84,50 +73,12 @@ class UserConfig:
 
     def set_value(self, key: str, value: str | bool | int):
         """Set or replace a configuration value for the user"""
-        self._validate(key, value)
         data = {"doc": {"config": {key: value}}}
         response, status = ElasticWrap(self.es_update_url).post(data)
         if status < 200 or status > 299:
             raise ValueError(f"Failed storing user value {status}: {response}")
 
         print(f"User {self._user_id} value '{key}' change: to {value}")
-
-    def _validate(self, key, value):
-        """validate key and value"""
-        if not self._user_id:
-            raise ValueError("Unable to persist config for null user_id")
-
-        if key not in self._DEFAULT_USER_SETTINGS:
-            raise KeyError(
-                f"Unable to persist config for an unknown key '{key}'"
-            )
-
-        valid_values = {
-            "stylesheet": self.VALID_STYLESHEETS,
-            "sort_by": self.VALID_SORT_BY,
-            "sort_order": self.VALID_SORT_ORDER,
-            "view_style_home": self.VALID_VIEW_STYLE,
-            "view_style_channel": self.VALID_VIEW_STYLE,
-            "view_style_download": self.VALID_VIEW_STYLE,
-            "view_style_playlist": self.VALID_VIEW_STYLE,
-            "grid_items": self.VALID_GRID_ITEMS,
-            "page_size": int,
-            "hide_watched": bool,
-            "show_ignored_only": bool,
-            "show_subed_only": bool,
-            "show_help_text": bool,
-        }
-        validation_value = valid_values.get(key)
-
-        if isinstance(validation_value, (list, range)):
-            if value not in validation_value:
-                raise ValueError(f"Invalid value for {key}: {value}")
-        elif validation_value == int:
-            if not isinstance(value, int):
-                raise ValueError(f"Invalid value for {key}: {value}")
-        elif validation_value == bool:
-            if not isinstance(value, bool):
-                raise ValueError(f"Invalid value for {key}: {value}")
 
     def get_config(self) -> UserConfigType:
         """get config from ES or load from the application defaults"""

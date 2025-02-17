@@ -4,6 +4,7 @@
 
 from common.serializers import PaginationSerializer, ValidateUnknownFieldsMixin
 from rest_framework import serializers
+from video.src.constants import VideoTypeEnum
 
 
 class DownloadItemSerializer(serializers.Serializer):
@@ -19,9 +20,7 @@ class DownloadItemSerializer(serializers.Serializer):
     timestamp = serializers.IntegerField()
     title = serializers.CharField()
     vid_thumb_url = serializers.CharField()
-    vid_type = serializers.ChoiceField(
-        choices=["videos", "streams", "shorts", "unknown"]
-    )
+    vid_type = serializers.ChoiceField(choices=VideoTypeEnum.values())
     youtube_id = serializers.CharField()
     _index = serializers.CharField(required=False)
     _score = serializers.IntegerField(required=False)

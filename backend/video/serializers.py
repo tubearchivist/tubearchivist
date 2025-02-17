@@ -5,6 +5,7 @@
 from channel.serializers import ChannelSerializer
 from common.serializers import PaginationSerializer
 from rest_framework import serializers
+from video.src.constants import OrderEnum, SortEnum, VideoTypeEnum, WatchedEnum
 
 
 class PlayerSerializer(serializers.Serializer):
@@ -91,7 +92,7 @@ class VideoSerializer(serializers.Serializer):
     title = serializers.CharField()
     vid_last_refresh = serializers.CharField()
     vid_thumb_url = serializers.CharField()
-    vid_type = serializers.ChoiceField(choices=["video", "stream", "short"])
+    vid_type = serializers.ChoiceField(choices=VideoTypeEnum.values_known())
     youtube_id = serializers.CharField()
     _index = serializers.CharField(required=False)
     _score = serializers.FloatField(required=False)
@@ -110,22 +111,12 @@ class VideoListQuerySerializer(serializers.Serializer):
     playlist = serializers.CharField(required=False)
     channel = serializers.CharField(required=False)
     watch = serializers.ChoiceField(
-        choices=["watched", "unwatched", "continue"], required=False
+        choices=WatchedEnum.values(), required=False
     )
-    sort = serializers.ChoiceField(
-        choices=[
-            "published",
-            "downloaded",
-            "views",
-            "likes",
-            "duration",
-            "filesize",
-        ],
-        required=False,
-    )
-    order = serializers.ChoiceField(choices=["asc", "desc"], required=False)
+    sort = serializers.ChoiceField(choices=SortEnum.names(), required=False)
+    order = serializers.ChoiceField(choices=OrderEnum.values(), required=False)
     type = serializers.ChoiceField(
-        choices=["videos", "streams", "shorts"], required=False
+        choices=VideoTypeEnum.values_known(), required=False
     )
 
 
