@@ -2,7 +2,6 @@ import { useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { VideoType } from './Home';
 import loadSearch from '../api/loader/loadSearch';
-import { PlaylistType } from './Playlist';
 import { ChannelType } from './Channels';
 import VideoList from '../components/VideoList';
 import ChannelList from '../components/ChannelList';
@@ -12,6 +11,7 @@ import { ViewStyles } from '../configuration/constants/ViewStyle';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import SearchExampleQueries from '../components/SearchExampleQueries';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import { PlaylistType } from '../api/loader/loadPlaylistById';
 
 const EmptySearchResponse: SearchResultsType = {
   results: {
@@ -39,12 +39,11 @@ const Search = () => {
   const { userConfig } = useUserConfigStore();
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');
-  const userMeConfig = userConfig.config;
 
-  const viewVideos = userMeConfig.view_style_home;
-  const viewChannels = userMeConfig.view_style_channel;
-  const viewPlaylists = userMeConfig.view_style_playlist;
-  const gridItems = userMeConfig.grid_items || 3;
+  const viewVideos = userConfig.view_style_home;
+  const viewChannels = userConfig.view_style_channel;
+  const viewPlaylists = userConfig.view_style_playlist;
+  const gridItems = userConfig.grid_items || 3;
 
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');

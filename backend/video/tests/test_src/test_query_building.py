@@ -15,12 +15,12 @@ def test_build_data():
     """test for correct key building"""
     qb = QueryBuilder(
         user_id=1,
-        channel=["test_channel"],
-        playlist=["test_playlist"],
-        watch=["watched"],
-        type=["videos"],
-        sort=["published"],
-        order=["desc"],
+        channel="test_channel",
+        playlist="test_playlist",
+        watch="watched",
+        type="videos",
+        sort="published",
+        order="desc",
     )
     result = qb.build_data()
     assert "query" in result
@@ -30,7 +30,7 @@ def test_build_data():
 
 def test_parse_watch():
     """watched query building"""
-    qb = QueryBuilder(user_id=1, watch=["watched"])
+    qb = QueryBuilder(user_id=1, watch="watched")
     result = qb.parse_watch("watched")
     assert result == {"match": {"player.watched": True}}
 
@@ -43,7 +43,7 @@ def test_parse_watch():
 
 def test_parse_type():
     """test type is parsed"""
-    qb = QueryBuilder(user_id=1, type=["videos"])
+    qb = QueryBuilder(user_id=1, type="videos")
     with pytest.raises(ValueError):
         qb.parse_type("invalid")
 
@@ -53,16 +53,14 @@ def test_parse_type():
 
 def test_parse_sort():
     """test sort and order"""
-    qb = QueryBuilder(user_id=1, sort=["views"], order=["desc"])
+    qb = QueryBuilder(user_id=1, sort="views", order="desc")
     result = qb.parse_sort()
     assert result == {"sort": [{"stats.view_count": {"order": "desc"}}]}
 
     with pytest.raises(ValueError):
-        qb = QueryBuilder(user_id=1, sort=["invalid"])
+        qb = QueryBuilder(user_id=1, sort="invalid")
         qb.parse_sort()
 
     with pytest.raises(ValueError):
-        qb = QueryBuilder(
-            user_id=1, sort=["stats.view_count"], order=["invalid"]
-        )
+        qb = QueryBuilder(user_id=1, sort="stats.view_count", order="invalid")
         qb.parse_sort()

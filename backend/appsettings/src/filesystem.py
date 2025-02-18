@@ -6,7 +6,7 @@ Functionality:
 import os
 
 from common.src.env_settings import EnvironmentSettings
-from common.src.es_connect import ElasticWrap, IndexPaginate
+from common.src.es_connect import IndexPaginate
 from common.src.helper import ignore_filelist
 from video.src.comments import CommentList
 from video.src.index import YoutubeVideo, index_new_video
@@ -56,7 +56,6 @@ class Scanner:
         """apply all changes"""
         self.delete()
         self.index()
-        self.url_fix()
 
     def delete(self) -> None:
         """delete videos from index"""
@@ -92,35 +91,3 @@ class Scanner:
         comment_list = CommentList(task=self.task)
         comment_list.add(video_ids=list(self.to_index))
         comment_list.index()
-
-    def url_fix(self) -> None:
-        """
-        update path v0.3.6 to v0.3.7
-        fix url not matching channel-videoid pattern
-        """
-        bool_must = (
-            "doc['media_url'].value == "
-            + "(doc['channel.channel_id'].value + '/' + "
-            + "doc['youtube_id'].value) + '.mp4'"
-        )
-        to_update = (
-            "ctx._source['media_url'] = "
-            + "ctx._source.channel['channel_id'] + '/' + "
-            + "ctx._source['youtube_id'] + '.mp4'"
-        )
-        data = {
-            "query": {
-                "bool": {
-                    "must_not": [{"script": {"script": {"source": bool_must}}}]
-                }
-            },
-            "script": {"source": to_update},
-        }
-        response, _ = ElasticWrap("ta_video/_update_by_query").post(data=data)
-        updated = response.get("updates")
-        if updated:
-            print(f"updated {updated} bad media_url")
-            if self.task:
-                self.task.send_progress(
-                    [f"Updated {updated} wrong media urls."]
-                )

@@ -1,10 +1,25 @@
 """all channel API views"""
 
+from channel.serializers import (
+    ChannelAggSerializer,
+    ChannelListQuerySerializer,
+    ChannelListSerializer,
+    ChannelNavSerializer,
+    ChannelSearchQuerySerializer,
+    ChannelSerializer,
+    ChannelUpdateSerializer,
+)
 from channel.src.index import YoutubeChannel, channel_overwrites
 from channel.src.nav import ChannelNav
+from common.serializers import ErrorResponseSerializer
 from common.src.urlparser import Parser
 from common.views_base import AdminWriteOnly, ApiBaseView
 from download.src.subscriptions import ChannelSubscription
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    OpenApiResponse,
+    extend_schema,
+)
 from rest_framework.response import Response
 from task.tasks import index_channel_playlists, subscribe_to
 
@@ -19,26 +34,38 @@ class ChannelApiListView(ApiBaseView):
     valid_filter = ["subscribed"]
     permission_classes = [AdminWriteOnly]
 
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(ChannelListSerializer()),
+        },
+        parameters=[
+            OpenApiParameter(
+                name="filter",
+                description="Filter by Subscribed",
+                type=ChannelListQuerySerializer(),
+            ),
+        ],
+    )
     def get(self, request):
         """get request"""
         self.data.update(
             {"sort": [{"channel_name.keyword": {"order": "asc"}}]}
         )
 
-        query_filter = request.GET.get("filter", False)
-        must_list = []
-        if query_filter:
-            if query_filter not in self.valid_filter:
-                message = f"invalid url query filter: {query_filter}"
-                print(message)
-                return Response({"message": message}, status=400)
+        serializer = ChannelListQuerySerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
 
+        must_list = []
+        query_filter = validated_data.get("filter")
+        if query_filter:
             must_list.append({"term": {"channel_subscribed": {"value": True}}})
 
         self.data["query"] = {"bool": {"must": must_list}}
         self.get_document_list(request)
+        serializer = ChannelListSerializer(self.response)
 
-        return Response(self.response)
+        return Response(serializer.data)
 
     def post(self, request):
         """subscribe/unsubscribe to list of channels"""
@@ -81,53 +108,79 @@ class ChannelApiView(ApiBaseView):
     search_base = "ta_channel/_doc/"
     permission_classes = [AdminWriteOnly]
 
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(ChannelSerializer()),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="Channel not found"
+            ),
+        }
+    )
     def get(self, request, channel_id):
         # pylint: disable=unused-argument
-        """get request"""
+        """get channel detail"""
         self.get_document(channel_id)
-        return Response(self.response, status=self.status_code)
+        if not self.response:
+            error = ErrorResponseSerializer({"error": "channel not found"})
+            return Response(error.data, status=404)
 
+        response_serializer = ChannelSerializer(self.response)
+        return Response(response_serializer.data, status=self.status_code)
+
+    @extend_schema(
+        request=ChannelUpdateSerializer(),
+        responses={
+            200: OpenApiResponse(ChannelUpdateSerializer()),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="Bad request"
+            ),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="Channel not found"
+            ),
+        },
+    )
     def post(self, request, channel_id):
-        """modify channel overwrites"""
+        """modify channel"""
         self.get_document(channel_id)
-        if not self.response["data"]:
-            return Response({"error": "channel not found"}, status=404)
+        if not self.response:
+            error = ErrorResponseSerializer({"error": "channel not found"})
+            return Response(error.data, status=404)
 
-        data = request.data
-        subscribed = data.get("channel_subscribed")
+        serializer = ChannelUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+
+        subscribed = validated_data.get("channel_subscribed")
         if subscribed is not None:
-            channel_sub = ChannelSubscription()
-            json_data = channel_sub.change_subscribe(channel_id, subscribed)
-            return Response(json_data, status=200)
+            ChannelSubscription().change_subscribe(channel_id, subscribed)
 
-        if "channel_overwrites" not in data:
-            return Response({"error": "invalid payload"}, status=400)
-
-        overwrites = data["channel_overwrites"]
-
-        try:
-            json_data = channel_overwrites(channel_id, overwrites)
+        overwrites = validated_data.get("channel_overwrites")
+        if overwrites:
+            channel_overwrites(channel_id, overwrites)
             if overwrites.get("index_playlists"):
                 index_channel_playlists.delay(channel_id)
 
-        except ValueError as err:
-            return Response({"error": str(err)}, status=400)
+        return Response(serializer.data, status=200)
 
-        return Response(json_data, status=200)
-
+    @extend_schema(
+        responses={
+            204: OpenApiResponse(description="Channel deleted"),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="Channel not found"
+            ),
+        },
+    )
     def delete(self, request, channel_id):
         # pylint: disable=unused-argument
         """delete channel"""
-        message = {"channel": channel_id}
         try:
             YoutubeChannel(channel_id).delete_channel()
-            status_code = 200
-            message.update({"state": "delete"})
+            return Response(status=204)
         except FileNotFoundError:
-            status_code = 404
-            message.update({"state": "not found"})
+            pass
 
-        return Response(message, status=status_code)
+        error = ErrorResponseSerializer({"error": "channel not found"})
+        return Response(error.data, status=404)
 
 
 class ChannelAggsApiView(ApiBaseView):
@@ -137,8 +190,13 @@ class ChannelAggsApiView(ApiBaseView):
 
     search_base = "ta_video/_search"
 
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(ChannelAggSerializer()),
+        },
+    )
     def get(self, request, channel_id):
-        """get aggs"""
+        """get channel aggregations"""
         self.data.update(
             {
                 "query": {
@@ -152,8 +210,9 @@ class ChannelAggsApiView(ApiBaseView):
             }
         )
         self.get_aggs()
+        serializer = ChannelAggSerializer(self.response)
 
-        return Response(self.response)
+        return Response(serializer.data)
 
 
 class ChannelNavApiView(ApiBaseView):
@@ -161,11 +220,17 @@ class ChannelNavApiView(ApiBaseView):
     GET: get channel nav
     """
 
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(ChannelNavSerializer()),
+        },
+    )
     def get(self, request, channel_id):
-        """get nav"""
+        """get navigation"""
 
         nav = ChannelNav(channel_id).get_nav()
-        return Response(nav)
+        serializer = ChannelNavSerializer(nav)
+        return Response(serializer.data)
 
 
 class ChannelApiSearchView(ApiBaseView):
@@ -175,10 +240,31 @@ class ChannelApiSearchView(ApiBaseView):
 
     search_base = "ta_channel/_doc/"
 
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(ChannelSerializer()),
+            400: OpenApiResponse(description="Bad Request"),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="Channel not found"
+            ),
+        },
+        parameters=[
+            OpenApiParameter(
+                name="q",
+                description="Search query string",
+                required=True,
+                type=str,
+            ),
+        ],
+    )
     def get(self, request):
-        """handle get request, search with s parameter"""
+        """search for local channel ID"""
 
-        query = request.GET.get("q")
+        serializer = ChannelSearchQuerySerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+
+        query = validated_data.get("q")
         if not query:
             message = "missing expected q parameter"
             return Response({"message": message, "data": False}, status=400)
@@ -186,13 +272,16 @@ class ChannelApiSearchView(ApiBaseView):
         try:
             parsed = Parser(query).parse()[0]
         except (ValueError, IndexError, AttributeError):
-            message = f"channel not found: {query}"
-            return Response({"message": message, "data": False}, status=404)
+            error = ErrorResponseSerializer(
+                {"error": f"channel not found: {query}"}
+            )
+            return Response(error.data, status=404)
 
         if not parsed["type"] == "channel":
-            message = "expected type channel"
-            return Response({"message": message, "data": False}, status=400)
+            error = ErrorResponseSerializer({"error": "expected channel data"})
+            return Response(error.data, status=400)
 
         self.get_document(parsed["url"])
+        serializer = ChannelSerializer(self.response)
 
-        return Response(self.response, status=self.status_code)
+        return Response(serializer.data, status=self.status_code)

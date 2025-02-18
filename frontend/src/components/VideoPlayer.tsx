@@ -59,7 +59,6 @@ const Subtitles = ({ subtitles }: SubtitlesProp) => {
 const handleTimeUpdate =
   (
     youtubeId: string,
-    duration: number,
     watched: boolean,
     sponsorBlock?: SponsorBlockType,
     setSponsorSegmentSkipped?: Dispatch<SetStateAction<SponsorSegmentsSkippedType>>,
@@ -142,15 +141,14 @@ const VideoPlayer = ({
   const arrowRightPressed = useKeyPress('ArrowRight');
   const arrowLeftPressed = useKeyPress('ArrowLeft');
 
-  const videoId = video.data.youtube_id;
-  const videoUrl = video.data.media_url;
-  const videoThumbUrl = video.data.vid_thumb_url;
-  const watched = video.data.player.watched;
-  const duration = video.data.player.duration;
-  const videoSubtitles = video.data.subtitles;
+  const videoId = video.youtube_id;
+  const videoUrl = video.media_url;
+  const videoThumbUrl = video.vid_thumb_url;
+  const watched = video.player.watched;
+  const duration = video.player.duration;
+  const videoSubtitles = video.subtitles;
 
-  let videoSrcProgress =
-    Number(video.data.player?.position) > 0 ? Number(video.data.player?.position) : '';
+  let videoSrcProgress = Number(video.player?.position) > 0 ? Number(video.player?.position) : '';
 
   if (searchParamVideoProgress !== null) {
     videoSrcProgress = searchParamVideoProgress;
@@ -337,7 +335,6 @@ const VideoPlayer = ({
             }}
             onTimeUpdate={handleTimeUpdate(
               videoId,
-              duration,
               watched,
               sponsorBlock,
               setSkippedSegments,

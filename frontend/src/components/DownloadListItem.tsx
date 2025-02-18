@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Download from '../pages/Download';
 import Routes from '../configuration/routes/RouteList';
@@ -5,9 +6,9 @@ import formatDate from '../functions/formatDates';
 import Button from './Button';
 import deleteDownloadById from '../api/actions/deleteDownloadById';
 import updateDownloadQueueStatusById from '../api/actions/updateDownloadQueueStatusById';
-import { useState } from 'react';
 import getApiUrl from '../configuration/getApiUrl';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import defaultVideoThumb from '/img/default-video-thumb.jpg';
 
 type DownloadListItemProps = {
   download: Download;
@@ -16,8 +17,8 @@ type DownloadListItemProps = {
 
 const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
   const { userConfig } = useUserConfigStore();
-  const view = userConfig.config.view_style_downloads;
-  const showIgnored = userConfig.config.show_ignored_only;
+  const view = userConfig.view_style_downloads;
+  const showIgnored = userConfig.show_ignored_only;
 
   const [hideDownload, setHideDownload] = useState(false);
 
@@ -25,7 +26,14 @@ const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
     <div className={`video-item ${view}`} id={`dl-${download.youtube_id}`}>
       <div className={`video-thumb-wrap ${view}`}>
         <div className="video-thumb">
-          <img src={`${getApiUrl()}${download.vid_thumb_url}`} alt="video_thumb" />
+          <img
+            src={`${getApiUrl()}${download.vid_thumb_url}`}
+            alt="video_thumb"
+            onError={({ currentTarget }) => {
+              currentTarget.onerror = null; // prevents looping
+              currentTarget.src = defaultVideoThumb;
+            }}
+          />
 
           <div className="video-tags">
             {showIgnored && <span>ignored</span>}

@@ -106,7 +106,7 @@ class Pagination:
         page_get = self.page_get
         page_from = 0
         if page_get in [0, 1]:
-            prev_pages = False
+            prev_pages = None
         elif page_get > 1:
             page_from = (page_get - 1) * self.page_size
             prev_pages = [

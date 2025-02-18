@@ -1,13 +1,17 @@
 import { Outlet, useLoaderData, useLocation, useSearchParams } from 'react-router-dom';
 import Footer from '../components/Footer';
 import useColours from '../configuration/colours/useColours';
-import { UserMeType } from '../api/actions/updateUserConfig';
+import { UserConfigType } from '../api/actions/updateUserConfig';
 import { useEffect, useState } from 'react';
 import Navigation from '../components/Navigation';
 import { useAuthStore } from '../stores/AuthDataStore';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import { useUserAccountStore } from '../stores/UserAccountStore';
+import { UserAccountType } from '../api/loader/loadUserAccount';
+import { useAppSettingsStore } from '../stores/AppSettingsStore';
+import { AppSettingsConfigType } from '../api/loader/loadAppsettingsConfig';
 
-export type TaUpdateType = {
+type TaUpdateType = {
   version?: string;
   is_breaking?: boolean;
 };
@@ -20,7 +24,9 @@ export type AuthenticationType = {
 };
 
 type BaseLoaderData = {
-  userConfig: UserMeType;
+  userConfig: UserConfigType;
+  userAccount: UserAccountType;
+  appSettings: AppSettingsConfigType;
   auth: AuthenticationType;
 };
 
@@ -32,7 +38,10 @@ export type OutletContextType = {
 const Base = () => {
   const { setAuth } = useAuthStore();
   const { setUserConfig } = useUserConfigStore();
-  const { userConfig, auth } = useLoaderData() as BaseLoaderData;
+  const { setUserAccount } = useUserAccountStore();
+  const { setAppSettingsConfig } = useAppSettingsStore();
+
+  const { userConfig, userAccount, appSettings, auth } = useLoaderData() as BaseLoaderData;
 
   const location = useLocation();
 
@@ -46,6 +55,9 @@ const Base = () => {
   useEffect(() => {
     setAuth(auth);
     setUserConfig(userConfig);
+    setUserAccount(userAccount);
+    setAppSettingsConfig(appSettings);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

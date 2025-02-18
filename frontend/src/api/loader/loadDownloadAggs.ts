@@ -7,11 +7,9 @@ type DownloadAggsBucket = {
 };
 
 export type DownloadAggsType = {
-  channel_downloads: {
-    doc_count_error_upper_bound: number;
-    sum_other_doc_count: number;
-    buckets: DownloadAggsBucket[];
-  };
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+  buckets: DownloadAggsBucket[];
 };
 
 const loadDownloadAggs = async (showIgnored: boolean): Promise<DownloadAggsType> => {

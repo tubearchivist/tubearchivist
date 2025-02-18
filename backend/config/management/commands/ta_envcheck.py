@@ -168,25 +168,35 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(message))
 
     def _enable_cast_overwrite(self):
-        """cast workaround, remove auth for static files in nginx"""
+        """enable cast env var"""
         self.stdout.write("[6] check ENABLE_CAST overwrite")
         overwrite = EnvironmentSettings.ENABLE_CAST
         if not overwrite:
             self.stdout.write(self.style.SUCCESS("    ENABLE_CAST is not set"))
             return
 
+    def _disable_static_auth(self):
+        """cast workaround, remove auth for static files in nginx"""
+        self.stdout.write("[7] check DISABLE_STATIC_AUTH overwrite")
+        overwrite = EnvironmentSettings.DISABLE_STATIC_AUTH
+        if not overwrite:
+            self.stdout.write(
+                self.style.SUCCESS("    DISABLE_STATIC_AUTH is not set")
+            )
+            return
+
         regex = re.compile(r"[^\S\r\n]*auth_request /api/ping/;\n")
         changed = file_overwrite(NGINX, regex, "")
         if changed:
-            message = "    ✓ process nginx to enable Cast"
+            message = "    ✓ process nginx to disable static auth"
         else:
-            message = "    ✓ Cast is already enabled in nginx"
+            message = "    ✓ static auth is already disabled in nginx"
 
         self.stdout.write(self.style.SUCCESS(message))
 
     def _create_superuser(self):
         """create superuser if not exist"""
-        self.stdout.write("[7] create superuser")
+        self.stdout.write("[8] create superuser")
         is_created = Account.objects.filter(is_superuser=True)
         if is_created:
             message = "    superuser already created"

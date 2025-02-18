@@ -53,8 +53,8 @@ class SponsorBlock:
         print(f"{youtube_id}: get sponsorblock timestamps")
         try:
             response = requests.get(url, headers=headers, timeout=10)
-        except requests.ReadTimeout:
-            print(f"{youtube_id}: sponsorblock API timeout")
+        except (requests.ReadTimeout, requests.ConnectionError) as err:
+            print(f"{youtube_id}: sponsorblock API error: {str(err)}")
             return False
 
         if not response.ok:

@@ -23,16 +23,15 @@ class QueryBuilder:
         must_list = []
         channel = self.request_params.get("channel")
         if channel:
-            must_list.append({"match": {"playlist_channel_id": channel[0]}})
+            must_list.append({"match": {"playlist_channel_id": channel}})
 
         subscribed = self.request_params.get("subscribed")
         if subscribed:
-            subed_bool = subscribed[0] == "true"
-            must_list.append({"match": {"playlist_subscribed": subed_bool}})
+            must_list.append({"match": {"playlist_subscribed": subscribed}})
 
         playlist_type = self.request_params.get("type")
         if playlist_type:
-            type_list = self.parse_type(playlist_type[0])
+            type_list = self.parse_type(playlist_type)
             must_list.append(type_list)
 
         query = {"bool": {"must": must_list}}

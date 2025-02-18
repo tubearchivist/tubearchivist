@@ -22,7 +22,7 @@ const Login = () => {
 
     const loginResponse = await signIn(username, password, saveLogin);
 
-    const signedIn = loginResponse.status === 200;
+    const signedIn = loginResponse.status === 204;
 
     if (signedIn) {
       navigate(Routes.Home);

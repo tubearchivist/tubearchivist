@@ -1,15 +1,37 @@
 """all user api views"""
 
+from common.serializers import ErrorResponseSerializer
 from common.views import ApiBaseView
 from django.contrib.auth import authenticate, login, logout
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from user.models import Account
-from user.serializers import AccountSerializer
+from user.serializers import (
+    AccountSerializer,
+    LoginSerializer,
+    UserMeConfigSerializer,
+)
 from user.src.user_config import UserConfig
+
+
+class UserAccountView(ApiBaseView):
+    """resolves to /api/user/account/
+    GET: return current user account
+    """
+
+    @extend_schema(
+        responses=AccountSerializer(),
+    )
+    def get(self, request):
+        """get user account"""
+        user_id = request.user.id
+        account = Account.objects.get(id=user_id)
+        account_serializer = AccountSerializer(account)
+        return Response(account_serializer.data)
 
 
 class UserConfigView(ApiBaseView):
@@ -18,46 +40,36 @@ class UserConfigView(ApiBaseView):
     POST: update user config
     """
 
+    @extend_schema(responses=UserMeConfigSerializer())
     def get(self, request):
-        """get config"""
-        user_id = request.user.id
-        account = Account.objects.get(id=user_id)
-        serializer = AccountSerializer(account)
-        response = serializer.data.copy()
+        """get user config"""
+        config = UserConfig(request.user.id).get_config()
+        serializer = UserMeConfigSerializer(config)
 
-        config = UserConfig(user_id).get_config()
-        response.update({"config": config})
+        return Response(serializer.data)
 
-        return Response(response)
-
+    @extend_schema(
+        request=UserMeConfigSerializer(required=False),
+        responses={
+            200: UserMeConfigSerializer(),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="Bad request"
+            ),
+        },
+    )
     def post(self, request):
-        """update config"""
-        user_id = request.user.id
-        data = request.data
+        """update config, allows partial update"""
 
-        data_config = data.get("config")
-        if not data_config:
-            message = {
-                "status": "Bad Request",
-                "message": "missing config key",
-            }
-            return Response(message, status=400)
+        data_serializer = UserMeConfigSerializer(
+            data=request.data, partial=True
+        )
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+        UserConfig(request.user.id).update_config(to_update=validated_data)
+        config = UserConfig(request.user.id).get_config()
+        serializer = UserMeConfigSerializer(config)
 
-        user_conf = UserConfig(user_id)
-        for key, value in data_config.items():
-            try:
-                user_conf.set_value(key, value)
-            except ValueError as err:
-                message = {
-                    "status": "Bad Request",
-                    "message": f"failed updating {key} to '{value}', {err}",
-                }
-                return Response(message, status=400)
-
-        response = user_conf.get_config()
-        response.update({"user_id": user_id})
-
-        return Response(response)
+        return Response(serializer.data)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -67,21 +79,37 @@ class LoginApiView(APIView):
     """
 
     permission_classes = [AllowAny]
+    SEC_IN_DAY = 60 * 60 * 24
 
+    @extend_schema(
+        request=LoginSerializer(),
+        responses={204: OpenApiResponse(description="login successful")},
+    )
     def post(self, request, *args, **kwargs):
-        """post data"""
+        """login with username and password"""
         # pylint: disable=no-member
+        data_serializer = LoginSerializer(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
 
-        username = request.data.get("username")
-        password = request.data.get("password")
+        username = validated_data["username"]
+        password = validated_data["password"]
+        remember_me = validated_data.get("remember_me")
 
         user = authenticate(request, username=username, password=password)
+        if user is None:
+            error = ErrorResponseSerializer({"error": "Invalid credentials"})
+            return Response(error.data, status=400)
 
-        if user is not None:
-            login(request, user)  # Creates a session for the user
-            return Response({"message": "Login successful"}, status=200)
+        if remember_me == "on":
+            request.session.set_expiry(self.SEC_IN_DAY * 365)
+        else:
+            request.session.set_expiry(self.SEC_IN_DAY * 2)
 
-        return Response({"message": "Invalid credentials"}, status=400)
+        print(f"expire session in {request.session.get_expiry_age()} secs")
+
+        login(request, user)  # Creates a session for the user
+        return Response(status=204)
 
 
 class LogoutApiView(ApiBaseView):
@@ -89,7 +117,10 @@ class LogoutApiView(ApiBaseView):
     POST: handle logout
     """
 
+    @extend_schema(
+        responses={204: OpenApiResponse(description="logout successful")}
+    )
     def post(self, request, *args, **kwargs):
-        """logout on post request"""
+        """logout user from session"""
         logout(request)
-        return Response({"message": "Successfully logged out."}, status=200)
+        return Response(status=204)

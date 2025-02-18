@@ -10,10 +10,11 @@ import { PlaylistsResponseType } from './Playlists';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 
 const ChannelPlaylist = () => {
   const { channelId } = useParams();
-  const { userConfig, setPartialConfig } = useUserConfigStore();
+  const { userConfig, setUserConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const [refreshPlaylists, setRefreshPlaylists] = useState(false);
@@ -23,8 +24,13 @@ const ChannelPlaylist = () => {
   const playlistList = playlistsResponse?.data;
   const pagination = playlistsResponse?.paginate;
 
-  const view = userConfig.config.view_style_playlist;
-  const showSubedOnly = userConfig.config.show_subed_only;
+  const view = userConfig.view_style_playlist;
+  const showSubedOnly = userConfig.show_subed_only;
+
+  const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
+    const updatedUserConfig = await updateUserConfig(config);
+    setUserConfig(updatedUserConfig);
+  };
 
   useEffect(() => {
     (async () => {
@@ -52,7 +58,7 @@ const ChannelPlaylist = () => {
               <input
                 checked={showSubedOnly}
                 onChange={() => {
-                  setPartialConfig({ show_subed_only: !showSubedOnly });
+                  handleUserConfigUpdate({ show_subed_only: !showSubedOnly });
                   setRefreshPlaylists(true);
                 }}
                 type="checkbox"
@@ -73,14 +79,14 @@ const ChannelPlaylist = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                setPartialConfig({ view_style_playlist: 'grid' });
+                handleUserConfigUpdate({ view_style_playlist: 'grid' });
               }}
               alt="grid view"
             />
             <img
               src={iconListView}
               onClick={() => {
-                setPartialConfig({ view_style_playlist: 'list' });
+                handleUserConfigUpdate({ view_style_playlist: 'list' });
               }}
               alt="list view"
             />

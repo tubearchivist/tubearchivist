@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
-import { PlaylistType } from '../pages/Playlist';
 import updatePlaylistSubscription from '../api/actions/updatePlaylistSubscription';
 import formatDate from '../functions/formatDates';
 import Button from './Button';
 import PlaylistThumbnail from './PlaylistThumbnail';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import { PlaylistType } from '../api/loader/loadPlaylistById';
 
 type PlaylistListProps = {
   playlistList: PlaylistType[] | undefined;
@@ -14,7 +14,7 @@ type PlaylistListProps = {
 
 const PlaylistList = ({ playlistList, setRefresh }: PlaylistListProps) => {
   const { userConfig } = useUserConfigStore();
-  const viewLayout = userConfig.config.view_style_playlist;
+  const viewLayout = userConfig.view_style_playlist;
 
   if (!playlistList || playlistList.length === 0) {
     return <p>No playlists found.</p>;

@@ -115,6 +115,8 @@ class SearchProcess:
                 video_dict["subtitles"][idx][
                     "media_url"
                 ] = f"{media_root}/{url}"
+        else:
+            video_dict["subtitles"] = []
 
         video_dict.update(
             {
@@ -137,6 +139,9 @@ class SearchProcess:
                         "position": player_position,
                     }
                 )
+
+        if "playlist" not in video_dict:
+            video_dict["playlist"] = []
 
         return dict(sorted(video_dict.items()))
 

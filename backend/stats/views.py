@@ -1,7 +1,19 @@
 """all stats API views"""
 
+from common.serializers import ErrorResponseSerializer
 from common.views_base import ApiBaseView
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.response import Response
+from stats.serializers import (
+    BiggestChannelItemSerializer,
+    BiggestChannelQuerySerializer,
+    ChannelStatsSerializer,
+    DownloadHistItemSerializer,
+    DownloadStatsSerializer,
+    PlaylistStatsSerializer,
+    VideoStatsSerializer,
+    WatchStatsSerializer,
+)
 from stats.src.aggs import (
     BiggestChannel,
     Channel,
@@ -18,11 +30,13 @@ class StatVideoView(ApiBaseView):
     GET: return video stats
     """
 
+    @extend_schema(responses=VideoStatsSerializer())
     def get(self, request):
-        """get stats"""
+        """get video stats"""
         # pylint: disable=unused-argument
+        serializer = VideoStatsSerializer(Video().process())
 
-        return Response(Video().process())
+        return Response(serializer.data)
 
 
 class StatChannelView(ApiBaseView):
@@ -30,11 +44,13 @@ class StatChannelView(ApiBaseView):
     GET: return channel stats
     """
 
+    @extend_schema(responses=ChannelStatsSerializer())
     def get(self, request):
-        """get stats"""
+        """get channel stats"""
         # pylint: disable=unused-argument
+        serializer = ChannelStatsSerializer(Channel().process())
 
-        return Response(Channel().process())
+        return Response(serializer.data)
 
 
 class StatPlaylistView(ApiBaseView):
@@ -42,11 +58,13 @@ class StatPlaylistView(ApiBaseView):
     GET: return playlist stats
     """
 
+    @extend_schema(responses=PlaylistStatsSerializer())
     def get(self, request):
-        """get stats"""
+        """get playlist stats"""
         # pylint: disable=unused-argument
+        serializer = PlaylistStatsSerializer(Playlist().process())
 
-        return Response(Playlist().process())
+        return Response(serializer.data)
 
 
 class StatDownloadView(ApiBaseView):
@@ -54,23 +72,27 @@ class StatDownloadView(ApiBaseView):
     GET: return download stats
     """
 
+    @extend_schema(responses=DownloadStatsSerializer())
     def get(self, request):
-        """get stats"""
+        """get download stats"""
         # pylint: disable=unused-argument
+        serializer = DownloadStatsSerializer(Download().process())
 
-        return Response(Download().process())
+        return Response(serializer.data)
 
 
 class StatWatchProgress(ApiBaseView):
-    """resolves to /api/stats/watchprogress/
+    """resolves to /api/stats/watch/
     GET: return watch/unwatch progress stats
     """
 
+    @extend_schema(responses=WatchStatsSerializer())
     def get(self, request):
-        """handle get request"""
+        """get watched stats"""
         # pylint: disable=unused-argument
+        serializer = WatchStatsSerializer(WatchProgress().process())
 
-        return Response(WatchProgress().process())
+        return Response(serializer.data)
 
 
 class StatDownloadHist(ApiBaseView):
@@ -78,11 +100,14 @@ class StatDownloadHist(ApiBaseView):
     GET: return download video count histogram for last days
     """
 
+    @extend_schema(responses=DownloadHistItemSerializer(many=True))
     def get(self, request):
-        """handle get request"""
+        """get download hist items"""
         # pylint: disable=unused-argument
+        download_items = DownloadHist().process()
+        serializer = DownloadHistItemSerializer(download_items, many=True)
 
-        return Response(DownloadHist().process())
+        return Response(serializer.data)
 
 
 class StatBiggestChannel(ApiBaseView):
@@ -91,14 +116,24 @@ class StatBiggestChannel(ApiBaseView):
     param: order
     """
 
-    order_choices = ["doc_count", "duration", "media_size"]
-
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(BiggestChannelItemSerializer(many=True)),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="Bad request"
+            ),
+        },
+    )
     def get(self, request):
-        """handle get request"""
+        """get biggest channels stats"""
+        query_serializer = BiggestChannelQuerySerializer(
+            data=request.query_params
+        )
+        query_serializer.is_valid(raise_exception=True)
+        validated_query = query_serializer.validated_data
+        order = validated_query["order"]
 
-        order = request.GET.get("order", "doc_count")
-        if order and order not in self.order_choices:
-            message = {"message": f"invalid order parameter {order}"}
-            return Response(message, status=400)
+        channel_items = BiggestChannel(order).process()
+        serializer = BiggestChannelItemSerializer(channel_items, many=True)
 
-        return Response(BiggestChannel(order).process())
+        return Response(serializer.data)

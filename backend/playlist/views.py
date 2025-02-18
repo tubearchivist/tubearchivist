@@ -2,11 +2,25 @@
 
 import uuid
 
+from common.serializers import (
+    AsyncTaskResponseSerializer,
+    ErrorResponseSerializer,
+)
 from common.views_base import AdminWriteOnly, ApiBaseView
 from download.src.subscriptions import PlaylistSubscription
+from drf_spectacular.utils import OpenApiResponse, extend_schema
+from playlist.serializers import (
+    PlaylistBulkAddSerializer,
+    PlaylistCustomPostSerializer,
+    PlaylistDeleteQuerySerializer,
+    PlaylistListCustomPostSerializer,
+    PlaylistListQuerySerializer,
+    PlaylistListSerializer,
+    PlaylistSerializer,
+    PlaylistSingleUpdate,
+)
 from playlist.src.index import YoutubePlaylist
 from playlist.src.query_building import QueryBuilder
-from rest_framework import status
 from rest_framework.response import Response
 from task.tasks import subscribe_to
 from user.src.user_config import UserConfig
@@ -25,58 +39,156 @@ class PlaylistApiListView(ApiBaseView):
     search_base = "ta_playlist/_search/"
     permission_classes = [AdminWriteOnly]
 
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(PlaylistListSerializer()),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="Bad request"
+            ),
+        },
+        parameters=[PlaylistListQuerySerializer],
+    )
     def get(self, request):
-        """get request"""
+        """get playlist list"""
+        query_serializer = PlaylistListQuerySerializer(
+            data=request.query_params
+        )
+        query_serializer.is_valid(raise_exception=True)
+        validated_query = query_serializer.validated_data
         try:
-            data = QueryBuilder(**request.GET).build_data()
+            data = QueryBuilder(**validated_query).build_data()
         except ValueError as err:
-            return Response({"error": str(err)}, status=400)
+            error = ErrorResponseSerializer({"error": str(err)})
+            return Response(error.data, status=400)
 
         self.data = data
         self.get_document_list(request)
 
-        return Response(self.response)
+        response_serializer = PlaylistListSerializer(self.response)
 
+        return Response(response_serializer.data)
+
+    @extend_schema(
+        request=PlaylistBulkAddSerializer(),
+        responses={
+            200: OpenApiResponse(AsyncTaskResponseSerializer()),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="Bad request"
+            ),
+        },
+    )
     def post(self, request):
-        """subscribe/unsubscribe to list of playlists"""
-        data = request.data
-        try:
-            to_add = data["data"]
-        except KeyError:
-            message = "missing expected data key"
-            print(message)
-            return Response({"message": message}, status=400)
+        """async subscribe to list of playlists"""
+        data_serializer = PlaylistBulkAddSerializer(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
 
-        data = data["data"]
-        if isinstance(data, dict):
-            custom_name = data.get("create")
-            if custom_name:
-                playlist_id = f"TA_playlist_{uuid.uuid4()}"
-                custom_playlist = YoutubePlaylist(playlist_id)
-                custom_playlist.create(custom_name)
-                return Response(custom_playlist.json_data)
+        pending = [i["playlist_id"] for i in validated_data["data"]]
+        if not pending:
+            error = ErrorResponseSerializer({"error": "nothing to subscribe"})
+            return Response(error.data, status=400)
 
-        pending = []
-        for playlist_item in to_add:
-            playlist_id = playlist_item["playlist_id"]
-            if playlist_item["playlist_subscribed"]:
-                pending.append(playlist_id)
-            else:
-                self._unsubscribe(playlist_id)
+        url_str = " ".join(pending)
+        task = subscribe_to.delay(url_str, expected_type="playlist")
 
-        if pending:
-            url_str = " ".join(pending)
-            subscribe_to.delay(url_str, expected_type="playlist")
+        message = {
+            "message": "playlist subscribe task started",
+            "task_id": task.id,
+        }
+        serializer = AsyncTaskResponseSerializer(message)
 
-        return Response(data)
+        return Response(serializer.data)
 
-    @staticmethod
-    def _unsubscribe(playlist_id: str):
-        """unsubscribe"""
-        print(f"[{playlist_id}] unsubscribe from playlist")
-        _ = PlaylistSubscription().change_subscribe(
-            playlist_id, subscribe_status=False
-        )
+
+class PlaylistCustomApiListView(ApiBaseView):
+    """resolves to /api/playlist/custom/
+    POST: Create new custom playlist
+    """
+
+    search_base = "ta_playlist/_search/"
+    permission_classes = [AdminWriteOnly]
+
+    @extend_schema(
+        request=PlaylistListCustomPostSerializer(),
+        responses={
+            200: OpenApiResponse(PlaylistSerializer()),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="Bad request"
+            ),
+        },
+    )
+    def post(self, request):
+        """create new custom playlist"""
+        serializer = PlaylistListCustomPostSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+
+        custom_name = validated_data["playlist_name"]
+        playlist_id = f"TA_playlist_{uuid.uuid4()}"
+        custom_playlist = YoutubePlaylist(playlist_id)
+        custom_playlist.create(custom_name)
+
+        response_serializer = PlaylistSerializer(custom_playlist.json_data)
+
+        return Response(response_serializer.data)
+
+
+class PlaylistCustomApiView(ApiBaseView):
+    """resolves to /api/playlist/custom/<playlist_id>/
+    POST: modify custom playlist
+    """
+
+    search_base = "ta_playlist/_doc/"
+    permission_classes = [AdminWriteOnly]
+
+    @extend_schema(
+        request=PlaylistCustomPostSerializer(),
+        responses={
+            200: OpenApiResponse(PlaylistSerializer()),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="bad request"
+            ),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="playlist not found"
+            ),
+        },
+    )
+    def post(self, request, playlist_id):
+        """modify custom playlist"""
+        data_serializer = PlaylistCustomPostSerializer(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+
+        self.get_document(playlist_id)
+        if not self.response:
+            error = ErrorResponseSerializer({"error": "playlist not found"})
+            return Response(error.data, status=404)
+
+        if not self.response["playlist_type"] == "custom":
+            error = ErrorResponseSerializer(
+                {"error": f"playlist with ID {playlist_id} is not custom"}
+            )
+            return Response(error.data, status=400)
+
+        action = validated_data.get("action")
+        video_id = validated_data.get("video_id")
+
+        playlist = YoutubePlaylist(playlist_id)
+        if action == "create":
+            try:
+                playlist.add_video_to_playlist(video_id)
+            except TypeError:
+                error = ErrorResponseSerializer(
+                    {"error": f"failed to add video {video_id} to playlist"}
+                )
+                return Response(error.data, status=400)
+        else:
+            hide = UserConfig(request.user.id).get_value("hide_watched")
+            playlist.move_video(video_id, action, hide_watched=hide)
+
+        response_serializer = PlaylistSerializer(playlist.json_data)
+
+        return Response(response_serializer.data)
 
 
 class PlaylistApiView(ApiBaseView):
@@ -88,51 +200,74 @@ class PlaylistApiView(ApiBaseView):
     permission_classes = [AdminWriteOnly]
     valid_custom_actions = ["create", "remove", "up", "down", "top", "bottom"]
 
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(PlaylistSerializer()),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="playlist not found"
+            ),
+        },
+    )
     def get(self, request, playlist_id):
         # pylint: disable=unused-argument
-        """get request"""
+        """get playlist"""
         self.get_document(playlist_id)
-        return Response(self.response, status=self.status_code)
+        if not self.response:
+            error = ErrorResponseSerializer({"error": "playlist not found"})
+            return Response(error.data, status=404)
 
+        response_serializer = PlaylistSerializer(self.response)
+
+        return Response(response_serializer.data)
+
+    @extend_schema(
+        request=PlaylistSingleUpdate(),
+        responses={
+            200: OpenApiResponse(PlaylistSerializer()),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="playlist not found"
+            ),
+        },
+    )
     def post(self, request, playlist_id):
-        """post to custom playlist to add a video to list"""
+        """update subscribed state of playlist"""
+        data_serializer = PlaylistSingleUpdate(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+
         self.get_document(playlist_id)
-        if not self.response["data"]:
-            return Response({"error": "playlist not found"}, status=404)
+        if not self.response:
+            error = ErrorResponseSerializer({"error": "playlist not found"})
+            return Response(error.data, status=404)
 
-        data = request.data
-        subscribed = data.get("playlist_subscribed")
-        if subscribed is not None:
-            playlist_sub = PlaylistSubscription()
-            json_data = playlist_sub.change_subscribe(playlist_id, subscribed)
-            return Response(json_data, status=200)
+        subscribed = validated_data["playlist_subscribed"]
+        playlist_sub = PlaylistSubscription()
+        json_data = playlist_sub.change_subscribe(playlist_id, subscribed)
 
-        if not self.response["data"]["playlist_type"] == "custom":
-            message = f"playlist with ID {playlist_id} is not custom"
-            return Response({"message": message}, status=400)
+        response_serializer = PlaylistSerializer(json_data)
+        return Response(response_serializer.data)
 
-        action = request.data.get("action")
-        if action not in self.valid_custom_actions:
-            message = f"invalid action: {action}"
-            return Response({"message": message}, status=400)
-
-        playlist = YoutubePlaylist(playlist_id)
-        video_id = request.data.get("video_id")
-        if action == "create":
-            playlist.add_video_to_playlist(video_id)
-        else:
-            hide = UserConfig(request.user.id).get_value("hide_watched")
-            playlist.move_video(video_id, action, hide_watched=hide)
-
-        return Response({"success": True}, status=status.HTTP_201_CREATED)
-
+    @extend_schema(
+        parameters=[PlaylistDeleteQuerySerializer],
+        responses={
+            204: OpenApiResponse(description="playlist deleted"),
+        },
+    )
     def delete(self, request, playlist_id):
         """delete playlist"""
         print(f"{playlist_id}: delete playlist")
-        delete_videos = request.GET.get("delete-videos", False)
+
+        query_serializer = PlaylistDeleteQuerySerializer(
+            data=request.query_params
+        )
+        query_serializer.is_valid(raise_exception=True)
+        validated_query = query_serializer.validated_data
+
+        delete_videos = validated_query.get("delete_videos", False)
+
         if delete_videos:
             YoutubePlaylist(playlist_id).delete_videos_playlist()
         else:
             YoutubePlaylist(playlist_id).delete_metadata()
 
-        return Response({"success": True})
+        return Response(status=204)

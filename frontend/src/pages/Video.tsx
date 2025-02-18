@@ -31,7 +31,6 @@ import loadPlaylistList from '../api/loader/loadPlaylistList';
 import { PlaylistsResponseType } from './Playlists';
 import PaginationDummy from '../components/PaginationDummy';
 import updateCustomPlaylist from '../api/actions/updateCustomPlaylist';
-import { PlaylistType } from './Playlist';
 import loadCommentsbyVideoId from '../api/loader/loadCommentsbyVideoId';
 import CommentBox, { CommentsType } from '../components/CommentBox';
 import Button from '../components/Button';
@@ -39,6 +38,8 @@ import getApiUrl from '../configuration/getApiUrl';
 import loadVideoNav, { VideoNavResponseType } from '../api/loader/loadVideoNav';
 import useIsAdmin from '../functions/useIsAdmin';
 import ToggleConfig from '../components/ToggleConfig';
+import { PlaylistType } from '../api/loader/loadPlaylistById';
+// import { useAppSettingsStore } from '../stores/AppSettingsStore';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {
   return playlist.playlist_entries.some(entry => {
@@ -95,20 +96,9 @@ export type SponsorBlockType = {
   message?: string;
 };
 
-export type SimilarVideosResponseType = {
-  data: VideoType[];
-  config: ConfigType;
-};
+export type VideoResponseType = VideoType;
 
-export type VideoResponseType = {
-  data: VideoType;
-  config: ConfigType;
-};
-
-type CommentsResponseType = {
-  data: CommentsType[];
-  config: ConfigType;
-};
+type CommentsResponseType = CommentsType[];
 
 export type VideoCommentsResponseType = {
   data: VideoType;
@@ -120,6 +110,7 @@ const Video = () => {
   const { videoId } = useParams() as VideoParams;
   const navigate = useNavigate();
   const isAdmin = useIsAdmin();
+  // const { appSettingsConfig } = useAppSettingsStore();
 
   const [videoEnded, setVideoEnded] = useState(false);
   const [playlistAutoplay, setPlaylistAutoplay] = useState(
@@ -135,25 +126,31 @@ const Video = () => {
   const [reindex, setReindex] = useState(false);
 
   const [videoResponse, setVideoResponse] = useState<VideoResponseType>();
-  const [simmilarVideos, setSimmilarVideos] = useState<SimilarVideosResponseType>();
+  const [simmilarVideos, setSimmilarVideos] = useState<VideoResponseType[]>();
   const [videoPlaylistNav, setVideoPlaylistNav] = useState<VideoNavResponseType[]>();
   const [customPlaylistsResponse, setCustomPlaylistsResponse] = useState<PlaylistsResponseType>();
   const [commentsResponse, setCommentsResponse] = useState<CommentsResponseType>();
 
   useEffect(() => {
     (async () => {
-      if (refreshVideoList || videoId !== videoResponse?.data?.youtube_id) {
+      if (refreshVideoList || videoId !== videoResponse?.youtube_id) {
         const videoByIdResponse = await loadVideoById(videoId);
         const simmilarVideosResponse = await loadSimmilarVideosById(videoId);
         const customPlaylistsResponse = await loadPlaylistList({ type: 'custom' });
-        const commentsResponse = await loadCommentsbyVideoId(videoId);
         const videoNavResponse = await loadVideoNav(videoId);
+
+        try {
+          const commentsResponse = await loadCommentsbyVideoId(videoId);
+          setCommentsResponse(commentsResponse);
+        } catch (e) {
+          console.log('Comments not found', e);
+        }
 
         setVideoResponse(videoByIdResponse);
         setSimmilarVideos(simmilarVideosResponse);
         setVideoPlaylistNav(videoNavResponse);
         setCustomPlaylistsResponse(customPlaylistsResponse);
-        setCommentsResponse(commentsResponse);
+
         setRefreshVideoList(false);
       }
     })();
@@ -194,18 +191,18 @@ const Video = () => {
     return [];
   }
 
-  const video = videoResponse.data;
-  const watched = videoResponse.data.player.watched;
-  const config = videoResponse.config;
+  const video = videoResponse;
+  const watched = videoResponse.player.watched;
+  // const config = appSettingsConfig;
   const playlistNav = videoPlaylistNav;
-  const sponsorBlock = videoResponse.data.sponsorblock;
+  const sponsorBlock = videoResponse.sponsorblock;
   const customPlaylists = customPlaylistsResponse?.data;
   const starRating = convertStarRating(video?.stats?.average_rating);
-  const comments = commentsResponse?.data;
+  const comments = commentsResponse;
 
   console.log('playlistNav', playlistNav);
 
-  const cast = config.enable_cast;
+  const cast = false; // config.enable_cast;
 
   return (
     <>
@@ -569,7 +566,7 @@ const Video = () => {
           <h3>Similar Videos</h3>
           <div className="video-list grid grid-3" id="similar-videos">
             <VideoList
-              videoList={simmilarVideos?.data}
+              videoList={simmilarVideos}
               viewLayout="grid"
               refreshVideoList={setRefreshVideoList}
             />

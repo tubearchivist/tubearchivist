@@ -8,10 +8,7 @@ python manage.py ta_stop_on_error
 
 # django setup
 python manage.py migrate
-
-if [[ -z "$DJANGO_DEBUG" ]]; then
-    python manage.py collectstatic --noinput -c
-fi
+python manage.py collectstatic --noinput -c
 
 # ta setup
 python manage.py ta_envcheck

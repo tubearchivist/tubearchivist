@@ -1,8 +1,8 @@
-import { useUserConfigStore } from '../stores/UserConfigStore';
+import { useUserAccountStore } from '../stores/UserAccountStore';
 
 const useIsAdmin = () => {
-  const { userConfig } = useUserConfigStore();
-  const isAdmin = userConfig?.is_staff || userConfig?.is_superuser;
+  const { userAccount } = useUserAccountStore();
+  const isAdmin = userAccount?.is_staff || userAccount?.is_superuser;
 
   return isAdmin;
 };

@@ -60,7 +60,7 @@ export type VideoType = {
   player: PlayerType;
   published: string;
   sponsorblock?: SponsorBlockType;
-  playlist?: string[];
+  playlist: string[];
   stats: StatsType;
   streams: StreamType[];
   subtitles: Subtitles[];
@@ -108,8 +108,6 @@ const Home = () => {
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');
 
-  const userMeConfig = userConfig.config;
-
   const [refreshVideoList, setRefreshVideoList] = useState(false);
 
   const [videoResponse, setVideoReponse] = useState<VideoListByFilterResponseType>();
@@ -123,17 +121,17 @@ const Home = () => {
   const hasVideos = videoResponse?.data?.length !== 0;
   const showEmbeddedVideo = videoId !== null;
 
-  const isGridView = userMeConfig.view_style_home === ViewStyles.grid;
-  const gridView = isGridView ? `boxed-${userMeConfig.grid_items}` : '';
-  const gridViewGrid = isGridView ? `grid-${userMeConfig.grid_items}` : '';
+  const isGridView = userConfig.view_style_home === ViewStyles.grid;
+  const gridView = isGridView ? `boxed-${userConfig.grid_items}` : '';
+  const gridViewGrid = isGridView ? `grid-${userConfig.grid_items}` : '';
 
   useEffect(() => {
     (async () => {
       const videos = await loadVideoListByFilter({
         page: currentPage,
-        watch: userMeConfig.hide_watched ? 'unwatched' : undefined,
-        sort: userMeConfig.sort_by,
-        order: userMeConfig.sort_order,
+        watch: userConfig.hide_watched ? 'unwatched' : undefined,
+        sort: userConfig.sort_by,
+        order: userConfig.sort_order,
       });
 
       try {
@@ -150,9 +148,9 @@ const Home = () => {
     })();
   }, [
     refreshVideoList,
-    userMeConfig.sort_by,
-    userMeConfig.sort_order,
-    userMeConfig.hide_watched,
+    userConfig.sort_by,
+    userConfig.sort_order,
+    userConfig.hide_watched,
     currentPage,
     pagination?.current_page,
     showEmbeddedVideo,
@@ -171,10 +169,10 @@ const Home = () => {
             <div className="title-bar">
               <h1>Continue Watching</h1>
             </div>
-            <div className={`video-list ${userMeConfig.view_style_home} ${gridViewGrid}`}>
+            <div className={`video-list ${userConfig.view_style_home} ${gridViewGrid}`}>
               <VideoList
                 videoList={continueVideos}
-                viewLayout={userMeConfig.view_style_home}
+                viewLayout={userConfig.view_style_home}
                 refreshVideoList={setRefreshVideoList}
               />
             </div>
@@ -189,7 +187,7 @@ const Home = () => {
       </div>
 
       <div className={`boxed-content ${gridView}`}>
-        <div className={`video-list ${userMeConfig.view_style_home} ${gridViewGrid}`}>
+        <div className={`video-list ${userConfig.view_style_home} ${gridViewGrid}`}>
           {!hasVideos && (
             <>
               <h2>No videos found...</h2>
@@ -204,7 +202,7 @@ const Home = () => {
           {hasVideos && (
             <VideoList
               videoList={videoList}
-              viewLayout={userMeConfig.view_style_home}
+              viewLayout={userConfig.view_style_home}
               refreshVideoList={setRefreshVideoList}
             />
           )}

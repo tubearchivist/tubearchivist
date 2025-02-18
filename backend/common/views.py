@@ -2,10 +2,23 @@
 
 from appsettings.src.config import ReleaseVersion
 from appsettings.src.reindex import ReindexProgress
+from common.serializers import (
+    AsyncTaskResponseSerializer,
+    ErrorResponseSerializer,
+    NotificationQueryFilterSerializer,
+    NotificationSerializer,
+    PingSerializer,
+    RefreshAddDataSerializer,
+    RefreshAddQuerySerializer,
+    RefreshQuerySerializer,
+    RefreshResponseSerializer,
+    WatchedDataSerializer,
+)
 from common.src.searching import SearchForm
 from common.src.ta_redis import RedisArchivist
 from common.src.watched import WatchState
 from common.views_base import AdminOnly, ApiBaseView
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.response import Response
 from task.tasks import check_reindex
 
@@ -16,6 +29,9 @@ class PingView(ApiBaseView):
     """
 
     @staticmethod
+    @extend_schema(
+        responses={200: OpenApiResponse(PingSerializer())},
+    )
     def get(request):
         """get pong"""
         data = {
@@ -24,7 +40,8 @@ class PingView(ApiBaseView):
             "version": ReleaseVersion().get_local_version(),
             "ta_update": ReleaseVersion().get_update(),
         }
-        return Response(data)
+        serializer = PingSerializer(data)
+        return Response(serializer.data)
 
 
 class RefreshView(ApiBaseView):
@@ -35,30 +52,69 @@ class RefreshView(ApiBaseView):
 
     permission_classes = [AdminOnly]
 
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(RefreshResponseSerializer()),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="Bad request"
+            ),
+        },
+        parameters=[RefreshQuerySerializer()],
+    )
     def get(self, request):
-        """handle get request"""
-        request_type = request.GET.get("type")
-        request_id = request.GET.get("id")
+        """get refresh status"""
+        query_serializer = RefreshQuerySerializer(data=request.query_params)
+        query_serializer.is_valid(raise_exception=True)
+        validated_query = query_serializer.validated_data
+        request_type = validated_query.get("type")
+        request_id = validated_query.get("id")
 
         if request_id and not request_type:
-            return Response({"status": "Bad Request"}, status=400)
+            error = ErrorResponseSerializer(
+                {"error": "specified id also needs type"}
+            )
+            return Response(error.data, status=400)
 
         try:
             progress = ReindexProgress(
                 request_type=request_type, request_id=request_id
             ).get_progress()
         except ValueError:
-            return Response({"status": "Bad Request"}, status=400)
+            error = ErrorResponseSerializer({"error": "bad request"})
+            return Response(error.data, status=400)
 
-        return Response(progress)
+        response_serializer = RefreshResponseSerializer(progress)
 
+        return Response(response_serializer.data)
+
+    @extend_schema(
+        request=RefreshAddDataSerializer(),
+        responses={
+            200: OpenApiResponse(AsyncTaskResponseSerializer()),
+        },
+        parameters=[RefreshAddQuerySerializer()],
+    )
     def post(self, request):
-        """handle post request"""
-        data = request.data
-        extract_videos = bool(request.GET.get("extract_videos", False))
-        check_reindex.delay(data=data, extract_videos=extract_videos)
+        """add to reindex queue"""
+        query_serializer = RefreshAddQuerySerializer(data=request.query_params)
+        query_serializer.is_valid(raise_exception=True)
+        validated_query = query_serializer.validated_data
 
-        return Response(data)
+        data_serializer = RefreshAddDataSerializer(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+
+        extract_videos = validated_query.get("extract_videos")
+        task = check_reindex.delay(
+            data=validated_data, extract_videos=extract_videos
+        )
+        message = {
+            "message": "reindex task started",
+            "task_id": task.id,
+        }
+        serializer = AsyncTaskResponseSerializer(message)
+
+        return Response(serializer.data)
 
 
 class WatchedView(ApiBaseView):
@@ -66,17 +122,31 @@ class WatchedView(ApiBaseView):
     POST: change watched state of video, channel or playlist
     """
 
+    @extend_schema(
+        request=WatchedDataSerializer(),
+        responses={
+            200: OpenApiResponse(WatchedDataSerializer()),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="Bad request"
+            ),
+        },
+    )
     def post(self, request):
         """change watched state"""
-        youtube_id = request.data.get("id")
-        is_watched = request.data.get("is_watched")
+        data_serializer = WatchedDataSerializer(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+        youtube_id = validated_data.get("id")
+        is_watched = validated_data.get("is_watched")
 
         if not youtube_id or is_watched is None:
-            message = {"message": "missing id or is_watched"}
-            return Response(message, status=400)
+            error = ErrorResponseSerializer(
+                {"error": "missing id or is_watched"}
+            )
+            return Response(error.data, status=400)
 
         WatchState(youtube_id, is_watched, request.user.id).change()
-        return Response({"message": "success"}, status=200)
+        return Response(data_serializer.data)
 
 
 class SearchView(ApiBaseView):
@@ -106,11 +176,26 @@ class NotificationView(ApiBaseView):
 
     valid_filters = ["download", "settings", "channel"]
 
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(NotificationSerializer(many=True)),
+        },
+        parameters=[NotificationQueryFilterSerializer],
+    )
     def get(self, request):
         """get all notifications"""
+        query_serializer = NotificationQueryFilterSerializer(
+            data=request.query_params
+        )
+        query_serializer.is_valid(raise_exception=True)
+        validated_query = query_serializer.validated_data
+        filter_by = validated_query.get("filter")
+
         query = "message"
-        filter_by = request.GET.get("filter", None)
         if filter_by in self.valid_filters:
             query = f"{query}:{filter_by}"
 
-        return Response(RedisArchivist().list_items(query))
+        notifications = RedisArchivist().list_items(query)
+        response_serializer = NotificationSerializer(notifications, many=True)
+
+        return Response(response_serializer.data)

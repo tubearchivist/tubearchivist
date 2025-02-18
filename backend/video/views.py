@@ -1,11 +1,22 @@
 """all API views for video endpoints"""
 
+from common.serializers import ErrorResponseSerializer
 from common.src.helper import calc_is_watched
 from common.src.ta_redis import RedisArchivist
 from common.src.watched import WatchState
 from common.views_base import AdminWriteOnly, ApiBaseView
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from playlist.src.index import YoutubePlaylist
 from rest_framework.response import Response
+from video.serializers import (
+    CommentItemSerializer,
+    PlayerSerializer,
+    PlaylistNavItemSerializer,
+    VideoListQuerySerializer,
+    VideoListSerializer,
+    VideoProgressUpdateSerializer,
+    VideoSerializer,
+)
 from video.src.index import YoutubeVideo
 from video.src.query_building import QueryBuilder
 
@@ -24,13 +35,22 @@ class VideoApiListView(ApiBaseView):
 
     search_base = "ta_video/_search/"
 
+    @extend_schema(
+        parameters=[VideoListQuerySerializer()],
+        responses={
+            200: VideoListSerializer(),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="bad request"
+            ),
+        },
+    )
     def get(self, request):
-        """get request"""
-        try:
-            data = QueryBuilder(request.user.id, **request.GET).build_data()
-        except ValueError as err:
-            return Response({"error": str(err)}, status=400)
+        """get video list"""
+        query_serializer = VideoListQuerySerializer(data=request.query_params)
+        query_serializer.is_valid(raise_exception=True)
+        validated_query = query_serializer.validated_data
 
+        data = QueryBuilder(request.user.id, **validated_query).build_data()
         if data == {"query": {"bool": {"must": [None]}}}:
             # skip empty lookup
             return Response([])
@@ -38,7 +58,9 @@ class VideoApiListView(ApiBaseView):
         self.data = data
         self.get_document_list(request, progress_match=request.user.id)
 
-        return Response(self.response)
+        response_serializer = VideoListSerializer(self.response)
+
+        return Response(response_serializer.data)
 
 
 class VideoApiView(ApiBaseView):
@@ -49,25 +71,71 @@ class VideoApiView(ApiBaseView):
     search_base = "ta_video/_doc/"
     permission_classes = [AdminWriteOnly]
 
+    @extend_schema(
+        responses={
+            200: VideoSerializer(),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="video not found"
+            ),
+        },
+    )
     def get(self, request, video_id):
-        # pylint: disable=unused-argument
-        """get request"""
+        """get video"""
         self.get_document(video_id, progress_match=request.user.id)
-        return Response(self.response, status=self.status_code)
+        if not self.response:
+            error = ErrorResponseSerializer({"error": "video not found"})
+            return Response(error.data, status=404)
 
+        serializer = VideoSerializer(self.response)
+        return Response(serializer.data)
+
+    @extend_schema(
+        responses={
+            204: OpenApiResponse(description="video deleted"),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="video not found"
+            ),
+        }
+    )
     def delete(self, request, video_id):
         # pylint: disable=unused-argument
-        """delete single video"""
-        message = {"video": video_id}
+        """delete video"""
         try:
             YoutubeVideo(video_id).delete_media_file()
-            status_code = 200
-            message.update({"state": "delete"})
         except FileNotFoundError:
-            status_code = 404
-            message.update({"state": "not found"})
+            error = ErrorResponseSerializer({"error": "video not found"})
+            return Response(error.data, status=404)
 
-        return Response(message, status=status_code)
+        return Response(status=204)
+
+
+class VideoCommentView(ApiBaseView):
+    """resolves to /api/video/<video_id>/comment/
+    handle video comments
+    GET: return all comments from video with reply threads
+    """
+
+    search_base = "ta_comment/_doc/"
+
+    @extend_schema(
+        responses={
+            200: CommentItemSerializer(),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="video not found"
+            ),
+        }
+    )
+    def get(self, request, video_id):
+        """get video comments"""
+        # pylint: disable=unused-argument
+        self.get_document(video_id)
+        if self.status_code == 404:
+            error = ErrorResponseSerializer({"error": "video not found"})
+            return Response(error.data, status=404)
+
+        serializer = CommentItemSerializer(self.response, many=True)
+
+        return Response(serializer.data)
 
 
 class VideoApiNavView(ApiBaseView):
@@ -77,26 +145,39 @@ class VideoApiNavView(ApiBaseView):
 
     search_base = "ta_video/_doc/"
 
+    @extend_schema(
+        responses={
+            200: PlaylistNavItemSerializer(),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="video not found"
+            ),
+        }
+    )
     def get(self, request, video_id):
         # pylint: disable=unused-argument
-        """get request"""
+        """get video playlist nav"""
         self.get_document(video_id)
-        if self.status_code != 200:
-            return Response(status=self.status_code)
+        if self.status_code == 404:
+            error = ErrorResponseSerializer({"error": "video not found"})
+            return Response(error.data, status=404)
 
         playlist_nav = []
 
-        if not self.response["data"].get("playlist"):
+        if not self.response.get("playlist"):
             return Response(playlist_nav)
 
-        for playlist_id in self.response["data"]["playlist"]:
+        for playlist_id in self.response["playlist"]:
             playlist = YoutubePlaylist(playlist_id)
             playlist.get_from_es()
             playlist.build_nav(video_id)
             if playlist.nav:
                 playlist_nav.append(playlist.nav)
 
-        return Response(playlist_nav, status=self.status_code)
+        response_serializer = PlaylistNavItemSerializer(
+            playlist_nav, many=True
+        )
+
+        return Response(response_serializer.data)
 
 
 class VideoProgressView(ApiBaseView):
@@ -111,19 +192,32 @@ class VideoProgressView(ApiBaseView):
         """redis key"""
         return f"{user_id}:progress:{video_id}"
 
+    @extend_schema(
+        request=VideoProgressUpdateSerializer(),
+        responses={
+            200: PlayerSerializer(),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="video not found"
+            ),
+        },
+    )
     def post(self, request, video_id):
-        """set progress position in redis"""
-        position = request.data.get("position", 0)
+        """set video progress position in redis"""
+        data_serializer = VideoProgressUpdateSerializer(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+
+        self.get_document(video_id)
+        if self.status_code == 404:
+            error = ErrorResponseSerializer({"error": "video not found"})
+            return Response(error.data, status=404)
+
+        position = validated_data["position"]
         key = self._get_key(request.user.id, video_id)
         redis_con = RedisArchivist()
-        current_progress = redis_con.get_message_dict(key)
-
-        if not current_progress:
-            self.get_document(video_id)
-            if self.status_code != 200:
-                return Response(status=self.status_code)
-
-            current_progress = self.response["data"]["player"]
+        current_progress = (
+            redis_con.get_message_dict(key) or self.response["player"]
+        )
 
         current_progress.update({"position": position, "youtube_id": video_id})
         watched = self._check_watched(request, video_id, current_progress)
@@ -134,8 +228,11 @@ class VideoProgressView(ApiBaseView):
 
         current_progress.update({"watched": watched})
         redis_con.set_message(key, current_progress, expire=expire)
+        print(current_progress)
 
-        return Response(current_progress)
+        response_serializer = PlayerSerializer(current_progress)
+
+        return Response(response_serializer.data)
 
     def _check_watched(self, request, video_id, current_progress) -> bool:
         """check watched state"""
@@ -150,29 +247,17 @@ class VideoProgressView(ApiBaseView):
 
         return watched
 
+    @extend_schema(
+        responses={
+            204: OpenApiResponse(description="video progress deleted"),
+        }
+    )
     def delete(self, request, video_id):
         """delete progress position"""
         key = self._get_key(request.user.id, video_id)
         RedisArchivist().del_message(key)
-        self.response = {"progress-reset": video_id}
 
-        return Response(self.response)
-
-
-class VideoCommentView(ApiBaseView):
-    """resolves to /api/video/<video_id>/comment/
-    handle video comments
-    GET: return all comments from video with reply threads
-    """
-
-    search_base = "ta_comment/_doc/"
-
-    def get(self, request, video_id):
-        """get video comments"""
-        # pylint: disable=unused-argument
-        self.get_document(video_id)
-
-        return Response(self.response, status=200)
+        return Response(status=204)
 
 
 class VideoSimilarView(ApiBaseView):
@@ -182,6 +267,9 @@ class VideoSimilarView(ApiBaseView):
 
     search_base = "ta_video/_search/"
 
+    @extend_schema(
+        responses=VideoSerializer(many=True),
+    )
     def get(self, request, video_id):
         """get similar videos"""
         self.data = {
@@ -196,4 +284,5 @@ class VideoSimilarView(ApiBaseView):
             },
         }
         self.get_document_list(request, pagination=False)
-        return Response(self.response, status=200)
+        serializer = VideoSerializer(self.response["data"], many=True)
+        return Response(serializer.data)

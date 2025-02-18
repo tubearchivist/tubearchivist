@@ -1,7 +1,5 @@
 """base classes to inherit from"""
 
-from appsettings.src.config import AppConfig
-from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap
 from common.src.index_generic import Pagination
 from common.src.search_processor import SearchProcess, process_aggs
@@ -45,13 +43,7 @@ class ApiBaseView(APIView):
 
     def __init__(self):
         super().__init__()
-        self.response = {
-            "data": False,
-            "config": {
-                "enable_cast": EnvironmentSettings.ENABLE_CAST,
-                "downloads": AppConfig().config["downloads"],
-            },
-        }
+        self.response = {}
         self.data = {"query": {"match_all": {}}}
         self.status_code = False
         self.context = False
@@ -62,12 +54,12 @@ class ApiBaseView(APIView):
         path = f"{self.search_base}{document_id}"
         response, status_code = ElasticWrap(path).get()
         try:
-            self.response["data"] = SearchProcess(
+            self.response = SearchProcess(
                 response, match_video_user_progress=progress_match
             ).process()
         except KeyError:
             print(f"item not found: {document_id}")
-            self.response["data"] = False
+
         self.status_code = status_code
 
     def initiate_pagination(self, request):

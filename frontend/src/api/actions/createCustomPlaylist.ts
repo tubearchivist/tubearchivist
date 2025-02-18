@@ -1,9 +1,9 @@
 import APIClient from '../../functions/APIClient';
 
 const createCustomPlaylist = async (playlistId: string) => {
-  return APIClient('/api/playlist/', {
+  return APIClient('/api/playlist/custom/', {
     method: 'POST',
-    body: { data: { create: playlistId } },
+    body: { playlist_name: playlistId },
   });
 };
 

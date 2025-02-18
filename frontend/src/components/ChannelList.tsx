@@ -16,7 +16,7 @@ type ChannelListProps = {
 
 const ChannelList = ({ channelList, refreshChannelList }: ChannelListProps) => {
   const { userConfig } = useUserConfigStore();
-  const viewLayout = userConfig.config.view_style_channel;
+  const viewLayout = userConfig.view_style_channel;
 
   if (!channelList || channelList.length === 0) {
     return <p>No channels found.</p>;

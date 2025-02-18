@@ -11,6 +11,16 @@ class VideoTypeEnum(enum.Enum):
     SHORTS = "shorts"
     UNKNOWN = "unknown"
 
+    @classmethod
+    def values(cls) -> list[str]:
+        """value list"""
+        return [i.value for i in cls]
+
+    @classmethod
+    def values_known(cls) -> list[str]:
+        """values known"""
+        return [i.value for i in cls if i.value != "unknown"]
+
 
 class SortEnum(enum.Enum):
     """all sort by options"""
@@ -22,9 +32,37 @@ class SortEnum(enum.Enum):
     DURATION = "player.duration"
     MEDIASIZE = "media_size"
 
+    @classmethod
+    def values(cls) -> list[str]:
+        """value list"""
+        return [i.value for i in cls]
+
+    @classmethod
+    def names(cls) -> list[str]:
+        """name list"""
+        return [i.name.lower() for i in cls]
+
 
 class OrderEnum(enum.Enum):
     """all order by options"""
 
     ASC = "asc"
     DESC = "desc"
+
+    @classmethod
+    def values(cls) -> list[str]:
+        """value list"""
+        return [i.value for i in cls]
+
+
+class WatchedEnum(enum.Enum):
+    """watched state enum"""
+
+    WATCHED = "watched"
+    UNWATCHED = "unwatched"
+    CONTINUE = "continue"
+
+    @classmethod
+    def values(cls) -> list[str]:
+        """value list"""
+        return [i.value for i in cls]
