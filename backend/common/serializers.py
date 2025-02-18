@@ -42,7 +42,7 @@ class PaginationSerializer(serializers.Serializer):
     current_page = serializers.IntegerField()
     max_hits = serializers.BooleanField()
     params = serializers.CharField()
-    last_page = serializers.BooleanField()
+    last_page = serializers.IntegerField()
     next_pages = serializers.ListField(
         child=serializers.IntegerField(), allow_null=True
     )
