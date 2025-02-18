@@ -36,7 +36,7 @@ FROM python:3.11.8-slim-bookworm AS tubearchivist
 
 ARG INSTALL_DEBUG
 
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1
 
 # copy build requirements
 COPY --from=builder /root/.local /root/.local
