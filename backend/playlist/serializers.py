@@ -49,6 +49,7 @@ class PlaylistListQuerySerializer(serializers.Serializer):
     type = serializers.ChoiceField(
         choices=["regular", "custom"], required=False
     )
+    page = serializers.IntegerField(required=False)
 
 
 class PlaylistSingleAddSerializer(serializers.Serializer):

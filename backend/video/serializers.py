@@ -118,6 +118,7 @@ class VideoListQuerySerializer(serializers.Serializer):
     type = serializers.ChoiceField(
         choices=VideoTypeEnum.values_known(), required=False
     )
+    page = serializers.IntegerField(required=False)
 
 
 class CommentThreadItemSerializer(serializers.Serializer):

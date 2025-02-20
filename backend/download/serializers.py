@@ -42,6 +42,7 @@ class DownloadListQuerySerializer(
         choices=["pending", "ignore"], required=False
     )
     channel = serializers.CharField(required=False, help_text="channel ID")
+    page = serializers.IntegerField(required=False)
 
 
 class DownloadListQueueDeleteQuerySerializer(serializers.Serializer):
