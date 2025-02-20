@@ -12,4 +12,4 @@ requests==2.32.3
 ryd-client==0.0.6
 uvicorn==0.34.0
 whitenoise==6.9.0
-yt-dlp[default]==2025.1.26
+yt-dlp[default]==2025.2.19
