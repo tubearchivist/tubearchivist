@@ -59,6 +59,7 @@ class ChannelListQuerySerializer(serializers.Serializer):
     """serialize list query"""
 
     filter = serializers.ChoiceField(choices=["subscribed"], required=False)
+    page = serializers.IntegerField(required=False)
 
 
 class ChannelUpdateSerializer(serializers.Serializer):

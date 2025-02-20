@@ -38,13 +38,7 @@ class ChannelApiListView(ApiBaseView):
         responses={
             200: OpenApiResponse(ChannelListSerializer()),
         },
-        parameters=[
-            OpenApiParameter(
-                name="filter",
-                description="Filter by Subscribed",
-                type=ChannelListQuerySerializer(),
-            ),
-        ],
+        parameters=[ChannelListQuerySerializer()],
     )
     def get(self, request):
         """get request"""
