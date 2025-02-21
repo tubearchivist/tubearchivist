@@ -63,20 +63,16 @@ const ChannelAbout = () => {
         const channelResponse = await loadChannelById(channelId);
 
         setChannelResponse(channelResponse);
-        setDownloadFormat(channelResponse?.data?.channel_overwrites?.download_format ?? null);
-        setAutoDeleteAfter(channelResponse?.data?.channel_overwrites?.autodelete_days ?? null);
-        setIndexPlaylists(channelResponse?.data?.channel_overwrites?.index_playlists ?? null);
-        setEnableSponsorblock(
-          channelResponse?.data?.channel_overwrites?.integrate_sponsorblock ?? null,
-        );
-        setPageSizeVideo(
-          channelResponse?.data?.channel_overwrites?.subscriptions_channel_size ?? null,
-        );
+        setDownloadFormat(channelResponse?.channel_overwrites?.download_format ?? null);
+        setAutoDeleteAfter(channelResponse?.channel_overwrites?.autodelete_days ?? null);
+        setIndexPlaylists(channelResponse?.channel_overwrites?.index_playlists ?? false);
+        setEnableSponsorblock(channelResponse?.channel_overwrites?.integrate_sponsorblock ?? null);
+        setPageSizeVideo(channelResponse?.channel_overwrites?.subscriptions_channel_size ?? null);
         setPageSizeShorts(
-          channelResponse?.data?.channel_overwrites?.subscriptions_shorts_channel_size ?? null,
+          channelResponse?.channel_overwrites?.subscriptions_shorts_channel_size ?? null,
         );
         setPageSizeStreams(
-          channelResponse?.data?.channel_overwrites?.subscriptions_live_channel_size ?? null,
+          channelResponse?.channel_overwrites?.subscriptions_live_channel_size ?? null,
         );
 
         setRefresh(false);

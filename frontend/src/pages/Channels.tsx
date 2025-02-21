@@ -17,13 +17,13 @@ import { useUserConfigStore } from '../stores/UserConfigStore';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 
 type ChannelOverwritesType = {
-  download_format?: string;
-  autodelete_days?: number;
-  index_playlists?: boolean;
-  integrate_sponsorblock?: boolean | null;
-  subscriptions_channel_size?: number;
-  subscriptions_live_channel_size?: number;
-  subscriptions_shorts_channel_size?: number;
+  download_format: string | null;
+  autodelete_days: number | null;
+  index_playlists: boolean | null;
+  integrate_sponsorblock: boolean | null;
+  subscriptions_channel_size: number | null;
+  subscriptions_live_channel_size: number | null;
+  subscriptions_shorts_channel_size: number | null;
 };
 
 export type ChannelType = {
