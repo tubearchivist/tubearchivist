@@ -228,7 +228,6 @@ class VideoProgressView(ApiBaseView):
 
         current_progress.update({"watched": watched})
         redis_con.set_message(key, current_progress, expire=expire)
-        print(current_progress)
 
         response_serializer = PlayerSerializer(current_progress)
 
