@@ -6,7 +6,13 @@ export function useKeyPress(targetKey: string) {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === targetKey) {
+      if (
+        event.key === targetKey &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.altKey &&
+        !event.altKey
+      ) {
         setIsKeyPressed(true);
       }
     };
