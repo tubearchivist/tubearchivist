@@ -240,3 +240,19 @@ services:
 ```
 
 If you want to run queries on the Elasticsearch container directly from your host with for example `curl` or something like *postman*, you might want to **publish** the port 9200 instead of just **exposing** it.
+
+**Persist Token**  
+The token will get stored in ES in the `config` folder, and not in the `data` folder. To persist the token between ES container rebuilds, you'll need to persist the config folder as an additional volume:
+
+1. Create the token as described above
+2. While the container is running, copy the current config folder out of the container, e.g.: 
+```
+docker cp archivist-es:/usr/share/elasticsearch/config/ volume/es_config
+```
+3. Then stop all containers and mount this folder into the container as an additional volume:
+```yml
+- ./volume/es_config:/usr/share/elasticsearch/config
+```
+4. Start all containers back up.
+
+Now your token will persist between ES container rebuilds.

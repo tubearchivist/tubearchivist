@@ -57,7 +57,7 @@ class YoutubeChannel(YouTubeItem):
         self.youtube_meta["thumbnails"].reverse()
         self.json_data = {
             "channel_active": True,
-            "channel_description": self.youtube_meta.get("description", False),
+            "channel_description": self.youtube_meta.get("description", ""),
             "channel_id": self.youtube_id,
             "channel_last_refresh": int(datetime.now().timestamp()),
             "channel_name": self.youtube_meta["uploader"],
@@ -116,7 +116,7 @@ class YoutubeChannel(YouTubeItem):
             "channel_id": self.youtube_id,
             "channel_subscribed": False,
             "channel_tags": [],
-            "channel_description": False,
+            "channel_description": "",
             "channel_thumb_url": False,
             "channel_views": 0,
         }

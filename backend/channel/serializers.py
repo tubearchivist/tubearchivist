@@ -42,7 +42,9 @@ class ChannelSerializer(serializers.Serializer):
     channel_overwrites = ChannelOverwriteSerializer(required=False)
     channel_subs = serializers.IntegerField()
     channel_subscribed = serializers.BooleanField()
-    channel_tags = serializers.ListField(child=serializers.CharField())
+    channel_tags = serializers.ListField(
+        child=serializers.CharField(), required=False
+    )
     channel_views = serializers.IntegerField()
     _index = serializers.CharField(required=False)
     _score = serializers.IntegerField(required=False)
