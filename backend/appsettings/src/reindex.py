@@ -333,7 +333,7 @@ class Reindex(ReindexBase):
         # add back
         video.json_data["player"] = es_meta.get("player")
         video.json_data["date_downloaded"] = es_meta.get("date_downloaded")
-        video.json_data["video_type"] = es_meta.get("video_type")
+        video.json_data["vid_type"] = es_meta.get("vid_type")
         video.json_data["channel"] = es_meta.get("channel")
         if es_meta.get("playlist"):
             video.json_data["playlist"] = es_meta.get("playlist")
