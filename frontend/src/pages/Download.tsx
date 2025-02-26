@@ -318,7 +318,9 @@ const Download = () => {
           {downloadList &&
             downloadList?.map(download => {
               return (
-                <Fragment key={`${download.channel_id}_${download.timestamp}`}>
+                <Fragment
+                  key={`${download.channel_id}_${download.timestamp}_${download.youtube_id}`}
+                >
                   <DownloadListItem download={download} setRefresh={setRefresh} />
                 </Fragment>
               );

@@ -123,9 +123,15 @@ const VideoPlayer = ({
   const [searchParams] = useSearchParams();
   const searchParamVideoProgress = searchParams.get('t');
 
+  const playBackSpeedFromStorage = Number(localStorage.getItem('playerSpeed') || 1);
+  const playBackSpeedIndex =
+    VIDEO_PLAYBACK_SPEEDS.indexOf(playBackSpeedFromStorage) !== -1
+      ? VIDEO_PLAYBACK_SPEEDS.indexOf(playBackSpeedFromStorage)
+      : 3;
+
   const [skippedSegments, setSkippedSegments] = useState<SponsorSegmentsSkippedType>({});
   const [isMuted, setIsMuted] = useState(false);
-  const [playbackSpeedIndex, setPlaybackSpeedIndex] = useState(3);
+  const [playbackSpeedIndex, setPlaybackSpeedIndex] = useState(playBackSpeedIndex);
   const [lastSubtitleTack, setLastSubtitleTack] = useState(0);
   const [showHelpDialog, setShowHelpDialog] = useState(false);
   const [showInfoDialog, setShowInfoDialog] = useState(false);
@@ -329,9 +335,7 @@ const VideoPlayer = ({
             }}
             onLoadStart={(videoTag: VideoTag) => {
               videoTag.currentTarget.volume = Number(localStorage.getItem('playerVolume') ?? 1);
-              videoTag.currentTarget.playbackRate = Number(
-                localStorage.getItem('playerSpeed') ?? 1,
-              );
+              videoTag.currentTarget.playbackRate = Number(playBackSpeedFromStorage ?? 1);
             }}
             onTimeUpdate={handleTimeUpdate(
               videoId,
