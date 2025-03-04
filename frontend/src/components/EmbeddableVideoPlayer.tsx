@@ -66,7 +66,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
 
         setVideoResponse(videoResponse);
 
-        inlinePlayerRef.current?.scrollIntoView();
+        inlinePlayerRef.current?.scrollIntoView({ block: 'start', inline: 'start' });
 
         setRefresh(false);
       }
@@ -75,7 +75,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
   }, [videoId, refresh]);
 
   useEffect(() => {
-    inlinePlayerRef.current?.scrollIntoView();
+    inlinePlayerRef.current?.scrollIntoView({ block: 'start', inline: 'start' });
   }, []);
 
   if (videoResponse === undefined) {
