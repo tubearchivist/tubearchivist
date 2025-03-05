@@ -119,7 +119,6 @@ const Home = () => {
   const continueVideos = continueVideoResponse?.data;
 
   const hasVideos = videoResponse?.data?.length !== 0;
-  const showEmbeddedVideo = videoId !== null;
 
   const isGridView = userConfig.view_style_home === ViewStyles.grid;
   const gridView = isGridView ? `boxed-${userConfig.grid_items}` : '';
@@ -153,7 +152,6 @@ const Home = () => {
     userConfig.hide_watched,
     currentPage,
     pagination?.current_page,
-    showEmbeddedVideo,
   ]);
 
   return (
@@ -161,7 +159,7 @@ const Home = () => {
       <title>TubeArchivist</title>
       <ScrollToTopOnNavigate />
 
-      {showEmbeddedVideo && <EmbeddableVideoPlayer videoId={videoId} />}
+      <EmbeddableVideoPlayer videoId={videoId} />
 
       <div className={`boxed-content ${gridView}`}>
         {continueVideos && continueVideos.length > 0 && (

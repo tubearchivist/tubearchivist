@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { VideoResponseType } from '../pages/Video';
 import VideoPlayer from './VideoPlayer';
 import loadVideoById from '../api/loader/loadVideoById';
@@ -21,12 +21,11 @@ type Playlist = {
 type PlaylistList = Playlist[];
 
 type EmbeddableVideoPlayerProps = {
-  videoId: string;
+  videoId: string | null;
 };
 
 const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
   const inlinePlayerRef = useRef<HTMLDivElement>(null);
-  const prevVideoId = useRef<string | null>(null);
   const { appSettingsConfig } = useAppSettingsStore();
 
   const [, setSearchParams] = useSearchParams();
@@ -38,6 +37,12 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
 
   useEffect(() => {
     (async () => {
+      if (!videoId) {
+        return;
+      }
+
+      inlinePlayerRef.current?.scrollIntoView();
+
       if (refresh || videoId !== videoResponse?.youtube_id) {
         const videoResponse = await loadVideoById(videoId);
 
@@ -72,16 +77,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId, refresh]);
 
-  useLayoutEffect(() => {
-    if (videoId !== prevVideoId.current) {
-      setTimeout(() => {
-        inlinePlayerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 0);
-    }
-    prevVideoId.current = videoId; // Update the previous video ID
-  }, [videoId]);
-
-  if (videoResponse === undefined) {
+  if (videoResponse === undefined || videoId === null) {
     return <div ref={inlinePlayerRef} className="player-wrapper" />;
   }
 
