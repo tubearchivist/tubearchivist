@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { VideoResponseType } from '../pages/Video';
 import VideoPlayer from './VideoPlayer';
 import loadVideoById from '../api/loader/loadVideoById';
@@ -26,6 +26,7 @@ type EmbeddableVideoPlayerProps = {
 
 const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
   const inlinePlayerRef = useRef<HTMLDivElement>(null);
+  const prevVideoId = useRef<string | null>(null);
   const { appSettingsConfig } = useAppSettingsStore();
 
   const [, setSearchParams] = useSearchParams();
@@ -65,18 +66,20 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
         }
 
         setVideoResponse(videoResponse);
-
-        inlinePlayerRef.current?.scrollIntoView({ block: 'start', inline: 'start' });
-
         setRefresh(false);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId, refresh]);
 
-  useEffect(() => {
-    inlinePlayerRef.current?.scrollIntoView({ block: 'start', inline: 'start' });
-  }, []);
+  useLayoutEffect(() => {
+    if (videoId !== prevVideoId.current) {
+      setTimeout(() => {
+        inlinePlayerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
+    }
+    prevVideoId.current = videoId; // Update the previous video ID
+  }, [videoId]);
 
   if (videoResponse === undefined) {
     return <div ref={inlinePlayerRef} className="player-wrapper" />;
