@@ -45,6 +45,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const channel = channelResponse;
   const videoList = videoResponse?.data;
   const pagination = videoResponse?.paginate;
+  const refreshWhenVideoIdChanges = videoId !== null;
 
   const hasVideos = videoResponse?.data?.length !== 0;
 
@@ -80,6 +81,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
     channelId,
     pagination?.current_page,
     videoType,
+    refreshWhenVideoIdChanges,
   ]);
 
   if (!channel) {
