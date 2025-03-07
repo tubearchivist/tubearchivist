@@ -117,7 +117,6 @@ const Home = () => {
   const videoList = videoResponse?.data;
   const pagination = videoResponse?.paginate;
   const continueVideos = continueVideoResponse?.data;
-  const refreshWhenVideoIdChanges = videoId !== null;
 
   const hasVideos = videoResponse?.data?.length !== 0;
 
@@ -153,7 +152,7 @@ const Home = () => {
     userConfig.hide_watched,
     currentPage,
     pagination?.current_page,
-    refreshWhenVideoIdChanges,
+    videoId,
   ]);
 
   return (

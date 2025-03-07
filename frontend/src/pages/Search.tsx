@@ -56,7 +56,6 @@ const Search = () => {
   const playlistList = searchResults?.results.playlist_results;
   const fulltextList = searchResults?.results.fulltext_results;
   const queryType = searchResults?.queryType;
-  const refreshWhenVideoIdChanges = videoId !== null;
 
   const hasSearchQuery = searchTerm.length > 0;
   const hasVideos = Number(videoList?.length) > 0;
@@ -90,7 +89,7 @@ const Search = () => {
     } else {
       setSearchResults(EmptySearchResponse);
     }
-  }, [debouncedSearchTerm, refresh, refreshWhenVideoIdChanges]);
+  }, [debouncedSearchTerm, refresh, videoId]);
 
   const fetchResults = async (searchQuery: string) => {
     const searchResults = await loadSearch(searchQuery);

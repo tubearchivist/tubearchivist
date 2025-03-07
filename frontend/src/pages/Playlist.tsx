@@ -56,7 +56,6 @@ const Playlist = () => {
   const palylistEntries = playlistResponse?.playlist_entries;
   const videoArchivedCount = Number(palylistEntries?.filter(video => video.downloaded).length);
   const videoInPlaylistCount = pagination?.total_hits;
-  const refreshWhenVideoIdChanges = videoId !== null;
 
   const view = userConfig.view_style_home;
   const gridItems = userConfig.grid_items;
@@ -93,7 +92,7 @@ const Playlist = () => {
     refresh,
     currentPage,
     pagination?.current_page,
-    refreshWhenVideoIdChanges,
+    videoId,
   ]);
 
   if (!playlistId || !playlist) {
