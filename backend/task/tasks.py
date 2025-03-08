@@ -272,9 +272,9 @@ def thumbnail_check(self):
         return
 
     manager.init(self)
-    thumnail = ThumbValidator(task=self)
-    thumnail.validate()
-    thumnail.clean_up()
+    thumbnail = ThumbValidator(task=self)
+    thumbnail.validate()
+    thumbnail.clean_up()
 
 
 @shared_task(bind=True, name="resync_thumbs", base=BaseTask)
