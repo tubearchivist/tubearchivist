@@ -56,7 +56,6 @@ const Playlist = () => {
   const palylistEntries = playlistResponse?.playlist_entries;
   const videoArchivedCount = Number(palylistEntries?.filter(video => video.downloaded).length);
   const videoInPlaylistCount = pagination?.total_hits;
-  const showEmbeddedVideo = videoId !== null;
 
   const view = userConfig.view_style_home;
   const gridItems = userConfig.grid_items;
@@ -93,7 +92,7 @@ const Playlist = () => {
     refresh,
     currentPage,
     pagination?.current_page,
-    showEmbeddedVideo,
+    videoId,
   ]);
 
   if (!playlistId || !playlist) {
@@ -301,7 +300,7 @@ const Playlist = () => {
         />
       </div>
 
-      {showEmbeddedVideo && <EmbeddableVideoPlayer videoId={videoId} />}
+      <EmbeddableVideoPlayer videoId={videoId} />
 
       <div className={`boxed-content ${gridView}`}>
         <div className={`video-list ${view} ${gridViewGrid}`}>

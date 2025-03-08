@@ -56,7 +56,6 @@ const Search = () => {
   const playlistList = searchResults?.results.playlist_results;
   const fulltextList = searchResults?.results.fulltext_results;
   const queryType = searchResults?.queryType;
-  const showEmbeddedVideo = videoId !== null;
 
   const hasSearchQuery = searchTerm.length > 0;
   const hasVideos = Number(videoList?.length) > 0;
@@ -90,7 +89,7 @@ const Search = () => {
     } else {
       setSearchResults(EmptySearchResponse);
     }
-  }, [debouncedSearchTerm, refresh, showEmbeddedVideo]);
+  }, [debouncedSearchTerm, refresh, videoId]);
 
   const fetchResults = async (searchQuery: string) => {
     const searchResults = await loadSearch(searchQuery);
@@ -102,7 +101,9 @@ const Search = () => {
   return (
     <>
       <title>TubeArchivist</title>
-      {showEmbeddedVideo && <EmbeddableVideoPlayer videoId={videoId} />}
+
+      <EmbeddableVideoPlayer videoId={videoId} />
+
       <div className={`boxed-content ${gridView}`}>
         <div className="title-bar">
           <h1>Search your Archive</h1>

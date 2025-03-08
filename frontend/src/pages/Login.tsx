@@ -28,7 +28,7 @@ const Login = () => {
       navigate(Routes.Home);
     } else {
       const data = await loginResponse.json();
-      setErrorMessage(data?.message || 'Unknown Error');
+      setErrorMessage(data?.error || 'Unknown Error');
       navigate(Routes.Login);
     }
   };

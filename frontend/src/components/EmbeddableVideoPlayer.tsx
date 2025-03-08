@@ -21,7 +21,7 @@ type Playlist = {
 type PlaylistList = Playlist[];
 
 type EmbeddableVideoPlayerProps = {
-  videoId: string;
+  videoId: string | null;
 };
 
 const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
@@ -37,6 +37,12 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
 
   useEffect(() => {
     (async () => {
+      if (!videoId) {
+        return;
+      }
+
+      inlinePlayerRef.current?.scrollIntoView();
+
       if (refresh || videoId !== videoResponse?.youtube_id) {
         const videoResponse = await loadVideoById(videoId);
 
@@ -65,20 +71,13 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
         }
 
         setVideoResponse(videoResponse);
-
-        inlinePlayerRef.current?.scrollIntoView();
-
         setRefresh(false);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId, refresh]);
 
-  useEffect(() => {
-    inlinePlayerRef.current?.scrollIntoView();
-  }, []);
-
-  if (videoResponse === undefined) {
+  if (videoResponse === undefined || videoId === null) {
     return <div ref={inlinePlayerRef} className="player-wrapper" />;
   }
 

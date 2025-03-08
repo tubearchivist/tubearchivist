@@ -47,7 +47,6 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const pagination = videoResponse?.paginate;
 
   const hasVideos = videoResponse?.data?.length !== 0;
-  const showEmbeddedVideo = videoId !== null;
 
   const view = userConfig.view_style_home;
   const isGridView = view === ViewStyles.grid;
@@ -81,7 +80,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
     channelId,
     pagination?.current_page,
     videoType,
-    showEmbeddedVideo,
+    videoId,
   ]);
 
   if (!channel) {
@@ -152,10 +151,13 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
           </div>
         </div>
       </div>
+
       <div className={`boxed-content ${gridView}`}>
         <Filterbar hideToggleText={'Hide watched videos:'} viewStyleName={ViewStyleNames.home} />
       </div>
-      {showEmbeddedVideo && <EmbeddableVideoPlayer videoId={videoId} />}
+
+      <EmbeddableVideoPlayer videoId={videoId} />
+
       <div className={`boxed-content ${gridView}`}>
         <div className={`video-list ${view} ${gridViewGrid}`}>
           {!hasVideos && (

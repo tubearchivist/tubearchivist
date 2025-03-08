@@ -123,6 +123,7 @@ const VideoPlayer = ({
   const [searchParams] = useSearchParams();
   const searchParamVideoProgress = searchParams.get('t');
 
+  const volumeFromStorage = Number(localStorage.getItem('playerVolume') ?? 1);
   const playBackSpeedFromStorage = Number(localStorage.getItem('playerSpeed') || 1);
   const playBackSpeedIndex =
     VIDEO_PLAYBACK_SPEEDS.indexOf(playBackSpeedFromStorage) !== -1
@@ -334,7 +335,7 @@ const VideoPlayer = ({
               localStorage.setItem('playerSpeed', videoTag.currentTarget.playbackRate.toString());
             }}
             onLoadStart={(videoTag: VideoTag) => {
-              videoTag.currentTarget.volume = Number(localStorage.getItem('playerVolume') ?? 1);
+              videoTag.currentTarget.volume = volumeFromStorage;
               videoTag.currentTarget.playbackRate = Number(playBackSpeedFromStorage ?? 1);
             }}
             onTimeUpdate={handleTimeUpdate(
