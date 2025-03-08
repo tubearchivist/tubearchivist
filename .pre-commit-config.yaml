@@ -4,14 +4,14 @@ repos:
     hooks:
       - id: end-of-file-fixer
   - repo: https://github.com/psf/black
-    rev: 24.10.0
+    rev: 25.1.0
     hooks:
       - id: black
         alias: python
         files: ^backend/
         args: ["--line-length=79"]
   - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
+    rev: 6.0.1
     hooks:
       - id: isort
         name: isort (python)
@@ -19,19 +19,19 @@ repos:
         files: ^backend/
         args: ["--profile", "black", "-l 79"]
   - repo: https://github.com/pycqa/flake8
-    rev: 7.1.1
+    rev: 7.1.2
     hooks:
       - id: flake8
         alias: python
         files: ^backend/
         args: ["--max-complexity=10", "--max-line-length=79"]
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.3.0
+    rev: v2.4.1
     hooks:
       - id: codespell
         exclude: ^frontend/package-lock.json
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v9.17.0
+    rev: v9.22.0
     hooks:
       - id: eslint
         name: eslint
