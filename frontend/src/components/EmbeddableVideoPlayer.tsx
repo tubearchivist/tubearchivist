@@ -92,8 +92,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
   const likes = formatNumbers(video.stats.like_count);
   const hasDislikes = video.stats.dislike_count > 0 && appSettingsConfig.downloads.integrate_ryd;
   const dislikes = formatNumbers(video.stats.dislike_count);
-  // const config = videoResponse.config;
-  const cast = false; // config.enable_cast;
+  const cast = appSettingsConfig.application.enable_cast;
 
   return (
     <>

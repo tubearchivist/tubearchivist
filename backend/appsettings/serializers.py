@@ -62,6 +62,7 @@ class AppConfigAppSerializer(
     """serialize app config"""
 
     enable_snapshot = serializers.BooleanField()
+    enable_cast = serializers.BooleanField()
 
 
 class AppConfigSerializer(ValidateUnknownFieldsMixin, serializers.Serializer):

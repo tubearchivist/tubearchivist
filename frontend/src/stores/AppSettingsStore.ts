@@ -36,6 +36,7 @@ export const useAppSettingsStore = create<AppSettingsState>(set => ({
     },
     application: {
       enable_snapshot: false,
+      enable_cast: false,
     },
   },
   setAppSettingsConfig: appSettingsConfig => set({ appSettingsConfig }),

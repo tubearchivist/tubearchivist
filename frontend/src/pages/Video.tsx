@@ -39,7 +39,7 @@ import loadVideoNav, { VideoNavResponseType } from '../api/loader/loadVideoNav';
 import useIsAdmin from '../functions/useIsAdmin';
 import ToggleConfig from '../components/ToggleConfig';
 import { PlaylistType } from '../api/loader/loadPlaylistById';
-// import { useAppSettingsStore } from '../stores/AppSettingsStore';
+import { useAppSettingsStore } from '../stores/AppSettingsStore';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {
   return playlist.playlist_entries.some(entry => {
@@ -110,7 +110,7 @@ const Video = () => {
   const { videoId } = useParams() as VideoParams;
   const navigate = useNavigate();
   const isAdmin = useIsAdmin();
-  // const { appSettingsConfig } = useAppSettingsStore();
+  const { appSettingsConfig } = useAppSettingsStore();
 
   const [videoEnded, setVideoEnded] = useState(false);
   const [playlistAutoplay, setPlaylistAutoplay] = useState(
@@ -193,7 +193,6 @@ const Video = () => {
 
   const video = videoResponse;
   const watched = videoResponse.player.watched;
-  // const config = appSettingsConfig;
   const playlistNav = videoPlaylistNav;
   const sponsorBlock = videoResponse.sponsorblock;
   const customPlaylists = customPlaylistsResponse?.data;
@@ -202,7 +201,7 @@ const Video = () => {
 
   console.log('playlistNav', playlistNav);
 
-  const cast = false; // config.enable_cast;
+  const cast = appSettingsConfig.application.enable_cast;
 
   return (
     <>

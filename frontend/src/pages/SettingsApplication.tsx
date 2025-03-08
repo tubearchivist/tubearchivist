@@ -92,6 +92,7 @@ const SettingsApplication = () => {
   const [showApiToken, setShowApiToken] = useState(false);
   const [downloadDislikes, setDownloadDislikes] = useState(false);
   const [enableSponsorBlock, setEnableSponsorBlock] = useState(false);
+  const [enableCast, setEnableCast] = useState(false);
 
   // Snapshots
   const [enableSnapshots, setEnableSnapshots] = useState(false);
@@ -135,6 +136,7 @@ const SettingsApplication = () => {
     // Integrations
     setDownloadDislikes(appSettingsConfig.downloads.integrate_ryd);
     setEnableSponsorBlock(appSettingsConfig.downloads.integrate_sponsorblock);
+    setEnableCast(appSettingsConfig.application.enable_cast);
 
     // Snapshots
     setEnableSnapshots(appSettingsConfig.application.enable_snapshot);
@@ -864,6 +866,16 @@ const SettingsApplication = () => {
                 <ToggleConfig
                   name="downloads.integrate_sponsorblock"
                   value={enableSponsorBlock}
+                  updateCallback={handleUpdateConfig}
+                />
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Enable Cast</p>
+                </div>
+                <ToggleConfig
+                  name="application.enable_cast"
+                  value={enableCast}
                   updateCallback={handleUpdateConfig}
                 />
               </div>

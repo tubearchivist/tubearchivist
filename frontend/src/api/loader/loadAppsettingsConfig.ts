@@ -29,6 +29,7 @@ export type AppSettingsConfigType = {
   };
   application: {
     enable_snapshot: boolean;
+    enable_cast: boolean;
   };
 };
 

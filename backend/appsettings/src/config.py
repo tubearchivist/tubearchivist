@@ -51,6 +51,7 @@ class ApplicationConfigType(TypedDict):
     """describes application config"""
 
     enable_snapshot: bool
+    enable_cast: bool
 
 
 class AppConfigType(TypedDict):
@@ -93,7 +94,10 @@ class AppConfig:
             "integrate_ryd": False,
             "integrate_sponsorblock": False,
         },
-        "application": {"enable_snapshot": True},
+        "application": {
+            "enable_snapshot": True,
+            "enable_cast": False,
+        },
     }
 
     def __init__(self):
