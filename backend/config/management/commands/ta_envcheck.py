@@ -85,7 +85,6 @@ class Command(BaseCommand):
         self._elastic_user_overwrite()
         self._ta_port_overwrite()
         self._ta_backend_port_overwrite()
-        self._enable_cast_overwrite()
         self._create_superuser()
 
     def _expected_vars(self):
@@ -166,14 +165,6 @@ class Command(BaseCommand):
             message = f"    ✓ TA_BACKEND_PORT already set to {overwrite}"
 
         self.stdout.write(self.style.SUCCESS(message))
-
-    def _enable_cast_overwrite(self):
-        """enable cast env var"""
-        self.stdout.write("[6] check ENABLE_CAST overwrite")
-        overwrite = EnvironmentSettings.ENABLE_CAST
-        if not overwrite:
-            self.stdout.write(self.style.SUCCESS("    ENABLE_CAST is not set"))
-            return
 
     def _disable_static_auth(self):
         """cast workaround, remove auth for static files in nginx"""

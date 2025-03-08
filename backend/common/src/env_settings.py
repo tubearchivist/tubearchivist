@@ -24,7 +24,6 @@ class EnvironmentSettings:
 
     HOST_UID: int = int(environ.get("HOST_UID", False))
     HOST_GID: int = int(environ.get("HOST_GID", False))
-    ENABLE_CAST: bool = bool(environ.get("ENABLE_CAST"))
     DISABLE_STATIC_AUTH: bool = bool(environ.get("DISABLE_STATIC_AUTH"))
     TZ: str = str(environ.get("TZ", "UTC"))
     TA_PORT: int = int(environ.get("TA_PORT", False))
@@ -73,7 +72,6 @@ class EnvironmentSettings:
             HOST_UID: {self.HOST_UID}
             HOST_GID: {self.HOST_GID}
             TZ: {self.TZ}
-            ENABLE_CAST: {self.ENABLE_CAST}
             DISABLE_STATIC_AUTH: {self.DISABLE_STATIC_AUTH}
             TA_PORT: {self.TA_PORT}
             TA_BACKEND_PORT: {self.TA_BACKEND_PORT}
