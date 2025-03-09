@@ -12,10 +12,10 @@ services:
       - cache:/cache
     environment:
       - ES_URL=http://archivist-es:9200     # needs protocol e.g. http and port
-      - REDIS_HOST=archivist-redis          # don't add protocol
+      - REDIS_CON=redis://archivist-redis:6379
       - HOST_UID=1000
       - HOST_GID=1000
-      - TA_HOST=tubearchivist.local         # set your host name
+      - TA_HOST=http://tubearchivist.local  # set your host name with protocol and port
       - TA_USERNAME=tubearchivist           # your initial TA credentials
       - TA_PASSWORD=verysecret              # your initial TA credentials
       - ELASTIC_PASSWORD=verysecret         # set password for Elasticsearch
@@ -30,7 +30,7 @@ services:
       - archivist-es
       - archivist-redis
   archivist-redis:
-    image: redis/redis-stack-server
+    image: redis
     container_name: archivist-redis
     restart: unless-stopped
     expose:
