@@ -3,7 +3,6 @@
 Welcome, and thanks for showing interest in improving Tube Archivist!  
 
 ## Table of Content
-- [Next Steps](#next-steps)
 - [Beta Testing](#beta-testing)
 - [How to open an issue](#how-to-open-an-issue)
   - [Bug Report](#bug-report)
@@ -15,16 +14,6 @@ Welcome, and thanks for showing interest in improving Tube Archivist!
 - [Improve to the Documentation](#improve-to-the-documentation)
 - [Development Environment](#development-environment)
 ---
-
-## Next Steps
-Going forward, this project will focus on developing a new modern frontend.
-
-- For the time being, don't open any new PRs that are not towards the new frontend.
-- New features requests likely won't get accepted during this process.
-- Depending on the severity, bug reports may or may not get fixed during this time.
-- When in doubt, reach out.
-
-Join us on [Discord](https://tubearchivist.com/discord) if you want to help with that process.
 
 ## Beta Testing
 Be the first to help test new features and improvements and provide feedback! There are regular `:unstable` builds for easy access. That's for the tinkerers and the breave. Ideally use a testing environment first, before a release be the first to install it on your main system.
@@ -87,19 +76,16 @@ This is a quick checklist to help streamline the process:
 - Show off your progress, even if not yet complete, by creating a [draft](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests#draft-pull-requests) PR first and switch it as *ready* when you are ready.
 - Make sure all your code is linted and formatted correctly, see below. The automatic GH action unfortunately needs to be triggered manually by a maintainer for first time contributors, but will trigger automatically for existing contributors.
 
-### Making changes to the JavaScript
-
-The JavaScript does not require any build step; you just edit the files directly. However, there is config for eslint and prettier (a linter and formatter respectively); their use is recommended but not required. To use them, install `node`, run `npm i` from the root directory of this repository to install dependencies, then run `npm run lint` and `npm run format` to run eslint and prettier respectively.
-
 ### Code formatting and linting
 
-To keep things clean and consistent for everybody, there is a github action setup to lint and check the changes. You can test your code locally first if you want. For example if you made changes in the **video** module, run
+This project uses the excellent [pre-commit](https://github.com/pre-commit/pre-commit) library. The [pre-commit-config.yml](https://github.com/tubearchivist/tubearchivist/blob/master/.pre-commit-config.yaml) file is part of this repo.
 
-```shell
-./deploy.sh validate tubearchivist/home/src/index/video.py
-```
+**Quick Start**
+- Run `pre-commit install` from the root of the repo.
+- Next time you commit to your local git repo, the defined hooks will run.
+- On first run, this will download and install the needed environments to your local machine, that can take some time. But that will be reused on sunsequent commits. 
 
-to validate your changes. If you omit the path, all the project files will get checked. This is subject to change as the codebase improves.
+That is also running as a Git Hub action.
 
 ---
 
@@ -132,7 +118,7 @@ Some of you might have created useful scripts or API integrations around this pr
 
 ## Improve to the Documentation
 
-The documentation available at [docs.tubearchivist.com](https://docs.tubearchivist.com/) and is build from a separate repo [tubearchivist/docs](https://github.com/tubearchivist/docs). The Readme has additional instructions on how to make changes.
+The documentation available at [docs.tubearchivist.com](https://docs.tubearchivist.com/) and is build from a separate repo [tubearchivist/docs](https://github.com/tubearchivist/docs). The Readme there has additional instructions on how to make changes.
 
 ---
 
@@ -165,7 +151,7 @@ TZ=America/New_York
 DJANGO_DEBUG=True
 ```
 
-Than from look at the container startup script `run.sh`, make sure all needed migrations and startup checks ran, then to start the dev backend server from the same folder as `manage.py` run:
+Then look at the container startup script `run.sh`, make sure all needed migrations and startup checks ran. To start the dev backend server from the same folder as `manage.py` run:
 
 ```bash
 python manage.py runserver
@@ -205,11 +191,11 @@ Make your changes locally and re-run `docker compose up --build`. The `Dockerfil
 
 ### Develop environment inside a VM
 
-You may find it nice to run everything inside of a VM, though this is not necessary. There's a `deploy.sh` script which has some helpers for this use case. YMMV, this is what one of the developers does:
+You may find it nice to run everything inside of a VM for complete environment snapshots and encapsulation, though this is not strictly necessary. There's a `deploy.sh` script which has some helpers for this use case:
 
-- Clone the repo, work on it with your favorite code editor in your local filesystem. *testing* branch is where all the changes are happening, might be unstable and is WIP.
-- Then I have a VM running standard Ubuntu Server LTS with docker installed. The VM keeps my projects separate and offers convenient snapshot functionality. The VM also offers ways to simulate low end environments by limiting CPU cores and memory. You can use this [Ansible Docker Ubuntu](https://github.com/bbilly1/ansible-playbooks) playbook to get started quickly. But you could also just run docker on your host system.
-- I have my local DNS resolve `tubearchivist.local` to the IP of the VM for convenience. To deploy the latest changes and rebuild the application to the testing VM run:
+- This assumes a standard Ubuntu Server VM with docker and docker compose already installed.
+- Configure your local DNS to resolve `tubearchivist.local` to the IP of the VM.
+- To deploy the latest changes and rebuild the application to the testing VM run:
 ```bash
 ./deploy.sh test
 ```

@@ -2,9 +2,9 @@
 [*more screenshots and video*](SHOWCASE.MD)
 
 <div align="center">
-<a href="https://github.com/bbilly1/tilefy" target="_blank"><img src="https://tiles.tilefy.me/t/tubearchivist-docker.png" alt="tubearchivist-docker" title="Tube Archivist Docker Pulls" height="50" width="190"/></a>
-<a href="https://github.com/bbilly1/tilefy" target="_blank"><img src="https://tiles.tilefy.me/t/tubearchivist-github-star.png" alt="tubearchivist-github-star" title="Tube Archivist GitHub Stars" height="50" width="190"/></a>
-<a href="https://github.com/bbilly1/tilefy" target="_blank"><img src="https://tiles.tilefy.me/t/tubearchivist-github-forks.png" alt="tubearchivist-github-forks" title="Tube Archivist GitHub Forks" height="50" width="190"/></a>
+<a href="https://hub.docker.com/r/bbilly1/tubearchivist" target="_blank"><img src="https://tiles.tilefy.me/t/tubearchivist-docker.png" alt="tubearchivist-docker" title="Tube Archivist Docker Pulls" height="50" width="190"/></a>
+<a href="https://github.com/tubearchivist/tubearchivist/stargazers" target="_blank"><img src="https://tiles.tilefy.me/t/tubearchivist-github-star.png" alt="tubearchivist-github-star" title="Tube Archivist GitHub Stars" height="50" width="190"/></a>
+<a href="https://github.com/tubearchivist/tubearchivist/forks" target="_blank"><img src="https://tiles.tilefy.me/t/tubearchivist-github-forks.png" alt="tubearchivist-github-forks" title="Tube Archivist GitHub Forks" height="50" width="190"/></a>
 <a href="https://www.tubearchivist.com/discord" target="_blank"><img src="https://tiles.tilefy.me/t/tubearchivist-discord.png" alt="tubearchivist-discord" title="TA Discord Server Members" height="50" width="190"/></a>
 </div>
 
@@ -47,6 +47,8 @@ The instructions here should get you up and running quickly, for Docker beginner
 
 Take a look at the example [docker-compose.yml](https://github.com/tubearchivist/tubearchivist/blob/master/docker-compose.yml) and configure the required environment variables.
 
+All environment variables are explained in detail in the docs [here](https://docs.tubearchivist.com/installation/env-vars/).
+
 **TubeArchivist**:  
 | Environment Var | Value |  |
 | ----------- | ----------- | ----------- |
@@ -68,8 +70,8 @@ Take a look at the example [docker-compose.yml](https://github.com/tubearchivist
 | HOST_UID | Allow TA to own the video files instead of container user | Optional |
 | ELASTIC_USER | Change the default ElasticSearch user | Optional |
 | TA_LDAP | Configure TA to use LDAP Authentication | [Read more](https://docs.tubearchivist.com/configuration/ldap/) |
-| ENABLE_CAST | Enable casting support | [Read more](https://docs.tubearchivist.com/configuration/cast/) |
-| DJANGO_DEBUG | Return additional error messages, for debug only |  |
+| DISABLE_STATIC_AUTH | Remove authentication from media files, (Google Cast...) | [Read more](https://docs.tubearchivist.com/installation/env-vars/#disable_static_auth) |
+| DJANGO_DEBUG | Return additional error messages, for debug only | Optional |
 
 **ElasticSearch**  
 | Environment Var | Value | State |
