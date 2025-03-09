@@ -168,7 +168,7 @@ class Command(BaseCommand):
             )
             return
 
-        if not config:
+        if not config or config == {"status": False}:
             self.stdout.write(
                 self.style.SUCCESS("    no config values to migrate")
             )
@@ -181,7 +181,7 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.SUCCESS("    ✓ migrated appconfig to ES")
             )
-            RedisArchivist().del_message("config")
+            RedisArchivist().del_message("config", save=True)
             return
 
         message = "    🗙 failed to migrate app config"
@@ -262,8 +262,8 @@ class Command(BaseCommand):
     def _init_app_config(self) -> None:
         """init default app config to ES"""
         self.stdout.write("[10] Check AppConfig")
-        try:
-            _ = AppConfig().config
+        _, status_code = ElasticWrap("ta_config/_doc/appsettings").get()
+        if status_code in [200, 201]:
             self.stdout.write(
                 self.style.SUCCESS("    skip completed appsettings init")
             )
@@ -273,15 +273,16 @@ class Command(BaseCommand):
                     self.style.SUCCESS(f"    added new default: {new_default}")
                 )
 
-        except ValueError:
-            handler = AppConfig.__new__(AppConfig)
-            _, status_code = handler.sync_defaults()
-            self.stdout.write(
-                self.style.SUCCESS("    ✓ Created default appsettings.")
-            )
-            self.stdout.write(
-                self.style.SUCCESS(f"      Status code: {status_code}")
-            )
+            return
+
+        handler = AppConfig.__new__(AppConfig)
+        _, status_code = handler.sync_defaults()
+        self.stdout.write(
+            self.style.SUCCESS("    ✓ Created default appsettings.")
+        )
+        self.stdout.write(
+            self.style.SUCCESS(f"      Status code: {status_code}")
+        )
 
     def _mig_channel_tags(self) -> None:
         """update from v0.4.13 to v0.5.0, migrate incorrect data types"""
