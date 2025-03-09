@@ -107,9 +107,12 @@ class RedisArchivist(RedisBase):
 
         return [self.get_message_dict(i) for i in all_matches]
 
-    def del_message(self, key: str) -> bool:
+    def del_message(self, key: str, save: bool = False) -> bool:
         """delete key from redis"""
         response = self.conn.execute_command("DEL", self.NAME_SPACE + key)
+        if save:
+            self.bg_save()
+
         return response
 
 
