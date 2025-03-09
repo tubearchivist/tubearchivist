@@ -65,6 +65,7 @@ UNEXPECTED_ENV_VARS = {
     "TA_UWSGI_PORT": "Has been replaced with 'TA_BACKEND_PORT'",
     "REDIS_HOST": "Has been replaced with 'REDIS_CON' connection string",
     "REDIS_PORT": "Has been consolidated in 'REDIS_CON' connection string",
+    "ENABLE_CAST": "That is now a toggle in setting and DISABLE_STATIC_AUTH",
 }
 INST = "https://github.com/tubearchivist/tubearchivist#installing-and-updating"
 NGINX = "/etc/nginx/sites-available/default"
