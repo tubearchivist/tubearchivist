@@ -46,9 +46,16 @@ const Login = () => {
 
         const authData = await auth.json();
 
+        if (auth.status === 403) {
+          setWaitingForBackend(false);
+          clearInterval(backendCheckInterval);
+        }
+
         if (authData.response === 'pong') {
           setWaitingForBackend(false);
           clearInterval(backendCheckInterval);
+
+          navigate(Routes.Home);
         }
       } catch (error) {
         console.log('Checking backend availability: ', error);
@@ -59,7 +66,7 @@ const Login = () => {
     return () => {
       clearInterval(backendCheckInterval);
     };
-  }, []);
+  }, [navigate]);
 
   return (
     <>
@@ -128,9 +135,7 @@ const Login = () => {
             </>
           )}
 
-          {!waitingForBackend && (
-            <Button label="Login" type="submit" />
-          )}
+          {!waitingForBackend && <Button label="Login" type="submit" />}
         </form>
         <p className="login-links">
           <span>
