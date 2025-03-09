@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Routes from '../configuration/routes/RouteList';
 import { useNavigate } from 'react-router-dom';
 import useColours from '../configuration/colours/useColours';
 import Button from '../components/Button';
 import signIn from '../api/actions/signIn';
+import loadAuth from '../api/loader/loadAuth';
 
 const Login = () => {
   useColours();
@@ -13,10 +14,15 @@ const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [saveLogin, setSaveLogin] = useState(false);
+  const [waitingForBackend, setWaitingForBackend] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
+
+    if (waitingForBackend) {
+      return false;
+    }
 
     setErrorMessage(null);
 
@@ -32,6 +38,28 @@ const Login = () => {
       navigate(Routes.Login);
     }
   };
+
+  useEffect(() => {
+    const backendCheckInterval = setInterval(async () => {
+      try {
+        const auth = await loadAuth();
+
+        const authData = await auth.json();
+
+        if (authData.response === 'pong') {
+          setWaitingForBackend(false);
+          clearInterval(backendCheckInterval);
+        }
+      } catch (error) {
+        console.log('Checking backend availability: ', error);
+        setWaitingForBackend(true);
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(backendCheckInterval);
+    };
+  }, []);
 
   return (
     <>
@@ -92,7 +120,17 @@ const Login = () => {
 
           <input type="hidden" name="next" value={Routes.Home} />
 
-          <Button label="Login" type="submit" />
+          {waitingForBackend && (
+            <>
+              <div className="lds-ring" style={{ color: 'var(--accent-font-dark)' }}>
+                <div />
+              </div>
+            </>
+          )}
+
+          {!waitingForBackend && (
+            <Button label="Login" type="submit" />
+          )}
         </form>
         <p className="login-links">
           <span>
