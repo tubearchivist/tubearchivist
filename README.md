@@ -52,7 +52,7 @@ All environment variables are explained in detail in the docs [here](https://doc
 **TubeArchivist**:  
 | Environment Var | Value |  |
 | ----------- | ----------- | ----------- |
-| TA_HOST | Server IP or hostname | Required |
+| TA_HOST | Server IP or hostname `http://tubearchivist.local:8000` | Required |
 | TA_USERNAME | Initial username when logging into TA | Required |
 | TA_PASSWORD | Initial password when logging into TA | Required |
 | ELASTIC_PASSWORD | Password for ElasticSearch | Required |
