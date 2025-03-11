@@ -20,7 +20,7 @@ from common.serializers import (
     ErrorResponseSerializer,
 )
 from common.src.ta_redis import RedisArchivist
-from common.views_base import AdminOnly, ApiBaseView
+from common.views_base import AdminOnly, AdminWriteOnly, ApiBaseView
 from django.conf import settings
 from download.src.yt_dlp_base import CookieHandler, POTokenHandler
 from drf_spectacular.utils import OpenApiResponse, extend_schema
@@ -152,7 +152,7 @@ class AppConfigApiView(ApiBaseView):
     POST: update app settings
     """
 
-    permission_classes = [AdminOnly]
+    permission_classes = [AdminWriteOnly]
 
     @staticmethod
     @extend_schema(
