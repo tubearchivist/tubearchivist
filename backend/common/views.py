@@ -20,6 +20,7 @@ from common.src.watched import WatchState
 from common.views_base import AdminOnly, ApiBaseView
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from task.tasks import check_reindex
 
 
@@ -199,3 +200,11 @@ class NotificationView(ApiBaseView):
         response_serializer = NotificationSerializer(notifications, many=True)
 
         return Response(response_serializer.data)
+
+
+class HealthCheck(APIView):
+    """health check view, no auth needed"""
+
+    def get(self, request):
+        """health check, no auth needed"""
+        return Response("OK", status=200)
