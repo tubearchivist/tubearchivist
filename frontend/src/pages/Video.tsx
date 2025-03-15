@@ -43,6 +43,8 @@ import { useAppSettingsStore } from '../stores/AppSettingsStore';
 import updateDownloadQueueStatusById from '../api/actions/updateDownloadQueueStatusById';
 import { FileSizeUnits } from '../api/actions/updateUserConfig';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import { ApiError } from '../functions/APIClient';
+import NotFound from './404Page';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {
   return playlist.playlist_entries.some(entry => {
@@ -116,6 +118,7 @@ const Video = () => {
   const { appSettingsConfig } = useAppSettingsStore();
   const { userConfig } = useUserConfigStore();
 
+  const [error, setError] = useState<ApiError | null>(null);
   const [videoEnded, setVideoEnded] = useState(false);
   const [playlistAutoplay, setPlaylistAutoplay] = useState(
     localStorage.getItem('playlistAutoplay') === 'true',
@@ -138,7 +141,18 @@ const Video = () => {
   useEffect(() => {
     (async () => {
       if (refreshVideoList || videoId !== videoResponse?.youtube_id) {
-        const videoByIdResponse = await loadVideoById(videoId);
+        setError(null);
+        try {
+          const videoByIdResponse = await loadVideoById(videoId);
+          setVideoResponse(videoByIdResponse);
+        } catch (err) {
+          if ((err as ApiError).status === 404) {
+            setError(err as ApiError);
+          } else {
+            console.error('Failed to fetch item:', err);
+          }
+        }
+
         const simmilarVideosResponse = await loadSimmilarVideosById(videoId);
         const customPlaylistsResponse = await loadPlaylistList({ type: 'custom' });
         const videoNavResponse = await loadVideoNav(videoId);
@@ -150,7 +164,6 @@ const Video = () => {
           console.log('Comments not found', e);
         }
 
-        setVideoResponse(videoByIdResponse);
         setSimmilarVideos(simmilarVideosResponse);
         setVideoPlaylistNav(videoNavResponse);
         setCustomPlaylistsResponse(customPlaylistsResponse);
@@ -190,6 +203,8 @@ const Video = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoEnded, playlistAutoplay]);
+
+  if (error) return <NotFound failType="video" />;
 
   if (videoResponse === undefined) {
     return [];

@@ -23,6 +23,8 @@ import Button from '../components/Button';
 import loadVideoListByFilter from '../api/loader/loadVideoListByPage';
 import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import { ApiError } from '../functions/APIClient';
+import NotFound from './404Page';
 
 export type VideoResponseType = {
   data?: VideoType[];
@@ -31,6 +33,7 @@ export type VideoResponseType = {
 
 const Playlist = () => {
   const { playlistId } = useParams();
+  const [error, setError] = useState<ApiError | null>(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');
@@ -66,22 +69,28 @@ const Playlist = () => {
 
   useEffect(() => {
     (async () => {
-      const playlist = await loadPlaylistById(playlistId);
-      const video = await loadVideoListByFilter({
-        playlist: playlistId,
-        page: currentPage,
-        watch: hideWatched ? 'unwatched' : undefined,
-      });
-
-      const isCustomPlaylist = playlist?.playlist_type === 'custom';
-      if (!isCustomPlaylist) {
-        const channel = await loadChannelById(playlist.playlist_channel_id);
-
-        setChannelResponse(channel);
+      setError(null);
+      try {
+        const playlist = await loadPlaylistById(playlistId);
+        const video = await loadVideoListByFilter({
+          playlist: playlistId,
+          page: currentPage,
+          watch: hideWatched ? 'unwatched' : undefined,
+        });
+        setPlaylistResponse(playlist);
+        setVideoResponse(video);
+        const isCustomPlaylist = playlist?.playlist_type === 'custom';
+        if (!isCustomPlaylist) {
+          const channel = await loadChannelById(playlist.playlist_channel_id);
+          setChannelResponse(channel);
+        }
+      } catch (err) {
+        if ((err as ApiError).status === 404) {
+          setError(err as ApiError);
+        } else {
+          console.error('Failed to fetch item:', err);
+        }
       }
-
-      setPlaylistResponse(playlist);
-      setVideoResponse(video);
       setRefresh(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -94,9 +103,9 @@ const Playlist = () => {
     videoId,
   ]);
 
-  if (!playlistId || !playlist) {
-    return `Playlist ${playlistId} not found!`;
-  }
+  if (error) return <NotFound failType="playlist" />;
+
+  if (!playlist || !playlistId) return [];
 
   const isCustomPlaylist = playlist.playlist_type === 'custom';
 

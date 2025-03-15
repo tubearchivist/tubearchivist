@@ -8,6 +8,8 @@ import ChannelBanner from '../components/ChannelBanner';
 import loadChannelNav, { ChannelNavResponseType } from '../api/loader/loadChannelNav';
 import loadChannelById from '../api/loader/loadChannelById';
 import useIsAdmin from '../functions/useIsAdmin';
+import { ApiError } from '../functions/APIClient';
+import NotFound from './404Page';
 
 type ChannelParams = {
   channelId: string;
@@ -18,6 +20,7 @@ export type ChannelResponseType = ChannelType;
 const ChannelBase = () => {
   const { channelId } = useParams() as ChannelParams;
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
+  const [error, setError] = useState<ApiError | null>(null);
   const isAdmin = useIsAdmin();
 
   const [channelResponse, setChannelResponse] = useState<ChannelResponseType>();
@@ -29,13 +32,23 @@ const ChannelBase = () => {
 
   useEffect(() => {
     (async () => {
+      setError(null);
+      try {
+        const channelResponse = await loadChannelById(channelId);
+        setChannelResponse(channelResponse);
+      } catch (err) {
+        if ((err as ApiError).status === 404) {
+          setError(err as ApiError);
+        } else {
+          console.error('Failed to fetch item:', err);
+        }
+      }
       const channelNavResponse = await loadChannelNav(channelId);
-      const channelResponse = await loadChannelById(channelId);
-
-      setChannelResponse(channelResponse);
       setChannelNav(channelNavResponse);
     })();
   }, [channelId]);
+
+  if (error) return <NotFound failType="channel" />;
 
   if (!channelId) {
     return [];

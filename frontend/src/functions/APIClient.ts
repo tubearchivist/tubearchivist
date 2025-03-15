@@ -55,6 +55,13 @@ const APIClient = async (
     throw new Error('Forbidden: Access denied.');
   }
 
+  if (response.status === 404) {
+    throw {
+      status: 404,
+      message: 'Resource not found',
+    } as ApiError;
+  }
+
   let data;
 
   // expected empty response

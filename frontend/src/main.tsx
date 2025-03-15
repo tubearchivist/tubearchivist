@@ -27,6 +27,7 @@ import ChannelAbout from './pages/ChannelAbout';
 import Download from './pages/Download';
 import loadUserAccount from './api/loader/loadUserAccount';
 import loadAppsettingsConfig from './api/loader/loadAppsettingsConfig';
+import NotFound from './pages/404Page';
 
 const router = createBrowserRouter(
   [
@@ -144,6 +145,10 @@ const router = createBrowserRouter(
       path: Routes.Login,
       element: <Login />,
       errorElement: <ErrorPage />,
+    },
+    {
+      path: '*',
+      element: <NotFound />,
     },
   ],
   { basename: import.meta.env.BASE_URL },
