@@ -37,6 +37,7 @@ const ChannelPlaylist = () => {
       const playlists = await loadPlaylistList({
         channel: channelId,
         subscribed: showSubedOnly,
+        page: currentPage,
       });
 
       setPlaylistsResponse(playlists);
