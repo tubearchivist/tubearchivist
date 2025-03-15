@@ -40,6 +40,7 @@ import useIsAdmin from '../functions/useIsAdmin';
 import ToggleConfig from '../components/ToggleConfig';
 import { PlaylistType } from '../api/loader/loadPlaylistById';
 import { useAppSettingsStore } from '../stores/AppSettingsStore';
+import updateDownloadQueueStatusById from '../api/actions/updateDownloadQueueStatusById';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {
   return playlist.playlist_entries.some(entry => {
@@ -358,7 +359,15 @@ const Video = () => {
                           navigate(Routes.Channel(video.channel.channel_id));
                         }}
                       />
-
+                      <Button
+                        label="Delete and Ignore"
+                        className="danger-button"
+                        onClick={async () => {
+                          await deleteVideo(videoId);
+                          await updateDownloadQueueStatusById(videoId, 'ignore-force');
+                          navigate(Routes.Channel(video.channel.channel_id));
+                        }}
+                      />
                       <Button
                         label="Cancel"
                         onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}

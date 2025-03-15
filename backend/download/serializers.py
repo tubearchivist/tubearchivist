@@ -56,7 +56,7 @@ class AddDownloadItemSerializer(serializers.Serializer):
     """serialize single item to add"""
 
     youtube_id = serializers.CharField()
-    status = serializers.ChoiceField(choices=["pending"])
+    status = serializers.ChoiceField(choices=["pending", "ignore-force"])
 
 
 class AddToDownloadListSerializer(serializers.Serializer):
