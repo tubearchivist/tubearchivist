@@ -1,5 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import updateUserConfig, { ColourVariants, UserConfigType } from '../api/actions/updateUserConfig';
+import updateUserConfig, {
+  ColourVariants,
+  FileSizeUnits,
+  UserConfigType,
+} from '../api/actions/updateUserConfig';
 import { ColourConstant } from '../configuration/colours/useColours';
 import SettingsNavigation from '../components/SettingsNavigation';
 import Notifications from '../components/Notifications';
@@ -18,14 +22,21 @@ const SettingsUser = () => {
   const [styleSheetRefresh, setStyleSheetRefresh] = useState(false);
   const [pageSize, setPageSize] = useState<number>(userConfig.page_size);
   const [showHelpText, setShowHelpText] = useState(userConfig.show_help_text);
+  const [selectedFileSizeUnit, setSelectedFileSizeUnit] = useState(FileSizeUnits.Binary);
 
   useEffect(() => {
     (async () => {
       setStyleSheet(userConfig.stylesheet);
       setPageSize(userConfig.page_size);
       setShowHelpText(userConfig.show_help_text);
+      setSelectedFileSizeUnit(userConfig.file_size_unit);
     })();
-  }, [userConfig.page_size, userConfig.stylesheet, userConfig.show_help_text]);
+  }, [
+    userConfig.page_size,
+    userConfig.stylesheet,
+    userConfig.show_help_text,
+    userConfig.file_size_unit,
+  ]);
 
   const handleStyleSheetChange = async (selectedStyleSheet: ColourVariants) => {
     handleUserConfigUpdate({ stylesheet: selectedStyleSheet });
@@ -38,6 +49,10 @@ const SettingsUser = () => {
   };
 
   const handleShowHelpTextChange = async (configKey: string, configValue: boolean) => {
+    handleUserConfigUpdate({ [configKey]: configValue });
+  };
+
+  const handleFileSizeUnitChange = async (configKey: string, configValue: string) => {
     handleUserConfigUpdate({ [configKey]: configValue });
   };
 
@@ -88,6 +103,7 @@ const SettingsUser = () => {
                 {styleSheetRefresh && <button onClick={handlePageRefresh}>Refresh</button>}
               </div>
             </div>
+
             <div className="settings-box-wrapper">
               <div>
                 <p>Archive view page size</p>
@@ -113,18 +129,40 @@ const SettingsUser = () => {
                 </div>
               </div>
             </div>
+
             <div className="settings-box-wrapper">
               <div>
                 <p>Show help text</p>
               </div>
+
               <ToggleConfig
                 name="show_help_text"
                 value={showHelpText}
                 updateCallback={handleShowHelpTextChange}
               />
             </div>
+
+            <div
+              className="settings-box-wrapper"
+              title="Metric (SI) units, aka powers of 1000. Binary (IEC), aka powers of 1024."
+            >
+              <div>
+                <p>File size units:</p>
+              </div>
+
+              <select
+                value={selectedFileSizeUnit}
+                onChange={event => {
+                  handleFileSizeUnitChange('file_size_unit', event.currentTarget.value);
+                }}
+              >
+                <option value={FileSizeUnits.Metric}>SI units</option>
+                <option value={FileSizeUnits.Binary}>Binary units</option>
+              </select>
+            </div>
           </div>
         </div>
+
         {isAdmin && (
           <>
             <div className="settings-group">

@@ -6,10 +6,10 @@ import { VideoStatsType } from '../pages/SettingsDashboard';
 
 type VideoTypeStatsProps = {
   videoStats?: VideoStatsType;
-  useSI: boolean;
+  useSIUnits: boolean;
 };
 
-const VideoTypeStats = ({ videoStats, useSI }: VideoTypeStatsProps) => {
+const VideoTypeStats = ({ videoStats, useSIUnits }: VideoTypeStatsProps) => {
   if (!videoStats) {
     return <p id="loading">Loading...</p>;
   }
@@ -19,7 +19,7 @@ const VideoTypeStats = ({ videoStats, useSI }: VideoTypeStatsProps) => {
       title: 'Regular Videos: ',
       data: {
         Videos: formatNumbers(videoStats?.type_videos?.doc_count || 0),
-        ['Media Size']: humanFileSize(videoStats?.type_videos?.media_size || 0, useSI),
+        ['Media Size']: humanFileSize(videoStats?.type_videos?.media_size || 0, useSIUnits),
         Duration: videoStats?.type_videos?.duration_str || 'NA',
       },
     },
@@ -27,7 +27,7 @@ const VideoTypeStats = ({ videoStats, useSI }: VideoTypeStatsProps) => {
       title: 'Shorts: ',
       data: {
         Videos: formatNumbers(videoStats?.type_shorts?.doc_count || 0),
-        ['Media Size']: humanFileSize(videoStats?.type_shorts?.media_size || 0, useSI),
+        ['Media Size']: humanFileSize(videoStats?.type_shorts?.media_size || 0, useSIUnits),
         Duration: videoStats?.type_shorts?.duration_str || 'NA',
       },
     },
@@ -35,7 +35,7 @@ const VideoTypeStats = ({ videoStats, useSI }: VideoTypeStatsProps) => {
       title: 'Streams: ',
       data: {
         Videos: formatNumbers(videoStats?.type_streams?.doc_count || 0),
-        ['Media Size']: humanFileSize(videoStats?.type_streams?.media_size || 0, useSI),
+        ['Media Size']: humanFileSize(videoStats?.type_streams?.media_size || 0, useSIUnits),
         Duration: videoStats?.type_streams?.duration_str || 'NA',
       },
     },

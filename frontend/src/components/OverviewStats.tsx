@@ -6,10 +6,10 @@ import { VideoStatsType } from '../pages/SettingsDashboard';
 
 type OverviewStatsProps = {
   videoStats?: VideoStatsType;
-  useSI: boolean;
+  useSIUnits: boolean;
 };
 
-const OverviewStats = ({ videoStats, useSI }: OverviewStatsProps) => {
+const OverviewStats = ({ videoStats, useSIUnits }: OverviewStatsProps) => {
   if (!videoStats) {
     return <p id="loading">Loading...</p>;
   }
@@ -19,7 +19,7 @@ const OverviewStats = ({ videoStats, useSI }: OverviewStatsProps) => {
       title: 'All: ',
       data: {
         Videos: formatNumbers(videoStats?.doc_count || 0),
-        ['Media Size']: humanFileSize(videoStats?.media_size || 0, useSI),
+        ['Media Size']: humanFileSize(videoStats?.media_size || 0, useSIUnits),
         Duration: videoStats?.duration_str,
       },
     },
@@ -27,7 +27,7 @@ const OverviewStats = ({ videoStats, useSI }: OverviewStatsProps) => {
       title: 'Active: ',
       data: {
         Videos: formatNumbers(videoStats?.active_true?.doc_count || 0),
-        ['Media Size']: humanFileSize(videoStats?.active_true?.media_size || 0, useSI),
+        ['Media Size']: humanFileSize(videoStats?.active_true?.media_size || 0, useSIUnits),
         Duration: videoStats?.active_true?.duration_str || 'NA',
       },
     },
@@ -35,7 +35,7 @@ const OverviewStats = ({ videoStats, useSI }: OverviewStatsProps) => {
       title: 'Inactive: ',
       data: {
         Videos: formatNumbers(videoStats?.active_false?.doc_count || 0),
-        ['Media Size']: humanFileSize(videoStats?.active_false?.media_size || 0, useSI),
+        ['Media Size']: humanFileSize(videoStats?.active_false?.media_size || 0, useSIUnits),
         Duration: videoStats?.active_false?.duration_str || 'NA',
       },
     },

@@ -15,6 +15,8 @@ import DownloadHistoryStats from '../components/DownloadHistoryStats';
 import BiggestChannelsStats from '../components/BiggestChannelsStats';
 import Notifications from '../components/Notifications';
 import PaginationDummy from '../components/PaginationDummy';
+import { useUserConfigStore } from '../stores/UserConfigStore';
+import { FileSizeUnits } from '../api/actions/updateUserConfig';
 
 export type VideoStatsType = {
   doc_count: number;
@@ -125,7 +127,7 @@ type DashboardStatsReponses = {
 };
 
 const SettingsDashboard = () => {
-  const [useSi, setUseSi] = useState(false);
+  const { userConfig } = useUserConfigStore();
 
   const [response, setResponse] = useState<DashboardStatsReponses>({
     videoStats: undefined,
@@ -181,6 +183,8 @@ const SettingsDashboard = () => {
     })();
   }, []);
 
+  const useSiUnits = userConfig.file_size_unit === FileSizeUnits.Metric;
+
   return (
     <>
       <title>TA | Settings Dashboard</title>
@@ -190,31 +194,17 @@ const SettingsDashboard = () => {
         <div className="title-bar">
           <h1>Your Archive</h1>
         </div>
-        <p>
-          File Sizes in:
-          <select
-            value={useSi ? 'true' : 'false'}
-            onChange={event => {
-              const value = event.target.value;
-              console.log(value);
-              setUseSi(value === 'true');
-            }}
-          >
-            <option value="true">SI units</option>
-            <option value="false">Binary units</option>
-          </select>
-        </p>
 
         <div className="settings-item">
           <h2>Overview</h2>
           <div className="info-box info-box-3">
-            <OverviewStats videoStats={videoStats} useSI={useSi} />
+            <OverviewStats videoStats={videoStats} useSIUnits={useSiUnits} />
           </div>
         </div>
         <div className="settings-item">
           <h2>Video Type</h2>
           <div className="info-box info-box-3">
-            <VideoTypeStats videoStats={videoStats} useSI={useSi} />
+            <VideoTypeStats videoStats={videoStats} useSIUnits={useSiUnits} />
           </div>
         </div>
         <div className="settings-item">
@@ -236,7 +226,7 @@ const SettingsDashboard = () => {
         <div className="settings-item">
           <h2>Download History</h2>
           <div className="info-box info-box-4">
-            <DownloadHistoryStats downloadHistoryStats={downloadHistoryStats} useSI={false} />
+            <DownloadHistoryStats downloadHistoryStats={downloadHistoryStats} useSIUnits={false} />
           </div>
         </div>
         <div className="settings-item">
@@ -246,7 +236,7 @@ const SettingsDashboard = () => {
               biggestChannelsStatsByCount={biggestChannelsStatsByCount}
               biggestChannelsStatsByDuration={biggestChannelsStatsByDuration}
               biggestChannelsStatsByMediaSize={biggestChannelsStatsByMediaSize}
-              useSI={useSi}
+              useSIUnits={useSiUnits}
             />
           </div>
         </div>

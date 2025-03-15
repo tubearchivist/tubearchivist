@@ -18,6 +18,7 @@ export const useUserConfigStore = create<UserConfigState>(set => ({
     view_style_playlist: 'grid',
     grid_items: 3,
     hide_watched: false,
+    file_size_unit: 'binary',
     show_ignored_only: false,
     show_subed_only: false,
     show_help_text: true,

@@ -3,6 +3,11 @@ import APIClient from '../../functions/APIClient';
 
 export type ColourVariants = 'dark.css' | 'light.css' | 'matrix.css' | 'midnight.css';
 
+export const FileSizeUnits = {
+  Binary: 'binary',
+  Metric: 'metric',
+};
+
 export type UserConfigType = {
   stylesheet: ColourVariants;
   page_size: number;
@@ -14,6 +19,7 @@ export type UserConfigType = {
   view_style_playlist: ViewLayoutType;
   grid_items: number;
   hide_watched: boolean;
+  file_size_unit: 'binary' | 'metric';
   show_ignored_only: boolean;
   show_subed_only: boolean;
   show_help_text: boolean;

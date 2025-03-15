@@ -5,10 +5,10 @@ import { DownloadHistoryStatsType } from '../pages/SettingsDashboard';
 
 type DownloadHistoryStatsProps = {
   downloadHistoryStats?: DownloadHistoryStatsType;
-  useSI: boolean;
+  useSIUnits: boolean;
 };
 
-const DownloadHistoryStats = ({ downloadHistoryStats, useSI }: DownloadHistoryStatsProps) => {
+const DownloadHistoryStats = ({ downloadHistoryStats, useSIUnits }: DownloadHistoryStatsProps) => {
   if (!downloadHistoryStats) {
     return <p id="loading">Loading...</p>;
   }
@@ -31,7 +31,7 @@ const DownloadHistoryStats = ({ downloadHistoryStats, useSI }: DownloadHistorySt
         <p>
           +{formatNumbers(count)} {videoText}
           <br />
-          {humanFileSize(media_size, useSI)}
+          {humanFileSize(media_size, useSIUnits)}
         </p>
       </div>
     );

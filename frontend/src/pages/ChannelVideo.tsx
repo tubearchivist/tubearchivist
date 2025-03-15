@@ -20,6 +20,7 @@ import loadVideoListByFilter, {
 import loadChannelAggs, { ChannelAggsType } from '../api/loader/loadChannelAggs';
 import humanFileSize from '../functions/humanFileSize';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import { FileSizeUnits } from '../api/actions/updateUserConfig';
 
 type ChannelParams = {
   channelId: string;
@@ -47,6 +48,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const pagination = videoResponse?.paginate;
 
   const hasVideos = videoResponse?.data?.length !== 0;
+  const useSiUnits = userConfig.file_size_unit === FileSizeUnits.Metric;
 
   const view = userConfig.view_style_home;
   const isGridView = view === ViewStyles.grid;
@@ -114,7 +116,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
                   <span className="space-carrot">|</span>{' '}
                   {videoAggsResponse.total_duration.value_str} playback{' '}
                   <span className="space-carrot">|</span> Total size{' '}
-                  {humanFileSize(videoAggsResponse.total_size.value, true)}
+                  {humanFileSize(videoAggsResponse.total_size.value, useSiUnits)}
                 </p>
                 <div className="button-box">
                   <Button

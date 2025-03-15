@@ -41,6 +41,8 @@ import ToggleConfig from '../components/ToggleConfig';
 import { PlaylistType } from '../api/loader/loadPlaylistById';
 import { useAppSettingsStore } from '../stores/AppSettingsStore';
 import updateDownloadQueueStatusById from '../api/actions/updateDownloadQueueStatusById';
+import { FileSizeUnits } from '../api/actions/updateUserConfig';
+import { useUserConfigStore } from '../stores/UserConfigStore';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {
   return playlist.playlist_entries.some(entry => {
@@ -112,6 +114,7 @@ const Video = () => {
   const navigate = useNavigate();
   const isAdmin = useIsAdmin();
   const { appSettingsConfig } = useAppSettingsStore();
+  const { userConfig } = useUserConfigStore();
 
   const [videoEnded, setVideoEnded] = useState(false);
   const [playlistAutoplay, setPlaylistAutoplay] = useState(
@@ -199,6 +202,7 @@ const Video = () => {
   const customPlaylists = customPlaylistsResponse?.data;
   const starRating = convertStarRating(video?.stats?.average_rating);
   const comments = commentsResponse;
+  const useSiUnits = userConfig.file_size_unit === FileSizeUnits.Metric;
 
   console.log('playlistNav', playlistNav);
 
@@ -439,14 +443,14 @@ const Video = () => {
             </div>
           </div>
           <div className="info-box-item">
-            {video.media_size && <p>File size: {humanFileSize(video.media_size)}</p>}
+            {video.media_size && <p>File size: {humanFileSize(video.media_size, useSiUnits)}</p>}
 
             {video.streams &&
               video.streams.map(stream => {
                 return (
                   <p key={stream.index}>
                     {capitalizeFirstLetter(stream.type)}: {stream.codec}{' '}
-                    {humanFileSize(stream.bitrate)}/s
+                    {humanFileSize(stream.bitrate, useSiUnits)}/s
                     {stream.width && (
                       <>
                         <span className="space-carrot">|</span> {stream.width}x{stream.height}
