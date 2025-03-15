@@ -71,7 +71,6 @@ const Playlist = () => {
         playlist: playlistId,
         page: currentPage,
         watch: hideWatched ? 'unwatched' : undefined,
-        sort: 'downloaded', // downloaded or published? or playlist sort order?
       });
 
       const isCustomPlaylist = playlist?.playlist_type === 'custom';
