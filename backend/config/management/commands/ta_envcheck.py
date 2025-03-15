@@ -86,6 +86,7 @@ class Command(BaseCommand):
         self._elastic_user_overwrite()
         self._ta_port_overwrite()
         self._ta_backend_port_overwrite()
+        self._disable_static_auth()
         self._create_superuser()
 
     def _expected_vars(self):
