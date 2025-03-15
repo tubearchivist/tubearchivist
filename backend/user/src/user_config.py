@@ -22,6 +22,7 @@ class UserConfigType(TypedDict, total=False):
     view_style_playlist: str
     grid_items: int
     hide_watched: bool
+    file_size_unit: str
     show_ignored_only: bool
     show_subed_only: bool
     show_help_text: bool
@@ -44,6 +45,7 @@ class UserConfig:
         view_style_playlist="grid",
         grid_items=3,
         hide_watched=False,
+        file_size_unit="binary",
         show_ignored_only=False,
         show_subed_only=False,
         show_help_text=True,
