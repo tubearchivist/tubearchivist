@@ -6,8 +6,8 @@ import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
 
 import { OutletContextType } from './Base';
-import loadPlaylistList from '../api/loader/loadPlaylistList';
-import Pagination, { PaginationType } from '../components/Pagination';
+import loadPlaylistList, { PlaylistsResponseType } from '../api/loader/loadPlaylistList';
+import Pagination from '../components/Pagination';
 import PlaylistList from '../components/PlaylistList';
 import updateBulkPlaylistSubscriptions from '../api/actions/updateBulkPlaylistSubscriptions';
 import createCustomPlaylist from '../api/actions/createCustomPlaylist';
@@ -17,12 +17,7 @@ import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import Notifications from '../components/Notifications';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
-import { PlaylistType } from '../api/loader/loadPlaylistById';
-
-export type PlaylistsResponseType = {
-  data?: PlaylistType[];
-  paginate?: PaginationType;
-};
+import { ApiResponseType } from '../functions/APIClient';
 
 const Playlists = () => {
   const { userConfig, setUserConfig } = useUserConfigStore();
@@ -35,12 +30,14 @@ const Playlists = () => {
   const [playlistsToAddText, setPlaylistsToAddText] = useState('');
   const [customPlaylistsToAddText, setCustomPlaylistsToAddText] = useState('');
 
-  const [playlistResponse, setPlaylistReponse] = useState<PlaylistsResponseType>();
+  const [playlistResponse, setPlaylistReponse] = useState<ApiResponseType<PlaylistsResponseType>>();
 
-  const playlistList = playlistResponse?.data;
-  const pagination = playlistResponse?.paginate;
+  const { data: playlistResponseData } = playlistResponse ?? {};
 
-  const hasPlaylists = playlistResponse?.data?.length !== 0;
+  const playlistList = playlistResponseData?.data;
+  const pagination = playlistResponseData?.paginate;
+
+  const hasPlaylists = playlistResponseData?.data?.length !== 0;
 
   const view = userConfig.view_style_playlist;
   const showSubedOnly = userConfig.show_subed_only;
@@ -61,7 +58,11 @@ const Playlists = () => {
 
   const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
     const updatedUserConfig = await updateUserConfig(config);
-    setUserConfig(updatedUserConfig);
+    const { data: updatedUserConfigData } = updatedUserConfig;
+
+    if (updatedUserConfigData) {
+      setUserConfig(updatedUserConfigData);
+    }
   };
 
   return (

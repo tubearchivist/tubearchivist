@@ -26,8 +26,8 @@ export type PlaylistType = {
 
 export type PlaylistResponseType = PlaylistType;
 
-const loadPlaylistById = async (playlistId: string | undefined): Promise<PlaylistResponseType> => {
-  return APIClient(`/api/playlist/${playlistId}/`);
+const loadPlaylistById = async (playlistId: string | undefined) => {
+  return APIClient<PlaylistResponseType>(`/api/playlist/${playlistId}/`);
 };
 
 export default loadPlaylistById;

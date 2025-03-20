@@ -7,8 +7,8 @@ export type ChannelNavResponseType = {
   has_pending: boolean;
 };
 
-const loadChannelNav = async (youtubeChannelId: string): Promise<ChannelNavResponseType> => {
-  return APIClient(`/api/channel/${youtubeChannelId}/nav/`);
+const loadChannelNav = async (youtubeChannelId: string) => {
+  return APIClient<ChannelNavResponseType>(`/api/channel/${youtubeChannelId}/nav/`);
 };
 
 export default loadChannelNav;

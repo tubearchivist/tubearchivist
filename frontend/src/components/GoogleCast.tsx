@@ -46,7 +46,12 @@ async function castVideoProgress(
         currentProgress: currentTime,
       });
 
-      if (videoProgressResponse.watched && video.player.watched !== videoProgressResponse.watched) {
+      const { data: videoProgressResponseData } = videoProgressResponse ?? {};
+
+      if (
+        videoProgressResponseData?.watched &&
+        video.player.watched !== videoProgressResponseData.watched
+      ) {
         onWatchStateChanged?.(true);
       }
     }

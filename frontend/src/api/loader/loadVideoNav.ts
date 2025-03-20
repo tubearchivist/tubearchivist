@@ -25,8 +25,8 @@ export type VideoNavResponseType = {
   };
 };
 
-const loadVideoNav = async (youtubeVideoId: string): Promise<VideoNavResponseType[]> => {
-  return APIClient(`/api/video/${youtubeVideoId}/nav/`);
+const loadVideoNav = async (youtubeVideoId: string) => {
+  return APIClient<VideoNavResponseType[]>(`/api/video/${youtubeVideoId}/nav/`);
 };
 
 export default loadVideoNav;

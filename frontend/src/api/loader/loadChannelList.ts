@@ -1,4 +1,13 @@
+import { PaginationType } from '../../components/Pagination';
 import APIClient from '../../functions/APIClient';
+import { ChannelType } from '../../pages/Channels';
+import { ConfigType } from '../../pages/Home';
+
+export type ChannelsListResponse = {
+  data: ChannelType[];
+  paginate: PaginationType;
+  config?: ConfigType;
+};
 
 const loadChannelList = async (page: number, showSubscribed: boolean) => {
   const searchParams = new URLSearchParams();
@@ -8,7 +17,7 @@ const loadChannelList = async (page: number, showSubscribed: boolean) => {
 
   const endpoint = `/api/channel/${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
-  return APIClient(endpoint);
+  return APIClient<ChannelsListResponse>(endpoint);
 };
 
 export default loadChannelList;

@@ -2,7 +2,7 @@ import humanFileSize from '../functions/humanFileSize';
 import formatNumbers from '../functions/formatNumbers';
 import { Link } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
-import { BiggestChannelsStatsType } from '../pages/SettingsDashboard';
+import { BiggestChannelsStatsType } from '../api/loader/loadStatsBiggestChannels';
 
 type BiggestChannelsStatsProps = {
   biggestChannelsStatsByCount?: BiggestChannelsStatsType;

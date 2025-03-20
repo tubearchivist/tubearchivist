@@ -19,8 +19,8 @@ export type AppriseNotificationType = {
   };
 };
 
-const loadAppriseNotification = async (): Promise<AppriseNotificationType> => {
-  return APIClient('/api/task/notification/');
+const loadAppriseNotification = async () => {
+  return APIClient<AppriseNotificationType>('/api/task/notification/');
 };
 
 export default loadAppriseNotification;

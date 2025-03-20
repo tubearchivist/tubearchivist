@@ -13,8 +13,8 @@ export type ChannelAggsType = {
   };
 };
 
-const loadChannelAggs = async (channelId: string): Promise<ChannelAggsType> => {
-  return APIClient(`/api/channel/${channelId}/aggs/`);
+const loadChannelAggs = async (channelId: string) => {
+  return APIClient<ChannelAggsType>(`/api/channel/${channelId}/aggs/`);
 };
 
 export default loadChannelAggs;

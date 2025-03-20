@@ -14,11 +14,8 @@ type VideoProgressProp = {
   currentProgress: number;
 };
 
-const updateVideoProgressById = async ({
-  youtubeId,
-  currentProgress,
-}: VideoProgressProp): Promise<VideoProgressResponseType> => {
-  return APIClient(`/api/video/${youtubeId}/progress/`, {
+const updateVideoProgressById = async ({ youtubeId, currentProgress }: VideoProgressProp) => {
+  return APIClient<VideoProgressResponseType>(`/api/video/${youtubeId}/progress/`, {
     method: 'POST',
     body: { position: currentProgress },
   });

@@ -27,7 +27,7 @@ import ChannelAbout from './pages/ChannelAbout';
 import Download from './pages/Download';
 import loadUserAccount from './api/loader/loadUserAccount';
 import loadAppsettingsConfig from './api/loader/loadAppsettingsConfig';
-import NotFound from './pages/404Page';
+import NotFound from './pages/NotFound';
 
 const router = createBrowserRouter(
   [
@@ -51,9 +51,9 @@ const router = createBrowserRouter(
           return redirect(Routes.Login);
         }
 
-        const userConfig = await loadUserMeConfig();
-        const userAccount = await loadUserAccount();
-        const appSettings = await loadAppsettingsConfig();
+        const { data: userConfig } = await loadUserMeConfig();
+        const { data: userAccount } = await loadUserAccount();
+        const { data: appSettings } = await loadAppsettingsConfig();
 
         return { userConfig, userAccount, appSettings, auth: authData };
       },
@@ -149,6 +149,7 @@ const router = createBrowserRouter(
     {
       path: '*',
       element: <NotFound />,
+      errorElement: <ErrorPage />,
     },
   ],
   { basename: import.meta.env.BASE_URL },

@@ -13,13 +13,14 @@ import createAppriseNotificationUrl, {
   AppriseTaskNameType,
 } from '../api/actions/createAppriseNotificationUrl';
 import deleteAppriseNotificationUrl from '../api/actions/deleteAppriseNotificationUrl';
-import { ApiError } from '../functions/APIClient';
+import { ApiError, ApiResponseType } from '../functions/APIClient';
 
 const SettingsScheduling = () => {
   const [refresh, setRefresh] = useState(false);
 
-  const [scheduleResponse, setScheduleResponse] = useState<ScheduleResponseType>([]);
-  const [appriseNotification, setAppriseNotification] = useState<AppriseNotificationType>();
+  const [scheduleResponse, setScheduleResponse] = useState<ApiResponseType<ScheduleResponseType>>();
+  const [appriseNotification, setAppriseNotification] =
+    useState<ApiResponseType<AppriseNotificationType>>();
 
   const [updateSubscribed, setUpdateSubscribed] = useState<string | undefined>();
   const [downloadPending, setDownloadPending] = useState<string | undefined>();
@@ -35,6 +36,9 @@ const SettingsScheduling = () => {
   const [downloadPendingError, setDownloadPendingError] = useState<string | null>(null);
   const [thumnailCheckError, setThumnailCheckError] = useState<string | null>(null);
   const [zipBackupError, setZipBackupError] = useState<string | null>(null);
+
+  const { data: scheduleResponseData } = scheduleResponse ?? {};
+  const { data: appriseNotificationData } = appriseNotification ?? {};
 
   useEffect(() => {
     (async () => {
@@ -54,7 +58,7 @@ const SettingsScheduling = () => {
     setRefresh(true);
   }, []);
 
-  const groupedSchedules = Object.groupBy(scheduleResponse, ({ name }) => name);
+  const groupedSchedules = Object.groupBy(scheduleResponseData || [], ({ name }) => name);
 
   console.log(groupedSchedules);
 
@@ -460,11 +464,11 @@ const SettingsScheduling = () => {
         <div className="settings-group">
           <h2>Add Notification URL</h2>
           <div className="settings-item">
-            {!appriseNotification && <p>No notifications stored</p>}
-            {appriseNotification && (
+            {!appriseNotificationData && <p>No notifications stored</p>}
+            {appriseNotificationData && (
               <>
                 <div className="description-text">
-                  {Object.entries(appriseNotification)?.map(([key, { urls, title }]) => {
+                  {Object.entries(appriseNotificationData)?.map(([key, { urls, title }]) => {
                     return (
                       <Fragment key={key}>
                         <h3>{title}</h3>

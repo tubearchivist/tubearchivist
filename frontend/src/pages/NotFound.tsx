@@ -4,6 +4,7 @@ import Routes from '../configuration/routes/RouteList';
 
 const NotFound = ({ failType = 'page' }) => {
   useColours();
+
   return (
     <>
       <title>404 | Not found</title>

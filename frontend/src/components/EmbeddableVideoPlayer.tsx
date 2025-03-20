@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { VideoResponseType } from '../pages/Video';
 import VideoPlayer from './VideoPlayer';
-import loadVideoById from '../api/loader/loadVideoById';
+import loadVideoById, { VideoResponseType } from '../api/loader/loadVideoById';
 import iconClose from '/img/icon-close.svg';
 import iconEye from '/img/icon-eye.svg';
 import iconThumb from '/img/icon-thumb.svg';
@@ -13,6 +12,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
 import loadPlaylistById from '../api/loader/loadPlaylistById';
 import { useAppSettingsStore } from '../stores/AppSettingsStore';
+import { ApiResponseType } from '../functions/APIClient';
 
 type Playlist = {
   id: string;
@@ -32,8 +32,10 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
 
   const [refresh, setRefresh] = useState(true);
 
-  const [videoResponse, setVideoResponse] = useState<VideoResponseType>();
+  const [videoResponse, setVideoResponse] = useState<ApiResponseType<VideoResponseType>>();
   const [playlists, setPlaylists] = useState<PlaylistList>();
+
+  const { data: videoResponseData } = videoResponse ?? {};
 
   useEffect(() => {
     (async () => {
@@ -43,27 +45,31 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
 
       inlinePlayerRef.current?.scrollIntoView();
 
-      if (refresh || videoId !== videoResponse?.youtube_id) {
+      if (refresh || videoId !== videoResponseData?.youtube_id) {
         const videoResponse = await loadVideoById(videoId);
 
-        const playlistIds = videoResponse.playlist;
+        const { data: videoResponseData } = videoResponse ?? {};
+
+        const playlistIds = videoResponseData?.playlist || [];
         if (playlistIds !== undefined) {
           const playlists = await Promise.all(
             playlistIds.map(async playlistid => {
               const playlistResponse = await loadPlaylistById(playlistid);
 
-              return playlistResponse;
+              const { data: playlistResponseData } = playlistResponse ?? {};
+
+              return playlistResponseData;
             }),
           );
 
           const playlistsFiltered = playlists
             .filter(playlist => {
-              return playlist.playlist_subscribed;
+              return playlist?.playlist_subscribed;
             })
             .map(playlist => {
               return {
-                id: playlist.playlist_id,
-                name: playlist.playlist_name,
+                id: playlist?.playlist_id || '',
+                name: playlist?.playlist_name || '',
               };
             });
 
@@ -77,11 +83,11 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId, refresh]);
 
-  if (videoResponse === undefined || videoId === null) {
+  if (videoResponseData === undefined || videoId === null) {
     return <div ref={inlinePlayerRef} className="player-wrapper" />;
   }
 
-  const video = videoResponse;
+  const video = videoResponseData;
   const name = video.title;
   const channelId = video.channel.channel_id;
   const channelName = video.channel.channel_name;
@@ -99,7 +105,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
       <div ref={inlinePlayerRef} className="player-wrapper">
         <div className="video-player">
           <VideoPlayer
-            video={videoResponse}
+            video={videoResponseData}
             sponsorBlock={sponsorblock}
             embed={true}
             autoplay={true}

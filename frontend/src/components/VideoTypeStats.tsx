@@ -2,7 +2,7 @@ import { Fragment } from 'react';
 import humanFileSize from '../functions/humanFileSize';
 import StatsInfoBoxItem from './StatsInfoBoxItem';
 import formatNumbers from '../functions/formatNumbers';
-import { VideoStatsType } from '../pages/SettingsDashboard';
+import { VideoStatsType } from '../api/loader/loadStatsVideo';
 
 type VideoTypeStatsProps = {
   videoStats?: VideoStatsType;

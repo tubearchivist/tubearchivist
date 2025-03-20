@@ -25,8 +25,8 @@ export type UserConfigType = {
   show_help_text: boolean;
 };
 
-const updateUserConfig = async (config: Partial<UserConfigType>): Promise<UserConfigType> => {
-  return APIClient('/api/user/me/', {
+const updateUserConfig = async (config: Partial<UserConfigType>) => {
+  return APIClient<UserConfigType>('/api/user/me/', {
     method: 'POST',
     body: config,
   });

@@ -1,8 +1,10 @@
 import APIClient from '../../functions/APIClient';
-import { ChannelResponseType } from '../../pages/ChannelBase';
+import { ChannelType } from '../../pages/Channels';
 
-const loadChannelById = async (youtubeChannelId: string): Promise<ChannelResponseType> => {
-  return APIClient(`/api/channel/${youtubeChannelId}/`);
+export type ChannelResponseType = ChannelType;
+
+const loadChannelById = async (youtubeChannelId: string) => {
+  return APIClient<ChannelResponseType>(`/api/channel/${youtubeChannelId}/`);
 };
 
 export default loadChannelById;

@@ -12,10 +12,10 @@ export type DownloadAggsType = {
   buckets: DownloadAggsBucket[];
 };
 
-const loadDownloadAggs = async (showIgnored: boolean): Promise<DownloadAggsType> => {
+const loadDownloadAggs = async (showIgnored: boolean) => {
   const searchParams = new URLSearchParams();
   searchParams.append('filter', showIgnored ? 'ignore' : 'pending');
-  return APIClient(
+  return APIClient<DownloadAggsType>(
     `/api/download/aggs/${searchParams.toString() ? `?${searchParams.toString()}` : ''}`,
   );
 };

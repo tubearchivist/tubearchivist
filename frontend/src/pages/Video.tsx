@@ -1,7 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import loadVideoById from '../api/loader/loadVideoById';
+import loadVideoById, { VideoResponseType } from '../api/loader/loadVideoById';
 import { Fragment, useEffect, useState } from 'react';
-import { ConfigType, VideoType } from './Home';
 import VideoPlayer from '../components/VideoPlayer';
 import iconEye from '/img/icon-eye.svg';
 import iconThumb from '/img/icon-thumb.svg';
@@ -13,7 +12,7 @@ import iconUnseen from '/img/icon-unseen.svg';
 import iconSeen from '/img/icon-seen.svg';
 import Routes from '../configuration/routes/RouteList';
 import Linkify from '../components/Linkify';
-import loadSimmilarVideosById from '../api/loader/loadSimmilarVideosById';
+import loadSimilarVideosById from '../api/loader/loadSimilarVideosById';
 import VideoList from '../components/VideoList';
 import updateWatchedState from '../api/actions/updateWatchedState';
 import humanFileSize from '../functions/humanFileSize';
@@ -27,12 +26,11 @@ import queueReindex from '../api/actions/queueReindex';
 import GoogleCast from '../components/GoogleCast';
 import WatchedCheckBox from '../components/WatchedCheckBox';
 import convertStarRating from '../functions/convertStarRating';
-import loadPlaylistList from '../api/loader/loadPlaylistList';
-import { PlaylistsResponseType } from './Playlists';
+import loadPlaylistList, { PlaylistsResponseType } from '../api/loader/loadPlaylistList';
 import PaginationDummy from '../components/PaginationDummy';
 import updateCustomPlaylist from '../api/actions/updateCustomPlaylist';
-import loadCommentsbyVideoId from '../api/loader/loadCommentsbyVideoId';
-import CommentBox, { CommentsType } from '../components/CommentBox';
+import loadCommentsbyVideoId, { CommentsResponseType } from '../api/loader/loadCommentsbyVideoId';
+import CommentBox from '../components/CommentBox';
 import Button from '../components/Button';
 import getApiUrl from '../configuration/getApiUrl';
 import loadVideoNav, { VideoNavResponseType } from '../api/loader/loadVideoNav';
@@ -43,8 +41,8 @@ import { useAppSettingsStore } from '../stores/AppSettingsStore';
 import updateDownloadQueueStatusById from '../api/actions/updateDownloadQueueStatusById';
 import { FileSizeUnits } from '../api/actions/updateUserConfig';
 import { useUserConfigStore } from '../stores/UserConfigStore';
-import { ApiError } from '../functions/APIClient';
-import NotFound from './404Page';
+import NotFound from './NotFound';
+import { ApiResponseType } from '../functions/APIClient';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {
   return playlist.playlist_entries.some(entry => {
@@ -81,7 +79,7 @@ type PlaylistNavItemType = {
   playlist_next: PlaylistNavNextItemType;
 };
 
-type PlaylistNavType = PlaylistNavItemType[];
+export type PlaylistNavType = PlaylistNavItemType[];
 
 export type SponsorBlockSegmentType = {
   category: string;
@@ -101,16 +99,6 @@ export type SponsorBlockType = {
   message?: string;
 };
 
-export type VideoResponseType = VideoType;
-
-type CommentsResponseType = CommentsType[];
-
-export type VideoCommentsResponseType = {
-  data: VideoType;
-  config: ConfigType;
-  playlist_nav: PlaylistNavType;
-};
-
 const Video = () => {
   const { videoId } = useParams() as VideoParams;
   const navigate = useNavigate();
@@ -118,7 +106,6 @@ const Video = () => {
   const { appSettingsConfig } = useAppSettingsStore();
   const { userConfig } = useUserConfigStore();
 
-  const [error, setError] = useState<ApiError | null>(null);
   const [videoEnded, setVideoEnded] = useState(false);
   const [playlistAutoplay, setPlaylistAutoplay] = useState(
     localStorage.getItem('playlistAutoplay') === 'true',
@@ -132,28 +119,27 @@ const Video = () => {
   const [refreshVideoList, setRefreshVideoList] = useState(false);
   const [reindex, setReindex] = useState(false);
 
-  const [videoResponse, setVideoResponse] = useState<VideoResponseType>();
-  const [simmilarVideos, setSimmilarVideos] = useState<VideoResponseType[]>();
-  const [videoPlaylistNav, setVideoPlaylistNav] = useState<VideoNavResponseType[]>();
-  const [customPlaylistsResponse, setCustomPlaylistsResponse] = useState<PlaylistsResponseType>();
-  const [commentsResponse, setCommentsResponse] = useState<CommentsResponseType>();
+  const [videoResponse, setVideoResponse] = useState<ApiResponseType<VideoResponseType>>();
+  const [similarVideos, setSimilarVideos] = useState<ApiResponseType<VideoResponseType[]>>();
+  const [videoPlaylistNav, setVideoPlaylistNav] =
+    useState<ApiResponseType<VideoNavResponseType[]>>();
+  const [customPlaylistsResponse, setCustomPlaylistsResponse] =
+    useState<ApiResponseType<PlaylistsResponseType>>();
+  const [commentsResponse, setCommentsResponse] = useState<ApiResponseType<CommentsResponseType>>();
+
+  const { data: videoResponseData, error: videoResponseError } = videoResponse ?? {};
+  const { data: similarVideosResponseData } = similarVideos ?? {};
+  const { data: videoPlaylistNavResponseData } = videoPlaylistNav ?? {};
+  const { data: customPlaylistsResponseData } = customPlaylistsResponse ?? {};
+  const { data: commentsResponseData } = commentsResponse ?? {};
 
   useEffect(() => {
     (async () => {
-      if (refreshVideoList || videoId !== videoResponse?.youtube_id) {
-        setError(null);
-        try {
-          const videoByIdResponse = await loadVideoById(videoId);
-          setVideoResponse(videoByIdResponse);
-        } catch (err) {
-          if ((err as ApiError).status === 404) {
-            setError(err as ApiError);
-          } else {
-            console.error('Failed to fetch item:', err);
-          }
-        }
+      if (refreshVideoList || videoId !== videoResponseData?.youtube_id) {
+        const videoByIdResponse = await loadVideoById(videoId);
+        setVideoResponse(videoByIdResponse);
 
-        const simmilarVideosResponse = await loadSimmilarVideosById(videoId);
+        const similarVideosResponse = await loadSimilarVideosById(videoId);
         const customPlaylistsResponse = await loadPlaylistList({ type: 'custom' });
         const videoNavResponse = await loadVideoNav(videoId);
 
@@ -164,7 +150,7 @@ const Video = () => {
           console.log('Comments not found', e);
         }
 
-        setSimmilarVideos(simmilarVideosResponse);
+        setSimilarVideos(similarVideosResponse);
         setVideoPlaylistNav(videoNavResponse);
         setCustomPlaylistsResponse(customPlaylistsResponse);
 
@@ -188,7 +174,7 @@ const Video = () => {
 
   useEffect(() => {
     if (videoEnded && playlistAutoplay) {
-      const playlist = videoPlaylistNav?.find(playlist => {
+      const playlist = videoPlaylistNavResponseData?.find(playlist => {
         return playlist.playlist_meta.playlist_id === playlistIdForAutoplay;
       });
 
@@ -204,19 +190,23 @@ const Video = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoEnded, playlistAutoplay]);
 
-  if (error) return <NotFound failType="video" />;
+  const errorMessage = videoResponseError?.error;
 
-  if (videoResponse === undefined) {
+  if (errorMessage) {
+    return <NotFound failType="video" />;
+  }
+
+  if (videoResponseData === undefined) {
     return [];
   }
 
-  const video = videoResponse;
-  const watched = videoResponse.player.watched;
-  const playlistNav = videoPlaylistNav;
-  const sponsorBlock = videoResponse.sponsorblock;
-  const customPlaylists = customPlaylistsResponse?.data;
+  const video = videoResponseData;
+  const watched = video.player.watched;
+  const playlistNav = videoPlaylistNavResponseData;
+  const sponsorBlock = video.sponsorblock;
+  const customPlaylists = customPlaylistsResponseData?.data;
   const starRating = convertStarRating(video?.stats?.average_rating);
-  const comments = commentsResponse;
+  const comments = commentsResponseData;
   const useSiUnits = userConfig.file_size_unit === FileSizeUnits.Metric;
 
   console.log('playlistNav', playlistNav);
@@ -229,7 +219,7 @@ const Video = () => {
       <ScrollToTopOnNavigate />
 
       <VideoPlayer
-        video={videoResponse}
+        video={video}
         sponsorBlock={sponsorBlock}
         autoplay={playlistAutoplay}
         onWatchStateChanged={() => {
@@ -593,7 +583,7 @@ const Video = () => {
           <h3>Similar Videos</h3>
           <div className="video-list grid grid-3" id="similar-videos">
             <VideoList
-              videoList={simmilarVideos}
+              videoList={similarVideosResponseData}
               viewLayout="grid"
               refreshVideoList={setRefreshVideoList}
             />
