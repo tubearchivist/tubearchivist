@@ -89,7 +89,7 @@ const Download = () => {
 
   const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
     const updatedUserConfig = await updateUserConfig(config);
-    const { data: updatedUserConfigData } = updatedUserConfig ;
+    const { data: updatedUserConfigData } = updatedUserConfig;
 
     if (updatedUserConfigData) {
       setUserConfig(updatedUserConfigData);
