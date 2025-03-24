@@ -4,8 +4,8 @@ type ApiTokenResponse = {
   token: string;
 };
 
-const loadApiToken = async (): Promise<ApiTokenResponse> => {
-  return APIClient('/api/appsettings/token/');
+const loadApiToken = async () => {
+  return APIClient<ApiTokenResponse>('/api/appsettings/token/');
 };
 
 export default loadApiToken;

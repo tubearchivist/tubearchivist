@@ -1,8 +1,10 @@
 import APIClient from '../../functions/APIClient';
-import { VideoResponseType } from '../../pages/Video';
+import { VideoType } from '../../pages/Home';
 
-const loadVideoById = async (youtubeId: string): Promise<VideoResponseType> => {
-  return APIClient(`/api/video/${youtubeId}/`);
+export type VideoResponseType = VideoType;
+
+const loadVideoById = async (youtubeId: string) => {
+  return APIClient<VideoResponseType>(`/api/video/${youtubeId}/`);
 };
 
 export default loadVideoById;

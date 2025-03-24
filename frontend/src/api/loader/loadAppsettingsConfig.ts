@@ -33,8 +33,8 @@ export type AppSettingsConfigType = {
   };
 };
 
-const loadAppsettingsConfig = async (): Promise<AppSettingsConfigType> => {
-  return APIClient('/api/appsettings/config/');
+const loadAppsettingsConfig = async () => {
+  return APIClient<AppSettingsConfigType>('/api/appsettings/config/');
 };
 
 export default loadAppsettingsConfig;

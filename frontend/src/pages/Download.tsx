@@ -20,6 +20,7 @@ import DownloadListItem from '../components/DownloadListItem';
 import loadDownloadAggs, { DownloadAggsType } from '../api/loader/loadDownloadAggs';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
+import { ApiResponseType } from '../functions/APIClient';
 
 type Download = {
   auto_start: boolean;
@@ -61,18 +62,22 @@ const Download = () => {
 
   const [downloadQueueText, setDownloadQueueText] = useState('');
 
-  const [downloadResponse, setDownloadResponse] = useState<DownloadResponseType>();
-  const [downloadAggsResponse, setDownloadAggsResponse] = useState<DownloadAggsType>();
+  const [downloadResponse, setDownloadResponse] = useState<ApiResponseType<DownloadResponseType>>();
+  const [downloadAggsResponse, setDownloadAggsResponse] =
+    useState<ApiResponseType<DownloadAggsType>>();
 
-  const downloadList = downloadResponse?.data;
-  const pagination = downloadResponse?.paginate;
-  const channelAggsList = downloadAggsResponse?.buckets;
+  const { data: downloadResponseData } = downloadResponse ?? {};
+  const { data: downloadAggsResponseData } = downloadAggsResponse ?? {};
+
+  const downloadList = downloadResponseData?.data;
+  const pagination = downloadResponseData?.paginate;
+  const channelAggsList = downloadAggsResponseData?.buckets;
 
   const downloadCount = pagination?.total_hits;
 
   const channel_filter_name =
-    downloadResponse?.data?.length && downloadResponse?.data?.length > 0
-      ? downloadResponse?.data[0].channel_name
+    downloadResponseData?.data?.length && downloadResponseData?.data?.length > 0
+      ? downloadResponseData?.data[0].channel_name
       : '';
 
   const view = userConfig.view_style_downloads;
@@ -84,19 +89,28 @@ const Download = () => {
 
   const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
     const updatedUserConfig = await updateUserConfig(config);
-    setUserConfig(updatedUserConfig);
+    const { data: updatedUserConfigData } = updatedUserConfig;
+
+    if (updatedUserConfigData) {
+      setUserConfig(updatedUserConfigData);
+    }
   };
 
   useEffect(() => {
     (async () => {
-      const videos = await loadDownloadQueue(currentPage, channelFilterFromUrl, showIgnored);
-      const videoCount = videos?.paginate?.total_hits;
+      const videosResponse = await loadDownloadQueue(
+        currentPage,
+        channelFilterFromUrl,
+        showIgnored,
+      );
+      const { data: channelResponseData } = videosResponse ?? {};
+      const videoCount = channelResponseData?.paginate?.total_hits;
 
       if (videoCount && lastVideoCount !== videoCount) {
         setLastVideoCount(videoCount);
       }
 
-      setDownloadResponse(videos);
+      setDownloadResponse(videosResponse);
       setRefresh(false);
     })();
 

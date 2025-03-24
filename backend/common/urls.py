@@ -25,4 +25,9 @@ urlpatterns = [
         views.NotificationView.as_view(),
         name="api-notification",
     ),
+    path(
+        "health/",
+        views.HealthCheck.as_view(),
+        name="api-health",
+    ),
 ]

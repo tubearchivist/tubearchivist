@@ -1,14 +1,14 @@
 import humanFileSize from '../functions/humanFileSize';
 import formatDate from '../functions/formatDates';
 import formatNumbers from '../functions/formatNumbers';
-import { DownloadHistoryStatsType } from '../pages/SettingsDashboard';
+import { DownloadHistoryStatsType } from '../api/loader/loadStatsDownloadHistory';
 
 type DownloadHistoryStatsProps = {
   downloadHistoryStats?: DownloadHistoryStatsType;
-  useSI: boolean;
+  useSIUnits: boolean;
 };
 
-const DownloadHistoryStats = ({ downloadHistoryStats, useSI }: DownloadHistoryStatsProps) => {
+const DownloadHistoryStats = ({ downloadHistoryStats, useSIUnits }: DownloadHistoryStatsProps) => {
   if (!downloadHistoryStats) {
     return <p id="loading">Loading...</p>;
   }
@@ -31,7 +31,7 @@ const DownloadHistoryStats = ({ downloadHistoryStats, useSI }: DownloadHistorySt
         <p>
           +{formatNumbers(count)} {videoText}
           <br />
-          {humanFileSize(media_size, useSI)}
+          {humanFileSize(media_size, useSIUnits)}
         </p>
       </div>
     );

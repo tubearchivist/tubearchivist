@@ -22,7 +22,11 @@ const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: Filterbar
 
   const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
     const updatedUserConfig = await updateUserConfig(config);
-    setUserConfig(updatedUserConfig);
+    const { data: updatedUserConfigData } = updatedUserConfig;
+
+    if (updatedUserConfigData) {
+      setUserConfig(updatedUserConfigData);
+    }
   };
 
   return (

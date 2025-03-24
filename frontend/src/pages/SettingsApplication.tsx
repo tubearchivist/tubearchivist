@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import loadSnapshots from '../api/loader/loadSnapshots';
+import loadSnapshots, { SnapshotListType } from '../api/loader/loadSnapshots';
 import Notifications from '../components/Notifications';
 import PaginationDummy from '../components/PaginationDummy';
 import SettingsNavigation from '../components/SettingsNavigation';
@@ -21,28 +21,11 @@ import deletePoToken from '../api/actions/deletePoToken';
 import updatePoToken from '../api/actions/updatePoToken';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 
-type SnapshotType = {
-  id: string;
-  state: string;
-  es_version: string;
-  start_date: string;
-  end_date: string;
-  end_stamp: number;
-  duration_s: number;
-};
-
-type SnapshotListType = {
-  next_exec: number;
-  next_exec_str: string;
-  expire_after: string;
-  snapshots?: SnapshotType[];
-};
-
 type SettingsApplicationReponses = {
   snapshots?: SnapshotListType;
   appSettingsConfig?: AppSettingsConfigType;
   apiToken?: string;
-  cookieState: CookieStateType;
+  cookieState?: CookieStateType;
 };
 
 const SettingsApplication = () => {
@@ -102,50 +85,55 @@ const SettingsApplication = () => {
   const fetchData = async () => {
     const snapshotResponse = await loadSnapshots();
     const appSettingsConfig = await loadAppsettingsConfig();
-    const apiToken = await loadApiToken();
-    const cookieState = await loadCookie();
+    const apiTokenResponse = await loadApiToken();
+    const cookieStateResponse = await loadCookie();
+
+    const { data: snapshotResponseData } = snapshotResponse ?? {};
+    const { data: appSettingsConfigData } = appSettingsConfig ?? {};
+    const { data: apiTokenResponseData } = apiTokenResponse ?? {};
+    const { data: cookieStateResponseData } = cookieStateResponse ?? {};
 
     // Subscriptions
-    setVideoPageSize(appSettingsConfig.subscriptions.channel_size);
-    setLivePageSize(appSettingsConfig.subscriptions.live_channel_size);
-    setShortPageSize(appSettingsConfig.subscriptions.shorts_channel_size);
-    setIsAutostart(appSettingsConfig.subscriptions.auto_start);
+    setVideoPageSize(appSettingsConfigData?.subscriptions.channel_size || null);
+    setLivePageSize(appSettingsConfigData?.subscriptions.live_channel_size || null);
+    setShortPageSize(appSettingsConfigData?.subscriptions.shorts_channel_size || null);
+    setIsAutostart(appSettingsConfigData?.subscriptions.auto_start || false);
 
     // Downloads
-    setCurrentDownloadSpeed(appSettingsConfig.downloads.limit_speed);
-    setCurrentThrottledRate(appSettingsConfig.downloads.throttledratelimit);
-    setCurrentScrapingSleep(appSettingsConfig.downloads.sleep_interval);
-    setCurrentAutodelete(appSettingsConfig.downloads.autodelete_days);
+    setCurrentDownloadSpeed(appSettingsConfigData?.downloads.limit_speed || null);
+    setCurrentThrottledRate(appSettingsConfigData?.downloads.throttledratelimit || null);
+    setCurrentScrapingSleep(appSettingsConfigData?.downloads.sleep_interval || null);
+    setCurrentAutodelete(appSettingsConfigData?.downloads.autodelete_days || null);
 
     // Download Format
-    setDownloadsFormat(appSettingsConfig.downloads.format);
-    setDownloadsFormatSort(appSettingsConfig.downloads.format_sort);
-    setDownloadsExtractorLang(appSettingsConfig.downloads.extractor_lang);
-    setEmbedMetadata(appSettingsConfig.downloads.add_metadata);
-    setEmbedThumbnail(appSettingsConfig.downloads.add_thumbnail);
+    setDownloadsFormat(appSettingsConfigData?.downloads.format || null);
+    setDownloadsFormatSort(appSettingsConfigData?.downloads.format_sort || null);
+    setDownloadsExtractorLang(appSettingsConfigData?.downloads.extractor_lang || null);
+    setEmbedMetadata(appSettingsConfigData?.downloads.add_metadata || false);
+    setEmbedThumbnail(appSettingsConfigData?.downloads.add_thumbnail || false);
 
     // Subtitles
-    setSubtitleLang(appSettingsConfig.downloads.subtitle);
-    setSubtitleSource(appSettingsConfig.downloads.subtitle_source);
-    setIndexSubtitles(appSettingsConfig.downloads.subtitle_index);
+    setSubtitleLang(appSettingsConfigData?.downloads.subtitle || null);
+    setSubtitleSource(appSettingsConfigData?.downloads.subtitle_source || null);
+    setIndexSubtitles(appSettingsConfigData?.downloads.subtitle_index || false);
 
     // Comments
-    setCommentsMax(appSettingsConfig.downloads.comment_max);
-    setCommentsSort(appSettingsConfig.downloads.comment_sort);
+    setCommentsMax(appSettingsConfigData?.downloads.comment_max || null);
+    setCommentsSort(appSettingsConfigData?.downloads.comment_sort || '');
 
     // Integrations
-    setDownloadDislikes(appSettingsConfig.downloads.integrate_ryd);
-    setEnableSponsorBlock(appSettingsConfig.downloads.integrate_sponsorblock);
-    setEnableCast(appSettingsConfig.application.enable_cast);
+    setDownloadDislikes(appSettingsConfigData?.downloads.integrate_ryd || false);
+    setEnableSponsorBlock(appSettingsConfigData?.downloads.integrate_sponsorblock || false);
+    setEnableCast(appSettingsConfigData?.application.enable_cast || false);
 
     // Snapshots
-    setEnableSnapshots(appSettingsConfig.application.enable_snapshot);
+    setEnableSnapshots(appSettingsConfigData?.application.enable_snapshot || false);
 
     setResponse({
-      snapshots: snapshotResponse,
-      appSettingsConfig,
-      apiToken: apiToken.token,
-      cookieState,
+      snapshots: snapshotResponseData,
+      appSettingsConfig: appSettingsConfigData,
+      apiToken: apiTokenResponseData?.token,
+      cookieState: cookieStateResponseData,
     });
   };
 

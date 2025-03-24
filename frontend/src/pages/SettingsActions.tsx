@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import loadBackupList from '../api/loader/loadBackupList';
+import loadBackupList, { BackupListType } from '../api/loader/loadBackupList';
 import SettingsNavigation from '../components/SettingsNavigation';
 import deleteDownloadQueueByFilter from '../api/actions/deleteDownloadQueueByFilter';
 import updateTaskByName from '../api/actions/updateTaskByName';
@@ -7,16 +7,7 @@ import queueBackup from '../api/actions/queueBackup';
 import restoreBackup from '../api/actions/restoreBackup';
 import Notifications from '../components/Notifications';
 import Button from '../components/Button';
-
-type Backup = {
-  filename: string;
-  file_path: string;
-  file_size: number;
-  timestamp: string;
-  reason: string;
-};
-
-type BackupListType = Backup[];
+import { ApiResponseType } from '../functions/APIClient';
 
 const SettingsActions = () => {
   const [deleteIgnored, setDeleteIgnored] = useState(false);
@@ -27,9 +18,11 @@ const SettingsActions = () => {
   const [isRestoringBackup, setIsRestoringBackup] = useState(false);
   const [reScanningFileSystem, setReScanningFileSystem] = useState(false);
 
-  const [backupListResponse, setBackupListResponse] = useState<BackupListType>();
+  const [backupListResponse, setBackupListResponse] = useState<ApiResponseType<BackupListType>>();
 
-  const backups = backupListResponse;
+  const { data: backupListResponseData } = backupListResponse ?? {};
+
+  const backups = backupListResponseData;
   const hasBackups = !!backups && backups?.length > 0;
 
   useEffect(() => {

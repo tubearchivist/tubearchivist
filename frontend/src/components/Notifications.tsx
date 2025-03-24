@@ -1,20 +1,11 @@
 import { Fragment, useEffect, useState } from 'react';
-import loadNotifications, { NotificationPages } from '../api/loader/loadNotifications';
+import loadNotifications, {
+  NotificationPages,
+  NotificationResponseType,
+} from '../api/loader/loadNotifications';
 import iconStop from '/img/icon-stop.svg';
 import stopTaskByName from '../api/actions/stopTaskByName';
-
-type NotificationType = {
-  title: string;
-  group: string;
-  api_stop: boolean;
-  level: string;
-  id: string;
-  command: boolean | string;
-  messages: string[];
-  progress: number;
-};
-
-type NotificationResponseType = NotificationType[];
+import { ApiResponseType } from '../functions/APIClient';
 
 type NotificationsProps = {
   pageName: NotificationPages;
@@ -29,13 +20,17 @@ const Notifications = ({
   update,
   setShouldRefresh,
 }: NotificationsProps) => {
-  const [notificationResponse, setNotificationResponse] = useState<NotificationResponseType>([]);
+  const [notificationResponse, setNotificationResponse] =
+    useState<ApiResponseType<NotificationResponseType>>();
+
+  const { data: notificationResponseData } = notificationResponse ?? {};
 
   useEffect(() => {
     const intervalId = setInterval(async () => {
       const notifications = await loadNotifications(pageName, includeReindex);
+      const { data: notificationsData } = notifications ?? {};
 
-      if (notifications.length === 0) {
+      if (notificationsData?.length === 0) {
         setNotificationResponse(notifications);
         clearInterval(intervalId);
         setShouldRefresh?.(true);
@@ -52,13 +47,13 @@ const Notifications = ({
     };
   }, [pageName, update, setShouldRefresh, includeReindex]);
 
-  if (notificationResponse.length === 0) {
+  if (notificationResponseData?.length === 0) {
     return [];
   }
 
   return (
     <>
-      {notificationResponse.map(notification => (
+      {notificationResponseData?.map(notification => (
         <div
           id={notification.id}
           className={`notification ${notification.level}`}

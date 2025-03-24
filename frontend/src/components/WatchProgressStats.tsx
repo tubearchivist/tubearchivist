@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import StatsInfoBoxItem from './StatsInfoBoxItem';
 import formatNumbers from '../functions/formatNumbers';
-import { WatchProgressStatsType } from '../pages/SettingsDashboard';
+import { WatchProgressStatsType } from '../api/loader/loadStatsWatchProgress';
 
 const formatProgress = (progress: number) => {
   return (Number(progress) * 100).toFixed(2) ?? '0';

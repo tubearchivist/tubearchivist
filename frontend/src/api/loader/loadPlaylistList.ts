@@ -1,12 +1,19 @@
+import { PaginationType } from '../../components/Pagination';
 import APIClient from '../../functions/APIClient';
+import { PlaylistType } from './loadPlaylistById';
 
-type PlaylistType = 'regular' | 'custom';
+export type PlaylistsResponseType = {
+  data?: PlaylistType[];
+  paginate?: PaginationType;
+};
+
+type PlaylistCategoryType = 'regular' | 'custom';
 
 type LoadPlaylistListProps = {
   channel?: string;
   page?: number | undefined;
   subscribed?: boolean;
-  type?: PlaylistType;
+  type?: PlaylistCategoryType;
 };
 
 const loadPlaylistList = async ({ channel, page, subscribed, type }: LoadPlaylistListProps) => {
@@ -18,7 +25,7 @@ const loadPlaylistList = async ({ channel, page, subscribed, type }: LoadPlaylis
   if (type) searchParams.append('type', type);
 
   const endpoint = `/api/playlist/${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
-  return APIClient(endpoint);
+  return APIClient<PlaylistsResponseType>(endpoint);
 };
 
 export default loadPlaylistList;

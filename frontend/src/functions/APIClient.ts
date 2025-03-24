@@ -15,10 +15,20 @@ export interface ApiError {
   message: string;
 }
 
-const APIClient = async (
+export type ResponseErrorType = {
+  error: string;
+};
+
+export type ApiResponseType<T> = {
+  data?: T;
+  error?: ResponseErrorType;
+  status: number;
+};
+
+const APIClient = async <T>(
   endpoint: string,
   { method = 'GET', body, headers = {}, ...options }: ApiClientOptions = {},
-) => {
+): Promise<ApiResponseType<T>> => {
   const apiUrl = getApiUrl();
   const csrfToken = getCookie('csrftoken');
 
@@ -55,27 +65,37 @@ const APIClient = async (
     throw new Error('Forbidden: Access denied.');
   }
 
-  let data;
-
   // expected empty response
   if (response.status === 204) {
-    data = null;
-    return data;
+    return {
+      data: undefined,
+      error: undefined,
+      status: response.status,
+    };
   }
 
   // Try parsing response data
   try {
-    data = await response.json();
+    const responseJson = await response.json();
+
+    const hasErrorMessage = responseJson.error;
+
+    return {
+      data: !hasErrorMessage ? responseJson : undefined,
+      error: hasErrorMessage ? responseJson : undefined,
+      status: response.status,
+    };
   } catch (error) {
-    data = null;
     console.error(`error fetching data: ${error}`);
-  }
 
-  if (!response.ok) {
-    throw new Error(data?.detail || 'An error occurred while processing the request.');
+    return {
+      data: undefined,
+      error: {
+        error: `error fetching data: ${error}`,
+      },
+      status: response.status,
+    };
   }
-
-  return data;
 };
 
 export default APIClient;

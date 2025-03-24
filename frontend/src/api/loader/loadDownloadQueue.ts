@@ -1,11 +1,7 @@
 import APIClient from '../../functions/APIClient';
 import { DownloadResponseType } from '../../pages/Download';
 
-const loadDownloadQueue = async (
-  page: number,
-  channelId: string | null,
-  showIgnored: boolean,
-): Promise<DownloadResponseType> => {
+const loadDownloadQueue = async (page: number, channelId: string | null, showIgnored: boolean) => {
   const searchParams = new URLSearchParams();
 
   if (page) searchParams.append('page', page.toString());
@@ -14,7 +10,7 @@ const loadDownloadQueue = async (
 
   const endpoint = `/api/download/${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
-  return APIClient(endpoint);
+  return APIClient<DownloadResponseType>(endpoint);
 };
 
 export default loadDownloadQueue;

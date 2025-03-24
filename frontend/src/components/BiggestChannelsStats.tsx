@@ -2,20 +2,20 @@ import humanFileSize from '../functions/humanFileSize';
 import formatNumbers from '../functions/formatNumbers';
 import { Link } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
-import { BiggestChannelsStatsType } from '../pages/SettingsDashboard';
+import { BiggestChannelsStatsType } from '../api/loader/loadStatsBiggestChannels';
 
 type BiggestChannelsStatsProps = {
   biggestChannelsStatsByCount?: BiggestChannelsStatsType;
   biggestChannelsStatsByDuration?: BiggestChannelsStatsType;
   biggestChannelsStatsByMediaSize?: BiggestChannelsStatsType;
-  useSI: boolean;
+  useSIUnits: boolean;
 };
 
 const BiggestChannelsStats = ({
   biggestChannelsStatsByCount,
   biggestChannelsStatsByDuration,
   biggestChannelsStatsByMediaSize,
-  useSI,
+  useSIUnits,
 }: BiggestChannelsStatsProps) => {
   if (
     !biggestChannelsStatsByCount &&
@@ -94,7 +94,9 @@ const BiggestChannelsStats = ({
                     <td className="agg-channel-name">
                       <Link to={Routes.Channel(id)}>{name}</Link>
                     </td>
-                    <td className="agg-channel-right-align">{humanFileSize(media_size, useSI)}</td>
+                    <td className="agg-channel-right-align">
+                      {humanFileSize(media_size, useSIUnits)}
+                    </td>
                   </tr>
                 );
               })}

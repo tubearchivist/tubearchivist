@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react';
 import SettingsNavigation from '../components/SettingsNavigation';
-import loadStatsVideo from '../api/loader/loadStatsVideo';
-import loadStatsChannel from '../api/loader/loadStatsChannel';
-import loadStatsPlaylist from '../api/loader/loadStatsPlaylist';
-import loadStatsDownload from '../api/loader/loadStatsDownload';
-import loadStatsWatchProgress from '../api/loader/loadStatsWatchProgress';
-import loadStatsDownloadHistory from '../api/loader/loadStatsDownloadHistory';
-import loadStatsBiggestChannels from '../api/loader/loadStatsBiggestChannels';
+import loadStatsVideo, { VideoStatsType } from '../api/loader/loadStatsVideo';
+import loadStatsChannel, { ChannelStatsType } from '../api/loader/loadStatsChannel';
+import loadStatsPlaylist, { PlaylistStatsType } from '../api/loader/loadStatsPlaylist';
+import loadStatsDownload, { DownloadStatsType } from '../api/loader/loadStatsDownload';
+import loadStatsWatchProgress, {
+  WatchProgressStatsType,
+} from '../api/loader/loadStatsWatchProgress';
+import loadStatsDownloadHistory, {
+  DownloadHistoryStatsType,
+} from '../api/loader/loadStatsDownloadHistory';
+import loadStatsBiggestChannels, {
+  BiggestChannelsStatsType,
+} from '../api/loader/loadStatsBiggestChannels';
 import OverviewStats from '../components/OverviewStats';
 import VideoTypeStats from '../components/VideoTypeStats';
 import ApplicationStats from '../components/ApplicationStats';
@@ -15,131 +21,38 @@ import DownloadHistoryStats from '../components/DownloadHistoryStats';
 import BiggestChannelsStats from '../components/BiggestChannelsStats';
 import Notifications from '../components/Notifications';
 import PaginationDummy from '../components/PaginationDummy';
-
-export type VideoStatsType = {
-  doc_count: number;
-  media_size: number;
-  duration: number;
-  duration_str: string;
-  type_videos: {
-    doc_count: number;
-    media_size: number;
-    duration: number;
-    duration_str: string;
-  };
-  type_shorts: {
-    doc_count: number;
-    media_size: number;
-    duration: number;
-    duration_str: string;
-  };
-  active_true: {
-    doc_count: number;
-    media_size: number;
-    duration: number;
-    duration_str: string;
-  };
-  active_false: {
-    doc_count: number;
-    media_size: number;
-    duration: number;
-    duration_str: string;
-  };
-  type_streams: {
-    doc_count: number;
-    media_size: number;
-    duration: number;
-    duration_str: string;
-  };
-};
-
-export type ChannelStatsType = {
-  doc_count: number;
-  active_true: number;
-  subscribed_true: number;
-};
-
-export type PlaylistStatsType = {
-  doc_count: number;
-  active_false: number;
-  active_true: number;
-  subscribed_true: number;
-};
-
-export type DownloadStatsType = {
-  pending: number;
-  pending_videos: number;
-  pending_shorts: number;
-  pending_streams: number;
-};
-
-export type WatchProgressStatsType = {
-  total: {
-    duration: number;
-    duration_str: string;
-    items: number;
-  };
-  unwatched: {
-    duration: number;
-    duration_str: string;
-    progress: number;
-    items: number;
-  };
-  watched: {
-    duration: number;
-    duration_str: string;
-    progress: number;
-    items: number;
-  };
-};
-
-type DownloadHistoryType = {
-  date: string;
-  count: number;
-  media_size: number;
-};
-
-export type DownloadHistoryStatsType = DownloadHistoryType[];
-
-type BiggestChannelsType = {
-  id: string;
-  name: string;
-  doc_count: number;
-  duration: number;
-  duration_str: string;
-  media_size: number;
-};
-
-export type BiggestChannelsStatsType = BiggestChannelsType[];
+import { useUserConfigStore } from '../stores/UserConfigStore';
+import { FileSizeUnits } from '../api/actions/updateUserConfig';
+import { ApiResponseType } from '../functions/APIClient';
 
 type DashboardStatsReponses = {
-  videoStats?: VideoStatsType;
-  channelStats?: ChannelStatsType;
-  playlistStats?: PlaylistStatsType;
-  downloadStats?: DownloadStatsType;
-  watchProgressStats?: WatchProgressStatsType;
-  downloadHistoryStats?: DownloadHistoryStatsType;
-  biggestChannelsStatsByCount?: BiggestChannelsStatsType;
-  biggestChannelsStatsByDuration?: BiggestChannelsStatsType;
-  biggestChannelsStatsByMediaSize?: BiggestChannelsStatsType;
+  videoStats?: ApiResponseType<VideoStatsType>;
+  channelStats?: ApiResponseType<ChannelStatsType>;
+  playlistStats?: ApiResponseType<PlaylistStatsType>;
+  downloadStats?: ApiResponseType<DownloadStatsType>;
+  watchProgressStats?: ApiResponseType<WatchProgressStatsType>;
+  downloadHistoryStats?: ApiResponseType<DownloadHistoryStatsType>;
+  biggestChannelsStatsByCount?: ApiResponseType<BiggestChannelsStatsType>;
+  biggestChannelsStatsByDuration?: ApiResponseType<BiggestChannelsStatsType>;
+  biggestChannelsStatsByMediaSize?: ApiResponseType<BiggestChannelsStatsType>;
 };
 
 const SettingsDashboard = () => {
-  const [useSi, setUseSi] = useState(false);
+  const { userConfig } = useUserConfigStore();
 
   const [response, setResponse] = useState<DashboardStatsReponses>({
     videoStats: undefined,
   });
 
-  const videoStats = response?.videoStats;
-  const channelStats = response?.channelStats;
-  const playlistStats = response?.playlistStats;
-  const downloadStats = response?.downloadStats;
-  const watchProgressStats = response?.watchProgressStats;
-  const downloadHistoryStats = response?.downloadHistoryStats;
-  const biggestChannelsStatsByCount = response?.biggestChannelsStatsByCount;
-  const biggestChannelsStatsByDuration = response?.biggestChannelsStatsByDuration;
-  const biggestChannelsStatsByMediaSize = response?.biggestChannelsStatsByMediaSize;
+  const { data: videoStats } = response?.videoStats || {};
+  const { data: channelStats } = response?.channelStats || {};
+  const { data: playlistStats } = response?.playlistStats || {};
+  const { data: downloadStats } = response?.downloadStats || {};
+  const { data: watchProgressStats } = response?.watchProgressStats || {};
+  const { data: downloadHistoryStats } = response?.downloadHistoryStats || {};
+  const { data: biggestChannelsStatsByCount } = response?.biggestChannelsStatsByCount || {};
+  const { data: biggestChannelsStatsByDuration } = response?.biggestChannelsStatsByDuration || {};
+  const { data: biggestChannelsStatsByMediaSize } = response?.biggestChannelsStatsByMediaSize || {};
 
   useEffect(() => {
     (async () => {
@@ -181,6 +94,8 @@ const SettingsDashboard = () => {
     })();
   }, []);
 
+  const useSiUnits = userConfig.file_size_unit === FileSizeUnits.Metric;
+
   return (
     <>
       <title>TA | Settings Dashboard</title>
@@ -190,31 +105,17 @@ const SettingsDashboard = () => {
         <div className="title-bar">
           <h1>Your Archive</h1>
         </div>
-        <p>
-          File Sizes in:
-          <select
-            value={useSi ? 'true' : 'false'}
-            onChange={event => {
-              const value = event.target.value;
-              console.log(value);
-              setUseSi(value === 'true');
-            }}
-          >
-            <option value="true">SI units</option>
-            <option value="false">Binary units</option>
-          </select>
-        </p>
 
         <div className="settings-item">
           <h2>Overview</h2>
           <div className="info-box info-box-3">
-            <OverviewStats videoStats={videoStats} useSI={useSi} />
+            <OverviewStats videoStats={videoStats} useSIUnits={useSiUnits} />
           </div>
         </div>
         <div className="settings-item">
           <h2>Video Type</h2>
           <div className="info-box info-box-3">
-            <VideoTypeStats videoStats={videoStats} useSI={useSi} />
+            <VideoTypeStats videoStats={videoStats} useSIUnits={useSiUnits} />
           </div>
         </div>
         <div className="settings-item">
@@ -236,7 +137,7 @@ const SettingsDashboard = () => {
         <div className="settings-item">
           <h2>Download History</h2>
           <div className="info-box info-box-4">
-            <DownloadHistoryStats downloadHistoryStats={downloadHistoryStats} useSI={false} />
+            <DownloadHistoryStats downloadHistoryStats={downloadHistoryStats} useSIUnits={false} />
           </div>
         </div>
         <div className="settings-item">
@@ -246,7 +147,7 @@ const SettingsDashboard = () => {
               biggestChannelsStatsByCount={biggestChannelsStatsByCount}
               biggestChannelsStatsByDuration={biggestChannelsStatsByDuration}
               biggestChannelsStatsByMediaSize={biggestChannelsStatsByMediaSize}
-              useSI={useSi}
+              useSIUnits={useSiUnits}
             />
           </div>
         </div>

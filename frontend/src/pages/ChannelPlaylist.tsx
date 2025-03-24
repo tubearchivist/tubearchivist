@@ -5,12 +5,12 @@ import { useEffect, useState } from 'react';
 import { OutletContextType } from './Base';
 import Pagination from '../components/Pagination';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
-import loadPlaylistList from '../api/loader/loadPlaylistList';
-import { PlaylistsResponseType } from './Playlists';
+import loadPlaylistList, { PlaylistsResponseType } from '../api/loader/loadPlaylistList';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
+import { ApiResponseType } from '../functions/APIClient';
 
 const ChannelPlaylist = () => {
   const { channelId } = useParams();
@@ -19,17 +19,24 @@ const ChannelPlaylist = () => {
 
   const [refreshPlaylists, setRefreshPlaylists] = useState(false);
 
-  const [playlistsResponse, setPlaylistsResponse] = useState<PlaylistsResponseType>();
+  const [playlistsResponse, setPlaylistsResponse] =
+    useState<ApiResponseType<PlaylistsResponseType>>();
 
-  const playlistList = playlistsResponse?.data;
-  const pagination = playlistsResponse?.paginate;
+  const { data: playlistsResponseData } = playlistsResponse ?? {};
+
+  const playlistList = playlistsResponseData?.data;
+  const pagination = playlistsResponseData?.paginate;
 
   const view = userConfig.view_style_playlist;
   const showSubedOnly = userConfig.show_subed_only;
 
   const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
     const updatedUserConfig = await updateUserConfig(config);
-    setUserConfig(updatedUserConfig);
+    const { data: updatedUserConfigData } = updatedUserConfig;
+
+    if (updatedUserConfigData) {
+      setUserConfig(updatedUserConfigData);
+    }
   };
 
   useEffect(() => {
@@ -37,6 +44,7 @@ const ChannelPlaylist = () => {
       const playlists = await loadPlaylistList({
         channel: channelId,
         subscribed: showSubedOnly,
+        page: currentPage,
       });
 
       setPlaylistsResponse(playlists);

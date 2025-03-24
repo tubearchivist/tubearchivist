@@ -15,6 +15,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [saveLogin, setSaveLogin] = useState(false);
   const [waitingForBackend, setWaitingForBackend] = useState(false);
+  const [waitedCount, setWaitedCount] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (event: { preventDefault: () => void }) => {
@@ -40,6 +41,8 @@ const Login = () => {
   };
 
   useEffect(() => {
+    let retryCount = 0;
+
     const backendCheckInterval = setInterval(async () => {
       try {
         const auth = await loadAuth();
@@ -59,6 +62,8 @@ const Login = () => {
         }
       } catch (error) {
         console.log('Checking backend availability: ', error);
+        retryCount += 1;
+        setWaitedCount(retryCount);
         setWaitingForBackend(true);
       }
     }, 1000);
@@ -137,6 +142,35 @@ const Login = () => {
 
           {!waitingForBackend && <Button label="Login" type="submit" />}
         </form>
+
+        {waitedCount > 10 && (
+          <div className="info-box">
+            <div className="info-box-item">
+              <h2>Having issues?</h2>
+
+              <div className="help-text left-align">
+                <p>Please verify that you setup your environment correctly:</p>
+                <ul>
+                  <li
+                    onClick={() => {
+                      navigator.clipboard.writeText(`TA_HOST=${window.location.origin}`);
+                    }}
+                  >
+                    TA_HOST={window.location.origin}
+                  </li>
+                  <li
+                    onClick={() => {
+                      navigator.clipboard.writeText('REDIS_CON=redis://archivist-redis:6379');
+                    }}
+                  >
+                    REDIS_CON=redis://archivist-redis:6379
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
         <p className="login-links">
           <span>
             <a href="https://github.com/tubearchivist/tubearchivist" target="_blank">

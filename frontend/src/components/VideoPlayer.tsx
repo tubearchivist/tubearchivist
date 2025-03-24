@@ -1,5 +1,5 @@
 import updateVideoProgressById from '../api/actions/updateVideoProgressById';
-import { SponsorBlockSegmentType, SponsorBlockType, VideoResponseType } from '../pages/Video';
+import { SponsorBlockSegmentType, SponsorBlockType } from '../pages/Video';
 import {
   Dispatch,
   Fragment,
@@ -13,6 +13,7 @@ import formatTime from '../functions/formatTime';
 import { useSearchParams } from 'react-router-dom';
 import getApiUrl from '../configuration/getApiUrl';
 import { useKeyPress } from '../functions/useKeypressHook';
+import { VideoResponseType } from '../api/loader/loadVideoById';
 
 const VIDEO_PLAYBACK_SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3];
 
@@ -95,7 +96,9 @@ const handleTimeUpdate =
         currentProgress: currentTime,
       });
 
-      if (videoProgressResponse.watched && watched !== videoProgressResponse.watched) {
+      const { data: videoProgressResponseData } = videoProgressResponse ?? {};
+
+      if (videoProgressResponseData?.watched && watched !== videoProgressResponseData.watched) {
         onWatchStateChanged?.(true);
       }
     }
@@ -185,7 +188,9 @@ const VideoPlayer = ({
         currentProgress: currentTime,
       });
 
-      if (videoProgressResponse.watched && watched !== videoProgressResponse.watched) {
+      const { data: videoProgressResponseData } = videoProgressResponse;
+
+      if (videoProgressResponseData?.watched && watched !== videoProgressResponseData.watched) {
         onWatchStateChanged?.(true);
       }
 

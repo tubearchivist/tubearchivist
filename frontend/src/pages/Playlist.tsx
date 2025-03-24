@@ -4,7 +4,7 @@ import loadPlaylistById, { PlaylistResponseType } from '../api/loader/loadPlayli
 import { OutletContextType } from './Base';
 import { VideoType } from './Home';
 import Filterbar from '../components/Filterbar';
-import loadChannelById from '../api/loader/loadChannelById';
+import loadChannelById, { ChannelResponseType } from '../api/loader/loadChannelById';
 import VideoList from '../components/VideoList';
 import Pagination, { PaginationType } from '../components/Pagination';
 import ChannelOverview from '../components/ChannelOverview';
@@ -13,7 +13,6 @@ import { ViewStyleNames, ViewStyles } from '../configuration/constants/ViewStyle
 import updatePlaylistSubscription from '../api/actions/updatePlaylistSubscription';
 import deletePlaylist from '../api/actions/deletePlaylist';
 import Routes from '../configuration/routes/RouteList';
-import { ChannelResponseType } from './ChannelBase';
 import formatDate from '../functions/formatDates';
 import queueReindex from '../api/actions/queueReindex';
 import updateWatchedState from '../api/actions/updateWatchedState';
@@ -23,6 +22,8 @@ import Button from '../components/Button';
 import loadVideoListByFilter from '../api/loader/loadVideoListByPage';
 import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import { ApiResponseType } from '../functions/APIClient';
+import NotFound from './NotFound';
 
 export type VideoResponseType = {
   data?: VideoType[];
@@ -44,16 +45,20 @@ const Playlist = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [reindex, setReindex] = useState(false);
 
-  const [playlistResponse, setPlaylistResponse] = useState<PlaylistResponseType>();
-  const [channelResponse, setChannelResponse] = useState<ChannelResponseType>();
-  const [videoResponse, setVideoResponse] = useState<VideoResponseType>();
+  const [playlistResponse, setPlaylistResponse] = useState<ApiResponseType<PlaylistResponseType>>();
+  const [channelResponse, setChannelResponse] = useState<ApiResponseType<ChannelResponseType>>();
+  const [videoResponse, setVideoResponse] = useState<ApiResponseType<VideoResponseType>>();
 
-  const playlist = playlistResponse;
-  const channel = channelResponse;
-  const videos = videoResponse?.data;
-  const pagination = videoResponse?.paginate;
+  const { data: playlistResponseData, error: playlistResponseError } = playlistResponse ?? {};
+  const { data: channelResponseData } = channelResponse ?? {};
+  const { data: videoResponseData } = videoResponse ?? {};
 
-  const palylistEntries = playlistResponse?.playlist_entries;
+  const playlist = playlistResponseData;
+  const channel = channelResponseData;
+  const videos = videoResponseData?.data;
+  const pagination = videoResponseData?.paginate;
+
+  const palylistEntries = playlistResponseData?.playlist_entries;
   const videoArchivedCount = Number(palylistEntries?.filter(video => video.downloaded).length);
   const videoInPlaylistCount = pagination?.total_hits;
 
@@ -71,18 +76,18 @@ const Playlist = () => {
         playlist: playlistId,
         page: currentPage,
         watch: hideWatched ? 'unwatched' : undefined,
-        sort: 'downloaded', // downloaded or published? or playlist sort order?
       });
-
-      const isCustomPlaylist = playlist?.playlist_type === 'custom';
-      if (!isCustomPlaylist) {
-        const channel = await loadChannelById(playlist.playlist_channel_id);
-
-        setChannelResponse(channel);
-      }
 
       setPlaylistResponse(playlist);
       setVideoResponse(video);
+
+      const { data: playlistResponseData } = playlist ?? {};
+
+      const isCustomPlaylist = playlistResponseData?.playlist_type === 'custom';
+      if (!isCustomPlaylist) {
+        const channel = await loadChannelById(playlistResponseData?.playlist_channel_id || '');
+        setChannelResponse(channel);
+      }
       setRefresh(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -95,9 +100,13 @@ const Playlist = () => {
     videoId,
   ]);
 
-  if (!playlistId || !playlist) {
-    return `Playlist ${playlistId} not found!`;
+  const errorMessage = playlistResponseError?.error;
+
+  if (errorMessage) {
+    return <NotFound failType="playlist" />;
   }
+
+  if (!playlist || !playlistId) return [];
 
   const isCustomPlaylist = playlist.playlist_type === 'custom';
 

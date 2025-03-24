@@ -10,8 +10,8 @@ export type UserAccountType = {
   last_login: string;
 };
 
-const loadUserAccount = async (): Promise<UserAccountType> => {
-  return APIClient('/api/user/account/');
+const loadUserAccount = async () => {
+  return APIClient<UserAccountType>('/api/user/account/');
 };
 
 export default loadUserAccount;

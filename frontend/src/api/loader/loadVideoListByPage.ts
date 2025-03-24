@@ -21,9 +21,7 @@ type FilterType = {
   type?: VideoTypes;
 };
 
-const loadVideoListByFilter = async (
-  filter: FilterType,
-): Promise<VideoListByFilterResponseType> => {
+const loadVideoListByFilter = async (filter: FilterType) => {
   const searchParams = new URLSearchParams();
 
   if (filter.playlist) {
@@ -39,7 +37,7 @@ const loadVideoListByFilter = async (
   if (filter.type) searchParams.append('type', filter.type);
 
   const endpoint = `/api/video/${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
-  return APIClient(endpoint);
+  return APIClient<VideoListByFilterResponseType>(endpoint);
 };
 
 export default loadVideoListByFilter;

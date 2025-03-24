@@ -1,11 +1,10 @@
 import { useOutletContext } from 'react-router-dom';
-import loadChannelList from '../api/loader/loadChannelList';
+import loadChannelList, { ChannelsListResponse } from '../api/loader/loadChannelList';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
 import iconAdd from '/img/icon-add.svg';
 import { useEffect, useState } from 'react';
-import Pagination, { PaginationType } from '../components/Pagination';
-import { ConfigType } from './Home';
+import Pagination from '../components/Pagination';
 import { OutletContextType } from './Base';
 import ChannelList from '../components/ChannelList';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
@@ -15,6 +14,7 @@ import updateBulkChannelSubscriptions from '../api/actions/updateBulkChannelSubs
 import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
+import { ApiResponseType } from '../functions/APIClient';
 
 type ChannelOverwritesType = {
   download_format: string | null;
@@ -42,31 +42,31 @@ export type ChannelType = {
   channel_views: number;
 };
 
-type ChannelsListResponse = {
-  data: ChannelType[];
-  paginate: PaginationType;
-  config?: ConfigType;
-};
-
 const Channels = () => {
   const { userConfig, setUserConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
   const isAdmin = useIsAdmin();
 
-  const [channelListResponse, setChannelListResponse] = useState<ChannelsListResponse>();
+  const [channelListResponse, setChannelListResponse] =
+    useState<ApiResponseType<ChannelsListResponse>>();
   const [showAddForm, setShowAddForm] = useState(false);
   const [refresh, setRefresh] = useState(true);
   const [showNotification, setShowNotification] = useState(false);
   const [channelsToSubscribeTo, setChannelsToSubscribeTo] = useState('');
 
-  const channels = channelListResponse?.data;
-  const pagination = channelListResponse?.paginate;
-  // const channelCount = pagination?.total_hits;
+  const { data: channelListResponseData } = channelListResponse ?? {};
+
+  const channels = channelListResponseData?.data;
+  const pagination = channelListResponseData?.paginate;
   const hasChannels = channels?.length !== 0;
 
   const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
     const updatedUserConfig = await updateUserConfig(config);
-    setUserConfig(updatedUserConfig);
+    const { data: updatedUserConfigData } = updatedUserConfig;
+
+    if (updatedUserConfigData) {
+      setUserConfig(updatedUserConfigData);
+    }
   };
 
   useEffect(() => {
@@ -187,7 +187,6 @@ const Channels = () => {
             />
           </div>
         </div>
-        {/* {hasChannels && <h2>Total channels: {channelCount}</h2>} */}
 
         <div className={`channel-list ${userConfig.view_style_channel}`}>
           {!hasChannels && <h2>No channels found...</h2>}

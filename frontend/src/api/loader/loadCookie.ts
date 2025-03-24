@@ -7,8 +7,8 @@ export type CookieStateType = {
   validated_str?: string;
 };
 
-const loadCookie = async (): Promise<CookieStateType> => {
-  return APIClient('/api/appsettings/cookie/');
+const loadCookie = async () => {
+  return APIClient<CookieStateType>('/api/appsettings/cookie/');
 };
 
 export default loadCookie;

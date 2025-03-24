@@ -1,8 +1,8 @@
 import APIClient from '../../functions/APIClient';
 import { CookieStateType } from '../loader/loadCookie';
 
-const validateCookie = async (): Promise<CookieStateType> => {
-  return APIClient('/api/appsettings/cookie/', {
+const validateCookie = async () => {
+  return APIClient<CookieStateType>('/api/appsettings/cookie/', {
     method: 'POST',
   });
 };

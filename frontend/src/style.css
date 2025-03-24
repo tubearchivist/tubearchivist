@@ -179,6 +179,10 @@ button:hover {
   padding: 5px 0 5px 1rem;
 }
 
+.left-align {
+  text-align: start;
+}
+
 .help-text::before {
   content: '?';
   font-size: 1.5em;

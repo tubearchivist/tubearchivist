@@ -58,7 +58,12 @@ class Command(BaseCommand):
 
         message = "    🗙 Redis connection failed"
         self.stdout.write(self.style.ERROR(f"{message}"))
-        RedisArchivist().exec("PING")
+        try:
+            redis_conn.execute_command("PING")
+        except Exception as err:  # pylint: disable=broad-except
+            message = f"    🗙 {type(err).__name__}: {err}"
+            self.stdout.write(self.style.ERROR(f"{message}"))
+
         sleep(60)
         raise CommandError(message)
 

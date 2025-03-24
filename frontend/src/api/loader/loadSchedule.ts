@@ -13,8 +13,8 @@ type ScheduleType = {
 
 export type ScheduleResponseType = ScheduleType[];
 
-const loadSchedule = async (): Promise<ScheduleResponseType> => {
-  return APIClient('/api/task/schedule/');
+const loadSchedule = async () => {
+  return APIClient<ScheduleResponseType>('/api/task/schedule/');
 };
 
 export default loadSchedule;

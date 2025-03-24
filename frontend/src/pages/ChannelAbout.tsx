@@ -1,8 +1,7 @@
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import ChannelOverview from '../components/ChannelOverview';
 import { useEffect, useState } from 'react';
-import loadChannelById from '../api/loader/loadChannelById';
-import { ChannelResponseType } from './ChannelBase';
+import loadChannelById, { ChannelResponseType } from '../api/loader/loadChannelById';
 import Linkify from '../components/Linkify';
 import deleteChannel from '../api/actions/deleteChannel';
 import Routes from '../configuration/routes/RouteList';
@@ -16,6 +15,7 @@ import useIsAdmin from '../functions/useIsAdmin';
 import InputConfig from '../components/InputConfig';
 import ToggleConfig from '../components/ToggleConfig';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import { ApiResponseType } from '../functions/APIClient';
 
 export type ChannelBaseOutletContextType = {
   currentPage: number;
@@ -45,7 +45,7 @@ const ChannelAbout = () => {
   const [reindex, setReindex] = useState(false);
   const [refresh, setRefresh] = useState(true);
 
-  const [channelResponse, setChannelResponse] = useState<ChannelResponseType>();
+  const [channelResponse, setChannelResponse] = useState<ApiResponseType<ChannelResponseType>>();
 
   const [downloadFormat, setDownloadFormat] = useState<string | null>(null);
   const [autoDeleteAfter, setAutoDeleteAfter] = useState<number | null>(null);
@@ -55,24 +55,31 @@ const ChannelAbout = () => {
   const [pageSizeShorts, setPageSizeShorts] = useState<number | null>(null);
   const [pageSizeStreams, setPageSizeStreams] = useState<number | null>(null);
 
-  const channel = channelResponse;
+  const { data: channelResponseData } = channelResponse ?? {};
+
+  const channel = channelResponseData;
 
   useEffect(() => {
     (async () => {
       if (refresh) {
         const channelResponse = await loadChannelById(channelId);
+        const { data: channelResponseData } = channelResponse;
 
         setChannelResponse(channelResponse);
-        setDownloadFormat(channelResponse?.channel_overwrites?.download_format ?? null);
-        setAutoDeleteAfter(channelResponse?.channel_overwrites?.autodelete_days ?? null);
-        setIndexPlaylists(channelResponse?.channel_overwrites?.index_playlists ?? false);
-        setEnableSponsorblock(channelResponse?.channel_overwrites?.integrate_sponsorblock ?? null);
-        setPageSizeVideo(channelResponse?.channel_overwrites?.subscriptions_channel_size ?? null);
+        setDownloadFormat(channelResponseData?.channel_overwrites?.download_format ?? null);
+        setAutoDeleteAfter(channelResponseData?.channel_overwrites?.autodelete_days ?? null);
+        setIndexPlaylists(channelResponseData?.channel_overwrites?.index_playlists ?? false);
+        setEnableSponsorblock(
+          channelResponseData?.channel_overwrites?.integrate_sponsorblock ?? null,
+        );
+        setPageSizeVideo(
+          channelResponseData?.channel_overwrites?.subscriptions_channel_size ?? null,
+        );
         setPageSizeShorts(
-          channelResponse?.channel_overwrites?.subscriptions_shorts_channel_size ?? null,
+          channelResponseData?.channel_overwrites?.subscriptions_shorts_channel_size ?? null,
         );
         setPageSizeStreams(
-          channelResponse?.channel_overwrites?.subscriptions_live_channel_size ?? null,
+          channelResponseData?.channel_overwrites?.subscriptions_live_channel_size ?? null,
         );
 
         setRefresh(false);

@@ -1,8 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { VideoType } from './Home';
-import loadSearch from '../api/loader/loadSearch';
-import { ChannelType } from './Channels';
+import loadSearch, { SearchResultsType } from '../api/loader/loadSearch';
 import VideoList from '../components/VideoList';
 import ChannelList from '../components/ChannelList';
 import PlaylistList from '../components/PlaylistList';
@@ -11,28 +9,20 @@ import { ViewStyles } from '../configuration/constants/ViewStyle';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import SearchExampleQueries from '../components/SearchExampleQueries';
 import { useUserConfigStore } from '../stores/UserConfigStore';
-import { PlaylistType } from '../api/loader/loadPlaylistById';
+import { ApiResponseType } from '../functions/APIClient';
 
-const EmptySearchResponse: SearchResultsType = {
-  results: {
-    video_results: [],
-    channel_results: [],
-    playlist_results: [],
-    fulltext_results: [],
+const EmptySearchResponse: ApiResponseType<SearchResultsType> = {
+  data: {
+    results: {
+      video_results: [],
+      channel_results: [],
+      playlist_results: [],
+      fulltext_results: [],
+    },
+    queryType: 'simple',
   },
-  queryType: 'simple',
-};
-
-type SearchResultType = {
-  video_results: VideoType[];
-  channel_results: ChannelType[];
-  playlist_results: PlaylistType[];
-  fulltext_results: [];
-};
-
-type SearchResultsType = {
-  results: SearchResultType;
-  queryType: string;
+  error: undefined,
+  status: 200,
 };
 
 const Search = () => {
@@ -47,15 +37,17 @@ const Search = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');
-  const [searchResults, setSearchResults] = useState<SearchResultsType>();
+  const [searchResults, setSearchResults] = useState<ApiResponseType<SearchResultsType>>();
 
   const [refresh, setRefresh] = useState(false);
 
-  const videoList = searchResults?.results.video_results;
-  const channelList = searchResults?.results.channel_results;
-  const playlistList = searchResults?.results.playlist_results;
-  const fulltextList = searchResults?.results.fulltext_results;
-  const queryType = searchResults?.queryType;
+  const { data: searchResultsData } = searchResults ?? {};
+
+  const videoList = searchResultsData?.results.video_results;
+  const channelList = searchResultsData?.results.channel_results;
+  const playlistList = searchResultsData?.results.playlist_results;
+  const fulltextList = searchResultsData?.results.fulltext_results;
+  const queryType = searchResultsData?.queryType;
 
   const hasSearchQuery = searchTerm.length > 0;
   const hasVideos = Number(videoList?.length) > 0;

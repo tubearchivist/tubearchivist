@@ -1,7 +1,9 @@
 import { Fragment } from 'react';
 import StatsInfoBoxItem from './StatsInfoBoxItem';
 import formatNumbers from '../functions/formatNumbers';
-import { ChannelStatsType, PlaylistStatsType, DownloadStatsType } from '../pages/SettingsDashboard';
+import { ChannelStatsType } from '../api/loader/loadStatsChannel';
+import { PlaylistStatsType } from '../api/loader/loadStatsPlaylist';
+import { DownloadStatsType } from '../api/loader/loadStatsDownload';
 
 type ApplicationStatsProps = {
   channelStats?: ChannelStatsType;

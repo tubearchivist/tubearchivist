@@ -14,6 +14,7 @@ import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import { SponsorBlockType } from './Video';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import { ApiResponseType } from '../functions/APIClient';
 
 export type PlayerType = {
   watched: boolean;
@@ -110,15 +111,19 @@ const Home = () => {
 
   const [refreshVideoList, setRefreshVideoList] = useState(false);
 
-  const [videoResponse, setVideoReponse] = useState<VideoListByFilterResponseType>();
+  const [videoResponse, setVideoReponse] =
+    useState<ApiResponseType<VideoListByFilterResponseType>>();
   const [continueVideoResponse, setContinueVideoResponse] =
-    useState<VideoListByFilterResponseType>();
+    useState<ApiResponseType<VideoListByFilterResponseType>>();
 
-  const videoList = videoResponse?.data;
-  const pagination = videoResponse?.paginate;
-  const continueVideos = continueVideoResponse?.data;
+  const { data: videoResponseData } = videoResponse ?? {};
+  const { data: continueVideoResponseData } = continueVideoResponse ?? {};
 
-  const hasVideos = videoResponse?.data?.length !== 0;
+  const videoList = videoResponseData?.data;
+  const pagination = videoResponseData?.paginate;
+  const continueVideos = continueVideoResponseData?.data;
+
+  const hasVideos = videoResponseData?.data?.length !== 0;
 
   const isGridView = userConfig.view_style_home === ViewStyles.grid;
   const gridView = isGridView ? `boxed-${userConfig.grid_items}` : '';

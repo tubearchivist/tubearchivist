@@ -7,8 +7,7 @@ import Pagination from '../components/Pagination';
 import Filterbar from '../components/Filterbar';
 import { ViewStyleNames, ViewStyles } from '../configuration/constants/ViewStyle';
 import ChannelOverview from '../components/ChannelOverview';
-import loadChannelById from '../api/loader/loadChannelById';
-import { ChannelResponseType } from './ChannelBase';
+import loadChannelById, { ChannelResponseType } from '../api/loader/loadChannelById';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import updateWatchedState from '../api/actions/updateWatchedState';
@@ -20,6 +19,8 @@ import loadVideoListByFilter, {
 import loadChannelAggs, { ChannelAggsType } from '../api/loader/loadChannelAggs';
 import humanFileSize from '../functions/humanFileSize';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import { FileSizeUnits } from '../api/actions/updateUserConfig';
+import { ApiResponseType } from '../functions/APIClient';
 
 type ChannelParams = {
   channelId: string;
@@ -38,15 +39,22 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
 
   const [refresh, setRefresh] = useState(false);
 
-  const [channelResponse, setChannelResponse] = useState<ChannelResponseType>();
-  const [videoResponse, setVideoReponse] = useState<VideoListByFilterResponseType>();
-  const [videoAggsResponse, setVideoAggsResponse] = useState<ChannelAggsType>();
+  const [channelResponse, setChannelResponse] = useState<ApiResponseType<ChannelResponseType>>();
+  const [videoResponse, setVideoReponse] =
+    useState<ApiResponseType<VideoListByFilterResponseType>>();
+  const [videoAggsResponse, setVideoAggsResponse] = useState<ApiResponseType<ChannelAggsType>>();
 
-  const channel = channelResponse;
-  const videoList = videoResponse?.data;
-  const pagination = videoResponse?.paginate;
+  const { data: channelResponseData } = channelResponse ?? {};
+  const { data: videoResponseData } = videoResponse ?? {};
+  const { data: videoAggsResponseData } = videoAggsResponse ?? {};
 
-  const hasVideos = videoResponse?.data?.length !== 0;
+  const channel = channelResponseData;
+  const videoList = videoResponseData?.data;
+  const pagination = videoResponseData?.paginate;
+  const videoAggs = videoAggsResponseData;
+
+  const hasVideos = videoResponseData?.data?.length !== 0;
+  const useSiUnits = userConfig.file_size_unit === FileSizeUnits.Metric;
 
   const view = userConfig.view_style_home;
   const isGridView = view === ViewStyles.grid;
@@ -107,14 +115,13 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
             setRefresh={setRefresh}
           />
           <div className="info-box-item">
-            {videoAggsResponse && (
+            {videoAggs && (
               <>
                 <p>
-                  {videoAggsResponse.total_items.value} videos{' '}
-                  <span className="space-carrot">|</span>{' '}
-                  {videoAggsResponse.total_duration.value_str} playback{' '}
+                  {videoAggs.total_items.value} videos <span className="space-carrot">|</span>{' '}
+                  {videoAggs.total_duration.value_str} playback{' '}
                   <span className="space-carrot">|</span> Total size{' '}
-                  {humanFileSize(videoAggsResponse.total_size.value, true)}
+                  {humanFileSize(videoAggs.total_size.value, useSiUnits)}
                 </p>
                 <div className="button-box">
                   <Button
