@@ -96,7 +96,7 @@ def update_subscribed(self):
     manager = TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] rescan already running")
-        self.send_progress("Rescan already in progress.")
+        self.send_progress(["Rescan already in progress."])
         return None
 
     manager.init(self)
@@ -124,7 +124,7 @@ def download_pending(self, auto_only=False):
     manager = TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] download queue already running")
-        self.send_progress("Download Queue is already running.")
+        self.send_progress(["Download Queue is already running."])
         return None
 
     manager.init(self)
@@ -134,7 +134,7 @@ def download_pending(self, auto_only=False):
 
         if failed:
             print(f"[task][{self.name}] Videos failed, retry.")
-            self.send_progress("Videos failed, retry.")
+            self.send_progress(["Videos failed, retry."])
             raise self.retry()
 
     except Retry as exc:
@@ -176,13 +176,13 @@ def check_reindex(self, data=False, extract_videos=False):
     if data:
         # started from frontend through API
         print(f"[task][{self.name}] reindex {data}")
-        self.send_progress("Add items to the reindex Queue.")
+        self.send_progress(["Add items to the reindex Queue."])
         ReindexManual(extract_videos=extract_videos).extract_data(data)
 
     manager = TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] reindex queue is already running")
-        self.send_progress("Reindex Queue is already running.")
+        self.send_progress(["Reindex Queue is already running."])
         return
 
     manager.init(self)
@@ -190,10 +190,10 @@ def check_reindex(self, data=False, extract_videos=False):
         # started from scheduler
         populate = ReindexPopulate()
         print(f"[task][{self.name}] reindex outdated documents")
-        self.send_progress("Add recent documents to the reindex Queue.")
+        self.send_progress(["Add recent documents to the reindex Queue."])
         populate.get_interval()
         populate.add_recent()
-        self.send_progress("Add outdated documents to the reindex Queue.")
+        self.send_progress(["Add outdated documents to the reindex Queue."])
         populate.add_outdated()
 
     handler = Reindex(task=self)
@@ -208,7 +208,7 @@ def run_manual_import(self):
     manager = TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] manual import is already running")
-        self.send_progress("Manual import is already running.")
+        self.send_progress(["Manual import is already running."])
         return
 
     manager.init(self)
@@ -221,7 +221,7 @@ def run_backup(self, reason="auto"):
     manager = TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] backup is already running")
-        self.send_progress("Backup is already running.")
+        self.send_progress(["Backup is already running."])
         return
 
     manager.init(self)
@@ -234,7 +234,7 @@ def run_restore_backup(self, filename):
     manager = TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] restore is already running")
-        self.send_progress("Restore is already running.")
+        self.send_progress(["Restore is already running."])
         return None
 
     manager.init(self)
@@ -252,7 +252,7 @@ def rescan_filesystem(self):
     manager = TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] filesystem rescan already running")
-        self.send_progress("Filesystem Rescan is already running.")
+        self.send_progress(["Filesystem Rescan is already running."])
         return
 
     manager.init(self)
@@ -268,7 +268,7 @@ def thumbnail_check(self):
     manager = TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] thumbnail check is already running")
-        self.send_progress("Thumbnail check is already running.")
+        self.send_progress(["Thumbnail check is already running."])
         return
 
     manager.init(self)
@@ -283,7 +283,7 @@ def re_sync_thumbs(self):
     manager = TaskManager()
     if manager.is_pending(self):
         print(f"[task][{self.name}] thumb re-embed is already running")
-        self.send_progress("Thumbnail re-embed is already running.")
+        self.send_progress(["Thumbnail re-embed is already running."])
         return
 
     manager.init(self)
