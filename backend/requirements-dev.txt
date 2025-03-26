@@ -5,6 +5,6 @@ pylint-django==2.6.1
 pylint==3.3.6
 pytest-django==4.10.0
 pytest==8.3.5
-python-dotenv==1.0.1
+python-dotenv==1.1.0
 requirementscheck==0.0.6
 types-requests==2.32.0.20250306
