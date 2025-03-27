@@ -21,7 +21,7 @@ services:
       - ELASTIC_PASSWORD=verysecret         # set password for Elasticsearch
       - TZ=America/New_York                 # set your time zone
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
       interval: 2m
       timeout: 10s
       retries: 3
