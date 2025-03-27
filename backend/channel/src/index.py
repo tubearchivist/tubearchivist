@@ -10,6 +10,7 @@ from datetime import datetime
 
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
+from common.src.helper import rand_sleep
 from common.src.index_generic import YouTubeItem
 from download.src.thumbnails import ThumbManager
 from download.src.yt_dlp_base import YtWrap
@@ -251,6 +252,7 @@ class YoutubeChannel(YouTubeItem):
 
             self._index_single_playlist(playlist)
             print("add playlist: " + playlist[1])
+            rand_sleep(self.config)
 
     def _notify_single_playlist(self, idx, total):
         """send notification"""
@@ -287,6 +289,7 @@ class YoutubeChannel(YouTubeItem):
         obs = {"skip_download": True, "extract_flat": True}
         playlists = YtWrap(obs, self.config).extract(url)
         if not playlists:
+            self.all_playlists = []
             return
 
         all_entries = [(i["id"], i["title"]) for i in playlists["entries"]]
