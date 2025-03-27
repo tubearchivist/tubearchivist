@@ -121,7 +121,11 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
               alt="close-icon"
               title="Close player"
               onClick={() => {
-                setSearchParams({});
+                setSearchParams(params => {
+                  const newParams = new URLSearchParams(params);
+                  newParams.delete('videoId');
+                  return newParams;
+                });
               }}
             />
 

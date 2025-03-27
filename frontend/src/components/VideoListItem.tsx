@@ -40,7 +40,11 @@ const VideoListItem = ({
     <div className={`video-item ${viewLayout}`}>
       <a
         onClick={() => {
-          setSearchParams({ videoId: video.youtube_id });
+          setSearchParams(params => {
+            const newParams = new URLSearchParams(params);
+            newParams.set('videoId', video.youtube_id);
+            return newParams;
+          });
         }}
       >
         <div className={`video-thumb-wrap ${viewLayout}`}>
