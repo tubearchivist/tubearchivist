@@ -8,7 +8,9 @@ const updateBulkPlaylistSubscriptions = async (playlistIds: string, status: bool
     const youtubePlaylistIds = playlistIds.split('\n');
 
     youtubePlaylistIds.forEach(playlistId => {
-      playlists.push({ playlist_id: playlistId, playlist_subscribed: status });
+      if (playlistId.trim()) {
+        playlists.push({ playlist_id: playlistId, playlist_subscribed: status });
+      }
     });
   } else {
     playlists.push({ playlist_id: playlistIds, playlist_subscribed: status });

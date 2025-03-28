@@ -8,7 +8,9 @@ const updateBulkChannelSubscriptions = async (channelIds: string, status: boolea
     const youtubeChannelIds = channelIds.split('\n');
 
     youtubeChannelIds.forEach(channelId => {
-      channels.push({ channel_id: channelId, channel_subscribed: status });
+      if (channelId.trim()) {
+        channels.push({ channel_id: channelId, channel_subscribed: status });
+      }
     });
   } else {
     channels.push({ channel_id: channelIds, channel_subscribed: status });

@@ -119,10 +119,12 @@ const Channels = () => {
                     label="Subscribe"
                     type="submit"
                     onClick={async () => {
-                      await updateBulkChannelSubscriptions(channelsToSubscribeTo, true);
+                      if (channelsToSubscribeTo.trim()) {
+                        await updateBulkChannelSubscriptions(channelsToSubscribeTo, true);
 
-                      setShowNotification(true);
-                      setShowAddForm(false);
+                        setShowNotification(true);
+                        setShowAddForm(false);
+                      }
                     }}
                   />
                 </div>

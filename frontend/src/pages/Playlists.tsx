@@ -102,9 +102,11 @@ const Playlists = () => {
                       label="Subscribe"
                       type="submit"
                       onClick={async () => {
-                        await updateBulkPlaylistSubscriptions(playlistsToAddText, true);
-                        setShowNotification(true);
-                        setShowAddForm(false);
+                        if (playlistsToAddText.trim()) {
+                          await updateBulkPlaylistSubscriptions(playlistsToAddText, true);
+                          setShowNotification(true);
+                          setShowAddForm(false);
+                        }
                       }}
                     />
                   </div>
@@ -125,8 +127,10 @@ const Playlists = () => {
                       label="Create"
                       type="submit"
                       onClick={async () => {
-                        await createCustomPlaylist(customPlaylistsToAddText);
-                        setRefresh(true);
+                        if (customPlaylistsToAddText.trim()) {
+                          await createCustomPlaylist(customPlaylistsToAddText);
+                          setRefresh(true);
+                        }
                       }}
                     />
                   </div>

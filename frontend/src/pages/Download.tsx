@@ -200,19 +200,23 @@ const Download = () => {
                   <Button
                     label="Add to queue"
                     onClick={async () => {
-                      await updateDownloadQueue(downloadQueueText, false);
-                      setDownloadQueueText('');
-                      setRefresh(true);
-                      setShowHiddenForm(false);
+                      if (downloadQueueText.trim()) {
+                        await updateDownloadQueue(downloadQueueText, false);
+                        setDownloadQueueText('');
+                        setRefresh(true);
+                        setShowHiddenForm(false);
+                      }
                     }}
                   />{' '}
                   <Button
                     label="Download now"
                     onClick={async () => {
-                      await updateDownloadQueue(downloadQueueText, true);
-                      setDownloadQueueText('');
-                      setRefresh(true);
-                      setShowHiddenForm(false);
+                      if (downloadQueueText.trim()) {
+                        await updateDownloadQueue(downloadQueueText, true);
+                        setDownloadQueueText('');
+                        setRefresh(true);
+                        setShowHiddenForm(false);
+                      }
                     }}
                   />
                 </div>
