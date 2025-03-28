@@ -40,7 +40,7 @@ const Notifications = ({
       }
 
       setNotificationResponse(notifications);
-    }, 500);
+    }, 1000);
 
     return () => {
       clearInterval(intervalId);
