@@ -98,24 +98,26 @@ const Download = () => {
 
   useEffect(() => {
     (async () => {
-      const videosResponse = await loadDownloadQueue(
-        currentPage,
-        channelFilterFromUrl,
-        showIgnored,
-      );
-      const { data: channelResponseData } = videosResponse ?? {};
-      const videoCount = channelResponseData?.paginate?.total_hits;
+      if (refresh) {
+        const videosResponse = await loadDownloadQueue(
+          currentPage,
+          channelFilterFromUrl,
+          showIgnored,
+        );
+        const { data: channelResponseData } = videosResponse ?? {};
+        const videoCount = channelResponseData?.paginate?.total_hits;
 
-      if (videoCount && lastVideoCount !== videoCount) {
-        setLastVideoCount(videoCount);
+        if (videoCount && lastVideoCount !== videoCount) {
+          setLastVideoCount(videoCount);
+        }
+
+        setDownloadResponse(videosResponse);
+        setRefresh(false);
       }
-
-      setDownloadResponse(videosResponse);
-      setRefresh(false);
     })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refresh, showIgnored, currentPage, downloadPending]);
+  }, [refresh, showIgnored, currentPage]);
 
   useEffect(() => {
     (async () => {
