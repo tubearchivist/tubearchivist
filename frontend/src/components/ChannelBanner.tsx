@@ -7,9 +7,15 @@ type ChannelIconProps = {
 };
 
 const ChannelBanner = ({ channelId, channelBannerUrl }: ChannelIconProps) => {
+  let src = `${getApiUrl()}${channelBannerUrl}`;
+
+  if (channelBannerUrl === undefined) {
+    src = defaultChannelImage;
+  }
+
   return (
     <img
-      src={`${getApiUrl()}${channelBannerUrl}`}
+      src={src}
       alt={`${channelId}-banner`}
       onError={({ currentTarget }) => {
         currentTarget.onerror = null; // prevents looping

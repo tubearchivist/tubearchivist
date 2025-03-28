@@ -22,12 +22,18 @@ const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
 
   const [hideDownload, setHideDownload] = useState(false);
 
+  let src = `${getApiUrl()}${download.vid_thumb_url}`;
+
+  if (download.vid_thumb_url === undefined) {
+    src = defaultVideoThumb;
+  }
+
   return (
     <div className={`video-item ${view}`} id={`dl-${download.youtube_id}`}>
       <div className={`video-thumb-wrap ${view}`}>
         <div className="video-thumb">
           <img
-            src={`${getApiUrl()}${download.vid_thumb_url}`}
+            src={src}
             alt="video_thumb"
             onError={({ currentTarget }) => {
               currentTarget.onerror = null; // prevents looping

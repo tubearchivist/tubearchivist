@@ -36,6 +36,12 @@ const VideoListItem = ({
     return <p>No video found.</p>;
   }
 
+  let videoThumbSrc = `${getApiUrl()}${video.vid_thumb_url}`;
+
+  if (video.vid_thumb_url === undefined) {
+    videoThumbSrc = defaultVideoThumb;
+  }
+
   return (
     <div className={`video-item ${viewLayout}`}>
       <a
@@ -46,7 +52,7 @@ const VideoListItem = ({
         <div className={`video-thumb-wrap ${viewLayout}`}>
           <div className="video-thumb">
             <img
-              src={`${getApiUrl()}${video.vid_thumb_url}`}
+              src={videoThumbSrc}
               alt="video-thumb"
               onError={({ currentTarget }) => {
                 currentTarget.onerror = null; // prevents looping
