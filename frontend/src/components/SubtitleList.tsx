@@ -2,7 +2,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
 import iconPlay from '/img/icon-play.svg';
 import Linkify from './Linkify';
-import getApiUrl from '../configuration/getApiUrl';
+import VideoThumbnail from './VideoThumbail';
 
 type SubtitleListType = {
   subtitle_index: number;
@@ -52,7 +52,7 @@ const SubtitleList = ({ subtitleList }: SubtitleListProps) => {
             >
               <div className="video-thumb-wrap list">
                 <div className="video-thumb">
-                  <img src={`${getApiUrl()}${subtitle.vid_thumb_url}`} alt="video-thumb" />
+                  <VideoThumbnail videoThumbUrl={subtitle.vid_thumb_url} />
                 </div>
                 <div className="video-play">
                   <img src={iconPlay} alt="play-icon" />
