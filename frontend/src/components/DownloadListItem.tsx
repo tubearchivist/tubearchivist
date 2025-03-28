@@ -6,9 +6,8 @@ import formatDate from '../functions/formatDates';
 import Button from './Button';
 import deleteDownloadById from '../api/actions/deleteDownloadById';
 import updateDownloadQueueStatusById from '../api/actions/updateDownloadQueueStatusById';
-import getApiUrl from '../configuration/getApiUrl';
 import { useUserConfigStore } from '../stores/UserConfigStore';
-import defaultVideoThumb from '/img/default-video-thumb.jpg';
+import VideoThumbnail from './VideoThumbail';
 
 type DownloadListItemProps = {
   download: Download;
@@ -22,24 +21,11 @@ const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
 
   const [hideDownload, setHideDownload] = useState(false);
 
-  let src = `${getApiUrl()}${download.vid_thumb_url}`;
-
-  if (download.vid_thumb_url === undefined) {
-    src = defaultVideoThumb;
-  }
-
   return (
     <div className={`video-item ${view}`} id={`dl-${download.youtube_id}`}>
       <div className={`video-thumb-wrap ${view}`}>
         <div className="video-thumb">
-          <img
-            src={src}
-            alt="video_thumb"
-            onError={({ currentTarget }) => {
-              currentTarget.onerror = null; // prevents looping
-              currentTarget.src = defaultVideoThumb;
-            }}
-          />
+          <VideoThumbnail videoThumbUrl={download.vid_thumb_url} />
 
           <div className="video-tags">
             {showIgnored && <span>ignored</span>}

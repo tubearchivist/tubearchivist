@@ -4,14 +4,13 @@ import { VideoType, ViewLayoutType } from '../pages/Home';
 import iconPlay from '/img/icon-play.svg';
 import iconDotMenu from '/img/icon-dot-menu.svg';
 import iconClose from '/img/icon-close.svg';
-import defaultVideoThumb from '/img/default-video-thumb.jpg';
 import updateWatchedState from '../api/actions/updateWatchedState';
 import formatDate from '../functions/formatDates';
 import WatchedCheckBox from './WatchedCheckBox';
 import MoveVideoMenu from './MoveVideoMenu';
 import { useState } from 'react';
-import getApiUrl from '../configuration/getApiUrl';
 import deleteVideoProgressById from '../api/actions/deleteVideoProgressById';
+import VideoThumbnail from './VideoThumbail';
 
 type VideoListItemProps = {
   video: VideoType;
@@ -36,12 +35,6 @@ const VideoListItem = ({
     return <p>No video found.</p>;
   }
 
-  let videoThumbSrc = `${getApiUrl()}${video.vid_thumb_url}`;
-
-  if (video.vid_thumb_url === undefined) {
-    videoThumbSrc = defaultVideoThumb;
-  }
-
   return (
     <div className={`video-item ${viewLayout}`}>
       <a
@@ -51,14 +44,7 @@ const VideoListItem = ({
       >
         <div className={`video-thumb-wrap ${viewLayout}`}>
           <div className="video-thumb">
-            <img
-              src={videoThumbSrc}
-              alt="video-thumb"
-              onError={({ currentTarget }) => {
-                currentTarget.onerror = null; // prevents looping
-                currentTarget.src = defaultVideoThumb;
-              }}
-            />
+            <VideoThumbnail videoThumbUrl={video.vid_thumb_url} />
 
             {video.player.progress && (
               <div
