@@ -77,12 +77,15 @@ COPY --from=node-builder ./frontend/dist /app/static
 VOLUME /cache
 VOLUME /youtube
 
+# network
+ENV TA_PORT=8000
+
 # healthcheck
-HEALTHCHECK --interval=2m --timeout=10s --retries=3 --start-period=30s --start-interval=5s CMD curl -f http://localhost:${TA_PORT:-8000}/api/health
+HEALTHCHECK --interval=2m --timeout=10s --retries=3 --start-period=30s --start-interval=5s CMD curl -f http://127.0.0.1:${TA_PORT}/api/health
 
 # start
 WORKDIR /app
-EXPOSE 8000
+EXPOSE $TA_PORT
 
 RUN chmod +x ./run.sh
 
