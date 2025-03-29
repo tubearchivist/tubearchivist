@@ -117,7 +117,11 @@ const Download = () => {
     })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refresh, showIgnored, currentPage]);
+  }, [refresh]);
+
+  useEffect(() => {
+    setRefresh(true);
+  }, [channelFilterFromUrl, currentPage, showIgnored]);
 
   useEffect(() => {
     (async () => {
@@ -126,10 +130,6 @@ const Download = () => {
       setDownloadAggsResponse(downloadAggs);
     })();
   }, [lastVideoCount, showIgnored]);
-
-  useEffect(() => {
-    setRefresh(true);
-  }, [channelFilterFromUrl]);
 
   return (
     <>
@@ -262,7 +262,7 @@ const Download = () => {
 
                   const params = searchParams;
                   if (value !== 'all') {
-                    params.append('channel', value);
+                    params.set('channel', value);
                   } else {
                     params.delete('channel');
                   }

@@ -80,7 +80,11 @@ const Base = () => {
   useEffect(() => {
     if (currentPageFromUrl !== currentPage) {
       setSearchParams(params => {
-        params.set('page', currentPage.toString());
+        if (currentPage == 0) {
+          params.delete('page');
+        } else {
+          params.set('page', currentPage.toString());
+        }
 
         return params;
       });
