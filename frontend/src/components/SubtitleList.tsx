@@ -44,9 +44,11 @@ const SubtitleList = ({ subtitleList }: SubtitleListProps) => {
           <div className="video-item list">
             <a
               onClick={() => {
-                setSearchParams({
-                  videoId: subtitle.youtube_id,
-                  t: stripNanoSecs(subtitle.subtitle_start) || '00:00:00',
+                setSearchParams(params => {
+                  params.set('videoId', subtitle.youtube_id);
+                  params.set('t', stripNanoSecs(subtitle.subtitle_start) || '00:00:00');
+
+                  return params;
                 });
               }}
             >

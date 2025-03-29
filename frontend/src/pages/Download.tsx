@@ -260,9 +260,11 @@ const Download = () => {
                 onChange={async event => {
                   const value = event.currentTarget.value;
 
-                  const params = new URLSearchParams();
+                  const params = searchParams;
                   if (value !== 'all') {
                     params.append('channel', value);
+                  } else {
+                    params.delete('channel');
                   }
 
                   setSearchParams(params);
