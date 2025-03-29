@@ -37,6 +37,8 @@ const Pagination = ({ pagination, setPage }: Props) => {
 
   const handleKeyEvent = useCallback(
     (event: KeyboardEvent) => {
+      event.preventDefault();
+
       const { code } = event;
 
       if (code === 'ArrowRight') {
