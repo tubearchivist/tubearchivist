@@ -13,6 +13,7 @@ class ChannelNav:
         """build nav items"""
         nav = {
             "has_pending": self._get_has_pending(),
+            "has_ignored": self._get_has_ignored(),
             "has_playlists": self._get_has_playlists(),
         }
         nav.update(self._get_vid_types())
@@ -53,6 +54,24 @@ class ChannelNav:
                 "bool": {
                     "must": [
                         {"term": {"status": {"value": "pending"}}},
+                        {"term": {"channel_id": {"value": self.channel_id}}},
+                    ]
+                }
+            },
+            "_source": False,
+        }
+        response, _ = ElasticWrap("ta_download/_search").get(data=data)
+
+        return bool(response["hits"]["hits"])
+
+    def _get_has_ignored(self):
+        """Check if there are ignored videos in the download queue"""
+        data = {
+            "size": 1,
+            "query": {
+                "bool": {
+                    "must": [
+                        {"term": {"status": {"value": "ignore"}}},
                         {"term": {"channel_id": {"value": self.channel_id}}},
                     ]
                 }

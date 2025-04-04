@@ -90,6 +90,7 @@ class ChannelNavSerializer(serializers.Serializer):
     """serialize channel navigation"""
 
     has_pending = serializers.BooleanField()
+    has_ignored = serializers.BooleanField()
     has_playlists = serializers.BooleanField()
     has_videos = serializers.BooleanField()
     has_streams = serializers.BooleanField()

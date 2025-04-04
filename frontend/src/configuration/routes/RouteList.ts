@@ -11,6 +11,7 @@ const Routes = {
   Playlist: (id: string) => `/playlist/${id}`,
   Downloads: '/downloads/',
   DownloadsByChannelId: (channelId: string) => `/downloads/?channel=${channelId}`,
+  IgnoredByChannelId: (channelId: string) => `/downloads/?channel=${channelId}&ignored=True`,
   Search: '/search/',
   SettingsDashboard: '/settings/',
   SettingsUser: '/settings/user/',
