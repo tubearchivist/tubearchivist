@@ -2,7 +2,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
 import iconPlay from '/img/icon-play.svg';
 import Linkify from './Linkify';
-import getApiUrl from '../configuration/getApiUrl';
+import VideoThumbnail from './VideoThumbail';
 
 type SubtitleListType = {
   subtitle_index: number;
@@ -44,15 +44,17 @@ const SubtitleList = ({ subtitleList }: SubtitleListProps) => {
           <div className="video-item list">
             <a
               onClick={() => {
-                setSearchParams({
-                  videoId: subtitle.youtube_id,
-                  t: stripNanoSecs(subtitle.subtitle_start) || '00:00:00',
+                setSearchParams(params => {
+                  params.set('videoId', subtitle.youtube_id);
+                  params.set('t', stripNanoSecs(subtitle.subtitle_start) || '00:00:00');
+
+                  return params;
                 });
               }}
             >
               <div className="video-thumb-wrap list">
                 <div className="video-thumb">
-                  <img src={`${getApiUrl()}${subtitle.vid_thumb_url}`} alt="video-thumb" />
+                  <VideoThumbnail videoThumbUrl={subtitle.vid_thumb_url} />
                 </div>
                 <div className="video-play">
                   <img src={iconPlay} alt="play-icon" />

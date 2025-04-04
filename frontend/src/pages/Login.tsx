@@ -134,9 +134,12 @@ const Login = () => {
 
           {waitingForBackend && (
             <>
-              <div className="lds-ring" style={{ color: 'var(--accent-font-dark)' }}>
-                <div />
-              </div>
+              <p>
+                Waiting for backend{' '}
+                <div className="lds-ring" style={{ color: 'var(--accent-font-dark)' }}>
+                  <div />
+                </div>
+              </p>
             </>
           )}
 

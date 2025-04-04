@@ -7,9 +7,15 @@ type PlaylistThumbnailProps = {
 };
 
 const PlaylistThumbnail = ({ playlistId, playlistThumbnail }: PlaylistThumbnailProps) => {
+  let src = `${getApiUrl()}${playlistThumbnail}`;
+
+  if (playlistThumbnail === undefined) {
+    src = defaultPlaylistThumbnail;
+  }
+
   return (
     <img
-      src={`${getApiUrl()}${playlistThumbnail}`}
+      src={src}
       alt={`${playlistId}-thumbnail`}
       onError={({ currentTarget }) => {
         currentTarget.onerror = null; // prevents looping

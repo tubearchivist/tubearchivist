@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Fragment } from 'react/jsx-runtime';
 import Routes from '../configuration/routes/RouteList';
 import { useCallback, useEffect } from 'react';
@@ -23,6 +23,9 @@ interface Props {
 const Pagination = ({ pagination, setPage }: Props) => {
   const { total_hits, params, prev_pages, current_page, next_pages, last_page, max_hits } =
     pagination;
+  const [searchParams] = useSearchParams();
+
+  const videoId = searchParams.get('videoId');
 
   const totalHits = Number(total_hits);
   const currentPage = Number(current_page);
@@ -39,7 +42,7 @@ const Pagination = ({ pagination, setPage }: Props) => {
     (event: KeyboardEvent) => {
       const { code } = event;
 
-      if (code === 'ArrowRight') {
+      if (code === 'ArrowRight' && videoId === null) {
         if (currentPage === 0 && totalHits > 1) {
           setPage(2);
           return;
@@ -52,7 +55,7 @@ const Pagination = ({ pagination, setPage }: Props) => {
         setPage(currentPage + 1);
       }
 
-      if (code === 'ArrowLeft') {
+      if (code === 'ArrowLeft' && videoId === null) {
         if (currentPage === 0) {
           return;
         }
@@ -65,7 +68,7 @@ const Pagination = ({ pagination, setPage }: Props) => {
         setPage(currentPage - 1);
       }
     },
-    [currentPage, lastPage, setPage, totalHits],
+    [currentPage, lastPage, setPage, totalHits, videoId],
   );
 
   useEffect(() => {

@@ -7,9 +7,15 @@ type ChannelIconProps = {
 };
 
 const ChannelIcon = ({ channelId, channelThumbUrl }: ChannelIconProps) => {
+  let src = `${getApiUrl()}${channelThumbUrl}`;
+
+  if (channelThumbUrl === undefined) {
+    src = defaultChannelIcon;
+  }
+
   return (
     <img
-      src={`${getApiUrl()}${channelThumbUrl}`}
+      src={src}
       alt={`${channelId}-thumb`}
       onError={({ currentTarget }) => {
         currentTarget.onerror = null; // prevents looping

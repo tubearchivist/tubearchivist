@@ -8,7 +8,9 @@ const updateDownloadQueue = async (youtubeIdStrings: string, autostart: boolean)
     const youtubeIds = youtubeIdStrings.split('\n');
 
     youtubeIds.forEach(youtubeId => {
-      urls.push({ youtube_id: youtubeId, status: 'pending' });
+      if (youtubeId.trim()) {
+        urls.push({ youtube_id: youtubeId, status: 'pending' });
+      }
     });
   } else {
     urls.push({ youtube_id: youtubeIdStrings, status: 'pending' });

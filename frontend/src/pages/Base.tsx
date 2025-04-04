@@ -36,6 +36,7 @@ export type OutletContextType = {
 };
 
 const Base = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { setAuth } = useAuthStore();
   const { setUserConfig } = useUserConfigStore();
   const { setUserAccount } = useUserAccountStore();
@@ -45,12 +46,9 @@ const Base = () => {
 
   const location = useLocation();
 
-  const searchParams = new URLSearchParams(location.search);
-
   const currentPageFromUrl = Number(searchParams.get('page'));
 
   const [currentPage, setCurrentPage] = useState(currentPageFromUrl);
-  const [, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     setAuth(auth);
@@ -82,7 +80,11 @@ const Base = () => {
   useEffect(() => {
     if (currentPageFromUrl !== currentPage) {
       setSearchParams(params => {
-        params.set('page', currentPage.toString());
+        if (currentPage == 0) {
+          params.delete('page');
+        } else {
+          params.set('page', currentPage.toString());
+        }
 
         return params;
       });

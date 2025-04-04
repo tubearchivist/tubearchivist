@@ -43,6 +43,7 @@ import { FileSizeUnits } from '../api/actions/updateUserConfig';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import NotFound from './NotFound';
 import { ApiResponseType } from '../functions/APIClient';
+import VideoThumbnail from '../components/VideoThumbail';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {
   return playlist.playlist_entries.some(entry => {
@@ -534,9 +535,8 @@ const Video = () => {
                       {playlistItem.playlist_previous && (
                         <>
                           <Link to={Routes.Video(playlistItem.playlist_previous.youtube_id)}>
-                            <img
-                              src={`${getApiUrl()}/${playlistItem.playlist_previous.vid_thumb}`}
-                              alt="previous thumbnail"
+                            <VideoThumbnail
+                              videoThumbUrl={playlistItem.playlist_previous.vid_thumb}
                             />
                           </Link>
                           <div className="playlist-desc">
@@ -564,10 +564,7 @@ const Video = () => {
                             </Link>
                           </div>
                           <Link to={Routes.Video(playlistItem.playlist_next.youtube_id)}>
-                            <img
-                              src={`${getApiUrl()}/${playlistItem.playlist_next.vid_thumb}`}
-                              alt="previous thumbnail"
-                            />
+                            <VideoThumbnail videoThumbUrl={playlistItem.playlist_next.vid_thumb} />
                           </Link>
                         </>
                       )}
