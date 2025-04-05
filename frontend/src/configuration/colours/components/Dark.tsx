@@ -1,7 +1,9 @@
-import './css/dark.css';
-
 const DarkStylesheet = () => {
-  return <></>;
+  return (
+    <head>
+      <link rel="stylesheet" href="/css/dark.css" />
+    </head>
+  );
 };
 
 export default DarkStylesheet;

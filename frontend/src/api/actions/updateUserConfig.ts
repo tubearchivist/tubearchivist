@@ -1,7 +1,12 @@
 import { SortByType, SortOrderType, ViewLayoutType } from '../../pages/Home';
 import APIClient from '../../functions/APIClient';
 
-export type ColourVariants = 'dark.css' | 'light.css' | 'matrix.css' | 'midnight.css';
+export type ColourVariants =
+  | 'dark.css'
+  | 'light.css'
+  | 'matrix.css'
+  | 'midnight.css'
+  | 'custom.css';
 
 export const FileSizeUnits = {
   Binary: 'binary',
