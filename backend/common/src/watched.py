@@ -43,14 +43,9 @@ class WatchState:
     def change_vid_state(self):
         """change watched state of video"""
         path = f"ta_video/_update/{self.youtube_id}"
-        data = {
-            "doc": {
-                "player": {
-                    "watched": self.is_watched,
-                    "watched_date": self.stamp,
-                }
-            }
-        }
+        data = {"doc": {"player": {"watched": self.is_watched}}}
+        if self.is_watched:
+            data["doc"]["player"]["watched_date"] = self.stamp
         response, status_code = ElasticWrap(path).post(data=data)
         key = f"{self.user_id}:progress:{self.youtube_id}"
         RedisArchivist().del_message(key)
