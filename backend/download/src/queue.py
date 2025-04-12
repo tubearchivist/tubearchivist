@@ -215,7 +215,10 @@ class PendingList(PendingIndex):
         if url in self.to_skip_already_indexed:
             # If the video is already indexed, we skip it
             print(f"{url}: skipped adding already downloaded.")
-        elif url in self.to_skip_already_in_ta_download and url not in self.missing_videos_to_update:
+        elif (
+            url in self.to_skip_already_in_ta_download
+            and url not in self.missing_videos_to_update
+        ):
             # If the video is already in the ta_download list, we add it to
             # the missing_videos_to_update, as we might need to change its
             # status to 'priority'
@@ -269,8 +272,10 @@ class PendingList(PendingIndex):
             for idx, (youtube_id, vid_type) in enumerate(self.missing_videos_to_update):
                 PendingInteract(youtube_id, "priority").update_status()
                 videos_updated.append(youtube_id)
-                print(f"{youtube_id}: [{idx + 1}/{total}]: changes status to \
-                    'priority'")
+                print(
+                    f"{youtube_id}: [{idx + 1}/{total}]: changes status to \
+                    'priority'"
+                )
 
         total = len(self.missing_videos)
         videos_added = []
