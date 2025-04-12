@@ -216,14 +216,17 @@ class PendingList(PendingIndex):
             # If the video is already indexed, we skip it
             print(f"{url}: skipped adding already downloaded.")
         elif url in self.to_skip_already_in_ta_download and url not in self.missing_videos_to_update:
-            # If the video is already in the ta_download list, we add it to the missing_videos_to_update, as we might need
-            # to change its status to 'priority'
+            # If the video is already in the ta_download list, we add it to
+            # the missing_videos_to_update, as we might need to change its
+            # status to 'priority'
             self.missing_videos_to_update.append((url, vid_type))
         elif url not in self.missing_videos:
-            # If the video is not in the other lists, we add it to the missing_videos one, so we can fetch the details
+            # If the video is not in the other lists, we add it to the
+            # missing_videos one, so we can fetch the details
             self.missing_videos.append((url, vid_type))
         else:
-            # We skip this video as it's either already downloaded, or a duplicate
+            # We skip this video as it's either already downloaded, or
+            # a duplicate
             print(f"{url}: skipped adding already indexed video to download.")
 
     def _parse_channel(self, url, vid_type):
@@ -258,13 +261,16 @@ class PendingList(PendingIndex):
 
         videos_updated = []
         if auto_start:
-            # If auto_start, we process the missing_videos_to_update and set the status of the videos in the list to
-            # 'priority', so that they will be immediately downloaded alongside the ones in the missing_videos list
+            # If auto_start, we process the missing_videos_to_update and set
+            # the status of the videos in the list to 'priority', so that they
+            # will be immediately downloaded alongside the ones in the
+            # missing_videos list
             total = len(self.missing_videos_to_update)
             for idx, (youtube_id, vid_type) in enumerate(self.missing_videos_to_update):
                 PendingInteract(youtube_id, "priority").update_status()
                 videos_updated.append(youtube_id)
-                print(f"{youtube_id}: [{idx + 1}/{total}]: changes status to 'priority'")
+                print(f"{youtube_id}: [{idx + 1}/{total}]: changes status to \
+                    'priority'")
 
         total = len(self.missing_videos)
         videos_added = []

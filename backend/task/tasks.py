@@ -165,7 +165,8 @@ def extrac_dl(self, youtube_ids, auto_start=False, status="pending"):
         download_pending.delay(auto_only=True)
 
     if videos_added or videos_updated:
-        return f"added {len(videos_added)} video(s) and updated {len(videos_updated)} video(s) in the queue"
+        return f"added {len(videos_added)} video(s) and \
+            updated {len(videos_updated)} video(s) in the queue"
 
     return None
 
