@@ -12,7 +12,7 @@ class DownloadItemSerializer(serializers.Serializer):
 
     auto_start = serializers.BooleanField()
     channel_id = serializers.CharField()
-    channel_indexed = serializers.BooleanField()
+    channel_indexed = serializers.BooleanField(required=False)
     channel_name = serializers.CharField()
     duration = serializers.CharField()
     published = serializers.CharField()
