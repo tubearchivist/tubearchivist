@@ -221,7 +221,7 @@ class PendingList(PendingIndex):
             # If the video is already in the ta_download list, we add it to
             # the missing_videos_to_update, as we might need to change its
             # status to 'priority'
-            self.missing_videos_to_update.append((url, vid_type))
+            self.missing_videos_to_update.append(url)
         elif url not in self.missing_videos:
             # If the video is not in the other lists, we add it to the
             # missing_videos one, so we can fetch the details
@@ -268,7 +268,7 @@ class PendingList(PendingIndex):
             # will be immediately downloaded alongside the ones in the
             # missing_videos list
             total = len(self.missing_videos_to_update)
-            for idx, (youtube_id, vid_type) in enumerate(self.missing_videos_to_update):
+            for idx, youtube_id in enumerate(self.missing_videos_to_update):
                 PendingInteract(youtube_id, "priority").update_status()
                 videos_updated.append(youtube_id)
                 print(
