@@ -29,7 +29,6 @@ class PendingIndex:
         self.to_skip_already_in_ta_download = False
         self.to_skip_already_indexed = False
 
-
     def get_download(self):
         """get a list of all pending videos in ta_download"""
         data = {
@@ -366,9 +365,7 @@ class PendingList(PendingIndex):
     def _parse_youtube_details(self, vid, vid_type=VideoTypeEnum.VIDEOS):
         """parse response"""
         vid_id = vid.get("id")
-        published = datetime.strptime(vid["upload_date"], "%Y%m%d").strftime(
-            "%Y-%m-%d"
-        )
+        published = datetime.strptime(vid["upload_date"], "%Y%m%d").strftime("%Y-%m-%d")
 
         # build dict
         youtube_details = {
