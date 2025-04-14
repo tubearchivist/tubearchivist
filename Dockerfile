@@ -25,7 +25,6 @@ RUN set -e; \
       libsasl2-dev \
       libssl-dev \
     ; \
-    apt-get clean; \
     rm -rf /var/lib/apt/lists/* ;
 
 # install requirements
@@ -58,7 +57,6 @@ RUN set -e; \
       curl \
       nginx \
     ; \
-    apt-get clean; \
     rm -rf /var/lib/apt/lists/* ;
 
 # install debug tools for testing environment
@@ -67,14 +65,13 @@ RUN set -e; \
         apt-get -y update; \
         apt-get -y install --no-install-recommends \
           bmon \
-          iputils-ping \
           htop \
+          iputils-ping \
           lsof \
           net-tools \
           procps \
           vim \
         ; \
-        apt-get clean; \
         rm -rf /var/lib/apt/lists/* ; \
         pip install --user \
           ipython \
