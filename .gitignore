@@ -4,6 +4,7 @@ __pycache__
 
 # django testing
 backend/static
+backend/staticfiles
 backend/.env
 
 # vscode custom conf
