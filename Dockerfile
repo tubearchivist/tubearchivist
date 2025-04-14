@@ -103,7 +103,7 @@ COPY --from=node-builder ./frontend/dist /app/static
 
 # final setup
 RUN set -e; \
-    chmod +x /app\/run.sh; \
+    chmod +x /app/run.sh; \
     sed -i 's/^user www\-data\;$/user root\;/' /etc/nginx/nginx.conf; \
     mkdir -p /cache /youtube;
 
