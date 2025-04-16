@@ -18,4 +18,5 @@ venv/
 assets/*
 
 # for local testing only
+dev_assets/
 testing.sh
