@@ -304,7 +304,7 @@ const Playlist = () => {
       <div className={`boxed-content ${gridView}`}>
         <Filterbar
           hideToggleText="Hide watched videos:"
-          viewStyleName={ViewStyleNames.playlist}
+          viewStyleName={ViewStyleNames.home}
           showSort={false}
         />
       </div>
