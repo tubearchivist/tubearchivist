@@ -1,5 +1,5 @@
 -r requirements.txt
-ipython==9.0.2
+ipython==9.2.0
 pre-commit==4.2.0
 pylint-django==2.6.1
 pylint==3.3.6
