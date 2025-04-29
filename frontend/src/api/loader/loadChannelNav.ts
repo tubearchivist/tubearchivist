@@ -5,6 +5,7 @@ export type ChannelNavResponseType = {
   has_shorts: boolean;
   has_playlists: boolean;
   has_pending: boolean;
+  has_ignored: boolean;
 };
 
 const loadChannelNav = async (youtubeChannelId: string) => {
