@@ -1,4 +1,4 @@
-import { ConfigType, SortByType, SortOrderType, VideoType } from '../../pages/Home';
+import { ConfigType, VideoType } from '../../pages/Home';
 import { PaginationType } from '../../components/Pagination';
 import APIClient from '../../functions/APIClient';
 
@@ -8,8 +8,44 @@ export type VideoListByFilterResponseType = {
   paginate?: PaginationType;
 };
 
-type WatchTypes = 'watched' | 'unwatched' | 'continue';
+export type SortByType =
+  | 'published'
+  | 'downloaded'
+  | 'views'
+  | 'likes'
+  | 'duration'
+  | 'mediasize'
+  | 'width'
+  | 'height';
+export const SortByEnum = {
+  Published: 'published',
+  Downloaded: 'downloaded',
+  Views: 'views',
+  Likes: 'likes',
+  Duration: 'duration',
+  'Media Size': 'mediasize',
+};
+
+export const SortByExpandedEnum = {
+  ...SortByEnum,
+  Width: 'width',
+  Height: 'height',
+};
+
+export type SortOrderType = 'asc' | 'desc';
+export const SortOrderEnum = {
+  Asc: 'asc',
+  Desc: 'desc',
+};
+
 export type VideoTypes = 'videos' | 'streams' | 'shorts';
+
+export type WatchTypes = 'watched' | 'unwatched' | 'continue';
+export const WatchTypesEnum = {
+  Watched: 'watched',
+  Unwatched: 'unwatched',
+  Continue: 'continue',
+};
 
 type FilterType = {
   page?: number;
