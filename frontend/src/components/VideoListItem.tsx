@@ -11,6 +11,9 @@ import MoveVideoMenu from './MoveVideoMenu';
 import { useState } from 'react';
 import deleteVideoProgressById from '../api/actions/deleteVideoProgressById';
 import VideoThumbnail from './VideoThumbail';
+import { FileSizeUnits } from '../api/actions/updateUserConfig';
+import { useUserConfigStore } from '../stores/UserConfigStore';
+import humanFileSize from '../functions/humanFileSize';
 
 type VideoListItemProps = {
   video: VideoType;
@@ -28,12 +31,16 @@ const VideoListItem = ({
   refreshVideoList,
 }: VideoListItemProps) => {
   const [, setSearchParams] = useSearchParams();
+  const { userConfig } = useUserConfigStore();
 
   const [showReorderMenu, setShowReorderMenu] = useState(false);
 
   if (!video) {
     return <p>No video found.</p>;
   }
+
+  const useSiUnits = userConfig.file_size_unit === FileSizeUnits.Metric;
+  const [videoStream, audioStream] = video.streams;
 
   return (
     <div className={`video-item ${viewLayout}`}>
@@ -109,6 +116,18 @@ const VideoListItem = ({
             <Link className="video-more" to={Routes.Video(video.youtube_id)}>
               <h2>{video.title}</h2>
             </Link>
+
+            {viewLayout === 'list' && (
+              <>
+                <p>
+                  {videoStream.width}x{videoStream.height} {videoStream.codec}{' '}
+                  {humanFileSize(videoStream.bitrate, useSiUnits)}
+                </p>
+                <p>
+                  {audioStream.codec} {humanFileSize(audioStream.bitrate, useSiUnits)}
+                </p>
+              </>
+            )}
           </div>
 
           {showReorderButton && !showReorderMenu && (
