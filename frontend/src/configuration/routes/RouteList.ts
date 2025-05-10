@@ -17,7 +17,6 @@ const Routes = {
   SettingsApplication: '/settings/application/',
   SettingsScheduling: '/settings/scheduling/',
   SettingsActions: '/settings/actions/',
-  SettingsVideos: '/settings/videos/',
   Login: '/login/',
   Video: (id: string) => `/video/${id}`,
   VideoAtTimestamp: (id: string, timestamp: string) => `/video/${id}/?t=${timestamp}`,
