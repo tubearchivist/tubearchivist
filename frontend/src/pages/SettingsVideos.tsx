@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import SettingsNavigation from '../components/SettingsNavigation';
 import { ApiResponseType } from '../functions/APIClient';
 import loadVideoListByFilter, {
-  SortByExpandedEnum,
+  SortByEnum,
   SortByType,
   SortOrderEnum,
   SortOrderType,
@@ -17,7 +17,6 @@ import humanFileSize from '../functions/humanFileSize';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { FileSizeUnits } from '../api/actions/updateUserConfig';
 import Routes from '../configuration/routes/RouteList';
-import SortArrow from '../components/SortArrow';
 
 const SettingsVideos = () => {
   const { userConfig } = useUserConfigStore();
@@ -108,7 +107,7 @@ const SettingsVideos = () => {
                 setSortBy(event.currentTarget.value as SortByType);
               }}
             >
-              {Object.entries(SortByExpandedEnum).map(([key, value]) => {
+              {Object.entries(SortByEnum).map(([key, value]) => {
                 return <option value={value}>{key}</option>;
               })}
             </select>
@@ -165,10 +164,7 @@ const SettingsVideos = () => {
                         onHeaderClicked('width');
                       }}
                     >
-                      <div>
-                        <SortArrow visible={sortBy === 'width'} sortOrder={sortOrder} />
-                        Width
-                      </div>
+                      <div>Width</div>
                     </a>
                   </th>
                   <th>
@@ -177,7 +173,6 @@ const SettingsVideos = () => {
                         onHeaderClicked('height');
                       }}
                     >
-                      <SortArrow visible={sortBy === 'height'} sortOrder={sortOrder} />
                       Height
                     </a>
                   </th>
@@ -187,7 +182,6 @@ const SettingsVideos = () => {
                         onHeaderClicked('mediasize');
                       }}
                     >
-                      <SortArrow visible={sortBy === 'mediasize'} sortOrder={sortOrder} />
                       Media size
                     </a>
                   </th>

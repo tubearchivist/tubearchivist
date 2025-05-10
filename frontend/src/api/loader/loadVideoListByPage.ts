@@ -24,10 +24,6 @@ export const SortByEnum = {
   Likes: 'likes',
   Duration: 'duration',
   'Media Size': 'mediasize',
-};
-
-export const SortByExpandedEnum = {
-  ...SortByEnum,
   Width: 'width',
   Height: 'height',
 };
