@@ -4,10 +4,15 @@ import iconAdd from '/img/icon-add.svg';
 import iconSubstract from '/img/icon-substract.svg';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
-import { SortByType, SortOrderType } from '../pages/Home';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { ViewStyles } from '../configuration/constants/ViewStyle';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
+import {
+  SortByEnum,
+  SortByType,
+  SortOrderEnum,
+  SortOrderType,
+} from '../api/loader/loadVideoListByPage';
 
 type FilterbarProps = {
   hideToggleText: string;
@@ -67,12 +72,9 @@ const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: Filterbar
                 handleUserConfigUpdate({ sort_by: event.target.value as SortByType });
               }}
             >
-              <option value="published">date published</option>
-              <option value="downloaded">date downloaded</option>
-              <option value="views">views</option>
-              <option value="likes">likes</option>
-              <option value="duration">duration</option>
-              <option value="mediasize">media size</option>
+              {Object.entries(SortByEnum).map(([key, value]) => {
+                return <option value={value}>{key}</option>;
+              })}
             </select>
             <select
               name="sort_order"
@@ -82,8 +84,9 @@ const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: Filterbar
                 handleUserConfigUpdate({ sort_order: event.target.value as SortOrderType });
               }}
             >
-              <option value="asc">asc</option>
-              <option value="desc">desc</option>
+              {Object.entries(SortOrderEnum).map(([key, value]) => {
+                return <option value={value}>{key}</option>;
+              })}
             </select>
           </div>
         </div>

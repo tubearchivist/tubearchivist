@@ -28,6 +28,7 @@ import Download from './pages/Download';
 import loadUserAccount from './api/loader/loadUserAccount';
 import loadAppsettingsConfig from './api/loader/loadAppsettingsConfig';
 import NotFound from './pages/NotFound';
+import SettingsVideos from './pages/SettingsVideos';
 
 const router = createBrowserRouter(
   [
@@ -134,6 +135,10 @@ const router = createBrowserRouter(
         {
           path: Routes.SettingsUser,
           element: <SettingsUser />,
+        },
+        {
+          path: Routes.SettingsVideos,
+          element: <SettingsVideos />,
         },
         {
           path: Routes.About,
