@@ -1,7 +1,9 @@
-import './css/light.css';
-
 const LightStylesheet = () => {
-  return <></>;
+  return (
+    <head>
+      <link rel="stylesheet" href="/css/light.css" />
+    </head>
+  );
 };
 
 export default LightStylesheet;

@@ -60,7 +60,7 @@ const Playlist = () => {
 
   const palylistEntries = playlistResponseData?.playlist_entries;
   const videoArchivedCount = Number(palylistEntries?.filter(video => video.downloaded).length);
-  const videoInPlaylistCount = pagination?.total_hits;
+  const videoInPlaylistCount = Number(palylistEntries?.length);
 
   const view = userConfig.view_style_home;
   const gridItems = userConfig.grid_items;
@@ -304,7 +304,7 @@ const Playlist = () => {
       <div className={`boxed-content ${gridView}`}>
         <Filterbar
           hideToggleText="Hide watched videos:"
-          viewStyleName={ViewStyleNames.playlist}
+          viewStyleName={ViewStyleNames.home}
           showSort={false}
         />
       </div>

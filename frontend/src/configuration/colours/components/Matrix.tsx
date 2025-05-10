@@ -1,7 +1,9 @@
-import './css/matrix.css';
-
 const MatrixStylesheet = () => {
-  return <></>;
+  return (
+    <head>
+      <link rel="stylesheet" href="/css/matrix.css" />
+    </head>
+  );
 };
 
 export default MatrixStylesheet;
