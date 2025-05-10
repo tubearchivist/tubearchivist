@@ -26,6 +26,9 @@ const SettingsNavigation = () => {
             <Link to={Routes.SettingsActions}>
               <h3>Actions</h3>
             </Link>
+            <Link to={Routes.SettingsVideos}>
+              <h3>Videos</h3>
+            </Link>
           </>
         )}
       </div>

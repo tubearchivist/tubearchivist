@@ -99,8 +99,6 @@ export type ConfigType = {
   downloads: DownloadsType;
 };
 
-export type SortByType = 'published' | 'downloaded' | 'views' | 'likes' | 'duration' | 'mediasize';
-export type SortOrderType = 'asc' | 'desc';
 export type ViewLayoutType = 'grid' | 'list';
 
 const Home = () => {
