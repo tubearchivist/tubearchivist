@@ -133,6 +133,11 @@ button:hover {
   color: var(--main-bg);
 }
 
+.video-details table td,
+.video-details table th {
+  padding: 5px;
+}
+
 .button-box {
   padding: 5px 2px;
   display: inline-flex;

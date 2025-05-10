@@ -1,5 +1,6 @@
-import { SortByType, SortOrderType, ViewLayoutType } from '../../pages/Home';
+import { ViewLayoutType } from '../../pages/Home';
 import APIClient from '../../functions/APIClient';
+import { SortByType, SortOrderType } from '../loader/loadVideoListByPage';
 
 export type ColourVariants =
   | 'dark.css'
