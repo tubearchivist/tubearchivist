@@ -5,7 +5,7 @@ import iconSubstract from '/img/icon-substract.svg';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
 import { useUserConfigStore } from '../stores/UserConfigStore';
-import { ViewStyles } from '../configuration/constants/ViewStyle';
+import { ViewStylesEnum } from '../configuration/constants/ViewStyle';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import {
   SortByEnum,
@@ -23,7 +23,7 @@ type FilterbarProps = {
 const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: FilterbarProps) => {
   const { userConfig, setUserConfig } = useUserConfigStore();
   const [showHidden, setShowHidden] = useState(false);
-  const isGridView = userConfig.view_style_home === ViewStyles.grid;
+  const isGridView = userConfig.view_style_home === ViewStylesEnum.Grid;
 
   const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
     const updatedUserConfig = await updateUserConfig(config);
@@ -128,14 +128,14 @@ const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: Filterbar
         <img
           src={iconGridView}
           onClick={() => {
-            handleUserConfigUpdate({ [viewStyleName]: 'grid' });
+            handleUserConfigUpdate({ [viewStyleName]: ViewStylesEnum.Grid });
           }}
           alt="grid view"
         />
         <img
           src={iconListView}
           onClick={() => {
-            handleUserConfigUpdate({ [viewStyleName]: 'list' });
+            handleUserConfigUpdate({ [viewStyleName]: ViewStylesEnum.List });
           }}
           alt="list view"
         />

@@ -5,7 +5,7 @@ import VideoList from '../components/VideoList';
 import Routes from '../configuration/routes/RouteList';
 import Pagination from '../components/Pagination';
 import Filterbar from '../components/Filterbar';
-import { ViewStyleNames, ViewStyles } from '../configuration/constants/ViewStyle';
+import { ViewStyleNames, ViewStylesEnum } from '../configuration/constants/ViewStyle';
 import ChannelOverview from '../components/ChannelOverview';
 import loadChannelById, { ChannelResponseType } from '../api/loader/loadChannelById';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
@@ -57,7 +57,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const useSiUnits = userConfig.file_size_unit === FileSizeUnits.Metric;
 
   const view = userConfig.view_style_home;
-  const isGridView = view === ViewStyles.grid;
+  const isGridView = view === ViewStylesEnum.Grid;
   const gridView = isGridView ? `boxed-${userConfig.grid_items}` : '';
   const gridViewGrid = isGridView ? `grid-${userConfig.grid_items}` : '';
 

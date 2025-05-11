@@ -11,6 +11,7 @@ import iconListView from '/img/icon-listview.svg';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import { ApiResponseType } from '../functions/APIClient';
+import { ViewStylesType, ViewStylesEnum } from '../configuration/constants/ViewStyle';
 
 const ChannelPlaylist = () => {
   const { channelId } = useParams();
@@ -87,14 +88,18 @@ const ChannelPlaylist = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                handleUserConfigUpdate({ view_style_playlist: 'grid' });
+                handleUserConfigUpdate({
+                  view_style_playlist: ViewStylesEnum.Grid as ViewStylesType,
+                });
               }}
               alt="grid view"
             />
             <img
               src={iconListView}
               onClick={() => {
-                handleUserConfigUpdate({ view_style_playlist: 'list' });
+                handleUserConfigUpdate({
+                  view_style_playlist: ViewStylesEnum.List as ViewStylesType,
+                });
               }}
               alt="list view"
             />

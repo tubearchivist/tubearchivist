@@ -9,7 +9,7 @@ import VideoList from '../components/VideoList';
 import { ChannelType } from './Channels';
 import { OutletContextType } from './Base';
 import Filterbar from '../components/Filterbar';
-import { ViewStyleNames, ViewStyles } from '../configuration/constants/ViewStyle';
+import { ViewStyleNames, ViewStylesEnum } from '../configuration/constants/ViewStyle';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import { SponsorBlockType } from './Video';
@@ -99,8 +99,6 @@ export type ConfigType = {
   downloads: DownloadsType;
 };
 
-export type ViewLayoutType = 'grid' | 'list';
-
 const Home = () => {
   const { userConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
@@ -123,7 +121,7 @@ const Home = () => {
 
   const hasVideos = videoResponseData?.data?.length !== 0;
 
-  const isGridView = userConfig.view_style_home === ViewStyles.grid;
+  const isGridView = userConfig.view_style_home === ViewStylesEnum.Grid;
   const gridView = isGridView ? `boxed-${userConfig.grid_items}` : '';
   const gridViewGrid = isGridView ? `grid-${userConfig.grid_items}` : '';
 
