@@ -38,7 +38,7 @@ const ChannelOverview = ({
             <Link to={Routes.ChannelVideo(channelId)}>{channelname}</Link>
           </h3>
 
-          <FormattedNumber text="Subscribers:" number={channelSubs} />
+          {channelSubs !== null && <FormattedNumber text="Subscribers:" number={channelSubs} />}
 
           {isAdmin && (
             <>

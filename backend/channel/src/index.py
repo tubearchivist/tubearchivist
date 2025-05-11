@@ -157,8 +157,18 @@ class YoutubeChannel(YouTubeItem):
         # add ingest pipeline
         processors = []
         for field, value in self.json_data.items():
-            line = {"set": {"field": "channel." + field, "value": value}}
+            if value is None:
+                line = {
+                    "script": {
+                        "lang": "painless",
+                        "source": f"ctx['{field}'] = null;",
+                    }
+                }
+            else:
+                line = {"set": {"field": "channel." + field, "value": value}}
+
             processors.append(line)
+
         data = {"description": self.youtube_id, "processors": processors}
         ingest_path = f"_ingest/pipeline/{self.youtube_id}"
         _, _ = ElasticWrap(ingest_path).put(data)
