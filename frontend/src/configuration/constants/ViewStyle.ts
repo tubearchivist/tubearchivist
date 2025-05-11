@@ -5,7 +5,9 @@ export const ViewStyleNames = {
   playlist: 'view_style_playlist',
 };
 
-export const ViewStyles = {
-  grid: 'grid',
-  list: 'list',
+export type ViewStylesType = 'grid' | 'list' | 'table';
+export const ViewStylesEnum = {
+  Grid: 'grid',
+  List: 'list',
+  Table: 'table',
 };

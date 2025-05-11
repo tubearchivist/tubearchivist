@@ -44,6 +44,7 @@ import { useUserConfigStore } from '../stores/UserConfigStore';
 import NotFound from './NotFound';
 import { ApiResponseType } from '../functions/APIClient';
 import VideoThumbnail from '../components/VideoThumbail';
+import { ViewStylesEnum, ViewStylesType } from '../configuration/constants/ViewStyle';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {
   return playlist.playlist_entries.some(entry => {
@@ -581,7 +582,7 @@ const Video = () => {
           <div className="video-list grid grid-3" id="similar-videos">
             <VideoList
               videoList={similarVideosResponseData}
-              viewLayout="grid"
+              viewLayout={ViewStylesEnum.Grid as ViewStylesType}
               refreshVideoList={setRefreshVideoList}
             />
           </div>

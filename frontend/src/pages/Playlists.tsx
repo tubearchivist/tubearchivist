@@ -18,6 +18,7 @@ import { useUserConfigStore } from '../stores/UserConfigStore';
 import Notifications from '../components/Notifications';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import { ApiResponseType } from '../functions/APIClient';
+import { ViewStylesEnum, ViewStylesType } from '../configuration/constants/ViewStyle';
 
 const Playlists = () => {
   const { userConfig, setUserConfig } = useUserConfigStore();
@@ -177,14 +178,18 @@ const Playlists = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                handleUserConfigUpdate({ view_style_playlist: 'grid' });
+                handleUserConfigUpdate({
+                  view_style_playlist: ViewStylesEnum.Grid as ViewStylesType,
+                });
               }}
               alt="grid view"
             />
             <img
               src={iconListView}
               onClick={() => {
-                handleUserConfigUpdate({ view_style_playlist: 'list' });
+                handleUserConfigUpdate({
+                  view_style_playlist: ViewStylesEnum.List as ViewStylesType,
+                });
               }}
               alt="list view"
             />

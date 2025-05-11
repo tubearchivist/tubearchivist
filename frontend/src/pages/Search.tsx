@@ -5,7 +5,7 @@ import VideoList from '../components/VideoList';
 import ChannelList from '../components/ChannelList';
 import PlaylistList from '../components/PlaylistList';
 import SubtitleList from '../components/SubtitleList';
-import { ViewStyles } from '../configuration/constants/ViewStyle';
+import { ViewStylesEnum } from '../configuration/constants/ViewStyle';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import SearchExampleQueries from '../components/SearchExampleQueries';
 import { useUserConfigStore } from '../stores/UserConfigStore';
@@ -61,7 +61,7 @@ const Search = () => {
   const isPlaylistQuery = queryType === 'playlist' || isSimpleQuery;
   const isFullTextQuery = queryType === 'full' || isSimpleQuery;
 
-  const isGridView = viewVideos === ViewStyles.grid;
+  const isGridView = viewVideos === ViewStylesEnum.Grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
 

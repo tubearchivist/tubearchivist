@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
-import { VideoType, ViewLayoutType } from '../pages/Home';
+import { VideoType } from '../pages/Home';
 import iconPlay from '/img/icon-play.svg';
 import iconDotMenu from '/img/icon-dot-menu.svg';
 import iconClose from '/img/icon-close.svg';
@@ -11,10 +11,11 @@ import MoveVideoMenu from './MoveVideoMenu';
 import { useState } from 'react';
 import deleteVideoProgressById from '../api/actions/deleteVideoProgressById';
 import VideoThumbnail from './VideoThumbail';
+import { ViewStylesType } from '../configuration/constants/ViewStyle';
 
 type VideoListItemProps = {
   video: VideoType;
-  viewLayout: ViewLayoutType;
+  viewLayout: ViewStylesType;
   playlistId?: string;
   showReorderButton?: boolean;
   refreshVideoList: (refresh: boolean) => void;

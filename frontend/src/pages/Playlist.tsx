@@ -9,7 +9,7 @@ import VideoList from '../components/VideoList';
 import Pagination, { PaginationType } from '../components/Pagination';
 import ChannelOverview from '../components/ChannelOverview';
 import Linkify from '../components/Linkify';
-import { ViewStyleNames, ViewStyles } from '../configuration/constants/ViewStyle';
+import { ViewStyleNames, ViewStylesEnum } from '../configuration/constants/ViewStyle';
 import updatePlaylistSubscription from '../api/actions/updatePlaylistSubscription';
 import deletePlaylist from '../api/actions/deletePlaylist';
 import Routes from '../configuration/routes/RouteList';
@@ -65,7 +65,7 @@ const Playlist = () => {
   const view = userConfig.view_style_home;
   const gridItems = userConfig.grid_items;
   const hideWatched = userConfig.hide_watched;
-  const isGridView = view === ViewStyles.grid;
+  const isGridView = view === ViewStylesEnum.Grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
 
