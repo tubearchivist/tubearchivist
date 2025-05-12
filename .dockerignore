@@ -5,6 +5,13 @@
 # Docker
 .docker
 
+# Backend development
+backend/static
+backend/staticfiles
+
+# Frontend development
+frontend/node_modules
+
 # Python
 tubearchivist/__pycache__/
 tubearchivist/*/__pycache__/
