@@ -125,7 +125,7 @@ const Search = () => {
               <div id="video-results" className={`video-list ${viewVideos} ${gridViewGrid}`}>
                 <VideoList
                   videoList={videoList}
-                  viewLayout={viewVideos}
+                  viewStyle={viewVideos}
                   refreshVideoList={setRefresh}
                 />
               </div>

@@ -582,7 +582,7 @@ const Video = () => {
           <div className="video-list grid grid-3" id="similar-videos">
             <VideoList
               videoList={similarVideosResponseData}
-              viewLayout={ViewStylesEnum.Grid as ViewStylesType}
+              viewStyle={ViewStylesEnum.Grid as ViewStylesType}
               refreshVideoList={setRefreshVideoList}
             />
           </div>

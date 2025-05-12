@@ -28,7 +28,7 @@ const ChannelPlaylist = () => {
   const playlistList = playlistsResponseData?.data;
   const pagination = playlistsResponseData?.paginate;
 
-  const view = userConfig.view_style_playlist;
+  const viewStyle = userConfig.view_style_playlist;
   const showSubedOnly = userConfig.show_subed_only;
 
   const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
@@ -108,7 +108,7 @@ const ChannelPlaylist = () => {
       </div>
 
       <div className={`boxed-content`}>
-        <div className={`playlist-list ${view}`}>
+        <div className={`playlist-list ${viewStyle}`}>
           <PlaylistList playlistList={playlistList} setRefresh={setRefreshPlaylists} />
         </div>
       </div>

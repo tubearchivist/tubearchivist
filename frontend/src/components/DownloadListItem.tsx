@@ -16,14 +16,14 @@ type DownloadListItemProps = {
 
 const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
   const { userConfig } = useUserConfigStore();
-  const view = userConfig.view_style_downloads;
+  const viewStyle = userConfig.view_style_downloads;
   const showIgnored = userConfig.show_ignored_only;
 
   const [hideDownload, setHideDownload] = useState(false);
 
   return (
-    <div className={`video-item ${view}`} id={`dl-${download.youtube_id}`}>
-      <div className={`video-thumb-wrap ${view}`}>
+    <div className={`video-item ${viewStyle}`} id={`dl-${download.youtube_id}`}>
+      <div className={`video-thumb-wrap ${viewStyle}`}>
         <div className="video-thumb">
           <VideoThumbnail videoThumbUrl={download.vid_thumb_url} />
 
@@ -39,7 +39,7 @@ const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
         </div>
       </div>
 
-      <div className={`video-desc ${view}`}>
+      <div className={`video-desc ${viewStyle}`}>
         <div>
           {download.channel_indexed && (
             <Link to={Routes.Channel(download.channel_id)}>{download.channel_name}</Link>

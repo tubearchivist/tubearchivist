@@ -1,10 +1,11 @@
-import { ViewStylesType } from '../configuration/constants/ViewStyle';
+import { ViewStylesEnum, ViewStylesType } from '../configuration/constants/ViewStyle';
 import { VideoType } from '../pages/Home';
 import VideoListItem from './VideoListItem';
+import VideoListItemTable from './VideoListItemTable';
 
 type VideoListProps = {
   videoList: VideoType[] | undefined;
-  viewLayout: ViewStylesType;
+  viewStyle: ViewStylesType;
   playlistId?: string;
   showReorderButton?: boolean;
   refreshVideoList: (refresh: boolean) => void;
@@ -12,13 +13,17 @@ type VideoListProps = {
 
 const VideoList = ({
   videoList,
-  viewLayout,
+  viewStyle,
   playlistId,
   showReorderButton = false,
   refreshVideoList,
 }: VideoListProps) => {
   if (!videoList || videoList.length === 0) {
     return <p>No videos found.</p>;
+  }
+
+  if (viewStyle === ViewStylesEnum.Table) {
+    return <VideoListItemTable videoList={videoList} viewStyle={viewStyle} />;
   }
 
   return (
@@ -28,7 +33,7 @@ const VideoList = ({
           <VideoListItem
             key={video.youtube_id}
             video={video}
-            viewLayout={viewLayout}
+            viewStyle={viewStyle}
             playlistId={playlistId}
             showReorderButton={showReorderButton}
             refreshVideoList={refreshVideoList}

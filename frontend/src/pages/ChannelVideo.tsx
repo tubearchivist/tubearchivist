@@ -5,7 +5,11 @@ import VideoList from '../components/VideoList';
 import Routes from '../configuration/routes/RouteList';
 import Pagination from '../components/Pagination';
 import Filterbar from '../components/Filterbar';
-import { ViewStyleNames, ViewStylesEnum } from '../configuration/constants/ViewStyle';
+import {
+  ViewStyleNames,
+  ViewStyleNamesType,
+  ViewStylesEnum,
+} from '../configuration/constants/ViewStyle';
 import ChannelOverview from '../components/ChannelOverview';
 import loadChannelById, { ChannelResponseType } from '../api/loader/loadChannelById';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
@@ -15,6 +19,8 @@ import Button from '../components/Button';
 import loadVideoListByFilter, {
   VideoListByFilterResponseType,
   VideoTypes,
+  WatchTypes,
+  WatchTypesEnum,
 } from '../api/loader/loadVideoListByPage';
 import loadChannelAggs, { ChannelAggsType } from '../api/loader/loadChannelAggs';
 import humanFileSize from '../functions/humanFileSize';
@@ -56,8 +62,8 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const hasVideos = videoResponseData?.data?.length !== 0;
   const useSiUnits = userConfig.file_size_unit === FileSizeUnits.Metric;
 
-  const view = userConfig.view_style_home;
-  const isGridView = view === ViewStylesEnum.Grid;
+  const viewStyle = userConfig.view_style_home;
+  const isGridView = viewStyle === ViewStylesEnum.Grid;
   const gridView = isGridView ? `boxed-${userConfig.grid_items}` : '';
   const gridViewGrid = isGridView ? `grid-${userConfig.grid_items}` : '';
 
@@ -67,7 +73,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
       const videos = await loadVideoListByFilter({
         channel: channelId,
         page: currentPage,
-        watch: userConfig.hide_watched ? 'unwatched' : undefined,
+        watch: userConfig.hide_watched ? (WatchTypesEnum.Unwatched as WatchTypes) : undefined,
         sort: userConfig.sort_by,
         order: userConfig.sort_order,
         type: videoType,
@@ -160,13 +166,16 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
       </div>
 
       <div className={`boxed-content ${gridView}`}>
-        <Filterbar hideToggleText={'Hide watched videos:'} viewStyleName={ViewStyleNames.home} />
+        <Filterbar
+          hideToggleText={'Hide watched videos:'}
+          viewStyle={ViewStyleNames.Home as ViewStyleNamesType}
+        />
       </div>
 
       <EmbeddableVideoPlayer videoId={videoId} />
 
       <div className={`boxed-content ${gridView}`}>
-        <div className={`video-list ${view} ${gridViewGrid}`}>
+        <div className={`video-list ${viewStyle} ${gridViewGrid}`}>
           {!hasVideos && (
             <>
               <h2>No videos found...</h2>
@@ -177,7 +186,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
             </>
           )}
 
-          <VideoList videoList={videoList} viewLayout={view} refreshVideoList={setRefresh} />
+          <VideoList videoList={videoList} viewStyle={viewStyle} refreshVideoList={setRefresh} />
         </div>
       </div>
       {pagination && (
