@@ -15,7 +15,7 @@ import { ViewStylesType } from '../configuration/constants/ViewStyle';
 
 type VideoListItemProps = {
   video: VideoType;
-  viewLayout: ViewStylesType;
+  viewStyle: ViewStylesType;
   playlistId?: string;
   showReorderButton?: boolean;
   refreshVideoList: (refresh: boolean) => void;
@@ -23,7 +23,7 @@ type VideoListItemProps = {
 
 const VideoListItem = ({
   video,
-  viewLayout,
+  viewStyle,
   playlistId,
   showReorderButton = false,
   refreshVideoList,
@@ -37,7 +37,7 @@ const VideoListItem = ({
   }
 
   return (
-    <div className={`video-item ${viewLayout}`}>
+    <div className={`video-item ${viewStyle}`}>
       <a
         onClick={() => {
           setSearchParams(params => {
@@ -47,7 +47,7 @@ const VideoListItem = ({
           });
         }}
       >
-        <div className={`video-thumb-wrap ${viewLayout}`}>
+        <div className={`video-thumb-wrap ${viewStyle}`}>
           <div className="video-thumb">
             <VideoThumbnail videoThumbUrl={video.vid_thumb_url} />
 
@@ -73,7 +73,7 @@ const VideoListItem = ({
           </div>
         </div>
       </a>
-      <div className={`video-desc ${viewLayout}`}>
+      <div className={`video-desc ${viewStyle}`}>
         <div className="video-desc-player" id={`video-info-${video.youtube_id}`}>
           <WatchedCheckBox
             watched={video.player.watched}

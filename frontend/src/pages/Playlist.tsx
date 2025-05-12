@@ -9,7 +9,11 @@ import VideoList from '../components/VideoList';
 import Pagination, { PaginationType } from '../components/Pagination';
 import ChannelOverview from '../components/ChannelOverview';
 import Linkify from '../components/Linkify';
-import { ViewStyleNames, ViewStylesEnum } from '../configuration/constants/ViewStyle';
+import {
+  ViewStyleNames,
+  ViewStyleNamesType,
+  ViewStylesEnum,
+} from '../configuration/constants/ViewStyle';
 import updatePlaylistSubscription from '../api/actions/updatePlaylistSubscription';
 import deletePlaylist from '../api/actions/deletePlaylist';
 import Routes from '../configuration/routes/RouteList';
@@ -19,7 +23,10 @@ import updateWatchedState from '../api/actions/updateWatchedState';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import Button from '../components/Button';
-import loadVideoListByFilter from '../api/loader/loadVideoListByPage';
+import loadVideoListByFilter, {
+  WatchTypes,
+  WatchTypesEnum,
+} from '../api/loader/loadVideoListByPage';
 import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { ApiResponseType } from '../functions/APIClient';
@@ -62,10 +69,10 @@ const Playlist = () => {
   const videoArchivedCount = Number(palylistEntries?.filter(video => video.downloaded).length);
   const videoInPlaylistCount = Number(palylistEntries?.length);
 
-  const view = userConfig.view_style_home;
+  const viewStyle = userConfig.view_style_home; // its a list of videos, so view_style_home
   const gridItems = userConfig.grid_items;
   const hideWatched = userConfig.hide_watched;
-  const isGridView = view === ViewStylesEnum.Grid;
+  const isGridView = viewStyle === ViewStylesEnum.Grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
 
@@ -75,7 +82,7 @@ const Playlist = () => {
       const video = await loadVideoListByFilter({
         playlist: playlistId,
         page: currentPage,
-        watch: hideWatched ? 'unwatched' : undefined,
+        watch: hideWatched ? (WatchTypesEnum.Unwatched as WatchTypes) : undefined,
       });
 
       setPlaylistResponse(playlist);
@@ -304,7 +311,7 @@ const Playlist = () => {
       <div className={`boxed-content ${gridView}`}>
         <Filterbar
           hideToggleText="Hide watched videos:"
-          viewStyleName={ViewStyleNames.home}
+          viewStyle={ViewStyleNames.Home as ViewStyleNamesType} // its a list of videos, so ViewStyleNames.Home
           showSort={false}
         />
       </div>
@@ -312,7 +319,7 @@ const Playlist = () => {
       <EmbeddableVideoPlayer videoId={videoId} />
 
       <div className={`boxed-content ${gridView}`}>
-        <div className={`video-list ${view} ${gridViewGrid}`}>
+        <div className={`video-list ${viewStyle} ${gridViewGrid}`}>
           {videoInPlaylistCount === 0 && (
             <>
               <h2>No videos found...</h2>
@@ -334,7 +341,7 @@ const Playlist = () => {
           {videoInPlaylistCount !== 0 && (
             <VideoList
               videoList={videos}
-              viewLayout={view}
+              viewStyle={viewStyle}
               playlistId={playlistId}
               showReorderButton={isCustomPlaylist}
               refreshVideoList={setRefresh}

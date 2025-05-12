@@ -14,7 +14,7 @@ type PlaylistListProps = {
 
 const PlaylistList = ({ playlistList, setRefresh }: PlaylistListProps) => {
   const { userConfig } = useUserConfigStore();
-  const viewLayout = userConfig.view_style_playlist;
+  const viewStyle = userConfig.view_style_playlist;
 
   if (!playlistList || playlistList.length === 0) {
     return <p>No playlists found.</p>;
@@ -24,7 +24,7 @@ const PlaylistList = ({ playlistList, setRefresh }: PlaylistListProps) => {
     <>
       {playlistList.map((playlist: PlaylistType) => {
         return (
-          <div key={playlist.playlist_id} className={`playlist-item ${viewLayout}`}>
+          <div key={playlist.playlist_id} className={`playlist-item ${viewStyle}`}>
             <div className="playlist-thumbnail">
               <Link to={Routes.Playlist(playlist.playlist_id)}>
                 <PlaylistThumbnail
@@ -33,7 +33,7 @@ const PlaylistList = ({ playlistList, setRefresh }: PlaylistListProps) => {
                 />
               </Link>
             </div>
-            <div className={`playlist-desc ${viewLayout}`}>
+            <div className={`playlist-desc ${viewStyle}`}>
               {playlist.playlist_type != 'custom' && (
                 <Link to={Routes.Channel(playlist.playlist_channel_id)}>
                   <h3>{playlist.playlist_channel}</h3>

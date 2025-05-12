@@ -80,10 +80,10 @@ const Download = () => {
       ? downloadResponseData?.data[0].channel_name
       : '';
 
-  const view = userConfig.view_style_downloads;
+  const viewStyle = userConfig.view_style_downloads;
   const gridItems = userConfig.grid_items;
   const showIgnored = userConfig.show_ignored_only;
-  const isGridView = view === ViewStylesEnum.Grid;
+  const isGridView = viewStyle === ViewStylesEnum.Grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
 
@@ -340,7 +340,7 @@ const Download = () => {
       </div>
 
       <div className={`boxed-content ${gridView}`}>
-        <div className={`video-list ${view} ${gridViewGrid}`}>
+        <div className={`video-list ${viewStyle} ${gridViewGrid}`}>
           {downloadList &&
             downloadList?.map(download => {
               return (

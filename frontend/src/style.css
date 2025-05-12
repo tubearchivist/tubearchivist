@@ -133,8 +133,8 @@ button:hover {
   color: var(--main-bg);
 }
 
-.video-details table td,
-.video-details table th {
+.video-item table td,
+.video-item table th {
   padding: 5px;
 }
 

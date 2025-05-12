@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import iconSort from '/img/icon-sort.svg';
 import iconAdd from '/img/icon-add.svg';
 import iconSubstract from '/img/icon-substract.svg';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
+import iconTableView from '/img/icon-tableview.svg';
 import { useUserConfigStore } from '../stores/UserConfigStore';
-import { ViewStylesEnum } from '../configuration/constants/ViewStyle';
+import { ViewStyleNamesType, ViewStylesEnum } from '../configuration/constants/ViewStyle';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import {
   SortByEnum,
@@ -16,14 +17,29 @@ import {
 
 type FilterbarProps = {
   hideToggleText: string;
-  viewStyleName: string;
+  viewStyle: ViewStyleNamesType;
   showSort?: boolean;
 };
 
-const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: FilterbarProps) => {
+const Filterbar = ({ hideToggleText, viewStyle, showSort = true }: FilterbarProps) => {
   const { userConfig, setUserConfig } = useUserConfigStore();
+
   const [showHidden, setShowHidden] = useState(false);
-  const isGridView = userConfig.view_style_home === ViewStylesEnum.Grid;
+
+  const currentViewStyle = userConfig[viewStyle];
+  const isGridView = currentViewStyle === ViewStylesEnum.Grid;
+
+  useEffect(() => {
+    if (!showSort) {
+      return;
+    }
+
+    if (currentViewStyle === ViewStylesEnum.Table) {
+      setShowHidden(true);
+    } else {
+      setShowHidden(false);
+    }
+  }, [currentViewStyle, showSort]);
 
   const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
     const updatedUserConfig = await updateUserConfig(config);
@@ -60,7 +76,7 @@ const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: Filterbar
         </div>
       </div>
 
-      {showHidden && showSort && (
+      {showHidden && (
         <div className="sort">
           <div id="form">
             <span>Sort by:</span>
@@ -92,12 +108,12 @@ const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: Filterbar
         </div>
       )}
       <div className="view-icons">
-        {setShowHidden && showSort && (
+        {showSort && (
           <img
             src={iconSort}
             alt="sort-icon"
             onClick={() => {
-              setShowHidden?.(!showHidden);
+              setShowHidden(!showHidden);
             }}
             id="animate-icon"
           />
@@ -128,16 +144,23 @@ const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: Filterbar
         <img
           src={iconGridView}
           onClick={() => {
-            handleUserConfigUpdate({ [viewStyleName]: ViewStylesEnum.Grid });
+            handleUserConfigUpdate({ [viewStyle]: ViewStylesEnum.Grid });
           }}
           alt="grid view"
         />
         <img
           src={iconListView}
           onClick={() => {
-            handleUserConfigUpdate({ [viewStyleName]: ViewStylesEnum.List });
+            handleUserConfigUpdate({ [viewStyle]: ViewStylesEnum.List });
           }}
           alt="list view"
+        />
+        <img
+          src={iconTableView}
+          onClick={() => {
+            handleUserConfigUpdate({ [viewStyle]: ViewStylesEnum.Table });
+          }}
+          alt="table view"
         />
       </div>
     </div>
