@@ -94,6 +94,10 @@ class Command(BaseCommand):
                 sleep(5)
                 continue
 
+            if status_code and status_code == 401:
+                sleep(5)
+                continue
+
             if status_code and status_code == 200:
                 path = "_cluster/health?wait_for_status=yellow&timeout=60s"
                 _, _ = ElasticWrap(path).get(timeout=60)
