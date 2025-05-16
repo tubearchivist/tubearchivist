@@ -52,6 +52,7 @@ const Download = () => {
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const channelFilterFromUrl = searchParams.get('channel');
+  const ignoredParam = searchParams.get('ignored');
 
   const [refresh, setRefresh] = useState(false);
   const [showHiddenForm, setShowHiddenForm] = useState(false);
@@ -82,7 +83,8 @@ const Download = () => {
 
   const view = userConfig.view_style_downloads;
   const gridItems = userConfig.grid_items;
-  const showIgnored = userConfig.show_ignored_only;
+  const showIgnored =
+    ignoredParam !== null ? ignoredParam === 'True' : userConfig.show_ignored_only;
   const isGridView = view === ViewStyles.grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
