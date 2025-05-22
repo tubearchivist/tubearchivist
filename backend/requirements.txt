@@ -7,9 +7,9 @@ Django==5.2.1
 djangorestframework==3.16.0
 drf-spectacular==0.28.0
 Pillow==11.2.1
-redis==6.0.0
+redis==6.1.0
 requests==2.32.3
 ryd-client==0.0.6
 uvicorn==0.34.2
 whitenoise==6.9.0
-yt-dlp[default]==2025.4.30
+yt-dlp[default]==2025.5.22
