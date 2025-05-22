@@ -7,4 +7,4 @@ pytest-django==4.11.1
 pytest==8.3.5
 python-dotenv==1.1.0
 requirementscheck==0.0.6
-types-requests==2.32.0.20250328
+types-requests==2.32.0.20250515

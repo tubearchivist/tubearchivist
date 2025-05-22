@@ -55,6 +55,7 @@ class Command(BaseCommand):
         self._init_app_config()
         self._mig_channel_tags()
         self._mig_video_channel_tags()
+        self._mig_fix_download_channel_indexed()
 
     def _make_folders(self):
         """make expected cache folders"""
@@ -339,6 +340,40 @@ class Command(BaseCommand):
                     self.style.SUCCESS(
                         "    no video channel tags needed fixing"
                     )
+                )
+            return
+
+        message = "    🗙 failed to fix video channel tags"
+        self.stdout.write(self.style.ERROR(message))
+        self.stdout.write(response)
+        sleep(60)
+        raise CommandError(message)
+
+    def _mig_fix_download_channel_indexed(self) -> None:
+        """migrate from v0.5.2 to 0.5.3, fix missing channel_indexed"""
+        self.stdout.write("[MIGRATION] fix incorrect video channel tags types")
+        path = "ta_download/_update_by_query"
+        data = {
+            "query": {
+                "bool": {
+                    "must_not": [{"exists": {"field": "channel_indexed"}}]
+                }
+            },
+            "script": {
+                "source": "ctx._source.channel_indexed = false",
+                "lang": "painless",
+            },
+        }
+        response, status_code = ElasticWrap(path).post(data)
+        if status_code in [200, 201]:
+            updated = response.get("updated")
+            if updated:
+                self.stdout.write(
+                    self.style.SUCCESS(f"    ✓ fixed {updated} queued videos")
+                )
+            else:
+                self.stdout.write(
+                    self.style.SUCCESS("    no queued videos to fix")
                 )
             return
 

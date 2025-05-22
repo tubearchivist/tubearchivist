@@ -15,6 +15,32 @@ import createAppriseNotificationUrl, {
 import deleteAppriseNotificationUrl from '../api/actions/deleteAppriseNotificationUrl';
 import { ApiError, ApiResponseType } from '../functions/APIClient';
 
+const getGroupedSchedule = (
+  scheduleResponse: ApiResponseType<ScheduleResponseType> | undefined,
+) => {
+  const { data: scheduleResponseData } = scheduleResponse ?? {};
+
+  const groupedSchedules = Object.groupBy(scheduleResponseData || [], ({ name }) => name);
+
+  const { update_subscribed, download_pending, run_backup, check_reindex, thumbnail_check } =
+    groupedSchedules;
+
+  const updateSubscribedSchedule = update_subscribed?.pop();
+  const downloadPendingSchedule = download_pending?.pop();
+  const runBackup = run_backup?.pop();
+  const checkReindexSchedule = check_reindex?.pop();
+  const thumbnailCheckSchedule = thumbnail_check?.pop();
+
+  return {
+    updateSubscribedSchedule,
+    downloadPendingSchedule,
+    runBackup,
+    checkReindexSchedule,
+    thumbnailCheckSchedule,
+    download_pending,
+  };
+};
+
 const SettingsScheduling = () => {
   const [refresh, setRefresh] = useState(false);
 
@@ -37,7 +63,6 @@ const SettingsScheduling = () => {
   const [thumnailCheckError, setThumnailCheckError] = useState<string | null>(null);
   const [zipBackupError, setZipBackupError] = useState<string | null>(null);
 
-  const { data: scheduleResponseData } = scheduleResponse ?? {};
   const { data: appriseNotificationData } = appriseNotification ?? {};
 
   useEffect(() => {
@@ -49,6 +74,22 @@ const SettingsScheduling = () => {
         setScheduleResponse(scheduleResponse);
         setAppriseNotification(appriseNotificationResponse);
 
+        const {
+          checkReindexSchedule,
+          downloadPendingSchedule,
+          runBackup,
+          thumbnailCheckSchedule,
+          updateSubscribedSchedule,
+        } = getGroupedSchedule(scheduleResponse);
+
+        setUpdateSubscribed(updateSubscribedSchedule?.schedule || '');
+        setDownloadPending(downloadPendingSchedule?.schedule || '');
+        setCheckReindex(checkReindexSchedule?.schedule || '');
+        setCheckReindexDays(checkReindexSchedule?.config?.days || 0);
+        setThumbnailCheck(thumbnailCheckSchedule?.schedule || '');
+        setZipBackup(runBackup?.schedule || '');
+        setZipBackupDays(runBackup?.config?.rotate || 0);
+
         setRefresh(false);
       }
     })();
@@ -58,18 +99,14 @@ const SettingsScheduling = () => {
     setRefresh(true);
   }, []);
 
-  const groupedSchedules = Object.groupBy(scheduleResponseData || [], ({ name }) => name);
-
-  console.log(groupedSchedules);
-
-  const { update_subscribed, download_pending, run_backup, check_reindex, thumbnail_check } =
-    groupedSchedules;
-
-  const updateSubscribedSchedule = update_subscribed?.pop();
-  const downloadPendingSchedule = download_pending?.pop();
-  const runBackup = run_backup?.pop();
-  const checkReindexSchedule = check_reindex?.pop();
-  const thumbnailCheckSchedule = thumbnail_check?.pop();
+  const {
+    checkReindexSchedule,
+    downloadPendingSchedule,
+    runBackup,
+    thumbnailCheckSchedule,
+    updateSubscribedSchedule,
+    download_pending,
+  } = getGroupedSchedule(scheduleResponse);
 
   return (
     <>
@@ -146,7 +183,7 @@ const SettingsScheduling = () => {
 
             <input
               type="text"
-              value={updateSubscribed || updateSubscribedSchedule?.schedule || ''}
+              value={updateSubscribed}
               onChange={e => {
                 setUpdateSubscribed(e.currentTarget.value);
               }}
@@ -201,7 +238,7 @@ const SettingsScheduling = () => {
 
             <input
               type="text"
-              value={downloadPending || downloadPendingSchedule?.schedule || ''}
+              value={downloadPending}
               onChange={e => {
                 setDownloadPending(e.currentTarget.value);
               }}
@@ -257,7 +294,7 @@ const SettingsScheduling = () => {
 
             <input
               type="text"
-              value={checkReindex || checkReindexSchedule?.schedule || ''}
+              value={checkReindex}
               onChange={e => {
                 setCheckReindex(e.currentTarget.value);
               }}
@@ -293,7 +330,7 @@ const SettingsScheduling = () => {
 
             <input
               type="number"
-              value={checkReindexDays || checkReindexSchedule?.config?.days || 0}
+              value={checkReindexDays}
               onChange={e => {
                 setCheckReindexDays(Number(e.currentTarget.value));
               }}
@@ -342,7 +379,7 @@ const SettingsScheduling = () => {
 
             <input
               type="text"
-              value={thumbnailCheck || thumbnailCheckSchedule?.schedule || ''}
+              value={thumbnailCheck}
               onChange={e => {
                 setThumbnailCheck(e.currentTarget.value);
               }}
@@ -404,7 +441,7 @@ const SettingsScheduling = () => {
 
             <input
               type="text"
-              value={zipBackup || runBackup?.schedule || ''}
+              value={zipBackup}
               onChange={e => {
                 setZipBackup(e.currentTarget.value);
               }}
@@ -440,7 +477,7 @@ const SettingsScheduling = () => {
 
             <input
               type="number"
-              value={(zipBackupDays || runBackup?.config?.rotate)?.toString() || 0}
+              value={zipBackupDays?.toString()}
               onChange={e => {
                 setZipBackupDays(Number(e.currentTarget.value));
               }}
@@ -525,7 +562,7 @@ const SettingsScheduling = () => {
             <input
               type="text"
               placeholder="Apprise notification URL"
-              value={notificationUrl || ''}
+              value={notificationUrl}
               onChange={e => {
                 setNotificationUrl(e.currentTarget.value);
               }}
