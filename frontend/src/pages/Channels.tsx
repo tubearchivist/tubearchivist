@@ -15,6 +15,7 @@ import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import { ApiResponseType } from '../functions/APIClient';
+import { ViewStylesEnum, ViewStylesType } from '../configuration/constants/ViewStyle';
 
 type ChannelOverwritesType = {
   download_format: string | null;
@@ -172,16 +173,19 @@ const Channels = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                handleUserConfigUpdate({ view_style_channel: 'grid' });
+                handleUserConfigUpdate({
+                  view_style_channel: ViewStylesEnum.Grid as ViewStylesType,
+                });
               }}
               data-origin="channel"
-              data-value="grid"
               alt="grid view"
             />
             <img
               src={iconListView}
               onClick={() => {
-                handleUserConfigUpdate({ view_style_channel: 'list' });
+                handleUserConfigUpdate({
+                  view_style_channel: ViewStylesEnum.List as ViewStylesType,
+                });
               }}
               data-origin="channel"
               data-value="list"

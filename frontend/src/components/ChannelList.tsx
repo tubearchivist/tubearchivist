@@ -16,7 +16,7 @@ type ChannelListProps = {
 
 const ChannelList = ({ channelList, refreshChannelList }: ChannelListProps) => {
   const { userConfig } = useUserConfigStore();
-  const viewLayout = userConfig.view_style_channel;
+  const viewStyle = userConfig.view_style_channel;
 
   if (!channelList || channelList.length === 0) {
     return <p>No channels found.</p>;
@@ -26,8 +26,8 @@ const ChannelList = ({ channelList, refreshChannelList }: ChannelListProps) => {
     <>
       {channelList.map(channel => {
         return (
-          <div key={channel.channel_id} className={`channel-item ${viewLayout}`}>
-            <div className={`channel-banner ${viewLayout}`}>
+          <div key={channel.channel_id} className={`channel-item ${viewStyle}`}>
+            <div className={`channel-banner ${viewStyle}`}>
               <Link to={Routes.Channel(channel.channel_id)}>
                 <ChannelBanner
                   channelId={channel.channel_id}
@@ -35,7 +35,7 @@ const ChannelList = ({ channelList, refreshChannelList }: ChannelListProps) => {
                 />
               </Link>
             </div>
-            <div className={`info-box info-box-2 ${viewLayout}`}>
+            <div className={`info-box info-box-2 ${viewStyle}`}>
               <div className="info-box-item">
                 <div className="round-img">
                   <Link to={Routes.Channel(channel.channel_id)}>
