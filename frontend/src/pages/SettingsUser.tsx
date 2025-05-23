@@ -1,4 +1,5 @@
 import updateUserConfig, {
+  ColourConstant,
   ColourVariants,
   FileSizeUnits,
   UserConfigType,
@@ -10,7 +11,6 @@ import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { useEffect, useState } from 'react';
 import ToggleConfig from '../components/ToggleConfig';
-import { ColourConstant } from '../configuration/colours/colourConstant';
 
 const SettingsUser = () => {
   const { userConfig, setUserConfig } = useUserConfigStore();
@@ -38,6 +38,9 @@ const SettingsUser = () => {
   const handleStyleSheetChange = async (selectedStyleSheet: ColourVariants) => {
     handleUserConfigUpdate({ stylesheet: selectedStyleSheet });
     setStyleSheet(selectedStyleSheet);
+
+    // Store in local storage for pages like login, without a userConfig
+    localStorage.setItem('stylesheet', selectedStyleSheet);
   };
 
   const handlePageSizeChange = async () => {
