@@ -124,56 +124,206 @@ The documentation available at [docs.tubearchivist.com](https://docs.tubearchivi
 
 ## Development Environment
 
-This codebase is set up to be developed natively outside of docker as well as in a docker container. Developing outside of a docker container can be convenient, as IDE and hot reload usually works out of the box. But testing inside of a container is still essential, as there are subtle differences, especially when working with the filesystem and networking between containers.
+This codebase is set up to be developed natively outside of docker as well as in a docker container. Developing outside
+of a docker container can be convenient, as IDE and hot reload usually works out of the box. But testing inside of a
+container is still essential, as there are subtle differences, especially when working with the filesystem and networking
+between containers.
+
+In general, you need to perform the following steps:
+1. Define the environment variables
+2. Configure and launch Elasticsearch and Redis
+3. Configure and launch the backend, worker and scheduler
+4. Configure and launch the fronted
 
 Note:
-- Subtitles currently fail to load with `DJANGO_DEBUG=True`, that is due to incorrect `Content-Type` error set by Django's static file implementation. That's only if you run the Django dev server, Nginx sets the correct headers.
+- Subtitles currently fail to load with `DJANGO_DEBUG=True`, that is due to incorrect `Content-Type` error set by Django's 
+  static file implementation. That's only if you run the Django dev server, Nginx sets the correct headers.
 
 ### Native Instruction
 
-For convenience, it's recommended to still run Redis and ES in a docker container. Make sure both containers can be reachable over the network.
+The instructions to develop the application in a native environment might be applied, with minor changes, to the other cases.
+To speed up the development, you will need 5 terminals:
+- 1 terminal to run docker compose
+- 1 terminal to install the virtual environment, the python libraries and launch the backend
+- 1 terminal to run the worker
+- 1 terminal to run the scheduler
+- 1 terminal to run the frontend
 
-Set up your virtual environment and install the requirements defined in `requirements-dev.txt`.
+#### Define the environment variables
 
-There are options built in to load environment variables from a file using `load_dotenv`. Example `.env` file to place in the same folder as `manage.py`:
+Create a file named `.env` in the `backend` folder with the following content (you can modify them according your needs, but
+in general they should work out of the box). Or copy, paste and rename the default development template `dev_assets/template.env`
+file.
 
-```
-TA_HOST="localhost"
-TA_USERNAME=tubearchivist
-TA_PASSWORD=verysecret
+```shell
+TA_HOST="http://localhost:3000"
+TA_USERNAME="tubearchivist"
+TA_PASSWORD="verysecret"
 TA_MEDIA_DIR="static/volume/media"
 TA_CACHE_DIR="static"
 TA_APP_DIR="."
-REDIS_CON=redis://localhost:6379
+REDIS_CON="redis://localhost:6379"
 ES_URL="http://localhost:9200"
-ELASTIC_PASSWORD=verysecret
-TZ=America/New_York
+ELASTIC_PASSWORD="verysecret"
+TZ="America/New_York"
 DJANGO_DEBUG=True
 ```
 
-Then look at the container startup script `run.sh`, make sure all needed migrations and startup checks ran. To start the dev backend server from the same folder as `manage.py` run:
+#### Configure and run Elasticsearch and Redis
 
-```bash
-python manage.py runserver
+When working in a native environment (laptop/computer), you probably want to focus on the development of the application
+components (backend/frontend), rather than the external resources like Elasticsearch or Redis. Therefore, it's recommended
+to still run Redis and ES in a docker container. Be sure both containers are reachable over the network.
+In order to achieve that, add the `ports` element to both the `archivist-es` and `archivist-redis` services in the
+`docker-compose.yml` file.
+Moreover, the default `tubearchivist` service should be commented out.
+
+The containers should be launched first, as they are dependencies for all the other services.
+
+```yaml
+services:
+#  tubearchivist:
+#    container_name: tubearchivist
+#    ...
+
+  archivist-redis:
+    ...
+    ports:
+      - "6379:6379"
+
+  archivist-es:
+    ...
+    ports:
+      - "9200:9200"
 ```
 
-The backend will be available on [localhost:8000/api/](localhost:8000/api/).
+Then launch the containers with this command:
 
-You'll probably also want to have a Celery worker instance running, refer to `run.sh` for that. The Beat Scheduler might not be needed.
+```shell
+# From the root folder of the repository, launch docker compose.
+# Both containers, archivist-redis and archivist-es should start
 
-Then from the frontend folder, install the dependencies with:
+docker compose up
+```
 
-```bash
+#### Configure and launch the backend, worker and scheduler
+
+You need to configure a virtual environment, install the requirements and then launch the services. For simplicity, it is
+suggested to launch the services in different terminal as described below.
+
+To set up the virtual environment with name `.venv`, run the following command:
+
+```shell
+# From the root folder of the repository, launch this command in the second terminal
+
+# Create the virtual environment
+python3 -m venv .venv
+```
+
+The virtual environment needs to be set up only once, but it needs to be sourced every time the terminals for the backend
+and queue are closed.
+
+To install the python libraries, launch the following commands:
+
+```shell
+# This can be executed in the second terminal
+
+# Load the virtual environment
+source .venv/bin/activate
+
+# Move to the backend folder
+cd backend
+
+# Install the libraries
+python3 -m pip install -r requirements-dev.txt
+```
+
+The installation of the libraries should be executed each time the contents `requirements-dev.txt` file change.
+
+The first execution of the backend is quite tricky, as there are several steps to be executed. You can take a look at
+the container startup script `docker_assets/run.sh`. However, for simplicity, there is
+a shell script (`run_dev_backend.sh` in the `dev_assets` folder) which can be executed and contains all the required
+commands to bootstrap a test environment. The script can be run at each new restart of the application. It performs the
+following steps:
+- prepares the environment (needed for the first execution)
+- applies the migrations
+- checks the environment
+- checks the connections
+- prepares the environment
+- launches the backend application
+
+```shell
+# This can be executed in the second terminal
+
+# Load the virtual environment
+source .venv/bin/activate
+
+# Move to the backend folder
+cd backend
+
+# Launch the script from the backend folder
+../dev_assets/run_dev_backend.sh
+```
+
+At the end of the setup, if there are no errors, you will see a similar message:
+
+```text
+System check identified no issues (0 silenced).
+April 12, 2025 - 13:51:52
+Django version 5.1.7, using settings 'config.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+```
+
+The backend will be available on [http://localhost:8000/api/](http://localhost:8000/api/).
+
+If the backend works correctly, you need to launch the worker.
+
+```shell
+# This can be executed in the third terminal
+
+# Load the virtual environment
+source .venv/bin/activate
+
+# Launch the worker from the root folder of the repository
+.venv/bin/celery -A task.celery worker \
+  --loglevel=INFO \
+  --concurrency 4 \
+  --max-tasks-per-child 5 \
+  --max-memory-per-child 150000
+```
+
+You can now launch the scheduler in a new terminal.
+
+```shell
+# This can be executed in the fourth terminal
+
+# Load the virtual environment
+source .venv/bin/activate
+
+# Launch the scheduler from the root folder of the repository
+.venv/bin/celery -A task beat --loglevel=INFO \
+  --scheduler django_celery_beat.schedulers:DatabaseScheduler
+```
+
+#### Configure and launch the fronted
+
+The frontend is simpler to install. Firstly, you have to install the dependencies, then to launch the application.
+
+```shell
+# This can be executed in the fifth terminal
+
+# Move to the frontend folder
+cd frontend
+
+# Install the npm libraries
 npm install
-```
 
-Then to start the frontend development server:
-
-```bash
+# Launch the frontend application
 npm run dev
 ```
 
-And the frontend should be available at [localhost:3000](localhost:3000).
+The frontend should be available at [http://localhost:3000](http://localhost:3000).
 
 ### Docker Instructions
 
