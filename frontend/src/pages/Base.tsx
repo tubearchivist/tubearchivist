@@ -1,6 +1,6 @@
 import { Outlet, useLoaderData, useLocation, useSearchParams } from 'react-router-dom';
 import Footer from '../components/Footer';
-import useColours from '../configuration/colours/useColours';
+import Colours from '../configuration/colours/Colours';
 import { UserConfigType } from '../api/actions/updateUserConfig';
 import { useEffect, useState } from 'react';
 import Navigation from '../components/Navigation';
@@ -94,10 +94,9 @@ const Base = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
-  useColours();
-
   return (
     <>
+      <Colours />
       <div className="main-content">
         <Navigation />
         {/** Outlet: https://reactrouter.com/en/main/components/outlet */}

@@ -1,10 +1,9 @@
-import { useNavigate } from 'react-router-dom';
 import updateUserConfig, {
+  ColourConstant,
   ColourVariants,
   FileSizeUnits,
   UserConfigType,
 } from '../api/actions/updateUserConfig';
-import { ColourConstant } from '../configuration/colours/useColours';
 import SettingsNavigation from '../components/SettingsNavigation';
 import Notifications from '../components/Notifications';
 import Button from '../components/Button';
@@ -16,10 +15,8 @@ import ToggleConfig from '../components/ToggleConfig';
 const SettingsUser = () => {
   const { userConfig, setUserConfig } = useUserConfigStore();
   const isAdmin = useIsAdmin();
-  const navigate = useNavigate();
 
   const [styleSheet, setStyleSheet] = useState<ColourVariants>(userConfig.stylesheet);
-  const [styleSheetRefresh, setStyleSheetRefresh] = useState(false);
   const [pageSize, setPageSize] = useState<number>(userConfig.page_size);
   const [showHelpText, setShowHelpText] = useState(userConfig.show_help_text);
   const [selectedFileSizeUnit, setSelectedFileSizeUnit] = useState(FileSizeUnits.Binary);
@@ -41,7 +38,9 @@ const SettingsUser = () => {
   const handleStyleSheetChange = async (selectedStyleSheet: ColourVariants) => {
     handleUserConfigUpdate({ stylesheet: selectedStyleSheet });
     setStyleSheet(selectedStyleSheet);
-    setStyleSheetRefresh(true);
+
+    // Store in local storage for pages like login, without a userConfig
+    localStorage.setItem('stylesheet', selectedStyleSheet);
   };
 
   const handlePageSizeChange = async () => {
@@ -63,11 +62,6 @@ const SettingsUser = () => {
     if (updatedUserConfigData) {
       setUserConfig(updatedUserConfigData);
     }
-  };
-
-  const handlePageRefresh = () => {
-    navigate(0);
-    setStyleSheetRefresh(false);
   };
 
   return (
@@ -104,7 +98,6 @@ const SettingsUser = () => {
                     );
                   })}
                 </select>
-                {styleSheetRefresh && <button onClick={handlePageRefresh}>Refresh</button>}
               </div>
             </div>
 

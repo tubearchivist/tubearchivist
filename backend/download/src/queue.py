@@ -344,11 +344,8 @@ class PendingList(PendingIndex):
             "duration": get_duration_str(vid["duration"]),
             "published": published,
             "timestamp": int(datetime.now().timestamp()),
-            # Pulling enum value out so it is serializable
             "vid_type": vid_type.value,
+            "channel_indexed": vid["channel_id"] in self.all_channels,
         }
-        if self.all_channels:
-            youtube_details.update(
-                {"channel_indexed": vid["channel_id"] in self.all_channels}
-            )
+
         return youtube_details
