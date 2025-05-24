@@ -1,6 +1,6 @@
 # Contributing to Tube Archivist
 
-Welcome, and thanks for showing interest in improving Tube Archivist!  
+Welcome, and thanks for showing interest in improving Tube Archivist!
 
 ## Table of Content
 - [Beta Testing](#beta-testing)
@@ -26,10 +26,10 @@ There is always something that can get missed during development. Look at the co
 
 Then provide feedback, if there is a problem but also if there is no problem. Reach out on [Discord](https://tubearchivist.com/discord) in the `#beta-testing` channel with your findings.
 
-This will help with a smooth update for the regular release. Plus you get to test things out early! 
+This will help with a smooth update for the regular release. Plus you get to test things out early!
 
 ## How to open an issue
-Please read this carefully before opening any [issue](https://github.com/tubearchivist/tubearchivist/issues) on GitHub. Make sure you read [Next Steps](#next-steps) above.
+Please read this carefully before opening any [issue](https://github.com/tubearchivist/tubearchivist/issues) on GitHub.
 
 **Do**:
 - Do provide details and context, this matters a lot and makes it easier for people to help.
@@ -65,8 +65,6 @@ IMPORTANT: When receiving help, contribute back to the community by improving th
 
 ## How to make a Pull Request
 
-Make sure you read [Next Steps](#next-steps) above.
-
 Thank you for contributing and helping improve this project. Focus for the foreseeable future is on improving and building on existing functionality, *not* on adding and expanding the application.
 
 This is a quick checklist to help streamline the process:
@@ -83,7 +81,7 @@ This project uses the excellent [pre-commit](https://github.com/pre-commit/pre-c
 **Quick Start**
 - Run `pre-commit install` from the root of the repo.
 - Next time you commit to your local git repo, the defined hooks will run.
-- On first run, this will download and install the needed environments to your local machine, that can take some time. But that will be reused on sunsequent commits. 
+- On first run, this will download and install the needed environments to your local machine, that can take some time. But that will be reused on sunsequent commits.
 
 That is also running as a Git Hub action.
 
@@ -93,7 +91,7 @@ That is also running as a Git Hub action.
 
 As you have read the [FAQ](https://docs.tubearchivist.com/faq/) and the [known limitations](https://github.com/tubearchivist/tubearchivist#known-limitations) and have gotten an idea what this project tries to do, there will be some obvious shortcomings that stand out, that have been explicitly excluded from the scope of this project, at least for the time being.
 
-Extending the scope of this project will only be feasible with more [regular contributors](https://github.com/tubearchivist/tubearchivist/graphs/contributors) that are willing to help improve this project in the long run. Contributors that have an overall improvement of the project in mind and not just about implementing this *one* thing.  
+Extending the scope of this project will only be feasible with more [regular contributors](https://github.com/tubearchivist/tubearchivist/graphs/contributors) that are willing to help improve this project in the long run. Contributors that have an overall improvement of the project in mind and not just about implementing this *one* thing.
 
 Small minor additions, or making a PR for a documented feature request or bug, even if that was and will be your only contribution to this project, are always welcome and is *not* what this is about.
 
@@ -206,7 +204,7 @@ You may find it nice to run everything inside of a VM for complete environment s
 ### Working with Elasticsearch
 Additionally to the required services as listed in the example docker-compose file, the **Dev Tools** of [Kibana](https://www.elastic.co/guide/en/kibana/current/docker.html) are invaluable for running and testing Elasticsearch queries.
 
-**Quick start**  
+**Quick start**
 Generate your access token in Elasitcsearch:
 ```bash
 bin/elasticsearch-service-tokens create elastic/kibana kibana
@@ -227,11 +225,11 @@ services:
 
 If you want to run queries on the Elasticsearch container directly from your host with for example `curl` or something like *postman*, you might want to **publish** the port 9200 instead of just **exposing** it.
 
-**Persist Token**  
+**Persist Token**
 The token will get stored in ES in the `config` folder, and not in the `data` folder. To persist the token between ES container rebuilds, you'll need to persist the config folder as an additional volume:
 
 1. Create the token as described above
-2. While the container is running, copy the current config folder out of the container, e.g.: 
+2. While the container is running, copy the current config folder out of the container, e.g.:
 ```
 docker cp archivist-es:/usr/share/elasticsearch/config/ volume/es_config
 ```
