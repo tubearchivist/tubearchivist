@@ -1,4 +1,4 @@
-![Tube Archivist](assets/tube-archivist-front.jpg?raw=true "Tube Archivist Banner")  
+![Tube Archivist](assets/tube-archivist-front.jpg?raw=true "Tube Archivist Banner")
 [*more screenshots and video*](SHOWCASE.MD)
 
 <div align="center">
@@ -23,13 +23,13 @@
 ------------------------
 
 ## Core functionality
-Once your YouTube video collection grows, it becomes hard to search and find a specific video. That's where Tube Archivist comes in: By indexing your video collection with metadata from YouTube, you can organize, search and enjoy your archived YouTube videos without hassle offline through a convenient web interface. This includes:  
+Once your YouTube video collection grows, it becomes hard to search and find a specific video. That's where Tube Archivist comes in: By indexing your video collection with metadata from YouTube, you can organize, search and enjoy your archived YouTube videos without hassle offline through a convenient web interface. This includes:
 * Subscribe to your favorite YouTube channels
 * Download Videos using **[yt-dlp](https://github.com/yt-dlp/yt-dlp)**
 * Index and make videos searchable
 * Play videos
 * Keep track of viewed and unviewed videos
-  
+
 ## Resources
 - [Discord](https://www.tubearchivist.com/discord): Connect with us on our Discord server.
 - [r/TubeArchivist](https://www.reddit.com/r/TubeArchivist/): Join our Subreddit.
@@ -38,8 +38,8 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 - [Plex Plugin](https://github.com/tubearchivist/tubearchivist-plex): Add your videos to Plex
 
 ## Installing
-For minimal system requirements, the Tube Archivist stack needs around 2GB of available memory for a small testing setup and around 4GB of available memory for a mid to large sized installation. Minimal with dual core with 4 threads, better quad core plus. 
-This project requires docker. Ensure it is installed and running on your system.  
+For minimal system requirements, the Tube Archivist stack needs around 2GB of available memory for a small testing setup and around 4GB of available memory for a mid to large sized installation. Minimal with dual core with 4 threads, better quad core plus.
+This project requires docker. Ensure it is installed and running on your system.
 
 The documentation has additional user provided instructions for [Unraid](https://docs.tubearchivist.com/installation/unraid/), [Synology](https://docs.tubearchivist.com/installation/synology/) and [Podman](https://docs.tubearchivist.com/installation/podman/).
 
@@ -49,7 +49,7 @@ Take a look at the example [docker-compose.yml](https://github.com/tubearchivist
 
 All environment variables are explained in detail in the docs [here](https://docs.tubearchivist.com/installation/env-vars/).
 
-**TubeArchivist**:  
+**TubeArchivist**:
 | Environment Var | Value |  |
 | ----------- | ----------- | ----------- |
 | TA_HOST | Server IP or hostname `http://tubearchivist.local:8000` | Required |
@@ -72,8 +72,17 @@ All environment variables are explained in detail in the docs [here](https://doc
 | TA_LDAP | Configure TA to use LDAP Authentication | [Read more](https://docs.tubearchivist.com/configuration/ldap/) |
 | DISABLE_STATIC_AUTH | Remove authentication from media files, (Google Cast...) | [Read more](https://docs.tubearchivist.com/installation/env-vars/#disable_static_auth) |
 | DJANGO_DEBUG | Return additional error messages, for debug only | Optional |
+| TA_LOGIN_AUTH_MODE | Configure the order of login authentication backends (Default: single) | Optional |
 
-**ElasticSearch**  
+| TA_LOGIN_AUTH_MODE value | Description |
+| ------------------------ | ----------- |
+| single                   | Only use a single backend (default, or LDAP, or Forward auth, selected by TA_LDAP or TA_ENABLE_AUTH_PROXY) |
+| local                    | Use local password database only |
+| ldap                     | Use LDAP backend only |
+| forwardauth              | Use reverse proxy headers only |
+| ldap_local               | Use LDAP backend in addition to the local password database |
+
+**ElasticSearch**
 | Environment Var | Value | State |
 | ----------- | ----------- | ----------- |
 | ELASTIC_PASSWORD | Matching password `ELASTIC_PASSWORD` from TubeArchivist | Required |
@@ -81,58 +90,58 @@ All environment variables are explained in detail in the docs [here](https://doc
 
 
 ## Update
-Always use the *latest* (the default) or a named semantic version tag for the docker images. The *unstable* tags are only for your testing environment, there might not be an update path for these testing builds. 
+Always use the *latest* (the default) or a named semantic version tag for the docker images. The *unstable* tags are only for your testing environment, there might not be an update path for these testing builds.
 
-You will see the current version number of **Tube Archivist** in the footer of the interface. There is a daily version check task querying tubearchivist.com, notifying you of any new releases in the footer. To update, you need to update the docker images, the method for which will depend on your platform. For example, if you're using `docker-compose`, run `docker-compose pull` and then restart with `docker-compose up -d`. After updating, check the footer to verify you are running the expected version.  
+You will see the current version number of **Tube Archivist** in the footer of the interface. There is a daily version check task querying tubearchivist.com, notifying you of any new releases in the footer. To update, you need to update the docker images, the method for which will depend on your platform. For example, if you're using `docker-compose`, run `docker-compose pull` and then restart with `docker-compose up -d`. After updating, check the footer to verify you are running the expected version.
 
-  - This project is tested for updates between one or two releases maximum. Further updates back may or may not be supported and you might have to reset your index and configurations to update. Ideally apply new updates at least once per month.  
-  - There can be breaking changes between updates, particularly as the application grows, new environment variables or settings might be required for you to set in the your docker-compose file. *Always* check the **release notes**: Any breaking changes will be marked there.  
-  - All testing and development is done with the Elasticsearch version number as mentioned in the provided *docker-compose.yml* file. This will be updated when a new release of Elasticsearch is available. Running an older version of Elasticsearch is most likely not going to result in any issues, but it's still recommended to run the same version as mentioned. Use `bbilly1/tubearchivist-es` to automatically get the recommended version.   
+  - This project is tested for updates between one or two releases maximum. Further updates back may or may not be supported and you might have to reset your index and configurations to update. Ideally apply new updates at least once per month.
+  - There can be breaking changes between updates, particularly as the application grows, new environment variables or settings might be required for you to set in the your docker-compose file. *Always* check the **release notes**: Any breaking changes will be marked there.
+  - All testing and development is done with the Elasticsearch version number as mentioned in the provided *docker-compose.yml* file. This will be updated when a new release of Elasticsearch is available. Running an older version of Elasticsearch is most likely not going to result in any issues, but it's still recommended to run the same version as mentioned. Use `bbilly1/tubearchivist-es` to automatically get the recommended version.
 
 ## Getting Started
 1. Go through the **settings** page and look at the available options. Particularly set *Download Format* to your desired video quality before downloading. **Tube Archivist** downloads the best available quality by default. To support iOS or MacOS and some other browsers a compatible format must be specified. For example:
 ```
 bestvideo[vcodec*=avc1]+bestaudio[acodec*=mp4a]/mp4
 ```
-2. Subscribe to some of your favorite YouTube channels on the **channels** page. 
+2. Subscribe to some of your favorite YouTube channels on the **channels** page.
 3. On the **downloads** page, click on *Rescan subscriptions* to add videos from the subscribed channels to your Download queue or click on *Add to download queue* to manually add Video IDs, links, channels or playlists.
-4. Click on *Start download* and let **Tube Archivist** to it's thing. 
+4. Click on *Start download* and let **Tube Archivist** to it's thing.
 5. Enjoy your archived collection!
 
 
-### Port Collisions  
-If you have a collision on port `8000`, best solution is to use dockers *HOST_PORT* and *CONTAINER_PORT* distinction: To for example change the interface to port 9000 use `9000:8000` in your docker-compose file.  
+### Port Collisions
+If you have a collision on port `8000`, best solution is to use dockers *HOST_PORT* and *CONTAINER_PORT* distinction: To for example change the interface to port 9000 use `9000:8000` in your docker-compose file.
 
 For more information on port collisions, check the docs.
 
-## Common Errors  
-Here is a list of common errors and their solutions.  
+## Common Errors
+Here is a list of common errors and their solutions.
 
 ### `vm.max_map_count`
 **Elastic Search** in Docker requires the kernel setting of the host machine `vm.max_map_count` to be set to at least 262144.
 
-To temporary set the value run:  
+To temporary set the value run:
 ```
 sudo sysctl -w vm.max_map_count=262144
-```  
-To apply the change permanently depends on your host operating system:  
+```
+To apply the change permanently depends on your host operating system:
 
  - For example on Ubuntu Server add `vm.max_map_count = 262144` to the file `/etc/sysctl.conf`.
- - On Arch based systems create a file `/etc/sysctl.d/max_map_count.conf` with the content `vm.max_map_count = 262144`. 
- - On any other platform look up in the documentation on how to pass kernel parameters.  
+ - On Arch based systems create a file `/etc/sysctl.d/max_map_count.conf` with the content `vm.max_map_count = 262144`.
+ - On any other platform look up in the documentation on how to pass kernel parameters.
 
 
 ### Permissions for elasticsearch
-If you see a message similar to `Unable to access 'path.repo' (/usr/share/elasticsearch/data/snapshot)` or `failed to obtain node locks, tried [/usr/share/elasticsearch/data]` and `maybe these locations are not writable` when initially starting elasticsearch, that probably means the container is not allowed to write files to the volume.  
+If you see a message similar to `Unable to access 'path.repo' (/usr/share/elasticsearch/data/snapshot)` or `failed to obtain node locks, tried [/usr/share/elasticsearch/data]` and `maybe these locations are not writable` when initially starting elasticsearch, that probably means the container is not allowed to write files to the volume.
 To fix that issue, shutdown the container and on your host machine run:
 ```
 chown 1000:0 -R /path/to/mount/point
 ```
-This will match the permissions with the **UID** and **GID** of elasticsearch process within the container and should fix the issue.  
+This will match the permissions with the **UID** and **GID** of elasticsearch process within the container and should fix the issue.
 
 
 ### Disk usage
-The Elasticsearch index will turn to ***read only*** if the disk usage of the container goes above 95% until the usage drops below 90% again, you will see error messages like `disk usage exceeded flood-stage watermark`.  
+The Elasticsearch index will turn to ***read only*** if the disk usage of the container goes above 95% until the usage drops below 90% again, you will see error messages like `disk usage exceeded flood-stage watermark`.
 
 Similar to that, TubeArchivist will become all sorts of messed up when running out of disk space. There are some error messages in the logs when that happens, but it's best to make sure to have enough disk space before starting to download.
 
@@ -142,7 +151,7 @@ If you are seeing errors like `failed to create shim: OCI runtime create failed`
 This can happen if you have nested virtualizations, e.g. LXC running Docker in Proxmox.
 
 ## Known limitations
-- Video files created by Tube Archivist need to be playable in your browser of choice. Not every codec is compatible with every browser and might require some testing with format selection. 
+- Video files created by Tube Archivist need to be playable in your browser of choice. Not every codec is compatible with every browser and might require some testing with format selection.
 - Every limitation of **yt-dlp** will also be present in Tube Archivist. If **yt-dlp** can't download or extract a video for any reason, Tube Archivist won't be able to either.
 - There is no flexibility in naming of the media files.
 
@@ -191,7 +200,7 @@ Implemented:
 - [X] Scan your file system to index already downloaded videos [2021-09-14]
 
 ## User Scripts
-This is a list of useful user scripts, generously created from folks like you to extend this project and its functionality. Make sure to check the respective repository links for detailed license information.  
+This is a list of useful user scripts, generously created from folks like you to extend this project and its functionality. Make sure to check the respective repository links for detailed license information.
 
 This is your time to shine, [read this](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#user-scripts) then open a PR to add your script here.
 
@@ -200,13 +209,13 @@ This is your time to shine, [read this](https://github.com/tubearchivist/tubearc
 - [DarkFighterLuke/ta_base_url_nginx](https://gist.github.com/DarkFighterLuke/4561b6bfbf83720493dc59171c58ac36): Set base URL with Nginx when you can't use subdomains.
 - [lamusmaser/ta_migration_helper](https://github.com/lamusmaser/ta_migration_helper): Advanced helper script for migration issues to TubeArchivist v0.4.4 or later.
 - [lamusmaser/create_info_json](https://gist.github.com/lamusmaser/837fb58f73ea0cad784a33497932e0dd): Script to generate `.info.json` files using `ffmpeg` collecting information from downloaded videos.
-- [lamusmaser/ta_fix_for_video_redirection](https://github.com/lamusmaser/ta_fix_for_video_redirection): Script to fix videos that were incorrectly indexed by YouTube's "Video is Unavailable" response. 
+- [lamusmaser/ta_fix_for_video_redirection](https://github.com/lamusmaser/ta_fix_for_video_redirection): Script to fix videos that were incorrectly indexed by YouTube's "Video is Unavailable" response.
 - [RoninTech/ta-helper](https://github.com/RoninTech/ta-helper): Helper script to provide a symlink association to reference TubeArchivist videos with their original titles.
 - [tangyjoust/Tautulli-Notify-TubeArchivist-of-Plex-Watched-State](https://github.com/tangyjoust/Tautulli-Notify-TubeArchivist-of-Plex-Watched-State) Mark videos watched in Plex (through streaming not manually) through Tautulli back to TubeArchivist
 - [Dhs92/delete_shorts](https://github.com/Dhs92/delete_shorts): A script to delete ALL YouTube Shorts from TubeArchivist
 
 ## Donate
-The best donation to **Tube Archivist** is your time, take a look at the [contribution page](CONTRIBUTING.md) to get started.  
+The best donation to **Tube Archivist** is your time, take a look at the [contribution page](CONTRIBUTING.md) to get started.
 Second best way to support the development is to provide for caffeinated beverages:
 * [GitHub Sponsor](https://github.com/sponsors/bbilly1) become a sponsor here on GitHub
 * [Paypal.me](https://paypal.me/bbilly1) for a one time coffee
