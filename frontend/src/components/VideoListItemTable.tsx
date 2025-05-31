@@ -24,8 +24,7 @@ const VideoListItemTable = ({ videoList, viewStyle }: VideoListItemProps) => {
             <th>Channel</th>
             <th>Title</th>
             <th>Type</th>
-            <th>Width</th>
-            <th>Height</th>
+            <th>Resolution</th>
             <th>Media size</th>
             <th>Video codec</th>
             <th>Video bitrate</th>
@@ -40,15 +39,14 @@ const VideoListItemTable = ({ videoList, viewStyle }: VideoListItemProps) => {
 
             return (
               <tr key={youtube_id}>
-                <td>
+                <td className="no-nowrap">
                   <Link to={Routes.Channel(channel.channel_id)}>{channel.channel_name}</Link>
                 </td>
-                <td>
+                <td className="no-nowrap title">
                   <Link to={Routes.Video(youtube_id)}>{title}</Link>
                 </td>
                 <td>{vid_type}</td>
-                <td>{videoStream.width}</td>
-                <td>{videoStream.height}</td>
+                <td>{`${videoStream.width}x${videoStream.height}`}</td>
                 <td>{humanFileSize(media_size, useSiUnits)}</td>
                 <td>{videoStream.codec}</td>
                 <td>{humanFileSize(videoStream.bitrate, useSiUnits)}</td>
