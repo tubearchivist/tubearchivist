@@ -130,6 +130,7 @@ const Home = () => {
   const isGridView = userConfig.view_style_home === ViewStylesEnum.Grid;
   const gridView = isGridView ? `boxed-${userConfig.grid_items}` : '';
   const gridViewGrid = isGridView ? `grid-${userConfig.grid_items}` : '';
+  const isTableView = userConfig.view_style_home === ViewStylesEnum.Table;
 
   useEffect(() => {
     (async () => {
@@ -170,7 +171,7 @@ const Home = () => {
       <EmbeddableVideoPlayer videoId={videoId} />
 
       <div className={`boxed-content ${gridView}`}>
-        {continueVideos && continueVideos.length > 0 && (
+        {continueVideos && continueVideos.length > 0 && !isTableView && (
           <>
             <div className="title-bar">
               <h1>Continue Watching</h1>

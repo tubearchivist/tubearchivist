@@ -133,9 +133,38 @@ button:hover {
   color: var(--main-bg);
 }
 
-.video-item table td,
-.video-item table th {
-  padding: 5px;
+.video-item.table {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.video-item.table table {
+  min-width: 800px;
+  width: 100%;
+  border-collapse: collapse;
+  position: relative;
+}
+
+.video-item.table th,
+.video-item.table td {
+  padding: 8px 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.video-item.table th {
+  font-weight: 600;
+  border-bottom: 1px solid #ddd;
+}
+
+.video-item.table td {
+  border-bottom: 1px solid #eee;
+}
+
+.video-item.table td.no-nowrap {
+  white-space: normal;
+  word-break: keep-all;
+  min-width: 100px;
 }
 
 .button-box {
