@@ -301,16 +301,25 @@ const VideoPlayer = ({
   }, [subtitlesPressed]);
 
   useEffect(() => {
-    if (arrowLeftPressed) {
-      infoDialog('- 5 seconds');
-    }
-  }, [arrowLeftPressed]);
+    if (arrowLeftPressed || arrowRightPressed) {
+      let timeStep = 5;
 
-  useEffect(() => {
-    if (arrowRightPressed) {
-      infoDialog('+ 5 seconds');
+      if (arrowLeftPressed) {
+        infoDialog('- 5 seconds');
+        timeStep *= -1;
+      }
+
+      if (arrowRightPressed) {
+        infoDialog('+ 5 seconds');
+      }
+
+      const currentCurrentTime = videoRef.current?.currentTime;
+
+      if (currentCurrentTime !== undefined && videoRef.current) {
+        videoRef.current.currentTime = currentCurrentTime + timeStep;
+      }
     }
-  }, [arrowRightPressed]);
+  }, [arrowLeftPressed, arrowRightPressed]);
 
   useEffect(() => {
     if (questionmarkPressed) {
@@ -361,6 +370,11 @@ const VideoPlayer = ({
               });
             }}
             onEnded={handleVideoEnd(videoId, watched)}
+            onKeyDown={e => {
+              if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                e.preventDefault();
+              }
+            }}
             autoPlay={autoplay}
             controls
             width="100%"
