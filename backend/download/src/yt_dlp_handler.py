@@ -311,8 +311,19 @@ class DownloadPostProcess(DownloaderBase):
 
         print(f"auto delete older than {autodelete_days} days")
         now_lte = str(self.now - autodelete_days * 24 * 60 * 60)
+        channel_overwrite = "channel.channel_overwrites.autodelete_days"
         data = {
-            "query": {"range": {"player.watched_date": {"lte": now_lte}}},
+            "query": {
+                "bool": {
+                    "must": [
+                        {"range": {"player.watched_date": {"lte": now_lte}}},
+                        {"term": {"player.watched": True}},
+                    ],
+                    "must_not": [
+                        {"exists": {"field": channel_overwrite}},
+                    ],
+                }
+            },
             "sort": [{"player.watched_date": {"order": "asc"}}],
         }
         self._auto_delete_watched(data)
@@ -327,6 +338,7 @@ class DownloadPostProcess(DownloaderBase):
                 must_list = [
                     {"range": {"player.watched_date": {"lte": now_lte}}},
                     {"term": {"channel.channel_id": {"value": channel_id}}},
+                    {"term": {"player.watched": True}},
                 ]
                 data = {
                     "query": {"bool": {"must": must_list}},

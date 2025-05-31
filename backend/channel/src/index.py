@@ -56,12 +56,13 @@ class YoutubeChannel(YouTubeItem):
     def process_youtube_meta(self):
         """extract relevant fields"""
         self.youtube_meta["thumbnails"].reverse()
+        channel_name = self.youtube_meta["uploader"] or self.youtube_meta["id"]
         self.json_data = {
             "channel_active": True,
             "channel_description": self.youtube_meta.get("description", ""),
             "channel_id": self.youtube_id,
             "channel_last_refresh": int(datetime.now().timestamp()),
-            "channel_name": self.youtube_meta["uploader"],
+            "channel_name": channel_name,
             "channel_subs": self.youtube_meta.get("channel_follower_count", 0),
             "channel_subscribed": False,
             "channel_tags": self.youtube_meta.get("tags", []),
@@ -157,8 +158,18 @@ class YoutubeChannel(YouTubeItem):
         # add ingest pipeline
         processors = []
         for field, value in self.json_data.items():
-            line = {"set": {"field": "channel." + field, "value": value}}
+            if value is None:
+                line = {
+                    "script": {
+                        "lang": "painless",
+                        "source": f"ctx['{field}'] = null;",
+                    }
+                }
+            else:
+                line = {"set": {"field": "channel." + field, "value": value}}
+
             processors.append(line)
+
         data = {"description": self.youtube_id, "processors": processors}
         ingest_path = f"_ingest/pipeline/{self.youtube_id}"
         _, _ = ElasticWrap(ingest_path).put(data)

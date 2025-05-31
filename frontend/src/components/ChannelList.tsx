@@ -49,7 +49,9 @@ const ChannelList = ({ channelList, refreshChannelList }: ChannelListProps) => {
                   <h3>
                     <Link to={Routes.Channel(channel.channel_id)}>{channel.channel_name}</Link>
                   </h3>
-                  <FormattedNumber text="Subscribers:" number={channel.channel_subs} />
+                  {channel.channel_subs !== null && (
+                    <FormattedNumber text="Subscribers:" number={channel.channel_subs} />
+                  )}
                 </div>
               </div>
               <div className="info-box-item">

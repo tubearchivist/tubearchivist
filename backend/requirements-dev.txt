@@ -1,10 +1,10 @@
 -r requirements.txt
-ipython==9.0.2
+ipython==9.2.0
 pre-commit==4.2.0
 pylint-django==2.6.1
-pylint==3.3.6
+pylint==3.3.7
 pytest-django==4.11.1
 pytest==8.3.5
 python-dotenv==1.1.0
 requirementscheck==0.0.6
-types-requests==2.32.0.20250328
+types-requests==2.32.0.20250515
