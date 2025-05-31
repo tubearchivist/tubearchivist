@@ -11,6 +11,7 @@ import iconListView from '/img/icon-listview.svg';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import { ApiResponseType } from '../functions/APIClient';
+import { ViewStylesType, ViewStylesEnum } from '../configuration/constants/ViewStyle';
 
 const ChannelPlaylist = () => {
   const { channelId } = useParams();
@@ -27,7 +28,7 @@ const ChannelPlaylist = () => {
   const playlistList = playlistsResponseData?.data;
   const pagination = playlistsResponseData?.paginate;
 
-  const view = userConfig.view_style_playlist;
+  const viewStyle = userConfig.view_style_playlist;
   const showSubedOnly = userConfig.show_subed_only;
 
   const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
@@ -87,14 +88,18 @@ const ChannelPlaylist = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                handleUserConfigUpdate({ view_style_playlist: 'grid' });
+                handleUserConfigUpdate({
+                  view_style_playlist: ViewStylesEnum.Grid as ViewStylesType,
+                });
               }}
               alt="grid view"
             />
             <img
               src={iconListView}
               onClick={() => {
-                handleUserConfigUpdate({ view_style_playlist: 'list' });
+                handleUserConfigUpdate({
+                  view_style_playlist: ViewStylesEnum.List as ViewStylesType,
+                });
               }}
               alt="list view"
             />
@@ -103,7 +108,7 @@ const ChannelPlaylist = () => {
       </div>
 
       <div className={`boxed-content`}>
-        <div className={`playlist-list ${view}`}>
+        <div className={`playlist-list ${viewStyle}`}>
           <PlaylistList playlistList={playlistList} setRefresh={setRefreshPlaylists} />
         </div>
       </div>
