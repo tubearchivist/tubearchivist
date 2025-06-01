@@ -165,9 +165,9 @@ def extrac_dl(self, youtube_ids, auto_start=False, status="pending"):
         download_pending.delay(auto_only=True)
 
     if videos_added:
-        return f"added {len(videos_added)} video(s) in the queue"
-    else:
-        return None
+        return f"added {len(videos_added)} Videos to Queue"
+
+    return None
 
 
 @shared_task(bind=True, name="check_reindex", base=BaseTask)
