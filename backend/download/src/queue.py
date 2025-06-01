@@ -334,9 +334,7 @@ class PendingList(PendingIndex):
     def _parse_youtube_details(self, vid, vid_type=VideoTypeEnum.VIDEOS):
         """parse response"""
         vid_id = vid.get("id")
-        published = datetime.strptime(vid["upload_date"], "%Y%m%d").strftime(
-            "%Y-%m-%d"
-        )
+        published = datetime.strptime(vid["upload_date"], "%Y%m%d").strftime("%Y-%m-%d")
 
         # build dict
         youtube_details = {
