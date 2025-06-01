@@ -206,7 +206,9 @@ class PendingList(PendingIndex):
 
     def _add_video(self, url, vid_type, auto_start=False):
         """add video to list"""
-        if auto_start and url in set(i["youtube_id"] for i in self.all_pending):
+        if auto_start and url in set(
+            i["youtube_id"] for i in self.all_pending
+        ):
             PendingInteract(youtube_id=url, status="priority").update_status()
             return
 
@@ -334,7 +336,9 @@ class PendingList(PendingIndex):
     def _parse_youtube_details(self, vid, vid_type=VideoTypeEnum.VIDEOS):
         """parse response"""
         vid_id = vid.get("id")
-        published = datetime.strptime(vid["upload_date"], "%Y%m%d").strftime("%Y-%m-%d")
+        published = datetime.strptime(vid["upload_date"], "%Y%m%d").strftime(
+            "%Y-%m-%d"
+        )
 
         # build dict
         youtube_details = {
