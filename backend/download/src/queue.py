@@ -26,8 +26,7 @@ class PendingIndex:
         self.all_channels = False
         self.channel_overwrites = False
         self.video_overwrites = False
-        self.to_skip_already_in_ta_download = False
-        self.to_skip_already_indexed = False
+        self.to_skip = False
 
     def get_download(self):
         """get a list of all pending videos in ta_download"""
@@ -39,10 +38,10 @@ class PendingIndex:
 
         self.all_pending = []
         self.all_ignored = []
-        self.to_skip_already_in_ta_download = []
+        self.to_skip = []
 
         for result in all_results:
-            self.to_skip_already_in_ta_download.append(result["youtube_id"])
+            self.to_skip.append(result["youtube_id"])
             if result["status"] == "pending":
                 self.all_pending.append(result)
             elif result["status"] == "ignore":
@@ -50,14 +49,13 @@ class PendingIndex:
 
     def get_indexed(self):
         """get a list of all videos indexed"""
-        self.to_skip_already_indexed = []
         data = {
             "query": {"match_all": {}},
             "sort": [{"published": {"order": "desc"}}],
         }
         self.all_videos = IndexPaginate("ta_video", data).get_results()
         for video in self.all_videos:
-            self.to_skip_already_indexed.append(video["youtube_id"])
+            self.to_skip.append(video["youtube_id"])
 
     def get_channels(self):
         """get a list of all channels indexed"""
@@ -166,20 +164,17 @@ class PendingList(PendingIndex):
         self.config = AppConfig().config
         self.youtube_ids = youtube_ids
         self.task = task
-        self.to_skip_already_in_ta_download = False
-        self.to_skip_already_indexed = False
+        self.to_skip = False
         self.missing_videos = False
-        self.missing_videos_to_update = False
 
-    def parse_url_list(self):
+    def parse_url_list(self, auto_start=False):
         """extract youtube ids from list"""
         self.missing_videos = []
-        self.missing_videos_to_update = []
         self.get_download()
         self.get_indexed()
         total = len(self.youtube_ids)
         for idx, entry in enumerate(self.youtube_ids):
-            self._process_entry(entry)
+            self._process_entry(entry, auto_start=auto_start)
             if not self.task:
                 continue
 
@@ -188,11 +183,11 @@ class PendingList(PendingIndex):
                 progress=(idx + 1) / total,
             )
 
-    def _process_entry(self, entry):
+    def _process_entry(self, entry, auto_start=False):
         """process single entry from url list"""
         vid_type = self._get_vid_type(entry)
         if entry["type"] == "video":
-            self._add_video(entry["url"], vid_type)
+            self._add_video(entry["url"], vid_type, auto_start=auto_start)
         elif entry["type"] == "channel":
             self._parse_channel(entry["url"], vid_type)
         elif entry["type"] == "playlist":
@@ -209,26 +204,15 @@ class PendingList(PendingIndex):
 
         return VideoTypeEnum(vid_type_str)
 
-    def _add_video(self, url, vid_type):
+    def _add_video(self, url, vid_type, auto_start=False):
         """add video to list"""
-        if url in self.to_skip_already_indexed:
-            # If the video is already indexed, we skip it
-            print(f"{url}: skipped adding already downloaded.")
-        elif (
-            url in self.to_skip_already_in_ta_download
-            and url not in self.missing_videos_to_update
-        ):
-            # If the video is already in the ta_download list, we add it to
-            # the missing_videos_to_update, as we might need to change its
-            # status to 'priority'
-            self.missing_videos_to_update.append(url)
-        elif url not in self.missing_videos:
-            # If the video is not in the other lists, we add it to the
-            # missing_videos one, so we can fetch the details
+        if auto_start and url in set(i["youtube_id"] for i in self.all_pending):
+            PendingInteract(youtube_id=url, status="priority").update_status()
+            return
+
+        if url not in self.missing_videos and url not in self.to_skip:
             self.missing_videos.append((url, vid_type))
         else:
-            # We skip this video as it's either already downloaded, or
-            # a duplicate
             print(f"{url}: skipped adding already indexed video to download.")
 
     def _parse_channel(self, url, vid_type):
@@ -261,21 +245,6 @@ class PendingList(PendingIndex):
         """add missing videos to pending list"""
         self.get_channels()
 
-        videos_updated = []
-        if auto_start:
-            # If auto_start, we process the missing_videos_to_update and set
-            # the status of the videos in the list to 'priority', so that they
-            # will be immediately downloaded alongside the ones in the
-            # missing_videos list
-            total = len(self.missing_videos_to_update)
-            for idx, youtube_id in enumerate(self.missing_videos_to_update):
-                PendingInteract(youtube_id, "priority").update_status()
-                videos_updated.append(youtube_id)
-                print(
-                    f"{youtube_id}: [{idx + 1}/{total}]: changes status to \
-                    'priority'"
-                )
-
         total = len(self.missing_videos)
         videos_added = []
         for idx, (youtube_id, vid_type) in enumerate(self.missing_videos):
@@ -305,7 +274,7 @@ class PendingList(PendingIndex):
             if idx != total:
                 rand_sleep(self.config)
 
-        return videos_added, videos_updated
+        return videos_added
 
     def _notify_add(self, idx, total):
         """send notification for adding videos to download queue"""
