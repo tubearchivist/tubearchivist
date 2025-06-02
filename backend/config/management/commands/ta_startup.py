@@ -263,7 +263,7 @@ class Command(BaseCommand):
     def _init_app_config(self) -> None:
         """init default app config to ES"""
         self.stdout.write("[10] Check AppConfig")
-        _, status_code = ElasticWrap("ta_config/_doc/appsettings").get()
+        response, status_code = ElasticWrap("ta_config/_doc/appsettings").get()
         if status_code in [200, 201]:
             self.stdout.write(
                 self.style.SUCCESS("    skip completed appsettings init")
@@ -275,6 +275,13 @@ class Command(BaseCommand):
                 )
 
             return
+
+        if status_code != 404:
+            message = "    🗙 ta_config index lookup failed"
+            self.stdout.write(self.style.ERROR(message))
+            self.stdout.write(response)
+            sleep(60)
+            raise CommandError(message)
 
         handler = AppConfig.__new__(AppConfig)
         _, status_code = handler.sync_defaults()
