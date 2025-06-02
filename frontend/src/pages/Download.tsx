@@ -52,6 +52,7 @@ const Download = () => {
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const channelFilterFromUrl = searchParams.get('channel');
+  const ignoredOnlyParam = searchParams.get('ignored');
 
   const [refresh, setRefresh] = useState(false);
   const [showHiddenForm, setShowHiddenForm] = useState(false);
@@ -82,7 +83,8 @@ const Download = () => {
 
   const view = userConfig.view_style_downloads;
   const gridItems = userConfig.grid_items;
-  const [showIgnored, setShowIgnored] = useState(false);
+  const showIgnored =
+    ignoredOnlyParam !== null ? ignoredOnlyParam === 'true' : userConfig.show_ignored_only;
   const isGridView = view === ViewStyles.grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
@@ -130,21 +132,6 @@ const Download = () => {
       setDownloadAggsResponse(downloadAggs);
     })();
   }, [lastVideoCount, showIgnored]);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const ignoredParam = params.get('ignored');
-    if (ignoredParam !== null) {
-      setShowIgnored(ignoredParam === 'True');
-      params.delete('ignored');
-
-      // Reconstruct the URL without the 'ignored' parameter. This preserves any
-      // other query parameters that might be there.
-      const newSearch = params.toString();
-      const newUrl = window.location.pathname + (newSearch ? `?${newSearch}` : '');
-      window.history.replaceState({}, '', newUrl);
-    }
-  }, []);
 
   return (
     <>
@@ -248,8 +235,10 @@ const Download = () => {
               <input
                 id="showIgnored"
                 onChange={() => {
-                  setShowIgnored(!showIgnored);
                   handleUserConfigUpdate({ show_ignored_only: !showIgnored });
+                  const newParams = new URLSearchParams(searchParams.toString());
+                  newParams.set('ignored', String(!showIgnored));
+                  setSearchParams(newParams);
                   setRefresh(true);
                 }}
                 type="checkbox"
