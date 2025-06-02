@@ -156,7 +156,7 @@ def extrac_dl(self, youtube_ids, auto_start=False, status="pending"):
         to_add = youtube_ids
 
     pending_handler = PendingList(youtube_ids=to_add, task=self)
-    pending_handler.parse_url_list()
+    pending_handler.parse_url_list(auto_start=auto_start)
     videos_added = pending_handler.add_to_pending(
         status=status, auto_start=auto_start
     )
