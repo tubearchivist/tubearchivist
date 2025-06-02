@@ -12,6 +12,7 @@ class PlayerSerializer(serializers.Serializer):
     """serialize player"""
 
     watched = serializers.BooleanField()
+    watched_date = serializers.IntegerField(required=False)
     duration = serializers.IntegerField()
     duration_str = serializers.CharField()
     progress = serializers.FloatField(required=False)
