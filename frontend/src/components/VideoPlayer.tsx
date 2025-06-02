@@ -150,6 +150,7 @@ const VideoPlayer = ({
   const resetPlaybackSpeedPressed = useKeyPress('=');
   const arrowRightPressed = useKeyPress('ArrowRight');
   const arrowLeftPressed = useKeyPress('ArrowLeft');
+  const pPausedPressed = useKeyPress('p');
 
   const videoId = video.youtube_id;
   const videoUrl = video.media_url;
@@ -213,6 +214,16 @@ const VideoPlayer = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mutePressed]);
+
+  useEffect(() => {
+    if (pPausedPressed) {
+      if (videoRef.current?.paused) {
+        videoRef.current.play();
+      } else {
+        videoRef.current?.pause();
+      }
+    }
+  }, [pPausedPressed]);
 
   useEffect(() => {
     if (increasePlaybackSpeedPressed) {
@@ -399,6 +410,10 @@ const VideoPlayer = ({
               <tr>
                 <td>Show help</td>
                 <td>?</td>
+              </tr>
+              <tr>
+                <td>Toggle pause play</td>
+                <td>p</td>
               </tr>
               <tr>
                 <td>Toggle mute</td>
