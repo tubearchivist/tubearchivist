@@ -52,6 +52,7 @@ const Download = () => {
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
 
   const channelFilterFromUrl = searchParams.get('channel');
+  const ignoredOnlyParam = searchParams.get('ignored');
 
   const [refresh, setRefresh] = useState(false);
   const [showHiddenForm, setShowHiddenForm] = useState(false);
@@ -82,7 +83,8 @@ const Download = () => {
 
   const view = userConfig.view_style_downloads;
   const gridItems = userConfig.grid_items;
-  const showIgnored = userConfig.show_ignored_only;
+  const showIgnored =
+    ignoredOnlyParam !== null ? ignoredOnlyParam === 'true' : userConfig.show_ignored_only;
   const isGridView = view === ViewStyles.grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
@@ -234,6 +236,9 @@ const Download = () => {
                 id="showIgnored"
                 onChange={() => {
                   handleUserConfigUpdate({ show_ignored_only: !showIgnored });
+                  const newParams = new URLSearchParams(searchParams.toString());
+                  newParams.set('ignored', String(!showIgnored));
+                  setSearchParams(newParams);
                   setRefresh(true);
                 }}
                 type="checkbox"
