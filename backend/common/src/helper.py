@@ -8,7 +8,7 @@ import os
 import random
 import string
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 from time import sleep
 from typing import Any
 from urllib.parse import urlparse
@@ -106,13 +106,14 @@ def requests_headers() -> dict[str, str]:
 def date_parser(timestamp: int | str) -> str:
     """return formatted date string"""
     if isinstance(timestamp, int):
-        date_obj = datetime.fromtimestamp(timestamp)
+        date_obj = datetime.fromtimestamp(timestamp, tz=timezone.utc)
     elif isinstance(timestamp, str):
         date_obj = datetime.strptime(timestamp, "%Y-%m-%d")
+        date_obj = date_obj.replace(tzinfo=timezone.utc)
     else:
         raise TypeError(f"invalid timestamp: {timestamp}")
 
-    return date_obj.date().isoformat()
+    return date_obj.isoformat()
 
 
 def time_parser(timestamp: str) -> float:

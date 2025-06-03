@@ -22,14 +22,14 @@ def test_randomizor_with_positive_length():
 def test_date_parser_with_int():
     """unix timestamp"""
     timestamp = 1621539600
-    expected_date = "2021-05-20"
+    expected_date = "2021-05-20T19:40:00+00:00"
     assert date_parser(timestamp) == expected_date
 
 
 def test_date_parser_with_str():
     """iso timestamp"""
     date_str = "2021-05-21"
-    expected_date = "2021-05-21"
+    expected_date = "2021-05-21T00:00:00+00:00"
     assert date_parser(date_str) == expected_date
 
 
