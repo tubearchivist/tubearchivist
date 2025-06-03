@@ -1,6 +1,7 @@
 """build query for video fetching"""
 
 from common.src.ta_redis import RedisArchivist
+from playlist.src.index import YoutubePlaylist
 from video.src.constants import OrderEnum, SortEnum, VideoTypeEnum
 
 
@@ -84,6 +85,11 @@ class QueryBuilder:
 
     def parse_sort(self) -> dict | None:
         """build sort key"""
+        playlist = self.request_params.get("playlist")
+        if playlist:
+            # overwrite sort based on idx in playlist
+            return self._get_playlist_sort(playlist_id=playlist)
+
         sort = self.request_params.get("sort")
         if not sort:
             return None
@@ -100,3 +106,39 @@ class QueryBuilder:
         order_by = getattr(OrderEnum, order.upper()).value
 
         return {"sort": [{sort_field: {"order": order_by}}]}
+
+    def _get_playlist_sort(self, playlist_id: str):
+        """get sort for playlist"""
+        playlist = YoutubePlaylist(playlist_id)
+        playlist.get_from_es()
+        if not playlist.json_data:
+            raise ValueError(f"playlist {playlist_id} not found")
+
+        sort_score = {
+            i["youtube_id"]: i["idx"]
+            for i in playlist.json_data["playlist_entries"]
+            if i["downloaded"]
+        }
+        script = (
+            "if(params.scores.containsKey(doc['youtube_id'].value)) "
+            + "{return params.scores[doc['youtube_id'].value];} "
+            + "return 100000;"
+        )
+
+        sort = {
+            "sort": [
+                {
+                    "_script": {
+                        "type": "number",
+                        "script": {
+                            "lang": "painless",
+                            "source": script,
+                            "params": {"scores": sort_score},
+                        },
+                        "order": "asc",
+                    }
+                }
+            ],
+        }
+
+        return sort
