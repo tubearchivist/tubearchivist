@@ -20,7 +20,6 @@ class YtWrap:
     OBS_BASE = {
         "default_search": "ytsearch",
         "quiet": True,
-        "check_formats": "selected",
         "socket_timeout": 10,
         "extractor_retries": 3,
         "retries": 10,
@@ -66,6 +65,7 @@ class YtWrap:
 
     def download(self, url):
         """make download request"""
+        self.obs.update({"check_formats": "selected"})
         with yt_dlp.YoutubeDL(self.obs) as ydl:
             try:
                 ydl.download([url])
