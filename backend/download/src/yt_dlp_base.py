@@ -10,6 +10,7 @@ from io import StringIO
 
 import yt_dlp
 from appsettings.src.config import AppConfig
+from common.src.env_settings import EnvironmentSettings
 from common.src.ta_redis import RedisArchivist
 from django.conf import settings
 
@@ -38,6 +39,13 @@ class YtWrap:
         if self.config:
             self._add_cookie()
             self._add_potoken()
+
+        # Force IPv6 if enabled
+        if getattr(EnvironmentSettings, "IPV6", False):
+            self.obs["force_ipv6"] = True
+            # setting source_address to None to avoid reusing previous IPv6 after ip change
+            # this is needed to avoid issues with IPv6 address rotation
+            self.obs["source_address"] = None
 
         if getattr(settings, "DEBUG", False):
             del self.obs["quiet"]
