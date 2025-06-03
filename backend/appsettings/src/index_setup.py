@@ -201,7 +201,15 @@ class ElasitIndexWrap:
         if self.backup_run:
             return
 
-        config = AppConfig().config
+        try:
+            config = AppConfig().config
+        except ValueError:
+            # create defaults in ES if config not found
+            print("AppConfig not found, creating defaults...")
+            handler = AppConfig.__new__(AppConfig)
+            handler.sync_defaults()
+            config = AppConfig.CONFIG_DEFAULTS
+
         if config["application"]["enable_snapshot"]:
             # take snapshot if enabled
             ElasticSnapshot().take_snapshot_now(wait=True)
