@@ -51,6 +51,9 @@ class EnvironmentSettings:
     )
     ES_DISABLE_VERIFY_SSL: bool = bool(environ.get("ES_DISABLE_VERIFY_SSL"))
 
+    # IPV6
+    IPV6: bool = environ.get("IPV6", "false").lower() == "true"
+
     def get_cache_root(self):
         """get root for web server"""
         if self.CACHE_DIR.startswith("/"):
