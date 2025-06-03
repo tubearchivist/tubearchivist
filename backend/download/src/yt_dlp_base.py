@@ -43,8 +43,6 @@ class YtWrap:
         # Force IPv6 if enabled
         if getattr(EnvironmentSettings, "IPV6", False):
             self.obs["force_ipv6"] = True
-            # setting source_address to None to avoid reusing previous IPv6 after ip change
-            # this is needed to avoid issues with IPv6 address rotation
             self.obs["source_address"] = None
 
         if getattr(settings, "DEBUG", False):
