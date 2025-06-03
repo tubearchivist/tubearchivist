@@ -204,8 +204,8 @@ const SettingsActions = () => {
             deleted videos from the filesystem.
           </p>
           <p>
-            Rescan your media folder looking for missing videos and clean up index. More info on
-            the Github{' '}
+            Rescan your media folder looking for missing videos and clean up index. More info on the
+            Github{' '}
             <a
               href="https://docs.tubearchivist.com/settings/actions/#rescan-filesystem"
               target="_blank"
