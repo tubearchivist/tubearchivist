@@ -70,6 +70,7 @@ RUN sed -i 's/^user www\-data\;$/user root\;/' /etc/nginx/nginx.conf
 COPY ./backend /app
 COPY ./docker_assets/run.sh /app
 COPY ./docker_assets/backend_start.py /app
+COPY ./docker_assets/beat_auto_spawn.sh /app
 
 COPY --from=node-builder ./frontend/dist /app/static
 
