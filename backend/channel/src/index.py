@@ -14,7 +14,6 @@ from common.src.helper import rand_sleep
 from common.src.index_generic import YouTubeItem
 from download.src.thumbnails import ThumbManager
 from download.src.yt_dlp_base import YtWrap
-from playlist.src.index import YoutubePlaylist
 
 
 class YoutubeChannel(YouTubeItem):
@@ -215,6 +214,8 @@ class YoutubeChannel(YouTubeItem):
 
     def delete_playlists(self):
         """delete all indexed playlist from es"""
+        from playlist.src.index import YoutubePlaylist
+
         all_playlists = self.get_indexed_playlists()
         for playlist in all_playlists:
             YoutubePlaylist(playlist["playlist_id"]).delete_metadata()
@@ -277,6 +278,8 @@ class YoutubeChannel(YouTubeItem):
     @staticmethod
     def _index_single_playlist(playlist):
         """add single playlist if needed"""
+        from playlist.src.index import YoutubePlaylist
+
         playlist = YoutubePlaylist(playlist[0])
         playlist.update_playlist(skip_on_empty=True)
 

@@ -195,7 +195,6 @@ if bool(environ.get("TA_LDAP")):
             ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_NEVER,
         }
 
-    AUTHENTICATION_BACKENDS = ("django_auth_ldap.backend.LDAPBackend",)
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -239,10 +238,31 @@ if bool(environ.get("TA_ENABLE_AUTH_PROXY")):
 
     MIDDLEWARE.append("user.src.remote_user_auth.HttpRemoteUserMiddleware")
 
+
+# Configure Authentication Backend Combinations
+_login_auth_mode = (environ.get("TA_LOGIN_AUTH_MODE") or "single").casefold()
+if _login_auth_mode == "local":
+    AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
+elif _login_auth_mode == "ldap":
+    AUTHENTICATION_BACKENDS = ("django_auth_ldap.backend.LDAPBackend",)
+elif _login_auth_mode == "forwardauth":
     AUTHENTICATION_BACKENDS = (
         "django.contrib.auth.backends.RemoteUserBackend",
     )
-
+elif _login_auth_mode == "ldap_local":
+    AUTHENTICATION_BACKENDS = (
+        "django_auth_ldap.backend.LDAPBackend",
+        "django.contrib.auth.backends.ModelBackend",
+    )
+else:
+    # If none of these cases match, AUTHENTICATION_BACKENDS is unset, which
+    # means the ModelBackend should be used by default
+    if bool(environ.get("TA_LDAP")):
+        AUTHENTICATION_BACKENDS = ("django_auth_ldap.backend.LDAPBackend",)
+    if bool(environ.get("TA_ENABLE_AUTH_PROXY")):
+        AUTHENTICATION_BACKENDS = (
+            "django.contrib.auth.backends.RemoteUserBackend",
+        )
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/

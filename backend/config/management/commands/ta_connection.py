@@ -99,7 +99,12 @@ class Command(BaseCommand):
                 continue
 
             if status_code and status_code == 200:
-                path = "_cluster/health?wait_for_status=yellow&timeout=60s"
+                path = (
+                    "_cluster/health?"
+                    "wait_for_status=yellow&"
+                    "timeout=60s&"
+                    "wait_for_active_shards=1"
+                )
                 _, _ = ElasticWrap(path).get(timeout=60)
                 self.stdout.write(
                     self.style.SUCCESS("    ✓ ES connection established")

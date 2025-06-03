@@ -7,7 +7,6 @@ functionality:
 import json
 from datetime import datetime
 
-from channel.src import index as channel
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
 from common.src.index_generic import YouTubeItem
@@ -74,8 +73,10 @@ class YoutubePlaylist(YouTubeItem):
 
     def _ensure_channel(self):
         """make sure channel is indexed"""
+        from channel.src.index import YoutubeChannel
+
         channel_id = self.json_data["playlist_channel_id"]
-        channel_handler = channel.YoutubeChannel(channel_id)
+        channel_handler = YoutubeChannel(channel_id)
         channel_handler.build_json(upload=True)
 
     def get_local_vids(self) -> list[str]:

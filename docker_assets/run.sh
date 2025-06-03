@@ -3,6 +3,12 @@
 
 set -e
 
+if [[ -n "$DJANGO_DEBUG" ]]; then
+  LOGLEVEL="DEBUG"
+else
+  LOGLEVEL="INFO"
+fi
+
 # stop on pending manual migration
 python manage.py ta_stop_on_error
 
@@ -18,10 +24,11 @@ python manage.py ta_startup
 # start all tasks
 nginx &
 celery -A task.celery worker \
-    --loglevel=INFO \
+    --loglevel=$LOGLEVEL \
     --concurrency 4 \
     --max-tasks-per-child 5 \
     --max-memory-per-child 150000 &
-celery -A task beat --loglevel=INFO \
-    --scheduler django_celery_beat.schedulers:DatabaseScheduler &
+
+./beat_auto_spawn.sh &
+
 python backend_start.py

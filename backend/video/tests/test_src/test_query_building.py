@@ -16,7 +16,6 @@ def test_build_data():
     qb = QueryBuilder(
         user_id=1,
         channel="test_channel",
-        playlist="test_playlist",
         watch="watched",
         type="videos",
         sort="published",

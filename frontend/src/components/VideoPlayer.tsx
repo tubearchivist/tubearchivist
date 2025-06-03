@@ -150,6 +150,7 @@ const VideoPlayer = ({
   const resetPlaybackSpeedPressed = useKeyPress('=');
   const arrowRightPressed = useKeyPress('ArrowRight');
   const arrowLeftPressed = useKeyPress('ArrowLeft');
+  const pPausedPressed = useKeyPress('p');
 
   const videoId = video.youtube_id;
   const videoUrl = video.media_url;
@@ -213,6 +214,16 @@ const VideoPlayer = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mutePressed]);
+
+  useEffect(() => {
+    if (pPausedPressed) {
+      if (videoRef.current?.paused) {
+        videoRef.current.play();
+      } else {
+        videoRef.current?.pause();
+      }
+    }
+  }, [pPausedPressed]);
 
   useEffect(() => {
     if (increasePlaybackSpeedPressed) {
@@ -301,16 +312,25 @@ const VideoPlayer = ({
   }, [subtitlesPressed]);
 
   useEffect(() => {
-    if (arrowLeftPressed) {
-      infoDialog('- 5 seconds');
-    }
-  }, [arrowLeftPressed]);
+    if (arrowLeftPressed || arrowRightPressed) {
+      let timeStep = 5;
 
-  useEffect(() => {
-    if (arrowRightPressed) {
-      infoDialog('+ 5 seconds');
+      if (arrowLeftPressed) {
+        infoDialog('- 5 seconds');
+        timeStep *= -1;
+      }
+
+      if (arrowRightPressed) {
+        infoDialog('+ 5 seconds');
+      }
+
+      const currentCurrentTime = videoRef.current?.currentTime;
+
+      if (currentCurrentTime !== undefined && videoRef.current) {
+        videoRef.current.currentTime = currentCurrentTime + timeStep;
+      }
     }
-  }, [arrowRightPressed]);
+  }, [arrowLeftPressed, arrowRightPressed]);
 
   useEffect(() => {
     if (questionmarkPressed) {
@@ -361,6 +381,11 @@ const VideoPlayer = ({
               });
             }}
             onEnded={handleVideoEnd(videoId, watched)}
+            onKeyDown={e => {
+              if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                e.preventDefault();
+              }
+            }}
             autoPlay={autoplay}
             controls
             width="100%"
@@ -385,6 +410,10 @@ const VideoPlayer = ({
               <tr>
                 <td>Show help</td>
                 <td>?</td>
+              </tr>
+              <tr>
+                <td>Toggle pause play</td>
+                <td>p</td>
               </tr>
               <tr>
                 <td>Toggle mute</td>

@@ -173,9 +173,6 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         self._validate_id()
         # extract
         self.channel_id = self.youtube_meta["channel_id"]
-        upload_date = self.youtube_meta["upload_date"]
-        upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
-        published = upload_date_time.strftime("%Y-%m-%d")
         last_refresh = int(datetime.now().timestamp())
         # base64_blur = ThumbManager().get_base64_blur(self.youtube_id)
         base64_blur = False
@@ -187,7 +184,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             "vid_thumb_url": self.youtube_meta["thumbnail"],
             "vid_thumb_base64": base64_blur,
             "tags": self.youtube_meta.get("tags", []),
-            "published": published,
+            "published": self._build_published(),
             "vid_last_refresh": last_refresh,
             "date_downloaded": last_refresh,
             "youtube_id": self.youtube_id,
@@ -195,6 +192,18 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             "vid_type": self.video_type.value,
             "active": True,
         }
+
+    def _build_published(self):
+        """build published date or timestamp"""
+        timestamp = self.youtube_meta["timestamp"]
+        if timestamp:
+            return timestamp
+
+        upload_date = self.youtube_meta["upload_date"]
+        upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
+        published = upload_date_time.strftime("%Y-%m-%d")
+
+        return published
 
     def _validate_id(self):
         """validate expected video ID, raise value error on mismatch"""

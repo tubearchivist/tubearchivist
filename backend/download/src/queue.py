@@ -167,14 +167,14 @@ class PendingList(PendingIndex):
         self.to_skip = False
         self.missing_videos = False
 
-    def parse_url_list(self):
+    def parse_url_list(self, auto_start=False):
         """extract youtube ids from list"""
         self.missing_videos = []
         self.get_download()
         self.get_indexed()
         total = len(self.youtube_ids)
         for idx, entry in enumerate(self.youtube_ids):
-            self._process_entry(entry)
+            self._process_entry(entry, auto_start=auto_start)
             if not self.task:
                 continue
 
@@ -183,11 +183,11 @@ class PendingList(PendingIndex):
                 progress=(idx + 1) / total,
             )
 
-    def _process_entry(self, entry):
+    def _process_entry(self, entry, auto_start=False):
         """process single entry from url list"""
         vid_type = self._get_vid_type(entry)
         if entry["type"] == "video":
-            self._add_video(entry["url"], vid_type)
+            self._add_video(entry["url"], vid_type, auto_start=auto_start)
         elif entry["type"] == "channel":
             self._parse_channel(entry["url"], vid_type)
         elif entry["type"] == "playlist":
@@ -204,8 +204,14 @@ class PendingList(PendingIndex):
 
         return VideoTypeEnum(vid_type_str)
 
-    def _add_video(self, url, vid_type):
+    def _add_video(self, url, vid_type, auto_start=False):
         """add video to list"""
+        if auto_start and url in set(
+            i["youtube_id"] for i in self.all_pending
+        ):
+            PendingInteract(youtube_id=url, status="priority").update_status()
+            return
+
         if url not in self.missing_videos and url not in self.to_skip:
             self.missing_videos.append((url, vid_type))
         else:
@@ -330,9 +336,6 @@ class PendingList(PendingIndex):
     def _parse_youtube_details(self, vid, vid_type=VideoTypeEnum.VIDEOS):
         """parse response"""
         vid_id = vid.get("id")
-        published = datetime.strptime(vid["upload_date"], "%Y%m%d").strftime(
-            "%Y-%m-%d"
-        )
 
         # build dict
         youtube_details = {
@@ -342,10 +345,23 @@ class PendingList(PendingIndex):
             "title": vid["title"],
             "channel_id": vid["channel_id"],
             "duration": get_duration_str(vid["duration"]),
-            "published": published,
+            "published": self._build_published(vid),
             "timestamp": int(datetime.now().timestamp()),
             "vid_type": vid_type.value,
             "channel_indexed": vid["channel_id"] in self.all_channels,
         }
 
         return youtube_details
+
+    @staticmethod
+    def _build_published(vid):
+        """build published date or timestamp"""
+        timestamp = vid["timestamp"]
+        if timestamp:
+            return timestamp
+
+        upload_date = vid["upload_date"]
+        upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
+        published = upload_date_time.strftime("%Y-%m-%d")
+
+        return published
