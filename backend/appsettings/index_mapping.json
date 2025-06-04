@@ -239,7 +239,8 @@
                     "type": "keyword"
                 },
                 "published": {
-                    "type": "date"
+                    "type": "date",
+                    "format": "epoch_second||strict_date_optional_time"
                 },
                 "playlist": {
                     "type": "text",
