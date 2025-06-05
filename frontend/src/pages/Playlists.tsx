@@ -18,6 +18,7 @@ import { useUserConfigStore } from '../stores/UserConfigStore';
 import Notifications from '../components/Notifications';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import { ApiResponseType } from '../functions/APIClient';
+import { ViewStylesEnum, ViewStylesType } from '../configuration/constants/ViewStyle';
 
 const Playlists = () => {
   const { userConfig, setUserConfig } = useUserConfigStore();
@@ -39,7 +40,7 @@ const Playlists = () => {
 
   const hasPlaylists = playlistResponseData?.data?.length !== 0;
 
-  const view = userConfig.view_style_playlist;
+  const viewStyle = userConfig.view_style_playlist;
   const showSubedOnly = userConfig.show_subed_only;
 
   useEffect(() => {
@@ -177,21 +178,25 @@ const Playlists = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                handleUserConfigUpdate({ view_style_playlist: 'grid' });
+                handleUserConfigUpdate({
+                  view_style_playlist: ViewStylesEnum.Grid as ViewStylesType,
+                });
               }}
               alt="grid view"
             />
             <img
               src={iconListView}
               onClick={() => {
-                handleUserConfigUpdate({ view_style_playlist: 'list' });
+                handleUserConfigUpdate({
+                  view_style_playlist: ViewStylesEnum.List as ViewStylesType,
+                });
               }}
               alt="list view"
             />
           </div>
         </div>
 
-        <div className={`playlist-list ${view}`}>
+        <div className={`playlist-list ${viewStyle}`}>
           {!hasPlaylists && <h2>No playlists found...</h2>}
 
           {hasPlaylists && <PlaylistList playlistList={playlistList} setRefresh={setRefresh} />}
