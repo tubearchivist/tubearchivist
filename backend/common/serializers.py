@@ -69,6 +69,7 @@ class NotificationSerializer(serializers.Serializer):
     level = serializers.ChoiceField(choices=["info", "error"])
     messages = serializers.ListField(child=serializers.CharField())
     progress = serializers.FloatField(required=False)
+    command = serializers.ChoiceField(choices=["STOP", "KILL"], required=False)
 
 
 class NotificationQueryFilterSerializer(serializers.Serializer):
