@@ -70,9 +70,17 @@ Thank you for contributing and helping improve this project. Focus for the fores
 This is a quick checklist to help streamline the process:
 
 - For **code changes**, make your PR against the [testing branch](https://github.com/tubearchivist/tubearchivist/tree/testing). That's where all active development happens. This simplifies the later merging into *master*, minimizes any conflicts and usually allows for easy and convenient *fast-forward* merging.
-- For **documentation changes**, make your PR directly against the *master* branch.
 - Show off your progress, even if not yet complete, by creating a [draft](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests#draft-pull-requests) PR first and switch it as *ready* when you are ready.
-- Make sure all your code is linted and formatted correctly, see below. The automatic GH action unfortunately needs to be triggered manually by a maintainer for first time contributors, but will trigger automatically for existing contributors.
+- Make sure all your code is linted and formatted correctly, see below.
+
+### Documentation Changes
+
+All documentation is intended to represent the state of the [latest](https://github.com/tubearchivist/tubearchivist/releases/latest) release. 
+
+- If your PR with code changes also requires changes to documentation *.md files here in this repo, create a separate PR for that, so it can be merged separately at release.
+- You can make the PR directly against the *master* branch.
+- If your PR requires changes on the [tubearchivist/docs](https://github.com/tubearchivist/docs), make the PR over there.
+- Prepare your documentation updates at the same time as the code changes, so people testing your PR can consult the prepared docs if needed.
 
 ### Code formatting and linting
 
