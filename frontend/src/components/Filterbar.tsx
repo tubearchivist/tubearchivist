@@ -1,24 +1,45 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import iconSort from '/img/icon-sort.svg';
 import iconAdd from '/img/icon-add.svg';
 import iconSubstract from '/img/icon-substract.svg';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
-import { SortByType, SortOrderType } from '../pages/Home';
+import iconTableView from '/img/icon-tableview.svg';
 import { useUserConfigStore } from '../stores/UserConfigStore';
-import { ViewStyles } from '../configuration/constants/ViewStyle';
+import { ViewStyleNamesType, ViewStylesEnum } from '../configuration/constants/ViewStyle';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
+import {
+  SortByEnum,
+  SortByType,
+  SortOrderEnum,
+  SortOrderType,
+} from '../api/loader/loadVideoListByPage';
 
 type FilterbarProps = {
   hideToggleText: string;
-  viewStyleName: string;
+  viewStyle: ViewStyleNamesType;
   showSort?: boolean;
 };
 
-const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: FilterbarProps) => {
+const Filterbar = ({ hideToggleText, viewStyle, showSort = true }: FilterbarProps) => {
   const { userConfig, setUserConfig } = useUserConfigStore();
+
   const [showHidden, setShowHidden] = useState(false);
-  const isGridView = userConfig.view_style_home === ViewStyles.grid;
+
+  const currentViewStyle = userConfig[viewStyle];
+  const isGridView = currentViewStyle === ViewStylesEnum.Grid;
+
+  useEffect(() => {
+    if (!showSort) {
+      return;
+    }
+
+    if (currentViewStyle === ViewStylesEnum.Table) {
+      setShowHidden(true);
+    } else {
+      setShowHidden(false);
+    }
+  }, [currentViewStyle, showSort]);
 
   const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
     const updatedUserConfig = await updateUserConfig(config);
@@ -55,7 +76,7 @@ const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: Filterbar
         </div>
       </div>
 
-      {showHidden && showSort && (
+      {showHidden && (
         <div className="sort">
           <div id="form">
             <span>Sort by:</span>
@@ -67,12 +88,9 @@ const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: Filterbar
                 handleUserConfigUpdate({ sort_by: event.target.value as SortByType });
               }}
             >
-              <option value="published">date published</option>
-              <option value="downloaded">date downloaded</option>
-              <option value="views">views</option>
-              <option value="likes">likes</option>
-              <option value="duration">duration</option>
-              <option value="mediasize">media size</option>
+              {Object.entries(SortByEnum).map(([key, value]) => {
+                return <option value={value}>{key}</option>;
+              })}
             </select>
             <select
               name="sort_order"
@@ -82,19 +100,20 @@ const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: Filterbar
                 handleUserConfigUpdate({ sort_order: event.target.value as SortOrderType });
               }}
             >
-              <option value="asc">asc</option>
-              <option value="desc">desc</option>
+              {Object.entries(SortOrderEnum).map(([key, value]) => {
+                return <option value={value}>{key}</option>;
+              })}
             </select>
           </div>
         </div>
       )}
       <div className="view-icons">
-        {setShowHidden && showSort && (
+        {showSort && (
           <img
             src={iconSort}
             alt="sort-icon"
             onClick={() => {
-              setShowHidden?.(!showHidden);
+              setShowHidden(!showHidden);
             }}
             id="animate-icon"
           />
@@ -125,16 +144,23 @@ const Filterbar = ({ hideToggleText, viewStyleName, showSort = true }: Filterbar
         <img
           src={iconGridView}
           onClick={() => {
-            handleUserConfigUpdate({ [viewStyleName]: 'grid' });
+            handleUserConfigUpdate({ [viewStyle]: ViewStylesEnum.Grid });
           }}
           alt="grid view"
         />
         <img
           src={iconListView}
           onClick={() => {
-            handleUserConfigUpdate({ [viewStyleName]: 'list' });
+            handleUserConfigUpdate({ [viewStyle]: ViewStylesEnum.List });
           }}
           alt="list view"
+        />
+        <img
+          src={iconTableView}
+          onClick={() => {
+            handleUserConfigUpdate({ [viewStyle]: ViewStylesEnum.Table });
+          }}
+          alt="table view"
         />
       </div>
     </div>

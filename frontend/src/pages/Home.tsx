@@ -4,12 +4,18 @@ import Routes from '../configuration/routes/RouteList';
 import Pagination from '../components/Pagination';
 import loadVideoListByFilter, {
   VideoListByFilterResponseType,
+  WatchTypes,
+  WatchTypesEnum,
 } from '../api/loader/loadVideoListByPage';
 import VideoList from '../components/VideoList';
 import { ChannelType } from './Channels';
 import { OutletContextType } from './Base';
 import Filterbar from '../components/Filterbar';
-import { ViewStyleNames, ViewStyles } from '../configuration/constants/ViewStyle';
+import {
+  ViewStyleNames,
+  ViewStyleNamesType,
+  ViewStylesEnum,
+} from '../configuration/constants/ViewStyle';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import { SponsorBlockType } from './Video';
@@ -99,10 +105,6 @@ export type ConfigType = {
   downloads: DownloadsType;
 };
 
-export type SortByType = 'published' | 'downloaded' | 'views' | 'likes' | 'duration' | 'mediasize';
-export type SortOrderType = 'asc' | 'desc';
-export type ViewLayoutType = 'grid' | 'list';
-
 const Home = () => {
   const { userConfig } = useUserConfigStore();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
@@ -125,15 +127,16 @@ const Home = () => {
 
   const hasVideos = videoResponseData?.data?.length !== 0;
 
-  const isGridView = userConfig.view_style_home === ViewStyles.grid;
+  const isGridView = userConfig.view_style_home === ViewStylesEnum.Grid;
   const gridView = isGridView ? `boxed-${userConfig.grid_items}` : '';
   const gridViewGrid = isGridView ? `grid-${userConfig.grid_items}` : '';
+  const isTableView = userConfig.view_style_home === ViewStylesEnum.Table;
 
   useEffect(() => {
     (async () => {
       const videos = await loadVideoListByFilter({
         page: currentPage,
-        watch: userConfig.hide_watched ? 'unwatched' : undefined,
+        watch: userConfig.hide_watched ? (WatchTypesEnum.Unwatched as WatchTypes) : undefined,
         sort: userConfig.sort_by,
         order: userConfig.sort_order,
       });
@@ -168,7 +171,7 @@ const Home = () => {
       <EmbeddableVideoPlayer videoId={videoId} />
 
       <div className={`boxed-content ${gridView}`}>
-        {continueVideos && continueVideos.length > 0 && (
+        {continueVideos && continueVideos.length > 0 && !isTableView && (
           <>
             <div className="title-bar">
               <h1>Continue Watching</h1>
@@ -176,7 +179,7 @@ const Home = () => {
             <div className={`video-list ${userConfig.view_style_home} ${gridViewGrid}`}>
               <VideoList
                 videoList={continueVideos}
-                viewLayout={userConfig.view_style_home}
+                viewStyle={userConfig.view_style_home}
                 refreshVideoList={setRefreshVideoList}
               />
             </div>
@@ -187,7 +190,10 @@ const Home = () => {
           <h1>Recent Videos</h1>
         </div>
 
-        <Filterbar hideToggleText="Show unwatched only:" viewStyleName={ViewStyleNames.home} />
+        <Filterbar
+          hideToggleText="Show unwatched only:"
+          viewStyle={ViewStyleNames.Home as ViewStyleNamesType}
+        />
       </div>
 
       <div className={`boxed-content ${gridView}`}>
@@ -206,7 +212,7 @@ const Home = () => {
           {hasVideos && (
             <VideoList
               videoList={videoList}
-              viewLayout={userConfig.view_style_home}
+              viewStyle={userConfig.view_style_home}
               refreshVideoList={setRefreshVideoList}
             />
           )}

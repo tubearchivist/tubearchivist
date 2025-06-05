@@ -10,7 +10,7 @@ import { ConfigType } from './Home';
 import loadDownloadQueue from '../api/loader/loadDownloadQueue';
 import { OutletContextType } from './Base';
 import Pagination, { PaginationType } from '../components/Pagination';
-import { ViewStyles } from '../configuration/constants/ViewStyle';
+import { ViewStylesEnum, ViewStylesType } from '../configuration/constants/ViewStyle';
 import updateDownloadQueue from '../api/actions/updateDownloadQueue';
 import updateTaskByName from '../api/actions/updateTaskByName';
 import Notifications from '../components/Notifications';
@@ -81,11 +81,11 @@ const Download = () => {
       ? downloadResponseData?.data[0].channel_name
       : '';
 
-  const view = userConfig.view_style_downloads;
+  const viewStyle = userConfig.view_style_downloads;
   const gridItems = userConfig.grid_items;
   const showIgnored =
     ignoredOnlyParam !== null ? ignoredOnlyParam === 'true' : userConfig.show_ignored_only;
-  const isGridView = view === ViewStyles.grid;
+  const isGridView = viewStyle === ViewStylesEnum.Grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
 
@@ -315,14 +315,18 @@ const Download = () => {
             <img
               src={iconGridView}
               onClick={() => {
-                handleUserConfigUpdate({ view_style_downloads: 'grid' });
+                handleUserConfigUpdate({
+                  view_style_downloads: ViewStylesEnum.Grid as ViewStylesType,
+                });
               }}
               alt="grid view"
             />
             <img
               src={iconListView}
               onClick={() => {
-                handleUserConfigUpdate({ view_style_downloads: 'list' });
+                handleUserConfigUpdate({
+                  view_style_downloads: ViewStylesEnum.List as ViewStylesType,
+                });
               }}
               alt="list view"
             />
@@ -341,7 +345,7 @@ const Download = () => {
       </div>
 
       <div className={`boxed-content ${gridView}`}>
-        <div className={`video-list ${view} ${gridViewGrid}`}>
+        <div className={`video-list ${viewStyle} ${gridViewGrid}`}>
           {downloadList &&
             downloadList?.map(download => {
               return (

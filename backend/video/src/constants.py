@@ -31,6 +31,8 @@ class SortEnum(enum.Enum):
     LIKES = "stats.like_count"
     DURATION = "player.duration"
     MEDIASIZE = "media_size"
+    WIDTH = "streams.width"
+    HEIGHT = "streams.height"
 
     @classmethod
     def values(cls) -> list[str]:
