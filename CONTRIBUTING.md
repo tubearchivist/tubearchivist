@@ -21,7 +21,7 @@ Be the first to help test new features/improvements and provide feedback! Regula
 There is always something that can get missed during development. Look at the commit messages tagged with `#build` - these are the unstable builds and give a quick overview of what has changed.
 
 - Test the features mentioned, play around, try to break it.
-- Test the update path by installing the `:latest` release first, the upgrade to `:unstable` to check for any errors.
+- Test the update path by installing the `:latest` release first, then upgrade to `:unstable` to check for any errors.
 - Test the unstable build on a fresh install.
 
 Then provide feedback - even if you don't encounter any issues! You can do this in the `#beta-testing` channel on the [Discord](https://tubearchivist.com/discord) Discord server.
