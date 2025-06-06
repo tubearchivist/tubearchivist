@@ -16,17 +16,17 @@ Welcome, and thanks for showing interest in improving Tube Archivist!
 ---
 
 ## Beta Testing
-Be the first to help test new features and improvements and provide feedback! There are regular `:unstable` builds for easy access. That's for the tinkerers and the breave. Ideally use a testing environment first, before a release be the first to install it on your main system.
+Be the first to help test new features/improvements and provide feedback! Regular `:unstable` builds are available for early access. These are for the tinkerers and the brave. Ideally, use a testing environment first, before upgrading your main installation.
 
-There is always something that can get missed during development. Look at the commit messages tagged with `#build`, these are the unstable builds and give a quick overview what has changed.
+There is always something that can get missed during development. Look at the commit messages tagged with `#build` - these are the unstable builds and give a quick overview of what has changed.
 
 - Test the features mentioned, play around, try to break it.
-- Test the update path by installing the `:latest` release first, the upgrade to `:unstable` to check for any errors.
+- Test the update path by installing the `:latest` release first, then upgrade to `:unstable` to check for any errors.
 - Test the unstable build on a fresh install.
 
-Then provide feedback, if there is a problem but also if there is no problem. Reach out on [Discord](https://tubearchivist.com/discord) in the `#beta-testing` channel with your findings.
+Then provide feedback - even if you don't encounter any issues! You can do this in the `#beta-testing` channel on the [Discord](https://tubearchivist.com/discord) Discord server.
 
-This will help with a smooth update for the regular release. Plus you get to test things out early!
+This helps ensure a smooth update for the stable release. Plus you get to test things out early!
 
 ## How to open an issue
 Please read this carefully before opening any [issue](https://github.com/tubearchivist/tubearchivist/issues) on GitHub.
