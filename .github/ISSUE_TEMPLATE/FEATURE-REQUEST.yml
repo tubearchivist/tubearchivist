@@ -10,3 +10,5 @@ body:
       options:
         - label: I understand that this issue will be closed without comment.
           required: true
+        - label: I will resist the temptation and I will not submit this issue. If I submit this, I understand I might get blocked from this repo.
+          required: true
