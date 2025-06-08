@@ -959,6 +959,12 @@ video:-webkit-full-screen {
   filter: var(--img-filter-error);
 }
 
+.timestamp-link {
+  color: var(--accent-font-light);
+  cursor: pointer;
+  font-weight: bold;
+}
+
 /* multi search page */
 .multi-search-box {
   padding-right: 20px;
