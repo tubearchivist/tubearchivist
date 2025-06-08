@@ -242,7 +242,9 @@ if bool(environ.get("TA_ENABLE_AUTH_PROXY")):
 # Configure Authentication Backend Combinations
 _login_auth_mode = (environ.get("TA_LOGIN_AUTH_MODE") or "single").casefold()
 if _login_auth_mode == "local":
-    AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
+    AUTHENTICATION_BACKENDS: tuple = (
+        "django.contrib.auth.backends.ModelBackend",
+    )
 elif _login_auth_mode == "ldap":
     AUTHENTICATION_BACKENDS = ("django_auth_ldap.backend.LDAPBackend",)
 elif _login_auth_mode == "forwardauth":
