@@ -195,7 +195,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def _build_published(self):
         """build published date or timestamp"""
-        timestamp = self.youtube_meta["timestamp"]
+        timestamp = self.youtube_meta.get("timestamp")
         if timestamp:
             return timestamp
 
