@@ -25,7 +25,9 @@ const Linkify = ({ children, ignoreLineBreak = false, onTimestampClick }: Linkif
       // MM:SS format
       const [minutes, seconds] = parts;
       return minutes * 60 + seconds;
-    } else if (parts.length === 3) {
+    }
+
+    if (parts.length === 3) {
       // HH:MM:SS format
       const [hours, minutes, seconds] = parts;
       return hours * 3600 + minutes * 60 + seconds;
@@ -37,7 +39,9 @@ const Linkify = ({ children, ignoreLineBreak = false, onTimestampClick }: Linkif
   const addMarkup = (word: string) => {
     if (isUrl(word)) {
       return `<a href="${word}" rel="noopener noreferrer" target="_blank">${word}</a>`;
-    } else if (isTimestamp(word) && onTimestampClick) {
+    }
+
+    if (isTimestamp(word) && onTimestampClick) {
       const seconds = parseTimestamp(word);
       return `<span class="timestamp-link" data-timestamp="${seconds}">${word}</span>`;
     }
