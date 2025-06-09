@@ -9,6 +9,11 @@ else
   LOGLEVEL="INFO"
 fi
 
+if [ "${TA_AUTO_UPDATE_YTDLP,,}" = "true" ]; then
+    echo "Updating yt-dlp..."
+    python -m pip install -U yt-dlp
+fi
+
 # stop on pending manual migration
 python manage.py ta_stop_on_error
 
