@@ -8,7 +8,7 @@ djangorestframework==3.16.0
 drf-spectacular==0.28.0
 Pillow==11.2.1
 redis==6.2.0
-requests==2.32.3
+requests==2.32.4
 ryd-client==0.0.6
 uvicorn==0.34.3
 whitenoise==6.9.0
