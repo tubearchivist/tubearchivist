@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import loadBackupList, { BackupListType } from '../api/loader/loadBackupList';
 import SettingsNavigation from '../components/SettingsNavigation';
 import deleteDownloadQueueByFilter from '../api/actions/deleteDownloadQueueByFilter';
+import deleteAllEmptyChannels from '../api/actions/deleteAllEmptyChannels';
 import updateTaskByName from '../api/actions/updateTaskByName';
 import queueBackup from '../api/actions/queueBackup';
 import restoreBackup from '../api/actions/restoreBackup';
@@ -12,6 +13,7 @@ import { ApiResponseType } from '../functions/APIClient';
 const SettingsActions = () => {
   const [deleteIgnored, setDeleteIgnored] = useState(false);
   const [deletePending, setDeletePending] = useState(false);
+  const [deleteEmptyChannels, setDeleteEmptyChannels] = useState(false);
   const [processingImports, setProcessingImports] = useState(false);
   const [reEmbed, setReEmbed] = useState(false);
   const [backupStarted, setBackupStarted] = useState(false);
@@ -43,6 +45,7 @@ const SettingsActions = () => {
           update={
             deleteIgnored ||
             deletePending ||
+            deleteEmptyChannels ||
             processingImports ||
             reEmbed ||
             backupStarted ||
@@ -52,6 +55,7 @@ const SettingsActions = () => {
           setShouldRefresh={() => {
             setDeleteIgnored(false);
             setDeletePending(false);
+            setDeleteEmptyChannels(false);
             setProcessingImports(false);
             setReEmbed(false);
             setBackupStarted(false);
@@ -85,6 +89,21 @@ const SettingsActions = () => {
               onClick={async () => {
                 await deleteDownloadQueueByFilter('pending');
                 setDeletePending(true);
+              }}
+            />
+          )}
+        </div>
+        <div className="settings-group">
+          <h2>Delete empty channels</h2>
+          <p>Delete indexed channels that have no videos published.</p>
+          {deleteEmptyChannels && <p>Deleting empty channels...</p>}
+          {!deleteEmptyChannels && (
+            <Button
+              label="Delete empty channels"
+              title="Delete empty channels that are indexed"
+              onClick={async () => {
+                await deleteAllEmptyChannels();
+                setDeleteEmptyChannels(true);
               }}
             />
           )}
