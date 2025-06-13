@@ -8,7 +8,7 @@ FROM node:lts-alpine AS node-builder
 COPY ./frontend /frontend
 
 WORKDIR /frontend
-RUN npm i
+RUN npm ci
 RUN npm run build:deploy
 
 WORKDIR /
