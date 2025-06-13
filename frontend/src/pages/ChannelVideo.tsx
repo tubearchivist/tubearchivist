@@ -98,94 +98,96 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   ]);
 
   return (
-    <>
-      <title>{`TA | Channel: ${channel.channel_name}`}</title>
-      <ScrollToTopOnNavigate />
-      <div className="boxed-content">
-        <div className="info-box info-box-2">
-          <ChannelOverview
-            channelId={channel.channel_id}
-            channelname={channel.channel_name}
-            channelSubs={channel.channel_subs}
-            channelSubscribed={channel.channel_subscribed}
-            channelThumbUrl={channel.channel_thumb_url}
-            setRefresh={setRefresh}
-          />
-          <div className="info-box-item">
-            {videoAggs && (
-              <>
-                <p>
-                  {videoAggs.total_items.value} videos <span className="space-carrot">|</span>{' '}
-                  {videoAggs.total_duration.value_str} playback{' '}
-                  <span className="space-carrot">|</span> Total size{' '}
-                  {humanFileSize(videoAggs.total_size.value, useSiUnits)}
-                </p>
-                <div className="button-box">
-                  <Button
-                    label="Mark as watched"
-                    id="watched-button"
-                    type="button"
-                    title={`Mark all videos from ${channel.channel_name} as watched`}
-                    onClick={async () => {
-                      await updateWatchedState({
-                        id: channel.channel_id,
-                        is_watched: true,
-                      });
+    channel && (
+      <>
+        <title>{`TA | Channel: ${channel.channel_name}`}</title>
+        <ScrollToTopOnNavigate />
+        <div className="boxed-content">
+          <div className="info-box info-box-2">
+            <ChannelOverview
+              channelId={channel.channel_id}
+              channelname={channel.channel_name}
+              channelSubs={channel.channel_subs}
+              channelSubscribed={channel.channel_subscribed}
+              channelThumbUrl={channel.channel_thumb_url}
+              setRefresh={setRefresh}
+            />
+            <div className="info-box-item">
+              {videoAggs && (
+                <>
+                  <p>
+                    {videoAggs.total_items.value} videos <span className="space-carrot">|</span>{' '}
+                    {videoAggs.total_duration.value_str} playback{' '}
+                    <span className="space-carrot">|</span> Total size{' '}
+                    {humanFileSize(videoAggs.total_size.value, useSiUnits)}
+                  </p>
+                  <div className="button-box">
+                    <Button
+                      label="Mark as watched"
+                      id="watched-button"
+                      type="button"
+                      title={`Mark all videos from ${channel.channel_name} as watched`}
+                      onClick={async () => {
+                        await updateWatchedState({
+                          id: channel.channel_id,
+                          is_watched: true,
+                        });
 
-                      setRefresh(true);
-                    }}
-                  />{' '}
-                  <Button
-                    label="Mark as unwatched"
-                    id="unwatched-button"
-                    type="button"
-                    title={`Mark all videos from ${channel.channel_name} as unwatched`}
-                    onClick={async () => {
-                      await updateWatchedState({
-                        id: channel.channel_id,
-                        is_watched: false,
-                      });
+                        setRefresh(true);
+                      }}
+                    />{' '}
+                    <Button
+                      label="Mark as unwatched"
+                      id="unwatched-button"
+                      type="button"
+                      title={`Mark all videos from ${channel.channel_name} as unwatched`}
+                      onClick={async () => {
+                        await updateWatchedState({
+                          id: channel.channel_id,
+                          is_watched: false,
+                        });
 
-                      setRefresh(true);
-                    }}
-                  />
-                </div>
-              </>
-            )}
+                        setRefresh(true);
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className={`boxed-content ${gridView}`}>
-        <Filterbar
-          hideToggleText={'Hide watched videos:'}
-          viewStyle={ViewStyleNames.Home as ViewStyleNamesType}
-        />
-      </div>
-
-      <EmbeddableVideoPlayer videoId={videoId} />
-
-      <div className={`boxed-content ${gridView}`}>
-        <div className={`video-list ${viewStyle} ${gridViewGrid}`}>
-          {!hasVideos && (
-            <>
-              <h2>No videos found...</h2>
-              <p>
-                Try going to the <Link to={Routes.Downloads}>downloads page</Link> to start the scan
-                and download tasks.
-              </p>
-            </>
-          )}
-
-          <VideoList videoList={videoList} viewStyle={viewStyle} refreshVideoList={setRefresh} />
+        <div className={`boxed-content ${gridView}`}>
+          <Filterbar
+            hideToggleText={'Hide watched videos:'}
+            viewStyle={ViewStyleNames.Home as ViewStyleNamesType}
+          />
         </div>
-      </div>
-      {pagination && (
-        <div className="boxed-content">
-          <Pagination pagination={pagination} setPage={setCurrentPage} />
+
+        <EmbeddableVideoPlayer videoId={videoId} />
+
+        <div className={`boxed-content ${gridView}`}>
+          <div className={`video-list ${viewStyle} ${gridViewGrid}`}>
+            {!hasVideos && (
+              <>
+                <h2>No videos found...</h2>
+                <p>
+                  Try going to the <Link to={Routes.Downloads}>downloads page</Link> to start the
+                  scan and download tasks.
+                </p>
+              </>
+            )}
+
+            <VideoList videoList={videoList} viewStyle={viewStyle} refreshVideoList={setRefresh} />
+          </div>
         </div>
-      )}
-    </>
+        {pagination && (
+          <div className="boxed-content">
+            <Pagination pagination={pagination} setPage={setCurrentPage} />
+          </div>
+        )}
+      </>
+    )
   );
 };
 
