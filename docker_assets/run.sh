@@ -9,9 +9,13 @@ else
   LOGLEVEL="INFO"
 fi
 
-if [ "${TA_AUTO_UPDATE_YTDLP,,}" = "true" ]; then
+# update yt-dlp if needed
+if [[ "${TA_AUTO_UPDATE_YTDLP,,}" =~ ^(release|nightly)$ ]]; then
     echo "Updating yt-dlp..."
-    python -m pip install -U yt-dlp
+    preflag=$([[ "${TA_AUTO_UPDATE_YTDLP,,}" == "nightly" ]] && echo "--pre" || echo "")
+    python -m pip install --target=/root/.local/bin --upgrade $preflag "yt-dlp[default]" || {
+        echo "yt-dlp update failed"
+    }
 fi
 
 # stop on pending manual migration
