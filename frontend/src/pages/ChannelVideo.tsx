@@ -97,15 +97,6 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
     videoId,
   ]);
 
-  if (!channel) {
-    return (
-      <div className="boxed-content">
-        <br />
-        <h2>Channel {channelId} not found!</h2>
-      </div>
-    );
-  }
-
   return (
     <>
       <title>{`TA | Channel: ${channel.channel_name}`}</title>
