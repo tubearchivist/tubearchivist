@@ -15,6 +15,7 @@ from task.serializers import (
     TaskIDDataSerializer,
     TaskNotificationPostSerializer,
     TaskNotificationSerializer,
+    TaskNotificationTestSerializer,
     TaskResultSerializer,
 )
 from task.src.config_schedule import CrontabValidator, ScheduleBuilder
@@ -343,3 +344,48 @@ class ScheduleNotification(ApiBaseView):
             Notifications(task_name).remove_task()
 
         return Response(status=204)
+
+
+class NotificationTestView(ApiBaseView):
+    """resolves to /api/task/notification/test/
+    POST: test notification url
+    """
+
+    @extend_schema(
+        request=TaskNotificationTestSerializer(),
+        responses={
+            200: OpenApiResponse(description="test notification sent"),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="bad request"
+            ),
+        },
+    )
+    def post(self, request):
+        """test notification"""
+        import apprise
+
+        data_serializer = TaskNotificationTestSerializer(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+
+        url = validated_data["url"]
+        task_name = validated_data.get("task_name", "manual_test")
+
+        apobj = apprise.Apprise()
+        if not apobj.add(url):
+            error = ErrorResponseSerializer(
+                {"error": "invalid notification URL"}
+            )
+            return Response(error.data, status=400)
+
+        title = f"[TA] {task_name} process ended with SUCCESS"
+        body = "This is a test notification. Task completed successfully."
+
+        try:
+            result = apobj.notify(body=body, title=title)
+            return Response(
+                {"success": result, "message": "Test notification sent"}
+            )
+        except Exception as err:
+            error = ErrorResponseSerializer({"error": str(err)})
+            return Response(error.data, status=400)
