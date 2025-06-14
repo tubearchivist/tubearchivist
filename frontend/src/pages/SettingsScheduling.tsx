@@ -12,6 +12,9 @@ import createTaskSchedule from '../api/actions/createTaskSchedule';
 import createAppriseNotificationUrl, {
   AppriseTaskNameType,
 } from '../api/actions/createAppriseNotificationUrl';
+import testAppriseNotificationUrl, {
+  TestNotificationResponseType,
+} from '../api/actions/testAppriseNotificationUrl';
 import deleteAppriseNotificationUrl from '../api/actions/deleteAppriseNotificationUrl';
 import { ApiError, ApiResponseType } from '../functions/APIClient';
 
@@ -62,6 +65,7 @@ const SettingsScheduling = () => {
   const [downloadPendingError, setDownloadPendingError] = useState<string | null>(null);
   const [thumnailCheckError, setThumnailCheckError] = useState<string | null>(null);
   const [zipBackupError, setZipBackupError] = useState<string | null>(null);
+  const [testNotificationMessage, setTestNotificationMessage] = useState<string | null>(null);
 
   const { data: appriseNotificationData } = appriseNotification ?? {};
 
@@ -536,49 +540,89 @@ const SettingsScheduling = () => {
           </div>
 
           <div className="settings-item">
-            <p>
-              <i>
-                Send notification on completed tasks with the help of the{' '}
-                <a href="https://github.com/caronc/apprise" target="_blank">
-                  Apprise
-                </a>{' '}
-                library.
-              </i>
-            </p>
+            <div>
+              <p>
+                <i>
+                  Send notification on completed tasks with the help of the{' '}
+                  <a href="https://github.com/caronc/apprise" target="_blank">
+                    Apprise
+                  </a>{' '}
+                  library.
+                </i>
+              </p>
 
-            <select
-              value={notificationTask}
-              onChange={e => {
-                setNotificationTask(e.currentTarget.value);
-              }}
-            >
-              <option value="">-- select task --</option>
-              <option value="update_subscribed">Rescan your Subscriptions</option>
-              <option value="extract_download">Add to download queue</option>
-              <option value="download_pending">Downloading</option>
-              <option value="check_reindex">Reindex Documents</option>
-            </select>
+              <select
+                value={notificationTask}
+                onChange={e => {
+                  setNotificationTask(e.currentTarget.value);
+                }}
+              >
+                <option value="">-- select task --</option>
+                <option value="update_subscribed">Rescan your Subscriptions</option>
+                <option value="extract_download">Add to download queue</option>
+                <option value="download_pending">Downloading</option>
+                <option value="check_reindex">Reindex Documents</option>
+              </select>
 
-            <input
-              type="text"
-              placeholder="Apprise notification URL"
-              value={notificationUrl}
-              onChange={e => {
-                setNotificationUrl(e.currentTarget.value);
-              }}
-            />
+              <input
+                type="text"
+                placeholder="Apprise notification URL"
+                value={notificationUrl}
+                onChange={e => {
+                  setNotificationUrl(e.currentTarget.value);
+                }}
+              />
 
-            <Button
-              label="Save"
-              onClick={async () => {
-                await createAppriseNotificationUrl(
-                  notificationTask as AppriseTaskNameType,
-                  notificationUrl || '',
-                );
+              <div className="button-box">
+                <Button
+                  label="Save"
+                  onClick={async () => {
+                    await createAppriseNotificationUrl(
+                      notificationTask as AppriseTaskNameType,
+                      notificationUrl || '',
+                    );
 
-                setRefresh(true);
-              }}
-            />
+                    setRefresh(true);
+                  }}
+                />
+
+                <Button
+                  label="Test"
+                  onClick={async () => {
+                    setTestNotificationMessage(null);
+                    try {
+                      const response: ApiResponseType<TestNotificationResponseType> =
+                        await testAppriseNotificationUrl(
+                          notificationTask as AppriseTaskNameType,
+                          notificationUrl || '',
+                        );
+                      if (response.data?.success) {
+                        setTestNotificationMessage(response.data.message);
+                      } else {
+                        setTestNotificationMessage(
+                          response.data?.message || 'Test notification failed',
+                        );
+                      }
+                    } catch (error) {
+                      const apiError = error as ApiError;
+                      if (apiError.status && apiError.message) {
+                        setTestNotificationMessage(apiError.message);
+                      } else {
+                        setTestNotificationMessage(
+                          'An unexpected error occurred while testing notification.',
+                        );
+                      }
+                    }
+                    setRefresh(true);
+                  }}
+                />
+              </div>
+              {testNotificationMessage && (
+                <div className="danger-zone" style={{ marginTop: '10px' }}>
+                  {testNotificationMessage}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
