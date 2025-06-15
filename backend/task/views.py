@@ -15,6 +15,7 @@ from task.serializers import (
     TaskIDDataSerializer,
     TaskNotificationPostSerializer,
     TaskNotificationSerializer,
+    TaskNotificationTestSerializer,
     TaskResultSerializer,
 )
 from task.src.config_schedule import CrontabValidator, ScheduleBuilder
@@ -343,3 +344,99 @@ class ScheduleNotification(ApiBaseView):
             Notifications(task_name).remove_task()
 
         return Response(status=204)
+
+
+class NotificationTestView(ApiBaseView):
+    """resolves to /api/task/notification/test/
+    POST: test notification url
+    """
+
+    @extend_schema(
+        request=TaskNotificationTestSerializer(),
+        responses={
+            200: OpenApiResponse(description="test notification sent"),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="bad request"
+            ),
+        },
+    )
+    def _parse_apprise_error_message(self, log_output):
+        """Parse log output from apprise for detailed error information"""
+        error_msg = "Notification failed"
+        if log_output:
+            lines = log_output.strip().split("\n")
+            error_lines = [
+                line
+                for line in lines
+                if any(
+                    level in line for level in ["ERROR", "WARNING", "CRITICAL"]
+                )
+            ]
+            if error_lines:
+                error_msg = error_lines[-1]
+                if ":" in error_msg:
+                    error_msg = error_msg.split(":", 1)[-1].strip()
+            else:
+                error_msg = f"Notification failed - {log_output.strip()}"
+        else:
+            error_msg = (
+                "Notification failed - check URL format, "
+                "credentials, and network connectivity"
+            )
+        return error_msg
+
+    def post(self, request):
+        """test notification"""
+        import apprise
+
+        data_serializer = TaskNotificationTestSerializer(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+
+        url = validated_data["url"]
+        task_name = validated_data.get("task_name", "manual_test")
+
+        # Connect to apprise's logger to obtain error messages
+        with apprise.LogCapture(
+            level=apprise.logging.INFO, fmt="%(message)s"
+        ) as log_capture:
+            try:
+                apobj = apprise.Apprise()
+
+                if not apobj.add(url):
+                    log_output = log_capture.getvalue()
+                    error_msg = f"Invalid notification URL format: {url}"
+                    if log_output:
+                        error_msg += f" - {log_output.strip()}"
+                    return Response(
+                        {"success": False, "message": error_msg}, status=400
+                    )
+
+                title = f"[TA] {task_name} process ended with SUCCESS"
+                body = (
+                    "This is a test notification. Task completed successfully."
+                )
+
+                result = apobj.notify(body=body, title=title)
+                log_output = log_capture.getvalue()
+
+                if result:
+                    response_data = {
+                        "success": True,
+                        "message": "Test notification sent successfully",
+                    }
+                    return Response(response_data)
+
+                error_msg = self._parse_apprise_error_message(log_output)
+                return Response(
+                    {"success": False, "message": error_msg}, status=400
+                )
+
+            except Exception as err:
+                log_output = log_capture.getvalue()
+                error_msg = f"Notification error: {str(err)}"
+                if log_output:
+                    error_msg += f" - {log_output.strip()}"
+                return Response(
+                    {"success": False, "message": error_msg}, status=400
+                )
