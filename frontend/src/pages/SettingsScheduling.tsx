@@ -65,7 +65,10 @@ const SettingsScheduling = () => {
   const [downloadPendingError, setDownloadPendingError] = useState<string | null>(null);
   const [thumnailCheckError, setThumnailCheckError] = useState<string | null>(null);
   const [zipBackupError, setZipBackupError] = useState<string | null>(null);
-  const [testNotificationMessage, setTestNotificationMessage] = useState<string | null>(null);
+  const [testNotificationMessage, setTestNotificationMessage] = useState<{
+    message: string;
+    success: boolean;
+  } | null>(null);
 
   const { data: appriseNotificationData } = appriseNotification ?? {};
 
@@ -576,6 +579,7 @@ const SettingsScheduling = () => {
               <div className="button-box">
                 <Button
                   label="Save"
+                  disabled={!notificationUrl || !notificationTask}
                   onClick={async () => {
                     await createAppriseNotificationUrl(
                       notificationTask as AppriseTaskNameType,
@@ -588,6 +592,7 @@ const SettingsScheduling = () => {
 
                 <Button
                   label="Test"
+                  disabled={!notificationUrl || !notificationTask}
                   onClick={async () => {
                     setTestNotificationMessage(null);
                     try {
@@ -597,20 +602,25 @@ const SettingsScheduling = () => {
                           notificationUrl || '',
                         );
                       if (response.data?.success) {
-                        setTestNotificationMessage(response.data.message);
+                        setTestNotificationMessage({
+                          message: response.data.message,
+                          success: true,
+                        });
                       } else {
-                        setTestNotificationMessage(
-                          response.data?.message || 'Test notification failed',
-                        );
+                        setTestNotificationMessage({
+                          message: response.data?.message || 'Test notification failed',
+                          success: true,
+                        });
                       }
                     } catch (error) {
                       const apiError = error as ApiError;
                       if (apiError.status && apiError.message) {
-                        setTestNotificationMessage(apiError.message);
+                        setTestNotificationMessage({ message: apiError.message, success: false });
                       } else {
-                        setTestNotificationMessage(
-                          'An unexpected error occurred while testing notification.',
-                        );
+                        setTestNotificationMessage({
+                          message: 'An unexpected error occurred while testing notification.',
+                          success: false,
+                        });
                       }
                     }
                     setRefresh(true);
@@ -618,8 +628,11 @@ const SettingsScheduling = () => {
                 />
               </div>
               {testNotificationMessage && (
-                <div className="danger-zone" style={{ marginTop: '10px' }}>
-                  {testNotificationMessage}
+                <div
+                  className={!testNotificationMessage.success ? 'danger-zone' : ''}
+                  style={{ margin: '10px 5px' }}
+                >
+                  <p>{testNotificationMessage.message}</p>
                 </div>
               )}
             </div>
