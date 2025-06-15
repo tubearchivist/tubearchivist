@@ -360,38 +360,6 @@ class NotificationTestView(ApiBaseView):
             ),
         },
     )
-    def _setup_apprise_logging(self):
-        """Setup logging capture for apprise"""
-        import io
-        import logging
-
-        log_capture = io.StringIO()
-        handler = logging.StreamHandler(log_capture)
-        formatter = logging.Formatter("%(levelname)s: %(message)s")
-        handler.setFormatter(formatter)
-        loggers_to_capture = ["apprise", "requests", "urllib3"]
-        original_levels = {}
-
-        for logger_name in loggers_to_capture:
-            logger = logging.getLogger(logger_name)
-            original_levels[logger_name] = logger.level
-            logger.addHandler(handler)
-            logger.setLevel(logging.DEBUG)
-            logger.propagate = True
-
-        return log_capture, handler, loggers_to_capture, original_levels
-
-    def _cleanup_apprise_logging(
-        self, handler, loggers_to_capture, original_levels
-    ):
-        """Cleanup apprise logging setup"""
-        import logging
-
-        for logger_name in loggers_to_capture:
-            logger = logging.getLogger(logger_name)
-            logger.removeHandler(handler)
-            logger.setLevel(original_levels[logger_name])
-
     def _parse_apprise_error_message(self, log_output):
         """Parse log output from apprise for detailed error information"""
         error_msg = "Notification failed"
@@ -428,52 +396,47 @@ class NotificationTestView(ApiBaseView):
         url = validated_data["url"]
         task_name = validated_data.get("task_name", "manual_test")
 
-        # Setup logging
-        log_capture, handler, loggers_to_capture, original_levels = (
-            self._setup_apprise_logging()
-        )
+        # Connect to apprise's logger to obtain error messages
+        with apprise.LogCapture(
+            level=apprise.logging.INFO, fmt="%(message)s"
+        ) as log_capture:
+            try:
+                apobj = apprise.Apprise()
 
-        try:
-            apobj = apprise.Apprise()
+                if not apobj.add(url):
+                    log_output = log_capture.getvalue()
+                    error_msg = f"Invalid notification URL format: {url}"
+                    if log_output:
+                        error_msg += f" - {log_output.strip()}"
+                    return Response(
+                        {"success": False, "message": error_msg}, status=400
+                    )
 
-            if not apobj.add(url):
+                title = f"[TA] {task_name} process ended with SUCCESS"
+                body = (
+                    "This is a test notification. Task completed successfully."
+                )
+
+                result = apobj.notify(body=body, title=title)
                 log_output = log_capture.getvalue()
-                error_msg = f"Invalid notification URL format: {url}"
-                if log_output:
-                    error_msg += f" - Details: {log_output.strip()}"
+
+                if result:
+                    response_data = {
+                        "success": True,
+                        "message": "Test notification sent successfully",
+                    }
+                    return Response(response_data)
+
+                error_msg = self._parse_apprise_error_message(log_output)
                 return Response(
                     {"success": False, "message": error_msg}, status=400
                 )
 
-            title = f"[TA] {task_name} process ended with SUCCESS"
-            body = "This is a test notification. Task completed successfully."
-
-            result = apobj.notify(body=body, title=title)
-            log_output = log_capture.getvalue()
-
-            if result:
-                response_data = {
-                    "success": True,
-                    "message": "Test notification sent successfully",
-                }
+            except Exception as err:
+                log_output = log_capture.getvalue()
+                error_msg = f"Notification error: {str(err)}"
                 if log_output:
-                    response_data["debug_info"] = log_output.strip()
-                return Response(response_data)
-
-            error_msg = self._parse_apprise_error_message(log_output)
-            return Response(
-                {"success": False, "message": error_msg}, status=400
-            )
-
-        except Exception as err:
-            log_output = log_capture.getvalue()
-            error_msg = f"Notification error: {str(err)}"
-            if log_output:
-                error_msg += f" - Log output: {log_output.strip()}"
-            return Response(
-                {"success": False, "message": error_msg}, status=400
-            )
-        finally:
-            self._cleanup_apprise_logging(
-                handler, loggers_to_capture, original_levels
-            )
+                    error_msg += f" - {log_output.strip()}"
+                return Response(
+                    {"success": False, "message": error_msg}, status=400
+                )
