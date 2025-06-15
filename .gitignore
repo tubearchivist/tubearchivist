@@ -12,3 +12,5 @@ backend/.env
 
 # JavaScript stuff
 node_modules
+
+.editorconfig
