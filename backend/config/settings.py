@@ -104,98 +104,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-if bool(environ.get("TA_LDAP")):
-    # pylint: disable=global-at-module-level
-    import ldap
-    from django_auth_ldap.config import LDAPSearch
-
-    global AUTH_LDAP_SERVER_URI
-    AUTH_LDAP_SERVER_URI = environ.get("TA_LDAP_SERVER_URI")
-
-    global AUTH_LDAP_BIND_DN
-    AUTH_LDAP_BIND_DN = environ.get("TA_LDAP_BIND_DN")
-
-    global AUTH_LDAP_BIND_PASSWORD
-    AUTH_LDAP_BIND_PASSWORD = environ.get("TA_LDAP_BIND_PASSWORD")
-
-    """
-    Since these are new environment variables, taking the opporunity to use
-    more accurate env names.
-    Given Names are *_technically_* different from Personal names, as people
-    who change their names have different given names and personal names,
-    and they go by personal names. Additionally, "LastName" is actually
-    incorrect for many cultures, such as Korea, where the
-    family name comes first, and the personal name comes last.
-
-    But we all know people are going to try to guess at these, so still want
-    to include names that people will guess, hence using first/last as well.
-    """
-
-    # Attribute mapping options
-
-    global AUTH_LDAP_USER_ATTR_MAP_USERNAME
-    AUTH_LDAP_USER_ATTR_MAP_USERNAME = (
-        environ.get("TA_LDAP_USER_ATTR_MAP_USERNAME")
-        or environ.get("TA_LDAP_USER_ATTR_MAP_UID")
-        or "uid"
-    )
-
-    global AUTH_LDAP_USER_ATTR_MAP_PERSONALNAME
-    AUTH_LDAP_USER_ATTR_MAP_PERSONALNAME = (
-        environ.get("TA_LDAP_USER_ATTR_MAP_PERSONALNAME")
-        or environ.get("TA_LDAP_USER_ATTR_MAP_FIRSTNAME")
-        or environ.get("TA_LDAP_USER_ATTR_MAP_GIVENNAME")
-        or "givenName"
-    )
-
-    global AUTH_LDAP_USER_ATTR_MAP_SURNAME
-    AUTH_LDAP_USER_ATTR_MAP_SURNAME = (
-        environ.get("TA_LDAP_USER_ATTR_MAP_SURNAME")
-        or environ.get("TA_LDAP_USER_ATTR_MAP_LASTNAME")
-        or environ.get("TA_LDAP_USER_ATTR_MAP_FAMILYNAME")
-        or "sn"
-    )
-
-    global AUTH_LDAP_USER_ATTR_MAP_EMAIL
-    AUTH_LDAP_USER_ATTR_MAP_EMAIL = (
-        environ.get("TA_LDAP_USER_ATTR_MAP_EMAIL")
-        or environ.get("TA_LDAP_USER_ATTR_MAP_MAIL")
-        or "mail"
-    )
-
-    global AUTH_LDAP_USER_BASE
-    AUTH_LDAP_USER_BASE = environ.get("TA_LDAP_USER_BASE")
-
-    global AUTH_LDAP_USER_FILTER
-    AUTH_LDAP_USER_FILTER = environ.get("TA_LDAP_USER_FILTER")
-
-    global AUTH_LDAP_USER_SEARCH
-    # pylint: disable=no-member
-    AUTH_LDAP_USER_SEARCH = LDAPSearch(
-        AUTH_LDAP_USER_BASE,
-        ldap.SCOPE_SUBTREE,
-        "(&("
-        + AUTH_LDAP_USER_ATTR_MAP_USERNAME
-        + "=%(user)s)"
-        + AUTH_LDAP_USER_FILTER
-        + ")",
-    )
-
-    global AUTH_LDAP_USER_ATTR_MAP
-    AUTH_LDAP_USER_ATTR_MAP = {
-        "username": AUTH_LDAP_USER_ATTR_MAP_USERNAME,
-        "first_name": AUTH_LDAP_USER_ATTR_MAP_PERSONALNAME,
-        "last_name": AUTH_LDAP_USER_ATTR_MAP_SURNAME,
-        "email": AUTH_LDAP_USER_ATTR_MAP_EMAIL,
-    }
-
-    if bool(environ.get("TA_LDAP_DISABLE_CERT_CHECK")):
-        global AUTH_LDAP_GLOBAL_OPTIONS
-        AUTH_LDAP_GLOBAL_OPTIONS = {
-            ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_NEVER,
-        }
-
-
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
@@ -229,16 +137,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = "user.Account"
 
-# Forward-auth authentication
-if bool(environ.get("TA_ENABLE_AUTH_PROXY")):
-    TA_AUTH_PROXY_USERNAME_HEADER = (
-        environ.get("TA_AUTH_PROXY_USERNAME_HEADER") or "HTTP_REMOTE_USER"
-    )
-    TA_AUTH_PROXY_LOGOUT_URL = environ.get("TA_AUTH_PROXY_LOGOUT_URL")
-
-    MIDDLEWARE.append("user.src.remote_user_auth.HttpRemoteUserMiddleware")
-
-
 # Configure Authentication Backend Combinations
 _login_auth_mode = (environ.get("TA_LOGIN_AUTH_MODE") or "single").casefold()
 if _login_auth_mode == "local":
@@ -247,24 +145,33 @@ if _login_auth_mode == "local":
     )
 elif _login_auth_mode == "ldap":
     AUTHENTICATION_BACKENDS = ("django_auth_ldap.backend.LDAPBackend",)
+    from .ldap_settings import *  # noqa: F403 F401
 elif _login_auth_mode == "forwardauth":
+    from .fwd_auth_settings import *  # noqa: F403 F401
+
     AUTHENTICATION_BACKENDS = (
         "django.contrib.auth.backends.RemoteUserBackend",
     )
+    MIDDLEWARE.append("user.src.remote_user_auth.HttpRemoteUserMiddleware")
 elif _login_auth_mode == "ldap_local":
     AUTHENTICATION_BACKENDS = (
         "django_auth_ldap.backend.LDAPBackend",
         "django.contrib.auth.backends.ModelBackend",
     )
+    from .ldap_settings import *  # noqa: F403 F401
 else:
     # If none of these cases match, AUTHENTICATION_BACKENDS is unset, which
     # means the ModelBackend should be used by default
     if bool(environ.get("TA_LDAP")):
         AUTHENTICATION_BACKENDS = ("django_auth_ldap.backend.LDAPBackend",)
+        from .ldap_settings import *  # noqa: F403 F401
     if bool(environ.get("TA_ENABLE_AUTH_PROXY")):
+        from .fwd_auth_settings import *  # noqa: F403 F401
+
         AUTHENTICATION_BACKENDS = (
             "django.contrib.auth.backends.RemoteUserBackend",
         )
+        MIDDLEWARE.append("user.src.remote_user_auth.HttpRemoteUserMiddleware")
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
