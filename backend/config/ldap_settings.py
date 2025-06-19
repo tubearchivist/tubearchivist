@@ -1,4 +1,5 @@
 from os import environ
+
 import ldap
 from django_auth_ldap.config import LDAPSearch
 
@@ -73,3 +74,38 @@ if bool(environ.get("TA_LDAP_DISABLE_CERT_CHECK")):
     AUTH_LDAP_GLOBAL_OPTIONS = {
         ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_NEVER,
     }
+
+# Promote specific usernames to staff or superuser permission levels
+_ldap_superuser_username_config = (
+    environ.get("TA_LDAP_PROMOTE_USERNAMES_TO_SUPERUSER") or ""
+)
+_ldap_superuser_usernames = []
+if _ldap_superuser_username_config:
+    _ldap_superuser_usernames = [
+        u.strip() for u in _ldap_superuser_username_config.split(",")
+    ]
+
+_ldap_staff_username_config = (
+    environ.get("TA_LDAP_PROMOTE_USERNAMES_TO_STAFF") or ""
+)
+_ldap_staff_usernames = []
+if _ldap_staff_username_config:
+    _ldap_staff_usernames = [
+        u.strip() for u in _ldap_staff_username_config.split(",")
+    ]
+
+if _ldap_staff_usernames or _ldap_superuser_usernames:
+    import django_auth_ldap.backend
+
+    def create_user(sender, user=None, ldap_user=None, **kwargs):
+        if user.ldap_username in _ldap_superuser_usernames and not (
+            user.is_superuser and user.is_staff
+        ):
+            user.is_staff = True
+            user.is_superuser = True
+            user.save()
+        elif user.ldap_username in _ldap_staff_usernames and not user.is_staff:
+            user.is_staff = True
+            user.save()
+
+    django_auth_ldap.backend.populate_user.connect(create_user)
