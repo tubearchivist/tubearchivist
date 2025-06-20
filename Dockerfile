@@ -1,14 +1,18 @@
 # multi stage to build tube archivist
 # build python wheel, download and extract ffmpeg, copy into final image
 
+FROM node:lts-alpine AS npm-builder
+COPY frontend/package.json frontend/package-lock.json /
+RUN npm i
+
 FROM node:lts-alpine AS node-builder
 
 # RUN npm config set registry https://registry.npmjs.org/
 
+COPY --from=npm-builder ./node_modules /frontend/node_modules
 COPY ./frontend /frontend
-
 WORKDIR /frontend
-RUN npm i
+
 RUN npm run build:deploy
 
 WORKDIR /
@@ -54,9 +58,9 @@ RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recomm
 
 # install debug tools for testing environment
 RUN if [ "$INSTALL_DEBUG" ] ; then \
-        apt-get -y update && apt-get -y install --no-install-recommends \
-        vim htop bmon net-tools iputils-ping procps lsof \
-        && pip install --user ipython pytest pytest-django \
+    apt-get -y update && apt-get -y install --no-install-recommends \
+    vim htop bmon net-tools iputils-ping procps lsof \
+    && pip install --user ipython pytest pytest-django \
     ; fi
 
 # make folders
