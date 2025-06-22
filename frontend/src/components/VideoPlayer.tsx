@@ -126,7 +126,6 @@ const VideoPlayer = ({
   const [searchParams] = useSearchParams();
   const searchParamVideoProgress = searchParams.get('t');
 
-  const theaterModeFromStorage = localStorage.getItem('theaterMode') === 'true';
   const volumeFromStorage = Number(localStorage.getItem('playerVolume') ?? 1);
   const playBackSpeedFromStorage = Number(localStorage.getItem('playerSpeed') || 1);
   const playBackSpeedIndex =
@@ -141,7 +140,7 @@ const VideoPlayer = ({
   const [showHelpDialog, setShowHelpDialog] = useState(false);
   const [showInfoDialog, setShowInfoDialog] = useState(false);
   const [infoDialogContent, setInfoDialogContent] = useState('');
-  const [isTheaterMode, setIsTheaterMode] = useState(theaterModeFromStorage);
+  const [isTheaterMode, setIsTheaterMode] = useState(false);
   const [theaterModeKeyPressed, setTheaterModeKeyPressed] = useState(false);
 
   const questionmarkPressed = useKeyPress('?');
@@ -361,8 +360,6 @@ const VideoPlayer = ({
       const newTheaterMode = !isTheaterMode;
       setIsTheaterMode(newTheaterMode);
 
-      localStorage.setItem('theaterMode', newTheaterMode.toString());
-
       infoDialog(newTheaterMode ? 'Theater mode' : 'Normal mode');
     } else if (!theaterModePressed) {
       setTheaterModeKeyPressed(false);
@@ -376,8 +373,6 @@ const VideoPlayer = ({
 
     if (escapePressed && isTheaterMode) {
       setIsTheaterMode(false);
-
-      localStorage.setItem('theaterMode', 'false');
 
       infoDialog('Normal mode');
     }
