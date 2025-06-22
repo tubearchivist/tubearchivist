@@ -126,6 +126,7 @@ const VideoPlayer = ({
   const [searchParams] = useSearchParams();
   const searchParamVideoProgress = searchParams.get('t');
 
+  const theaterModeFromStorage = localStorage.getItem('theaterMode') === 'true';
   const volumeFromStorage = Number(localStorage.getItem('playerVolume') ?? 1);
   const playBackSpeedFromStorage = Number(localStorage.getItem('playerSpeed') || 1);
   const playBackSpeedIndex =
@@ -140,6 +141,8 @@ const VideoPlayer = ({
   const [showHelpDialog, setShowHelpDialog] = useState(false);
   const [showInfoDialog, setShowInfoDialog] = useState(false);
   const [infoDialogContent, setInfoDialogContent] = useState('');
+  const [isTheaterMode, setIsTheaterMode] = useState(theaterModeFromStorage);
+  const [theaterModeKeyPressed, setTheaterModeKeyPressed] = useState(false);
 
   const questionmarkPressed = useKeyPress('?');
   const mutePressed = useKeyPress('m');
@@ -151,6 +154,8 @@ const VideoPlayer = ({
   const arrowRightPressed = useKeyPress('ArrowRight');
   const arrowLeftPressed = useKeyPress('ArrowLeft');
   const pPausedPressed = useKeyPress('p');
+  const theaterModePressed = useKeyPress('t');
+  const escapePressed = useKeyPress('Escape');
 
   const videoId = video.youtube_id;
   const videoUrl = video.media_url;
@@ -345,10 +350,46 @@ const VideoPlayer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questionmarkPressed]);
 
+  useEffect(() => {
+    if (embed) {
+      return;
+    }
+
+    if (theaterModePressed && !theaterModeKeyPressed) {
+      setTheaterModeKeyPressed(true);
+
+      const newTheaterMode = !isTheaterMode;
+      setIsTheaterMode(newTheaterMode);
+
+      localStorage.setItem('theaterMode', newTheaterMode.toString());
+
+      infoDialog(newTheaterMode ? 'Theater mode' : 'Normal mode');
+    } else if (!theaterModePressed) {
+      setTheaterModeKeyPressed(false);
+    }
+  }, [theaterModePressed, isTheaterMode, theaterModeKeyPressed]);
+
+  useEffect(() => {
+    if (embed) {
+      return;
+    }
+
+    if (escapePressed && isTheaterMode) {
+      setIsTheaterMode(false);
+
+      localStorage.setItem('theaterMode', 'false');
+
+      infoDialog('Normal mode');
+    }
+  }, [escapePressed, isTheaterMode]);
+
   return (
     <>
-      <div id="player" className={embed ? '' : 'player-wrapper'}>
-        <div className={embed ? '' : 'video-main'}>
+      <div
+        id="player"
+        className={embed ? '' : `player-wrapper ${isTheaterMode ? 'theater-mode' : ''}`}
+      >
+        <div className={embed ? '' : `video-main ${isTheaterMode ? 'theater-mode' : ''}`}>
           <video
             ref={videoRef}
             key={`${getApiUrl()}${videoUrl}`}
@@ -423,6 +464,18 @@ const VideoPlayer = ({
                 <td>Toggle fullscreen</td>
                 <td>f</td>
               </tr>
+              {!embed && (
+                <>
+                  <tr>
+                    <td>Toggle theater mode</td>
+                    <td>t</td>
+                  </tr>
+                  <tr>
+                    <td>Exit theater mode</td>
+                    <td>Esc</td>
+                  </tr>
+                </>
+              )}
               <tr>
                 <td>Toggle subtitles (if available)</td>
                 <td>c</td>
