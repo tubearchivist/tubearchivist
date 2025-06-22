@@ -779,7 +779,11 @@ const SettingsApplication = () => {
                         <li>Make sure to contribute to this excellent project.</li>
                         <li>
                           More details{' '}
-                          <a target="_blank" href="https://returnyoutubedislike.com/">
+                          <a
+                            href="https://returnyoutubedislike.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
                             here
                           </a>
                           .
@@ -794,7 +798,11 @@ const SettingsApplication = () => {
                         <li>Make sure to contribute to this excellent project.</li>
                         <li>
                           More details{' '}
-                          <a target="_blank" href="https://sponsor.ajay.app/">
+                          <a
+                            href="https://sponsor.ajay.app/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
                             here
                           </a>
                           .
@@ -831,7 +839,11 @@ const SettingsApplication = () => {
                 <div>
                   <p>
                     Enable{' '}
-                    <a target="_blank" href="https://returnyoutubedislike.com/">
+                    <a
+                      href="https://returnyoutubedislike.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       returnyoutubedislike
                     </a>
                   </p>
@@ -846,7 +858,7 @@ const SettingsApplication = () => {
                 <div>
                   <p>
                     Enable{' '}
-                    <a href="https://sponsor.ajay.app/" target="_blank">
+                    <a href="https://sponsor.ajay.app/" target="_blank" rel="noopener noreferrer">
                       Sponsorblock
                     </a>
                   </p>

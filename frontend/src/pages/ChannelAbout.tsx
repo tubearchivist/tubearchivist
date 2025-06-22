@@ -130,7 +130,11 @@ const ChannelAbout = () => {
               {channel.channel_active && (
                 <p>
                   Youtube:{' '}
-                  <a href={`https://www.youtube.com/channel/${channel.channel_id}`} target="_blank">
+                  <a
+                    href={`https://www.youtube.com/channel/${channel.channel_id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     Active
                   </a>
                 </p>
@@ -316,7 +320,7 @@ const ChannelAbout = () => {
                 <div>
                   <p>
                     Overwrite{' '}
-                    <a href="https://sponsor.ajay.app/" target="_blank">
+                    <a href="https://sponsor.ajay.app/" target="_blank" rel="noopener noreferrer">
                       SponsorBlock
                     </a>
                   </p>

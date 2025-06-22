@@ -279,7 +279,11 @@ const Video = () => {
               {video.active && (
                 <p>
                   Youtube:{' '}
-                  <a href={`https://www.youtube.com/watch?v=${video.youtube_id}`} target="_blank">
+                  <a
+                    href={`https://www.youtube.com/watch?v=${video.youtube_id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     Active
                   </a>
                 </p>

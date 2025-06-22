@@ -180,6 +180,7 @@ const Playlist = () => {
                       <a
                         href={`https://www.youtube.com/playlist?list=${playlist.playlist_id}`}
                         target="_blank"
+                        rel="noopener noreferrer"
                       >
                         Active
                       </a>

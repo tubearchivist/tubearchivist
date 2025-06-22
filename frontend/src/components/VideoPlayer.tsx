@@ -467,11 +467,19 @@ const VideoPlayer = ({
               <h4>
                 This video doesn't have any sponsor segments added. To add a segment go to{' '}
                 <u>
-                  <a href={`https://www.youtube.com/watch?v=${videoId}`}>this video on YouTube</a>
+                  <a
+                    href={`https://www.youtube.com/watch?v=${videoId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    this video on YouTube
+                  </a>
                 </u>{' '}
                 and add a segment using the{' '}
                 <u>
-                  <a href="https://sponsor.ajay.app/">SponsorBlock</a>
+                  <a href="https://sponsor.ajay.app/" target="_blank" rel="noopener noreferrer">
+                    SponsorBlock
+                  </a>
                 </u>{' '}
                 extension.
               </h4>
@@ -480,11 +488,19 @@ const VideoPlayer = ({
               <h4>
                 This video has unlocked sponsor segments. Go to{' '}
                 <u>
-                  <a href={`https://www.youtube.com/watch?v=${videoId}`}>this video on YouTube</a>
+                  <a
+                    href={`https://www.youtube.com/watch?v=${videoId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    this video on YouTube
+                  </a>
                 </u>{' '}
                 and vote on the segments using the{' '}
                 <u>
-                  <a href="https://sponsor.ajay.app/">SponsorBlock</a>
+                  <a href="https://sponsor.ajay.app/" target="_blank" rel="noopener noreferrer">
+                    SponsorBlock
+                  </a>
                 </u>{' '}
                 extension.
               </h4>
