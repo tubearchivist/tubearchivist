@@ -3,13 +3,13 @@ celery==5.5.3
 django-auth-ldap==5.2.0
 django-celery-beat==2.8.1
 django-cors-headers==4.7.0
-Django==5.2.2
+Django==5.2.3
 djangorestframework==3.16.0
 drf-spectacular==0.28.0
 Pillow==11.2.1
 redis==6.2.0
 requests==2.32.4
 ryd-client==0.0.6
-uvicorn==0.34.3
+uvicorn==0.35.0
 whitenoise==6.9.0
-yt-dlp[default]==2025.6.9
+yt-dlp[default]==2025.6.30

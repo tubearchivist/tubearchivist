@@ -71,6 +71,7 @@ All environment variables are explained in detail in the docs [here](https://doc
 | ELASTIC_USER | Change the default ElasticSearch user | Optional |
 | TA_LDAP | Configure TA to use LDAP Authentication | [Read more](https://docs.tubearchivist.com/configuration/ldap/) |
 | DISABLE_STATIC_AUTH | Remove authentication from media files, (Google Cast...) | [Read more](https://docs.tubearchivist.com/installation/env-vars/#disable_static_auth) |
+| TA_AUTO_UPDATE_YTDLP | Configure TA to automatically install the latest yt-dlp on container start | Optional |
 | DJANGO_DEBUG | Return additional error messages, for debug only | Optional |
 | TA_LOGIN_AUTH_MODE | Configure the order of login authentication backends (Default: single) | Optional |
 

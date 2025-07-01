@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import LoadingIndicator from './LoadingIndicator';
 
 type InputTextProps = {
   type: 'text' | 'number';
@@ -51,13 +52,7 @@ const InputConfig = ({ type, name, value, setValue, oldValue, updateCallback }: 
           </>
         )}
         {oldValue !== null && <button onClick={() => handleUpdate(name, null)}>reset</button>}
-        {loading && (
-          <>
-            <div className="lds-ring" style={{ color: 'var(--accent-font-dark)' }}>
-              <div />
-            </div>
-          </>
-        )}
+        {loading && <LoadingIndicator />}
         {success && <span>✅</span>}
       </div>
     </div>
