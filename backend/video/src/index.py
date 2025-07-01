@@ -48,11 +48,26 @@ class SponsorBlock:
 
     def get_timestamps(self, youtube_id):
         """get timestamps from the API"""
-        url = f"{self.API}/skipSegments?videoID={youtube_id}"
+        url = f"{self.API}/skipSegments"
         headers = {"User-Agent": self.user_agent}
+        categories = [
+            'sponsor',
+            'selfpromo',
+            'interaction',
+            'intro',
+            'outro',
+            'preview',
+            'music_offtopic',
+            'poi_highlight',
+            'filler',
+            ]
+        params = {
+            'videoID': youtube_id,
+            'category': categories,
+            }
         print(f"{youtube_id}: get sponsorblock timestamps")
         try:
-            response = requests.get(url, headers=headers, timeout=10)
+            response = requests.get(url, headers=headers, params=params, timeout=10)
         except (requests.ReadTimeout, requests.ConnectionError) as err:
             print(f"{youtube_id}: sponsorblock API error: {str(err)}")
             return False
@@ -75,8 +90,16 @@ class SponsorBlock:
 
     def _get_sponsor_dict(self, all_segments):
         """format and process response"""
-        _ = [i.pop("description", None) for i in all_segments]
         has_unlocked = not any(i.get("locked") for i in all_segments)
+        
+        # Set only sponsor to skip (retain legacy behaviour)
+        categories_skip = ['sponsor']
+        for segment in all_segments:
+            segment_category = segment['category']
+            if segment_category in categories_skip:
+                segment['actionType'] = 'skip'
+            else:
+                segment['actionType'] = 'none'
 
         sponsor_dict = {
             "last_refresh": self.last_refresh,
