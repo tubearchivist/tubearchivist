@@ -18,7 +18,7 @@ RUN npm run build:deploy
 WORKDIR /
 
 # First stage to build python wheel
-FROM python:3.11.8-slim-bookworm AS builder
+FROM python:3.11.13-slim-bookworm AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential gcc libldap2-dev libsasl2-dev libssl-dev git
@@ -28,7 +28,7 @@ COPY ./backend/requirements.txt /requirements.txt
 RUN pip install --user -r requirements.txt
 
 # build ffmpeg
-FROM python:3.11.8-slim-bookworm AS ffmpeg-builder
+FROM python:3.11.13-slim-bookworm AS ffmpeg-builder
 
 ARG TARGETPLATFORM
 
@@ -36,7 +36,7 @@ COPY docker_assets/ffmpeg_download.py ffmpeg_download.py
 RUN python ffmpeg_download.py $TARGETPLATFORM
 
 # build final image
-FROM python:3.11.8-slim-bookworm AS tubearchivist
+FROM python:3.11.13-slim-bookworm AS tubearchivist
 
 ARG INSTALL_DEBUG
 
