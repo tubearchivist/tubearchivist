@@ -81,6 +81,7 @@ class Command(BaseCommand):
         """run all commands"""
         self.stdout.write(LOGO)
         self.stdout.write(TOPIC)
+        self._additional_auth_vars_expectations()
         self._expected_vars()
         self._unexpected_vars()
         self._elastic_user_overwrite()
@@ -88,6 +89,50 @@ class Command(BaseCommand):
         self._ta_backend_port_overwrite()
         self._disable_static_auth()
         self._create_superuser()
+
+    def _additional_auth_vars_expectations(self):
+        """conditionally add additional expectations for auth modes"""
+        ldap_required_env = [
+            "TA_LDAP_SERVER_URI",
+            "TA_LDAP_BIND_DN",
+            "TA_LDAP_BIND_PASSWORD",
+            "TA_LDAP_USER_BASE",
+            "TA_LDAP_USER_FILTER",
+        ]
+        _login_auth_mode = (
+            os.environ.get("TA_LOGIN_AUTH_MODE") or "single"
+        ).casefold()
+        if _login_auth_mode == "local":
+            UNEXPECTED_ENV_VARS["TA_LDAP"] = (
+                "TA_LDAP is not valid with current auth mode"
+            )
+            UNEXPECTED_ENV_VARS["TA_ENABLE_AUTH_PROXY"] = (
+                "TA_ENABLE_AUTH_PROXY is not valid with current auth mode"
+            )
+        elif _login_auth_mode == "ldap":
+            EXPECTED_ENV_VARS.extend(ldap_required_env)
+            UNEXPECTED_ENV_VARS["TA_ENABLE_AUTH_PROXY"] = (
+                "TA_ENABLE_AUTH_PROXY is not valid with current auth mode"
+            )
+        elif _login_auth_mode == "forwardauth":
+            UNEXPECTED_ENV_VARS["TA_LDAP"] = (
+                "TA_LDAP is not valid with current auth mode"
+            )
+        elif _login_auth_mode == "ldap_local":
+            EXPECTED_ENV_VARS.extend(ldap_required_env)
+            UNEXPECTED_ENV_VARS["TA_ENABLE_AUTH_PROXY"] = (
+                "TA_ENABLE_AUTH_PROXY is not valid with current auth mode"
+            )
+        else:
+            if bool(os.environ.get("TA_LDAP")):
+                EXPECTED_ENV_VARS.extend(ldap_required_env)
+                UNEXPECTED_ENV_VARS["TA_ENABLE_AUTH_PROXY"] = (
+                    "TA_ENABLE_AUTH_PROXY is not valid with current auth mode"
+                )
+            if bool(os.environ.get("TA_ENABLE_AUTH_PROXY")):
+                UNEXPECTED_ENV_VARS["TA_LDAP"] = (
+                    "TA_LDAP is not valid with current auth mode"
+                )
 
     def _expected_vars(self):
         """check if expected env vars are set"""
