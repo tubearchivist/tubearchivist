@@ -125,18 +125,22 @@ class PendingInteract:
         if vid_type:
             must_list.append({"term": {"vid_type": {"value": vid_type}}})
 
+        if new_status == "priority":
+            source = """
+            ctx._source.status = 'pending';
+            ctx._source.auto_start = true;
+            ctx._source.message = null;
+            """
+        else:
+            source = f"ctx._source.status = '{new_status}'"
+
         data = {
             "query": {"bool": {"must": must_list}},
-            "script": {
-                "source": f"ctx._source.status = '{new_status}'",
-                "lang": "painless",
-            },
+            "script": {"source": source, "lang": "painless"},
         }
-        print(data)
+
         path = "ta_download/_update_by_query?refresh=true"
-        response, status_code = ElasticWrap(path).post(data)
-        print(status_code)
-        print(response)
+        _, _ = ElasticWrap(path).post(data)
 
     def update_status(self):
         """update status of pending item"""
