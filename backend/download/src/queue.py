@@ -258,8 +258,8 @@ class PendingList(PendingIndex):
         video_results = ChannelSubscription().get_last_youtube_videos(
             url, limit=False, query_filter=vid_type
         )
-        for video_id, _, vid_type in video_results:
-            self._add_video(video_id, vid_type)
+        for video_entry in video_results:
+            self._add_video(video_entry["id"], video_entry["vid_type"])
 
     def _parse_playlist(self, url):
         """add all videos of playlist to list"""
