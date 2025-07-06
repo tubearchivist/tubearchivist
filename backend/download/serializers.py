@@ -42,6 +42,9 @@ class DownloadListQuerySerializer(
     filter = serializers.ChoiceField(
         choices=["pending", "ignore"], required=False
     )
+    vid_type = serializers.ChoiceField(
+        choices=VideoTypeEnum.values_known(), required=False
+    )
     channel = serializers.CharField(required=False, help_text="channel ID")
     page = serializers.IntegerField(required=False)
 

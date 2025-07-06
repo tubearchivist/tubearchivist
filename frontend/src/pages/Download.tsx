@@ -53,6 +53,7 @@ const Download = () => {
 
   const channelFilterFromUrl = searchParams.get('channel');
   const ignoredOnlyParam = searchParams.get('ignored');
+  const vidTypeFilterFromUrl = searchParams.get('vid-type');
 
   const [refresh, setRefresh] = useState(false);
   const [showHiddenForm, setShowHiddenForm] = useState(false);
@@ -104,6 +105,7 @@ const Download = () => {
         const videosResponse = await loadDownloadQueue(
           currentPage,
           channelFilterFromUrl,
+          vidTypeFilterFromUrl,
           showIgnored,
         );
         const { data: channelResponseData } = videosResponse ?? {};
@@ -123,7 +125,7 @@ const Download = () => {
 
   useEffect(() => {
     setRefresh(true);
-  }, [channelFilterFromUrl, currentPage, showIgnored]);
+  }, [channelFilterFromUrl, vidTypeFilterFromUrl, currentPage, showIgnored]);
 
   useEffect(() => {
     (async () => {
@@ -257,6 +259,26 @@ const Download = () => {
             </div>
           </div>
           <div className="view-icons">
+            <select
+              name="vid_type_filter"
+              id="vid_type_filter"
+              value={vidTypeFilterFromUrl || 'all'}
+              onChange={async event => {
+                const value = event.currentTarget.value;
+                const params = searchParams;
+                if (value !== 'all') {
+                  params.set('vid-type', value);
+                } else {
+                  params.delete('vid-type');
+                }
+                setSearchParams(params);
+              }}
+            >
+              <option value="all">all types</option>
+              <option value="videos">Videos</option>
+              <option value="streams">Streams</option>
+              <option value="shorts">Shorts</option>
+            </select>
             {channelAggsList && channelAggsList.length > 1 && (
               <select
                 name="channel_filter"
@@ -275,7 +297,7 @@ const Download = () => {
                   setSearchParams(params);
                 }}
               >
-                <option value="all">all</option>
+                <option value="all">all channels</option>
                 {channelAggsList.map(channel => {
                   const [name, id] = channel.key;
                   const count = channel.doc_count;

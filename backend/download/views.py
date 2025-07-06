@@ -65,6 +65,12 @@ class DownloadApiListView(ApiBaseView):
                 {"term": {"channel_id": {"value": filter_channel}}}
             )
 
+        vid_type_filter = validated_data.get("vid_type")
+        if vid_type_filter:
+            must_list.append(
+                {"term": {"vid_type": {"value": vid_type_filter}}}
+            )
+
         self.data["query"] = {"bool": {"must": must_list}}
 
         self.get_document_list(request)
