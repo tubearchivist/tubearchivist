@@ -257,7 +257,7 @@ const Download = () => {
                 id="showIgnored"
                 onChange={() => {
                   handleUserConfigUpdate({ show_ignored_only: !showIgnored });
-                  const newParams = new URLSearchParams(searchParams.toString());
+                  const newParams = new URLSearchParams();
                   newParams.set('ignored', String(!showIgnored));
                   setSearchParams(newParams);
                   setRefresh(true);
