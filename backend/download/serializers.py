@@ -53,6 +53,10 @@ class DownloadListQueueDeleteQuerySerializer(serializers.Serializer):
     """serialize bulk delete download queue query string"""
 
     filter = serializers.ChoiceField(choices=["pending", "ignore"])
+    channel = serializers.CharField(required=False, help_text="channel ID")
+    vid_type = serializers.ChoiceField(
+        choices=VideoTypeEnum.values_known(), required=False
+    )
 
 
 class AddDownloadItemSerializer(serializers.Serializer):

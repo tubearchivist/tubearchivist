@@ -138,9 +138,18 @@ class DownloadApiListView(ApiBaseView):
         validated_query = serializer.validated_data
 
         query_filter = validated_query["filter"]
+        channel = validated_query.get("channel")
+        vid_type = validated_query.get("vid_type")
         message = f"delete queue by status: {query_filter}"
+        if channel:
+            message += f" - filter by channel: {channel}"
+        if vid_type:
+            message += f" - filter by vid_type: {vid_type}"
+
         print(message)
-        PendingInteract(status=query_filter).delete_by_status()
+        PendingInteract(status=query_filter).delete_bulk(
+            channel_id=channel, vid_type=vid_type
+        )
 
         return Response(status=204)
 
