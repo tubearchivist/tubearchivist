@@ -69,7 +69,7 @@ export type VideoType = {
   sponsorblock?: SponsorBlockType;
   playlist: string[];
   stats: StatsType;
-  streams: StreamType[];
+  streams: StreamType[] | undefined;
   subtitles: Subtitles[];
   tags: string[];
   title: string;
