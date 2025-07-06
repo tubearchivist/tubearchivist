@@ -8,6 +8,8 @@ from common.views_base import AdminOnly, ApiBaseView
 from download.serializers import (
     AddToDownloadListSerializer,
     AddToDownloadQuerySerializer,
+    BulkUpdateDowloadDataSerializer,
+    BulkUpdateDowloadQuerySerializer,
     DownloadAggsSerializer,
     DownloadItemSerializer,
     DownloadListQuerySerializer,
@@ -119,6 +121,38 @@ class DownloadApiListView(ApiBaseView):
         response_serializer = AsyncTaskResponseSerializer(message)
 
         return Response(response_serializer.data)
+
+    @staticmethod
+    @extend_schema(
+        request=BulkUpdateDowloadDataSerializer(),
+        parameters=[BulkUpdateDowloadQuerySerializer()],
+        responses={204: OpenApiResponse(description="Status updated")},
+    )
+    def patch(request):
+        """bulk update status"""
+        data_serializer = BulkUpdateDowloadDataSerializer(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+
+        new_status = validated_data["status"]
+
+        query_serializer = BulkUpdateDowloadQuerySerializer(
+            data=request.query_params
+        )
+        query_serializer.is_valid(raise_exception=True)
+        validated_query = query_serializer.validated_data
+        status_filter = validated_query.get("filter")
+        channel = validated_query.get("channel")
+        vid_type = validated_query.get("vid_type")
+
+        PendingInteract(status=status_filter).update_bulk(
+            channel_id=channel, vid_type=vid_type, new_status=new_status
+        )
+
+        if new_status == "priority":
+            download_pending.delay(auto_only=True)
+
+        return Response(status=204)
 
     @extend_schema(
         parameters=[DownloadListQueueDeleteQuerySerializer()],

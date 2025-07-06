@@ -78,6 +78,22 @@ class AddToDownloadQuerySerializer(serializers.Serializer):
     autostart = serializers.BooleanField(required=False)
 
 
+class BulkUpdateDowloadQuerySerializer(serializers.Serializer):
+    """serialize bulk update query"""
+
+    filter = serializers.ChoiceField(choices=["pending", "ignore", "priority"])
+    channel = serializers.CharField(required=False)
+    vid_type = serializers.ChoiceField(
+        choices=VideoTypeEnum.values_known(), required=False
+    )
+
+
+class BulkUpdateDowloadDataSerializer(serializers.Serializer):
+    """serialize data"""
+
+    status = serializers.ChoiceField(choices=["pending", "ignore", "priority"])
+
+
 class DownloadQueueItemUpdateSerializer(serializers.Serializer):
     """update single download queue item"""
 

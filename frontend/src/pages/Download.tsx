@@ -22,6 +22,9 @@ import { useUserConfigStore } from '../stores/UserConfigStore';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import { ApiResponseType } from '../functions/APIClient';
 import deleteDownloadQueueByFilter from '../api/actions/deleteDownloadQueueByFilter';
+import updateDownloadQueueByFilter, {
+  DownloadQueueStatus,
+} from '../api/actions/updateDownloadQueueByFilter';
 
 type Download = {
   auto_start: boolean;
@@ -140,6 +143,16 @@ const Download = () => {
       setDownloadAggsResponse(downloadAggs);
     })();
   }, [lastVideoCount, showIgnored]);
+
+  const handleBulkStatusUpdate = async (status: DownloadQueueStatus) => {
+    await updateDownloadQueueByFilter(
+      showIgnoredFilter,
+      channelFilterFromUrl,
+      vidTypeFilterFromUrl,
+      status,
+    );
+    setRefresh(true);
+  };
 
   return (
     <>
@@ -397,6 +410,18 @@ const Download = () => {
                 </span>
               )}
             </p>
+            <div>
+              {showIgnored ? (
+                <div className="button-box">
+                  <Button onClick={() => handleBulkStatusUpdate('pending')}>Add to Queue</Button>
+                </div>
+              ) : (
+                <div className="button-box">
+                  <Button onClick={() => handleBulkStatusUpdate('ignore')}>Ignore</Button>
+                  <Button onClick={() => handleBulkStatusUpdate('priority')}>Download Now</Button>
+                </div>
+              )}
+            </div>
             <div className="button-box">
               {showDeleteConfirm ? (
                 <>
@@ -416,7 +441,7 @@ const Download = () => {
                   <Button onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
                 </>
               ) : (
-                <Button onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}>Delete</Button>
+                <Button onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}>Forget</Button>
               )}
             </div>
           </div>

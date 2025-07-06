@@ -114,6 +114,30 @@ class PendingInteract:
         path = "ta_download/_delete_by_query?refresh=true"
         _, _ = ElasticWrap(path).post(data=data)
 
+    def update_bulk(
+        self, channel_id: str | None, vid_type: str | None, new_status: str
+    ):
+        """update status in bulk"""
+        must_list = [{"term": {"status": {"value": self.status}}}]
+        if channel_id:
+            must_list.append({"term": {"channel_id": {"value": channel_id}}})
+
+        if vid_type:
+            must_list.append({"term": {"vid_type": {"value": vid_type}}})
+
+        data = {
+            "query": {"bool": {"must": must_list}},
+            "script": {
+                "source": f"ctx._source.status = '{new_status}'",
+                "lang": "painless",
+            },
+        }
+        print(data)
+        path = "ta_download/_update_by_query?refresh=true"
+        response, status_code = ElasticWrap(path).post(data)
+        print(status_code)
+        print(response)
+
     def update_status(self):
         """update status of pending item"""
         if self.status == "priority":
