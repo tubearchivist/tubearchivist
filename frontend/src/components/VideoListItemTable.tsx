@@ -48,9 +48,9 @@ const VideoListItemTable = ({ videoList, viewStyle }: VideoListItemProps) => {
                 <td>{vid_type}</td>
                 <td>{`${videoStream.width}x${videoStream.height}`}</td>
                 <td>{humanFileSize(media_size, useSiUnits)}</td>
-                <td>{videoStream.codec}</td>
+                <td>{videoStream.codec || 'unknown'}</td>
                 <td>{humanFileSize(videoStream.bitrate, useSiUnits)}</td>
-                <td>{audioStream.codec}</td>
+                <td>{audioStream.codec || 'unknown'}</td>
                 <td>{humanFileSize(audioStream.bitrate, useSiUnits)}</td>
               </tr>
             );
