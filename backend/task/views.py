@@ -360,31 +360,6 @@ class NotificationTestView(ApiBaseView):
             ),
         },
     )
-    def _parse_apprise_error_message(self, log_output):
-        """Parse log output from apprise for detailed error information"""
-        error_msg = "Notification failed"
-        if log_output:
-            lines = log_output.strip().split("\n")
-            error_lines = [
-                line
-                for line in lines
-                if any(
-                    level in line for level in ["ERROR", "WARNING", "CRITICAL"]
-                )
-            ]
-            if error_lines:
-                error_msg = error_lines[-1]
-                if ":" in error_msg:
-                    error_msg = error_msg.split(":", 1)[-1].strip()
-            else:
-                error_msg = f"Notification failed - {log_output.strip()}"
-        else:
-            error_msg = (
-                "Notification failed - check URL format, "
-                "credentials, and network connectivity"
-            )
-        return error_msg
-
     def post(self, request):
         """test notification"""
         import apprise
@@ -396,47 +371,47 @@ class NotificationTestView(ApiBaseView):
         url = validated_data["url"]
         task_name = validated_data.get("task_name", "manual_test")
 
-        # Connect to apprise's logger to obtain error messages
-        with apprise.LogCapture(
-            level=apprise.logging.INFO, fmt="%(message)s"
-        ) as log_capture:
-            try:
-                apobj = apprise.Apprise()
+        try:
+            apobj = apprise.Apprise()
 
-                if not apobj.add(url):
-                    log_output = log_capture.getvalue()
-                    error_msg = f"Invalid notification URL format: {url}"
-                    if log_output:
-                        error_msg += f" - {log_output.strip()}"
-                    return Response(
-                        {"success": False, "message": error_msg}, status=400
-                    )
-
-                title = f"[TA] {task_name} process ended with SUCCESS"
-                body = (
-                    "This is a test notification. Task completed successfully."
+            if not apobj.add(url):
+                return Response(
+                    {
+                        "success": False,
+                        "message": f"Invalid notification URL format: {url}",
+                    },
+                    status=400,
                 )
 
-                result = apobj.notify(body=body, title=title)
-                log_output = log_capture.getvalue()
+            title = f"[TA] {task_name} process ended with SUCCESS"
+            body = "This is a test notification. Task completed successfully."
 
-                if result:
-                    response_data = {
+            result = apobj.notify(body=body, title=title)
+
+            if result:
+                return Response(
+                    {
                         "success": True,
                         "message": "Test notification sent successfully",
                     }
-                    return Response(response_data)
-
-                error_msg = self._parse_apprise_error_message(log_output)
-                return Response(
-                    {"success": False, "message": error_msg}, status=400
                 )
 
-            except Exception as err:
-                log_output = log_capture.getvalue()
-                error_msg = f"Notification error: {str(err)}"
-                if log_output:
-                    error_msg += f" - {log_output.strip()}"
-                return Response(
-                    {"success": False, "message": error_msg}, status=400
-                )
+            return Response(
+                {
+                    "success": False,
+                    "message": (
+                        "Notification failed. "
+                        "Please check container logs for more information."
+                    ),
+                },
+                status=400,
+            )
+
+        except Exception as err:
+            return Response(
+                {
+                    "success": False,
+                    "message": f"Notification error: {str(err)}",
+                },
+                status=400,
+            )
