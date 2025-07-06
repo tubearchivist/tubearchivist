@@ -6,10 +6,10 @@ type AppriseTaskNameType =
   | 'download_pending'
   | 'check_reindex';
 
-const deleteAppriseNotificationUrl = async (taskName: AppriseTaskNameType) => {
+const deleteAppriseNotificationUrl = async (taskName: AppriseTaskNameType, url: string) => {
   return APIClient('/api/task/notification/', {
     method: 'DELETE',
-    body: { task_name: taskName },
+    body: { task_name: taskName, url: url },
   });
 };
 

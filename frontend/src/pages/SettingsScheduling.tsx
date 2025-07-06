@@ -519,7 +519,10 @@ const SettingsScheduling = () => {
                                 className="danger-button"
                                 label="Delete"
                                 onClick={async () => {
-                                  await deleteAppriseNotificationUrl(key as AppriseTaskNameType);
+                                  await deleteAppriseNotificationUrl(
+                                    key as AppriseTaskNameType,
+                                    url,
+                                  );
 
                                   setRefresh(true);
                                 }}
