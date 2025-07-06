@@ -111,7 +111,7 @@ class PendingInteract:
 
         data = {"query": {"bool": {"must": must_list}}}
 
-        path = "ta_download/_delete_by_query"
+        path = "ta_download/_delete_by_query?refresh=true"
         _, _ = ElasticWrap(path).post(data=data)
 
     def update_status(self):

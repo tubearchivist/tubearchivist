@@ -21,6 +21,7 @@ import loadDownloadAggs, { DownloadAggsType } from '../api/loader/loadDownloadAg
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import { ApiResponseType } from '../functions/APIClient';
+import deleteDownloadQueueByFilter from '../api/actions/deleteDownloadQueueByFilter';
 
 type Download = {
   auto_start: boolean;
@@ -57,6 +58,8 @@ const Download = () => {
 
   const [refresh, setRefresh] = useState(false);
   const [showHiddenForm, setShowHiddenForm] = useState(false);
+  const [showQueueActions, setShowQueueActions] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [downloadPending, setDownloadPending] = useState(false);
   const [rescanPending, setRescanPending] = useState(false);
 
@@ -86,6 +89,9 @@ const Download = () => {
   const gridItems = userConfig.grid_items;
   const showIgnored =
     ignoredOnlyParam !== null ? ignoredOnlyParam === 'true' : userConfig.show_ignored_only;
+
+  const showIgnoredFilter = showIgnored ? 'ignore' : 'pending';
+
   const isGridView = viewStyle === ViewStylesEnum.Grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
@@ -259,6 +265,9 @@ const Download = () => {
             </div>
           </div>
           <div className="view-icons">
+            <Button onClick={() => setShowQueueActions(!showQueueActions)}>
+              {showQueueActions ? 'Hide Actions' : 'Show Actions'}
+            </Button>
             <select
               name="vid_type_filter"
               id="vid_type_filter"
@@ -363,7 +372,55 @@ const Download = () => {
               <i>{channel_filter_name}</i>
             </>
           )}
+          {vidTypeFilterFromUrl && (
+            <>
+              {' - by type '}
+              <i>{vidTypeFilterFromUrl}</i>
+            </>
+          )}
         </h3>
+        {showQueueActions && (
+          <div className="settings-group">
+            <h3>Bulk actions</h3>
+            <p>
+              Applied filtered by status <i>'{showIgnoredFilter}'</i>
+              {channelFilterFromUrl && (
+                <span>
+                  {' '}
+                  and by channel: <i>'{channel_filter_name}'</i>
+                </span>
+              )}
+              {vidTypeFilterFromUrl && (
+                <span>
+                  {' '}
+                  and by type: <i>'{vidTypeFilterFromUrl}'</i>
+                </span>
+              )}
+            </p>
+            <div className="button-box">
+              {showDeleteConfirm ? (
+                <>
+                  <Button
+                    className="danger-button"
+                    onClick={async () => {
+                      await deleteDownloadQueueByFilter(
+                        showIgnoredFilter,
+                        channelFilterFromUrl,
+                        vidTypeFilterFromUrl,
+                      );
+                      setRefresh(true);
+                    }}
+                  >
+                    Confirm
+                  </Button>
+                  <Button onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
+                </>
+              ) : (
+                <Button onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}>Delete</Button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className={`boxed-content ${gridView}`}>
