@@ -107,12 +107,13 @@ class DownloadApiListView(ApiBaseView):
         validated_query = query_serializer.validated_data
 
         auto_start = validated_query.get("autostart")
-        print(f"auto_start: {auto_start}")
+        flat = validated_query.get("flat", False)
+        print(f"auto_start: {auto_start}, flat: {flat}")
         to_add = validated_data["data"]
 
         pending = [i["youtube_id"] for i in to_add if i["status"] == "pending"]
         url_str = " ".join(pending)
-        task = extrac_dl.delay(url_str, auto_start=auto_start)
+        task = extrac_dl.delay(url_str, auto_start=auto_start, flat=flat)
 
         message = {
             "message": "add to queue task started",

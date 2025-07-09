@@ -15,9 +15,9 @@ class DownloadItemSerializer(serializers.Serializer):
     channel_indexed = serializers.BooleanField()
     channel_name = serializers.CharField()
     duration = serializers.CharField()
-    published = serializers.CharField()
+    published = serializers.CharField(allow_null=True)
     status = serializers.ChoiceField(choices=["pending", "ignore"])
-    timestamp = serializers.IntegerField()
+    timestamp = serializers.IntegerField(allow_null=True)
     title = serializers.CharField()
     vid_thumb_url = serializers.CharField()
     vid_type = serializers.ChoiceField(choices=VideoTypeEnum.values())
@@ -76,6 +76,7 @@ class AddToDownloadQuerySerializer(serializers.Serializer):
     """add to queue query serializer"""
 
     autostart = serializers.BooleanField(required=False)
+    flat = serializers.BooleanField(required=False)
 
 
 class BulkUpdateDowloadQuerySerializer(serializers.Serializer):

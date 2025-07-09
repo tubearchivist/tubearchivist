@@ -103,8 +103,11 @@ def requests_headers() -> dict[str, str]:
     return {"User-Agent": template}
 
 
-def date_parser(timestamp: int | str) -> str:
+def date_parser(timestamp: int | str | None) -> str | None:
     """return formatted date string"""
+    if timestamp is None:
+        return None
+
     if isinstance(timestamp, int):
         date_obj = datetime.fromtimestamp(timestamp, tz=timezone.utc)
     elif isinstance(timestamp, str):
@@ -184,11 +187,12 @@ def get_duration_sec(file_path: str) -> int:
     return duration_sec
 
 
-def get_duration_str(seconds: int) -> str:
+def get_duration_str(seconds: int | float) -> str:
     """Return a human-readable duration string from seconds."""
     if not seconds:
         return "NA"
 
+    seconds = int(seconds)
     units = [("y", 31536000), ("d", 86400), ("h", 3600), ("m", 60), ("s", 1)]
     duration_parts = []
 
