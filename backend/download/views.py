@@ -8,6 +8,8 @@ from common.views_base import AdminOnly, ApiBaseView
 from download.serializers import (
     AddToDownloadListSerializer,
     AddToDownloadQuerySerializer,
+    BulkUpdateDowloadDataSerializer,
+    BulkUpdateDowloadQuerySerializer,
     DownloadAggsSerializer,
     DownloadItemSerializer,
     DownloadListQuerySerializer,
@@ -65,6 +67,12 @@ class DownloadApiListView(ApiBaseView):
                 {"term": {"channel_id": {"value": filter_channel}}}
             )
 
+        vid_type_filter = validated_data.get("vid_type")
+        if vid_type_filter:
+            must_list.append(
+                {"term": {"vid_type": {"value": vid_type_filter}}}
+            )
+
         self.data["query"] = {"bool": {"must": must_list}}
 
         self.get_document_list(request)
@@ -114,6 +122,38 @@ class DownloadApiListView(ApiBaseView):
 
         return Response(response_serializer.data)
 
+    @staticmethod
+    @extend_schema(
+        request=BulkUpdateDowloadDataSerializer(),
+        parameters=[BulkUpdateDowloadQuerySerializer()],
+        responses={204: OpenApiResponse(description="Status updated")},
+    )
+    def patch(request):
+        """bulk update status"""
+        data_serializer = BulkUpdateDowloadDataSerializer(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+
+        new_status = validated_data["status"]
+
+        query_serializer = BulkUpdateDowloadQuerySerializer(
+            data=request.query_params
+        )
+        query_serializer.is_valid(raise_exception=True)
+        validated_query = query_serializer.validated_data
+        status_filter = validated_query.get("filter")
+        channel = validated_query.get("channel")
+        vid_type = validated_query.get("vid_type")
+
+        PendingInteract(status=status_filter).update_bulk(
+            channel_id=channel, vid_type=vid_type, new_status=new_status
+        )
+
+        if new_status == "priority":
+            download_pending.delay(auto_only=True)
+
+        return Response(status=204)
+
     @extend_schema(
         parameters=[DownloadListQueueDeleteQuerySerializer()],
         responses={
@@ -132,9 +172,18 @@ class DownloadApiListView(ApiBaseView):
         validated_query = serializer.validated_data
 
         query_filter = validated_query["filter"]
+        channel = validated_query.get("channel")
+        vid_type = validated_query.get("vid_type")
         message = f"delete queue by status: {query_filter}"
+        if channel:
+            message += f" - filter by channel: {channel}"
+        if vid_type:
+            message += f" - filter by vid_type: {vid_type}"
+
         print(message)
-        PendingInteract(status=query_filter).delete_by_status()
+        PendingInteract(status=query_filter).delete_bulk(
+            channel_id=channel, vid_type=vid_type
+        )
 
         return Response(status=204)
 

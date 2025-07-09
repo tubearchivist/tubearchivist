@@ -100,11 +100,47 @@ class PendingInteract:
         path = f"ta_download/_doc/{self.youtube_id}"
         _, _ = ElasticWrap(path).delete(refresh=True)
 
-    def delete_by_status(self):
+    def delete_bulk(self, channel_id: str | None, vid_type: str | None):
         """delete all matching item by status"""
-        data = {"query": {"term": {"status": {"value": self.status}}}}
-        path = "ta_download/_delete_by_query"
+        must_list = [{"term": {"status": {"value": self.status}}}]
+        if channel_id:
+            must_list.append({"term": {"channel_id": {"value": channel_id}}})
+
+        if vid_type:
+            must_list.append({"term": {"vid_type": {"value": vid_type}}})
+
+        data = {"query": {"bool": {"must": must_list}}}
+
+        path = "ta_download/_delete_by_query?refresh=true"
         _, _ = ElasticWrap(path).post(data=data)
+
+    def update_bulk(
+        self, channel_id: str | None, vid_type: str | None, new_status: str
+    ):
+        """update status in bulk"""
+        must_list = [{"term": {"status": {"value": self.status}}}]
+        if channel_id:
+            must_list.append({"term": {"channel_id": {"value": channel_id}}})
+
+        if vid_type:
+            must_list.append({"term": {"vid_type": {"value": vid_type}}})
+
+        if new_status == "priority":
+            source = """
+            ctx._source.status = 'pending';
+            ctx._source.auto_start = true;
+            ctx._source.message = null;
+            """
+        else:
+            source = f"ctx._source.status = '{new_status}'"
+
+        data = {
+            "query": {"bool": {"must": must_list}},
+            "script": {"source": source, "lang": "painless"},
+        }
+
+        path = "ta_download/_update_by_query?refresh=true"
+        _, _ = ElasticWrap(path).post(data)
 
     def update_status(self):
         """update status of pending item"""

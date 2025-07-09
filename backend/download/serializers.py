@@ -42,6 +42,9 @@ class DownloadListQuerySerializer(
     filter = serializers.ChoiceField(
         choices=["pending", "ignore"], required=False
     )
+    vid_type = serializers.ChoiceField(
+        choices=VideoTypeEnum.values_known(), required=False
+    )
     channel = serializers.CharField(required=False, help_text="channel ID")
     page = serializers.IntegerField(required=False)
 
@@ -50,6 +53,10 @@ class DownloadListQueueDeleteQuerySerializer(serializers.Serializer):
     """serialize bulk delete download queue query string"""
 
     filter = serializers.ChoiceField(choices=["pending", "ignore"])
+    channel = serializers.CharField(required=False, help_text="channel ID")
+    vid_type = serializers.ChoiceField(
+        choices=VideoTypeEnum.values_known(), required=False
+    )
 
 
 class AddDownloadItemSerializer(serializers.Serializer):
@@ -69,6 +76,22 @@ class AddToDownloadQuerySerializer(serializers.Serializer):
     """add to queue query serializer"""
 
     autostart = serializers.BooleanField(required=False)
+
+
+class BulkUpdateDowloadQuerySerializer(serializers.Serializer):
+    """serialize bulk update query"""
+
+    filter = serializers.ChoiceField(choices=["pending", "ignore", "priority"])
+    channel = serializers.CharField(required=False)
+    vid_type = serializers.ChoiceField(
+        choices=VideoTypeEnum.values_known(), required=False
+    )
+
+
+class BulkUpdateDowloadDataSerializer(serializers.Serializer):
+    """serialize data"""
+
+    status = serializers.ChoiceField(choices=["pending", "ignore", "priority"])
 
 
 class DownloadQueueItemUpdateSerializer(serializers.Serializer):

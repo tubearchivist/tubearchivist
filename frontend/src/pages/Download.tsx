@@ -21,6 +21,10 @@ import loadDownloadAggs, { DownloadAggsType } from '../api/loader/loadDownloadAg
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
 import { ApiResponseType } from '../functions/APIClient';
+import deleteDownloadQueueByFilter from '../api/actions/deleteDownloadQueueByFilter';
+import updateDownloadQueueByFilter, {
+  DownloadQueueStatus,
+} from '../api/actions/updateDownloadQueueByFilter';
 
 type Download = {
   auto_start: boolean;
@@ -53,9 +57,12 @@ const Download = () => {
 
   const channelFilterFromUrl = searchParams.get('channel');
   const ignoredOnlyParam = searchParams.get('ignored');
+  const vidTypeFilterFromUrl = searchParams.get('vid-type');
 
   const [refresh, setRefresh] = useState(false);
   const [showHiddenForm, setShowHiddenForm] = useState(false);
+  const [showQueueActions, setShowQueueActions] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [downloadPending, setDownloadPending] = useState(false);
   const [rescanPending, setRescanPending] = useState(false);
 
@@ -85,6 +92,9 @@ const Download = () => {
   const gridItems = userConfig.grid_items;
   const showIgnored =
     ignoredOnlyParam !== null ? ignoredOnlyParam === 'true' : userConfig.show_ignored_only;
+
+  const showIgnoredFilter = showIgnored ? 'ignore' : 'pending';
+
   const isGridView = viewStyle === ViewStylesEnum.Grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
@@ -104,6 +114,7 @@ const Download = () => {
         const videosResponse = await loadDownloadQueue(
           currentPage,
           channelFilterFromUrl,
+          vidTypeFilterFromUrl,
           showIgnored,
         );
         const { data: channelResponseData } = videosResponse ?? {};
@@ -123,7 +134,7 @@ const Download = () => {
 
   useEffect(() => {
     setRefresh(true);
-  }, [channelFilterFromUrl, currentPage, showIgnored]);
+  }, [channelFilterFromUrl, vidTypeFilterFromUrl, currentPage, showIgnored]);
 
   useEffect(() => {
     (async () => {
@@ -132,6 +143,16 @@ const Download = () => {
       setDownloadAggsResponse(downloadAggs);
     })();
   }, [lastVideoCount, showIgnored]);
+
+  const handleBulkStatusUpdate = async (status: DownloadQueueStatus) => {
+    await updateDownloadQueueByFilter(
+      showIgnoredFilter,
+      channelFilterFromUrl,
+      vidTypeFilterFromUrl,
+      status,
+    );
+    setRefresh(true);
+  };
 
   return (
     <>
@@ -236,7 +257,7 @@ const Download = () => {
                 id="showIgnored"
                 onChange={() => {
                   handleUserConfigUpdate({ show_ignored_only: !showIgnored });
-                  const newParams = new URLSearchParams(searchParams.toString());
+                  const newParams = new URLSearchParams();
                   newParams.set('ignored', String(!showIgnored));
                   setSearchParams(newParams);
                   setRefresh(true);
@@ -257,6 +278,29 @@ const Download = () => {
             </div>
           </div>
           <div className="view-icons">
+            <Button onClick={() => setShowQueueActions(!showQueueActions)}>
+              {showQueueActions ? 'Hide Actions' : 'Show Actions'}
+            </Button>
+            <select
+              name="vid_type_filter"
+              id="vid_type_filter"
+              value={vidTypeFilterFromUrl || 'all'}
+              onChange={async event => {
+                const value = event.currentTarget.value;
+                const params = searchParams;
+                if (value !== 'all') {
+                  params.set('vid-type', value);
+                } else {
+                  params.delete('vid-type');
+                }
+                setSearchParams(params);
+              }}
+            >
+              <option value="all">all types</option>
+              <option value="videos">Videos</option>
+              <option value="streams">Streams</option>
+              <option value="shorts">Shorts</option>
+            </select>
             {channelAggsList && channelAggsList.length > 1 && (
               <select
                 name="channel_filter"
@@ -275,7 +319,7 @@ const Download = () => {
                   setSearchParams(params);
                 }}
               >
-                <option value="all">all</option>
+                <option value="all">all channels</option>
                 {channelAggsList.map(channel => {
                   const [name, id] = channel.key;
                   const count = channel.doc_count;
@@ -341,7 +385,67 @@ const Download = () => {
               <i>{channel_filter_name}</i>
             </>
           )}
+          {vidTypeFilterFromUrl && (
+            <>
+              {' - by type '}
+              <i>{vidTypeFilterFromUrl}</i>
+            </>
+          )}
         </h3>
+        {showQueueActions && (
+          <div className="settings-group">
+            <h3>Bulk actions</h3>
+            <p>
+              Applied filtered by status <i>'{showIgnoredFilter}'</i>
+              {channelFilterFromUrl && (
+                <span>
+                  {' '}
+                  and by channel: <i>'{channel_filter_name}'</i>
+                </span>
+              )}
+              {vidTypeFilterFromUrl && (
+                <span>
+                  {' '}
+                  and by type: <i>'{vidTypeFilterFromUrl}'</i>
+                </span>
+              )}
+            </p>
+            <div>
+              {showIgnored ? (
+                <div className="button-box">
+                  <Button onClick={() => handleBulkStatusUpdate('pending')}>Add to Queue</Button>
+                </div>
+              ) : (
+                <div className="button-box">
+                  <Button onClick={() => handleBulkStatusUpdate('ignore')}>Ignore</Button>
+                  <Button onClick={() => handleBulkStatusUpdate('priority')}>Download Now</Button>
+                </div>
+              )}
+            </div>
+            <div className="button-box">
+              {showDeleteConfirm ? (
+                <>
+                  <Button
+                    className="danger-button"
+                    onClick={async () => {
+                      await deleteDownloadQueueByFilter(
+                        showIgnoredFilter,
+                        channelFilterFromUrl,
+                        vidTypeFilterFromUrl,
+                      );
+                      setRefresh(true);
+                    }}
+                  >
+                    Confirm
+                  </Button>
+                  <Button onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
+                </>
+              ) : (
+                <Button onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}>Forget</Button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className={`boxed-content ${gridView}`}>

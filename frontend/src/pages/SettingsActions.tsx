@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import loadBackupList, { BackupListType } from '../api/loader/loadBackupList';
 import SettingsNavigation from '../components/SettingsNavigation';
-import deleteDownloadQueueByFilter from '../api/actions/deleteDownloadQueueByFilter';
 import updateTaskByName from '../api/actions/updateTaskByName';
 import queueBackup from '../api/actions/queueBackup';
 import restoreBackup from '../api/actions/restoreBackup';
@@ -62,32 +61,6 @@ const SettingsActions = () => {
 
         <div className="title-bar">
           <h1>Actions</h1>
-        </div>
-        <div className="settings-group">
-          <h2>Delete download queue</h2>
-          <p>Delete your pending or previously ignored videos from your download queue.</p>
-          {deleteIgnored && <p>Deleting download queue: ignored</p>}
-          {!deleteIgnored && (
-            <Button
-              label="Delete all ignored"
-              title="Delete all previously ignored videos from the queue"
-              onClick={async () => {
-                await deleteDownloadQueueByFilter('ignore');
-                setDeleteIgnored(true);
-              }}
-            />
-          )}{' '}
-          {deletePending && <p>Deleting download queue: pending</p>}
-          {!deletePending && (
-            <Button
-              label="Delete all queued"
-              title="Delete all pending videos from the queue"
-              onClick={async () => {
-                await deleteDownloadQueueByFilter('pending');
-                setDeletePending(true);
-              }}
-            />
-          )}
         </div>
         <div className="settings-group">
           <h2>Manual media files import.</h2>
