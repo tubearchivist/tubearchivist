@@ -1,6 +1,6 @@
 import APIClient from '../../functions/APIClient';
 
-const updateDownloadQueue = async (youtubeIdStrings: string, autostart: boolean) => {
+const updateDownloadQueue = async (youtubeIdStrings: string, autostart: boolean, flat: boolean) => {
   const urls = [];
   const containsMultiple = youtubeIdStrings.includes('\n');
 
@@ -16,12 +16,12 @@ const updateDownloadQueue = async (youtubeIdStrings: string, autostart: boolean)
     urls.push({ youtube_id: youtubeIdStrings, status: 'pending' });
   }
 
-  let params = '';
-  if (autostart) {
-    params = '?autostart=true';
-  }
+  const searchParams = new URLSearchParams();
+  if (autostart) searchParams.append('autostart', 'true');
+  if (flat) searchParams.append('flat', 'true');
+  const endpoint = `/api/download/${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
-  return APIClient(`/api/download/${params}`, {
+  return APIClient(endpoint, {
     method: 'POST',
     body: { data: [...urls] },
   });

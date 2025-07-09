@@ -57,8 +57,9 @@ const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
         </div>
 
         <p>
-          Published: {formatDate(download.published)} | Duration: {download.duration} |{' '}
-          {download.youtube_id}
+          {download.published && <span>Published: {formatDate(download.published)} | </span>}
+          <span>Duration: {download.duration} | </span>
+          <span>{download.youtube_id}</span>
         </p>
 
         {download.message && <p className="danger-zone">{download.message}</p>}

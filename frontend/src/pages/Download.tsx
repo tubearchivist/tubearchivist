@@ -33,9 +33,9 @@ type Download = {
   channel_name: string;
   duration: string;
   message?: string;
-  published: string;
+  published: string | null;
   status: string;
-  timestamp: number;
+  timestamp: number | null;
   title: string;
   vid_thumb_url: string;
   vid_type: string;
@@ -61,6 +61,8 @@ const Download = () => {
 
   const [refresh, setRefresh] = useState(false);
   const [showHiddenForm, setShowHiddenForm] = useState(false);
+  const [addAsAutoStart, setAddAsAutoStart] = useState(false);
+  const [addAsFlat, setAddAsFlat] = useState(false);
   const [showQueueActions, setShowQueueActions] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [downloadPending, setDownloadPending] = useState(false);
@@ -215,6 +217,46 @@ const Download = () => {
             {showHiddenForm && (
               <div className="show-form">
                 <div>
+                  <div className="toggle">
+                    <div className="toggleBox">
+                      <input
+                        id="hide_watched"
+                        type="checkbox"
+                        checked={addAsFlat}
+                        onChange={() => setAddAsFlat(!addAsFlat)}
+                      />
+                      {addAsFlat ? (
+                        <label htmlFor="" className="onbtn">
+                          On
+                        </label>
+                      ) : (
+                        <label htmlFor="" className="ofbtn">
+                          Off
+                        </label>
+                      )}
+                    </div>
+                    <span>Fast add</span>
+                  </div>
+                  <div className="toggle">
+                    <div className="toggleBox">
+                      <input
+                        id="hide_watched"
+                        type="checkbox"
+                        checked={addAsAutoStart}
+                        onChange={() => setAddAsAutoStart(!addAsAutoStart)}
+                      />
+                      {addAsAutoStart ? (
+                        <label htmlFor="" className="onbtn">
+                          On
+                        </label>
+                      ) : (
+                        <label htmlFor="" className="ofbtn">
+                          Off
+                        </label>
+                      )}
+                    </div>
+                    <span>Auto Download</span>
+                  </div>
                   <textarea
                     value={downloadQueueText}
                     onChange={e => setDownloadQueueText(e.target.value)}
@@ -226,24 +268,13 @@ const Download = () => {
                     label="Add to queue"
                     onClick={async () => {
                       if (downloadQueueText.trim()) {
-                        await updateDownloadQueue(downloadQueueText, false);
+                        await updateDownloadQueue(downloadQueueText, addAsAutoStart, addAsFlat);
                         setDownloadQueueText('');
                         setRefresh(true);
                         setShowHiddenForm(false);
                       }
                     }}
                   />{' '}
-                  <Button
-                    label="Download now"
-                    onClick={async () => {
-                      if (downloadQueueText.trim()) {
-                        await updateDownloadQueue(downloadQueueText, true);
-                        setDownloadQueueText('');
-                        setRefresh(true);
-                        setShowHiddenForm(false);
-                      }
-                    }}
-                  />
                 </div>
               </div>
             )}
