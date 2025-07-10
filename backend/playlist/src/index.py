@@ -93,6 +93,18 @@ class YoutubePlaylist(YouTubeItem):
         channel_handler = YoutubeChannel(channel_id)
         channel_handler.build_json(upload=True)
 
+    def get_playlist_videos(self):
+        """get all playlist videos"""
+        data = {
+            "query": {
+                "term": {"playlist.keyword": {"value": self.youtube_id}}
+            },
+            "_source": ["youtube_id"],
+        }
+        result = IndexPaginate("ta_video", data).get_results()
+
+        return result
+
     def get_local_vids(self) -> list[str]:
         """get local video ids from youtube entries"""
         entries = self.youtube_meta["entries"]
@@ -158,13 +170,7 @@ class YoutubePlaylist(YouTubeItem):
     def remove_vids_from_playlist(self):
         """remove playlist ids from videos if needed"""
         needed = [i["youtube_id"] for i in self.json_data["playlist_entries"]]
-        data = {
-            "query": {
-                "term": {"playlist.keyword": {"value": self.youtube_id}}
-            },
-            "_source": ["youtube_id"],
-        }
-        result = IndexPaginate("ta_video", data).get_results()
+        result = self.get_playlist_videos()
         to_remove = [
             i["youtube_id"] for i in result if i["youtube_id"] not in needed
         ]
