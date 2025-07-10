@@ -48,6 +48,7 @@ class DownloadListQuerySerializer(
     channel = serializers.CharField(required=False, help_text="channel ID")
     page = serializers.IntegerField(required=False)
     q = serializers.CharField(required=False, help_text="Search Query")
+    error = serializers.BooleanField(required=False, allow_null=True)
 
 
 class DownloadListQueueDeleteQuerySerializer(serializers.Serializer):

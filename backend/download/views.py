@@ -77,6 +77,12 @@ class DownloadApiListView(ApiBaseView):
         if search_query:
             must_list.append({"match_phrase_prefix": {"title": search_query}})
 
+        if validated_data.get("error") is not None:
+            operator = "must" if validated_data["error"] else "must_not"
+            must_list.append(
+                {"bool": {operator: [{"exists": {"field": "message"}}]}}
+            )
+
         self.data["query"] = {"bool": {"must": must_list}}
 
         self.get_document_list(request)

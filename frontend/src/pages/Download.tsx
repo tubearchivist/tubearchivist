@@ -4,7 +4,6 @@ import iconAdd from '/img/icon-add.svg';
 import iconSubstract from '/img/icon-substract.svg';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
-import iconSearch from '/img/icon-search.svg';
 import { Fragment, useEffect, useState } from 'react';
 import { useOutletContext, useSearchParams } from 'react-router-dom';
 import { ConfigType } from './Home';
@@ -59,13 +58,13 @@ const Download = () => {
   const channelFilterFromUrl = searchParams.get('channel');
   const ignoredOnlyParam = searchParams.get('ignored');
   const vidTypeFilterFromUrl = searchParams.get('vid-type');
+  const errorFilterFromUrl = searchParams.get('error');
 
   const [refresh, setRefresh] = useState(false);
   const [showHiddenForm, setShowHiddenForm] = useState(false);
   const [addAsAutoStart, setAddAsAutoStart] = useState(false);
   const [addAsFlat, setAddAsFlat] = useState(false);
   const [showQueueActions, setShowQueueActions] = useState(false);
-  const [showSearchInput, setShowSearchInput] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [downloadPending, setDownloadPending] = useState(false);
@@ -120,6 +119,7 @@ const Download = () => {
           currentPage,
           channelFilterFromUrl,
           vidTypeFilterFromUrl,
+          errorFilterFromUrl,
           showIgnored,
           searchInput,
         );
@@ -140,7 +140,14 @@ const Download = () => {
 
   useEffect(() => {
     setRefresh(true);
-  }, [channelFilterFromUrl, vidTypeFilterFromUrl, currentPage, showIgnored, searchInput]);
+  }, [
+    channelFilterFromUrl,
+    vidTypeFilterFromUrl,
+    errorFilterFromUrl,
+    currentPage,
+    showIgnored,
+    searchInput,
+  ]);
 
   useEffect(() => {
     (async () => {
@@ -158,11 +165,6 @@ const Download = () => {
       status,
     );
     setRefresh(true);
-  };
-
-  const handleShowSearchInput = () => {
-    if (showSearchInput) setSearchInput('');
-    setShowSearchInput(!showSearchInput);
   };
 
   return (
@@ -318,74 +320,8 @@ const Download = () => {
             </div>
           </div>
           <div className="view-icons">
-            {showSearchInput && (
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchInput}
-                onChange={e => setSearchInput(e.target.value)}
-                autoFocus
-              />
-            )}
-            <img
-              src={iconSearch}
-              alt="search-icon"
-              title="Search"
-              onClick={handleShowSearchInput}
-            />
-            <select
-              name="vid_type_filter"
-              id="vid_type_filter"
-              value={vidTypeFilterFromUrl || 'all'}
-              onChange={async event => {
-                const value = event.currentTarget.value;
-                const params = searchParams;
-                if (value !== 'all') {
-                  params.set('vid-type', value);
-                } else {
-                  params.delete('vid-type');
-                }
-                setSearchParams(params);
-              }}
-            >
-              <option value="all">all types</option>
-              <option value="videos">Videos</option>
-              <option value="streams">Streams</option>
-              <option value="shorts">Shorts</option>
-            </select>
-            {channelAggsList && channelAggsList.length > 1 && (
-              <select
-                name="channel_filter"
-                id="channel_filter"
-                value={channelFilterFromUrl || 'all'}
-                onChange={async event => {
-                  const value = event.currentTarget.value;
-
-                  const params = searchParams;
-                  if (value !== 'all') {
-                    params.set('channel', value);
-                  } else {
-                    params.delete('channel');
-                  }
-
-                  setSearchParams(params);
-                }}
-              >
-                <option value="all">all channels</option>
-                {channelAggsList.map(channel => {
-                  const [name, id] = channel.key;
-                  const count = channel.doc_count;
-
-                  return (
-                    <option key={id} value={id}>
-                      {name} ({count})
-                    </option>
-                  );
-                })}
-              </select>
-            )}
             <Button onClick={() => setShowQueueActions(!showQueueActions)}>
-              {showQueueActions ? 'Hide Actions' : 'Show Actions'}
+              {showQueueActions ? 'Hide Advanced' : 'Show Advanced'}
             </Button>
 
             {isGridView && (
@@ -449,6 +385,85 @@ const Download = () => {
         </h3>
         {showQueueActions && (
           <div className="settings-group">
+            <h3>Search & Filter</h3>
+            <select
+              name="vid_type_filter"
+              id="vid_type_filter"
+              value={vidTypeFilterFromUrl || 'all'}
+              onChange={async event => {
+                const value = event.currentTarget.value;
+                const params = searchParams;
+                if (value !== 'all') {
+                  params.set('vid-type', value);
+                } else {
+                  params.delete('vid-type');
+                }
+                setSearchParams(params);
+              }}
+            >
+              <option value="all">all types</option>
+              <option value="videos">Videos</option>
+              <option value="streams">Streams</option>
+              <option value="shorts">Shorts</option>
+            </select>
+            {channelAggsList && channelAggsList.length > 1 && (
+              <select
+                name="channel_filter"
+                id="channel_filter"
+                value={channelFilterFromUrl || 'all'}
+                onChange={async event => {
+                  const value = event.currentTarget.value;
+
+                  const params = searchParams;
+                  if (value !== 'all') {
+                    params.set('channel', value);
+                  } else {
+                    params.delete('channel');
+                  }
+
+                  setSearchParams(params);
+                }}
+              >
+                <option value="all">all channels</option>
+                {channelAggsList.map(channel => {
+                  const [name, id] = channel.key;
+                  const count = channel.doc_count;
+
+                  return (
+                    <option key={id} value={id}>
+                      {name} ({count})
+                    </option>
+                  );
+                })}
+              </select>
+            )}
+            <select
+              name="error_filter"
+              id="error_filter"
+              value={errorFilterFromUrl || 'all'}
+              onChange={async event => {
+                const value = event.currentTarget.value;
+                const params = searchParams;
+                if (value !== 'all') {
+                  params.set('error', value);
+                } else {
+                  params.delete('error');
+                }
+                setSearchParams(params);
+              }}
+            >
+              <option value="all">all error state</option>
+              <option value="true">has error</option>
+              <option value="false">has no error</option>
+            </select>
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
+            />
+            {searchInput && <Button onClick={() => setSearchInput('')}>Clear</Button>}
+
             <h3>Bulk actions</h3>
             <p>
               Applied filtered by status <i>'{showIgnoredFilter}'</i>
