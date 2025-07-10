@@ -4,6 +4,7 @@ import iconAdd from '/img/icon-add.svg';
 import iconSubstract from '/img/icon-substract.svg';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
+import iconSearch from '/img/icon-search.svg';
 import { Fragment, useEffect, useState } from 'react';
 import { useOutletContext, useSearchParams } from 'react-router-dom';
 import { ConfigType } from './Home';
@@ -64,6 +65,8 @@ const Download = () => {
   const [addAsAutoStart, setAddAsAutoStart] = useState(false);
   const [addAsFlat, setAddAsFlat] = useState(false);
   const [showQueueActions, setShowQueueActions] = useState(false);
+  const [showSearchInput, setShowSearchInput] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [downloadPending, setDownloadPending] = useState(false);
   const [rescanPending, setRescanPending] = useState(false);
@@ -118,6 +121,7 @@ const Download = () => {
           channelFilterFromUrl,
           vidTypeFilterFromUrl,
           showIgnored,
+          searchInput,
         );
         const { data: channelResponseData } = videosResponse ?? {};
         const videoCount = channelResponseData?.paginate?.total_hits;
@@ -136,7 +140,7 @@ const Download = () => {
 
   useEffect(() => {
     setRefresh(true);
-  }, [channelFilterFromUrl, vidTypeFilterFromUrl, currentPage, showIgnored]);
+  }, [channelFilterFromUrl, vidTypeFilterFromUrl, currentPage, showIgnored, searchInput]);
 
   useEffect(() => {
     (async () => {
@@ -154,6 +158,11 @@ const Download = () => {
       status,
     );
     setRefresh(true);
+  };
+
+  const handleShowSearchInput = () => {
+    if (showSearchInput) setSearchInput('');
+    setShowSearchInput(!showSearchInput);
   };
 
   return (
@@ -309,9 +318,21 @@ const Download = () => {
             </div>
           </div>
           <div className="view-icons">
-            <Button onClick={() => setShowQueueActions(!showQueueActions)}>
-              {showQueueActions ? 'Hide Actions' : 'Show Actions'}
-            </Button>
+            {showSearchInput && (
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
+                autoFocus
+              />
+            )}
+            <img
+              src={iconSearch}
+              alt="search-icon"
+              title="Search"
+              onClick={handleShowSearchInput}
+            />
             <select
               name="vid_type_filter"
               id="vid_type_filter"
@@ -363,6 +384,9 @@ const Download = () => {
                 })}
               </select>
             )}
+            <Button onClick={() => setShowQueueActions(!showQueueActions)}>
+              {showQueueActions ? 'Hide Actions' : 'Show Actions'}
+            </Button>
 
             {isGridView && (
               <div className="grid-count">

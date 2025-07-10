@@ -73,6 +73,10 @@ class DownloadApiListView(ApiBaseView):
                 {"term": {"vid_type": {"value": vid_type_filter}}}
             )
 
+        search_query = validated_data.get("q")
+        if search_query:
+            must_list.append({"match_phrase_prefix": {"title": search_query}})
+
         self.data["query"] = {"bool": {"must": must_list}}
 
         self.get_document_list(request)
