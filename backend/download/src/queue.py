@@ -216,18 +216,17 @@ class PendingList(PendingIndex):
         self.get_channels()
         total = len(self.youtube_ids)
         for idx, entry in enumerate(self.youtube_ids):
+            if self.task:
+                self.task.send_progress(
+                    message_lines=[f"Extracting items {idx + 1}/{total}"],
+                    progress=(idx + 1) / total,
+                )
+
             self._process_entry(entry, idx, total)
             if self.task and self.task.is_stopped():
                 break
 
             rand_sleep(self.config)
-            if not self.task:
-                continue
-
-            self.task.send_progress(
-                message_lines=[f"Extracting items {idx + 1}/{total}"],
-                progress=(idx + 1) / total,
-            )
 
     def _process_entry(self, entry: dict, idx_url: int, total_url: int):
         """process single entry from url list"""
@@ -319,7 +318,7 @@ class PendingList(PendingIndex):
     def _parse_playlist(self, url):
         """fast parse playlist"""
         playlist = YoutubePlaylist(url)
-        playlist.get_from_youtube()
+        playlist.update_playlist()
         if not playlist.youtube_meta:
             print(f"{url}: playlist metadata extraction failed, skipping")
             return
