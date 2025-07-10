@@ -504,6 +504,7 @@ const Download = () => {
                         vidTypeFilterFromUrl,
                       );
                       setRefresh(true);
+                      setShowDeleteConfirm(false);
                     }}
                   >
                     Confirm
