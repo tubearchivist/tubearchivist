@@ -155,9 +155,13 @@ def is_shorts(youtube_id: str) -> bool:
     """check if youtube_id is a shorts video, bot not it it's not a shorts"""
     shorts_url = f"https://www.youtube.com/shorts/{youtube_id}"
     cookies = {"SOCS": "CAI"}
-    response = requests.head(
-        shorts_url, cookies=cookies, headers=requests_headers(), timeout=10
-    )
+    try:
+        response = requests.head(
+            shorts_url, cookies=cookies, headers=requests_headers(), timeout=10
+        )
+    except requests.exceptions.RequestException:
+        # assume video on error
+        return False
 
     return response.status_code == 200
 

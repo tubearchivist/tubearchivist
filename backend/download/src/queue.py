@@ -266,8 +266,15 @@ class PendingList(PendingIndex):
         video_results = ChannelSubscription().get_last_youtube_videos(
             url, limit=False, query_filter=query_filter
         )
+        if not video_results:
+            print(f"{url}: no videos to add from channel, skipping")
+            return
+
         channel_handler = YoutubeChannel(url)
         channel_handler.build_json(upload=False)
+        if not channel_handler.json_data:
+            print(f"{url}: channel metadata extraction failed, skipping")
+            return
 
         total = len(video_results)
         for idx, video_data in enumerate(video_results):
@@ -307,6 +314,10 @@ class PendingList(PendingIndex):
         """fast parse playlist"""
         playlist = YoutubePlaylist(url)
         playlist.get_from_youtube()
+        if not playlist.youtube_meta:
+            print(f"{url}: playlist metadata extraction failed, skipping")
+            return
+
         video_results = playlist.youtube_meta["entries"]
 
         total = len(video_results)
@@ -347,11 +358,14 @@ class PendingList(PendingIndex):
         video = YoutubeVideo(youtube_id=url)
         video.get_from_youtube()
 
-        video_data = video.youtube_meta
-        video_data["vid_type"] = vid_type
+        if not video.youtube_meta:
+            print(f"{url}: video metadata extraction failed, skipping")
+            return None
+
+        video.youtube_meta["vid_type"] = vid_type
         to_add = self._parse_entry(
             youtube_id=url,
-            video_data=video_data,
+            video_data=video.youtube_meta,
             url_type=url_type,
             idx=idx,
             total=total,
