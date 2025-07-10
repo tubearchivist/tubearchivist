@@ -493,10 +493,7 @@ class ReindexProgress(ReindexBase):
 
 
 class ChannelFullScan:
-    """
-    update from v0.3.0 to v0.3.1
-    full scan of channel to fix vid_type mismatch
-    """
+    """full scan of channel to fix vid_type mismatch"""
 
     def __init__(self, channel_id):
         self.channel_id = channel_id
