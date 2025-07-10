@@ -35,11 +35,17 @@ class YoutubePlaylist(YouTubeItem):
         self.get_from_es()
         if self.json_data:
             subscribed = self.json_data.get("playlist_subscribed")
+            playlist_sort_order = self.json_data.get("playlist_sort_order")
         else:
             subscribed = False
+            playlist_sort_order = "top"
+
+        playlist_items = "::1" if playlist_sort_order == "top" else "::-1"
 
         if scrape or not self.json_data:
-            self.get_from_youtube()
+            self.get_from_youtube(
+                obs_overwrite={"playlist_items": playlist_items}
+            )
             if not self.youtube_meta:
                 self.json_data = False
                 return
@@ -48,8 +54,13 @@ class YoutubePlaylist(YouTubeItem):
             self._ensure_channel()
             ids_found = self.get_local_vids()
             self.get_entries(ids_found)
-            self.json_data["playlist_entries"] = self.all_members
-            self.json_data["playlist_subscribed"] = subscribed
+            self.json_data.update(
+                {
+                    "playlist_entries": self.all_members,
+                    "playlist_subscribed": subscribed,
+                    "playlist_sort_order": playlist_sort_order,
+                }
+            )
 
     def process_youtube_meta(self):
         """extract relevant fields from youtube"""
@@ -189,6 +200,15 @@ class YoutubePlaylist(YouTubeItem):
         self.remove_vids_from_playlist()
         self.get_playlist_art()
         return True
+
+    def change_sort_order(self, new_sort_order):
+        """update sort order of playlist"""
+        playlist = YoutubePlaylist(self.youtube_id)
+        playlist.build_json()
+        playlist.json_data["playlist_sort_order"] = new_sort_order
+        playlist.upload_to_es()
+
+        return playlist.json_data
 
     def build_nav(self, youtube_id):
         """find next and previous in playlist of a given youtube_id"""

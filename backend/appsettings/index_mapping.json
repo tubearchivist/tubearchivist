@@ -506,6 +506,9 @@
                     "type": "date",
                     "format": "epoch_second"
                 },
+                "playlist_sort_order": {
+                    "type": "keyword"
+                },
                 "playlist_entries": {
                     "properties": {
                         "downloaded": {

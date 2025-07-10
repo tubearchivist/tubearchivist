@@ -14,6 +14,7 @@ export type PlaylistType = {
   playlist_channel_id: string;
   playlist_description: string;
   playlist_entries: PlaylistEntryType[];
+  playlist_sort_order: 'top' | 'bottom';
   playlist_id: string;
   playlist_last_refresh: string;
   playlist_name: string;

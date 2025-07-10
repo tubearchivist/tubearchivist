@@ -240,9 +240,24 @@ class PlaylistApiView(ApiBaseView):
             error = ErrorResponseSerializer({"error": "playlist not found"})
             return Response(error.data, status=404)
 
-        subscribed = validated_data["playlist_subscribed"]
-        playlist_sub = PlaylistSubscription()
-        json_data = playlist_sub.change_subscribe(playlist_id, subscribed)
+        subscribed = validated_data.get("playlist_subscribed")
+        sort_order = validated_data.get("playlist_sort_order")
+
+        json_data = None
+        if subscribed is not None:
+            playlist_sub = PlaylistSubscription()
+            json_data = playlist_sub.change_subscribe(playlist_id, subscribed)
+
+        if sort_order:
+            json_data = YoutubePlaylist(playlist_id).change_sort_order(
+                new_sort_order=sort_order
+            )
+
+        if not json_data:
+            error = ErrorResponseSerializer(
+                {"error": "expect playlist_subscribed or playlist_sort_order"}
+            )
+            return Response(error.data, status=400)
 
         response_serializer = PlaylistSerializer(json_data)
         return Response(response_serializer.data)
