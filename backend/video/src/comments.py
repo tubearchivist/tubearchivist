@@ -79,7 +79,9 @@ class Comments:
     def get_yt_comments(self):
         """get comments from youtube"""
         yt_obs = self.build_yt_obs()
-        info_json = YtWrap(yt_obs, config=self.config).extract(self.youtube_id)
+        info_json, _ = YtWrap(yt_obs, config=self.config).extract(
+            self.youtube_id
+        )
         if not info_json:
             return False, False
 

@@ -39,10 +39,10 @@ class BaseTask(Task):
         RedisArchivist().set_message(key, message, expire=20)
 
     def on_success(self, retval, task_id, args, kwargs):
-        """callback task completed successfully"""
+        """callback task completed"""
         print(f"{task_id} success callback")
         message, key = self._build_message()
-        message.update({"messages": ["Task completed successfully"]})
+        message.update({"messages": ["Task completed"]})
         RedisArchivist().set_message(key, message, expire=5)
 
     def before_start(self, task_id, args, kwargs):
@@ -58,9 +58,11 @@ class BaseTask(Task):
         task_title = TASK_CONFIG.get(self.name).get("title")
         Notifications(self.name).send(task_id, task_title)
 
-    def send_progress(self, message_lines, progress=False, title=False):
+    def send_progress(
+        self, message_lines, progress=False, title=False, level="info"
+    ):
         """send progress message"""
-        message, key = self._build_message()
+        message, key = self._build_message(level=level)
         message.update(
             {
                 "messages": message_lines,

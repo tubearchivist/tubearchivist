@@ -26,6 +26,7 @@ class YouTubeItem:
         self.youtube_id = youtube_id
         self.es_path = f"{self.index_name}/_doc/{youtube_id}"
         self.config = AppConfig().config
+        self.error = None
         self.youtube_meta = False
         self.json_data = False
 
@@ -43,7 +44,9 @@ class YouTubeItem:
             obs_request["extractor_args"] = {"youtube": {"lang": langs_list}}
 
         url = self.build_yt_url()
-        self.youtube_meta = YtWrap(obs_request, self.config).extract(url)
+        self.youtube_meta, self.error = YtWrap(
+            obs_request, self.config
+        ).extract(url)
 
     def get_from_es(self):
         """get indexed data from elastic search"""

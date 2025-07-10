@@ -369,6 +369,14 @@ class PendingList(PendingIndex):
 
         if not video.youtube_meta:
             print(f"{url}: video metadata extraction failed, skipping")
+            if self.task:
+                self.task.send_progress(
+                    message_lines=[
+                        "Video extraction failed.",
+                        f"{video.error}",
+                    ],
+                    level="error",
+                )
             return None
 
         video.youtube_meta["vid_type"] = vid_type
@@ -559,5 +567,6 @@ class PendingList(PendingIndex):
             message_lines=[
                 "Adding extracted videos failed.",
                 f"Status code: {status_code}",
-            ]
+            ],
+            level="error",
         )

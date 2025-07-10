@@ -61,7 +61,7 @@ class ChannelSubscription:
                 obs["playlistend"] = limit_amount
 
             url = f"https://www.youtube.com/channel/{channel_id}/{vid_type}"
-            channel_query = YtWrap(obs, self.config).extract(url)
+            channel_query, _ = YtWrap(obs, self.config).extract(url)
             if not channel_query:
                 continue
 
