@@ -34,14 +34,19 @@ class YouTubeItem:
         """build youtube url"""
         return self.yt_base + self.youtube_id
 
-    def get_from_youtube(self):
+    def get_from_youtube(self, obs_overwrite: dict | None = None):
         """use yt-dlp to get meta data from youtube"""
         print(f"{self.youtube_id}: get metadata from youtube")
         obs_request = self.yt_obs.copy()
         if self.config["downloads"]["extractor_lang"]:
             langs = self.config["downloads"]["extractor_lang"]
             langs_list = [i.strip() for i in langs.split(",")]
-            obs_request["extractor_args"] = {"youtube": {"lang": langs_list}}
+            obs_request["extractor_args"] = {
+                "youtube": {"lang": langs_list}
+            }  # type: ignore
+
+        if obs_overwrite:
+            obs_request.update(obs_overwrite)
 
         url = self.build_yt_url()
         self.youtube_meta, self.error = YtWrap(
