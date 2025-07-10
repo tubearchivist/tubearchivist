@@ -17,7 +17,7 @@ from download.serializers import (
     DownloadListSerializer,
     DownloadQueueItemUpdateSerializer,
 )
-from download.src.queue import PendingInteract
+from download.src.queue_interact import PendingInteract
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.response import Response
 from task.tasks import download_pending, extrac_dl
