@@ -4,7 +4,6 @@ functionality:
 - index and update in es
 """
 
-import json
 import os
 from datetime import datetime
 
@@ -121,27 +120,6 @@ class YoutubeChannel(YouTubeItem):
             "channel_thumb_url": False,
             "channel_views": 0,
         }
-        self._info_json_fallback()
-
-    def _info_json_fallback(self):
-        """read channel info.json for additional metadata"""
-        info_json = os.path.join(
-            EnvironmentSettings.CACHE_DIR,
-            "import",
-            f"{self.youtube_id}.info.json",
-        )
-        if os.path.exists(info_json):
-            print(f"{self.youtube_id}: read info.json file")
-            with open(info_json, "r", encoding="utf-8") as f:
-                content = json.loads(f.read())
-
-            self.json_data.update(
-                {
-                    "channel_subs": content.get("channel_follower_count", 0),
-                    "channel_description": content.get("description", False),
-                }
-            )
-            os.remove(info_json)
 
     def get_channel_art(self):
         """download channel art for new channels"""
