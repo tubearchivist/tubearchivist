@@ -70,6 +70,9 @@ class YoutubePlaylist(YouTubeItem):
             print(f"{self.youtube_id}: thumbnail extraction failed")
             playlist_thumbnail = False
 
+        if not self.youtube_meta.get("channel_id"):
+            raise ValueError("Failed to extract Channel ID for Playlist")
+
         self.json_data = {
             "playlist_id": self.youtube_id,
             "playlist_active": True,
