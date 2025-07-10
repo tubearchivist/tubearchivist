@@ -165,15 +165,17 @@ class SearchProcess:
 
     def _process_download(self, download_dict):
         """run on single download item"""
-        video_id = download_dict["youtube_id"]
-        cache_root = EnvironmentSettings().get_cache_root()
-        vid_thumb_url = ThumbManager(video_id).vid_thumb_path()
-        published = date_parser(download_dict["published"])
+        vid_thumb_url = None
+        if download_dict.get("vid_thumb_url"):
+            video_id = download_dict["youtube_id"]
+            cache_root = EnvironmentSettings().get_cache_root()
+            relative_path = ThumbManager(video_id).vid_thumb_path()
+            vid_thumb_url = f"{cache_root}/{relative_path}"
 
         download_dict.update(
             {
-                "vid_thumb_url": f"{cache_root}/{vid_thumb_url}",
-                "published": published,
+                "vid_thumb_url": vid_thumb_url,
+                "published": date_parser(download_dict["published"]),
             }
         )
         return dict(sorted(download_dict.items()))

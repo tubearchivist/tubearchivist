@@ -61,16 +61,13 @@ class ChannelSubscription:
                 obs["playlistend"] = limit_amount
 
             url = f"https://www.youtube.com/channel/{channel_id}/{vid_type}"
-            channel_query = YtWrap(obs, self.config).extract(url)
+            channel_query, _ = YtWrap(obs, self.config).extract(url)
             if not channel_query:
                 continue
 
-            last_videos.extend(
-                [
-                    (i["id"], i["title"], vid_type)
-                    for i in channel_query["entries"]
-                ]
-            )
+            for entry in channel_query["entries"]:
+                entry["vid_type"] = vid_type
+                last_videos.append(entry)
 
         return last_videos
 
@@ -93,7 +90,9 @@ class ChannelSubscription:
 
             if last_videos:
                 ids_to_add = is_missing([i[0] for i in last_videos])
-                for video_id, _, vid_type in last_videos:
+                for video_entry in last_videos:
+                    video_id = video_entry["id"]
+                    vid_type = video_entry["vid_type"]
                     if video_id in ids_to_add:
                         missing_videos.append((video_id, vid_type))
 

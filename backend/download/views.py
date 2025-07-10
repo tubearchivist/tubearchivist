@@ -73,6 +73,16 @@ class DownloadApiListView(ApiBaseView):
                 {"term": {"vid_type": {"value": vid_type_filter}}}
             )
 
+        search_query = validated_data.get("q")
+        if search_query:
+            must_list.append({"match_phrase_prefix": {"title": search_query}})
+
+        if validated_data.get("error") is not None:
+            operator = "must" if validated_data["error"] else "must_not"
+            must_list.append(
+                {"bool": {operator: [{"exists": {"field": "message"}}]}}
+            )
+
         self.data["query"] = {"bool": {"must": must_list}}
 
         self.get_document_list(request)
@@ -107,12 +117,13 @@ class DownloadApiListView(ApiBaseView):
         validated_query = query_serializer.validated_data
 
         auto_start = validated_query.get("autostart")
-        print(f"auto_start: {auto_start}")
+        flat = validated_query.get("flat", False)
+        print(f"auto_start: {auto_start}, flat: {flat}")
         to_add = validated_data["data"]
 
         pending = [i["youtube_id"] for i in to_add if i["status"] == "pending"]
         url_str = " ".join(pending)
-        task = extrac_dl.delay(url_str, auto_start=auto_start)
+        task = extrac_dl.delay(url_str, auto_start=auto_start, flat=flat)
 
         message = {
             "message": "add to queue task started",

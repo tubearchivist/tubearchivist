@@ -510,12 +510,14 @@ class ChannelFullScan:
         self.to_update = []
         for video in all_local_videos:
             video_id = video["youtube_id"]
-            remote_match = [i for i in all_remote_videos if i[0] == video_id]
+            remote_match = [
+                i for i in all_remote_videos if i["id"] == video_id
+            ]
             if not remote_match:
                 print(f"{video_id}: no remote match found")
                 continue
 
-            expected_type = remote_match[0][-1]
+            expected_type = remote_match[0]["vid_type"]
             if video["vid_type"] != expected_type:
                 self.to_update.append(
                     {

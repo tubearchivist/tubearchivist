@@ -33,9 +33,9 @@ type Download = {
   channel_name: string;
   duration: string;
   message?: string;
-  published: string;
+  published: string | null;
   status: string;
-  timestamp: number;
+  timestamp: number | null;
   title: string;
   vid_thumb_url: string;
   vid_type: string;
@@ -58,10 +58,14 @@ const Download = () => {
   const channelFilterFromUrl = searchParams.get('channel');
   const ignoredOnlyParam = searchParams.get('ignored');
   const vidTypeFilterFromUrl = searchParams.get('vid-type');
+  const errorFilterFromUrl = searchParams.get('error');
 
   const [refresh, setRefresh] = useState(false);
   const [showHiddenForm, setShowHiddenForm] = useState(false);
+  const [addAsAutoStart, setAddAsAutoStart] = useState(false);
+  const [addAsFlat, setAddAsFlat] = useState(false);
   const [showQueueActions, setShowQueueActions] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [downloadPending, setDownloadPending] = useState(false);
   const [rescanPending, setRescanPending] = useState(false);
@@ -115,7 +119,9 @@ const Download = () => {
           currentPage,
           channelFilterFromUrl,
           vidTypeFilterFromUrl,
+          errorFilterFromUrl,
           showIgnored,
+          searchInput,
         );
         const { data: channelResponseData } = videosResponse ?? {};
         const videoCount = channelResponseData?.paginate?.total_hits;
@@ -134,7 +140,14 @@ const Download = () => {
 
   useEffect(() => {
     setRefresh(true);
-  }, [channelFilterFromUrl, vidTypeFilterFromUrl, currentPage, showIgnored]);
+  }, [
+    channelFilterFromUrl,
+    vidTypeFilterFromUrl,
+    errorFilterFromUrl,
+    currentPage,
+    showIgnored,
+    searchInput,
+  ]);
 
   useEffect(() => {
     (async () => {
@@ -215,6 +228,46 @@ const Download = () => {
             {showHiddenForm && (
               <div className="show-form">
                 <div>
+                  <div className="toggle">
+                    <div className="toggleBox">
+                      <input
+                        id="hide_watched"
+                        type="checkbox"
+                        checked={addAsFlat}
+                        onChange={() => setAddAsFlat(!addAsFlat)}
+                      />
+                      {addAsFlat ? (
+                        <label htmlFor="" className="onbtn">
+                          On
+                        </label>
+                      ) : (
+                        <label htmlFor="" className="ofbtn">
+                          Off
+                        </label>
+                      )}
+                    </div>
+                    <span>Fast add</span>
+                  </div>
+                  <div className="toggle">
+                    <div className="toggleBox">
+                      <input
+                        id="hide_watched"
+                        type="checkbox"
+                        checked={addAsAutoStart}
+                        onChange={() => setAddAsAutoStart(!addAsAutoStart)}
+                      />
+                      {addAsAutoStart ? (
+                        <label htmlFor="" className="onbtn">
+                          On
+                        </label>
+                      ) : (
+                        <label htmlFor="" className="ofbtn">
+                          Off
+                        </label>
+                      )}
+                    </div>
+                    <span>Auto Download</span>
+                  </div>
                   <textarea
                     value={downloadQueueText}
                     onChange={e => setDownloadQueueText(e.target.value)}
@@ -226,24 +279,13 @@ const Download = () => {
                     label="Add to queue"
                     onClick={async () => {
                       if (downloadQueueText.trim()) {
-                        await updateDownloadQueue(downloadQueueText, false);
+                        await updateDownloadQueue(downloadQueueText, addAsAutoStart, addAsFlat);
                         setDownloadQueueText('');
                         setRefresh(true);
                         setShowHiddenForm(false);
                       }
                     }}
                   />{' '}
-                  <Button
-                    label="Download now"
-                    onClick={async () => {
-                      if (downloadQueueText.trim()) {
-                        await updateDownloadQueue(downloadQueueText, true);
-                        setDownloadQueueText('');
-                        setRefresh(true);
-                        setShowHiddenForm(false);
-                      }
-                    }}
-                  />
                 </div>
               </div>
             )}
@@ -279,59 +321,8 @@ const Download = () => {
           </div>
           <div className="view-icons">
             <Button onClick={() => setShowQueueActions(!showQueueActions)}>
-              {showQueueActions ? 'Hide Actions' : 'Show Actions'}
+              {showQueueActions ? 'Hide Advanced' : 'Show Advanced'}
             </Button>
-            <select
-              name="vid_type_filter"
-              id="vid_type_filter"
-              value={vidTypeFilterFromUrl || 'all'}
-              onChange={async event => {
-                const value = event.currentTarget.value;
-                const params = searchParams;
-                if (value !== 'all') {
-                  params.set('vid-type', value);
-                } else {
-                  params.delete('vid-type');
-                }
-                setSearchParams(params);
-              }}
-            >
-              <option value="all">all types</option>
-              <option value="videos">Videos</option>
-              <option value="streams">Streams</option>
-              <option value="shorts">Shorts</option>
-            </select>
-            {channelAggsList && channelAggsList.length > 1 && (
-              <select
-                name="channel_filter"
-                id="channel_filter"
-                value={channelFilterFromUrl || 'all'}
-                onChange={async event => {
-                  const value = event.currentTarget.value;
-
-                  const params = searchParams;
-                  if (value !== 'all') {
-                    params.set('channel', value);
-                  } else {
-                    params.delete('channel');
-                  }
-
-                  setSearchParams(params);
-                }}
-              >
-                <option value="all">all channels</option>
-                {channelAggsList.map(channel => {
-                  const [name, id] = channel.key;
-                  const count = channel.doc_count;
-
-                  return (
-                    <option key={id} value={id}>
-                      {name} ({count})
-                    </option>
-                  );
-                })}
-              </select>
-            )}
 
             {isGridView && (
               <div className="grid-count">
@@ -394,6 +385,85 @@ const Download = () => {
         </h3>
         {showQueueActions && (
           <div className="settings-group">
+            <h3>Search & Filter</h3>
+            <select
+              name="vid_type_filter"
+              id="vid_type_filter"
+              value={vidTypeFilterFromUrl || 'all'}
+              onChange={async event => {
+                const value = event.currentTarget.value;
+                const params = searchParams;
+                if (value !== 'all') {
+                  params.set('vid-type', value);
+                } else {
+                  params.delete('vid-type');
+                }
+                setSearchParams(params);
+              }}
+            >
+              <option value="all">all types</option>
+              <option value="videos">Videos</option>
+              <option value="streams">Streams</option>
+              <option value="shorts">Shorts</option>
+            </select>
+            {channelAggsList && channelAggsList.length > 1 && (
+              <select
+                name="channel_filter"
+                id="channel_filter"
+                value={channelFilterFromUrl || 'all'}
+                onChange={async event => {
+                  const value = event.currentTarget.value;
+
+                  const params = searchParams;
+                  if (value !== 'all') {
+                    params.set('channel', value);
+                  } else {
+                    params.delete('channel');
+                  }
+
+                  setSearchParams(params);
+                }}
+              >
+                <option value="all">all channels</option>
+                {channelAggsList.map(channel => {
+                  const [name, id] = channel.key;
+                  const count = channel.doc_count;
+
+                  return (
+                    <option key={id} value={id}>
+                      {name} ({count})
+                    </option>
+                  );
+                })}
+              </select>
+            )}
+            <select
+              name="error_filter"
+              id="error_filter"
+              value={errorFilterFromUrl || 'all'}
+              onChange={async event => {
+                const value = event.currentTarget.value;
+                const params = searchParams;
+                if (value !== 'all') {
+                  params.set('error', value);
+                } else {
+                  params.delete('error');
+                }
+                setSearchParams(params);
+              }}
+            >
+              <option value="all">all error state</option>
+              <option value="true">has error</option>
+              <option value="false">has no error</option>
+            </select>
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
+            />
+            {searchInput && <Button onClick={() => setSearchInput('')}>Clear</Button>}
+
             <h3>Bulk actions</h3>
             <p>
               Applied filtered by status <i>'{showIgnoredFilter}'</i>

@@ -14,6 +14,7 @@ from common.src.es_connect import ElasticWrap
 from common.src.helper import get_duration_sec, get_duration_str, randomizor
 from common.src.index_generic import YouTubeItem
 from django.conf import settings
+from download.src.thumbnails import ThumbManager
 from playlist.src import index as ta_playlist
 from ryd_client import ryd_client
 from user.src.user_config import UserConfig
@@ -409,5 +410,8 @@ def index_new_video(youtube_id, video_type=VideoTypeEnum.VIDEOS):
         raise ValueError("failed to get metadata for " + youtube_id)
 
     video.check_subtitles()
+    url = video.json_data["vid_thumb_url"]
+    ThumbManager(item_id=video.youtube_id).download_video_thumb(url=url)
     video.upload_to_es()
+
     return video.json_data
