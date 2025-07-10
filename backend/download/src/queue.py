@@ -217,6 +217,9 @@ class PendingList(PendingIndex):
         total = len(self.youtube_ids)
         for idx, entry in enumerate(self.youtube_ids):
             self._process_entry(entry, idx, total)
+            if self.task and self.task.is_stopped():
+                break
+
             rand_sleep(self.config)
             if not self.task:
                 continue
@@ -282,6 +285,9 @@ class PendingList(PendingIndex):
             if video_id in self.to_skip:
                 continue
 
+            if self.task and self.task.is_stopped():
+                break
+
             if self.flat:
                 if not video_data.get("channel"):
                     channel_name = channel_handler.json_data["channel_name"]
@@ -325,6 +331,9 @@ class PendingList(PendingIndex):
             video_id = video_data["id"]
             if video_id in self.to_skip:
                 continue
+
+            if self.task and self.task.is_stopped():
+                break
 
             if self.flat:
                 if not video_data.get("channel"):
