@@ -159,11 +159,10 @@ class YoutubePlaylist(YouTubeItem):
         """remove playlist ids from videos if needed"""
         needed = [i["youtube_id"] for i in self.json_data["playlist_entries"]]
         data = {
-            "query": {"match": {"playlist": self.youtube_id}},
+            "query": {
+                "term": {"playlist.keyword": {"value": self.youtube_id}}
+            },
             "_source": ["youtube_id"],
-        }
-        data = {
-            "query": {"term": {"playlist.keyword": {"value": self.youtube_id}}}
         }
         result = IndexPaginate("ta_video", data).get_results()
         to_remove = [
