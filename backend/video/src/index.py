@@ -10,7 +10,6 @@ from datetime import datetime
 import requests
 from channel.src import index as ta_channel
 from common.src.env_settings import EnvironmentSettings
-from common.src.es_connect import ElasticWrap
 from common.src.helper import get_duration_sec, get_duration_str, randomizor
 from common.src.index_generic import YouTubeItem
 from django.conf import settings
@@ -394,12 +393,6 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             subtitles.append(to_add)
 
         return subtitles
-
-    def update_media_url(self):
-        """update only media_url in es for reindex channel rename"""
-        data = {"doc": {"media_url": self.json_data["media_url"]}}
-        path = f"{self.index_name}/_update/{self.youtube_id}"
-        _, _ = ElasticWrap(path).post(data=data)
 
 
 def index_new_video(youtube_id, video_type=VideoTypeEnum.VIDEOS):
