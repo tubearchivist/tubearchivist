@@ -261,7 +261,7 @@ def rescan_filesystem(self):
     handler = Scanner(task=self)
     handler.scan()
     handler.apply()
-    ThumbValidator(task=self).validate()
+    thumbnail_check.delay()
 
 
 @shared_task(bind=True, name="thumbnail_check", base=BaseTask)

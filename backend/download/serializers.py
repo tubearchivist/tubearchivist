@@ -19,7 +19,7 @@ class DownloadItemSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=["pending", "ignore"])
     timestamp = serializers.IntegerField(allow_null=True)
     title = serializers.CharField()
-    vid_thumb_url = serializers.CharField()
+    vid_thumb_url = serializers.CharField(allow_null=True)
     vid_type = serializers.ChoiceField(choices=VideoTypeEnum.values())
     youtube_id = serializers.CharField()
     message = serializers.CharField(required=False)

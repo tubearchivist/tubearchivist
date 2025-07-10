@@ -216,7 +216,7 @@ class PendingList(PendingIndex):
         self.get_channels()
         total = len(self.youtube_ids)
         for idx, entry in enumerate(self.youtube_ids):
-            self._process_entry(entry)
+            self._process_entry(entry, idx, total)
             rand_sleep(self.config)
             if not self.task:
                 continue
@@ -226,10 +226,12 @@ class PendingList(PendingIndex):
                 progress=(idx + 1) / total,
             )
 
-    def _process_entry(self, entry: dict):
+    def _process_entry(self, entry: dict, idx_url: int, total_url: int):
         """process single entry from url list"""
         if entry["type"] == "video":
-            self._add_video(entry["url"], entry["vid_type"])
+            self._add_video(
+                entry["url"], entry["vid_type"], idx_url, total_url
+            )
         elif entry["type"] == "channel":
             self._parse_channel(entry["url"], entry["vid_type"])
         elif entry["type"] == "playlist":
@@ -237,7 +239,7 @@ class PendingList(PendingIndex):
         else:
             raise ValueError(f"invalid url_type: {entry}")
 
-    def _add_video(self, url, vid_type):
+    def _add_video(self, url, vid_type, idx, total):
         """add video to list"""
         if self.auto_start and url in set(
             i["youtube_id"] for i in self.all_pending
@@ -248,7 +250,13 @@ class PendingList(PendingIndex):
         if url in self.missing_videos or url in self.to_skip:
             print(f"{url}: skipped adding already indexed video to download.")
         else:
-            to_add = self._parse_video(url, vid_type)
+            to_add = self._parse_video(
+                url,
+                vid_type,
+                url_type="video",
+                idx=idx,
+                total=total,
+            )
             if to_add:
                 self.missing_videos.append(to_add)
 
@@ -261,7 +269,8 @@ class PendingList(PendingIndex):
         channel_handler = YoutubeChannel(url)
         channel_handler.build_json(upload=False)
 
-        for video_data in video_results:
+        total = len(video_results)
+        for idx, video_data in enumerate(video_results):
             video_id = video_data["id"]
             if video_id in self.to_skip:
                 continue
@@ -276,10 +285,20 @@ class PendingList(PendingIndex):
                     video_data["channel_id"] = channel_id
 
                 to_add = self._parse_entry(
-                    youtube_id=video_id, video_data=video_data
+                    youtube_id=video_id,
+                    video_data=video_data,
+                    url_type="channel",
+                    idx=idx,
+                    total=total,
                 )
             else:
-                to_add = self._parse_video(video_id, vid_type)
+                to_add = self._parse_video(
+                    video_id,
+                    vid_type,
+                    url_type="channel",
+                    idx=idx,
+                    total=total,
+                )
 
             if to_add:
                 self.missing_videos.append(to_add)
@@ -290,7 +309,8 @@ class PendingList(PendingIndex):
         playlist.get_from_youtube()
         video_results = playlist.youtube_meta["entries"]
 
-        for video_data in video_results:
+        total = len(video_results)
+        for idx, video_data in enumerate(video_results):
             video_id = video_data["id"]
             if video_id in self.to_skip:
                 continue
@@ -303,26 +323,52 @@ class PendingList(PendingIndex):
                     channel_id = playlist.youtube_meta["channel_id"]
                     video_data["channel_id"] = channel_id
 
-                to_add = self._parse_entry(video_id, video_data)
+                to_add = self._parse_entry(
+                    video_id,
+                    video_data,
+                    url_type="playlist",
+                    idx=idx,
+                    total=total,
+                )
             else:
-                to_add = self._parse_video(video_id, vid_type=None)
+                to_add = self._parse_video(
+                    video_id,
+                    vid_type=None,
+                    url_type="playlist",
+                    idx=idx,
+                    total=total,
+                )
 
             if to_add:
                 self.missing_videos.append(to_add)
 
-    def _parse_video(self, url, vid_type):
+    def _parse_video(self, url, vid_type, url_type, idx, total):
         """parse video"""
         video = YoutubeVideo(youtube_id=url)
         video.get_from_youtube()
 
         video_data = video.youtube_meta
         video_data["vid_type"] = vid_type
-        to_add = self._parse_entry(youtube_id=url, video_data=video_data)
+        to_add = self._parse_entry(
+            youtube_id=url,
+            video_data=video_data,
+            url_type=url_type,
+            idx=idx,
+            total=total,
+        )
+        ThumbManager(item_id=url).download_video_thumb(to_add["vid_thumb_url"])
         rand_sleep(self.config)
 
         return to_add
 
-    def _parse_entry(self, youtube_id: str, video_data: dict) -> dict | None:
+    def _parse_entry(
+        self,
+        youtube_id: str,
+        video_data: dict,
+        url_type: str,
+        idx: int,
+        total: int,
+    ) -> dict | None:
         """parse entry"""
         if video_data.get("id") != youtube_id:
             # skip premium videos with different id or redirects
@@ -345,8 +391,8 @@ class PendingList(PendingIndex):
             "channel_id": video_data["channel_id"],
             "channel_indexed": video_data["channel_id"] in self.all_channels,
         }
-        thumb_url = to_add["vid_thumb_url"]
-        ThumbManager(to_add["youtube_id"]).download_video_thumb(thumb_url)
+
+        self._notify_progress(url_type, video_data["title"], idx, total)
 
         return to_add
 
@@ -354,9 +400,6 @@ class PendingList(PendingIndex):
         """extract thumb"""
         if "thumbnail" in video_data:
             return video_data["thumbnail"]
-
-        if "thumbnails" in video_data:
-            return video_data["thumbnails"][-1]["url"]
 
         return None
 
@@ -430,6 +473,24 @@ class PendingList(PendingIndex):
 
         return len(self.missing_videos)
 
+    def _notify_progress(self, url_type, name, idx, total):
+        """notify extraction progress"""
+        if not self.task:
+            return
+
+        if self.flat:
+            second_line = f"Bulk processing {total} items."
+        else:
+            second_line = f"Processing video {idx + 1}/{total}."
+
+        self.task.send_progress(
+            message_lines=[
+                f"Extracting '{name}' from {url_type.title()}.",
+                second_line,
+            ],
+            progress=(idx + 1) / total,
+        )
+
     def _notify_empty(self):
         """notify nothing to add"""
         if not self.task:
@@ -437,7 +498,7 @@ class PendingList(PendingIndex):
 
         self.task.send_progress(
             message_lines=[
-                "Extractinc videos completed.",
+                "Extracting videos completed.",
                 "No new videos found to add.",
             ]
         )
