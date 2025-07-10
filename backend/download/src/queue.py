@@ -254,8 +254,9 @@ class PendingList(PendingIndex):
 
     def _parse_channel(self, url, vid_type):
         """parse channel"""
+        query_filter = getattr(VideoTypeEnum, vid_type.upper())
         video_results = ChannelSubscription().get_last_youtube_videos(
-            url, limit=False, query_filter=vid_type
+            url, limit=False, query_filter=query_filter
         )
         channel_handler = YoutubeChannel(url)
         channel_handler.build_json(upload=False)
@@ -295,6 +296,13 @@ class PendingList(PendingIndex):
                 continue
 
             if self.flat:
+                if not video_data.get("channel"):
+                    video_data["channel"] = playlist.youtube_meta["channel"]
+
+                if not video_data.get("channel_id"):
+                    channel_id = playlist.youtube_meta["channel_id"]
+                    video_data["channel_id"] = channel_id
+
                 to_add = self._parse_entry(video_id, video_data)
             else:
                 to_add = self._parse_video(video_id, vid_type=None)
@@ -310,6 +318,7 @@ class PendingList(PendingIndex):
         video_data = video.youtube_meta
         video_data["vid_type"] = vid_type
         to_add = self._parse_entry(youtube_id=url, video_data=video_data)
+        rand_sleep(self.config)
 
         return to_add
 
