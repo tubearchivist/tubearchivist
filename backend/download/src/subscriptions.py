@@ -24,6 +24,9 @@ class ChannelSubscription:
 
     def find_missing(self) -> int:
         """find missing videos from channel subscriptions"""
+        if self.task:
+            self.task.send_progress(["Looking up channels."])
+
         all_channels = get_channels(
             subscribed_only=True, source=["channel_id", "channel_overwrites"]
         )
@@ -47,6 +50,9 @@ class ChannelSubscription:
                         limit=query[1],
                     )
                 )
+
+        if self.task:
+            self.task.send_progress([f"Scanning {len(all_channels)} channels"])
 
         pending_handler = PendingList(
             youtube_ids=all_channel_urls,

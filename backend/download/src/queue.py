@@ -125,10 +125,10 @@ class PendingList(PendingIndex):
         self.get_indexed()
         self.get_channels()
         total = len(self.youtube_ids)
-        for idx, entry in enumerate(self.youtube_ids):
+        for idx, entry in enumerate(self.youtube_ids, start=1):
             if self.task:
                 self.task.send_progress(
-                    message_lines=[f"Extracting items {idx + 1}/{total}"],
+                    message_lines=[f"Extracting items {idx}/{total}"],
                     progress=(idx + 1) / total,
                 )
 
@@ -138,12 +138,18 @@ class PendingList(PendingIndex):
 
             rand_sleep(self.config)
 
-    def _process_entry(self, entry: dict, idx_url: int, total_url: int):
+    def _process_entry(self, entry: dict, idx: int, total: int):
         """process single entry from url list"""
         if entry["type"] == "video":
-            self._add_video(
-                entry["url"], entry["vid_type"], idx_url, total_url
-            )
+            to_add = self._add_video(entry["url"], entry["vid_type"])
+            if to_add:
+                self.__notify_add(
+                    item_type="video",
+                    name=to_add["title"],
+                    idx=idx,
+                    total=total,
+                )
+
         elif entry["type"] == "channel":
             self._parse_channel(entry)
         elif entry["type"] == "playlist":
@@ -151,26 +157,22 @@ class PendingList(PendingIndex):
         else:
             raise ValueError(f"invalid url_type: {entry}")
 
-    def _add_video(self, url, vid_type, idx, total):
+    def _add_video(self, url, vid_type):
         """add video to list"""
         if self.auto_start and url in set(
             i["youtube_id"] for i in self.all_pending
         ):
             PendingInteract(youtube_id=url, status="priority").update_status()
-            return
+            return None
 
         if url in self.missing_videos or url in self.to_skip:
             print(f"{url}: skipped adding already indexed video to download.")
         else:
-            to_add = self._parse_video(
-                url,
-                vid_type,
-                url_type="video",
-                idx=idx,
-                total=total,
-            )
+            to_add = self._parse_video(url, vid_type)
             if to_add:
                 self.missing_videos.append(to_add)
+
+        return to_add
 
     def _parse_channel(self, entry):
         """parse channel"""
@@ -198,48 +200,49 @@ class PendingList(PendingIndex):
             return
 
         total = len(video_results)
-        for idx, video_data in enumerate(video_results):
+        for idx, video_data in enumerate(video_results, start=1):
             to_add = self.__parse_channel_video(
-                video_data, vid_type, idx, total, channel_handler
+                video_data, vid_type, channel_handler
             )
-            if to_add:
-                self.missing_videos.append(to_add)
-
             if self.task and self.task.is_stopped():
                 break
 
+            if not to_add:
+                continue
+
+            self.missing_videos.append(to_add)
+            self.__notify_add(
+                item_type="channel",
+                name=channel_handler.json_data["channel_name"],
+                idx=idx,
+                total=total,
+            )
+
     def __parse_channel_video(
-        self, video_data, vid_type, idx, total, channel_handler
+        self, video_data, vid_type, channel_handler
     ) -> dict | None:
         """parse video of channel"""
         video_id = video_data["id"]
         if video_id in self.to_skip:
             return None
 
+        # fallback
+        channel_name = channel_handler.json_data["channel_name"]
+        channel_id = channel_handler.json_data["channel_id"]
+
         if self.flat:
             if not video_data.get("channel"):
-                channel_name = channel_handler.json_data["channel_name"]
                 video_data["channel"] = channel_name
 
             if not video_data.get("channel_id"):
-                channel_id = channel_handler.json_data["channel_id"]
                 video_data["channel_id"] = channel_id
 
             to_add = self._parse_entry(
                 youtube_id=video_id,
                 video_data=video_data,
-                url_type="channel",
-                idx=idx,
-                total=total,
             )
         else:
-            to_add = self._parse_video(
-                video_id,
-                vid_type,
-                url_type="channel",
-                idx=idx,
-                total=total,
-            )
+            to_add = self._parse_video(video_id, vid_type)
 
         return to_add
 
@@ -254,7 +257,7 @@ class PendingList(PendingIndex):
         video_results = playlist.youtube_meta["entries"]
 
         total = len(video_results)
-        for idx, video_data in enumerate(video_results):
+        for idx, video_data in enumerate(video_results, start=1):
             video_id = video_data["id"]
             if video_id in self.to_skip:
                 continue
@@ -270,27 +273,23 @@ class PendingList(PendingIndex):
                     channel_id = playlist.youtube_meta["channel_id"]
                     video_data["channel_id"] = channel_id
 
-                to_add = self._parse_entry(
-                    video_id,
-                    video_data,
-                    url_type="playlist",
-                    idx=idx,
-                    total=total,
-                )
+                to_add = self._parse_entry(video_id, video_data)
             else:
-                to_add = self._parse_video(
-                    video_id,
-                    vid_type=None,
-                    url_type="playlist",
-                    idx=idx,
-                    total=total,
-                )
+                to_add = self._parse_video(video_id, vid_type=None)
 
-            if to_add:
-                self.missing_videos.append(to_add)
+            if not to_add:
+                continue
 
-    def _parse_video(self, url, vid_type, url_type, idx, total):
-        """parse video"""
+            self.missing_videos.append(to_add)
+            self.__notify_add(
+                item_type="playlist",
+                name=playlist.json_data["playlist_name"],
+                idx=idx,
+                total=total,
+            )
+
+    def _parse_video(self, url, vid_type):
+        """parse video when not flat, fetch from YT"""
         video = YoutubeVideo(youtube_id=url)
         video.get_from_youtube()
 
@@ -310,9 +309,6 @@ class PendingList(PendingIndex):
         to_add = self._parse_entry(
             youtube_id=url,
             video_data=video.youtube_meta,
-            url_type=url_type,
-            idx=idx,
-            total=total,
         )
         ThumbManager(item_id=url).download_video_thumb(to_add["vid_thumb_url"])
         rand_sleep(self.config)
@@ -323,9 +319,6 @@ class PendingList(PendingIndex):
         self,
         youtube_id: str,
         video_data: dict,
-        url_type: str,
-        idx: int,
-        total: int,
     ) -> dict | None:
         """parse entry"""
         if video_data.get("id") != youtube_id:
@@ -349,8 +342,6 @@ class PendingList(PendingIndex):
             "channel_id": video_data["channel_id"],
             "channel_indexed": video_data["channel_id"] in self.all_channels,
         }
-
-        self._notify_progress(url_type, video_data["title"], idx, total)
 
         return to_add
 
@@ -434,21 +425,26 @@ class PendingList(PendingIndex):
 
         return len(self.missing_videos)
 
-    def _notify_progress(self, url_type, name, idx, total):
-        """notify extraction progress"""
+    def __notify_add(
+        self, item_type: str, name: str, idx: int, total: int
+    ) -> None:
+        """notify"""
         if not self.task:
             return
 
         if self.flat:
-            second_line = f"Bulk processing {total} items."
+            lines = [
+                f"Bulk extracting {item_type.title()}: '{name}'.",
+                f"Fast adding item {idx}/{total}.",
+            ]
         else:
-            second_line = f"Processing video {idx + 1}/{total}."
+            lines = [
+                f"Full extracting {item_type.title()}: '{name}'",
+                f"Parsing item {idx}/{total}.",
+            ]
 
         self.task.send_progress(
-            message_lines=[
-                f"Extracting '{name}' from {url_type.title()}.",
-                second_line,
-            ],
+            message_lines=lines,
             progress=(idx + 1) / total,
         )
 
