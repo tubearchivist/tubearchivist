@@ -359,6 +359,9 @@ class PendingList(PendingIndex):
         if "thumbnail" in video_data:
             return video_data["thumbnail"]
 
+        if video_data.get("thumbnails"):
+            return video_data["thumbnails"][-1]["url"]
+
         return None
 
     def __extract_published(self, video_data) -> str | int | None:
