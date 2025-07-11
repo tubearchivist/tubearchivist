@@ -109,6 +109,7 @@ const Video = () => {
   const { userConfig } = useUserConfigStore();
 
   const [videoEnded, setVideoEnded] = useState(false);
+  const [seekToTimestamp, setSeekToTimestamp] = useState<number>();
   const [playlistAutoplay, setPlaylistAutoplay] = useState(
     localStorage.getItem('playlistAutoplay') === 'true',
   );
@@ -134,6 +135,10 @@ const Video = () => {
   const { data: videoPlaylistNavResponseData } = videoPlaylistNav ?? {};
   const { data: customPlaylistsResponseData } = customPlaylistsResponse ?? {};
   const { data: commentsResponseData } = commentsResponse ?? {};
+
+  const handleTimestampClick = (seconds: number) => {
+    setSeekToTimestamp(seconds);
+  };
 
   useEffect(() => {
     (async () => {
@@ -224,6 +229,8 @@ const Video = () => {
         video={video}
         sponsorBlock={sponsorBlock}
         autoplay={playlistAutoplay}
+        seekToTimestamp={seekToTimestamp}
+        setSeekToTimestamp={setSeekToTimestamp}
         onWatchStateChanged={() => {
           setRefreshVideoList(true);
         }}
@@ -279,7 +286,11 @@ const Video = () => {
               {video.active && (
                 <p>
                   Youtube:{' '}
-                  <a href={`https://www.youtube.com/watch?v=${video.youtube_id}`} target="_blank">
+                  <a
+                    href={`https://www.youtube.com/watch?v=${video.youtube_id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     Active
                   </a>
                 </p>
@@ -488,7 +499,7 @@ const Video = () => {
               id={descriptionExpanded ? 'text-expand-expanded' : 'text-expand'}
               className="description-text"
             >
-              <Linkify>{video.description}</Linkify>
+              <Linkify onTimestampClick={handleTimestampClick}>{video.description}</Linkify>
             </p>
 
             <Button
@@ -601,7 +612,7 @@ const Video = () => {
               {comments?.map(comment => {
                 return (
                   <Fragment key={comment.comment_id}>
-                    <CommentBox comment={comment} />
+                    <CommentBox comment={comment} onTimestampClick={handleTimestampClick} />
                   </Fragment>
                 );
               })}

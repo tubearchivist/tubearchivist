@@ -26,6 +26,7 @@ class YouTubeItem:
         self.youtube_id = youtube_id
         self.es_path = f"{self.index_name}/_doc/{youtube_id}"
         self.config = AppConfig().config
+        self.error = None
         self.youtube_meta = False
         self.json_data = False
 
@@ -33,17 +34,24 @@ class YouTubeItem:
         """build youtube url"""
         return self.yt_base + self.youtube_id
 
-    def get_from_youtube(self):
+    def get_from_youtube(self, obs_overwrite: dict | None = None):
         """use yt-dlp to get meta data from youtube"""
         print(f"{self.youtube_id}: get metadata from youtube")
         obs_request = self.yt_obs.copy()
         if self.config["downloads"]["extractor_lang"]:
             langs = self.config["downloads"]["extractor_lang"]
             langs_list = [i.strip() for i in langs.split(",")]
-            obs_request["extractor_args"] = {"youtube": {"lang": langs_list}}
+            obs_request["extractor_args"] = {
+                "youtube": {"lang": langs_list}
+            }  # type: ignore
+
+        if obs_overwrite:
+            obs_request.update(obs_overwrite)
 
         url = self.build_yt_url()
-        self.youtube_meta = YtWrap(obs_request, self.config).extract(url)
+        self.youtube_meta, self.error = YtWrap(
+            obs_request, self.config
+        ).extract(url)
 
     def get_from_es(self):
         """get indexed data from elastic search"""

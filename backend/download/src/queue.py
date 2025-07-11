@@ -4,16 +4,25 @@ Functionality:
 - linked with ta_dowload index
 """
 
+import json
 from datetime import datetime
 
 from appsettings.src.config import AppConfig
+from channel.src.index import YoutubeChannel
+from channel.src.remote_query import get_last_channel_videos
 from common.src.es_connect import ElasticWrap, IndexPaginate
-from common.src.helper import get_duration_str, is_shorts, rand_sleep
-from download.src.subscriptions import ChannelSubscription
+from common.src.helper import (
+    get_channels,
+    get_duration_str,
+    is_shorts,
+    rand_sleep,
+)
+from common.src.urlparser import ParsedURLType
+from download.src.queue_interact import PendingInteract
 from download.src.thumbnails import ThumbManager
-from download.src.yt_dlp_base import YtWrap
 from playlist.src.index import YoutubePlaylist
 from video.src.constants import VideoTypeEnum
+from video.src.index import YoutubeVideo
 
 
 class PendingIndex:
@@ -61,11 +70,7 @@ class PendingIndex:
         """get a list of all channels indexed"""
         self.all_channels = []
         self.channel_overwrites = {}
-        data = {
-            "query": {"match_all": {}},
-            "sort": [{"channel_id": {"order": "asc"}}],
-        }
-        channels = IndexPaginate("ta_channel", data).get_results()
+        channels = get_channels(subscribed_only=False)
 
         for channel in channels:
             channel_id = channel["channel_id"]
@@ -88,67 +93,6 @@ class PendingIndex:
                 self.video_overwrites.update({video_id: overwrites})
 
 
-class PendingInteract:
-    """interact with items in download queue"""
-
-    def __init__(self, youtube_id=False, status=False):
-        self.youtube_id = youtube_id
-        self.status = status
-
-    def delete_item(self):
-        """delete single item from pending"""
-        path = f"ta_download/_doc/{self.youtube_id}"
-        _, _ = ElasticWrap(path).delete(refresh=True)
-
-    def delete_by_status(self):
-        """delete all matching item by status"""
-        data = {"query": {"term": {"status": {"value": self.status}}}}
-        path = "ta_download/_delete_by_query"
-        _, _ = ElasticWrap(path).post(data=data)
-
-    def update_status(self):
-        """update status of pending item"""
-        if self.status == "priority":
-            data = {
-                "doc": {
-                    "status": "pending",
-                    "auto_start": True,
-                    "message": None,
-                }
-            }
-        else:
-            data = {"doc": {"status": self.status}}
-
-        path = f"ta_download/_update/{self.youtube_id}/?refresh=true"
-        _, _ = ElasticWrap(path).post(data=data)
-
-    def get_item(self):
-        """return pending item dict"""
-        path = f"ta_download/_doc/{self.youtube_id}"
-        response, status_code = ElasticWrap(path).get()
-        return response["_source"], status_code
-
-    def get_channel(self):
-        """
-        get channel metadata from queue to not depend on channel to be indexed
-        """
-        data = {
-            "size": 1,
-            "query": {"term": {"channel_id": {"value": self.youtube_id}}},
-        }
-        response, _ = ElasticWrap("ta_download/_search").get(data=data)
-        hits = response["hits"]["hits"]
-        if not hits:
-            channel_name = "NA"
-        else:
-            channel_name = hits[0]["_source"].get("channel_name", "NA")
-
-        return {
-            "channel_id": self.youtube_id,
-            "channel_name": channel_name,
-        }
-
-
 class PendingList(PendingIndex):
     """manage the pending videos list"""
 
@@ -159,126 +103,365 @@ class PendingList(PendingIndex):
         "check_formats": None,
     }
 
-    def __init__(self, youtube_ids=False, task=False):
+    def __init__(
+        self,
+        youtube_ids: list[ParsedURLType],
+        task=None,
+        auto_start=False,
+        flat=False,
+    ):
         super().__init__()
         self.config = AppConfig().config
         self.youtube_ids = youtube_ids
         self.task = task
+        self.auto_start = auto_start
+        self.flat = flat
         self.to_skip = False
-        self.missing_videos = False
+        self.missing_videos: list[dict] = []
 
-    def parse_url_list(self, auto_start=False):
+    def parse_url_list(self):
         """extract youtube ids from list"""
-        self.missing_videos = []
         self.get_download()
         self.get_indexed()
+        self.get_channels()
         total = len(self.youtube_ids)
         for idx, entry in enumerate(self.youtube_ids):
-            self._process_entry(entry, auto_start=auto_start)
-            if not self.task:
-                continue
+            if self.task:
+                self.task.send_progress(
+                    message_lines=[f"Extracting items {idx + 1}/{total}"],
+                    progress=(idx + 1) / total,
+                )
 
-            self.task.send_progress(
-                message_lines=[f"Extracting items {idx + 1}/{total}"],
-                progress=(idx + 1) / total,
-            )
+            self._process_entry(entry, idx, total)
+            if self.task and self.task.is_stopped():
+                break
 
-    def _process_entry(self, entry, auto_start=False):
+            rand_sleep(self.config)
+
+    def _process_entry(self, entry: dict, idx_url: int, total_url: int):
         """process single entry from url list"""
-        vid_type = self._get_vid_type(entry)
         if entry["type"] == "video":
-            self._add_video(entry["url"], vid_type, auto_start=auto_start)
+            self._add_video(
+                entry["url"], entry["vid_type"], idx_url, total_url
+            )
         elif entry["type"] == "channel":
-            self._parse_channel(entry["url"], vid_type)
+            self._parse_channel(entry)
         elif entry["type"] == "playlist":
-            self._parse_playlist(entry["url"])
+            self._parse_playlist(entry["url"], entry.get("limit"))
         else:
             raise ValueError(f"invalid url_type: {entry}")
 
-    @staticmethod
-    def _get_vid_type(entry):
-        """add vid type enum if available"""
-        vid_type_str = entry.get("vid_type")
-        if not vid_type_str:
-            return VideoTypeEnum.UNKNOWN
-
-        return VideoTypeEnum(vid_type_str)
-
-    def _add_video(self, url, vid_type, auto_start=False):
+    def _add_video(self, url, vid_type, idx, total):
         """add video to list"""
-        if auto_start and url in set(
+        if self.auto_start and url in set(
             i["youtube_id"] for i in self.all_pending
         ):
             PendingInteract(youtube_id=url, status="priority").update_status()
             return
 
-        if url not in self.missing_videos and url not in self.to_skip:
-            self.missing_videos.append((url, vid_type))
-        else:
+        if url in self.missing_videos or url in self.to_skip:
             print(f"{url}: skipped adding already indexed video to download.")
+        else:
+            to_add = self._parse_video(
+                url,
+                vid_type,
+                url_type="video",
+                idx=idx,
+                total=total,
+            )
+            if to_add:
+                self.missing_videos.append(to_add)
 
-    def _parse_channel(self, url, vid_type):
-        """add all videos of channel to list"""
-        video_results = ChannelSubscription().get_last_youtube_videos(
-            url, limit=False, query_filter=vid_type
+    def _parse_channel(self, entry):
+        """parse channel"""
+        url = entry["url"]
+        vid_type = entry["vid_type"]
+        if isinstance(vid_type, str):
+            # lookup enum
+            vid_type = getattr(VideoTypeEnum, vid_type.upper())
+
+        limit = entry.get("limit")
+        video_results = get_last_channel_videos(
+            channel_id=url,
+            config=self.config,
+            limit=limit,
+            query_filter=vid_type,
         )
-        for video_id, _, vid_type in video_results:
-            self._add_video(video_id, vid_type)
-
-    def _parse_playlist(self, url):
-        """add all videos of playlist to list"""
-        playlist = YoutubePlaylist(url)
-        is_active = playlist.update_playlist()
-        if not is_active:
-            message = f"{playlist.youtube_id}: failed to extract metadata"
-            print(message)
-            raise ValueError(message)
-
-        entries = playlist.json_data["playlist_entries"]
-        to_add = [i["youtube_id"] for i in entries if not i["downloaded"]]
-        if not to_add:
+        if not video_results:
+            print(f"{url}: no videos to add from channel, skipping")
             return
 
-        for video_id in to_add:
-            # match vid_type later
-            self._add_video(video_id, VideoTypeEnum.UNKNOWN)
+        channel_handler = YoutubeChannel(url)
+        channel_handler.build_json(upload=False)
+        if not channel_handler.json_data:
+            print(f"{url}: channel metadata extraction failed, skipping")
+            return
 
-    def add_to_pending(self, status="pending", auto_start=False):
-        """add missing videos to pending list"""
-        self.get_channels()
+        total = len(video_results)
+        for idx, video_data in enumerate(video_results):
+            to_add = self.__parse_channel_video(
+                video_data, vid_type, idx, total, channel_handler
+            )
+            if to_add:
+                self.missing_videos.append(to_add)
 
-        total = len(self.missing_videos)
-        videos_added = []
-        for idx, (youtube_id, vid_type) in enumerate(self.missing_videos):
             if self.task and self.task.is_stopped():
                 break
 
-            print(f"{youtube_id}: [{idx + 1}/{total}]: add to queue")
-            self._notify_add(idx, total)
-            video_details = self.get_youtube_details(youtube_id, vid_type)
-            if not video_details:
-                rand_sleep(self.config)
-                continue
+    def __parse_channel_video(
+        self, video_data, vid_type, idx, total, channel_handler
+    ) -> dict | None:
+        """parse video of channel"""
+        video_id = video_data["id"]
+        if video_id in self.to_skip:
+            return None
 
-            video_details.update(
-                {
-                    "status": status,
-                    "auto_start": auto_start,
-                }
+        if self.flat:
+            if not video_data.get("channel"):
+                channel_name = channel_handler.json_data["channel_name"]
+                video_data["channel"] = channel_name
+
+            if not video_data.get("channel_id"):
+                channel_id = channel_handler.json_data["channel_id"]
+                video_data["channel_id"] = channel_id
+
+            to_add = self._parse_entry(
+                youtube_id=video_id,
+                video_data=video_data,
+                url_type="channel",
+                idx=idx,
+                total=total,
+            )
+        else:
+            to_add = self._parse_video(
+                video_id,
+                vid_type,
+                url_type="channel",
+                idx=idx,
+                total=total,
             )
 
-            url = video_details["vid_thumb_url"]
-            ThumbManager(youtube_id).download_video_thumb(url)
-            es_url = f"ta_download/_doc/{youtube_id}"
-            _, _ = ElasticWrap(es_url).put(video_details)
-            videos_added.append(youtube_id)
+        return to_add
 
-            if idx != total:
-                rand_sleep(self.config)
+    def _parse_playlist(self, url: str, limit: int | None):
+        """fast parse playlist"""
+        playlist = YoutubePlaylist(url)
+        playlist.update_playlist(limit=limit)
+        if not playlist.youtube_meta:
+            print(f"{url}: playlist metadata extraction failed, skipping")
+            return
 
-        return videos_added
+        video_results = playlist.youtube_meta["entries"]
 
-    def _notify_add(self, idx, total):
+        total = len(video_results)
+        for idx, video_data in enumerate(video_results):
+            video_id = video_data["id"]
+            if video_id in self.to_skip:
+                continue
+
+            if self.task and self.task.is_stopped():
+                break
+
+            if self.flat:
+                if not video_data.get("channel"):
+                    video_data["channel"] = playlist.youtube_meta["channel"]
+
+                if not video_data.get("channel_id"):
+                    channel_id = playlist.youtube_meta["channel_id"]
+                    video_data["channel_id"] = channel_id
+
+                to_add = self._parse_entry(
+                    video_id,
+                    video_data,
+                    url_type="playlist",
+                    idx=idx,
+                    total=total,
+                )
+            else:
+                to_add = self._parse_video(
+                    video_id,
+                    vid_type=None,
+                    url_type="playlist",
+                    idx=idx,
+                    total=total,
+                )
+
+            if to_add:
+                self.missing_videos.append(to_add)
+
+    def _parse_video(self, url, vid_type, url_type, idx, total):
+        """parse video"""
+        video = YoutubeVideo(youtube_id=url)
+        video.get_from_youtube()
+
+        if not video.youtube_meta:
+            print(f"{url}: video metadata extraction failed, skipping")
+            if self.task:
+                self.task.send_progress(
+                    message_lines=[
+                        "Video extraction failed.",
+                        f"{video.error}",
+                    ],
+                    level="error",
+                )
+            return None
+
+        video.youtube_meta["vid_type"] = vid_type
+        to_add = self._parse_entry(
+            youtube_id=url,
+            video_data=video.youtube_meta,
+            url_type=url_type,
+            idx=idx,
+            total=total,
+        )
+        ThumbManager(item_id=url).download_video_thumb(to_add["vid_thumb_url"])
+        rand_sleep(self.config)
+
+        return to_add
+
+    def _parse_entry(
+        self,
+        youtube_id: str,
+        video_data: dict,
+        url_type: str,
+        idx: int,
+        total: int,
+    ) -> dict | None:
+        """parse entry"""
+        if video_data.get("id") != youtube_id:
+            # skip premium videos with different id or redirects
+            print(f"{youtube_id}: skipping redirect, id not matching")
+            return None
+
+        if video_data.get("live_status") in ["is_upcoming", "is_live"]:
+            print(f"{youtube_id}: skip is_upcoming or is_live")
+            return None
+
+        to_add = {
+            "youtube_id": video_data["id"],
+            "title": video_data["title"],
+            "vid_thumb_url": self.__extract_thumb(video_data),
+            "duration": get_duration_str(video_data.get("duration", 0)),
+            "published": self.__extract_published(video_data),
+            "timestamp": int(datetime.now().timestamp()),
+            "vid_type": self.__extract_vid_type(video_data),
+            "channel_name": video_data["channel"],
+            "channel_id": video_data["channel_id"],
+            "channel_indexed": video_data["channel_id"] in self.all_channels,
+        }
+
+        self._notify_progress(url_type, video_data["title"], idx, total)
+
+        return to_add
+
+    def __extract_thumb(self, video_data) -> str | None:
+        """extract thumb"""
+        if "thumbnail" in video_data:
+            return video_data["thumbnail"]
+
+        return None
+
+    def __extract_published(self, video_data) -> str | int | None:
+        """build published date or timestamp"""
+        timestamp = video_data.get("timestamp")
+        if timestamp:
+            return timestamp
+
+        upload_date = video_data.get("upload_date")
+        if not upload_date:
+            return None
+
+        upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
+        published = upload_date_time.strftime("%Y-%m-%d")
+
+        return published
+
+    def __extract_vid_type(self, video_data) -> str:
+        """build vid type"""
+        if "vid_type" in video_data:
+            return video_data["vid_type"]
+
+        if video_data.get("live_status") == "was_live":
+            return VideoTypeEnum.STREAMS.value
+
+        if video_data.get("width", 0) > video_data.get("height", 0):
+            return VideoTypeEnum.VIDEOS.value
+
+        duration = video_data.get("duration")
+        if duration and isinstance(duration, int):
+            if duration > 3 * 60:
+                return VideoTypeEnum.VIDEOS.value
+
+        if is_shorts(video_data["id"]):
+            return VideoTypeEnum.SHORTS.value
+
+        return VideoTypeEnum.VIDEOS.value
+
+    def add_to_pending(self, status="pending") -> int:
+        """add missing videos to pending list"""
+
+        total = len(self.missing_videos)
+
+        if not self.missing_videos:
+            self._notify_empty()
+            return 0
+
+        self._notify_start(total)
+        bulk_list = []
+        for video_entry in self.missing_videos:
+            video_entry.update(
+                {
+                    "status": status,
+                    "auto_start": self.auto_start,
+                }
+            )
+            video_id = video_entry["youtube_id"]
+            action = {"index": {"_index": "ta_download", "_id": video_id}}
+            bulk_list.append(json.dumps(action))
+            bulk_list.append(json.dumps(video_entry))
+
+        # add last newline
+        bulk_list.append("\n")
+        query_str = "\n".join(bulk_list)
+        _, status_code = ElasticWrap("_bulk").post(query_str, ndjson=True)
+        if status_code != 200:
+            self._notify_fail(status_code)
+        else:
+            self._notify_done(total)
+
+        return len(self.missing_videos)
+
+    def _notify_progress(self, url_type, name, idx, total):
+        """notify extraction progress"""
+        if not self.task:
+            return
+
+        if self.flat:
+            second_line = f"Bulk processing {total} items."
+        else:
+            second_line = f"Processing video {idx + 1}/{total}."
+
+        self.task.send_progress(
+            message_lines=[
+                f"Extracting '{name}' from {url_type.title()}.",
+                second_line,
+            ],
+            progress=(idx + 1) / total,
+        )
+
+    def _notify_empty(self):
+        """notify nothing to add"""
+        if not self.task:
+            return
+
+        self.task.send_progress(
+            message_lines=[
+                "Extracting videos completed.",
+                "No new videos found to add.",
+            ]
+        )
+
+    def _notify_start(self, total):
         """send notification for adding videos to download queue"""
         if not self.task:
             return
@@ -286,82 +469,31 @@ class PendingList(PendingIndex):
         self.task.send_progress(
             message_lines=[
                 "Adding new videos to download queue.",
-                f"Extracting items {idx + 1}/{total}",
-            ],
-            progress=(idx + 1) / total,
+                f"Bulk adding {total} videos",
+            ]
         )
 
-    def get_youtube_details(self, youtube_id, vid_type=VideoTypeEnum.VIDEOS):
-        """get details from youtubedl for single pending video"""
-        vid = YtWrap(self.yt_obs, self.config).extract(youtube_id)
-        if not vid:
-            return False
+    def _notify_done(self, total):
+        """send done notification"""
+        if not self.task:
+            return
 
-        if vid.get("id") != youtube_id:
-            # skip premium videos with different id
-            print(f"{youtube_id}: skipping premium video, id not matching")
-            return False
-        # stop if video is streaming live now
-        if vid["live_status"] in ["is_upcoming", "is_live"]:
-            print(f"{youtube_id}: skip is_upcoming or is_live")
-            return False
+        self.task.send_progress(
+            message_lines=[
+                "Adding new videos to the queue completed.",
+                f"Added {total} videos.",
+            ]
+        )
 
-        if vid["live_status"] == "was_live":
-            vid_type = VideoTypeEnum.STREAMS
-        else:
-            if self._check_shorts(vid):
-                vid_type = VideoTypeEnum.SHORTS
-            else:
-                vid_type = VideoTypeEnum.VIDEOS
+    def _notify_fail(self, status_code):
+        """failed to add"""
+        if not self.task:
+            return
 
-        if not vid.get("channel"):
-            print(f"{youtube_id}: skip video not part of channel")
-            return False
-
-        return self._parse_youtube_details(vid, vid_type)
-
-    @staticmethod
-    def _check_shorts(vid):
-        """check if vid is shorts video"""
-        if vid["width"] > vid["height"]:
-            return False
-
-        duration = vid.get("duration")
-        if duration and isinstance(duration, int):
-            if duration > 3 * 60:
-                return False
-
-        return is_shorts(vid["id"])
-
-    def _parse_youtube_details(self, vid, vid_type=VideoTypeEnum.VIDEOS):
-        """parse response"""
-        vid_id = vid.get("id")
-
-        # build dict
-        youtube_details = {
-            "youtube_id": vid_id,
-            "channel_name": vid["channel"],
-            "vid_thumb_url": vid["thumbnail"],
-            "title": vid["title"],
-            "channel_id": vid["channel_id"],
-            "duration": get_duration_str(vid["duration"]),
-            "published": self._build_published(vid),
-            "timestamp": int(datetime.now().timestamp()),
-            "vid_type": vid_type.value,
-            "channel_indexed": vid["channel_id"] in self.all_channels,
-        }
-
-        return youtube_details
-
-    @staticmethod
-    def _build_published(vid):
-        """build published date or timestamp"""
-        timestamp = vid["timestamp"]
-        if timestamp:
-            return timestamp
-
-        upload_date = vid["upload_date"]
-        upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
-        published = upload_date_time.strftime("%Y-%m-%d")
-
-        return published
+        self.task.send_progress(
+            message_lines=[
+                "Adding extracted videos failed.",
+                f"Status code: {status_code}",
+            ],
+            level="error",
+        )

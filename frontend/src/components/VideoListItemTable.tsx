@@ -6,6 +6,11 @@ import humanFileSize from '../functions/humanFileSize';
 import { FileSizeUnits } from '../api/actions/updateUserConfig';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 
+const StreamsTypeEmun = {
+  Video: 'video',
+  Audio: 'audio',
+};
+
 type VideoListItemProps = {
   videoList: VideoType[] | undefined;
   viewStyle: ViewStylesType;
@@ -35,7 +40,8 @@ const VideoListItemTable = ({ videoList, viewStyle }: VideoListItemProps) => {
 
         <tbody>
           {videoList?.map(({ youtube_id, title, channel, vid_type, media_size, streams }) => {
-            const [videoStream, audioStream] = streams;
+            const videoStream = streams?.find(s => s.type === StreamsTypeEmun.Video);
+            const audioStream = streams?.find(s => s.type === StreamsTypeEmun.Audio);
 
             return (
               <tr key={youtube_id}>
@@ -46,12 +52,12 @@ const VideoListItemTable = ({ videoList, viewStyle }: VideoListItemProps) => {
                   <Link to={Routes.Video(youtube_id)}>{title}</Link>
                 </td>
                 <td>{vid_type}</td>
-                <td>{`${videoStream.width}x${videoStream.height}`}</td>
+                <td>{`${videoStream?.width || '-'}x${videoStream?.height || '-'}`}</td>
                 <td>{humanFileSize(media_size, useSiUnits)}</td>
-                <td>{videoStream.codec}</td>
-                <td>{humanFileSize(videoStream.bitrate, useSiUnits)}</td>
-                <td>{audioStream.codec}</td>
-                <td>{humanFileSize(audioStream.bitrate, useSiUnits)}</td>
+                <td>{videoStream?.codec || '-'}</td>
+                <td>{humanFileSize(videoStream?.bitrate || 0, useSiUnits)}</td>
+                <td>{audioStream?.codec || '-'}</td>
+                <td>{humanFileSize(audioStream?.bitrate || 0, useSiUnits)}</td>
               </tr>
             );
           })}

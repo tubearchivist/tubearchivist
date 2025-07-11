@@ -4,7 +4,6 @@ functionality:
 - index and update in es
 """
 
-import json
 import os
 from datetime import datetime
 
@@ -121,27 +120,6 @@ class YoutubeChannel(YouTubeItem):
             "channel_thumb_url": False,
             "channel_views": 0,
         }
-        self._info_json_fallback()
-
-    def _info_json_fallback(self):
-        """read channel info.json for additional metadata"""
-        info_json = os.path.join(
-            EnvironmentSettings.CACHE_DIR,
-            "import",
-            f"{self.youtube_id}.info.json",
-        )
-        if os.path.exists(info_json):
-            print(f"{self.youtube_id}: read info.json file")
-            with open(info_json, "r", encoding="utf-8") as f:
-                content = json.loads(f.read())
-
-            self.json_data.update(
-                {
-                    "channel_subs": content.get("channel_follower_count", 0),
-                    "channel_description": content.get("description", False),
-                }
-            )
-            os.remove(info_json)
 
     def get_channel_art(self):
         """download channel art for new channels"""
@@ -177,48 +155,15 @@ class YoutubeChannel(YouTubeItem):
         update_path = f"ta_video/_update_by_query?pipeline={self.youtube_id}"
         _, _ = ElasticWrap(update_path).post(data)
 
-    def get_folder_path(self):
-        """get folder where media files get stored"""
-        folder_path = os.path.join(
-            EnvironmentSettings.MEDIA_DIR,
-            self.json_data["channel_id"],
-        )
-        return folder_path
+    def change_subscribe(self, new_subscribe_state: bool):
+        """change subscribe status"""
+        if not self.json_data:
+            self.build_json()
 
-    def delete_es_videos(self):
-        """delete all channel documents from elasticsearch"""
-        data = {
-            "query": {
-                "term": {"channel.channel_id": {"value": self.youtube_id}}
-            }
-        }
-        _, _ = ElasticWrap("ta_video/_delete_by_query").post(data)
-
-    def delete_es_comments(self):
-        """delete all comments from this channel"""
-        data = {
-            "query": {
-                "term": {"comment_channel_id": {"value": self.youtube_id}}
-            }
-        }
-        _, _ = ElasticWrap("ta_comment/_delete_by_query").post(data)
-
-    def delete_es_subtitles(self):
-        """delete all subtitles from this channel"""
-        data = {
-            "query": {
-                "term": {"subtitle_channel_id": {"value": self.youtube_id}}
-            }
-        }
-        _, _ = ElasticWrap("ta_subtitle/_delete_by_query").post(data)
-
-    def delete_playlists(self):
-        """delete all indexed playlist from es"""
-        from playlist.src.index import YoutubePlaylist
-
-        all_playlists = self.get_indexed_playlists()
-        for playlist in all_playlists:
-            YoutubePlaylist(playlist["playlist_id"]).delete_metadata()
+        self.json_data["channel_subscribed"] = new_subscribe_state
+        self.upload_to_es()
+        self.sync_to_videos()
+        return self.json_data
 
     def delete_channel(self):
         """delete channel and all videos"""
@@ -227,24 +172,7 @@ class YoutubeChannel(YouTubeItem):
         if not self.json_data:
             raise FileNotFoundError
 
-        folder_path = self.get_folder_path()
-        print(f"{self.youtube_id}: delete all media files")
-        try:
-            all_videos = os.listdir(folder_path)
-            for video in all_videos:
-                video_path = os.path.join(folder_path, video)
-                os.remove(video_path)
-            os.rmdir(folder_path)
-        except FileNotFoundError:
-            print(f"no videos found for {folder_path}")
-
-        print(f"{self.youtube_id}: delete indexed playlists")
-        self.delete_playlists()
-        print(f"{self.youtube_id}: delete indexed videos")
-        self.delete_es_videos()
-        self.delete_es_comments()
-        self.delete_es_subtitles()
-        self.del_in_es()
+        ChannelDelete(json_data=self.json_data).delete()
 
     def index_channel_playlists(self):
         """add all playlists of channel to index"""
@@ -265,6 +193,21 @@ class YoutubeChannel(YouTubeItem):
             self._index_single_playlist(playlist)
             print("add playlist: " + playlist[1])
             rand_sleep(self.config)
+
+    def get_all_playlists(self):
+        """get all playlists owned by this channel"""
+        url = (
+            f"https://www.youtube.com/channel/{self.youtube_id}"
+            + "/playlists?view=1&sort=dd&shelf_id=0"
+        )
+        obs = {"skip_download": True, "extract_flat": True}
+        playlists, _ = YtWrap(obs, self.config).extract(url)
+        if not playlists:
+            self.all_playlists = []
+            return
+
+        all_entries = [(i["id"], i["title"]) for i in playlists["entries"]]
+        self.all_playlists = all_entries
 
     def _notify_single_playlist(self, idx, total):
         """send notification"""
@@ -294,34 +237,6 @@ class YoutubeChannel(YouTubeItem):
         all_videos = IndexPaginate("ta_video", data).get_results()
         return all_videos
 
-    def get_all_playlists(self):
-        """get all playlists owned by this channel"""
-        url = (
-            f"https://www.youtube.com/channel/{self.youtube_id}"
-            + "/playlists?view=1&sort=dd&shelf_id=0"
-        )
-        obs = {"skip_download": True, "extract_flat": True}
-        playlists = YtWrap(obs, self.config).extract(url)
-        if not playlists:
-            self.all_playlists = []
-            return
-
-        all_entries = [(i["id"], i["title"]) for i in playlists["entries"]]
-        self.all_playlists = all_entries
-
-    def get_indexed_playlists(self, active_only=False):
-        """get all indexed playlists from channel"""
-        must_list = [
-            {"term": {"playlist_channel_id": {"value": self.youtube_id}}}
-        ]
-        if active_only:
-            must_list.append({"term": {"playlist_active": {"value": True}}})
-
-        data = {"query": {"bool": {"must": must_list}}}
-
-        all_playlists = IndexPaginate("ta_playlist", data).get_results()
-        return all_playlists
-
     def get_overwrites(self) -> dict:
         """get all per channel overwrites"""
         return self.json_data.get("channel_overwrites", {})
@@ -350,6 +265,93 @@ class YoutubeChannel(YouTubeItem):
             to_write.update({key: value})
 
         self.json_data["channel_overwrites"] = to_write
+
+
+class ChannelDelete(YouTubeItem):
+    """delete and cleanup"""
+
+    index_name = "ta_channel"
+
+    def __init__(self, json_data):
+        super().__init__(youtube_id=json_data["channel_id"])
+        self.json_data = json_data
+
+    def delete(self):
+        """delete channel and all videos"""
+        folder_path = self._get_folder_path()
+        print(f"{self.youtube_id}: delete all media files")
+        try:
+            all_videos = os.listdir(folder_path)
+            for video in all_videos:
+                video_path = os.path.join(folder_path, video)
+                os.remove(video_path)
+            os.rmdir(folder_path)
+        except FileNotFoundError:
+            print(f"no videos found for {folder_path}")
+
+        print(f"{self.youtube_id}: delete indexed playlists")
+        self._delete_playlists()
+        print(f"{self.youtube_id}: delete indexed videos")
+        self._delete_es_videos()
+        self._delete_es_comments()
+        self._delete_es_subtitles()
+        self.del_in_es()
+
+    def _get_folder_path(self):
+        """get folder where media files get stored"""
+        folder_path = os.path.join(
+            EnvironmentSettings.MEDIA_DIR,
+            self.json_data["channel_id"],
+        )
+        return folder_path
+
+    def _delete_es_videos(self):
+        """delete all channel documents from elasticsearch"""
+        data = {
+            "query": {
+                "term": {"channel.channel_id": {"value": self.youtube_id}}
+            }
+        }
+        _, _ = ElasticWrap("ta_video/_delete_by_query").post(data)
+
+    def _delete_es_comments(self):
+        """delete all comments from this channel"""
+        data = {
+            "query": {
+                "term": {"comment_channel_id": {"value": self.youtube_id}}
+            }
+        }
+        _, _ = ElasticWrap("ta_comment/_delete_by_query").post(data)
+
+    def _delete_es_subtitles(self):
+        """delete all subtitles from this channel"""
+        data = {
+            "query": {
+                "term": {"subtitle_channel_id": {"value": self.youtube_id}}
+            }
+        }
+        _, _ = ElasticWrap("ta_subtitle/_delete_by_query").post(data)
+
+    def _delete_playlists(self):
+        """delete all indexed playlist from es"""
+        from playlist.src.index import YoutubePlaylist
+
+        all_playlists = self._get_indexed_playlists()
+        for playlist in all_playlists:
+            YoutubePlaylist(playlist["playlist_id"]).delete_metadata()
+
+    def _get_indexed_playlists(self, active_only=False):
+        """get all indexed playlists from channel"""
+        must_list = [
+            {"term": {"playlist_channel_id": {"value": self.youtube_id}}}
+        ]
+        if active_only:
+            must_list.append({"term": {"playlist_active": {"value": True}}})
+
+        data = {"query": {"bool": {"must": must_list}}}
+
+        all_playlists = IndexPaginate("ta_playlist", data).get_results()
+        return all_playlists
 
 
 def channel_overwrites(channel_id, overwrites):

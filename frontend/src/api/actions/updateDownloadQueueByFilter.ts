@@ -1,11 +1,13 @@
 import APIClient from '../../functions/APIClient';
 
 type FilterType = 'ignore' | 'pending';
+export type DownloadQueueStatus = 'ignore' | 'pending' | 'priority';
 
-const deleteDownloadQueueByFilter = async (
+const updateDownloadQueueByFilter = async (
   filter: FilterType,
   channel: string | null,
   vid_type: string | null,
+  status: DownloadQueueStatus,
 ) => {
   const searchParams = new URLSearchParams();
   if (filter) searchParams.append('filter', filter);
@@ -13,8 +15,9 @@ const deleteDownloadQueueByFilter = async (
   if (vid_type) searchParams.append('vid_type', vid_type);
 
   return APIClient(`/api/download/?${searchParams.toString()}`, {
-    method: 'DELETE',
+    method: 'PATCH',
+    body: { status: status },
   });
 };
 
-export default deleteDownloadQueueByFilter;
+export default updateDownloadQueueByFilter;

@@ -15,11 +15,11 @@ class DownloadItemSerializer(serializers.Serializer):
     channel_indexed = serializers.BooleanField()
     channel_name = serializers.CharField()
     duration = serializers.CharField()
-    published = serializers.CharField()
+    published = serializers.CharField(allow_null=True)
     status = serializers.ChoiceField(choices=["pending", "ignore"])
-    timestamp = serializers.IntegerField()
+    timestamp = serializers.IntegerField(allow_null=True)
     title = serializers.CharField()
-    vid_thumb_url = serializers.CharField()
+    vid_thumb_url = serializers.CharField(allow_null=True)
     vid_type = serializers.ChoiceField(choices=VideoTypeEnum.values())
     youtube_id = serializers.CharField()
     message = serializers.CharField(required=False)
@@ -42,14 +42,23 @@ class DownloadListQuerySerializer(
     filter = serializers.ChoiceField(
         choices=["pending", "ignore"], required=False
     )
+    vid_type = serializers.ChoiceField(
+        choices=VideoTypeEnum.values_known(), required=False
+    )
     channel = serializers.CharField(required=False, help_text="channel ID")
     page = serializers.IntegerField(required=False)
+    q = serializers.CharField(required=False, help_text="Search Query")
+    error = serializers.BooleanField(required=False, allow_null=True)
 
 
 class DownloadListQueueDeleteQuerySerializer(serializers.Serializer):
     """serialize bulk delete download queue query string"""
 
     filter = serializers.ChoiceField(choices=["pending", "ignore"])
+    channel = serializers.CharField(required=False, help_text="channel ID")
+    vid_type = serializers.ChoiceField(
+        choices=VideoTypeEnum.values_known(), required=False
+    )
 
 
 class AddDownloadItemSerializer(serializers.Serializer):
@@ -69,6 +78,23 @@ class AddToDownloadQuerySerializer(serializers.Serializer):
     """add to queue query serializer"""
 
     autostart = serializers.BooleanField(required=False)
+    flat = serializers.BooleanField(required=False)
+
+
+class BulkUpdateDowloadQuerySerializer(serializers.Serializer):
+    """serialize bulk update query"""
+
+    filter = serializers.ChoiceField(choices=["pending", "ignore", "priority"])
+    channel = serializers.CharField(required=False)
+    vid_type = serializers.ChoiceField(
+        choices=VideoTypeEnum.values_known(), required=False
+    )
+
+
+class BulkUpdateDowloadDataSerializer(serializers.Serializer):
+    """serialize data"""
+
+    status = serializers.ChoiceField(choices=["pending", "ignore", "priority"])
 
 
 class DownloadQueueItemUpdateSerializer(serializers.Serializer):

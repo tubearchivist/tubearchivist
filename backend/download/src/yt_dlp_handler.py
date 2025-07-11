@@ -16,12 +16,12 @@ from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
 from common.src.helper import (
     get_channel_overwrites,
+    get_playlists,
     ignore_filelist,
     rand_sleep,
 )
 from common.src.ta_redis import RedisQueue
 from download.src.queue import PendingList
-from download.src.subscriptions import PlaylistSubscription
 from download.src.yt_dlp_base import YtWrap
 from playlist.src.index import YoutubePlaylist
 from video.src.comments import CommentList
@@ -403,8 +403,8 @@ class DownloadPostProcess(DownloaderBase):
 
     def _add_playlist_sub(self):
         """add subscribed playlists to refresh"""
-        subs = PlaylistSubscription().get_playlists()
-        to_add = [i["playlist_id"] for i in subs]
+        playlists = get_playlists(subscribed_only=True, source=["playlist_id"])
+        to_add = [i["playlist_id"] for i in playlists]
         RedisQueue(self.PLAYLIST_QUEUE).add_list(to_add)
 
     def _add_channel_playlists(self):

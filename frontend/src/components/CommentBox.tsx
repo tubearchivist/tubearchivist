@@ -37,9 +37,10 @@ export type CommentsType = {
 
 type CommentBoxProps = {
   comment: CommentsType;
+  onTimestampClick?: (seconds: number) => void;
 };
 
-const CommentBox = ({ comment }: CommentBoxProps) => {
+const CommentBox = ({ comment, onTimestampClick }: CommentBoxProps) => {
   const [showSubComments, setShowSubComments] = useState(false);
 
   const hasSubComments =
@@ -51,7 +52,7 @@ const CommentBox = ({ comment }: CommentBoxProps) => {
         {comment.comment_author}
       </h3>
       <p>
-        <Linkify>{comment.comment_text}</Linkify>
+        <Linkify onTimestampClick={onTimestampClick}>{comment.comment_text}</Linkify>
       </p>
 
       <div className="comment-meta">
@@ -95,7 +96,7 @@ const CommentBox = ({ comment }: CommentBoxProps) => {
               comment.comment_replies?.map(comment => {
                 return (
                   <Fragment key={comment.comment_id}>
-                    <CommentBox comment={comment} />
+                    <CommentBox comment={comment} onTimestampClick={onTimestampClick} />
                   </Fragment>
                 );
               })}
