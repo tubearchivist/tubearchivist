@@ -32,6 +32,38 @@ class Notifications:
 
         apobj.notify(body=body, title=title)
 
+    def test(self, url) -> tuple[bool, str]:
+        """send test notification"""
+        try:
+            apobj = apprise.Apprise()
+
+            if not apobj.add(url):
+                success = False
+                message = f"Invalid notification URL format: {url}"
+                return success, message
+
+            title = f"[TA] {self.task_name} process ended with SUCCESS"
+            body = "This is a test notification. Task completed successfully."
+
+            result = apobj.notify(body=body, title=title)
+
+            if result:
+                success = True
+                message = "Test notification sent successfully"
+                return success, message
+
+            success = False
+            message = (
+                "Notification failed. "
+                "Please check container logs for more information."
+            )
+            return success, message
+
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            success = False
+            message = f"Notification error: {str(err)}"
+            return success, message
+
     def _build_message(
         self, task_id: str, task_title: str
     ) -> tuple[str, str | None]:

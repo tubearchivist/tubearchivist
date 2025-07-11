@@ -362,8 +362,6 @@ class NotificationTestView(ApiBaseView):
     )
     def post(self, request):
         """test notification"""
-        import apprise
-
         data_serializer = TaskNotificationTestSerializer(data=request.data)
         data_serializer.is_valid(raise_exception=True)
         validated_data = data_serializer.validated_data
@@ -371,47 +369,9 @@ class NotificationTestView(ApiBaseView):
         url = validated_data["url"]
         task_name = validated_data.get("task_name", "manual_test")
 
-        try:
-            apobj = apprise.Apprise()
+        success, message = Notifications(task_name).test(url)
 
-            if not apobj.add(url):
-                return Response(
-                    {
-                        "success": False,
-                        "message": f"Invalid notification URL format: {url}",
-                    },
-                    status=400,
-                )
-
-            title = f"[TA] {task_name} process ended with SUCCESS"
-            body = "This is a test notification. Task completed successfully."
-
-            result = apobj.notify(body=body, title=title)
-
-            if result:
-                return Response(
-                    {
-                        "success": True,
-                        "message": "Test notification sent successfully",
-                    }
-                )
-
-            return Response(
-                {
-                    "success": False,
-                    "message": (
-                        "Notification failed. "
-                        "Please check container logs for more information."
-                    ),
-                },
-                status=400,
-            )
-
-        except Exception as err:
-            return Response(
-                {
-                    "success": False,
-                    "message": f"Notification error: {str(err)}",
-                },
-                status=400,
-            )
+        status = 200 if success else 400
+        return Response(
+            {"success": success, "message": message}, status=status
+        )
