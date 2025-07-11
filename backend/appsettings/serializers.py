@@ -24,6 +24,7 @@ class AppConfigSubSerializer(
     channel_size = serializers.IntegerField(required=False)
     live_channel_size = serializers.IntegerField(required=False)
     shorts_channel_size = serializers.IntegerField(required=False)
+    playlist_size = serializers.IntegerField(required=False)
     auto_start = serializers.BooleanField(required=False)
     extract_flat = serializers.BooleanField(required=False)
 

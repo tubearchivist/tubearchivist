@@ -21,6 +21,7 @@ class SubscriptionsConfigType(TypedDict):
     channel_size: int
     live_channel_size: int
     shorts_channel_size: int
+    playlist_size: int
     auto_start: bool
     extract_flat: bool
 
@@ -73,6 +74,7 @@ class AppConfig:
             "channel_size": 50,
             "live_channel_size": 50,
             "shorts_channel_size": 50,
+            "playlist_size": 50,
             "auto_start": False,
             "extract_flat": False,
         },

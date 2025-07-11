@@ -75,7 +75,7 @@ class PlaylistSubscription:
         if not all_playlists:
             return 0
 
-        size_limit = self.config["subscriptions"]["channel_size"]
+        size_limit = self.config["subscriptions"]["playlist_size"]
         all_playlist_urls: list[ParsedURLType] = []
         for playlist in all_playlists:
             all_playlist_urls.append(

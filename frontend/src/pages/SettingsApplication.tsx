@@ -41,6 +41,7 @@ const SettingsApplication = () => {
   const [videoPageSize, setVideoPageSize] = useState<number | null>(null);
   const [livePageSize, setLivePageSize] = useState<number | null>(null);
   const [shortPageSize, setShortPageSize] = useState<number | null>(null);
+  const [playlistPageSize, setPlaylistPageSize] = useState<number | null>(null);
   const [isAutostart, setIsAutostart] = useState<boolean>(false);
   const [isExtractFlat, setIsExtractFlat] = useState<boolean>(false);
 
@@ -98,6 +99,7 @@ const SettingsApplication = () => {
     setVideoPageSize(appSettingsConfigData?.subscriptions.channel_size || null);
     setLivePageSize(appSettingsConfigData?.subscriptions.live_channel_size || null);
     setShortPageSize(appSettingsConfigData?.subscriptions.shorts_channel_size || null);
+    setPlaylistPageSize(appSettingsConfigData?.subscriptions.playlist_size || null);
     setIsAutostart(appSettingsConfigData?.subscriptions.auto_start || false);
     setIsExtractFlat(appSettingsConfigData?.subscriptions.extract_flat || false);
 
@@ -257,6 +259,19 @@ const SettingsApplication = () => {
                   value={shortPageSize}
                   setValue={setShortPageSize}
                   oldValue={appSettingsConfig?.subscriptions.shorts_channel_size}
+                  updateCallback={handleUpdateConfig}
+                />
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Playlist page size</p>
+                </div>
+                <InputConfig
+                  type="number"
+                  name="subscriptions.playlist_size"
+                  value={playlistPageSize}
+                  setValue={setPlaylistPageSize}
+                  oldValue={appSettingsConfig?.subscriptions.playlist_size}
                   updateCallback={handleUpdateConfig}
                 />
               </div>
