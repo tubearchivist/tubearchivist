@@ -28,6 +28,7 @@ class PlaylistSerializer(serializers.Serializer):
     playlist_last_refresh = serializers.CharField()
     playlist_name = serializers.CharField()
     playlist_subscribed = serializers.BooleanField()
+    playlist_sort_order = serializers.ChoiceField(choices=["top", "bottom"])
     playlist_thumbnail = serializers.CharField()
     playlist_type = serializers.ChoiceField(choices=["regular", "custom"])
     _index = serializers.CharField(required=False)
@@ -68,7 +69,10 @@ class PlaylistBulkAddSerializer(serializers.Serializer):
 class PlaylistSingleUpdate(serializers.Serializer):
     """update state of single playlist"""
 
-    playlist_subscribed = serializers.BooleanField()
+    playlist_subscribed = serializers.BooleanField(required=False)
+    playlist_sort_order = serializers.ChoiceField(
+        choices=["top", "bottom"], required=False
+    )
 
 
 class PlaylistListCustomPostSerializer(serializers.Serializer):

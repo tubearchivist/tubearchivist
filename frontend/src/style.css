@@ -458,6 +458,36 @@ button:hover {
   margin: 20px 0;
 }
 
+.player-wrapper.theater-mode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.9);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-main.theater-mode {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+.video-main.theater-mode video {
+  max-height: 95vh;
+  max-width: 95vw;
+  width: auto;
+  height: auto;
+}
+
 .video-player {
   display: grid;
   align-content: space-evenly;

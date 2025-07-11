@@ -39,10 +39,10 @@ class BaseTask(Task):
         RedisArchivist().set_message(key, message, expire=20)
 
     def on_success(self, retval, task_id, args, kwargs):
-        """callback task completed successfully"""
+        """callback task completed"""
         print(f"{task_id} success callback")
         message, key = self._build_message()
-        message.update({"messages": ["Task completed successfully"]})
+        message.update({"messages": ["Task completed"]})
         RedisArchivist().set_message(key, message, expire=5)
 
     def before_start(self, task_id, args, kwargs):
@@ -58,9 +58,11 @@ class BaseTask(Task):
         task_title = TASK_CONFIG.get(self.name).get("title")
         Notifications(self.name).send(task_id, task_title)
 
-    def send_progress(self, message_lines, progress=False, title=False):
+    def send_progress(
+        self, message_lines, progress=False, title=False, level="info"
+    ):
         """send progress message"""
-        message, key = self._build_message()
+        message, key = self._build_message(level=level)
         message.update(
             {
                 "messages": message_lines,
@@ -101,13 +103,13 @@ def update_subscribed(self):
 
     manager.init(self)
     handler = SubscriptionScanner(task=self)
-    missing_videos = handler.scan()
+    added = handler.scan()
     auto_start = handler.auto_start
-    if missing_videos:
-        print(missing_videos)
-        extrac_dl.delay(missing_videos, auto_start=auto_start)
-        message = f"Found {len(missing_videos)} videos to add to the queue."
-        return message
+    if added:
+        if auto_start:
+            download_pending.delay(auto_only=True)
+
+        return f"Found {added} videos to add to the queue."
 
     return None
 
@@ -147,7 +149,9 @@ def download_pending(self, auto_only=False):
 
 
 @shared_task(name="extract_download", bind=True, base=BaseTask)
-def extrac_dl(self, youtube_ids, auto_start=False, status="pending"):
+def extrac_dl(
+    self, youtube_ids, auto_start=False, flat=False, status="pending"
+):
     """parse list passed and add to pending"""
     TaskManager().init(self)
     if isinstance(youtube_ids, str):
@@ -155,17 +159,17 @@ def extrac_dl(self, youtube_ids, auto_start=False, status="pending"):
     else:
         to_add = youtube_ids
 
-    pending_handler = PendingList(youtube_ids=to_add, task=self)
-    pending_handler.parse_url_list(auto_start=auto_start)
-    videos_added = pending_handler.add_to_pending(
-        status=status, auto_start=auto_start
+    pending_handler = PendingList(
+        youtube_ids=to_add, task=self, auto_start=auto_start, flat=flat
     )
+    pending_handler.parse_url_list()
+    videos_added = pending_handler.add_to_pending(status=status)
 
     if auto_start:
         download_pending.delay(auto_only=True)
 
     if videos_added:
-        return f"added {len(videos_added)} Videos to Queue"
+        return f"added {videos_added} Videos to Queue"
 
     return None
 
@@ -259,7 +263,7 @@ def rescan_filesystem(self):
     handler = Scanner(task=self)
     handler.scan()
     handler.apply()
-    ThumbValidator(task=self).validate()
+    thumbnail_check.delay()
 
 
 @shared_task(bind=True, name="thumbnail_check", base=BaseTask)

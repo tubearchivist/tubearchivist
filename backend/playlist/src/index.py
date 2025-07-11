@@ -30,16 +30,24 @@ class YoutubePlaylist(YouTubeItem):
         self.all_members = False
         self.nav = False
 
-    def build_json(self, scrape=False):
+    def build_json(self, scrape=False, limit: int | None = None):
         """collection to create json_data"""
         self.get_from_es()
         if self.json_data:
             subscribed = self.json_data.get("playlist_subscribed")
+            playlist_sort_order = self.json_data.get("playlist_sort_order")
         else:
             subscribed = False
+            playlist_sort_order = "top"
+
+        limit_str = limit if limit is not None else ""
+        sort_order = 1 if playlist_sort_order == "top" else -1
+        playlist_items = f":{limit_str}:{sort_order}"
 
         if scrape or not self.json_data:
-            self.get_from_youtube()
+            self.get_from_youtube(
+                obs_overwrite={"playlist_items": playlist_items}
+            )
             if not self.youtube_meta:
                 self.json_data = False
                 return
@@ -48,8 +56,13 @@ class YoutubePlaylist(YouTubeItem):
             self._ensure_channel()
             ids_found = self.get_local_vids()
             self.get_entries(ids_found)
-            self.json_data["playlist_entries"] = self.all_members
-            self.json_data["playlist_subscribed"] = subscribed
+            self.json_data.update(
+                {
+                    "playlist_entries": self.all_members,
+                    "playlist_subscribed": subscribed,
+                    "playlist_sort_order": playlist_sort_order,
+                }
+            )
 
     def process_youtube_meta(self):
         """extract relevant fields from youtube"""
@@ -58,6 +71,9 @@ class YoutubePlaylist(YouTubeItem):
         except IndexError:
             print(f"{self.youtube_id}: thumbnail extraction failed")
             playlist_thumbnail = False
+
+        if not self.youtube_meta.get("channel_id"):
+            raise ValueError("Failed to extract Channel ID for Playlist")
 
         self.json_data = {
             "playlist_id": self.youtube_id,
@@ -78,6 +94,18 @@ class YoutubePlaylist(YouTubeItem):
         channel_id = self.json_data["playlist_channel_id"]
         channel_handler = YoutubeChannel(channel_id)
         channel_handler.build_json(upload=True)
+
+    def get_playlist_videos(self):
+        """get all playlist videos"""
+        data = {
+            "query": {
+                "term": {"playlist.keyword": {"value": self.youtube_id}}
+            },
+            "_source": ["youtube_id"],
+        }
+        result = IndexPaginate("ta_video", data).get_results()
+
+        return result
 
     def get_local_vids(self) -> list[str]:
         """get local video ids from youtube entries"""
@@ -110,6 +138,13 @@ class YoutubePlaylist(YouTubeItem):
         """download artwork of playlist"""
         url = self.json_data["playlist_thumbnail"]
         ThumbManager(self.youtube_id, item_type="playlist").download(url)
+
+    def change_subscribe(self, new_subscribe_state: bool):
+        """change subscribe status"""
+        self.build_json()
+        self.json_data["playlist_subscribed"] = new_subscribe_state
+        self.upload_to_es()
+        return self.json_data
 
     def add_vids_to_playlist(self):
         """sync the playlist id to videos"""
@@ -144,14 +179,7 @@ class YoutubePlaylist(YouTubeItem):
     def remove_vids_from_playlist(self):
         """remove playlist ids from videos if needed"""
         needed = [i["youtube_id"] for i in self.json_data["playlist_entries"]]
-        data = {
-            "query": {"match": {"playlist": self.youtube_id}},
-            "_source": ["youtube_id"],
-        }
-        data = {
-            "query": {"term": {"playlist.keyword": {"value": self.youtube_id}}}
-        }
-        result = IndexPaginate("ta_video", data).get_results()
+        result = self.get_playlist_videos()
         to_remove = [
             i["youtube_id"] for i in result if i["youtube_id"] not in needed
         ]
@@ -170,9 +198,9 @@ class YoutubePlaylist(YouTubeItem):
             if status_code == 200:
                 print(f"{self.youtube_id}: removed {video_id} from playlist")
 
-    def update_playlist(self, skip_on_empty=False):
+    def update_playlist(self, skip_on_empty=False, limit: int | None = None):
         """update metadata for playlist with data from YouTube"""
-        self.build_json(scrape=True)
+        self.build_json(scrape=True, limit=limit)
         if not self.json_data:
             # return false to deactivate
             return False
@@ -189,6 +217,15 @@ class YoutubePlaylist(YouTubeItem):
         self.remove_vids_from_playlist()
         self.get_playlist_art()
         return True
+
+    def change_sort_order(self, new_sort_order):
+        """update sort order of playlist"""
+        playlist = YoutubePlaylist(self.youtube_id)
+        playlist.build_json()
+        playlist.json_data["playlist_sort_order"] = new_sort_order
+        playlist.upload_to_es()
+
+        return playlist.json_data
 
     def build_nav(self, youtube_id):
         """find next and previous in playlist of a given youtube_id"""

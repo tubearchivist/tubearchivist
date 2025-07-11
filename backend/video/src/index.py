@@ -10,10 +10,10 @@ from datetime import datetime
 import requests
 from channel.src import index as ta_channel
 from common.src.env_settings import EnvironmentSettings
-from common.src.es_connect import ElasticWrap
 from common.src.helper import get_duration_sec, get_duration_str, randomizor
 from common.src.index_generic import YouTubeItem
 from django.conf import settings
+from download.src.thumbnails import ThumbManager
 from playlist.src import index as ta_playlist
 from ryd_client import ryd_client
 from user.src.user_config import UserConfig
@@ -195,7 +195,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def _build_published(self):
         """build published date or timestamp"""
-        timestamp = self.youtube_meta["timestamp"]
+        timestamp = self.youtube_meta.get("timestamp")
         if timestamp:
             return timestamp
 
@@ -394,12 +394,6 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
         return subtitles
 
-    def update_media_url(self):
-        """update only media_url in es for reindex channel rename"""
-        data = {"doc": {"media_url": self.json_data["media_url"]}}
-        path = f"{self.index_name}/_update/{self.youtube_id}"
-        _, _ = ElasticWrap(path).post(data=data)
-
 
 def index_new_video(youtube_id, video_type=VideoTypeEnum.VIDEOS):
     """combined classes to create new video in index"""
@@ -409,5 +403,8 @@ def index_new_video(youtube_id, video_type=VideoTypeEnum.VIDEOS):
         raise ValueError("failed to get metadata for " + youtube_id)
 
     video.check_subtitles()
+    url = video.json_data["vid_thumb_url"]
+    ThumbManager(item_id=video.youtube_id).download_video_thumb(url=url)
     video.upload_to_es()
+
     return video.json_data

@@ -8,6 +8,8 @@ from common.views_base import AdminOnly, ApiBaseView
 from download.serializers import (
     AddToDownloadListSerializer,
     AddToDownloadQuerySerializer,
+    BulkUpdateDowloadDataSerializer,
+    BulkUpdateDowloadQuerySerializer,
     DownloadAggsSerializer,
     DownloadItemSerializer,
     DownloadListQuerySerializer,
@@ -15,7 +17,7 @@ from download.serializers import (
     DownloadListSerializer,
     DownloadQueueItemUpdateSerializer,
 )
-from download.src.queue import PendingInteract
+from download.src.queue_interact import PendingInteract
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.response import Response
 from task.tasks import download_pending, extrac_dl
@@ -65,6 +67,22 @@ class DownloadApiListView(ApiBaseView):
                 {"term": {"channel_id": {"value": filter_channel}}}
             )
 
+        vid_type_filter = validated_data.get("vid_type")
+        if vid_type_filter:
+            must_list.append(
+                {"term": {"vid_type": {"value": vid_type_filter}}}
+            )
+
+        search_query = validated_data.get("q")
+        if search_query:
+            must_list.append({"match_phrase_prefix": {"title": search_query}})
+
+        if validated_data.get("error") is not None:
+            operator = "must" if validated_data["error"] else "must_not"
+            must_list.append(
+                {"bool": {operator: [{"exists": {"field": "message"}}]}}
+            )
+
         self.data["query"] = {"bool": {"must": must_list}}
 
         self.get_document_list(request)
@@ -99,12 +117,13 @@ class DownloadApiListView(ApiBaseView):
         validated_query = query_serializer.validated_data
 
         auto_start = validated_query.get("autostart")
-        print(f"auto_start: {auto_start}")
+        flat = validated_query.get("flat", False)
+        print(f"auto_start: {auto_start}, flat: {flat}")
         to_add = validated_data["data"]
 
         pending = [i["youtube_id"] for i in to_add if i["status"] == "pending"]
         url_str = " ".join(pending)
-        task = extrac_dl.delay(url_str, auto_start=auto_start)
+        task = extrac_dl.delay(url_str, auto_start=auto_start, flat=flat)
 
         message = {
             "message": "add to queue task started",
@@ -113,6 +132,38 @@ class DownloadApiListView(ApiBaseView):
         response_serializer = AsyncTaskResponseSerializer(message)
 
         return Response(response_serializer.data)
+
+    @staticmethod
+    @extend_schema(
+        request=BulkUpdateDowloadDataSerializer(),
+        parameters=[BulkUpdateDowloadQuerySerializer()],
+        responses={204: OpenApiResponse(description="Status updated")},
+    )
+    def patch(request):
+        """bulk update status"""
+        data_serializer = BulkUpdateDowloadDataSerializer(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+
+        new_status = validated_data["status"]
+
+        query_serializer = BulkUpdateDowloadQuerySerializer(
+            data=request.query_params
+        )
+        query_serializer.is_valid(raise_exception=True)
+        validated_query = query_serializer.validated_data
+        status_filter = validated_query.get("filter")
+        channel = validated_query.get("channel")
+        vid_type = validated_query.get("vid_type")
+
+        PendingInteract(status=status_filter).update_bulk(
+            channel_id=channel, vid_type=vid_type, new_status=new_status
+        )
+
+        if new_status == "priority":
+            download_pending.delay(auto_only=True)
+
+        return Response(status=204)
 
     @extend_schema(
         parameters=[DownloadListQueueDeleteQuerySerializer()],
@@ -132,9 +183,18 @@ class DownloadApiListView(ApiBaseView):
         validated_query = serializer.validated_data
 
         query_filter = validated_query["filter"]
+        channel = validated_query.get("channel")
+        vid_type = validated_query.get("vid_type")
         message = f"delete queue by status: {query_filter}"
+        if channel:
+            message += f" - filter by channel: {channel}"
+        if vid_type:
+            message += f" - filter by vid_type: {vid_type}"
+
         print(message)
-        PendingInteract(status=query_filter).delete_by_status()
+        PendingInteract(status=query_filter).delete_bulk(
+            channel_id=channel, vid_type=vid_type
+        )
 
         return Response(status=204)
 

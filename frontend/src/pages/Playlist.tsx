@@ -31,6 +31,7 @@ import useIsAdmin from '../functions/useIsAdmin';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { ApiResponseType } from '../functions/APIClient';
 import NotFound from './NotFound';
+import updatePlaylistSortOrder from '../api/actions/updatePlaylistSortOrder';
 
 export type VideoResponseType = {
   data?: VideoType[];
@@ -180,6 +181,7 @@ const Playlist = () => {
                       <a
                         href={`https://www.youtube.com/playlist?list=${playlist.playlist_id}`}
                         target="_blank"
+                        rel="noopener noreferrer"
                       >
                         Active
                       </a>
@@ -286,6 +288,31 @@ const Playlist = () => {
                   />
                 </div>
               )}
+              <div className="toggle">
+                <span>Switch sort order:</span>
+                <div className="toggleBox">
+                  <input
+                    id="playlist_sort_order"
+                    type="checkbox"
+                    checked={playlist.playlist_sort_order === 'bottom'}
+                    onChange={async () => {
+                      const newSortOrder =
+                        playlist.playlist_sort_order === 'top' ? 'bottom' : 'top';
+                      await updatePlaylistSortOrder(playlist.playlist_id, newSortOrder);
+                      setRefresh(true);
+                    }}
+                  />
+                  {playlist.playlist_sort_order === 'bottom' ? (
+                    <label htmlFor="" className="onbtn">
+                      On
+                    </label>
+                  ) : (
+                    <label htmlFor="" className="ofbtn">
+                      Off
+                    </label>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

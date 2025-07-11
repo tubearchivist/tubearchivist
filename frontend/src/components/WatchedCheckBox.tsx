@@ -1,6 +1,7 @@
 import iconUnseen from '/img/icon-unseen.svg';
 import iconSeen from '/img/icon-seen.svg';
 import { useEffect, useState } from 'react';
+import LoadingIndicator from './LoadingIndicator';
 
 type WatchedCheckBoxProps = {
   watched: boolean;
@@ -32,9 +33,7 @@ const WatchedCheckBox = ({ watched, onClick, onDone }: WatchedCheckBoxProps) => 
     <>
       {loading && (
         <>
-          <div className="lds-ring" style={{ color: 'var(--accent-font-dark)' }}>
-            <div />
-          </div>
+          <LoadingIndicator />
         </>
       )}
       {!loading && watched && (

@@ -1,20 +1,24 @@
 # multi stage to build tube archivist
 # build python wheel, download and extract ffmpeg, copy into final image
 
+FROM node:lts-alpine AS npm-builder
+COPY frontend/package.json frontend/package-lock.json /
+RUN npm i
+
 FROM node:lts-alpine AS node-builder
 
 # RUN npm config set registry https://registry.npmjs.org/
 
+COPY --from=npm-builder ./node_modules /frontend/node_modules
 COPY ./frontend /frontend
-
 WORKDIR /frontend
-RUN npm i
+
 RUN npm run build:deploy
 
 WORKDIR /
 
 # First stage to build python wheel
-FROM python:3.11.8-slim-bookworm AS builder
+FROM python:3.11.13-slim-bookworm AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential gcc libldap2-dev libsasl2-dev libssl-dev git
@@ -24,7 +28,7 @@ COPY ./backend/requirements.txt /requirements.txt
 RUN pip install --user -r requirements.txt
 
 # build ffmpeg
-FROM python:3.11.8-slim-bookworm AS ffmpeg-builder
+FROM python:3.11.13-slim-bookworm AS ffmpeg-builder
 
 ARG TARGETPLATFORM
 
@@ -32,7 +36,7 @@ COPY docker_assets/ffmpeg_download.py ffmpeg_download.py
 RUN python ffmpeg_download.py $TARGETPLATFORM
 
 # build final image
-FROM python:3.11.8-slim-bookworm AS tubearchivist
+FROM python:3.11.13-slim-bookworm AS tubearchivist
 
 ARG INSTALL_DEBUG
 
@@ -54,9 +58,9 @@ RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recomm
 
 # install debug tools for testing environment
 RUN if [ "$INSTALL_DEBUG" ] ; then \
-        apt-get -y update && apt-get -y install --no-install-recommends \
-        vim htop bmon net-tools iputils-ping procps lsof \
-        && pip install --user ipython pytest pytest-django \
+    apt-get -y update && apt-get -y install --no-install-recommends \
+    vim htop bmon net-tools iputils-ping procps lsof \
+    && pip install --user ipython pytest pytest-django \
     ; fi
 
 # make folders

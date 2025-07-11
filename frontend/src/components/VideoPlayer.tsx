@@ -159,6 +159,8 @@ const VideoPlayer = ({
   const [showHelpDialog, setShowHelpDialog] = useState(false);
   const [showInfoDialog, setShowInfoDialog] = useState(false);
   const [infoDialogContent, setInfoDialogContent] = useState('');
+  const [isTheaterMode, setIsTheaterMode] = useState(false);
+  const [theaterModeKeyPressed, setTheaterModeKeyPressed] = useState(false);
 
   const questionmarkPressed = useKeyPress('?');
   const mutePressed = useKeyPress('m');
@@ -170,6 +172,8 @@ const VideoPlayer = ({
   const arrowRightPressed = useKeyPress('ArrowRight');
   const arrowLeftPressed = useKeyPress('ArrowLeft');
   const pPausedPressed = useKeyPress('p');
+  const theaterModePressed = useKeyPress('t');
+  const escapePressed = useKeyPress('Escape');
 
   const videoId = video.youtube_id;
   const videoUrl = video.media_url;
@@ -364,10 +368,42 @@ const VideoPlayer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questionmarkPressed]);
 
+  useEffect(() => {
+    if (embed) {
+      return;
+    }
+
+    if (theaterModePressed && !theaterModeKeyPressed) {
+      setTheaterModeKeyPressed(true);
+
+      const newTheaterMode = !isTheaterMode;
+      setIsTheaterMode(newTheaterMode);
+
+      infoDialog(newTheaterMode ? 'Theater mode' : 'Normal mode');
+    } else if (!theaterModePressed) {
+      setTheaterModeKeyPressed(false);
+    }
+  }, [theaterModePressed, isTheaterMode, theaterModeKeyPressed]);
+
+  useEffect(() => {
+    if (embed) {
+      return;
+    }
+
+    if (escapePressed && isTheaterMode) {
+      setIsTheaterMode(false);
+
+      infoDialog('Normal mode');
+    }
+  }, [escapePressed, isTheaterMode]);
+
   return (
     <>
-      <div id="player" className={embed ? '' : 'player-wrapper'}>
-        <div className={embed ? '' : 'video-main'}>
+      <div
+        id="player"
+        className={embed ? '' : `player-wrapper ${isTheaterMode ? 'theater-mode' : ''}`}
+      >
+        <div className={embed ? '' : `video-main ${isTheaterMode ? 'theater-mode' : ''}`}>
           <video
             ref={videoRef}
             key={`${getApiUrl()}${videoUrl}`}
@@ -442,6 +478,18 @@ const VideoPlayer = ({
                 <td>Toggle fullscreen</td>
                 <td>f</td>
               </tr>
+              {!embed && (
+                <>
+                  <tr>
+                    <td>Toggle theater mode</td>
+                    <td>t</td>
+                  </tr>
+                  <tr>
+                    <td>Exit theater mode</td>
+                    <td>Esc</td>
+                  </tr>
+                </>
+              )}
               <tr>
                 <td>Toggle subtitles (if available)</td>
                 <td>c</td>
@@ -486,11 +534,19 @@ const VideoPlayer = ({
               <h4>
                 This video doesn't have any sponsor segments added. To add a segment go to{' '}
                 <u>
-                  <a href={`https://www.youtube.com/watch?v=${videoId}`}>this video on YouTube</a>
+                  <a
+                    href={`https://www.youtube.com/watch?v=${videoId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    this video on YouTube
+                  </a>
                 </u>{' '}
                 and add a segment using the{' '}
                 <u>
-                  <a href="https://sponsor.ajay.app/">SponsorBlock</a>
+                  <a href="https://sponsor.ajay.app/" target="_blank" rel="noopener noreferrer">
+                    SponsorBlock
+                  </a>
                 </u>{' '}
                 extension.
               </h4>
@@ -499,11 +555,19 @@ const VideoPlayer = ({
               <h4>
                 This video has unlocked sponsor segments. Go to{' '}
                 <u>
-                  <a href={`https://www.youtube.com/watch?v=${videoId}`}>this video on YouTube</a>
+                  <a
+                    href={`https://www.youtube.com/watch?v=${videoId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    this video on YouTube
+                  </a>
                 </u>{' '}
                 and vote on the segments using the{' '}
                 <u>
-                  <a href="https://sponsor.ajay.app/">SponsorBlock</a>
+                  <a href="https://sponsor.ajay.app/" target="_blank" rel="noopener noreferrer">
+                    SponsorBlock
+                  </a>
                 </u>{' '}
                 extension.
               </h4>

@@ -14,7 +14,6 @@ from channel.src.nav import ChannelNav
 from common.serializers import ErrorResponseSerializer
 from common.src.urlparser import Parser
 from common.views_base import AdminWriteOnly, ApiBaseView
-from download.src.subscriptions import ChannelSubscription
 from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiResponse,
@@ -89,9 +88,7 @@ class ChannelApiListView(ApiBaseView):
     def _unsubscribe(channel_id: str):
         """unsubscribe"""
         print(f"[{channel_id}] unsubscribe from channel")
-        ChannelSubscription().change_subscribe(
-            channel_id, channel_subscribed=False
-        )
+        YoutubeChannel(channel_id).change_subscribe(new_subscribe_state=False)
 
 
 class ChannelApiView(ApiBaseView):
@@ -146,7 +143,9 @@ class ChannelApiView(ApiBaseView):
 
         subscribed = validated_data.get("channel_subscribed")
         if subscribed is not None:
-            ChannelSubscription().change_subscribe(channel_id, subscribed)
+            YoutubeChannel(channel_id).change_subscribe(
+                new_subscribe_state=subscribed
+            )
 
         overwrites = validated_data.get("channel_overwrites")
         if overwrites:

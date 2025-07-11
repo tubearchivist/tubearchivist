@@ -6,7 +6,7 @@ import getCookie from './getCookie';
 import Routes from '../configuration/routes/RouteList';
 
 export interface ApiClientOptions extends Omit<RequestInit, 'body'> {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: Record<string, unknown> | string;
 }
 

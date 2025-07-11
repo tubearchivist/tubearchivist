@@ -42,6 +42,7 @@ const SettingsApplication = () => {
   const [livePageSize, setLivePageSize] = useState<number | null>(null);
   const [shortPageSize, setShortPageSize] = useState<number | null>(null);
   const [isAutostart, setIsAutostart] = useState<boolean>(false);
+  const [isExtractFlat, setIsExtractFlat] = useState<boolean>(false);
 
   // Downloads
   const [currentDownloadSpeed, setCurrentDownloadSpeed] = useState<number | null>(null);
@@ -98,6 +99,7 @@ const SettingsApplication = () => {
     setLivePageSize(appSettingsConfigData?.subscriptions.live_channel_size || null);
     setShortPageSize(appSettingsConfigData?.subscriptions.shorts_channel_size || null);
     setIsAutostart(appSettingsConfigData?.subscriptions.auto_start || false);
+    setIsExtractFlat(appSettingsConfigData?.subscriptions.extract_flat || false);
 
     // Downloads
     setCurrentDownloadSpeed(appSettingsConfigData?.downloads.limit_speed || null);
@@ -212,6 +214,10 @@ const SettingsApplication = () => {
                       Autostart automatically starts downloading videos from subscriptions with
                       priority.
                     </li>
+                    <li>
+                      Fast add extracts and adds videos in bulk. That is much faster but is not able
+                      to extract as much metadata during adding to the queue.
+                    </li>
                   </ul>
                 </div>
               )}
@@ -261,6 +267,16 @@ const SettingsApplication = () => {
                 <ToggleConfig
                   name="subscriptions.auto_start"
                   value={isAutostart}
+                  updateCallback={handleUpdateConfig}
+                />
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Fast add</p>
+                </div>
+                <ToggleConfig
+                  name="subscriptions.extract_flat"
+                  value={isExtractFlat}
                   updateCallback={handleUpdateConfig}
                 />
               </div>
@@ -779,7 +795,11 @@ const SettingsApplication = () => {
                         <li>Make sure to contribute to this excellent project.</li>
                         <li>
                           More details{' '}
-                          <a target="_blank" href="https://returnyoutubedislike.com/">
+                          <a
+                            href="https://returnyoutubedislike.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
                             here
                           </a>
                           .
@@ -794,7 +814,11 @@ const SettingsApplication = () => {
                         <li>Make sure to contribute to this excellent project.</li>
                         <li>
                           More details{' '}
-                          <a target="_blank" href="https://sponsor.ajay.app/">
+                          <a
+                            href="https://sponsor.ajay.app/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
                             here
                           </a>
                           .
@@ -831,7 +855,11 @@ const SettingsApplication = () => {
                 <div>
                   <p>
                     Enable{' '}
-                    <a target="_blank" href="https://returnyoutubedislike.com/">
+                    <a
+                      href="https://returnyoutubedislike.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       returnyoutubedislike
                     </a>
                   </p>
@@ -846,7 +874,7 @@ const SettingsApplication = () => {
                 <div>
                   <p>
                     Enable{' '}
-                    <a href="https://sponsor.ajay.app/" target="_blank">
+                    <a href="https://sponsor.ajay.app/" target="_blank" rel="noopener noreferrer">
                       Sponsorblock
                     </a>
                   </p>

@@ -227,7 +227,8 @@ class VideoProgressView(ApiBaseView):
             expire = False
 
         current_progress.update({"watched": watched})
-        redis_con.set_message(key, current_progress, expire=expire)
+        if position > 5:
+            redis_con.set_message(key, current_progress, expire=expire)
 
         response_serializer = PlayerSerializer(current_progress)
 

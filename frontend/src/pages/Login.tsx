@@ -5,6 +5,7 @@ import Colours from '../configuration/colours/Colours';
 import Button from '../components/Button';
 import signIn from '../api/actions/signIn';
 import loadAuth from '../api/loader/loadAuth';
+import LoadingIndicator from '../components/LoadingIndicator';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -134,10 +135,7 @@ const Login = () => {
           {waitingForBackend && (
             <>
               <p>
-                Waiting for backend{' '}
-                <div className="lds-ring" style={{ color: 'var(--accent-font-dark)' }}>
-                  <div />
-                </div>
+                Waiting for backend <LoadingIndicator />
               </p>
             </>
           )}

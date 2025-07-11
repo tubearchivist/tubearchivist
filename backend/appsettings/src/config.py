@@ -22,6 +22,7 @@ class SubscriptionsConfigType(TypedDict):
     live_channel_size: int
     shorts_channel_size: int
     auto_start: bool
+    extract_flat: bool
 
 
 class DownloadsConfigType(TypedDict):
@@ -73,6 +74,7 @@ class AppConfig:
             "live_channel_size": 50,
             "shorts_channel_size": 50,
             "auto_start": False,
+            "extract_flat": False,
         },
         "downloads": {
             "limit_speed": None,

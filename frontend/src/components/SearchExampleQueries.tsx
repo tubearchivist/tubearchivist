@@ -95,8 +95,8 @@ const SearchExampleQueries = () => {
               <span>full:</span> — search in video subtitles
               <ul>
                 <li>
-                  <span>lang:</span> — subtitles language (use two-letter ISO country code, same as
-                  the one from settings page)
+                  <span>lang:</span> — subtitles language (use two-letter ISO 639 language code,
+                  same as the one from settings page)
                 </li>
                 <li>
                   <span>source:</span>

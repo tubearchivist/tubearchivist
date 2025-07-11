@@ -80,30 +80,33 @@ class YtWrap:
 
         return True, True
 
-    def extract(self, url):
-        """make extract request"""
+    def extract(self, url) -> tuple[dict | None, str | None]:
+        """
+        make extract request
+        returns response, error
+        """
         with yt_dlp.YoutubeDL(self.obs) as ydl:
             try:
                 response = ydl.extract_info(url)
             except cookiejar.LoadError as err:
                 print(f"cookie file is invalid: {err}")
-                return False
+                return None, str(err)
             except yt_dlp.utils.ExtractorError as err:
                 print(f"{url}: failed to extract: {err}, continue...")
-                return False
+                return None, str(err)
             except yt_dlp.utils.DownloadError as err:
                 if "This channel does not have a" in str(err):
-                    return False
+                    return None, None
 
                 print(f"{url}: failed to get info from youtube: {err}")
                 if "Temporary failure in name resolution" in str(err):
                     raise ConnectionError("lost the internet, abort!") from err
 
-                return False
+                return None, str(err)
 
         self._validate_cookie()
 
-        return response
+        return response, None
 
     def _validate_cookie(self):
         """check cookie and write it back for next use"""
@@ -146,7 +149,7 @@ class CookieHandler:
         AppConfig().update_config({"downloads": {"cookie_import": False}})
         print("[cookie]: revoked")
 
-    def validate(self):
+    def validate(self) -> bool:
         """validate cookie using the liked videos playlist"""
         validation = RedisArchivist().get_message_dict("cookie:valid")
         if validation:
@@ -159,8 +162,8 @@ class CookieHandler:
             "extract_flat": True,
         }
         validator = YtWrap(obs_request, self.config)
-        response = bool(validator.extract("LL"))
-        self.store_validation(response)
+        response, error = validator.extract("LL")
+        self.store_validation(bool(response))
 
         # update in redis to avoid expiring
         modified = validator.obs["cookiefile"].getvalue().strip("\x00")
@@ -173,15 +176,15 @@ class CookieHandler:
                 "status": "message:download",
                 "level": "error",
                 "title": "Cookie validation failed, exiting...",
-                "message": "",
+                "message": error,
             }
             RedisArchivist().set_message(
                 "message:download", mess_dict, expire=4
             )
             print("[cookie]: validation failed, exiting...")
 
-        print(f"[cookie]: validation success: {response}")
-        return response
+        print(f"[cookie]: validation success: {bool(response)}")
+        return bool(response)
 
     @staticmethod
     def store_validation(response):

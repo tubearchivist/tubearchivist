@@ -28,6 +28,11 @@ class WatchState:
             self.change_vid_state()
             return
 
+        if url_type == "channel":
+            self.reset_channel_progress()
+        if url_type == "playlist":
+            self.reset_playlist_progress()
+
         self._add_pipeline()
         path = f"ta_video/_update_by_query?pipeline=watch_{self.youtube_id}"
         data = self._build_update_data(url_type)
@@ -52,6 +57,31 @@ class WatchState:
         if status_code != 200:
             print(response)
             raise ValueError("failed to mark video as watched")
+
+    def reset_channel_progress(self):
+        """reset channel progress positions"""
+        from channel.src.index import YoutubeChannel
+
+        videos = YoutubeChannel(self.youtube_id).get_channel_videos()
+        video_ids = [i["youtube_id"] for i in videos]
+        self._reset_list(video_ids)
+
+    def reset_playlist_progress(self):
+        """reset playlist progress positions"""
+        from playlist.src.index import YoutubePlaylist
+
+        videos = YoutubePlaylist(self.youtube_id).get_playlist_videos()
+        video_ids = [i["youtube_id"] for i in videos]
+        self._reset_list(video_ids)
+
+    def _reset_list(self, video_ids: list[str]):
+        """reset list of video ids"""
+        redis_con = RedisArchivist()
+        all_ids = redis_con.list_keys(f"{self.user_id}:progress")
+        for progress_id in all_ids:
+            video_id = progress_id.split(":")[-1]
+            if video_id in video_ids:
+                redis_con.del_message(progress_id)
 
     def _build_update_data(self, url_type):
         """build update by query data based on url_type"""
