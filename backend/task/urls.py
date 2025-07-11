@@ -34,4 +34,9 @@ urlpatterns = [
         views.ScheduleNotification.as_view(),
         name="api-schedule-notification",
     ),
+    path(
+        "notification/test/",
+        views.NotificationTestView.as_view(),
+        name="api-schedule-notification-test",
+    ),
 ]

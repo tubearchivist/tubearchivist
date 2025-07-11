@@ -91,3 +91,12 @@ class TaskNotificationPostSerializer(serializers.Serializer):
 
     task_name = serializers.ChoiceField(choices=list(TASK_CONFIG))
     url = serializers.CharField(required=False)
+
+
+class TaskNotificationTestSerializer(serializers.Serializer):
+    """serialize task notification test POST"""
+
+    url = serializers.CharField()
+    task_name = serializers.ChoiceField(
+        choices=list(TASK_CONFIG), required=False
+    )
