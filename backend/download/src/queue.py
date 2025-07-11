@@ -118,8 +118,9 @@ class PendingList(PendingIndex):
         self.flat = flat
         self.to_skip = False
         self.missing_videos: list[dict] = []
+        self.added = 0
 
-    def parse_url_list(self):
+    def parse_url_list(self, status="pending") -> int:
         """extract youtube ids from list"""
         self.get_download()
         self.get_indexed()
@@ -128,17 +129,24 @@ class PendingList(PendingIndex):
         for idx, entry in enumerate(self.youtube_ids, start=1):
             if self.task:
                 self.task.send_progress(
-                    message_lines=[f"Extracting items {idx}/{total}"],
-                    progress=(idx + 1) / total,
+                    message_lines=[f"Extracting URL {idx}/{total}"],
+                    progress=idx / total,
                 )
 
             self._process_entry(entry, idx, total)
+
+            if self.missing_videos:
+                self.added += self.add_to_pending(status)
+                self.missing_videos = []
+
             if self.task and self.task.is_stopped():
                 break
 
             rand_sleep(self.config)
 
-    def _process_entry(self, entry: dict, idx: int, total: int):
+        return self.added
+
+    def _process_entry(self, entry: ParsedURLType, idx: int, total: int):
         """process single entry from url list"""
         if entry["type"] == "video":
             to_add = self._add_video(entry["url"], entry["vid_type"])
@@ -373,7 +381,7 @@ class PendingList(PendingIndex):
     def __extract_vid_type(self, video_data) -> str:
         """build vid type"""
         if "vid_type" in video_data:
-            return video_data["vid_type"]
+            return str(video_data["vid_type"])
 
         if video_data.get("live_status") == "was_live":
             return VideoTypeEnum.STREAMS.value
@@ -445,7 +453,7 @@ class PendingList(PendingIndex):
 
         self.task.send_progress(
             message_lines=lines,
-            progress=(idx + 1) / total,
+            progress=idx / total,
         )
 
     def _notify_empty(self):

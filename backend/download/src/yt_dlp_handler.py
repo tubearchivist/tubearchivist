@@ -360,9 +360,7 @@ class DownloadPostProcess(DownloaderBase):
 
         print("add deleted to ignore list")
         vids = [{"type": "video", "url": i["youtube_id"]} for i in to_delete]
-        pending = PendingList(youtube_ids=vids)
-        pending.parse_url_list()
-        _ = pending.add_to_pending(status="ignore")
+        PendingList(youtube_ids=vids).parse_url_list(status="ignore")
 
     def refresh_playlist(self) -> None:
         """match videos with playlists"""

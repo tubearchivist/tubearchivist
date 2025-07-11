@@ -11,6 +11,9 @@ class VideoTypeEnum(enum.Enum):
     SHORTS = "shorts"
     UNKNOWN = "unknown"
 
+    def __str__(self):
+        return self.value
+
     @classmethod
     def values(cls) -> list[str]:
         """value list"""

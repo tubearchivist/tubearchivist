@@ -60,8 +60,7 @@ class ChannelSubscription:
             auto_start=self.config["subscriptions"].get("auto_start", False),
             flat=self.config["subscriptions"].get("extract_flat", False),
         )
-        pending_handler.parse_url_list()
-        added = pending_handler.add_to_pending()
+        added = pending_handler.parse_url_list()
 
         return added
 
@@ -99,8 +98,7 @@ class PlaylistSubscription:
             auto_start=self.config["subscriptions"].get("auto_start", False),
             flat=self.config["subscriptions"].get("extract_flat", False),
         )
-        pending_handler.parse_url_list()
-        added = pending_handler.add_to_pending()
+        added = pending_handler.parse_url_list()
 
         return added
 
