@@ -138,9 +138,6 @@ const Video = () => {
 
   const handleTimestampClick = (seconds: number) => {
     setSeekToTimestamp(seconds);
-
-    // Reset timestamp to allow clicking again
-    setTimeout(() => setSeekToTimestamp(undefined), 500);
   };
 
   useEffect(() => {
@@ -233,6 +230,7 @@ const Video = () => {
         sponsorBlock={sponsorBlock}
         autoplay={playlistAutoplay}
         seekToTimestamp={seekToTimestamp}
+        setSeekToTimestamp={setSeekToTimestamp}
         onWatchStateChanged={() => {
           setRefreshVideoList(true);
         }}

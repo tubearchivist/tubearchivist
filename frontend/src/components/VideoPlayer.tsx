@@ -112,6 +112,7 @@ type VideoPlayerProps = {
   onWatchStateChanged?: (status: boolean) => void;
   onVideoEnd?: () => void;
   seekToTimestamp?: number;
+  setSeekToTimestamp?: (timestamp: number | undefined) => void;
 };
 
 const VideoPlayer = ({
@@ -122,6 +123,7 @@ const VideoPlayer = ({
   onWatchStateChanged,
   onVideoEnd,
   seekToTimestamp,
+  setSeekToTimestamp,
 }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -140,6 +142,8 @@ const VideoPlayer = ({
     if (videoRef.current.paused) {
       videoRef.current.play();
     }
+    if (setSeekToTimestamp) setSeekToTimestamp(undefined);
+    window.scroll(0, 0);
   }, [seekToTimestamp]);
 
   const [searchParams] = useSearchParams();
