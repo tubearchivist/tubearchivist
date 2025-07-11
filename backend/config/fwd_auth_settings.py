@@ -1,0 +1,6 @@
+from os import environ
+
+TA_AUTH_PROXY_USERNAME_HEADER = (
+    environ.get("TA_AUTH_PROXY_USERNAME_HEADER") or "HTTP_REMOTE_USER"
+)
+TA_AUTH_PROXY_LOGOUT_URL = environ.get("TA_AUTH_PROXY_LOGOUT_URL")
