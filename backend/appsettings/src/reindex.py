@@ -11,11 +11,11 @@ from typing import Callable, TypedDict
 
 from appsettings.src.config import AppConfig
 from channel.src.index import YoutubeChannel
+from channel.src.remote_query import get_last_channel_videos
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
 from common.src.helper import rand_sleep
 from common.src.ta_redis import RedisQueue
-from download.src.subscriptions import ChannelSubscription
 from download.src.thumbnails import ThumbManager
 from download.src.yt_dlp_base import CookieHandler
 from playlist.src.index import YoutubePlaylist
@@ -376,7 +376,7 @@ class Reindex(ReindexBase):
 
         channel.upload_to_es()
         channel.sync_to_videos()
-        ChannelFullScan(channel_id).scan()
+        ChannelFullScan(channel_id, self.config).scan()
         self.processed["channels"] += 1
 
     def _reindex_single_playlist(self, playlist_id: str) -> None:
@@ -495,8 +495,9 @@ class ReindexProgress(ReindexBase):
 class ChannelFullScan:
     """full scan of channel to fix vid_type mismatch"""
 
-    def __init__(self, channel_id):
+    def __init__(self, channel_id, config):
         self.channel_id = channel_id
+        self.config = config
         self.to_update = False
 
     def scan(self):
@@ -527,9 +528,8 @@ class ChannelFullScan:
 
     def _get_all_remote(self):
         """get all channel videos"""
-        sub = ChannelSubscription()
-        all_remote_videos = sub.get_last_youtube_videos(
-            self.channel_id, limit=False
+        all_remote_videos = get_last_channel_videos(
+            self.channel_id, self.config, limit=False
         )
 
         return all_remote_videos

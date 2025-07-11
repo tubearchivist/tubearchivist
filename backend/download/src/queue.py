@@ -9,10 +9,16 @@ from datetime import datetime
 
 from appsettings.src.config import AppConfig
 from channel.src.index import YoutubeChannel
+from channel.src.remote_query import get_last_channel_videos
 from common.src.es_connect import ElasticWrap, IndexPaginate
-from common.src.helper import get_duration_str, is_shorts, rand_sleep
+from common.src.helper import (
+    get_channels,
+    get_duration_str,
+    is_shorts,
+    rand_sleep,
+)
+from common.src.urlparser import ParsedURLType
 from download.src.queue_interact import PendingInteract
-from download.src.subscriptions import ChannelSubscription
 from download.src.thumbnails import ThumbManager
 from playlist.src.index import YoutubePlaylist
 from video.src.constants import VideoTypeEnum
@@ -64,11 +70,7 @@ class PendingIndex:
         """get a list of all channels indexed"""
         self.all_channels = []
         self.channel_overwrites = {}
-        data = {
-            "query": {"match_all": {}},
-            "sort": [{"channel_id": {"order": "asc"}}],
-        }
-        channels = IndexPaginate("ta_channel", data).get_results()
+        channels = get_channels(subscribed_only=False)
 
         for channel in channels:
             channel_id = channel["channel_id"]
@@ -102,7 +104,11 @@ class PendingList(PendingIndex):
     }
 
     def __init__(
-        self, youtube_ids=False, task=False, auto_start=False, flat=False
+        self,
+        youtube_ids: list[ParsedURLType],
+        task=None,
+        auto_start=False,
+        flat=False,
     ):
         super().__init__()
         self.config = AppConfig().config
@@ -111,7 +117,7 @@ class PendingList(PendingIndex):
         self.auto_start = auto_start
         self.flat = flat
         self.to_skip = False
-        self.missing_videos = []
+        self.missing_videos: list[dict] = []
 
     def parse_url_list(self):
         """extract youtube ids from list"""
@@ -139,9 +145,9 @@ class PendingList(PendingIndex):
                 entry["url"], entry["vid_type"], idx_url, total_url
             )
         elif entry["type"] == "channel":
-            self._parse_channel(entry["url"], entry["vid_type"])
+            self._parse_channel(entry)
         elif entry["type"] == "playlist":
-            self._parse_playlist(entry["url"])
+            self._parse_playlist(entry["url"], entry.get("limit"))
         else:
             raise ValueError(f"invalid url_type: {entry}")
 
@@ -166,11 +172,20 @@ class PendingList(PendingIndex):
             if to_add:
                 self.missing_videos.append(to_add)
 
-    def _parse_channel(self, url, vid_type):
+    def _parse_channel(self, entry):
         """parse channel"""
-        query_filter = getattr(VideoTypeEnum, vid_type.upper())
-        video_results = ChannelSubscription().get_last_youtube_videos(
-            url, limit=False, query_filter=query_filter
+        url = entry["url"]
+        vid_type = entry["vid_type"]
+        if isinstance(vid_type, str):
+            # lookup enum
+            vid_type = getattr(VideoTypeEnum, vid_type.upper())
+
+        limit = entry.get("limit")
+        video_results = get_last_channel_videos(
+            channel_id=url,
+            config=self.config,
+            limit=limit,
+            query_filter=vid_type,
         )
         if not video_results:
             print(f"{url}: no videos to add from channel, skipping")
@@ -184,45 +199,54 @@ class PendingList(PendingIndex):
 
         total = len(video_results)
         for idx, video_data in enumerate(video_results):
-            video_id = video_data["id"]
-            if video_id in self.to_skip:
-                continue
+            to_add = self.__parse_channel_video(
+                video_data, vid_type, idx, total, channel_handler
+            )
+            if to_add:
+                self.missing_videos.append(to_add)
 
             if self.task and self.task.is_stopped():
                 break
 
-            if self.flat:
-                if not video_data.get("channel"):
-                    channel_name = channel_handler.json_data["channel_name"]
-                    video_data["channel"] = channel_name
+    def __parse_channel_video(
+        self, video_data, vid_type, idx, total, channel_handler
+    ) -> dict | None:
+        """parse video of channel"""
+        video_id = video_data["id"]
+        if video_id in self.to_skip:
+            return None
 
-                if not video_data.get("channel_id"):
-                    channel_id = channel_handler.json_data["channel_id"]
-                    video_data["channel_id"] = channel_id
+        if self.flat:
+            if not video_data.get("channel"):
+                channel_name = channel_handler.json_data["channel_name"]
+                video_data["channel"] = channel_name
 
-                to_add = self._parse_entry(
-                    youtube_id=video_id,
-                    video_data=video_data,
-                    url_type="channel",
-                    idx=idx,
-                    total=total,
-                )
-            else:
-                to_add = self._parse_video(
-                    video_id,
-                    vid_type,
-                    url_type="channel",
-                    idx=idx,
-                    total=total,
-                )
+            if not video_data.get("channel_id"):
+                channel_id = channel_handler.json_data["channel_id"]
+                video_data["channel_id"] = channel_id
 
-            if to_add:
-                self.missing_videos.append(to_add)
+            to_add = self._parse_entry(
+                youtube_id=video_id,
+                video_data=video_data,
+                url_type="channel",
+                idx=idx,
+                total=total,
+            )
+        else:
+            to_add = self._parse_video(
+                video_id,
+                vid_type,
+                url_type="channel",
+                idx=idx,
+                total=total,
+            )
 
-    def _parse_playlist(self, url):
+        return to_add
+
+    def _parse_playlist(self, url: str, limit: int | None):
         """fast parse playlist"""
         playlist = YoutubePlaylist(url)
-        playlist.update_playlist()
+        playlist.update_playlist(limit=limit)
         if not playlist.youtube_meta:
             print(f"{url}: playlist metadata extraction failed, skipping")
             return

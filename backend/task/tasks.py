@@ -103,13 +103,13 @@ def update_subscribed(self):
 
     manager.init(self)
     handler = SubscriptionScanner(task=self)
-    missing_videos = handler.scan()
+    added = handler.scan()
     auto_start = handler.auto_start
-    if missing_videos:
-        print(missing_videos)
-        extrac_dl.delay(missing_videos, auto_start=auto_start)
-        message = f"Found {len(missing_videos)} videos to add to the queue."
-        return message
+    if added:
+        if auto_start:
+            download_pending.delay(auto_only=True)
+
+        return f"Found {added} videos to add to the queue."
 
     return None
 

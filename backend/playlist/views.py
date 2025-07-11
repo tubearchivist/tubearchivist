@@ -7,7 +7,6 @@ from common.serializers import (
     ErrorResponseSerializer,
 )
 from common.views_base import AdminWriteOnly, ApiBaseView
-from download.src.subscriptions import PlaylistSubscription
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from playlist.serializers import (
     PlaylistBulkAddSerializer,
@@ -245,8 +244,9 @@ class PlaylistApiView(ApiBaseView):
 
         json_data = None
         if subscribed is not None:
-            playlist_sub = PlaylistSubscription()
-            json_data = playlist_sub.change_subscribe(playlist_id, subscribed)
+            json_data = YoutubePlaylist(playlist_id).change_subscribe(
+                new_subscribe_state=subscribed
+            )
 
         if sort_order:
             json_data = YoutubePlaylist(playlist_id).change_sort_order(

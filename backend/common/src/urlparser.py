@@ -4,11 +4,21 @@ Functionality:
 - identify vid_type if possible
 """
 
+from typing import Literal, NotRequired, TypedDict
 from urllib.parse import parse_qs, urlparse
 
 from common.src.ta_redis import RedisArchivist
 from download.src.yt_dlp_base import YtWrap
 from video.src.constants import VideoTypeEnum
+
+
+class ParsedURLType(TypedDict):
+    """represents single parsed url"""
+
+    type: Literal["video", "channel", "playlist"]
+    url: str
+    vid_type: VideoTypeEnum
+    limit: NotRequired[int | None]
 
 
 class Parser:
@@ -17,13 +27,13 @@ class Parser:
     channel handle lookup is cached, can be disabled for unittests
     """
 
-    def __init__(self, url_str, use_cache=True):
+    def __init__(self, url_str: str, use_cache: bool = True):
         self.url_list = [i.strip() for i in url_str.split()]
         self.use_cache = use_cache
 
-    def parse(self):
+    def parse(self) -> list[ParsedURLType]:
         """parse the list"""
-        ids = []
+        ids: list[ParsedURLType] = []
         for url in self.url_list:
             parsed = urlparse(url)
             if parsed.netloc:

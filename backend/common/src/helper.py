@@ -292,6 +292,50 @@ def get_channel_overwrites() -> dict[str, dict[str, Any]]:
     return overwrites
 
 
+def get_channels(
+    subscribed_only: bool, source: list[str] | None = None
+) -> list[dict]:
+    """get a list of all channels"""
+    data = {
+        "sort": [{"channel_name.keyword": {"order": "asc"}}],
+    }
+    if subscribed_only:
+        query = {"term": {"channel_subscribed": {"value": True}}}
+    else:
+        query = {"match_all": {}}
+
+    data["query"] = query  # type: ignore
+
+    if source:
+        data["_source"] = source  # type: ignore
+
+    all_channels = IndexPaginate("ta_channel", data).get_results()
+
+    return all_channels
+
+
+def get_playlists(
+    subscribed_only: bool, source: list[str] | None = None
+) -> list[dict]:
+    """get list of playlists"""
+
+    data = {
+        "sort": [{"playlist_channel.keyword": {"order": "desc"}}],
+    }
+
+    must_list = [{"term": {"playlist_active": {"value": True}}}]
+    if subscribed_only:
+        must_list.append({"term": {"playlist_subscribed": {"value": True}}})
+
+    data = {"query": {"bool": {"must": must_list}}}  # type: ignore
+    if source:
+        data["_source"] = source  # type: ignore
+
+    all_playlists = IndexPaginate("ta_playlist", data).get_results()
+
+    return all_playlists
+
+
 def calc_is_watched(duration: float, position: float) -> bool:
     """considered watched based on duration position"""
 

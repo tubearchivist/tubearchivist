@@ -30,7 +30,7 @@ class YoutubePlaylist(YouTubeItem):
         self.all_members = False
         self.nav = False
 
-    def build_json(self, scrape=False):
+    def build_json(self, scrape=False, limit: int | None = None):
         """collection to create json_data"""
         self.get_from_es()
         if self.json_data:
@@ -40,7 +40,9 @@ class YoutubePlaylist(YouTubeItem):
             subscribed = False
             playlist_sort_order = "top"
 
-        playlist_items = "::1" if playlist_sort_order == "top" else "::-1"
+        limit_str = limit if limit is not None else ""
+        sort_order = 1 if playlist_sort_order == "top" else -1
+        playlist_items = f":{limit_str}:{sort_order}"
 
         if scrape or not self.json_data:
             self.get_from_youtube(
@@ -137,6 +139,13 @@ class YoutubePlaylist(YouTubeItem):
         url = self.json_data["playlist_thumbnail"]
         ThumbManager(self.youtube_id, item_type="playlist").download(url)
 
+    def change_subscribe(self, new_subscribe_state: bool):
+        """change subscribe status"""
+        self.build_json()
+        self.json_data["playlist_subscribed"] = new_subscribe_state
+        self.upload_to_es()
+        return self.json_data
+
     def add_vids_to_playlist(self):
         """sync the playlist id to videos"""
         script = (
@@ -189,9 +198,9 @@ class YoutubePlaylist(YouTubeItem):
             if status_code == 200:
                 print(f"{self.youtube_id}: removed {video_id} from playlist")
 
-    def update_playlist(self, skip_on_empty=False):
+    def update_playlist(self, skip_on_empty=False, limit: int | None = None):
         """update metadata for playlist with data from YouTube"""
-        self.build_json(scrape=True)
+        self.build_json(scrape=True, limit=limit)
         if not self.json_data:
             # return false to deactivate
             return False
