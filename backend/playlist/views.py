@@ -239,6 +239,12 @@ class PlaylistApiView(ApiBaseView):
             error = ErrorResponseSerializer({"error": "playlist not found"})
             return Response(error.data, status=404)
 
+        if self.response["playlist_type"] == "custom":
+            error = ErrorResponseSerializer(
+                {"error": f"playlist with ID {playlist_id} is custom"}
+            )
+            return Response(error.data, status=400)
+
         subscribed = validated_data.get("playlist_subscribed")
         sort_order = validated_data.get("playlist_sort_order")
 

@@ -174,15 +174,12 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         # extract
         self.channel_id = self.youtube_meta["channel_id"]
         last_refresh = int(datetime.now().timestamp())
-        # base64_blur = ThumbManager().get_base64_blur(self.youtube_id)
-        base64_blur = False
         # build json_data basics
         self.json_data = {
             "title": self.youtube_meta["title"],
             "description": self.youtube_meta.get("description", ""),
             "category": self.youtube_meta.get("categories", []),
             "vid_thumb_url": self.youtube_meta["thumbnail"],
-            "vid_thumb_base64": base64_blur,
             "tags": self.youtube_meta.get("tags", []),
             "published": self._build_published(),
             "vid_last_refresh": last_refresh,

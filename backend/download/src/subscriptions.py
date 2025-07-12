@@ -28,7 +28,8 @@ class ChannelSubscription:
             self.task.send_progress(["Looking up channels."])
 
         all_channels = get_channels(
-            subscribed_only=True, source=["channel_id", "channel_overwrites"]
+            subscribed_only=True,
+            source=["channel_id", "channel_overwrites", "channel_tabs"],
         )
         if not all_channels:
             return 0
@@ -36,10 +37,15 @@ class ChannelSubscription:
         all_channel_urls: list[ParsedURLType] = []
 
         for channel in all_channels:
+            channel_tabs = channel["channel_tabs"]
+            if not channel_tabs:
+                continue
+
+            enum = [getattr(VideoTypeEnum, i.upper()) for i in channel_tabs]
             queries = VideoQueryBuilder(
                 config=self.config,
                 channel_overwrites=channel.get("channel_overwrites", {}),
-            ).build_queries(video_type=None)
+            ).build_queries(video_type=enum)
 
             for query in queries:
                 all_channel_urls.append(

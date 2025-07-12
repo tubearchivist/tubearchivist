@@ -27,4 +27,4 @@ def test_parse_type():
         qb.parse_type("invalid")
 
     result = qb.parse_type("custom")
-    assert result == {"match": {"playlist_type.keyword": "custom"}}
+    assert result == {"match": {"playlist_type": "custom"}}

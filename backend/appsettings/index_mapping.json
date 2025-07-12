@@ -62,6 +62,9 @@
                         }
                     }
                 },
+                "channel_tabs": {
+                    "type": "keyword"
+                },
                 "channel_overwrites": {
                     "properties": {
                         "download_format": {
@@ -104,10 +107,6 @@
             "index_name": "video",
             "expected_map": {
                 "vid_thumb_url": {
-                    "type": "text",
-                    "index": false
-                },
-                "vid_thumb_base64": {
                     "type": "text",
                     "index": false
                 },
@@ -164,6 +163,9 @@
                                     "ignore_above": 256
                                 }
                             }
+                        },
+                        "channel_tabs": {
+                            "type": "keyword"
                         },
                         "channel_overwrites": {
                             "properties": {

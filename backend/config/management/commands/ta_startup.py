@@ -19,11 +19,11 @@ from common.src.ta_redis import RedisArchivist
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import dateformat
 from django_celery_beat.models import CrontabSchedule, PeriodicTasks
-from redis.exceptions import ResponseError
 from task.models import CustomPeriodicTask
 from task.src.config_schedule import ScheduleBuilder
 from task.src.task_manager import TaskManager
 from task.tasks import version_check
+from video.src.constants import VideoTypeEnum
 
 TOPIC = """
 
@@ -49,14 +49,12 @@ class Command(BaseCommand):
         self._version_check()
         self._index_setup()
         self._snapshot_check()
-        self._mig_app_settings()
         self._create_default_schedules()
         self._update_schedule_tz()
         self._init_app_config()
-        self._mig_channel_tags()
-        self._mig_video_channel_tags()
         self._mig_fix_download_channel_indexed()
         self._mig_add_default_playlist_sort()
+        self._mig_set_channel_tabs()
 
     def _make_folders(self):
         """make expected cache folders"""
@@ -159,39 +157,6 @@ class Command(BaseCommand):
         self.stdout.write("[7] setup snapshots")
         ElasticSnapshot().setup()
 
-    def _mig_app_settings(self) -> None:
-        """update from v0.4.13 to v0.5.0, migrate application settings"""
-        self.stdout.write("[MIGRATION] move appconfig to ES")
-        try:
-            config = RedisArchivist().get_message("config")
-        except ResponseError:
-            self.stdout.write(
-                self.style.SUCCESS("    Redis does not support JSON decoding")
-            )
-            return
-
-        if not config or config == {"status": False}:
-            self.stdout.write(
-                self.style.SUCCESS("    no config values to migrate")
-            )
-            return
-
-        path = "ta_config/_doc/appsettings"
-        response, status_code = ElasticWrap(path).post(config)
-
-        if status_code in [200, 201]:
-            self.stdout.write(
-                self.style.SUCCESS("    ✓ migrated appconfig to ES")
-            )
-            RedisArchivist().del_message("config", save=True)
-            return
-
-        message = "    🗙 failed to migrate app config"
-        self.stdout.write(self.style.ERROR(message))
-        self.stdout.write(response)
-        sleep(60)
-        raise CommandError(message)
-
     def _create_default_schedules(self) -> None:
         """create default schedules for new installations"""
         self.stdout.write("[8] create initial schedules")
@@ -293,70 +258,6 @@ class Command(BaseCommand):
             self.style.SUCCESS(f"      Status code: {status_code}")
         )
 
-    def _mig_channel_tags(self) -> None:
-        """update from v0.4.13 to v0.5.0, migrate incorrect data types"""
-        self.stdout.write("[MIGRATION] fix incorrect channel tags types")
-        path = "ta_channel/_update_by_query"
-        data = {
-            "query": {"match": {"channel_tags": False}},
-            "script": {
-                "source": "ctx._source.channel_tags = []",
-                "lang": "painless",
-            },
-        }
-        response, status_code = ElasticWrap(path).post(data)
-        if status_code in [200, 201]:
-            updated = response.get("updated")
-            if updated:
-                self.stdout.write(
-                    self.style.SUCCESS(f"    ✓ fixed {updated} channel tags")
-                )
-            else:
-                self.stdout.write(
-                    self.style.SUCCESS("    no channel tags needed fixing")
-                )
-            return
-
-        message = "    🗙 failed to fix channel tags"
-        self.stdout.write(self.style.ERROR(message))
-        self.stdout.write(response)
-        sleep(60)
-        raise CommandError(message)
-
-    def _mig_video_channel_tags(self) -> None:
-        """update from v0.4.13 to v0.5.0, migrate incorrect data types"""
-        self.stdout.write("[MIGRATION] fix incorrect video channel tags types")
-        path = "ta_video/_update_by_query"
-        data = {
-            "query": {"match": {"channel.channel_tags": False}},
-            "script": {
-                "source": "ctx._source.channel.channel_tags = []",
-                "lang": "painless",
-            },
-        }
-        response, status_code = ElasticWrap(path).post(data)
-        if status_code in [200, 201]:
-            updated = response.get("updated")
-            if updated:
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        f"    ✓ fixed {updated} video channel tags"
-                    )
-                )
-            else:
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        "    no video channel tags needed fixing"
-                    )
-                )
-            return
-
-        message = "    🗙 failed to fix video channel tags"
-        self.stdout.write(self.style.ERROR(message))
-        self.stdout.write(response)
-        sleep(60)
-        raise CommandError(message)
-
     def _mig_fix_download_channel_indexed(self) -> None:
         """migrate from v0.5.2 to 0.5.3, fix missing channel_indexed"""
         self.stdout.write("[MIGRATION] fix incorrect video channel tags types")
@@ -420,6 +321,40 @@ class Command(BaseCommand):
             return
 
         message = "    🗙 failed to set default playlist sort order"
+        self.stdout.write(self.style.ERROR(message))
+        self.stdout.write(response)
+        sleep(60)
+        raise CommandError(message)
+
+    def _mig_set_channel_tabs(self) -> None:
+        """migrate from 0.5.4 to 0.5.5 set initial channel tabs"""
+        self.stdout.write("[MIGRATION] set default channel_tabs")
+
+        path = "ta_channel/_update_by_query"
+        tabs = VideoTypeEnum.values_known()
+        data = {
+            "query": {
+                "bool": {"must_not": [{"exists": {"field": "channel_tabs"}}]}
+            },
+            "script": {
+                "source": f"ctx._source.channel_tabs = {tabs}",
+                "lang": "painless",
+            },
+        }
+        response, status_code = ElasticWrap(path).post(data)
+        if status_code in [200, 201]:
+            updated = response.get("updated")
+            if updated:
+                self.stdout.write(
+                    self.style.SUCCESS(f"    ✓ updated {updated} channels")
+                )
+            else:
+                self.stdout.write(
+                    self.style.SUCCESS("    no channels need updating")
+                )
+            return
+
+        message = "    🗙 failed to set default channel_tabs"
         self.stdout.write(self.style.ERROR(message))
         self.stdout.write(response)
         sleep(60)
