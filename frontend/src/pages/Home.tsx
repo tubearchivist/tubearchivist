@@ -74,7 +74,6 @@ export type VideoType = {
   tags: string[];
   title: string;
   vid_last_refresh: string;
-  vid_thumb_base64: boolean;
   vid_thumb_url: string;
   vid_type: string;
   youtube_id: string;
