@@ -56,7 +56,7 @@ class Video(AggBase):
         """process aggregation"""
         aggregations = self.get()
         if not aggregations:
-            return None
+            return 0
 
         duration = int(aggregations["duration"]["value"])
         response = {
@@ -112,7 +112,7 @@ class Channel(AggBase):
         """process aggregation"""
         aggregations = self.get()
         if not aggregations:
-            return None
+            return 0
 
         response = {
             "doc_count": aggregations["channel_count"].get("value"),
@@ -145,7 +145,7 @@ class Playlist(AggBase):
         """process aggregation"""
         aggregations = self.get()
         if not aggregations:
-            return None
+            return 0
 
         response = {"doc_count": aggregations["playlist_count"].get("value")}
         for bucket in aggregations["playlist_active"]["buckets"]:
@@ -179,7 +179,7 @@ class Download(AggBase):
         aggregations = self.get()
         response = {}
         if not aggregations:
-            return None
+            return 0
 
         for bucket in aggregations["status"]["buckets"]:
             response.update({bucket["key"]: bucket.get("doc_count")})
@@ -221,7 +221,7 @@ class WatchProgress(AggBase):
         aggregations = self.get()
         response = {}
         if not aggregations:
-            return None
+            return 0
 
         buckets = aggregations[self.name]["buckets"]
         all_duration = int(aggregations["total_duration"].get("value"))
@@ -300,7 +300,7 @@ class DownloadHist(AggBase):
         """process query"""
         aggregations = self.get()
         if not aggregations:
-            return None
+            return 0
 
         buckets = aggregations[self.name]["buckets"]
 
@@ -350,7 +350,7 @@ class BiggestChannel(AggBase):
 
         aggregations = self.get()
         if not aggregations:
-            return None
+            return 0
 
         buckets = aggregations[self.name]["buckets"]
 
