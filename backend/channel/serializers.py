@@ -4,6 +4,7 @@
 
 from common.serializers import PaginationSerializer, ValidateUnknownFieldsMixin
 from rest_framework import serializers
+from video.src.constants import VideoTypeEnum
 
 
 class ChannelOverwriteSerializer(
@@ -44,6 +45,9 @@ class ChannelSerializer(serializers.Serializer):
     channel_subscribed = serializers.BooleanField()
     channel_tags = serializers.ListField(
         child=serializers.CharField(), required=False
+    )
+    channel_tabs = serializers.ListField(
+        child=serializers.ChoiceField(VideoTypeEnum.values_known())
     )
     channel_views = serializers.IntegerField()
     _index = serializers.CharField(required=False)
