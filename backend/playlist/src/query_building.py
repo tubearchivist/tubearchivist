@@ -45,7 +45,7 @@ class QueryBuilder:
 
         type_parsed = getattr(PlaylistTypesEnum, playlist_type.upper()).value
 
-        return {"match": {"playlist_type.keyword": type_parsed}}
+        return {"match": {"playlist_types": type_parsed}}
 
     def parse_sort(self) -> dict:
         """return sort"""

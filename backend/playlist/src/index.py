@@ -325,6 +325,7 @@ class YoutubePlaylist(YouTubeItem):
         self.delete_metadata()
 
     def create(self, name):
+        """create custom playlist"""
         self.json_data = {
             "playlist_id": self.youtube_id,
             "playlist_active": False,
@@ -337,6 +338,7 @@ class YoutubePlaylist(YouTubeItem):
             "playlist_description": False,
             "playlist_thumbnail": False,
             "playlist_subscribed": False,
+            "playlist_sort_order": "top",
         }
         self.upload_to_es()
         self.get_playlist_art()

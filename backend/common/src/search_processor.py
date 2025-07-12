@@ -160,6 +160,7 @@ class SearchProcess:
                 "playlist_last_refresh": playlist_last_refresh,
             }
         )
+        print(playlist_dict)
 
         return dict(sorted(playlist_dict.items()))
 
