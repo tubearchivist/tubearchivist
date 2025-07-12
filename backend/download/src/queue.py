@@ -165,7 +165,7 @@ class PendingList(PendingIndex):
         else:
             raise ValueError(f"invalid url_type: {entry}")
 
-    def _add_video(self, url, vid_type):
+    def _add_video(self, url, vid_type) -> dict | None:
         """add video to list"""
         if self.auto_start and url in set(
             i["youtube_id"] for i in self.all_pending
@@ -175,10 +175,11 @@ class PendingList(PendingIndex):
 
         if url in self.missing_videos or url in self.to_skip:
             print(f"{url}: skipped adding already indexed video to download.")
-        else:
-            to_add = self._parse_video(url, vid_type)
-            if to_add:
-                self.missing_videos.append(to_add)
+            return None
+
+        to_add = self._parse_video(url, vid_type)
+        if to_add:
+            self.missing_videos.append(to_add)
 
         return to_add
 
