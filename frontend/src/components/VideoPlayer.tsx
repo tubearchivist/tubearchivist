@@ -111,6 +111,8 @@ type VideoPlayerProps = {
   autoplay?: boolean;
   onWatchStateChanged?: (status: boolean) => void;
   onVideoEnd?: () => void;
+  seekToTimestamp?: number;
+  setSeekToTimestamp?: (timestamp: number | undefined) => void;
 };
 
 const VideoPlayer = ({
@@ -120,8 +122,29 @@ const VideoPlayer = ({
   autoplay = false,
   onWatchStateChanged,
   onVideoEnd,
+  seekToTimestamp,
+  setSeekToTimestamp,
 }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    if (seekToTimestamp === undefined || !videoRef.current) {
+      return;
+    }
+
+    const videoDuration = videoRef.current.duration;
+    if (isNaN(videoDuration) || seekToTimestamp > videoDuration) {
+      return;
+    }
+
+    videoRef.current.currentTime = seekToTimestamp;
+
+    if (videoRef.current.paused) {
+      videoRef.current.play();
+    }
+    if (setSeekToTimestamp) setSeekToTimestamp(undefined);
+    window.scroll(0, 0);
+  }, [seekToTimestamp]);
 
   const [searchParams] = useSearchParams();
   const searchParamVideoProgress = searchParams.get('t');

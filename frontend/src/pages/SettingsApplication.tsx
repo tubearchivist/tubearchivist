@@ -41,7 +41,9 @@ const SettingsApplication = () => {
   const [videoPageSize, setVideoPageSize] = useState<number | null>(null);
   const [livePageSize, setLivePageSize] = useState<number | null>(null);
   const [shortPageSize, setShortPageSize] = useState<number | null>(null);
+  const [playlistPageSize, setPlaylistPageSize] = useState<number | null>(null);
   const [isAutostart, setIsAutostart] = useState<boolean>(false);
+  const [isExtractFlat, setIsExtractFlat] = useState<boolean>(false);
 
   // Downloads
   const [currentDownloadSpeed, setCurrentDownloadSpeed] = useState<number | null>(null);
@@ -97,7 +99,9 @@ const SettingsApplication = () => {
     setVideoPageSize(appSettingsConfigData?.subscriptions.channel_size || null);
     setLivePageSize(appSettingsConfigData?.subscriptions.live_channel_size || null);
     setShortPageSize(appSettingsConfigData?.subscriptions.shorts_channel_size || null);
+    setPlaylistPageSize(appSettingsConfigData?.subscriptions.playlist_size || null);
     setIsAutostart(appSettingsConfigData?.subscriptions.auto_start || false);
+    setIsExtractFlat(appSettingsConfigData?.subscriptions.extract_flat || false);
 
     // Downloads
     setCurrentDownloadSpeed(appSettingsConfigData?.downloads.limit_speed || null);
@@ -212,6 +216,10 @@ const SettingsApplication = () => {
                       Autostart automatically starts downloading videos from subscriptions with
                       priority.
                     </li>
+                    <li>
+                      Fast add extracts and adds videos in bulk. That is much faster but is not able
+                      to extract as much metadata during adding to the queue.
+                    </li>
                   </ul>
                 </div>
               )}
@@ -256,11 +264,34 @@ const SettingsApplication = () => {
               </div>
               <div className="settings-box-wrapper">
                 <div>
+                  <p>Playlist page size</p>
+                </div>
+                <InputConfig
+                  type="number"
+                  name="subscriptions.playlist_size"
+                  value={playlistPageSize}
+                  setValue={setPlaylistPageSize}
+                  oldValue={appSettingsConfig?.subscriptions.playlist_size}
+                  updateCallback={handleUpdateConfig}
+                />
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
                   <p>Autostart download subscriptions</p>
                 </div>
                 <ToggleConfig
                   name="subscriptions.auto_start"
                   value={isAutostart}
+                  updateCallback={handleUpdateConfig}
+                />
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Fast add</p>
+                </div>
+                <ToggleConfig
+                  name="subscriptions.extract_flat"
+                  value={isExtractFlat}
                   updateCallback={handleUpdateConfig}
                 />
               </div>

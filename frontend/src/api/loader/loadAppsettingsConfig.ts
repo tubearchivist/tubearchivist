@@ -5,7 +5,9 @@ export type AppSettingsConfigType = {
     channel_size: number | null;
     live_channel_size: number | null;
     shorts_channel_size: number | null;
+    playlist_size: number | null;
     auto_start: boolean;
+    extract_flat: boolean;
   };
   downloads: {
     limit_speed: number | null;

@@ -56,7 +56,7 @@ class ElasticWrap:
         return response.json(), response.status_code
 
     def post(
-        self, data: bool | dict = False, ndjson: bool = False
+        self, data: bool | dict | str = False, ndjson: bool = False
     ) -> tuple[dict, int]:
         """post data to es"""
 

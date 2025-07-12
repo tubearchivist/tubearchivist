@@ -133,6 +133,17 @@ button:hover {
   color: var(--main-bg);
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+button:disabled:hover {
+  background-color: var(--accent-font-dark);
+  transform: none;
+  color: #ffffff;
+}
+
 .video-item.table {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -987,6 +998,12 @@ video:-webkit-full-screen {
   width: 20px;
   margin-left: 5px;
   filter: var(--img-filter-error);
+}
+
+.timestamp-link {
+  color: var(--accent-font-light);
+  cursor: pointer;
+  font-weight: bold;
 }
 
 /* multi search page */

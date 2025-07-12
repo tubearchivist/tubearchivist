@@ -461,6 +461,15 @@
                 "playlist_description": {
                     "type": "text"
                 },
+                "playlist_subscribed": {
+                    "type": "boolean"
+                },
+                "playlist_type": {
+                    "type": "keyword"
+                },
+                "playlist_active": {
+                    "type": "boolean"
+                },
                 "playlist_name": {
                     "type": "text",
                     "analyzer": "english",
@@ -496,6 +505,9 @@
                 "playlist_last_refresh": {
                     "type": "date",
                     "format": "epoch_second"
+                },
+                "playlist_sort_order": {
+                    "type": "keyword"
                 },
                 "playlist_entries": {
                     "properties": {

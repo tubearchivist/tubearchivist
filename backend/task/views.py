@@ -15,6 +15,7 @@ from task.serializers import (
     TaskIDDataSerializer,
     TaskNotificationPostSerializer,
     TaskNotificationSerializer,
+    TaskNotificationTestSerializer,
     TaskResultSerializer,
 )
 from task.src.config_schedule import CrontabValidator, ScheduleBuilder
@@ -343,3 +344,34 @@ class ScheduleNotification(ApiBaseView):
             Notifications(task_name).remove_task()
 
         return Response(status=204)
+
+
+class NotificationTestView(ApiBaseView):
+    """resolves to /api/task/notification/test/
+    POST: test notification url
+    """
+
+    @extend_schema(
+        request=TaskNotificationTestSerializer(),
+        responses={
+            200: OpenApiResponse(description="test notification sent"),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="bad request"
+            ),
+        },
+    )
+    def post(self, request):
+        """test notification"""
+        data_serializer = TaskNotificationTestSerializer(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+
+        url = validated_data["url"]
+        task_name = validated_data.get("task_name", "manual_test")
+
+        success, message = Notifications(task_name).test(url)
+
+        status = 200 if success else 400
+        return Response(
+            {"success": success, "message": message}, status=status
+        )

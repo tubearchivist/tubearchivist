@@ -265,7 +265,7 @@ class ValidatorCallback:
     def run(self):
         """run the task for page"""
         print(f"{self.index_name}: validate artwork")
-        if self.index_name == "ta_video":
+        if self.index_name in ["ta_video", "ta_download"]:
             self._validate_videos()
         elif self.index_name == "ta_channel":
             self._validate_channels()
@@ -324,6 +324,13 @@ class ThumbValidator:
                 "_source": ["playlist_id", "playlist_thumbnail"],
             },
             "name": "ta_playlist",
+        },
+        {
+            "data": {
+                "query": {"term": {"status": {"value": "pending"}}},
+                "_source": ["youtube_id", "vid_thumb_url"],
+            },
+            "name": "ta_download",
         },
     ]
 

@@ -24,7 +24,7 @@ class Command(BaseCommand):
     """command framework"""
 
     TIMEOUT = 120
-    MIN_MAJOR, MAX_MAJOR = 8, 8
+    MIN_MAJOR, MAX_MAJOR = 8, 9
     MIN_MINOR = 0
 
     # pylint: disable=no-member

@@ -103,8 +103,11 @@ def requests_headers() -> dict[str, str]:
     return {"User-Agent": template}
 
 
-def date_parser(timestamp: int | str) -> str:
+def date_parser(timestamp: int | str | None) -> str | None:
     """return formatted date string"""
+    if timestamp is None:
+        return None
+
     if isinstance(timestamp, int):
         date_obj = datetime.fromtimestamp(timestamp, tz=timezone.utc)
     elif isinstance(timestamp, str):
@@ -152,9 +155,13 @@ def is_shorts(youtube_id: str) -> bool:
     """check if youtube_id is a shorts video, bot not it it's not a shorts"""
     shorts_url = f"https://www.youtube.com/shorts/{youtube_id}"
     cookies = {"SOCS": "CAI"}
-    response = requests.head(
-        shorts_url, cookies=cookies, headers=requests_headers(), timeout=10
-    )
+    try:
+        response = requests.head(
+            shorts_url, cookies=cookies, headers=requests_headers(), timeout=10
+        )
+    except requests.exceptions.RequestException:
+        # assume video on error
+        return False
 
     return response.status_code == 200
 
@@ -184,11 +191,12 @@ def get_duration_sec(file_path: str) -> int:
     return duration_sec
 
 
-def get_duration_str(seconds: int) -> str:
+def get_duration_str(seconds: int | float) -> str:
     """Return a human-readable duration string from seconds."""
     if not seconds:
         return "NA"
 
+    seconds = int(seconds)
     units = [("y", 31536000), ("d", 86400), ("h", 3600), ("m", 60), ("s", 1)]
     duration_parts = []
 
@@ -282,6 +290,50 @@ def get_channel_overwrites() -> dict[str, dict[str, Any]]:
     overwrites = {i["channel_id"]: i["channel_overwrites"] for i in result}
 
     return overwrites
+
+
+def get_channels(
+    subscribed_only: bool, source: list[str] | None = None
+) -> list[dict]:
+    """get a list of all channels"""
+    data = {
+        "sort": [{"channel_name.keyword": {"order": "asc"}}],
+    }
+    if subscribed_only:
+        query = {"term": {"channel_subscribed": {"value": True}}}
+    else:
+        query = {"match_all": {}}
+
+    data["query"] = query  # type: ignore
+
+    if source:
+        data["_source"] = source  # type: ignore
+
+    all_channels = IndexPaginate("ta_channel", data).get_results()
+
+    return all_channels
+
+
+def get_playlists(
+    subscribed_only: bool, source: list[str] | None = None
+) -> list[dict]:
+    """get list of playlists"""
+
+    data = {
+        "sort": [{"playlist_channel.keyword": {"order": "desc"}}],
+    }
+
+    must_list = [{"term": {"playlist_active": {"value": True}}}]
+    if subscribed_only:
+        must_list.append({"term": {"playlist_subscribed": {"value": True}}})
+
+    data = {"query": {"bool": {"must": must_list}}}  # type: ignore
+    if source:
+        data["_source"] = source  # type: ignore
+
+    all_playlists = IndexPaginate("ta_playlist", data).get_results()
+
+    return all_playlists
 
 
 def calc_is_watched(duration: float, position: float) -> bool:
