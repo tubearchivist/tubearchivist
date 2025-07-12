@@ -37,7 +37,7 @@ Please read this carefully before opening any [issue](https://github.com/tubearc
 - Do respond to questions within a day or two so issues can progress. If the issue doesn't move forward due to a lack of response, we'll assume it's solved and we'll close it after some time to keep the list fresh.
 
 **Don't**:
-- Don't open *duplicates*, that includes open and closed issues.
+- Don't open *duplicates*, that includes open and closed issues. Also don't post the same issue on multiple platforms, that makes it unnecessarily hard for maintainers to keep up.
 - Don't open an issue for something that's already on the [roadmap](https://github.com/tubearchivist/tubearchivist#roadmap), this needs your help to implement it, not another issue.
 - Don't open an issue for something that's a [known limitation](https://github.com/tubearchivist/tubearchivist#known-limitations). These are *known* by definition and don't need another reminder. Some limitations may be solved in the future, maybe by you?
 - Don't overwrite the *issue template*, they are there for a reason. Overwriting that shows that you don't really care about this project. It shows that you have a misunderstanding how open source collaboration works and just want to push your ideas through. Overwriting the template may result in a ban.
@@ -65,7 +65,7 @@ IMPORTANT: When receiving help, contribute back to the community by improving th
 
 ## How to make a Pull Request
 
-Thank you for contributing and helping improve this project. Focus for the foreseeable future is on improving and building on existing functionality, *not* on adding and expanding the application.
+Focus for the foreseeable future is on improving and building on existing functionality, *not* on adding and expanding the application.
 
 This is a quick checklist to help streamline the process:
 
@@ -107,7 +107,7 @@ Beyond that, general rules to consider:
 
 - Maintainability is key: It's not just about implementing something and being done with it, it's about maintaining it, fixing bugs as they occur, improving on it and supporting it in the long run.
 - Others can do it better: Some problems have been solved by very talented developers. These things don't need to be reinvented again here in this project.
-- Develop for the 80%: New features and additions *should* be beneficial for 80% of the users. If you are trying to solve your own problem that only applies to you, maybe that would be better to do in your own fork or if possible by a standalone implementation using the API.
+- Develop for the 80%: New features and additions *should* be beneficial for 80% of the users. If you are trying to solve your own problem that only apply to you, maybe that would be better to do in your own fork or if possible by a standalone implementation using the API.
 - If all of that sounds too strict for you, as stated above, start becoming a regular contributor to this project.
 
 ---
@@ -133,7 +133,7 @@ The documentation available at [docs.tubearchivist.com](https://docs.tubearchivi
 This codebase is set up to be developed natively outside of docker as well as in a docker container. Developing outside of a docker container can be convenient, as IDE and hot reload usually works out of the box. But testing inside of a container is still essential, as there are subtle differences, especially when working with the filesystem and networking between containers.
 
 Note:
-- Subtitles currently fail to load with `DJANGO_DEBUG=True`, that is due to incorrect `Content-Type` error set by Django's static file implementation. That's only if you run the Django dev server, Nginx sets the correct headers.
+- Subtitles currently fail to load with `DJANGO_DEBUG=True`, that is due to incorrect `Content-Type` error set by Django's static file implementation. That's only if you run the Django dev server, Nginx sets the correct headers in the container.
 
 ### Native Instruction
 
@@ -183,12 +183,6 @@ And the frontend should be available at [localhost:3000](localhost:3000).
 
 ### Docker Instructions
 
-Set up docker on your development machine.
-
-Clone this repository.
-
-Functional changes should be made against the unstable `testing` branch, so check that branch out, then make a new branch for your work.
-
 Edit the `docker-compose.yml` file and replace the [`image: bbilly1/tubearchivist` line](https://github.com/tubearchivist/tubearchivist/blob/4af12aee15620e330adf3624c984c3acf6d0ac8b/docker-compose.yml#L7) with `build: .`. Also make any other changes to the environment variables and so on necessary to run the application, just like you're launching the application as normal.
 
 Run `docker compose up --build`. This will bring up the application. Kill it with `ctrl-c` or by running `docker compose down` from a new terminal window in the same directory.
@@ -212,7 +206,7 @@ You may find it nice to run everything inside of a VM for complete environment s
 ### Working with Elasticsearch
 Additionally to the required services as listed in the example docker-compose file, the **Dev Tools** of [Kibana](https://www.elastic.co/guide/en/kibana/current/docker.html) are invaluable for running and testing Elasticsearch queries.
 
-**Quick start**
+**Quick start**  
 Generate your access token in Elasitcsearch:
 ```bash
 bin/elasticsearch-service-tokens create elastic/kibana kibana
@@ -233,7 +227,7 @@ services:
 
 If you want to run queries on the Elasticsearch container directly from your host with for example `curl` or something like *postman*, you might want to **publish** the port 9200 instead of just **exposing** it.
 
-**Persist Token**
+**Persist Token**  
 The token will get stored in ES in the `config` folder, and not in the `data` folder. To persist the token between ES container rebuilds, you'll need to persist the config folder as an additional volume:
 
 1. Create the token as described above

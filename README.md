@@ -91,13 +91,13 @@ All environment variables are explained in detail in the docs [here](https://doc
 
 
 ## Update
-Always use the *latest* (the default) or a named semantic version tag for the docker images. The *unstable* tags are only for your testing environment, there might not be an update path for these testing builds.
+Always use the *latest* (the default) or a named semantic version tag for the docker images. The *unstable* tags see [CONTRIBUTING.md#beta-testing](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#beta-testing).
 
-You will see the current version number of **Tube Archivist** in the footer of the interface. There is a daily version check task querying tubearchivist.com, notifying you of any new releases in the footer. To update, you need to update the docker images, the method for which will depend on your platform. For example, if you're using `docker-compose`, run `docker-compose pull` and then restart with `docker-compose up -d`. After updating, check the footer to verify you are running the expected version.
+You will see the current version number of **Tube Archivist** in the footer of the interface. There is a daily version check task querying tubearchivist.com, notifying you of any new releases in the footer. After updating, check the footer to verify you are running the expected version.
 
-  - This project is tested for updates between one or two releases maximum. Further updates back may or may not be supported and you might have to reset your index and configurations to update. Ideally apply new updates at least once per month.
+  - This project is tested for updates between one or two releases maximum. Further updates back may or may not be supported. Ideally apply new updates at least once per month.
   - There can be breaking changes between updates, particularly as the application grows, new environment variables or settings might be required for you to set in the your docker-compose file. *Always* check the **release notes**: Any breaking changes will be marked there.
-  - All testing and development is done with the Elasticsearch version number as mentioned in the provided *docker-compose.yml* file. This will be updated when a new release of Elasticsearch is available. Running an older version of Elasticsearch is most likely not going to result in any issues, but it's still recommended to run the same version as mentioned. Use `bbilly1/tubearchivist-es` to automatically get the recommended version.
+  - All testing and development is done with the Elasticsearch version number as mentioned in the provided *docker-compose.yml* file. This will be updated from time to time. Running an older version of Elasticsearch is most likely not going to result in any issues, but it's still recommended to run the same version as mentioned. Use `bbilly1/tubearchivist-es` to automatically get the recommended version.
 
 ## Getting Started
 1. Go through the **settings** page and look at the available options. Particularly set *Download Format* to your desired video quality before downloading. **Tube Archivist** downloads the best available quality by default. To support iOS or MacOS and some other browsers a compatible format must be specified. For example:
