@@ -210,7 +210,7 @@ class PendingList(PendingIndex):
         total = len(video_results)
         for idx, video_data in enumerate(video_results, start=1):
             to_add = self.__parse_channel_video(
-                video_data, vid_type, channel_handler
+                video_data, vid_type, channel_handler.json_data
             )
             if self.task and self.task.is_stopped():
                 break
@@ -227,7 +227,7 @@ class PendingList(PendingIndex):
             )
 
     def __parse_channel_video(
-        self, video_data, vid_type, channel_handler
+        self, video_data, vid_type, channel_json
     ) -> dict | None:
         """parse video of channel"""
         video_id = video_data["id"]
@@ -235,8 +235,8 @@ class PendingList(PendingIndex):
             return None
 
         # fallback
-        channel_name = channel_handler.json_data["channel_name"]
-        channel_id = channel_handler.json_data["channel_id"]
+        channel_name = channel_json["channel_name"]
+        channel_id = channel_json["channel_id"]
 
         if self.flat:
             if not video_data.get("channel"):
