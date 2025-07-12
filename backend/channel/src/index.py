@@ -7,12 +7,14 @@ functionality:
 import os
 from datetime import datetime
 
+from channel.src.remote_query import get_last_channel_videos
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
 from common.src.helper import rand_sleep
 from common.src.index_generic import YouTubeItem
 from download.src.thumbnails import ThumbManager
 from download.src.yt_dlp_base import YtWrap
+from video.src.constants import VideoTypeEnum
 
 
 class YoutubeChannel(YouTubeItem):
@@ -68,6 +70,7 @@ class YoutubeChannel(YouTubeItem):
             "channel_thumb_url": self._get_thumb_art(),
             "channel_tvart_url": self._get_tv_art(),
             "channel_views": self.youtube_meta.get("view_count") or 0,
+            "channel_tabs": self.get_channel_tabs(),
         }
 
     def _get_thumb_art(self):
@@ -102,6 +105,31 @@ class YoutubeChannel(YouTubeItem):
                 return i["url"]
 
         return False
+
+    def get_channel_tabs(self) -> list[str]:
+        """get channel tabs"""
+        tabs = VideoTypeEnum.values_known()
+        config_cp = self.config.copy()
+        config_cp["subscriptions"] = {
+            "channel_size": 1,
+            "live_channel_size": 1,
+            "shorts_channel_size": 1,
+        }
+        tabs = []
+        for query_filter in VideoTypeEnum:
+            if query_filter == VideoTypeEnum.UNKNOWN:
+                continue
+
+            videos = get_last_channel_videos(
+                channel_id=self.youtube_id,
+                config=config_cp,
+                limit=True,
+                query_filter=query_filter,
+            )
+            if videos:
+                tabs.append(query_filter.value)
+
+        return tabs
 
     def _video_fallback(self, fallback):
         """use video metadata as fallback"""

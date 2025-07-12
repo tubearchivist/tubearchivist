@@ -12,7 +12,9 @@ class VideoQueryBuilder:
         self.channel_overwrites = channel_overwrites or {}
 
     def build_queries(
-        self, video_type: VideoTypeEnum | None, limit: bool = True
+        self,
+        video_type: VideoTypeEnum | list[VideoTypeEnum] | None,
+        limit: bool = True,
     ) -> list[tuple[VideoTypeEnum, int | None]]:
         """Build queries for all or specific video type."""
         query_methods = {
@@ -22,13 +24,21 @@ class VideoQueryBuilder:
         }
 
         if video_type:
-            # build query for specific type
-            query_method = query_methods.get(video_type)
-            if query_method:
+            # build query for specific type/s
+            if not isinstance(video_type, list):
+                video_type = [video_type]
+
+            queries = []
+            for video_type_item in video_type:
+                query_method = query_methods.get(video_type_item)
+                if not query_method:
+                    continue
+
                 query = query_method(limit)
                 if query[1] != 0:
-                    return [query]
-                return []
+                    queries.append(query)
+
+            return queries
 
         # Build and return queries for all video types
         queries = []

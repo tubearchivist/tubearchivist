@@ -23,6 +23,7 @@ from task.models import CustomPeriodicTask
 from task.src.config_schedule import ScheduleBuilder
 from task.src.task_manager import TaskManager
 from task.tasks import version_check
+from video.src.constants import VideoTypeEnum
 
 TOPIC = """
 
@@ -53,6 +54,7 @@ class Command(BaseCommand):
         self._init_app_config()
         self._mig_fix_download_channel_indexed()
         self._mig_add_default_playlist_sort()
+        self._mig_set_channel_tabs()
 
     def _make_folders(self):
         """make expected cache folders"""
@@ -319,6 +321,40 @@ class Command(BaseCommand):
             return
 
         message = "    🗙 failed to set default playlist sort order"
+        self.stdout.write(self.style.ERROR(message))
+        self.stdout.write(response)
+        sleep(60)
+        raise CommandError(message)
+
+    def _mig_set_channel_tabs(self) -> None:
+        """migrate from 0.5.4 to 0.5.5 set initial channel tabs"""
+        self.stdout.write("[MIGRATION] set default channel_tabs")
+
+        path = "ta_channel/_update_by_query"
+        tabs = VideoTypeEnum.values_known()
+        data = {
+            "query": {
+                "bool": {"must_not": [{"exists": {"field": "channel_tabs"}}]}
+            },
+            "script": {
+                "source": f"ctx._source.channel_tabs = {tabs}",
+                "lang": "painless",
+            },
+        }
+        response, status_code = ElasticWrap(path).post(data)
+        if status_code in [200, 201]:
+            updated = response.get("updated")
+            if updated:
+                self.stdout.write(
+                    self.style.SUCCESS(f"    ✓ updated {updated} channels")
+                )
+            else:
+                self.stdout.write(
+                    self.style.SUCCESS("    no channels need updating")
+                )
+            return
+
+        message = "    🗙 failed to set default channel_tabs"
         self.stdout.write(self.style.ERROR(message))
         self.stdout.write(response)
         sleep(60)
