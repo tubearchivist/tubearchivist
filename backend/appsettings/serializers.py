@@ -21,10 +21,14 @@ class AppConfigSubSerializer(
 ):
     """serialize app config subscriptions"""
 
-    channel_size = serializers.IntegerField(required=False)
-    live_channel_size = serializers.IntegerField(required=False)
-    shorts_channel_size = serializers.IntegerField(required=False)
-    playlist_size = serializers.IntegerField(required=False)
+    channel_size = serializers.IntegerField(required=False, allow_null=True)
+    live_channel_size = serializers.IntegerField(
+        required=False, allow_null=True
+    )
+    shorts_channel_size = serializers.IntegerField(
+        required=False, allow_null=True
+    )
+    playlist_size = serializers.IntegerField(required=False, allow_null=True)
     auto_start = serializers.BooleanField(required=False)
     extract_flat = serializers.BooleanField(required=False)
 

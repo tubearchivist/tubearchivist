@@ -34,28 +34,7 @@ class ChannelSubscription:
         if not all_channels:
             return 0
 
-        all_channel_urls: list[ParsedURLType] = []
-
-        for channel in all_channels:
-            channel_tabs = channel["channel_tabs"]
-            if not channel_tabs:
-                continue
-
-            enum = [getattr(VideoTypeEnum, i.upper()) for i in channel_tabs]
-            queries = VideoQueryBuilder(
-                config=self.config,
-                channel_overwrites=channel.get("channel_overwrites", {}),
-            ).build_queries(video_type=enum)
-
-            for query in queries:
-                all_channel_urls.append(
-                    ParsedURLType(
-                        type="channel",
-                        url=channel["channel_id"],
-                        vid_type=query[0],
-                        limit=query[1],
-                    )
-                )
+        all_channel_urls = self._process_channel_urls(all_channels)
 
         if self.task:
             self.task.send_progress([f"Scanning {len(all_channels)} channels"])
@@ -69,6 +48,34 @@ class ChannelSubscription:
         added = pending_handler.parse_url_list()
 
         return added
+
+    def _process_channel_urls(self, all_channels: list[dict]):
+        """process channels, build queries"""
+
+        all_channel_urls: list[ParsedURLType] = []
+
+        for channel in all_channels:
+            channel_tabs = channel["channel_tabs"]
+            if not channel_tabs:
+                continue
+
+            enums = [getattr(VideoTypeEnum, i.upper()) for i in channel_tabs]
+            queries = VideoQueryBuilder(
+                config=self.config,
+                channel_overwrites=channel.get("channel_overwrites", {}),
+            ).build_queries(video_type=enums)
+
+            for query in queries:
+                all_channel_urls.append(
+                    ParsedURLType(
+                        type="channel",
+                        url=channel["channel_id"],
+                        vid_type=query[0],
+                        limit=query[1],
+                    )
+                )
+
+        return all_channel_urls
 
 
 class PlaylistSubscription:

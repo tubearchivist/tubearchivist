@@ -381,7 +381,11 @@ class PendingList(PendingIndex):
 
     def __extract_vid_type(self, video_data) -> str:
         """build vid type"""
-        if "vid_type" in video_data:
+        if (
+            "vid_type" in video_data
+            and video_data["vid_type"]
+            and str(video_data["vid_type"]) in VideoTypeEnum.values_known()
+        ):
             return str(video_data["vid_type"])
 
         if video_data.get("live_status") == "was_live":
