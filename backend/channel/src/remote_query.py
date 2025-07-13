@@ -84,7 +84,9 @@ class VideoQueryBuilder:
         limit: bool,
     ) -> tuple[VideoTypeEnum, int | None]:
         """Generic query for video page scraping."""
-        if not limit:
+        app_config_size = self.config["subscriptions"].get(config_key)
+        if not limit or app_config_size is None:
+            # treat None as unlimited
             return (video_type, None)
 
         if (
@@ -94,8 +96,8 @@ class VideoQueryBuilder:
             overwrite = self.channel_overwrites[overwrite_key]
             return (video_type, overwrite)
 
-        if overwrite := self.config["subscriptions"].get(config_key):
-            return (video_type, overwrite)
+        if app_config_size:
+            return (video_type, app_config_size)
 
         return (video_type, 0)
 

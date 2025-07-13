@@ -96,9 +96,9 @@ const SettingsApplication = () => {
     const { data: cookieStateResponseData } = cookieStateResponse ?? {};
 
     // Subscriptions
-    setVideoPageSize(appSettingsConfigData?.subscriptions.channel_size || null);
-    setLivePageSize(appSettingsConfigData?.subscriptions.live_channel_size || null);
-    setShortPageSize(appSettingsConfigData?.subscriptions.shorts_channel_size || null);
+    setVideoPageSize(appSettingsConfigData?.subscriptions.channel_size ?? null);
+    setLivePageSize(appSettingsConfigData?.subscriptions.live_channel_size ?? null);
+    setShortPageSize(appSettingsConfigData?.subscriptions.shorts_channel_size ?? null);
     setPlaylistPageSize(appSettingsConfigData?.subscriptions.playlist_size || null);
     setIsAutostart(appSettingsConfigData?.subscriptions.auto_start || false);
     setIsExtractFlat(appSettingsConfigData?.subscriptions.extract_flat || false);
