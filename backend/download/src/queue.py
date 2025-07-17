@@ -386,7 +386,7 @@ class PendingList(PendingIndex):
             and video_data["vid_type"]
             and str(video_data["vid_type"]) in VideoTypeEnum.values_known()
         ):
-            return str(video_data["vid_type"])
+            return VideoTypeEnum(video_data["vid_type"]).value
 
         if video_data.get("live_status") == "was_live":
             return VideoTypeEnum.STREAMS.value
