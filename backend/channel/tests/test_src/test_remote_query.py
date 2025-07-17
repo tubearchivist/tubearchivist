@@ -77,6 +77,17 @@ def test_build_multiple_queries(default_config, empty_overwrites):
     assert result == [(VideoTypeEnum.VIDEOS, 5), (VideoTypeEnum.SHORTS, 2)]
 
 
+def test_build_unknown_queries(default_config, empty_overwrites):
+    """vid_type unknown"""
+    builder = VideoQueryBuilder(default_config, empty_overwrites)
+    result = builder.build_queries(VideoTypeEnum.UNKNOWN)
+    assert result == [
+        (VideoTypeEnum.VIDEOS, 5),
+        (VideoTypeEnum.STREAMS, 3),
+        (VideoTypeEnum.SHORTS, 2),
+    ]
+
+
 def test_overwrite_applied(default_config, overwrites):
     """with overwrite from channel config"""
     builder = VideoQueryBuilder(default_config, overwrites)

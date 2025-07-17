@@ -23,7 +23,7 @@ class VideoQueryBuilder:
             VideoTypeEnum.SHORTS: self.shorts_query,
         }
 
-        if video_type:
+        if video_type and video_type != VideoTypeEnum.UNKNOWN:
             # build query for specific type/s
             if not isinstance(video_type, list):
                 video_type = [video_type]
