@@ -1,5 +1,4 @@
 import { useOutletContext, useParams } from 'react-router-dom';
-import Notifications from '../components/Notifications';
 import PlaylistList from '../components/PlaylistList';
 import { useEffect, useState } from 'react';
 import { OutletContextType } from './Base';
@@ -58,8 +57,6 @@ const ChannelPlaylist = () => {
       <title>TA | Channel: Playlists</title>
       <ScrollToTopOnNavigate />
       <div className="boxed-content">
-        <Notifications pageName="channel" includeReindex={true} />
-
         <div className="view-controls">
           <div className="toggle">
             <span>Show subscribed only:</span>
