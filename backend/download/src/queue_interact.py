@@ -30,15 +30,28 @@ class PendingInteract:
         _, _ = ElasticWrap(path).post(data=data)
 
     def update_bulk(
-        self, channel_id: str | None, vid_type: str | None, new_status: str
+        self,
+        channel_id: str | None,
+        vid_type: str | None,
+        new_status: str,
+        error: bool | None = None,
     ):
         """update status in bulk"""
         must_list = [{"term": {"status": {"value": self.status}}}]
+        must_not_list = []
+
         if channel_id:
             must_list.append({"term": {"channel_id": {"value": channel_id}}})
 
         if vid_type:
             must_list.append({"term": {"vid_type": {"value": vid_type}}})
+
+        if error is not None:
+            exists = {"exists": {"field": "message"}}
+            if error:
+                must_list.append(exists)  # type: ignore
+            else:
+                must_not_list.append(exists)
 
         if new_status == "priority":
             source = """
@@ -46,11 +59,13 @@ class PendingInteract:
             ctx._source.auto_start = true;
             ctx._source.message = null;
             """
+        elif new_status == "clear_error":
+            source = "ctx._source.message = null"
         else:
             source = f"ctx._source.status = '{new_status}'"
 
         data = {
-            "query": {"bool": {"must": must_list}},
+            "query": {"bool": {"must": must_list, "must_not": must_not_list}},
             "script": {"source": source, "lang": "painless"},
         }
 

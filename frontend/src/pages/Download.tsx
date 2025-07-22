@@ -162,6 +162,7 @@ const Download = () => {
       showIgnoredFilter,
       channelFilterFromUrl,
       vidTypeFilterFromUrl,
+      errorFilterFromUrl,
       status,
     );
     setRefresh(true);
@@ -467,16 +468,22 @@ const Download = () => {
             <h3>Bulk actions</h3>
             <p>
               Applied filtered by status <i>'{showIgnoredFilter}'</i>
+              {vidTypeFilterFromUrl && (
+                <span>
+                  {' '}
+                  and by type: <i>'{vidTypeFilterFromUrl}'</i>
+                </span>
+              )}
               {channelFilterFromUrl && (
                 <span>
                   {' '}
                   and by channel: <i>'{channel_filter_name}'</i>
                 </span>
               )}
-              {vidTypeFilterFromUrl && (
+              {errorFilterFromUrl && (
                 <span>
                   {' '}
-                  and by type: <i>'{vidTypeFilterFromUrl}'</i>
+                  and by error state: <i>'{errorFilterFromUrl}'</i>
                 </span>
               )}
             </p>
@@ -489,6 +496,9 @@ const Download = () => {
                 <div className="button-box">
                   <Button onClick={() => handleBulkStatusUpdate('ignore')}>Ignore</Button>
                   <Button onClick={() => handleBulkStatusUpdate('priority')}>Download Now</Button>
+                  <Button onClick={() => handleBulkStatusUpdate('clear_error')}>
+                    Clear Errors
+                  </Button>
                 </div>
               )}
             </div>

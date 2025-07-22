@@ -89,12 +89,15 @@ class BulkUpdateDowloadQuerySerializer(serializers.Serializer):
     vid_type = serializers.ChoiceField(
         choices=VideoTypeEnum.values_known(), required=False
     )
+    error = serializers.BooleanField(required=False, allow_null=True)
 
 
 class BulkUpdateDowloadDataSerializer(serializers.Serializer):
     """serialize data"""
 
-    status = serializers.ChoiceField(choices=["pending", "ignore", "priority"])
+    status = serializers.ChoiceField(
+        choices=["pending", "ignore", "priority", "clear_error"]
+    )
 
 
 class DownloadQueueItemUpdateSerializer(serializers.Serializer):
