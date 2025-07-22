@@ -155,9 +155,13 @@ class DownloadApiListView(ApiBaseView):
         status_filter = validated_query.get("filter")
         channel = validated_query.get("channel")
         vid_type = validated_query.get("vid_type")
+        error = validated_query.get("error")
 
         PendingInteract(status=status_filter).update_bulk(
-            channel_id=channel, vid_type=vid_type, new_status=new_status
+            channel_id=channel,
+            vid_type=vid_type,
+            new_status=new_status,
+            error=error,
         )
 
         if new_status == "priority":
