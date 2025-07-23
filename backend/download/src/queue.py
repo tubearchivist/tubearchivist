@@ -297,7 +297,7 @@ class PendingList(PendingIndex):
                 total=total,
             )
 
-    def _parse_video(self, url, vid_type):
+    def _parse_video(self, url: str, vid_type) -> dict | None:
         """parse video when not flat, fetch from YT"""
         video = YoutubeVideo(youtube_id=url)
         video.get_from_youtube()
@@ -319,6 +319,9 @@ class PendingList(PendingIndex):
             youtube_id=url,
             video_data=video.youtube_meta,
         )
+        if not to_add:
+            return None
+
         ThumbManager(item_id=url).download_video_thumb(to_add["vid_thumb_url"])
         rand_sleep(self.config)
 
