@@ -1,6 +1,6 @@
 """
 migration for 0.5.4 to 0.5.5
-index channel_tags for subscribed channels
+index channel_tabs for subscribed channels
 """
 
 import time
