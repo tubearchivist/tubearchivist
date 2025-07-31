@@ -168,10 +168,10 @@ We have come far, nonetheless we are not short of ideas on how to improve and ex
 - [ ] Download or Ignore videos by keyword ([#163](https://github.com/tubearchivist/tubearchivist/issues/163))
 - [ ] Custom searchable notes to videos, channels, playlists ([#144](https://github.com/tubearchivist/tubearchivist/issues/144))
 - [ ] Search comments
-- [ ] Search download queue
 - [ ] Per user videos/channel/playlists
 
 Implemented:
+- [X] Search download queue [2025-07-31]
 - [X] Configure shorts, streams and video sizes per channel [2024-07-15]
 - [X] User created playlists [2024-04-10]
 - [X] User roles, aka read only user [2023-11-10]
