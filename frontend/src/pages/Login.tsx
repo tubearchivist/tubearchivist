@@ -14,7 +14,6 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [saveLogin, setSaveLogin] = useState(false);
   const [waitingForBackend, setWaitingForBackend] = useState(false);
-  const [loggingIn, setLoggingIn] = useState(false);
   const [waitedCount, setWaitedCount] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -26,15 +25,17 @@ const Login = () => {
     }
 
     setErrorMessage(null);
-    setLoggingIn(true);
+
     const loginResponse = await signIn(username, password, saveLogin);
+
     const signedIn = loginResponse.status === 204;
+
     if (signedIn) {
       navigate(Routes.Home);
     } else {
       const data = await loginResponse.json();
       setErrorMessage(data?.error || 'Unknown Error');
-      setLoggingIn(false);
+      navigate(Routes.Login);
     }
   };
 
@@ -139,7 +140,7 @@ const Login = () => {
             </>
           )}
 
-          {!waitingForBackend && <Button label="Login" type="submit" disabled={loggingIn} />}
+          {!waitingForBackend && <Button label="Login" type="submit" />}
         </form>
 
         {waitedCount > 10 && (
