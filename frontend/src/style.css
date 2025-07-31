@@ -709,14 +709,22 @@ video:-webkit-full-screen {
 /* pagination */
 .pagination {
   padding: 30px 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: nowrap;
   margin-left: auto;
   margin-right: auto;
   text-align: center;
 }
 
+.pagination span {
+  padding: 0 10px;
+}
+
 .pagination-item {
   padding: 5px;
   border: 1px solid;
+  margin: 0 2px;
 }
 
 /* info box */
@@ -1450,6 +1458,13 @@ video:-webkit-full-screen {
   span,
   label {
     text-align: unset;
+  }
+  .pagination {
+    flex-wrap: wrap;
+    row-gap: 1.2rem;
+  }
+  .pagination span {
+    width: 100%;
   }
 }
 
