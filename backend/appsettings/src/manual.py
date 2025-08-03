@@ -156,10 +156,12 @@ class ImportFolderScanner:
                 failed_imports.append((current_video.get("media"), str(e)))
                 continue
 
-    if successful_imports:
-        comment_list = CommentList(task=self.task)
-        comment_list.add(video_ids=successful_imports)
-        comment_list.index()
+        # ✅ This block must be INSIDE the function
+        if successful_imports:
+            comment_list = CommentList(task=self.task)
+            comment_list.add(video_ids=successful_imports)
+            comment_list.index()
+
 
     def _notify(self, idx, current_video):
         """send notification back to task"""
