@@ -127,28 +127,38 @@ class ImportFolderScanner:
         return False, False
 
     def process_videos(self):
-        """loop through all videos"""
+        """loop through all videos with error skipping"""
         config = AppConfig().config
+        successful_imports = []
+        failed_imports = []
+
         for idx, current_video in enumerate(self.to_import):
-            if not current_video["media"]:
-                print(f"{current_video}: no matching media file found.")
-                raise ValueError
+            try:
+                if not current_video["media"]:
+                    print(f"{current_video}: no matching media file found.")
+                    raise ValueError("No media file found.")
 
-            if self.task:
-                self._notify(idx, current_video)
+                if self.task:
+                    self._notify(idx, current_video)
 
-            self._detect_youtube_id(current_video)
-            self._dump_thumb(current_video)
-            self._convert_thumb(current_video)
-            self._get_subtitles(current_video)
-            self._convert_video(current_video)
-            print(f"manual import: {current_video}")
+                self._detect_youtube_id(current_video)
+                self._dump_thumb(current_video)
+                self._convert_thumb(current_video)
+                self._get_subtitles(current_video)
+                self._convert_video(current_video)
 
-            ManualImport(current_video, config).run()
+                print(f"manual import: {current_video}")
+                ManualImport(current_video, config).run()
+                successful_imports.append(current_video["video_id"])
 
-        video_ids = [i["video_id"] for i in self.to_import]
+            except Exception as e:
+                print(f"[SKIP] Failed to import {current_video.get('media', 'unknown')}: {e}")
+                failed_imports.append((current_video.get("media"), str(e)))
+                continue
+
+    if successful_imports:
         comment_list = CommentList(task=self.task)
-        comment_list.add(video_ids=video_ids)
+        comment_list.add(video_ids=successful_imports)
         comment_list.index()
 
     def _notify(self, idx, current_video):
