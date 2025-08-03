@@ -71,7 +71,7 @@ const handleTimeUpdate =
     if (sponsorBlock && sponsorBlock.segments) {
       sponsorBlock.segments.forEach((segment: SponsorBlockSegmentType) => {
         const actionType = segment.actionType;
-        const doSkip = (actionType == 'skip');
+        const doSkip = actionType == 'skip';
         const [from, to] = segment.segment;
 
         if (doSkip && currentTime >= from && currentTime <= from + 0.3) {
