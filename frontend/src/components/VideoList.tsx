@@ -19,7 +19,7 @@ const VideoList = ({
   refreshVideoList,
 }: VideoListProps) => {
   if (!videoList || videoList.length === 0) {
-    return <p>No videos found.</p>;
+    return <p>No videos found...</p>;
   }
 
   if (viewStyle === ViewStylesEnum.Table) {

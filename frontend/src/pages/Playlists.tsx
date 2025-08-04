@@ -38,8 +38,6 @@ const Playlists = () => {
   const playlistList = playlistResponseData?.data;
   const pagination = playlistResponseData?.paginate;
 
-  const hasPlaylists = playlistResponseData?.data?.length !== 0;
-
   const viewStyle = userConfig.view_style_playlist;
   const showSubedOnly = userConfig.show_subed_only;
 
@@ -197,9 +195,7 @@ const Playlists = () => {
         </div>
 
         <div className={`playlist-list ${viewStyle}`}>
-          {!hasPlaylists && <h2>No playlists found...</h2>}
-
-          {hasPlaylists && <PlaylistList playlistList={playlistList} setRefresh={setRefresh} />}
+          <PlaylistList playlistList={playlistList} setRefresh={setRefresh} />
         </div>
       </div>
 

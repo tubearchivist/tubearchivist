@@ -59,7 +59,6 @@ const Channels = () => {
 
   const channels = channelListResponseData?.data;
   const pagination = channelListResponseData?.paginate;
-  const hasChannels = channels?.length !== 0;
 
   const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
     const updatedUserConfig = await updateUserConfig(config);
@@ -195,9 +194,7 @@ const Channels = () => {
         </div>
 
         <div className={`channel-list ${userConfig.view_style_channel}`}>
-          {!hasChannels && <h2>No channels found...</h2>}
-
-          {hasChannels && <ChannelList channelList={channels} refreshChannelList={setRefresh} />}
+          <ChannelList channelList={channels} refreshChannelList={setRefresh} />
         </div>
 
         {pagination && (

@@ -17,7 +17,7 @@ const PlaylistList = ({ playlistList, setRefresh }: PlaylistListProps) => {
   const viewStyle = userConfig.view_style_playlist;
 
   if (!playlistList || playlistList.length === 0) {
-    return <p>No playlists found.</p>;
+    return <p>No playlists found...</p>;
   }
 
   return (
