@@ -2,6 +2,7 @@ import { ViewStylesEnum, ViewStylesType } from '../configuration/constants/ViewS
 import { VideoType } from '../pages/Home';
 import VideoListItem from './VideoListItem';
 import VideoListItemTable from './VideoListItemTable';
+import LoadingIndicator from './LoadingIndicator';
 
 type VideoListProps = {
   videoList: VideoType[] | undefined;
@@ -18,7 +19,10 @@ const VideoList = ({
   showReorderButton = false,
   refreshVideoList,
 }: VideoListProps) => {
-  if (!videoList || videoList.length === 0) {
+  if (!videoList) {
+    return <LoadingIndicator />;
+  }
+  if (videoList.length === 0) {
     return <h2>No videos found...</h2>;
   }
 

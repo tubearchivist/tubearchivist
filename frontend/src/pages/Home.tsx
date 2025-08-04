@@ -198,10 +198,10 @@ const Home = () => {
       <div className={`boxed-content ${gridView}`}>
         <div className={`video-list ${userConfig.view_style_home} ${gridViewGrid}`}>
           <VideoList
-              videoList={videoList}
-              viewStyle={userConfig.view_style_home}
-              refreshVideoList={setRefreshVideoList}
-            />
+            videoList={videoList}
+            viewStyle={userConfig.view_style_home}
+            refreshVideoList={setRefreshVideoList}
+          />
           {!hasVideos && (
             <p>
               If you've already added a channel or playlist, try going to the{' '}

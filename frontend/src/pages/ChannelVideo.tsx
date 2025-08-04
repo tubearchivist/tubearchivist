@@ -171,8 +171,8 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
             <VideoList videoList={videoList} viewStyle={viewStyle} refreshVideoList={setRefresh} />
             {!hasVideos && (
               <p>
-                Try going to the <Link to={Routes.Downloads}>downloads page</Link> to start the
-                scan and download tasks.
+                Try going to the <Link to={Routes.Downloads}>downloads page</Link> to start the scan
+                and download tasks.
               </p>
             )}
           </div>

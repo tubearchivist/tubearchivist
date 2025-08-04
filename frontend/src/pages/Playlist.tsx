@@ -350,12 +350,12 @@ const Playlist = () => {
       <div className={`boxed-content ${gridView}`}>
         <div className={`video-list ${viewStyle} ${gridViewGrid}`}>
           <VideoList
-              videoList={videos}
-              viewStyle={viewStyle}
-              playlistId={playlistId}
-              showReorderButton={isCustomPlaylist}
-              refreshVideoList={setRefresh}
-            />
+            videoList={videos}
+            viewStyle={viewStyle}
+            playlistId={playlistId}
+            showReorderButton={isCustomPlaylist}
+            refreshVideoList={setRefresh}
+          />
           {videoInPlaylistCount === 0 && (
             <>
               {isCustomPlaylist && (
