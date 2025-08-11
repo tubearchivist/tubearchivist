@@ -70,9 +70,11 @@ const handleTimeUpdate =
 
     if (sponsorBlock && sponsorBlock.segments) {
       sponsorBlock.segments.forEach((segment: SponsorBlockSegmentType) => {
+        const actionType = segment.actionType;
+        const doSkip = actionType == 'skip';
         const [from, to] = segment.segment;
 
-        if (currentTime >= from && currentTime <= from + 0.3) {
+        if (doSkip && currentTime >= from && currentTime <= from + 0.3) {
           videoTag.currentTarget.currentTime = to;
 
           setSponsorSegmentSkipped?.((segments: SponsorSegmentsSkippedType) => {
