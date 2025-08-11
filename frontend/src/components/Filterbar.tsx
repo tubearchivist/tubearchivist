@@ -13,23 +13,22 @@ import {
   SortByType,
   SortOrderEnum,
   SortOrderType,
+  VideoTypes,
 } from '../api/loader/loadVideoListByPage';
 
 type FilterbarProps = {
-  hideToggleText: string;
   viewStyle: ViewStyleNamesType;
   showSort?: boolean;
+  showTypeFilter?: boolean;
 };
 
-const Filterbar = ({ hideToggleText, viewStyle, showSort = true }: FilterbarProps) => {
+const Filterbar = ({ viewStyle, showSort = true, showTypeFilter = false }: FilterbarProps) => {
   const { userConfig, setUserConfig } = useUserConfigStore();
 
   const [showHidden, setShowHidden] = useState(false);
 
   const currentViewStyle = userConfig[viewStyle];
   const isGridView = currentViewStyle === ViewStylesEnum.Grid;
-
-  console.log(hideToggleText);
 
   useEffect(() => {
     if (!showSort) {
@@ -67,30 +66,23 @@ const Filterbar = ({ hideToggleText, viewStyle, showSort = true }: FilterbarProp
           <option value="true">Watched only</option>
           <option value="false">Unwatched only</option>
         </select>
-      </div>
-      {/* <div className="toggle">
-        <span>{hideToggleText}</span>
-        <div className="toggleBox">
-          <input
-            id="hide_watched"
-            type="checkbox"
-            checked={userConfig.hide_watched}
-            onChange={() => {
-              handleUserConfigUpdate({ hide_watched: !userConfig.hide_watched });
+        {showTypeFilter && (
+          <select
+            value={userConfig.vid_type_filter === null ? '' : userConfig.vid_type_filter}
+            onChange={event => {
+              handleUserConfigUpdate({
+                vid_type_filter:
+                  event.target.value === '' ? null : (event.target.value as VideoTypes),
+              });
             }}
-          />
-
-          {userConfig.hide_watched ? (
-            <label htmlFor="" className="onbtn">
-              On
-            </label>
-          ) : (
-            <label htmlFor="" className="ofbtn">
-              Off
-            </label>
-          )}
-        </div>
-      </div> */}
+          >
+            <option value="">All Types</option>
+            <option value="videos">Videos</option>
+            <option value="streams">Streams</option>
+            <option value="shorts">Shorts</option>
+          </select>
+        )}
+      </div>
 
       {showHidden && (
         <div className="sort">

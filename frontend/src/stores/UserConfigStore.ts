@@ -18,6 +18,7 @@ export const useUserConfigStore = create<UserConfigState>(set => ({
     view_style_channel: ViewStylesEnum.List as ViewStylesType,
     view_style_downloads: ViewStylesEnum.List as ViewStylesType,
     view_style_playlist: ViewStylesEnum.Grid as ViewStylesType,
+    vid_type_filter: null,
     grid_items: 3,
     hide_watched: false,
     file_size_unit: 'binary',

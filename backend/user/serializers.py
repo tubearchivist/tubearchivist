@@ -5,7 +5,7 @@
 from common.src.helper import get_stylesheets
 from rest_framework import serializers
 from user.models import Account
-from video.src.constants import OrderEnum, SortEnum
+from video.src.constants import OrderEnum, SortEnum, VideoTypeEnum
 
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -37,6 +37,9 @@ class UserMeConfigSerializer(serializers.Serializer):
     view_style_channel = serializers.ChoiceField(choices=["grid", "list"])
     view_style_downloads = serializers.ChoiceField(choices=["grid", "list"])
     view_style_playlist = serializers.ChoiceField(choices=["grid", "list"])
+    vid_type_filter = serializers.ChoiceField(
+        choices=VideoTypeEnum.values_known(), allow_null=True
+    )
     grid_items = serializers.IntegerField(max_value=7, min_value=3)
     hide_watched = serializers.BooleanField(allow_null=True)
     file_size_unit = serializers.ChoiceField(choices=["binary", "metric"])

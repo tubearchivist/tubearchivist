@@ -4,6 +4,7 @@ import Routes from '../configuration/routes/RouteList';
 import Pagination from '../components/Pagination';
 import loadVideoListByFilter, {
   VideoListByFilterResponseType,
+  VideoTypes,
   WatchTypes,
   WatchTypesEnum,
 } from '../api/loader/loadVideoListByPage';
@@ -141,6 +142,7 @@ const Home = () => {
             : ((userConfig.hide_watched
                 ? WatchTypesEnum.Watched
                 : WatchTypesEnum.Unwatched) as WatchTypes),
+        type: userConfig.vid_type_filter as VideoTypes,
         sort: userConfig.sort_by,
         order: userConfig.sort_order,
       });
@@ -162,6 +164,7 @@ const Home = () => {
     userConfig.sort_by,
     userConfig.sort_order,
     userConfig.hide_watched,
+    userConfig.vid_type_filter,
     currentPage,
     pagination?.current_page,
     videoId,
@@ -194,10 +197,7 @@ const Home = () => {
           <h1>Recent Videos</h1>
         </div>
 
-        <Filterbar
-          hideToggleText="Show unwatched only:"
-          viewStyle={ViewStyleNames.Home as ViewStyleNamesType}
-        />
+        <Filterbar viewStyle={ViewStyleNames.Home as ViewStyleNamesType} showTypeFilter={true} />
       </div>
 
       <div className={`boxed-content ${gridView}`}>

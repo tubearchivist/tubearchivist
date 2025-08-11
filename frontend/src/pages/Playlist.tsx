@@ -24,6 +24,7 @@ import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import Button from '../components/Button';
 import loadVideoListByFilter, {
+  VideoTypes,
   WatchTypes,
   WatchTypesEnum,
 } from '../api/loader/loadVideoListByPage';
@@ -88,6 +89,7 @@ const Playlist = () => {
             : ((userConfig.hide_watched
                 ? WatchTypesEnum.Watched
                 : WatchTypesEnum.Unwatched) as WatchTypes),
+        type: userConfig.vid_type_filter as VideoTypes,
       });
 
       setPlaylistResponse(playlist);
@@ -106,6 +108,7 @@ const Playlist = () => {
   }, [
     playlistId,
     userConfig.hide_watched,
+    userConfig.vid_type_filter,
     refresh,
     currentPage,
     pagination?.current_page,
@@ -343,9 +346,9 @@ const Playlist = () => {
 
       <div className={`boxed-content ${gridView}`}>
         <Filterbar
-          hideToggleText="Hide watched videos:"
           viewStyle={ViewStyleNames.Home as ViewStyleNamesType} // its a list of videos, so ViewStyleNames.Home
           showSort={false}
+          showTypeFilter={true}
         />
       </div>
 

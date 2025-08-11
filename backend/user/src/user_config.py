@@ -20,6 +20,7 @@ class UserConfigType(TypedDict, total=False):
     view_style_channel: str
     view_style_downloads: str
     view_style_playlist: str
+    vid_type_filter: str | None
     grid_items: int
     hide_watched: bool | None
     file_size_unit: str
@@ -43,6 +44,7 @@ class UserConfig:
         view_style_channel="list",
         view_style_downloads="list",
         view_style_playlist="grid",
+        vid_type_filter=None,
         grid_items=3,
         hide_watched=False,
         file_size_unit="binary",

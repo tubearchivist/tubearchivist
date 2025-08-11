@@ -1,6 +1,6 @@
 import { ViewStylesType } from '../../configuration/constants/ViewStyle';
 import APIClient from '../../functions/APIClient';
-import { SortByType, SortOrderType } from '../loader/loadVideoListByPage';
+import { SortByType, SortOrderType, VideoTypes } from '../loader/loadVideoListByPage';
 
 export type ColourVariants =
   | 'dark.css'
@@ -31,6 +31,7 @@ export type UserConfigType = {
   view_style_channel: ViewStylesType;
   view_style_downloads: ViewStylesType;
   view_style_playlist: ViewStylesType;
+  vid_type_filter: VideoTypes | null;
   grid_items: number;
   hide_watched: boolean | null;
   file_size_unit: 'binary' | 'metric';
