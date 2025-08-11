@@ -21,6 +21,7 @@ from common.src.helper import (
     rand_sleep,
 )
 from common.src.ta_redis import RedisQueue
+from common.src.urlparser import ParsedURLType
 from download.src.queue import PendingList
 from download.src.yt_dlp_base import YtWrap
 from playlist.src.index import YoutubePlaylist
@@ -347,7 +348,7 @@ class DownloadPostProcess(DownloaderBase):
                 self._auto_delete_watched(data)
 
     @staticmethod
-    def _auto_delete_watched(data):
+    def _auto_delete_watched(data) -> None:
         """delete watched videos after x days"""
         to_delete = IndexPaginate("ta_video", data).get_results()
         if not to_delete:
@@ -359,8 +360,20 @@ class DownloadPostProcess(DownloaderBase):
             YoutubeVideo(youtube_id).delete_media_file()
 
         print("add deleted to ignore list")
-        vids = [{"type": "video", "url": i["youtube_id"]} for i in to_delete]
-        PendingList(youtube_ids=vids).parse_url_list(status="ignore")
+
+        parsed_ids: list[ParsedURLType] = []
+
+        for video_item in to_delete:
+            vid_type = getattr(VideoTypeEnum, video_item["vid_type"].upper())
+            parsed_ids.append(
+                {
+                    "type": "video",
+                    "url": video_item["youtube_id"],
+                    "vid_type": vid_type,
+                }
+            )
+
+        PendingList(youtube_ids=parsed_ids).parse_url_list(status="ignore")
 
     def refresh_playlist(self) -> None:
         """match videos with playlists"""
