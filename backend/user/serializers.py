@@ -38,7 +38,7 @@ class UserMeConfigSerializer(serializers.Serializer):
     view_style_downloads = serializers.ChoiceField(choices=["grid", "list"])
     view_style_playlist = serializers.ChoiceField(choices=["grid", "list"])
     grid_items = serializers.IntegerField(max_value=7, min_value=3)
-    hide_watched = serializers.BooleanField()
+    hide_watched = serializers.BooleanField(allow_null=True)
     file_size_unit = serializers.ChoiceField(choices=["binary", "metric"])
     show_ignored_only = serializers.BooleanField()
     show_subed_only = serializers.BooleanField()

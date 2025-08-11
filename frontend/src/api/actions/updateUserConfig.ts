@@ -32,7 +32,7 @@ export type UserConfigType = {
   view_style_downloads: ViewStylesType;
   view_style_playlist: ViewStylesType;
   grid_items: number;
-  hide_watched: boolean;
+  hide_watched: boolean | null;
   file_size_unit: 'binary' | 'metric';
   show_ignored_only: boolean;
   show_subed_only: boolean;

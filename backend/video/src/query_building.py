@@ -35,7 +35,7 @@ class QueryBuilder:
             must_list.append({"match": {"playlist.keyword": playlist}})
 
         watch = self.request_params.get("watch")
-        if watch:
+        if watch is not None:
             watch_must_list = self.parse_watch(watch)
             must_list.append(watch_must_list)
 

@@ -29,6 +29,8 @@ const Filterbar = ({ hideToggleText, viewStyle, showSort = true }: FilterbarProp
   const currentViewStyle = userConfig[viewStyle];
   const isGridView = currentViewStyle === ViewStylesEnum.Grid;
 
+  console.log(hideToggleText);
+
   useEffect(() => {
     if (!showSort) {
       return;
@@ -52,7 +54,21 @@ const Filterbar = ({ hideToggleText, viewStyle, showSort = true }: FilterbarProp
 
   return (
     <div className="view-controls three">
-      <div className="toggle">
+      <div>
+        <select
+          value={userConfig.hide_watched === null ? '' : userConfig.hide_watched.toString()}
+          onChange={event => {
+            handleUserConfigUpdate({
+              hide_watched: event.target.value === '' ? null : event.target.value === 'true',
+            });
+          }}
+        >
+          <option value="">All</option>
+          <option value="true">Watched only</option>
+          <option value="false">Unwatched only</option>
+        </select>
+      </div>
+      {/* <div className="toggle">
         <span>{hideToggleText}</span>
         <div className="toggleBox">
           <input
@@ -74,7 +90,7 @@ const Filterbar = ({ hideToggleText, viewStyle, showSort = true }: FilterbarProp
             </label>
           )}
         </div>
-      </div>
+      </div> */}
 
       {showHidden && (
         <div className="sort">

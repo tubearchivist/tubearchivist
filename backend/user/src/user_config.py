@@ -21,7 +21,7 @@ class UserConfigType(TypedDict, total=False):
     view_style_downloads: str
     view_style_playlist: str
     grid_items: int
-    hide_watched: bool
+    hide_watched: bool | None
     file_size_unit: str
     show_ignored_only: bool
     show_subed_only: bool

@@ -135,7 +135,12 @@ const Home = () => {
     (async () => {
       const videos = await loadVideoListByFilter({
         page: currentPage,
-        watch: userConfig.hide_watched ? (WatchTypesEnum.Unwatched as WatchTypes) : undefined,
+        watch:
+          userConfig.hide_watched === null
+            ? null
+            : ((userConfig.hide_watched
+                ? WatchTypesEnum.Watched
+                : WatchTypesEnum.Unwatched) as WatchTypes),
         sort: userConfig.sort_by,
         order: userConfig.sort_order,
       });

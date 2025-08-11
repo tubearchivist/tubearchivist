@@ -112,7 +112,7 @@ class VideoListQuerySerializer(serializers.Serializer):
     playlist = serializers.CharField(required=False)
     channel = serializers.CharField(required=False)
     watch = serializers.ChoiceField(
-        choices=WatchedEnum.values(), required=False
+        choices=WatchedEnum.values(), required=False, allow_null=True
     )
     sort = serializers.ChoiceField(choices=SortEnum.names(), required=False)
     order = serializers.ChoiceField(choices=OrderEnum.values(), required=False)

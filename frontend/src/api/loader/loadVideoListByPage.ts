@@ -36,7 +36,7 @@ export const SortOrderEnum = {
 
 export type VideoTypes = 'videos' | 'streams' | 'shorts';
 
-export type WatchTypes = 'watched' | 'unwatched' | 'continue';
+export type WatchTypes = 'watched' | 'unwatched' | 'continue' | null;
 export const WatchTypesEnum = {
   Watched: 'watched',
   Unwatched: 'unwatched',

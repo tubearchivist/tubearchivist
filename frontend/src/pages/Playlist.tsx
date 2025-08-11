@@ -72,7 +72,6 @@ const Playlist = () => {
 
   const viewStyle = userConfig.view_style_home; // its a list of videos, so view_style_home
   const gridItems = userConfig.grid_items;
-  const hideWatched = userConfig.hide_watched;
   const isGridView = viewStyle === ViewStylesEnum.Grid;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
@@ -83,7 +82,12 @@ const Playlist = () => {
       const video = await loadVideoListByFilter({
         playlist: playlistId,
         page: currentPage,
-        watch: hideWatched ? (WatchTypesEnum.Unwatched as WatchTypes) : undefined,
+        watch:
+          userConfig.hide_watched === null
+            ? null
+            : ((userConfig.hide_watched
+                ? WatchTypesEnum.Watched
+                : WatchTypesEnum.Unwatched) as WatchTypes),
       });
 
       setPlaylistResponse(playlist);
