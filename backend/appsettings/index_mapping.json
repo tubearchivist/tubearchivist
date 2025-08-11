@@ -368,6 +368,15 @@
                                 "category": {
                                     "type": "keyword"
                                 },
+                                "description": {
+                                    "type": "text",
+                                    "fields": {
+                                        "keyword": {
+                                            "type": "keyword",
+                                            "ignore_above": 256
+                                        }
+                                    }
+                                },
                                 "locked": {
                                     "type": "short"
                                 },
