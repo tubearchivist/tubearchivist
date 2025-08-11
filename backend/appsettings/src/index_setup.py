@@ -141,7 +141,7 @@ class ElasticIndex:
         _, _ = ElasticWrap(path).put(data)
 
 
-class ElasitIndexWrap:
+class ElasticIndexWrap:
     """interact with all index mapping and setup"""
 
     def __init__(self):

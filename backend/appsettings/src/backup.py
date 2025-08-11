@@ -153,7 +153,7 @@ class ElasticBackup:
     def restore(self, filename):
         """
         restore from backup zip file
-        call reset from ElasitIndexWrap first to start blank
+        call reset from ElasticIndexWrap first to start blank
         """
         zip_content = self._unpack_zip_backup(filename)
         self._restore_json_files(zip_content)

@@ -9,7 +9,7 @@ Functionality:
 from appsettings.src.backup import ElasticBackup
 from appsettings.src.config import ReleaseVersion
 from appsettings.src.filesystem import Scanner
-from appsettings.src.index_setup import ElasitIndexWrap
+from appsettings.src.index_setup import ElasticIndexWrap
 from appsettings.src.manual import ImportFolderScanner
 from appsettings.src.reindex import Reindex, ReindexManual, ReindexPopulate
 from celery import Task, shared_task
@@ -242,7 +242,7 @@ def run_restore_backup(self, filename):
 
     manager.init(self)
     self.send_progress(["Reset your Index"])
-    ElasitIndexWrap().reset()
+    ElasticIndexWrap().reset()
     ElasticBackup(task=self).restore(filename)
     print("index restore finished")
 
