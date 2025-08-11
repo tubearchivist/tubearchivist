@@ -197,23 +197,17 @@ const Home = () => {
 
       <div className={`boxed-content ${gridView}`}>
         <div className={`video-list ${userConfig.view_style_home} ${gridViewGrid}`}>
+          <VideoList
+            videoList={videoList}
+            viewStyle={userConfig.view_style_home}
+            refreshVideoList={setRefreshVideoList}
+          />
           {!hasVideos && (
-            <>
-              <h2>No videos found...</h2>
-              <p>
-                If you've already added a channel or playlist, try going to the{' '}
-                <Link to={Routes.Downloads}>downloads page</Link> to start the scan and download
-                tasks.
-              </p>
-            </>
-          )}
-
-          {hasVideos && (
-            <VideoList
-              videoList={videoList}
-              viewStyle={userConfig.view_style_home}
-              refreshVideoList={setRefreshVideoList}
-            />
+            <p>
+              If you've already added a channel or playlist, try going to the{' '}
+              <Link to={Routes.Downloads}>downloads page</Link> to start the scan and download
+              tasks.
+            </p>
           )}
         </div>
       </div>

@@ -168,17 +168,13 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
 
         <div className={`boxed-content ${gridView}`}>
           <div className={`video-list ${viewStyle} ${gridViewGrid}`}>
-            {!hasVideos && (
-              <>
-                <h2>No videos found...</h2>
-                <p>
-                  Try going to the <Link to={Routes.Downloads}>downloads page</Link> to start the
-                  scan and download tasks.
-                </p>
-              </>
-            )}
-
             <VideoList videoList={videoList} viewStyle={viewStyle} refreshVideoList={setRefresh} />
+            {!hasVideos && (
+              <p>
+                Try going to the <Link to={Routes.Downloads}>downloads page</Link> to start the scan
+                and download tasks.
+              </p>
+            )}
           </div>
         </div>
         {pagination && (

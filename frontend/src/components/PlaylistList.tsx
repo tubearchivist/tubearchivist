@@ -4,6 +4,7 @@ import updatePlaylistSubscription from '../api/actions/updatePlaylistSubscriptio
 import formatDate from '../functions/formatDates';
 import Button from './Button';
 import PlaylistThumbnail from './PlaylistThumbnail';
+import LoadingIndicator from './LoadingIndicator';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { PlaylistType } from '../api/loader/loadPlaylistById';
 
@@ -16,8 +17,11 @@ const PlaylistList = ({ playlistList, setRefresh }: PlaylistListProps) => {
   const { userConfig } = useUserConfigStore();
   const viewStyle = userConfig.view_style_playlist;
 
-  if (!playlistList || playlistList.length === 0) {
-    return <p>No playlists found.</p>;
+  if (!playlistList) {
+    return <LoadingIndicator />;
+  }
+  if (playlistList.length === 0) {
+    return <h2>No playlists found...</h2>;
   }
 
   return (

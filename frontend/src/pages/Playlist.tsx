@@ -349,16 +349,21 @@ const Playlist = () => {
 
       <div className={`boxed-content ${gridView}`}>
         <div className={`video-list ${viewStyle} ${gridViewGrid}`}>
+          <VideoList
+            videoList={videos}
+            viewStyle={viewStyle}
+            playlistId={playlistId}
+            showReorderButton={isCustomPlaylist}
+            refreshVideoList={setRefresh}
+          />
           {videoInPlaylistCount === 0 && (
             <>
-              <h2>No videos found...</h2>
               {isCustomPlaylist && (
                 <p>
                   Try going to the <a href="{% url 'home' %}">home page</a> to add videos to this
                   playlist.
                 </p>
               )}
-
               {!isCustomPlaylist && (
                 <p>
                   Try going to the <Link to={Routes.Downloads}>downloads page</Link> to start the
@@ -366,15 +371,6 @@ const Playlist = () => {
                 </p>
               )}
             </>
-          )}
-          {videoInPlaylistCount !== 0 && (
-            <VideoList
-              videoList={videos}
-              viewStyle={viewStyle}
-              playlistId={playlistId}
-              showReorderButton={isCustomPlaylist}
-              refreshVideoList={setRefresh}
-            />
           )}
         </div>
       </div>
