@@ -57,7 +57,7 @@ class YtWrap:
                     "extractor_args": {
                         "youtube": {
                             "po_token": [potoken],
-                            "player-client": ["web", "default"],
+                            "player-client": ["mweb", "default"],
                         },
                     }
                 }
