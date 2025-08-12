@@ -120,6 +120,7 @@ class VideoListQuerySerializer(serializers.Serializer):
         choices=VideoTypeEnum.values_known(), required=False
     )
     page = serializers.IntegerField(required=False)
+    height = serializers.IntegerField(required=False)
 
 
 class CommentThreadItemSerializer(serializers.Serializer):

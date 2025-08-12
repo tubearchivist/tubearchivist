@@ -33,6 +33,7 @@ import { useUserConfigStore } from '../stores/UserConfigStore';
 import { ApiResponseType } from '../functions/APIClient';
 import NotFound from './NotFound';
 import updatePlaylistSortOrder from '../api/actions/updatePlaylistSortOrder';
+import { useFilterBarTempConf } from '../stores/FilterbarTempConf';
 
 export type VideoResponseType = {
   data?: VideoType[];
@@ -46,6 +47,7 @@ const Playlist = () => {
   const videoId = searchParams.get('videoId');
 
   const { userConfig } = useUserConfigStore();
+  const { filterHeight } = useFilterBarTempConf();
   const { currentPage, setCurrentPage } = useOutletContext() as OutletContextType;
   const isAdmin = useIsAdmin();
 
@@ -90,6 +92,7 @@ const Playlist = () => {
                 ? WatchTypesEnum.Watched
                 : WatchTypesEnum.Unwatched) as WatchTypes),
         type: userConfig.vid_type_filter as VideoTypes,
+        height: filterHeight,
       });
 
       setPlaylistResponse(playlist);
@@ -109,6 +112,7 @@ const Playlist = () => {
     playlistId,
     userConfig.hide_watched,
     userConfig.vid_type_filter,
+    filterHeight,
     refresh,
     currentPage,
     pagination?.current_page,

@@ -44,6 +44,11 @@ class QueryBuilder:
             type_list_list = self.parse_type(video_type)
             must_list.append(type_list_list)
 
+        height = self.request_params.get("height")
+        if height:
+            height_must = self.parse_height(height)
+            must_list.append(height_must)
+
         query = {"bool": {"must": must_list}}
 
         return query
@@ -82,6 +87,11 @@ class QueryBuilder:
         vid_type = getattr(VideoTypeEnum, video_type.upper()).value
 
         return {"match": {"vid_type": vid_type}}
+
+    def parse_height(self, height: str):
+        """parse height to int"""
+
+        return {"term": {"streams.height": {"value": height}}}
 
     def parse_sort(self) -> dict | None:
         """build sort key"""

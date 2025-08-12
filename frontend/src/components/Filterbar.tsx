@@ -15,6 +15,7 @@ import {
   SortOrderType,
   VideoTypes,
 } from '../api/loader/loadVideoListByPage';
+import { useFilterBarTempConf } from '../stores/FilterbarTempConf';
 
 type FilterbarProps = {
   viewStyle: ViewStyleNamesType;
@@ -26,6 +27,7 @@ const Filterbar = ({ viewStyle, showSort = true, showTypeFilter = false }: Filte
   const { userConfig, setUserConfig } = useUserConfigStore();
 
   const [showHidden, setShowHidden] = useState(false);
+  const { filterHeight, setFilterHeight } = useFilterBarTempConf();
 
   const currentViewStyle = userConfig[viewStyle];
   const isGridView = currentViewStyle === ViewStylesEnum.Grid;
@@ -82,6 +84,11 @@ const Filterbar = ({ viewStyle, showSort = true, showTypeFilter = false }: Filte
             <option value="shorts">Shorts</option>
           </select>
         )}
+        <input
+          placeholder="height in px"
+          value={filterHeight}
+          onChange={e => setFilterHeight(e.target.value)}
+        />
       </div>
 
       {showHidden && (

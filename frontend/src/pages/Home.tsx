@@ -22,6 +22,7 @@ import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import { SponsorBlockType } from './Video';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { ApiResponseType } from '../functions/APIClient';
+import { useFilterBarTempConf } from '../stores/FilterbarTempConf';
 
 export type PlayerType = {
   watched: boolean;
@@ -118,6 +119,8 @@ const Home = () => {
   const [continueVideoResponse, setContinueVideoResponse] =
     useState<ApiResponseType<VideoListByFilterResponseType>>();
 
+  const { filterHeight } = useFilterBarTempConf();
+
   const { data: videoResponseData } = videoResponse ?? {};
   const { data: continueVideoResponseData } = continueVideoResponse ?? {};
 
@@ -145,6 +148,7 @@ const Home = () => {
         type: userConfig.vid_type_filter as VideoTypes,
         sort: userConfig.sort_by,
         order: userConfig.sort_order,
+        height: filterHeight,
       });
 
       try {
@@ -165,6 +169,7 @@ const Home = () => {
     userConfig.sort_order,
     userConfig.hide_watched,
     userConfig.vid_type_filter,
+    filterHeight,
     currentPage,
     pagination?.current_page,
     videoId,

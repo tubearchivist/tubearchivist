@@ -27,6 +27,7 @@ import humanFileSize from '../functions/humanFileSize';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { FileSizeUnits } from '../api/actions/updateUserConfig';
 import { ApiResponseType } from '../functions/APIClient';
+import { useFilterBarTempConf } from '../stores/FilterbarTempConf';
 
 type ChannelParams = {
   channelId: string;
@@ -44,6 +45,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const videoId = searchParams.get('videoId');
 
   const [refresh, setRefresh] = useState(false);
+  const { filterHeight } = useFilterBarTempConf();
 
   const [channelResponse, setChannelResponse] = useState<ApiResponseType<ChannelResponseType>>();
   const [videoResponse, setVideoReponse] =
@@ -82,6 +84,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
         sort: userConfig.sort_by,
         order: userConfig.sort_order,
         type: videoType,
+        height: filterHeight,
       });
       const channelAggs = await loadChannelAggs(channelId);
 
@@ -95,6 +98,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
     userConfig.sort_by,
     userConfig.sort_order,
     userConfig.hide_watched,
+    filterHeight,
     currentPage,
     channelId,
     pagination?.current_page,
