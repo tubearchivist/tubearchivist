@@ -5,6 +5,7 @@ import iconSubstract from '/img/icon-substract.svg';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
 import iconTableView from '/img/icon-tableview.svg';
+import iconFilter from '/img/icon-filter.svg';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { ViewStyleNamesType, ViewStylesEnum } from '../configuration/constants/ViewStyle';
 import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
@@ -27,7 +28,8 @@ const Filterbar = ({ viewStyle, showSort = true, showTypeFilter = false }: Filte
   const { userConfig, setUserConfig } = useUserConfigStore();
 
   const [showHidden, setShowHidden] = useState(false);
-  const { filterHeight, setFilterHeight } = useFilterBarTempConf();
+  const { filterHeight, setFilterHeight, showFilterItems, setShowFilterItems } =
+    useFilterBarTempConf();
 
   const currentViewStyle = userConfig[viewStyle];
   const isGridView = currentViewStyle === ViewStylesEnum.Grid;
@@ -55,39 +57,48 @@ const Filterbar = ({ viewStyle, showSort = true, showTypeFilter = false }: Filte
 
   return (
     <div className="view-controls three">
-      <div>
-        <select
-          value={userConfig.hide_watched === null ? '' : userConfig.hide_watched.toString()}
-          onChange={event => {
-            handleUserConfigUpdate({
-              hide_watched: event.target.value === '' ? null : event.target.value === 'true',
-            });
-          }}
-        >
-          <option value="">All</option>
-          <option value="true">Watched only</option>
-          <option value="false">Unwatched only</option>
-        </select>
-        {showTypeFilter && (
-          <select
-            value={userConfig.vid_type_filter === null ? '' : userConfig.vid_type_filter}
-            onChange={event => {
-              handleUserConfigUpdate({
-                vid_type_filter:
-                  event.target.value === '' ? null : (event.target.value as VideoTypes),
-              });
-            }}
-          >
-            <option value="">All Types</option>
-            <option value="videos">Videos</option>
-            <option value="streams">Streams</option>
-            <option value="shorts">Shorts</option>
-          </select>
+      <div className="view-icons">
+        {showFilterItems && (
+          <>
+            <select
+              value={userConfig.hide_watched === null ? '' : userConfig.hide_watched.toString()}
+              onChange={event => {
+                handleUserConfigUpdate({
+                  hide_watched: event.target.value === '' ? null : event.target.value === 'true',
+                });
+              }}
+            >
+              <option value="">All watched state</option>
+              <option value="true">Watched only</option>
+              <option value="false">Unwatched only</option>
+            </select>
+            {showTypeFilter && (
+              <select
+                value={userConfig.vid_type_filter === null ? '' : userConfig.vid_type_filter}
+                onChange={event => {
+                  handleUserConfigUpdate({
+                    vid_type_filter:
+                      event.target.value === '' ? null : (event.target.value as VideoTypes),
+                  });
+                }}
+              >
+                <option value="">All Types</option>
+                <option value="videos">Videos</option>
+                <option value="streams">Streams</option>
+                <option value="shorts">Shorts</option>
+              </select>
+            )}
+            <input
+              placeholder="height in px"
+              value={filterHeight}
+              onChange={e => setFilterHeight(e.target.value)}
+            />
+          </>
         )}
-        <input
-          placeholder="height in px"
-          value={filterHeight}
-          onChange={e => setFilterHeight(e.target.value)}
+        <img
+          src={iconFilter}
+          alt="icon filter"
+          onClick={() => setShowFilterItems(!showFilterItems)}
         />
       </div>
 
