@@ -65,7 +65,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const useSiUnits = userConfig.file_size_unit === FileSizeUnits.Metric;
 
   const viewStyle = userConfig.view_style_home;
-  const isGridView = viewStyle === ViewStylesEnum.Grid;
+  const isGridView = viewStyle === ViewStylesEnum.Grid || ViewStylesEnum.Table;
   const gridView = isGridView ? `boxed-${userConfig.grid_items}` : '';
   const gridViewGrid = isGridView ? `grid-${userConfig.grid_items}` : '';
 

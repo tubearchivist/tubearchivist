@@ -109,6 +109,7 @@ class PendingList(PendingIndex):
         task=None,
         auto_start=False,
         flat=False,
+        force=False,
     ):
         super().__init__()
         self.config = AppConfig().config
@@ -116,6 +117,7 @@ class PendingList(PendingIndex):
         self.task = task
         self.auto_start = auto_start
         self.flat = flat
+        self.force = force
         self.to_skip = False
         self.missing_videos: list[dict] = []
         self.added = 0
@@ -173,8 +175,14 @@ class PendingList(PendingIndex):
             PendingInteract(youtube_id=url, status="priority").update_status()
             return None
 
-        if url in self.missing_videos or url in self.to_skip:
+        if not self.force and (
+            url in self.missing_videos or url in self.to_skip
+        ):
             print(f"{url}: skipped adding already indexed video to download.")
+            return None
+
+        if self.force and url in self.all_ignored or url in self.all_pending:
+            print(f"{url}: skipped adding force video already in queue.")
             return None
 
         to_add = self._parse_video(url, vid_type)

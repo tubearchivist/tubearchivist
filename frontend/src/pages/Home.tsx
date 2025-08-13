@@ -130,7 +130,7 @@ const Home = () => {
 
   const hasVideos = videoResponseData?.data?.length !== 0;
 
-  const isGridView = userConfig.view_style_home === ViewStylesEnum.Grid;
+  const isGridView = userConfig.view_style_home === ViewStylesEnum.Grid || ViewStylesEnum.Table;
   const gridView = isGridView ? `boxed-${userConfig.grid_items}` : '';
   const gridViewGrid = isGridView ? `grid-${userConfig.grid_items}` : '';
   const isTableView = userConfig.view_style_home === ViewStylesEnum.Table;

@@ -79,6 +79,7 @@ class AddToDownloadQuerySerializer(serializers.Serializer):
 
     autostart = serializers.BooleanField(required=False)
     flat = serializers.BooleanField(required=False)
+    force = serializers.BooleanField(required=False)
 
 
 class BulkUpdateDowloadQuerySerializer(serializers.Serializer):

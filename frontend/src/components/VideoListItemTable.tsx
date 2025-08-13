@@ -5,6 +5,9 @@ import { ViewStylesType } from '../configuration/constants/ViewStyle';
 import humanFileSize from '../functions/humanFileSize';
 import { FileSizeUnits } from '../api/actions/updateUserConfig';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import { useVideoSelectionStore } from '../stores/VideoSelectionStore';
+import iconChecked from '/img/icon-seen.svg';
+import iconUnchecked from '/img/icon-unseen.svg';
 
 const StreamsTypeEmun = {
   Video: 'video',
@@ -18,6 +21,8 @@ type VideoListItemProps = {
 
 const VideoListItemTable = ({ videoList, viewStyle }: VideoListItemProps) => {
   const { userConfig } = useUserConfigStore();
+  const { showSelection, selectedVideoIds, removeVideoId, appendVideoId } =
+    useVideoSelectionStore();
 
   const useSiUnits = userConfig.file_size_unit === FileSizeUnits.Metric;
 
@@ -26,8 +31,9 @@ const VideoListItemTable = ({ videoList, viewStyle }: VideoListItemProps) => {
       <table>
         <thead>
           <tr>
-            <th>Channel</th>
+            {showSelection && <th />}
             <th>Title</th>
+            <th>Channel</th>
             <th>Type</th>
             <th>Resolution</th>
             <th>Media size</th>
@@ -45,11 +51,24 @@ const VideoListItemTable = ({ videoList, viewStyle }: VideoListItemProps) => {
 
             return (
               <tr key={youtube_id}>
-                <td className="no-nowrap">
-                  <Link to={Routes.Channel(channel.channel_id)}>{channel.channel_name}</Link>
-                </td>
+                {showSelection && (
+                  <td>
+                    <img
+                      src={selectedVideoIds.includes(youtube_id) ? iconChecked : iconUnchecked}
+                      className="video-item-select"
+                      onClick={() =>
+                        selectedVideoIds.includes(youtube_id)
+                          ? removeVideoId(youtube_id)
+                          : appendVideoId(youtube_id)
+                      }
+                    />
+                  </td>
+                )}
                 <td className="no-nowrap title">
                   <Link to={Routes.Video(youtube_id)}>{title}</Link>
+                </td>
+                <td className="no-nowrap">
+                  <Link to={Routes.Channel(channel.channel_id)}>{channel.channel_name}</Link>
                 </td>
                 <td>{vid_type}</td>
                 <td>{`${videoStream?.width || '-'}x${videoStream?.height || '-'}`}</td>

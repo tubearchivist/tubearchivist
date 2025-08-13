@@ -75,7 +75,7 @@ const Playlist = () => {
 
   const viewStyle = userConfig.view_style_home; // its a list of videos, so view_style_home
   const gridItems = userConfig.grid_items;
-  const isGridView = viewStyle === ViewStylesEnum.Grid;
+  const isGridView = viewStyle === ViewStylesEnum.Grid || ViewStylesEnum.Table;
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
 

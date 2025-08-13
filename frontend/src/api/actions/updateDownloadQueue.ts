@@ -1,11 +1,18 @@
 import APIClient from '../../functions/APIClient';
 
-const updateDownloadQueue = async (youtubeIdStrings: string, autostart: boolean, flat: boolean) => {
+type UpdateDownloadQueueType = {
+  youtubeIdStrings: string;
+  autostart?: boolean;
+  flat?: boolean;
+  force?: boolean;
+};
+
+const updateDownloadQueue = async (params: UpdateDownloadQueueType) => {
   const urls = [];
-  const containsMultiple = youtubeIdStrings.includes('\n');
+  const containsMultiple = params.youtubeIdStrings.includes('\n');
 
   if (containsMultiple) {
-    const youtubeIds = youtubeIdStrings.split('\n');
+    const youtubeIds = params.youtubeIdStrings.split('\n');
 
     youtubeIds.forEach(youtubeId => {
       if (youtubeId.trim()) {
@@ -13,12 +20,13 @@ const updateDownloadQueue = async (youtubeIdStrings: string, autostart: boolean,
       }
     });
   } else {
-    urls.push({ youtube_id: youtubeIdStrings, status: 'pending' });
+    urls.push({ youtube_id: params.youtubeIdStrings, status: 'pending' });
   }
 
   const searchParams = new URLSearchParams();
-  if (autostart) searchParams.append('autostart', 'true');
-  if (flat) searchParams.append('flat', 'true');
+  if (params.autostart === true) searchParams.append('autostart', 'true');
+  if (params.flat === true) searchParams.append('flat', 'true');
+  if (params.force === true) searchParams.append('force', 'true');
   const endpoint = `/api/download/${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
   return APIClient(endpoint, {
