@@ -266,12 +266,14 @@ class PendingList(PendingIndex):
     def _parse_playlist(self, url: str, limit: int | None):
         """fast parse playlist"""
         playlist = YoutubePlaylist(url)
-        playlist.update_playlist(limit=limit)
+        playlist.update_playlist()
         if not playlist.youtube_meta:
             print(f"{url}: playlist metadata extraction failed, skipping")
             return
 
         video_results = playlist.youtube_meta["entries"]
+        if limit:
+            video_results = video_results[:limit]
 
         total = len(video_results)
         for idx, video_data in enumerate(video_results, start=1):
