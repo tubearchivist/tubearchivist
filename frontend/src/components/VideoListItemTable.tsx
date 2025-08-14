@@ -26,12 +26,35 @@ const VideoListItemTable = ({ videoList, viewStyle }: VideoListItemProps) => {
 
   const useSiUnits = userConfig.file_size_unit === FileSizeUnits.Metric;
 
+  let pageIds: string[] = [];
+  if (videoList) {
+    pageIds = videoList.map(video => video.youtube_id);
+  }
+
+  const anySelected = pageIds.some(id => selectedVideoIds.includes(id));
+
+  const handleToggleAllCheck = () => {
+    if (anySelected) {
+      pageIds.forEach(id => removeVideoId(id));
+    } else {
+      pageIds.forEach(id => appendVideoId(id));
+    }
+  };
+
   return (
     <div className={`video-item ${viewStyle}`}>
       <table>
         <thead>
           <tr>
-            {showSelection && <th />}
+            {showSelection && (
+              <th>
+                <img
+                  src={anySelected ? iconChecked : iconUnchecked}
+                  className="video-item-select"
+                  onClick={handleToggleAllCheck}
+                />
+              </th>
+            )}
             <th>Title</th>
             <th>Channel</th>
             <th>Type</th>

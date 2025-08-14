@@ -178,7 +178,8 @@ button:disabled:hover {
   min-width: 100px;
 }
 
-.video-item.table td img {
+.video-item.table td img,
+.video-item.table th img {
   width: 20px;
   height: 20px;
 }
