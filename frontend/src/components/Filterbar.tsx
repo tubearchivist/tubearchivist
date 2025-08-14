@@ -110,10 +110,8 @@ const Filterbar = ({ viewStyle, showSort = true, showTypeFilter = false }: Filte
             onClick={() => setShowSelection(!showSelection)}
             title={showSelection ? 'Hide multi select boxes' : 'Show multi select boxes'}
           />
-        </div>
-        <div className="view-icons">
           {showFilterItems && (
-            <>
+            <div>
               <span>Filter:</span>
               <select
                 value={userConfig.hide_watched === null ? '' : userConfig.hide_watched.toString()}
@@ -148,15 +146,13 @@ const Filterbar = ({ viewStyle, showSort = true, showTypeFilter = false }: Filte
                 value={filterHeight}
                 onChange={e => setFilterHeight(e.target.value)}
               />
-            </>
+            </div>
           )}
           <img
             src={iconFilter}
             alt="icon filter"
             onClick={() => setShowFilterItems(!showFilterItems)}
           />
-        </div>
-        <div className="view-icons">
           {showHidden && (
             <div className="sort">
               <span>Sort:</span>
@@ -204,8 +200,6 @@ const Filterbar = ({ viewStyle, showSort = true, showTypeFilter = false }: Filte
               id="animate-icon"
             />
           )}
-        </div>
-        <div className="view-icons">
           {userConfig.grid_items !== undefined && isGridView && (
             <div className="grid-count">
               {userConfig.grid_items < 7 && (

@@ -428,9 +428,8 @@ button:disabled:hover {
 }
 
 .view-controls {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: end;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
   border-bottom: 2px solid;
   border-color: var(--accent-font-dark);
   margin: 15px 0;
