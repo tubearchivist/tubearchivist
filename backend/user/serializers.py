@@ -44,7 +44,8 @@ class UserMeConfigSerializer(serializers.Serializer):
     hide_watched = serializers.BooleanField(allow_null=True)
     file_size_unit = serializers.ChoiceField(choices=["binary", "metric"])
     show_ignored_only = serializers.BooleanField()
-    show_subed_only = serializers.BooleanField()
+    show_subed_only = serializers.BooleanField(allow_null=True)
+    show_subed_only_playlists = serializers.BooleanField(allow_null=True)
     show_help_text = serializers.BooleanField()
 
 

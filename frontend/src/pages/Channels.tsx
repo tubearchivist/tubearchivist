@@ -3,6 +3,7 @@ import loadChannelList, { ChannelsListResponse } from '../api/loader/loadChannel
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
 import iconAdd from '/img/icon-add.svg';
+import iconFilter from '/img/icon-filter.svg';
 import { useEffect, useState } from 'react';
 import Pagination from '../components/Pagination';
 import { OutletContextType } from './Base';
@@ -52,6 +53,7 @@ const Channels = () => {
     useState<ApiResponseType<ChannelsListResponse>>();
   const [showAddForm, setShowAddForm] = useState(false);
   const [refresh, setRefresh] = useState(true);
+  const [showFilterItems, setShowFilterItems] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [channelsToSubscribeTo, setChannelsToSubscribeTo] = useState('');
 
@@ -144,31 +146,34 @@ const Channels = () => {
         />
 
         <div className="view-controls">
-          <div className="toggle">
-            <span>Show subscribed only:</span>
-            <div className="toggleBox">
-              <input
-                id="show_subed_only"
-                onChange={async () => {
-                  handleUserConfigUpdate({ show_subed_only: !userConfig.show_subed_only });
-                  setRefresh(true);
-                }}
-                type="checkbox"
-                checked={userConfig.show_subed_only}
-              />
-              {!userConfig.show_subed_only && (
-                <label htmlFor="" className="ofbtn">
-                  Off
-                </label>
-              )}
-              {userConfig.show_subed_only && (
-                <label htmlFor="" className="onbtn">
-                  On
-                </label>
-              )}
-            </div>
-          </div>
           <div className="view-icons">
+            {showFilterItems && (
+              <div>
+                <span>Filter:</span>
+                <select
+                  value={
+                    userConfig.show_subed_only === null ? '' : userConfig.show_subed_only.toString()
+                  }
+                  onChange={event => {
+                    handleUserConfigUpdate({
+                      show_subed_only:
+                        event.target.value === '' ? null : event.target.value === 'true',
+                    });
+                    setRefresh(true);
+                  }}
+                >
+                  <option value="">All subscribe state</option>
+                  <option value="true">Subscribed only</option>
+                  <option value="false">Unsubscribed only</option>
+                </select>
+              </div>
+            )}
+            <img
+              src={iconFilter}
+              alt="icon filter"
+              onClick={() => setShowFilterItems(!showFilterItems)}
+            />
+
             <img
               src={iconGridView}
               onClick={() => {

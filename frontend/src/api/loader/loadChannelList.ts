@@ -9,11 +9,13 @@ export type ChannelsListResponse = {
   config?: ConfigType;
 };
 
-const loadChannelList = async (page: number, showSubscribed: boolean) => {
+const loadChannelList = async (page: number, showSubscribed: boolean | null) => {
   const searchParams = new URLSearchParams();
 
   if (page) searchParams.append('page', page.toString());
-  if (showSubscribed) searchParams.append('filter', 'subscribed');
+  if (showSubscribed !== null) {
+    searchParams.append('filter', showSubscribed ? 'subscribed' : 'unsubscribed');
+  }
 
   const endpoint = `/api/channel/${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 

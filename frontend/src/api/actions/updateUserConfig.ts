@@ -36,7 +36,8 @@ export type UserConfigType = {
   hide_watched: boolean | null;
   file_size_unit: 'binary' | 'metric';
   show_ignored_only: boolean;
-  show_subed_only: boolean;
+  show_subed_only: boolean | null;
+  show_subed_only_playlists: boolean | null;
   show_help_text: boolean;
 };
 

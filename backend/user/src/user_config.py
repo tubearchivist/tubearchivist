@@ -25,7 +25,8 @@ class UserConfigType(TypedDict, total=False):
     hide_watched: bool | None
     file_size_unit: str
     show_ignored_only: bool
-    show_subed_only: bool
+    show_subed_only: bool | None
+    show_subed_only_playlists: bool | None
     show_help_text: bool
 
 
@@ -49,7 +50,8 @@ class UserConfig:
         hide_watched=False,
         file_size_unit="binary",
         show_ignored_only=False,
-        show_subed_only=False,
+        show_subed_only=None,
+        show_subed_only_playlists=None,
         show_help_text=True,
     )
 
