@@ -9,14 +9,14 @@ Functionality:
 from appsettings.src.backup import ElasticBackup
 from appsettings.src.config import ReleaseVersion
 from appsettings.src.filesystem import Scanner
-from appsettings.src.index_setup import ElasitIndexWrap
+from appsettings.src.index_setup import ElasticIndexWrap
 from appsettings.src.manual import ImportFolderScanner
 from appsettings.src.reindex import Reindex, ReindexManual, ReindexPopulate
 from celery import Task, shared_task
 from celery.exceptions import Retry
 from channel.src.index import YoutubeChannel
 from common.src.ta_redis import RedisArchivist
-from common.src.urlparser import Parser
+from common.src.urlparser import ParsedURLType, Parser
 from download.src.queue import PendingList
 from download.src.subscriptions import SubscriptionHandler, SubscriptionScanner
 from download.src.thumbnails import ThumbFilesystem, ThumbValidator
@@ -150,8 +150,13 @@ def download_pending(self, auto_only=False):
 
 @shared_task(name="extract_download", bind=True, base=BaseTask)
 def extrac_dl(
-    self, youtube_ids, auto_start=False, flat=False, status="pending"
-):
+    self,
+    youtube_ids: str | list[ParsedURLType],
+    auto_start: bool = False,
+    flat: bool = False,
+    force: bool = False,
+    status: str = "pending",
+) -> str | None:
     """parse list passed and add to pending"""
     TaskManager().init(self)
     if isinstance(youtube_ids, str):
@@ -160,7 +165,11 @@ def extrac_dl(
         to_add = youtube_ids
 
     pending_handler = PendingList(
-        youtube_ids=to_add, task=self, auto_start=auto_start, flat=flat
+        youtube_ids=to_add,
+        task=self,
+        auto_start=auto_start,
+        flat=flat,
+        force=force,
     )
     videos_added = pending_handler.parse_url_list(status=status)
 
@@ -242,7 +251,7 @@ def run_restore_backup(self, filename):
 
     manager.init(self)
     self.send_progress(["Reset your Index"])
-    ElasitIndexWrap().reset()
+    ElasticIndexWrap().reset()
     ElasticBackup(task=self).restore(filename)
     print("index restore finished")
 

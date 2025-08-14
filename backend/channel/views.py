@@ -51,8 +51,11 @@ class ChannelApiListView(ApiBaseView):
 
         must_list = []
         query_filter = validated_data.get("filter")
-        if query_filter:
-            must_list.append({"term": {"channel_subscribed": {"value": True}}})
+        if query_filter is not None:
+            channel_subscribed = query_filter == "subscribed"
+            must_list.append(
+                {"term": {"channel_subscribed": {"value": channel_subscribed}}}
+            )
 
         self.data["query"] = {"bool": {"must": must_list}}
         self.get_document_list(request)

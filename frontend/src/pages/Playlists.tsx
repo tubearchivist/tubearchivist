@@ -4,6 +4,7 @@ import { useOutletContext } from 'react-router-dom';
 import iconAdd from '/img/icon-add.svg';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
+import iconFilter from '/img/icon-filter.svg';
 
 import { OutletContextType } from './Base';
 import loadPlaylistList, { PlaylistsResponseType } from '../api/loader/loadPlaylistList';
@@ -28,6 +29,7 @@ const Playlists = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [showFilterItems, setShowFilterItems] = useState(false);
   const [playlistsToAddText, setPlaylistsToAddText] = useState('');
   const [customPlaylistsToAddText, setCustomPlaylistsToAddText] = useState('');
 
@@ -39,7 +41,7 @@ const Playlists = () => {
   const pagination = playlistResponseData?.paginate;
 
   const viewStyle = userConfig.view_style_playlist;
-  const showSubedOnly = userConfig.show_subed_only;
+  const showSubedOnly = userConfig.show_subed_only_playlists;
 
   useEffect(() => {
     (async () => {
@@ -53,7 +55,7 @@ const Playlists = () => {
       setShowNotification(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refresh, userConfig.show_subed_only, currentPage, pagination?.current_page]);
+  }, [refresh, userConfig.show_subed_only_playlists, currentPage, pagination?.current_page]);
 
   const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
     const updatedUserConfig = await updateUserConfig(config);
@@ -150,29 +152,35 @@ const Playlists = () => {
         />
 
         <div className="view-controls">
-          <div className="toggle">
-            <span>Show subscribed only:</span>
-            <div className="toggleBox">
-              <input
-                checked={showSubedOnly}
-                onChange={() => {
-                  handleUserConfigUpdate({ show_subed_only: !showSubedOnly });
-                }}
-                type="checkbox"
-              />
-              {!showSubedOnly && (
-                <label htmlFor="" className="ofbtn">
-                  Off
-                </label>
-              )}
-              {showSubedOnly && (
-                <label htmlFor="" className="onbtn">
-                  On
-                </label>
-              )}
-            </div>
-          </div>
           <div className="view-icons">
+            {showFilterItems && (
+              <div>
+                <span>Filter:</span>
+                <select
+                  value={
+                    userConfig.show_subed_only_playlists === null
+                      ? ''
+                      : userConfig.show_subed_only_playlists.toString()
+                  }
+                  onChange={event => {
+                    handleUserConfigUpdate({
+                      show_subed_only_playlists:
+                        event.target.value === '' ? null : event.target.value === 'true',
+                    });
+                    setRefresh(true);
+                  }}
+                >
+                  <option value="">All subscribe state</option>
+                  <option value="true">Subscribed only</option>
+                  <option value="false">Unsubscribed only</option>
+                </select>
+              </div>
+            )}
+            <img
+              src={iconFilter}
+              alt="icon filter"
+              onClick={() => setShowFilterItems(!showFilterItems)}
+            />
             <img
               src={iconGridView}
               onClick={() => {

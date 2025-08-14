@@ -20,11 +20,13 @@ class UserConfigType(TypedDict, total=False):
     view_style_channel: str
     view_style_downloads: str
     view_style_playlist: str
+    vid_type_filter: str | None
     grid_items: int
-    hide_watched: bool
+    hide_watched: bool | None
     file_size_unit: str
     show_ignored_only: bool
-    show_subed_only: bool
+    show_subed_only: bool | None
+    show_subed_only_playlists: bool | None
     show_help_text: bool
 
 
@@ -43,11 +45,13 @@ class UserConfig:
         view_style_channel="list",
         view_style_downloads="list",
         view_style_playlist="grid",
+        vid_type_filter=None,
         grid_items=3,
         hide_watched=False,
         file_size_unit="binary",
         show_ignored_only=False,
-        show_subed_only=False,
+        show_subed_only=None,
+        show_subed_only_playlists=None,
         show_help_text=True,
     )
 

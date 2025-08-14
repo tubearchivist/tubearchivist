@@ -31,6 +31,7 @@ class VideoApiListView(ApiBaseView):
     - sort:enum=published|downloaded|views|likes|duration|filesize
     - order:enum=asc|desc
     - type:enum=videos|streams|shorts
+    - height:int=px
     """
 
     search_base = "ta_video/_search/"

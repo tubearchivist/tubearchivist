@@ -178,6 +178,11 @@ button:disabled:hover {
   min-width: 100px;
 }
 
+.video-item.table td img {
+  width: 20px;
+  height: 20px;
+}
+
 .button-box {
   padding: 5px 2px;
   display: inline-flex;
@@ -433,6 +438,7 @@ button:disabled:hover {
 .view-icons,
 .grid-count {
   display: flex;
+  flex-wrap: wrap;
   justify-content: end;
   align-items: center;
 }
@@ -575,6 +581,7 @@ video:-webkit-full-screen {
 
 .video-item {
   overflow: hidden;
+  position: relative;
 }
 
 .video-item:hover .video-tags {
@@ -586,6 +593,23 @@ video:-webkit-full-screen {
   grid-template-columns: 26% auto;
   background-color: var(--highlight-bg);
   align-items: center;
+}
+
+.video-item-select-wrapper {
+  background-color: var(--highlight-bg);
+  z-index: 10;
+  position: absolute;
+  padding: 5px;
+  top: 0px;
+  left: 0px;
+  width: 20px;
+  height: 20px;
+}
+
+.video-item-select {
+  width: 100%;
+  cursor: pointer;
+  filter: var(--img-filter);
 }
 
 .video-progress-bar,

@@ -35,7 +35,7 @@ class ElasticIndex:
         returns True when rebuild is needed
         """
 
-        if self.expected_map:
+        if self.expected_map or self.expected_map == {}:
             rebuild = self.validate_mappings()
             if rebuild:
                 return rebuild
@@ -49,7 +49,7 @@ class ElasticIndex:
 
     def validate_mappings(self):
         """check if all mappings are as expected"""
-        now_map = self.details["mappings"]["properties"]
+        now_map = self.details["mappings"].get("properties", {})
 
         for key, value in self.expected_map.items():
             # nested
@@ -74,6 +74,10 @@ class ElasticIndex:
             if not value == now_map[key]:
                 print(f"detected mapping change: {key}, {value}")
                 return True
+
+        # simple doc store
+        if self.expected_map == {} and now_map != self.expected_map:
+            return True
 
         return False
 
@@ -135,13 +139,16 @@ class ElasticIndex:
         data = {}
         if self.expected_set:
             data.update({"settings": self.expected_set})
-        if self.expected_map:
+        if self.expected_map or self.expected_map == {}:
             data.update({"mappings": {"properties": self.expected_map}})
+            if self.index_name == "config":
+                # no indexing for config
+                data["mappings"]["dynamic"] = False
 
         _, _ = ElasticWrap(path).put(data)
 
 
-class ElasitIndexWrap:
+class ElasticIndexWrap:
     """interact with all index mapping and setup"""
 
     def __init__(self):

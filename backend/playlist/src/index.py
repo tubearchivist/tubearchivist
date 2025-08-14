@@ -30,7 +30,7 @@ class YoutubePlaylist(YouTubeItem):
         self.all_members = False
         self.nav = False
 
-    def build_json(self, scrape=False, limit: int | None = None):
+    def build_json(self, scrape=False):
         """collection to create json_data"""
         self.get_from_es()
         if self.json_data:
@@ -40,9 +40,8 @@ class YoutubePlaylist(YouTubeItem):
             subscribed = False
             playlist_sort_order = "top"
 
-        limit_str = limit if limit is not None else ""
         sort_order = 1 if playlist_sort_order == "top" else -1
-        playlist_items = f":{limit_str}:{sort_order}"
+        playlist_items = f"::{sort_order}"
 
         if scrape or not self.json_data:
             self.get_from_youtube(
@@ -198,9 +197,9 @@ class YoutubePlaylist(YouTubeItem):
             if status_code == 200:
                 print(f"{self.youtube_id}: removed {video_id} from playlist")
 
-    def update_playlist(self, skip_on_empty=False, limit: int | None = None):
+    def update_playlist(self, skip_on_empty=False):
         """update metadata for playlist with data from YouTube"""
-        self.build_json(scrape=True, limit=limit)
+        self.build_json(scrape=True)
         if not self.json_data:
             # return false to deactivate
             return False

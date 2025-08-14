@@ -64,6 +64,7 @@ const Download = () => {
   const [showHiddenForm, setShowHiddenForm] = useState(false);
   const [addAsAutoStart, setAddAsAutoStart] = useState(false);
   const [addAsFlat, setAddAsFlat] = useState(false);
+  const [addAsForce, setAddAsForce] = useState(false);
   const [showQueueActions, setShowQueueActions] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -252,6 +253,26 @@ const Download = () => {
                   <div className="toggle">
                     <div className="toggleBox">
                       <input
+                        id="add_force"
+                        type="checkbox"
+                        checked={addAsForce}
+                        onChange={() => setAddAsForce(!addAsForce)}
+                      />
+                      {addAsForce ? (
+                        <label htmlFor="" className="onbtn">
+                          On
+                        </label>
+                      ) : (
+                        <label htmlFor="" className="ofbtn">
+                          Off
+                        </label>
+                      )}
+                    </div>
+                    <span>Re-Download</span>
+                  </div>
+                  <div className="toggle">
+                    <div className="toggleBox">
+                      <input
                         id="hide_watched"
                         type="checkbox"
                         checked={addAsAutoStart}
@@ -280,7 +301,12 @@ const Download = () => {
                     label="Add to queue"
                     onClick={async () => {
                       if (downloadQueueText.trim()) {
-                        await updateDownloadQueue(downloadQueueText, addAsAutoStart, addAsFlat);
+                        await updateDownloadQueue({
+                          youtubeIdStrings: downloadQueueText,
+                          autostart: addAsAutoStart,
+                          flat: addAsFlat,
+                          force: addAsForce,
+                        });
                         setDownloadQueueText('');
                         setRefresh(true);
                         setShowHiddenForm(false);

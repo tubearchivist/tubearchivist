@@ -35,7 +35,7 @@ class QueryBuilder:
             must_list.append({"match": {"playlist.keyword": playlist}})
 
         watch = self.request_params.get("watch")
-        if watch:
+        if watch is not None:
             watch_must_list = self.parse_watch(watch)
             must_list.append(watch_must_list)
 
@@ -43,6 +43,11 @@ class QueryBuilder:
         if video_type:
             type_list_list = self.parse_type(video_type)
             must_list.append(type_list_list)
+
+        height = self.request_params.get("height")
+        if height:
+            height_must = self.parse_height(height)
+            must_list.append(height_must)
 
         query = {"bool": {"must": must_list}}
 
@@ -82,6 +87,11 @@ class QueryBuilder:
         vid_type = getattr(VideoTypeEnum, video_type.upper()).value
 
         return {"match": {"vid_type": vid_type}}
+
+    def parse_height(self, height: str):
+        """parse height to int"""
+
+        return {"term": {"streams.height": {"value": height}}}
 
     def parse_sort(self) -> dict | None:
         """build sort key"""

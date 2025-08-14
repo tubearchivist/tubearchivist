@@ -27,6 +27,7 @@ import humanFileSize from '../functions/humanFileSize';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { FileSizeUnits } from '../api/actions/updateUserConfig';
 import { ApiResponseType } from '../functions/APIClient';
+import { useFilterBarTempConf } from '../stores/FilterbarTempConf';
 
 type ChannelParams = {
   channelId: string;
@@ -44,6 +45,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const videoId = searchParams.get('videoId');
 
   const [refresh, setRefresh] = useState(false);
+  const { filterHeight } = useFilterBarTempConf();
 
   const [channelResponse, setChannelResponse] = useState<ApiResponseType<ChannelResponseType>>();
   const [videoResponse, setVideoReponse] =
@@ -63,7 +65,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const useSiUnits = userConfig.file_size_unit === FileSizeUnits.Metric;
 
   const viewStyle = userConfig.view_style_home;
-  const isGridView = viewStyle === ViewStylesEnum.Grid;
+  const isGridView = viewStyle === ViewStylesEnum.Grid || ViewStylesEnum.Table;
   const gridView = isGridView ? `boxed-${userConfig.grid_items}` : '';
   const gridViewGrid = isGridView ? `grid-${userConfig.grid_items}` : '';
 
@@ -73,10 +75,16 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
       const videos = await loadVideoListByFilter({
         channel: channelId,
         page: currentPage,
-        watch: userConfig.hide_watched ? (WatchTypesEnum.Unwatched as WatchTypes) : undefined,
+        watch:
+          userConfig.hide_watched === null
+            ? null
+            : ((userConfig.hide_watched
+                ? WatchTypesEnum.Watched
+                : WatchTypesEnum.Unwatched) as WatchTypes),
         sort: userConfig.sort_by,
         order: userConfig.sort_order,
         type: videoType,
+        height: filterHeight,
       });
       const channelAggs = await loadChannelAggs(channelId);
 
@@ -90,6 +98,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
     userConfig.sort_by,
     userConfig.sort_order,
     userConfig.hide_watched,
+    filterHeight,
     currentPage,
     channelId,
     pagination?.current_page,
@@ -158,10 +167,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
         </div>
 
         <div className={`boxed-content ${gridView}`}>
-          <Filterbar
-            hideToggleText={'Hide watched videos:'}
-            viewStyle={ViewStyleNames.Home as ViewStyleNamesType}
-          />
+          <Filterbar viewStyle={ViewStyleNames.Home as ViewStyleNamesType} />
         </div>
 
         <EmbeddableVideoPlayer videoId={videoId} />
