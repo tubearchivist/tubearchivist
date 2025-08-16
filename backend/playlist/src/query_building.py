@@ -26,7 +26,7 @@ class QueryBuilder:
             must_list.append({"match": {"playlist_channel_id": channel}})
 
         subscribed = self.request_params.get("subscribed")
-        if subscribed:
+        if subscribed is not None:
             must_list.append({"match": {"playlist_subscribed": subscribed}})
 
         playlist_type = self.request_params.get("type")

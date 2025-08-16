@@ -46,7 +46,7 @@ class PlaylistListQuerySerializer(serializers.Serializer):
     """serialize playlist list query params"""
 
     channel = serializers.CharField(required=False)
-    subscribed = serializers.BooleanField(required=False)
+    subscribed = serializers.BooleanField(required=False, allow_null=True)
     type = serializers.ChoiceField(
         choices=["regular", "custom"], required=False
     )

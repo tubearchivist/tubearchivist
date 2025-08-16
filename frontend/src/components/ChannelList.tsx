@@ -7,6 +7,7 @@ import FormattedNumber from './FormattedNumber';
 import Button from './Button';
 import ChannelIcon from './ChannelIcon';
 import ChannelBanner from './ChannelBanner';
+import LoadingIndicator from './LoadingIndicator';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 
 type ChannelListProps = {
@@ -18,8 +19,11 @@ const ChannelList = ({ channelList, refreshChannelList }: ChannelListProps) => {
   const { userConfig } = useUserConfigStore();
   const viewStyle = userConfig.view_style_channel;
 
-  if (!channelList || channelList.length === 0) {
-    return <p>No channels found.</p>;
+  if (!channelList) {
+    return <LoadingIndicator />;
+  }
+  if (channelList.length === 0) {
+    return <h2>No channels found...</h2>;
   }
 
   return (

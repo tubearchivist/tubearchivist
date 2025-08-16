@@ -36,7 +36,7 @@ export const SortOrderEnum = {
 
 export type VideoTypes = 'videos' | 'streams' | 'shorts';
 
-export type WatchTypes = 'watched' | 'unwatched' | 'continue';
+export type WatchTypes = 'watched' | 'unwatched' | 'continue' | null;
 export const WatchTypesEnum = {
   Watched: 'watched',
   Unwatched: 'unwatched',
@@ -51,6 +51,7 @@ type FilterType = {
   sort?: SortByType;
   order?: SortOrderType;
   type?: VideoTypes;
+  height?: string;
 };
 
 const loadVideoListByFilter = async (filter: FilterType) => {
@@ -67,6 +68,7 @@ const loadVideoListByFilter = async (filter: FilterType) => {
   if (filter.sort) searchParams.append('sort', filter.sort);
   if (filter.order) searchParams.append('order', filter.order);
   if (filter.type) searchParams.append('type', filter.type);
+  if (filter.height) searchParams.append('height', filter.height.toString());
 
   const endpoint = `/api/video/${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
   return APIClient<VideoListByFilterResponseType>(endpoint);

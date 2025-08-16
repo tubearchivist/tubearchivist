@@ -10,7 +10,7 @@ from random import randint
 from time import sleep
 
 from appsettings.src.config import AppConfig, ReleaseVersion
-from appsettings.src.index_setup import ElasitIndexWrap
+from appsettings.src.index_setup import ElasticIndexWrap
 from appsettings.src.snapshot import ElasticSnapshot
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap
@@ -151,7 +151,7 @@ class Command(BaseCommand):
     def _index_setup(self):
         """migration: validate index mappings"""
         self.stdout.write("[6] validate index mappings")
-        ElasitIndexWrap().setup()
+        ElasticIndexWrap().setup()
 
     def _snapshot_check(self):
         """migration setup snapshots"""

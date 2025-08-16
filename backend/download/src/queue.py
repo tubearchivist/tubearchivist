@@ -109,6 +109,7 @@ class PendingList(PendingIndex):
         task=None,
         auto_start=False,
         flat=False,
+        force=False,
     ):
         super().__init__()
         self.config = AppConfig().config
@@ -116,6 +117,7 @@ class PendingList(PendingIndex):
         self.task = task
         self.auto_start = auto_start
         self.flat = flat
+        self.force = force
         self.to_skip = False
         self.missing_videos: list[dict] = []
         self.added = 0
@@ -173,8 +175,14 @@ class PendingList(PendingIndex):
             PendingInteract(youtube_id=url, status="priority").update_status()
             return None
 
-        if url in self.missing_videos or url in self.to_skip:
+        if not self.force and (
+            url in self.missing_videos or url in self.to_skip
+        ):
             print(f"{url}: skipped adding already indexed video to download.")
+            return None
+
+        if self.force and url in self.all_ignored or url in self.all_pending:
+            print(f"{url}: skipped adding force video already in queue.")
             return None
 
         to_add = self._parse_video(url, vid_type)
@@ -258,12 +266,14 @@ class PendingList(PendingIndex):
     def _parse_playlist(self, url: str, limit: int | None):
         """fast parse playlist"""
         playlist = YoutubePlaylist(url)
-        playlist.update_playlist(limit=limit)
+        playlist.update_playlist()
         if not playlist.youtube_meta:
             print(f"{url}: playlist metadata extraction failed, skipping")
             return
 
         video_results = playlist.youtube_meta["entries"]
+        if limit:
+            video_results = video_results[:limit]
 
         total = len(video_results)
         for idx, video_data in enumerate(video_results, start=1):

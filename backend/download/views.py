@@ -118,12 +118,15 @@ class DownloadApiListView(ApiBaseView):
 
         auto_start = validated_query.get("autostart")
         flat = validated_query.get("flat", False)
-        print(f"auto_start: {auto_start}, flat: {flat}")
+        force = validated_query.get("force", False)
+        print(f"auto_start: {auto_start}, flat: {flat}, force: {force}")
         to_add = validated_data["data"]
 
         pending = [i["youtube_id"] for i in to_add if i["status"] == "pending"]
         url_str = " ".join(pending)
-        task = extrac_dl.delay(url_str, auto_start=auto_start, flat=flat)
+        task = extrac_dl.delay(
+            url_str, auto_start=auto_start, flat=flat, force=force
+        )
 
         message = {
             "message": "add to queue task started",
@@ -153,15 +156,12 @@ class DownloadApiListView(ApiBaseView):
         query_serializer.is_valid(raise_exception=True)
         validated_query = query_serializer.validated_data
         status_filter = validated_query.get("filter")
-        channel = validated_query.get("channel")
-        vid_type = validated_query.get("vid_type")
-        error = validated_query.get("error")
 
         PendingInteract(status=status_filter).update_bulk(
-            channel_id=channel,
-            vid_type=vid_type,
-            new_status=new_status,
-            error=error,
+            channel_id=validated_query.get("channel"),
+            vid_type=validated_query.get("vid_type"),
+            new_status=validated_data["status"],
+            error=validated_query.get("error"),
         )
 
         if new_status == "priority":

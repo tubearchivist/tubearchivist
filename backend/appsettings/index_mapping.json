@@ -1,12 +1,7 @@
 {
     "index_config": [{
             "index_name": "config",
-            "expected_map": {
-                "config": {
-                    "type": "object",
-                    "enabled": false
-                }
-            },
+            "expected_map": {},
             "expected_set": {
                 "number_of_replicas": "0"
             }
@@ -367,6 +362,15 @@
                                 },
                                 "category": {
                                     "type": "keyword"
+                                },
+                                "description": {
+                                    "type": "text",
+                                    "fields": {
+                                        "keyword": {
+                                            "type": "keyword",
+                                            "ignore_above": 256
+                                        }
+                                    }
                                 },
                                 "locked": {
                                     "type": "short"

@@ -4,6 +4,8 @@ import { VideoType } from '../pages/Home';
 import iconPlay from '/img/icon-play.svg';
 import iconDotMenu from '/img/icon-dot-menu.svg';
 import iconClose from '/img/icon-close.svg';
+import iconChecked from '/img/icon-seen.svg';
+import iconUnchecked from '/img/icon-unseen.svg';
 import updateWatchedState from '../api/actions/updateWatchedState';
 import formatDate from '../functions/formatDates';
 import WatchedCheckBox from './WatchedCheckBox';
@@ -12,6 +14,7 @@ import { useState } from 'react';
 import deleteVideoProgressById from '../api/actions/deleteVideoProgressById';
 import VideoThumbnail from './VideoThumbail';
 import { ViewStylesType } from '../configuration/constants/ViewStyle';
+import { useVideoSelectionStore } from '../stores/VideoSelectionStore';
 
 type VideoListItemProps = {
   video: VideoType;
@@ -31,6 +34,8 @@ const VideoListItem = ({
   const [, setSearchParams] = useSearchParams();
 
   const [showReorderMenu, setShowReorderMenu] = useState(false);
+  const { selectedVideoIds, appendVideoId, removeVideoId, showSelection } =
+    useVideoSelectionStore();
 
   if (!video) {
     return <p>No video found.</p>;
@@ -38,6 +43,19 @@ const VideoListItem = ({
 
   return (
     <div className={`video-item ${viewStyle}`}>
+      {showSelection && (
+        <div className="video-item-select-wrapper">
+          <img
+            src={selectedVideoIds.includes(video.youtube_id) ? iconChecked : iconUnchecked}
+            className="video-item-select"
+            onClick={() =>
+              selectedVideoIds.includes(video.youtube_id)
+                ? removeVideoId(video.youtube_id)
+                : appendVideoId(video.youtube_id)
+            }
+          />
+        </div>
+      )}
       <a
         onClick={() => {
           setSearchParams(params => {
@@ -75,28 +93,32 @@ const VideoListItem = ({
       </a>
       <div className={`video-desc ${viewStyle}`}>
         <div className="video-desc-player" id={`video-info-${video.youtube_id}`}>
-          <WatchedCheckBox
-            watched={video.player.watched}
-            onClick={async status => {
-              await updateWatchedState({
-                id: video.youtube_id,
-                is_watched: status,
-              });
-            }}
-            onDone={() => {
-              refreshVideoList(true);
-            }}
-          />
-          {video.player.progress && (
-            <img
-              src={iconClose}
-              className="video-popup-menu-close-button"
-              title="Delete watch progress"
-              onClick={async () => {
-                await deleteVideoProgressById(video.youtube_id);
-                refreshVideoList(true);
-              }}
-            />
+          {!showSelection && (
+            <>
+              <WatchedCheckBox
+                watched={video.player.watched}
+                onClick={async status => {
+                  await updateWatchedState({
+                    id: video.youtube_id,
+                    is_watched: status,
+                  });
+                }}
+                onDone={() => {
+                  refreshVideoList(true);
+                }}
+              />
+              {video.player.progress && (
+                <img
+                  src={iconClose}
+                  className="video-popup-menu-close-button"
+                  title="Delete watch progress"
+                  onClick={async () => {
+                    await deleteVideoProgressById(video.youtube_id);
+                    refreshVideoList(true);
+                  }}
+                />
+              )}
+            </>
           )}
           <span>
             {formatDate(video.published)} | {video.player.duration_str}

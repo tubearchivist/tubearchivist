@@ -4,6 +4,7 @@ import Routes from '../configuration/routes/RouteList';
 import Pagination from '../components/Pagination';
 import loadVideoListByFilter, {
   VideoListByFilterResponseType,
+  VideoTypes,
   WatchTypes,
   WatchTypesEnum,
 } from '../api/loader/loadVideoListByPage';
@@ -21,6 +22,7 @@ import EmbeddableVideoPlayer from '../components/EmbeddableVideoPlayer';
 import { SponsorBlockType } from './Video';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { ApiResponseType } from '../functions/APIClient';
+import { useFilterBarTempConf } from '../stores/FilterbarTempConf';
 
 export type PlayerType = {
   watched: boolean;
@@ -117,6 +119,8 @@ const Home = () => {
   const [continueVideoResponse, setContinueVideoResponse] =
     useState<ApiResponseType<VideoListByFilterResponseType>>();
 
+  const { filterHeight } = useFilterBarTempConf();
+
   const { data: videoResponseData } = videoResponse ?? {};
   const { data: continueVideoResponseData } = continueVideoResponse ?? {};
 
@@ -126,7 +130,7 @@ const Home = () => {
 
   const hasVideos = videoResponseData?.data?.length !== 0;
 
-  const isGridView = userConfig.view_style_home === ViewStylesEnum.Grid;
+  const isGridView = userConfig.view_style_home === ViewStylesEnum.Grid || ViewStylesEnum.Table;
   const gridView = isGridView ? `boxed-${userConfig.grid_items}` : '';
   const gridViewGrid = isGridView ? `grid-${userConfig.grid_items}` : '';
   const isTableView = userConfig.view_style_home === ViewStylesEnum.Table;
@@ -135,9 +139,16 @@ const Home = () => {
     (async () => {
       const videos = await loadVideoListByFilter({
         page: currentPage,
-        watch: userConfig.hide_watched ? (WatchTypesEnum.Unwatched as WatchTypes) : undefined,
+        watch:
+          userConfig.hide_watched === null
+            ? null
+            : ((userConfig.hide_watched
+                ? WatchTypesEnum.Watched
+                : WatchTypesEnum.Unwatched) as WatchTypes),
+        type: userConfig.vid_type_filter as VideoTypes,
         sort: userConfig.sort_by,
         order: userConfig.sort_order,
+        height: filterHeight,
       });
 
       try {
@@ -157,6 +168,8 @@ const Home = () => {
     userConfig.sort_by,
     userConfig.sort_order,
     userConfig.hide_watched,
+    userConfig.vid_type_filter,
+    filterHeight,
     currentPage,
     pagination?.current_page,
     videoId,
@@ -189,31 +202,22 @@ const Home = () => {
           <h1>Recent Videos</h1>
         </div>
 
-        <Filterbar
-          hideToggleText="Show unwatched only:"
-          viewStyle={ViewStyleNames.Home as ViewStyleNamesType}
-        />
+        <Filterbar viewStyle={ViewStyleNames.Home as ViewStyleNamesType} showTypeFilter={true} />
       </div>
 
       <div className={`boxed-content ${gridView}`}>
         <div className={`video-list ${userConfig.view_style_home} ${gridViewGrid}`}>
+          <VideoList
+            videoList={videoList}
+            viewStyle={userConfig.view_style_home}
+            refreshVideoList={setRefreshVideoList}
+          />
           {!hasVideos && (
-            <>
-              <h2>No videos found...</h2>
-              <p>
-                If you've already added a channel or playlist, try going to the{' '}
-                <Link to={Routes.Downloads}>downloads page</Link> to start the scan and download
-                tasks.
-              </p>
-            </>
-          )}
-
-          {hasVideos && (
-            <VideoList
-              videoList={videoList}
-              viewStyle={userConfig.view_style_home}
-              refreshVideoList={setRefreshVideoList}
-            />
+            <p>
+              If you've already added a channel or playlist, try going to the{' '}
+              <Link to={Routes.Downloads}>downloads page</Link> to start the scan and download
+              tasks.
+            </p>
           )}
         </div>
       </div>
