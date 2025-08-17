@@ -1,22 +1,27 @@
-import { useOutletContext } from 'react-router-dom';
-import loadChannelList, { ChannelsListResponse } from '../api/loader/loadChannelList';
-import iconGridView from '/img/icon-gridview.svg';
-import iconListView from '/img/icon-listview.svg';
-import iconAdd from '/img/icon-add.svg';
-import iconFilter from '/img/icon-filter.svg';
 import { useEffect, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
+
+import loadChannelList, { ChannelsListResponse } from '../api/loader/loadChannelList';
+import updateBulkChannelSubscriptions from '../api/actions/updateBulkChannelSubscriptions';
+import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
+import { ApiResponseType } from '../functions/APIClient';
+
+import { useUserConfigStore } from '../stores/UserConfigStore';
+import useIsAdmin from '../functions/useIsAdmin';
+
 import Pagination from '../components/Pagination';
-import { OutletContextType } from './Base';
 import ChannelList from '../components/ChannelList';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import Notifications from '../components/Notifications';
 import Button from '../components/Button';
-import updateBulkChannelSubscriptions from '../api/actions/updateBulkChannelSubscriptions';
-import useIsAdmin from '../functions/useIsAdmin';
-import { useUserConfigStore } from '../stores/UserConfigStore';
-import updateUserConfig, { UserConfigType } from '../api/actions/updateUserConfig';
-import { ApiResponseType } from '../functions/APIClient';
+
+import { OutletContextType } from './Base';
 import { ViewStylesEnum, ViewStylesType } from '../configuration/constants/ViewStyle';
+
+import iconGridView from '/img/icon-gridview.svg';
+import iconListView from '/img/icon-listview.svg';
+import iconAdd from '/img/icon-add.svg';
+import iconFilter from '/img/icon-filter.svg';
 
 type ChannelOverwritesType = {
   download_format: string | null;
