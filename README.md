@@ -214,6 +214,7 @@ This is your time to shine, [read this](https://github.com/tubearchivist/tubearc
 - [RoninTech/ta-helper](https://github.com/RoninTech/ta-helper): Helper script to provide a symlink association to reference TubeArchivist videos with their original titles.
 - [tangyjoust/Tautulli-Notify-TubeArchivist-of-Plex-Watched-State](https://github.com/tangyjoust/Tautulli-Notify-TubeArchivist-of-Plex-Watched-State) Mark videos watched in Plex (through streaming not manually) through Tautulli back to TubeArchivist
 - [Dhs92/delete_shorts](https://github.com/Dhs92/delete_shorts): A script to delete ALL YouTube Shorts from TubeArchivist
+- [arisenfromtheashes/TA_DVR](https://github.com/arisenfromtheashes/TA_DVR): Scripts to assist in using Tube Archivist like a DVR
 
 ## Donate
 The best donation to **Tube Archivist** is your time, take a look at the [contribution page](CONTRIBUTING.md) to get started.
