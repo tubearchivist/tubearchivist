@@ -156,7 +156,6 @@ class ImportFolderScanner:
                 failed_imports.append((current_video.get("media"), str(e)))
                 continue
 
-        # ✅ This block must be INSIDE the function
         if successful_imports:
             comment_list = CommentList(task=self.task)
             comment_list.add(video_ids=successful_imports)
