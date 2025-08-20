@@ -49,7 +49,7 @@ const APIClient = async <T>(
     const data = await response.json();
     throw {
       status: response.status,
-      message: data?.message || 'An error occurred while processing the request.',
+      message: data?.message || data?.error || 'An error occurred while processing the request.',
     } as ApiError;
   }
 
