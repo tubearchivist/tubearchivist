@@ -20,6 +20,7 @@ import validateCookie from '../api/actions/validateCookie';
 import deletePoToken from '../api/actions/deletePoToken';
 import updatePoToken from '../api/actions/updatePoToken';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import MembershipAppsettings from '../components/MembershipAppsettings';
 
 type SettingsApplicationReponses = {
   snapshots?: SnapshotListType;
@@ -910,6 +911,9 @@ const SettingsApplication = () => {
                   updateCallback={handleUpdateConfig}
                 />
               </div>
+            </div>
+            <div className="info-box-item">
+              <MembershipAppsettings show_help_text={userConfig.show_help_text} />
             </div>
             <div className="info-box-item">
               <h2>Snapshots</h2>

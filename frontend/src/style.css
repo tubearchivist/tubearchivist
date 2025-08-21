@@ -1231,6 +1231,10 @@ video:-webkit-full-screen {
   min-width: 300px;
 }
 
+.settings-box-wrapper div {
+  padding: 3px 0;
+}
+
 /* settings */
 .settings-group {
   background-color: var(--highlight-bg);

@@ -136,4 +136,4 @@ class SnapshotRestoreResponseSerializer(serializers.Serializer):
 class TokenResponseSerializer(serializers.Serializer):
     """serialize token response"""
 
-    token = serializers.CharField()
+    token = serializers.CharField(allow_null=True)
