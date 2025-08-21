@@ -16,7 +16,7 @@ body:
         - label: I'm running the latest version of Tube Archivist and have read the [release notes](https://github.com/tubearchivist/tubearchivist/releases/latest).
           required: true
         - label: I'm [beta testing](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#beta-testing) and am running the latest unstable build. 
-        - label: I have read the [how to open an issue](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#how-to-open-an-issue) guide, particularly the [bug report](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#bug-report) section.
+        - label: I have read the [how to open an issue](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#how-to-open-an-issue) guide, particularly the [bug report](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#bug-report) section. I've double checked that I don't open a yt-dlp issue here.
           required: true
 
   - type: input

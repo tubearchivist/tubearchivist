@@ -46,6 +46,7 @@ Please read this carefully before opening any [issue](https://github.com/tubearc
 Bug reports are highly welcome! This project has improved a lot due to your help by providing feedback when something doesn't work as expected. The developers can't possibly cover all edge cases in an ever changing environment like YouTube and yt-dlp.
 
 Please keep in mind:
+- Don't report bugs from yt-dlp here. There is a [dedicated repo](https://github.com/yt-dlp/yt-dlp/issues) for that. Make sure to check for duplicates before opening a new issue there. 
 - Docker logs are the easiest way to understand what's happening when something goes wrong, *always* provide the logs upfront.
 - Set the environment variable `DJANGO_DEBUG=True` to Tube Archivist and reproduce the bug for a better log output. Don't forget to remove that variable again after.
 - A bug that can't be reproduced, is difficult or sometimes even impossible to fix. Provide very clear steps *how to reproduce*.
