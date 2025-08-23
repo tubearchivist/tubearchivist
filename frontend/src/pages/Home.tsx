@@ -23,6 +23,7 @@ import { SponsorBlockType } from './Video';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { ApiResponseType } from '../functions/APIClient';
 import { useFilterBarTempConf } from '../stores/FilterbarTempConf';
+import { HideWatchedName, HideWatchedType } from '../configuration/constants/HideWatched';
 
 export type PlayerType = {
   watched: boolean;
@@ -202,7 +203,11 @@ const Home = () => {
           <h1>Recent Videos</h1>
         </div>
 
-        <Filterbar viewStyle={ViewStyleNames.Home as ViewStyleNamesType} showTypeFilter={true} />
+        <Filterbar
+          viewStyle={ViewStyleNames.Home as ViewStyleNamesType}
+          hideWatched={HideWatchedName.Home as HideWatchedType}
+          showTypeFilter={true}
+        />
       </div>
 
       <div className={`boxed-content ${gridView}`}>

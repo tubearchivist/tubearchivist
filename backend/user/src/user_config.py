@@ -23,6 +23,8 @@ class UserConfigType(TypedDict, total=False):
     vid_type_filter: str | None
     grid_items: int
     hide_watched: bool | None
+    hide_watched_channel: bool | None
+    hide_watched_playlist: bool | None
     file_size_unit: str
     show_ignored_only: bool
     show_subed_only: bool | None
@@ -48,6 +50,8 @@ class UserConfig:
         vid_type_filter=None,
         grid_items=3,
         hide_watched=False,
+        hide_watched_channel=None,
+        hide_watched_playlist=None,
         file_size_unit="binary",
         show_ignored_only=False,
         show_subed_only=None,

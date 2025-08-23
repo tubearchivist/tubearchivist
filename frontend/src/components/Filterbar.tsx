@@ -21,14 +21,21 @@ import { useFilterBarTempConf } from '../stores/FilterbarTempConf';
 import { useVideoSelectionStore } from '../stores/VideoSelectionStore';
 import Button from './Button';
 import updateDownloadQueue from '../api/actions/updateDownloadQueue';
+import { HideWatchedType } from '../configuration/constants/HideWatched';
 
 type FilterbarProps = {
   viewStyle: ViewStyleNamesType;
+  hideWatched: HideWatchedType;
   showSort?: boolean;
   showTypeFilter?: boolean;
 };
 
-const Filterbar = ({ viewStyle, showSort = true, showTypeFilter = false }: FilterbarProps) => {
+const Filterbar = ({
+  viewStyle,
+  hideWatched,
+  showSort = true,
+  showTypeFilter = false,
+}: FilterbarProps) => {
   const { userConfig, setUserConfig } = useUserConfigStore();
   const {
     selectedVideoIds,
@@ -44,6 +51,7 @@ const Filterbar = ({ viewStyle, showSort = true, showTypeFilter = false }: Filte
     useFilterBarTempConf();
 
   const currentViewStyle = userConfig[viewStyle];
+  const currentHideWatched = userConfig[hideWatched];
   const isGridView = currentViewStyle === ViewStylesEnum.Grid;
 
   useEffect(() => {
@@ -114,10 +122,10 @@ const Filterbar = ({ viewStyle, showSort = true, showTypeFilter = false }: Filte
             <div>
               <span>Filter:</span>
               <select
-                value={userConfig.hide_watched === null ? '' : userConfig.hide_watched.toString()}
+                value={currentHideWatched === null ? '' : currentHideWatched.toString()}
                 onChange={event => {
                   handleUserConfigUpdate({
-                    hide_watched: event.target.value === '' ? null : event.target.value === 'true',
+                    [hideWatched]: event.target.value === '' ? null : event.target.value === 'true',
                   });
                 }}
               >

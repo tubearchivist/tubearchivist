@@ -34,6 +34,8 @@ export type UserConfigType = {
   vid_type_filter: VideoTypes | null;
   grid_items: number;
   hide_watched: boolean | null;
+  hide_watched_channel: boolean | null;
+  hide_watched_playlist: boolean | null;
   file_size_unit: 'binary' | 'metric';
   show_ignored_only: boolean;
   show_subed_only: boolean | null;
