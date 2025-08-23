@@ -34,6 +34,7 @@ import { ApiResponseType } from '../functions/APIClient';
 import NotFound from './NotFound';
 import updatePlaylistSortOrder from '../api/actions/updatePlaylistSortOrder';
 import { useFilterBarTempConf } from '../stores/FilterbarTempConf';
+import { HideWatchedType, HideWatchedName } from '../configuration/constants/HideWatched';
 
 export type VideoResponseType = {
   data?: VideoType[];
@@ -86,9 +87,9 @@ const Playlist = () => {
         playlist: playlistId,
         page: currentPage,
         watch:
-          userConfig.hide_watched === null
+          userConfig.hide_watched_playlist === null
             ? null
-            : ((userConfig.hide_watched
+            : ((userConfig.hide_watched_playlist
                 ? WatchTypesEnum.Watched
                 : WatchTypesEnum.Unwatched) as WatchTypes),
         type: userConfig.vid_type_filter as VideoTypes,
@@ -110,7 +111,7 @@ const Playlist = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     playlistId,
-    userConfig.hide_watched,
+    userConfig.hide_watched_playlist,
     userConfig.vid_type_filter,
     filterHeight,
     refresh,
@@ -351,6 +352,7 @@ const Playlist = () => {
       <div className={`boxed-content ${gridView}`}>
         <Filterbar
           viewStyle={ViewStyleNames.Home as ViewStyleNamesType} // its a list of videos, so ViewStyleNames.Home
+          hideWatched={HideWatchedName.Playlist as HideWatchedType}
           showSort={false}
           showTypeFilter={true}
         />

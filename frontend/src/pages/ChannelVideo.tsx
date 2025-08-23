@@ -28,6 +28,7 @@ import { useUserConfigStore } from '../stores/UserConfigStore';
 import { FileSizeUnits } from '../api/actions/updateUserConfig';
 import { ApiResponseType } from '../functions/APIClient';
 import { useFilterBarTempConf } from '../stores/FilterbarTempConf';
+import { HideWatchedName, HideWatchedType } from '../configuration/constants/HideWatched';
 
 type ChannelParams = {
   channelId: string;
@@ -76,9 +77,9 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
         channel: channelId,
         page: currentPage,
         watch:
-          userConfig.hide_watched === null
+          userConfig.hide_watched_channel === null
             ? null
-            : ((userConfig.hide_watched
+            : ((userConfig.hide_watched_channel
                 ? WatchTypesEnum.Watched
                 : WatchTypesEnum.Unwatched) as WatchTypes),
         sort: userConfig.sort_by,
@@ -97,7 +98,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
     refresh,
     userConfig.sort_by,
     userConfig.sort_order,
-    userConfig.hide_watched,
+    userConfig.hide_watched_channel,
     filterHeight,
     currentPage,
     channelId,
@@ -167,7 +168,10 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
         </div>
 
         <div className={`boxed-content ${gridView}`}>
-          <Filterbar viewStyle={ViewStyleNames.Home as ViewStyleNamesType} />
+          <Filterbar
+            viewStyle={ViewStyleNames.Home as ViewStyleNamesType}
+            hideWatched={HideWatchedName.Channel as HideWatchedType}
+          />
         </div>
 
         <EmbeddableVideoPlayer videoId={videoId} />
