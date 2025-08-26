@@ -324,6 +324,19 @@ class PendingList(PendingIndex):
                 )
             return None
 
+        expected_keys = {"id", "title", "channel", "channel_id"}
+        if not set(video.youtube_meta.keys()).issuperset(expected_keys):
+            print(f"{url}: video metadata extraction incomplete, skipping")
+            if self.task:
+                self.task.send_progress(
+                    message_lines=[
+                        "Video extraction failed.",
+                        "Metadata extraction incomplete.",
+                    ],
+                    level="error",
+                )
+            return None
+
         video.youtube_meta["vid_type"] = vid_type
         to_add = self._parse_entry(
             youtube_id=url,
