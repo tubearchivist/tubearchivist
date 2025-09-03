@@ -40,7 +40,7 @@ body:
     id: logs
     attributes:
       label: Relevant log output
-      description: Please copy and paste any relevant Docker logs. This will be automatically formatted into code, so no need for backticks.
+      description: Please copy and paste any relevant Docker logs. Make sure the logs are created with [DJANGO_DEBUG](https://docs.tubearchivist.com/installation/env-vars/#django_debug) enabled. This will be automatically formatted into code, so no need for backticks.
       render: shell
     validations:
       required: true

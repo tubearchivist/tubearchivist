@@ -124,6 +124,7 @@ class DownloadApiListView(ApiBaseView):
 
         pending = [i["youtube_id"] for i in to_add if i["status"] == "pending"]
         url_str = " ".join(pending)
+        print(f"url_str: {url_str}")
         task = extrac_dl.delay(
             url_str, auto_start=auto_start, flat=flat, force=force
         )

@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Routes from '../configuration/routes/RouteList';
 import { VideoType } from '../pages/Home';
 import iconPlay from '/img/icon-play.svg';
@@ -21,6 +21,7 @@ type VideoListItemProps = {
   viewStyle: ViewStylesType;
   playlistId?: string;
   showReorderButton?: boolean;
+  allowInlinePlay?: boolean;
   refreshVideoList: (refresh: boolean) => void;
 };
 
@@ -29,8 +30,10 @@ const VideoListItem = ({
   viewStyle,
   playlistId,
   showReorderButton = false,
+  allowInlinePlay = true,
   refreshVideoList,
 }: VideoListItemProps) => {
+  const navigate = useNavigate();
   const [, setSearchParams] = useSearchParams();
 
   const [showReorderMenu, setShowReorderMenu] = useState(false);
@@ -58,11 +61,15 @@ const VideoListItem = ({
       )}
       <a
         onClick={() => {
-          setSearchParams(params => {
-            const newParams = new URLSearchParams(params);
-            newParams.set('videoId', video.youtube_id);
-            return newParams;
-          });
+          if (allowInlinePlay) {
+            setSearchParams(params => {
+              const newParams = new URLSearchParams(params);
+              newParams.set('videoId', video.youtube_id);
+              return newParams;
+            });
+          } else {
+            navigate(Routes.Video(video.youtube_id));
+          }
         }}
       >
         <div className={`video-thumb-wrap ${viewStyle}`}>
@@ -86,9 +93,11 @@ const VideoListItem = ({
               ></div>
             )}
           </div>
-          <div className="video-play">
-            <img src={iconPlay} alt="play-icon" />
-          </div>
+          {allowInlinePlay && (
+            <div className="video-play">
+              <img src={iconPlay} alt="play-icon" />
+            </div>
+          )}
         </div>
       </a>
       <div className={`video-desc ${viewStyle}`}>

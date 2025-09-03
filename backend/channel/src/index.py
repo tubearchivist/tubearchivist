@@ -110,11 +110,6 @@ class YoutubeChannel(YouTubeItem):
         """get channel tabs"""
         tabs = VideoTypeEnum.values_known()
         config_cp = self.config.copy()
-        config_cp["subscriptions"] = {
-            "channel_size": 1,
-            "live_channel_size": 1,
-            "shorts_channel_size": 1,
-        }
         tabs = []
         for query_filter in VideoTypeEnum:
             if query_filter == VideoTypeEnum.UNKNOWN:
@@ -123,7 +118,7 @@ class YoutubeChannel(YouTubeItem):
             videos = get_last_channel_videos(
                 channel_id=self.youtube_id,
                 config=config_cp,
-                limit=True,
+                limit=1,
                 query_filter=query_filter,
             )
             if videos:
@@ -246,13 +241,21 @@ class YoutubeChannel(YouTubeItem):
         ]
         self.task.send_progress(message, progress=(idx + 1) / total)
 
-    @staticmethod
-    def _index_single_playlist(playlist):
+    def _index_single_playlist(self, playlist):
         """add single playlist if needed"""
         from playlist.src.index import YoutubePlaylist
 
-        playlist = YoutubePlaylist(playlist[0])
-        playlist.update_playlist(skip_on_empty=True)
+        try:
+            playlist = YoutubePlaylist(playlist[0])
+            playlist.update_playlist(skip_on_empty=True)
+        except ValueError as err:
+            message = [
+                f"{self.youtube_id}: skip failed playlist import",
+                str(err),
+            ]
+            print(message)
+            if self.task:
+                self.task.send_progress(message)
 
     def get_channel_videos(self):
         """get all videos from channel"""

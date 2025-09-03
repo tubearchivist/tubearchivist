@@ -1,128 +1,130 @@
 """build queries for video extraction from channel subscriptions"""
 
+from appsettings.src.config import AppConfigType
 from download.src.yt_dlp_base import YtWrap
 from video.src.constants import VideoTypeEnum
 
 
 class VideoQueryBuilder:
-    """Build queries for yt-dlp."""
+    """
+    Build queries for yt-dlp.
+    limit:
+    - None: no limit
+    - bool: limit lookup from overwrite or config if True
+    - int: limit as int direct
+    """
 
-    def __init__(self, config: dict, channel_overwrites: dict | None = None):
+    MAPPING = {
+        VideoTypeEnum.VIDEOS: {
+            "config_key": "channel_size",
+            "overwrite_key": "subscriptions_channel_size",
+        },
+        VideoTypeEnum.SHORTS: {
+            "config_key": "shorts_channel_size",
+            "overwrite_key": "subscriptions_shorts_channel_size",
+        },
+        VideoTypeEnum.STREAMS: {
+            "config_key": "live_channel_size",
+            "overwrite_key": "subscriptions_live_channel_size",
+        },
+    }
+
+    def __init__(
+        self,
+        config: AppConfigType,
+        channel_overwrites: dict | None = None,
+        limit: None | bool | int = True,
+    ):
         self.config = config
         self.channel_overwrites = channel_overwrites or {}
+        self.limit = limit
 
     def build_queries(
         self,
-        video_type: VideoTypeEnum | list[VideoTypeEnum] | None,
-        limit: bool = True,
+        vid_types: list[VideoTypeEnum] = VideoTypeEnum.known(),
     ) -> list[tuple[VideoTypeEnum, int | None]]:
-        """Build queries for all or specific video type."""
-        query_methods = {
-            VideoTypeEnum.VIDEOS: self.videos_query,
-            VideoTypeEnum.STREAMS: self.streams_query,
-            VideoTypeEnum.SHORTS: self.shorts_query,
-        }
+        """build queries"""
+        queries: list[tuple[VideoTypeEnum, int | None]] = []
+        for vid_type in vid_types:
+            if vid_type not in self.MAPPING:
+                continue
 
-        if video_type and video_type != VideoTypeEnum.UNKNOWN:
-            # build query for specific type/s
-            if not isinstance(video_type, list):
-                video_type = [video_type]
-
-            queries = []
-            for video_type_item in video_type:
-                query_method = query_methods.get(video_type_item)
-                if not query_method:
-                    continue
-
-                query = query_method(limit)
-                if query[1] != 0:
-                    queries.append(query)
-
-            return queries
-
-        # Build and return queries for all video types
-        queries = []
-        for build_query in query_methods.values():
-            query = build_query(limit)
-            if query[1] != 0:
+            query = self.build_query_type(vid_type)
+            if query:
                 queries.append(query)
 
         return queries
 
-    def videos_query(self, limit: bool) -> tuple[VideoTypeEnum, int | None]:
-        """Build query for videos."""
-        return self._build_generic_query(
-            video_type=VideoTypeEnum.VIDEOS,
-            overwrite_key="subscriptions_channel_size",
-            config_key="channel_size",
-            limit=limit,
-        )
-
-    def streams_query(self, limit: bool) -> tuple[VideoTypeEnum, int | None]:
-        """Build query for streams."""
-        return self._build_generic_query(
-            video_type=VideoTypeEnum.STREAMS,
-            overwrite_key="subscriptions_live_channel_size",
-            config_key="live_channel_size",
-            limit=limit,
-        )
-
-    def shorts_query(self, limit: bool) -> tuple[VideoTypeEnum, int | None]:
-        """Build query for shorts."""
-        return self._build_generic_query(
-            video_type=VideoTypeEnum.SHORTS,
-            overwrite_key="subscriptions_shorts_channel_size",
-            config_key="shorts_channel_size",
-            limit=limit,
-        )
-
-    def _build_generic_query(
+    def build_query_type(
         self,
-        video_type: VideoTypeEnum,
-        overwrite_key: str,
-        config_key: str,
-        limit: bool,
-    ) -> tuple[VideoTypeEnum, int | None]:
-        """Generic query for video page scraping."""
-        app_config_size = self.config["subscriptions"].get(config_key)
-        if not limit or app_config_size is None:
-            # treat None as unlimited
-            return (video_type, None)
+        vid_type: VideoTypeEnum,
+    ) -> tuple[VideoTypeEnum, int | None] | None:
+        """build query for vid_type"""
+        if self.limit is None:
+            return (vid_type, None)
 
-        if (
-            overwrite_key in self.channel_overwrites
-            and self.channel_overwrites[overwrite_key] is not None
-        ):
-            overwrite = self.channel_overwrites[overwrite_key]
-            return (video_type, overwrite)
+        if isinstance(self.limit, bool):
+            if self.limit is False:
+                return (vid_type, None)
 
-        if app_config_size:
-            return (video_type, app_config_size)
+            overwrite_key = self.MAPPING[vid_type]["overwrite_key"]
+            overwrite = self.channel_overwrites.get(overwrite_key)
+            if overwrite == 0:
+                return None
 
-        return (video_type, 0)
+            if overwrite:
+                return (vid_type, overwrite)
+
+            config_key = self.MAPPING[vid_type]["config_key"]
+            app_config = self.config["subscriptions"].get(config_key)
+            if app_config == 0:
+                return None
+
+            if app_config:
+                return (vid_type, app_config)  # type: ignore
+
+            return (vid_type, None)
+
+        if isinstance(self.limit, int):
+            return (vid_type, self.limit)
+
+        return (vid_type, None)
 
 
 def get_last_channel_videos(
-    channel_id,
-    config,
-    limit=None,
-    query_filter=None,
-    channel_overwrites=None,
-):
+    channel_id: str,
+    config: AppConfigType,
+    limit: None | bool | int = None,
+    query_filter: VideoTypeEnum | list[VideoTypeEnum] | None = None,
+) -> list[dict]:
     """get a list of last videos from channel"""
-    query_handler = VideoQueryBuilder(config, channel_overwrites)
-    queries = query_handler.build_queries(query_filter)
-    last_videos = []
+
+    builder = VideoQueryBuilder(config, limit=limit)
+
+    queries = []
+    if query_filter is None:
+        queries = builder.build_queries()
+    elif isinstance(query_filter, list):
+        queries = builder.build_queries(vid_types=query_filter)
+    else:
+        query = builder.build_query_type(vid_type=query_filter)
+        if query:
+            queries.append(query)
+
+    last_videos: list[dict] = []
+
+    if not query:
+        return last_videos
 
     for vid_type_enum, limit_amount in queries:
-        obs = {
+        obs: dict[str, bool | str] = {
             "skip_download": True,
             "extract_flat": True,
         }
         vid_type = vid_type_enum.value
 
         if limit is not None:
-            obs.update({"playlist_items": f":{limit_amount}:1"})
+            obs["playlist_items"] = f":{limit_amount}:1"
 
         url = f"https://www.youtube.com/channel/{channel_id}/{vid_type}"
         channel_query, _ = YtWrap(obs, config).extract(url)

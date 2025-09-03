@@ -63,15 +63,15 @@ class ChannelSubscription:
             queries = VideoQueryBuilder(
                 config=self.config,
                 channel_overwrites=channel.get("channel_overwrites", {}),
-            ).build_queries(video_type=enums)
+            ).build_queries(vid_types=enums)
 
-            for query in queries:
+            for vid_type, limit in queries:
                 all_channel_urls.append(
                     ParsedURLType(
                         type="channel",
                         url=channel["channel_id"],
-                        vid_type=query[0],
-                        limit=query[1],
+                        vid_type=vid_type,
+                        limit=limit,
                     )
                 )
 

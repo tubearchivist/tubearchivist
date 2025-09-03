@@ -191,7 +191,7 @@ class PendingList(PendingIndex):
 
         return to_add
 
-    def _parse_channel(self, entry):
+    def _parse_channel(self, entry) -> None:
         """parse channel"""
         url = entry["url"]
         vid_type = entry["vid_type"]
@@ -319,6 +319,19 @@ class PendingList(PendingIndex):
                     message_lines=[
                         "Video extraction failed.",
                         f"{video.error}",
+                    ],
+                    level="error",
+                )
+            return None
+
+        expected_keys = {"id", "title", "channel", "channel_id"}
+        if not set(video.youtube_meta.keys()).issuperset(expected_keys):
+            print(f"{url}: video metadata extraction incomplete, skipping")
+            if self.task:
+                self.task.send_progress(
+                    message_lines=[
+                        "Video extraction failed.",
+                        "Metadata extraction incomplete.",
                     ],
                     level="error",
                 )
