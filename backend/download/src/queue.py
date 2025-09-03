@@ -191,7 +191,7 @@ class PendingList(PendingIndex):
 
         return to_add
 
-    def _parse_channel(self, entry):
+    def _parse_channel(self, entry) -> None:
         """parse channel"""
         url = entry["url"]
         vid_type = entry["vid_type"]

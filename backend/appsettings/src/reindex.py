@@ -500,11 +500,14 @@ class ChannelFullScan:
         self.config = config
         self.to_update = False
 
-    def scan(self):
+    def scan(self) -> None:
         """match local with remote"""
         print(f"{self.channel_id}: start full scan")
         all_local_videos = self._get_all_local()
-        all_remote_videos = self._get_all_remote()
+        all_remote_videos = get_last_channel_videos(
+            self.channel_id, self.config, limit=None
+        )
+
         self.to_update = []
         for video in all_local_videos:
             video_id = video["youtube_id"]
@@ -525,14 +528,6 @@ class ChannelFullScan:
                 )
 
         self.update()
-
-    def _get_all_remote(self):
-        """get all channel videos"""
-        all_remote_videos = get_last_channel_videos(
-            self.channel_id, self.config, limit=False
-        )
-
-        return all_remote_videos
 
     def _get_all_local(self):
         """get all local indexed channel_videos"""

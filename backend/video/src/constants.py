@@ -24,6 +24,11 @@ class VideoTypeEnum(enum.Enum):
         """values known"""
         return [i.value for i in cls if i.value != "unknown"]
 
+    @classmethod
+    def known(cls):
+        """known members"""
+        return [i for i in cls if i.value != "unknown"]
+
 
 class SortEnum(enum.Enum):
     """all sort by options"""

@@ -110,11 +110,6 @@ class YoutubeChannel(YouTubeItem):
         """get channel tabs"""
         tabs = VideoTypeEnum.values_known()
         config_cp = self.config.copy()
-        config_cp["subscriptions"] = {
-            "channel_size": 1,
-            "live_channel_size": 1,
-            "shorts_channel_size": 1,
-        }
         tabs = []
         for query_filter in VideoTypeEnum:
             if query_filter == VideoTypeEnum.UNKNOWN:
@@ -123,7 +118,7 @@ class YoutubeChannel(YouTubeItem):
             videos = get_last_channel_videos(
                 channel_id=self.youtube_id,
                 config=config_cp,
-                limit=True,
+                limit=1,
                 query_filter=query_filter,
             )
             if videos:
