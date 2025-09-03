@@ -595,6 +595,7 @@ const Video = () => {
               videoList={similarVideosResponseData}
               viewStyle={ViewStylesEnum.Grid as ViewStylesType}
               refreshVideoList={setRefreshVideoList}
+              allowInlinePlay={false}
             />
           </div>
         </div>

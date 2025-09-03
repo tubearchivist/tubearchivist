@@ -9,6 +9,7 @@ type VideoListProps = {
   viewStyle: ViewStylesType;
   playlistId?: string;
   showReorderButton?: boolean;
+  allowInlinePlay?: boolean;
   refreshVideoList: (refresh: boolean) => void;
 };
 
@@ -17,6 +18,7 @@ const VideoList = ({
   viewStyle,
   playlistId,
   showReorderButton = false,
+  allowInlinePlay = true,
   refreshVideoList,
 }: VideoListProps) => {
   if (!videoList) {
@@ -40,6 +42,7 @@ const VideoList = ({
             viewStyle={viewStyle}
             playlistId={playlistId}
             showReorderButton={showReorderButton}
+            allowInlinePlay={allowInlinePlay}
             refreshVideoList={refreshVideoList}
           />
         );
