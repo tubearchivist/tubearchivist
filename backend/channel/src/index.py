@@ -241,13 +241,21 @@ class YoutubeChannel(YouTubeItem):
         ]
         self.task.send_progress(message, progress=(idx + 1) / total)
 
-    @staticmethod
-    def _index_single_playlist(playlist):
+    def _index_single_playlist(self, playlist):
         """add single playlist if needed"""
         from playlist.src.index import YoutubePlaylist
 
-        playlist = YoutubePlaylist(playlist[0])
-        playlist.update_playlist(skip_on_empty=True)
+        try:
+            playlist = YoutubePlaylist(playlist[0])
+            playlist.update_playlist(skip_on_empty=True)
+        except ValueError as err:
+            message = [
+                f"{self.youtube_id}: skip failed playlist import",
+                str(err),
+            ]
+            print(message)
+            if self.task:
+                self.task.send_progress(message)
 
     def get_channel_videos(self):
         """get all videos from channel"""

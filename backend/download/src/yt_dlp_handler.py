@@ -386,8 +386,19 @@ class DownloadPostProcess(DownloaderBase):
             if not playlist_id or not idx or not total:
                 break
 
-            playlist = YoutubePlaylist(playlist_id)
-            playlist.update_playlist(skip_on_empty=True)
+            try:
+                playlist = YoutubePlaylist(playlist_id)
+                playlist.update_playlist(skip_on_empty=True)
+            except ValueError as err:
+                message = [
+                    f"{playlist_id}: skip failed playlist import",
+                    str(err),
+                ]
+                print(message)
+                if self.task:
+                    self.task.send_progress(message)
+
+                continue
 
             if not self.task:
                 continue
