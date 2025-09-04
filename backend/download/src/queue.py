@@ -404,7 +404,7 @@ class PendingList(PendingIndex):
             upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
             return upload_date_time.replace(tzinfo=ZoneInfo(EnvironmentSettings.TZ)).timestamp()
 
-        return int(datetime.now().timestamp())
+        return int(datetime.now(tz=ZoneInfo(EnvironmentSettings.TZ)).timestamp())
 
     def __extract_vid_type(self, video_data) -> str:
         """build vid type"""
