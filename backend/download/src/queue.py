@@ -5,7 +5,7 @@ Functionality:
 """
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 from appsettings.src.config import AppConfig
 from channel.src.index import YoutubeChannel
@@ -401,7 +401,7 @@ class PendingList(PendingIndex):
             return None
 
         upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
-        published = upload_date_time.strftime("%Y-%m-%d")
+        published = upload_date_time.replace(tzinfo=timezone.utc).isoformat()
 
         return published
 
