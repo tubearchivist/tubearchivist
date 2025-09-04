@@ -457,9 +457,10 @@ class PendingList(PendingIndex):
         # add last newline
         bulk_list.append("\n")
         query_str = "\n".join(bulk_list)
-        _, status_code = ElasticWrap("_bulk").post(query_str, ndjson=True)
-        if status_code != 200:
-            self._notify_fail(status_code)
+        response, status_code = ElasticWrap("_bulk").post(query_str, ndjson=True)
+        has_errors = response.get("errors", False)
+        if status_code != 200 or has_errors:
+            self._notify_fail(status_code, has_errors)
         else:
             self._notify_done(total)
 
@@ -524,7 +525,7 @@ class PendingList(PendingIndex):
             ]
         )
 
-    def _notify_fail(self, status_code):
+    def _notify_fail(self, status_code, has_errors):
         """failed to add"""
         if not self.task:
             return
@@ -533,6 +534,7 @@ class PendingList(PendingIndex):
             message_lines=[
                 "Adding extracted videos failed.",
                 f"Status code: {status_code}",
+                f"Has Errors: {has_errors}"
             ],
             level="error",
         )
