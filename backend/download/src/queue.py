@@ -390,7 +390,8 @@ class PendingList(PendingIndex):
 
         return None
 
-    def __extract_published(self, video_data) -> str | int | None:
+    @staticmethod
+    def __extract_published(video_data) -> str | int | None:
         """build published date or timestamp"""
         timestamp = video_data.get("timestamp")
         if timestamp:
