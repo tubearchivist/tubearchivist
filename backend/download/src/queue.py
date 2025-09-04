@@ -458,9 +458,18 @@ class PendingList(PendingIndex):
         bulk_list.append("\n")
         query_str = "\n".join(bulk_list)
         response, status_code = ElasticWrap("_bulk").post(query_str, ndjson=True)
-        has_errors = response.get("errors", False)
-        if status_code != 200 or has_errors:
-            self._notify_fail(status_code, has_errors)
+        print(response)
+        if status_code != 200:
+            self._notify_fail(status_code)
+        elif response.get("errors", False):
+            failed_video_ids = []
+            for item in response.get("items", []):
+                action, result = next(iter(item.items()))
+                if "error" in result:
+                    failed_video_ids.append(result.get("_id"))
+
+            failed_video_ids_str = ",".join(failed_video_ids)
+            self._notify_fail(status_code, failed_video_ids_str)
         else:
             self._notify_done(total)
 
@@ -525,16 +534,20 @@ class PendingList(PendingIndex):
             ]
         )
 
-    def _notify_fail(self, status_code, has_errors):
+    def _notify_fail(self, status_code, failed_video_ids=None):
         """failed to add"""
         if not self.task:
             return
+        
+        message_lines = [
+            "Adding extracted videos failed.",
+            f"Status code: {status_code}",
+        ]
+
+        if failed_video_ids:
+            message_lines.append(f"Failed Videos: {failed_video_ids}")
 
         self.task.send_progress(
-            message_lines=[
-                "Adding extracted videos failed.",
-                f"Status code: {status_code}",
-                f"Has Errors: {has_errors}"
-            ],
+            message_lines=message_lines,
             level="error",
         )
