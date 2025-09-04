@@ -6,12 +6,13 @@ Functionality:
 
 import json
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from appsettings.src.config import AppConfig
 from channel.src.index import YoutubeChannel
 from channel.src.remote_query import get_last_channel_videos
-from common.src.es_connect import ElasticWrap, IndexPaginate
 from common.src.env_settings import EnvironmentSettings
+from common.src.es_connect import ElasticWrap, IndexPaginate
 from common.src.helper import (
     get_channels,
     get_duration_str,
@@ -24,7 +25,6 @@ from download.src.thumbnails import ThumbManager
 from playlist.src.index import YoutubePlaylist
 from video.src.constants import VideoTypeEnum
 from video.src.index import YoutubeVideo
-from zoneinfo import ZoneInfo
 
 
 class PendingIndex:
@@ -402,9 +402,13 @@ class PendingList(PendingIndex):
         upload_date = video_data.get("upload_date")
         if upload_date:
             upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
-            return upload_date_time.replace(tzinfo=ZoneInfo(EnvironmentSettings.TZ)).timestamp()
+            return upload_date_time.replace(
+                tzinfo=ZoneInfo(EnvironmentSettings.TZ)
+            ).timestamp()
 
-        return int(datetime.now(tz=ZoneInfo(EnvironmentSettings.TZ)).timestamp())
+        return int(
+            datetime.now(tz=ZoneInfo(EnvironmentSettings.TZ)).timestamp()
+        )
 
     def __extract_vid_type(self, video_data) -> str:
         """build vid type"""
@@ -457,7 +461,9 @@ class PendingList(PendingIndex):
         # add last newline
         bulk_list.append("\n")
         query_str = "\n".join(bulk_list)
-        response, status_code = ElasticWrap("_bulk").post(query_str, ndjson=True)
+        response, status_code = ElasticWrap("_bulk").post(
+            query_str, ndjson=True
+        )
         print(response)
         if status_code != 200:
             self._notify_fail(status_code)
@@ -538,7 +544,7 @@ class PendingList(PendingIndex):
         """failed to add"""
         if not self.task:
             return
-        
+
         message_lines = [
             "Adding extracted videos failed.",
             f"Status code: {status_code}",
