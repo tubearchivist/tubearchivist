@@ -144,7 +144,8 @@ class VideoDownloader(DownloaderBase):
             message = "processing"
 
         if self.task:
-            title = response["info_dict"]["title"]
+            info_dict = response.get("info_dict", {})
+            title = info_dict.get("title", "Processing")
             self.task.send_progress([title, message], progress=progress)
 
     def _build_obs(self):
