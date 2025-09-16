@@ -161,9 +161,11 @@ class VideoDownloader(DownloaderBase):
             "progress_hooks": [self._progress_hook],
             "noprogress": True,
             "continuedl": True,
+            "writesubtitles": False,
             "writethumbnail": False,
             "noplaylist": True,
             "color": "no_color",
+            "subtitleslangs": [],
         }
 
     def _build_obs_user(self):
@@ -215,6 +217,16 @@ class VideoDownloader(DownloaderBase):
                 }
             )
             self.obs["writethumbnail"] = True
+
+        if self.config["downloads"]["add_subtitles"]:
+            postprocessors.append(
+                {
+                    "key": "FFmpegEmbedSubtitle",
+                    "already_have_subtitle": True,
+                }
+            )
+            self.obs["subtitleslangs"] = [self.config["downloads"]["subtitle"]]
+            self.obs["writesubtitles"] = True
 
         self.obs["postprocessors"] = postprocessors
 

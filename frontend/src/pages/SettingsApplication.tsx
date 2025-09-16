@@ -57,6 +57,7 @@ const SettingsApplication = () => {
   const [downloadsFormatSort, setDownloadsFormatSort] = useState<string | null>(null);
   const [downloadsExtractorLang, setDownloadsExtractorLang] = useState<string | null>(null);
   const [embedMetadata, setEmbedMetadata] = useState(false);
+  const [embedSubtitles, setEmbedSubtitles] = useState(false);
   const [embedThumbnail, setEmbedThumbnail] = useState(false);
 
   // Subtitles
@@ -115,6 +116,7 @@ const SettingsApplication = () => {
     setDownloadsFormatSort(appSettingsConfigData?.downloads.format_sort || null);
     setDownloadsExtractorLang(appSettingsConfigData?.downloads.extractor_lang || null);
     setEmbedMetadata(appSettingsConfigData?.downloads.add_metadata || false);
+    setEmbedSubtitles(appSettingsConfigData?.downloads.add_subtitles || false);
     setEmbedThumbnail(appSettingsConfigData?.downloads.add_thumbnail || false);
 
     // Subtitles
@@ -547,6 +549,9 @@ const SettingsApplication = () => {
                       Indexing subtitles add the fulltext to the ES index. Not recommended on low
                       end hardware.
                     </li>
+                    <li>
+                      Embed subtitles adds the subtitles to the mp4 file.
+                    </li>
                   </ul>
                 </div>
               )}
@@ -602,6 +607,16 @@ const SettingsApplication = () => {
                     <ToggleConfig
                       name="downloads.subtitle_index"
                       value={indexSubtitles}
+                      updateCallback={handleUpdateConfig}
+                    />
+                  </div>
+                  <div className="settings-box-wrapper">
+                    <div>
+                      <p>Embed Subtitles</p>
+                    </div>
+                    <ToggleConfig
+                      name="downloads.add_subtitles"
+                      value={embedSubtitles}
                       updateCallback={handleUpdateConfig}
                     />
                   </div>

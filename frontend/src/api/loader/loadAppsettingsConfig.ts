@@ -16,6 +16,7 @@ export type AppSettingsConfigType = {
     format: string | null;
     format_sort: string | null;
     add_metadata: boolean;
+    add_subtitles: boolean;
     add_thumbnail: boolean;
     subtitle: string | null;
     subtitle_source: string | null;
