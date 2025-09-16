@@ -113,7 +113,7 @@ def get_last_channel_videos(
 
     last_videos: list[dict] = []
 
-    if not query:
+    if not queries:
         return last_videos
 
     for vid_type_enum, limit_amount in queries:
