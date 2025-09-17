@@ -18,6 +18,7 @@
     "zustand": "^5.0.7"
   },
   "devDependencies": {
+    "@eslint/js": "^9.33.0",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
     "@typescript-eslint/eslint-plugin": "^8.39.0",
