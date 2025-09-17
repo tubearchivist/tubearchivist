@@ -549,9 +549,7 @@ const SettingsApplication = () => {
                       Indexing subtitles add the fulltext to the ES index. Not recommended on low
                       end hardware.
                     </li>
-                    <li>
-                      Embed subtitles adds the subtitles to the mp4 file.
-                    </li>
+                    <li>Embed subtitles adds the subtitles to the mp4 file.</li>
                   </ul>
                 </div>
               )}
