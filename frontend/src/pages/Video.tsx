@@ -467,13 +467,23 @@ const Video = () => {
               video.streams.map(stream => {
                 return (
                   <p key={stream.index}>
-                    {capitalizeFirstLetter(stream.type)}: {stream.codec}{' '}
-                    {humanFileSize(stream.bitrate, useSiUnits)}/s
+                    {capitalizeFirstLetter(stream.type)}: {stream.codec}
+                    {stream.bitrate && (
+                      <>
+                        <span className="space-carrot">|</span>{' '}
+                        {`${humanFileSize(stream.bitrate, useSiUnits)}/s`}
+                      </>
+                    )}
                     {stream.width && (
                       <>
                         <span className="space-carrot">|</span> {stream.width}x{stream.height}
                       </>
-                    )}{' '}
+                    )}
+                    {stream.language && (
+                      <>
+                        <span className="space-carrot">|</span> {stream.language}
+                      </>
+                    )}
                   </p>
                 );
               })}
