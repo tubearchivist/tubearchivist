@@ -144,7 +144,8 @@ class VideoDownloader(DownloaderBase):
             message = "processing"
 
         if self.task:
-            title = response["info_dict"]["title"]
+            info_dict = response.get("info_dict", {})
+            title = info_dict.get("title", "Processing")
             self.task.send_progress([title, message], progress=progress)
 
     def _build_obs(self):
@@ -161,9 +162,11 @@ class VideoDownloader(DownloaderBase):
             "progress_hooks": [self._progress_hook],
             "noprogress": True,
             "continuedl": True,
+            "writesubtitles": False,
             "writethumbnail": False,
             "noplaylist": True,
             "color": "no_color",
+            "subtitleslangs": [],
         }
 
     def _build_obs_user(self):
@@ -215,6 +218,16 @@ class VideoDownloader(DownloaderBase):
                 }
             )
             self.obs["writethumbnail"] = True
+
+        if self.config["downloads"]["add_subtitles"]:
+            postprocessors.append(
+                {
+                    "key": "FFmpegEmbedSubtitle",
+                    "already_have_subtitle": True,
+                }
+            )
+            self.obs["subtitleslangs"] = [self.config["downloads"]["subtitle"]]
+            self.obs["writesubtitles"] = True
 
         self.obs["postprocessors"] = postprocessors
 
