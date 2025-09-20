@@ -410,6 +410,12 @@ const SettingsApplication = () => {
                           </span>
                           : "best" universally iOS-compatible video (forced avc1) and "best" audio (forced mp4a), mp4 container, max video height of 1080p.
                         </li>
+                        <li>
+                          <span className="settings-current">
+                            {'bv*[vcodec~=av01]+ba[acodec~=mp4a]/bv*[vcodec~=av01]+ba/bv*[vcodec~=avc1]+ba[acodec~=mp4a]/bv*[vcodec~=avc1]+ba/bv*+ba/b'}
+                          </span>
+                          : "best" iOS-compatible video (av01, compatible with iPhone 15 Pro and newer) and "best" audio (mp4a), no max video height, with fallback to avc1 and other formats if necessary.
+                        </li>
                         <li>This can also be configured on a per channel basis.</li>
                         <li>
                           More details{' '}
