@@ -396,19 +396,19 @@ const SettingsApplication = () => {
                           <span className="settings-current">
                             {'bestvideo[height<=720]+bestaudio/best[height<=720]'}
                           </span>
-                          : best video and audio, max video height of 720p.
+                          : "best" video and "best" audio (yt-dlp's choice), max video height of 720p.
                         </li>
                         <li>
                           <span className="settings-current">
                             {'bestvideo[height<=1080]+bestaudio/best[height<=1080]'}
                           </span>
-                          : best video and audio, max video height of 1080p.
+                          : "best" video and "best" audio (yt-dlp's choice), max video height of 1080p.
                         </li>
                         <li>
                           <span className="settings-current">
                             {'bestvideo[height<=1080][vcodec*=avc1]+bestaudio[acodec*=mp4a]/mp4'}
                           </span>
-                          : best iOS-compatible video and audio, max video height of 1080p.
+                          : "best" universally iOS-compatible video (forced avc1) and "best" audio (forced mp4a), mp4 container, max video height of 1080p.
                         </li>
                         <li>This can also be configured on a per channel basis.</li>
                         <li>
