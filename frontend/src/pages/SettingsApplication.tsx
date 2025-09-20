@@ -396,19 +396,19 @@ const SettingsApplication = () => {
                           <span className="settings-current">
                             {'bestvideo[height<=720]+bestaudio/best[height<=720]'}
                           </span>
-                          : best audio and max video height of 720p.
+                          : best video and audio, max video height of 720p.
                         </li>
                         <li>
                           <span className="settings-current">
                             {'bestvideo[height<=1080]+bestaudio/best[height<=1080]'}
                           </span>
-                          : best audio and max video height of 1080p.
+                          : best video and audio, max video height of 1080p.
                         </li>
                         <li>
                           <span className="settings-current">
                             {'bestvideo[height<=1080][vcodec*=avc1]+bestaudio[acodec*=mp4a]/mp4'}
                           </span>
-                          : Max 1080p video height with iOS compatible video and audio codecs.
+                          : best iOS-compatible video and audio, max video height of 1080p.
                         </li>
                         <li>This can also be configured on a per channel basis.</li>
                         <li>
