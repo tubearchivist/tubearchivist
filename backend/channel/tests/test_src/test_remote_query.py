@@ -115,6 +115,25 @@ def test_zero_query_not_included(default_config):
     assert not result  # Should be skipped due to 0
 
 
+def test_zero_config_overwrite(default_config):
+    """zero default config but with overwrite"""
+    new_default = default_config.copy()
+    new_default["subscriptions"]["shorts_channel_size"] = 0
+    new_overwrites = {
+        "subscriptions_channel_size": 20,
+        "subscriptions_live_channel_size": 20,
+        "subscriptions_shorts_channel_size": 8,
+    }
+
+    builder = VideoQueryBuilder(new_default, new_overwrites, limit=True)
+    result = builder.build_queries()
+    assert result == [
+        (VideoTypeEnum.VIDEOS, 20),
+        (VideoTypeEnum.STREAMS, 20),
+        (VideoTypeEnum.SHORTS, 8),
+    ]
+
+
 def test_invalid_video_type_is_ignored(default_config):
     """invalid enum"""
     builder = VideoQueryBuilder(default_config)
