@@ -102,7 +102,7 @@ def get_last_channel_videos(
     builder = VideoQueryBuilder(config, limit=limit)
 
     queries = []
-    if query_filter is None:
+    if query_filter is None or query_filter == VideoTypeEnum.UNKNOWN:
         queries = builder.build_queries()
     elif isinstance(query_filter, list):
         queries = builder.build_queries(vid_types=query_filter)
@@ -113,7 +113,7 @@ def get_last_channel_videos(
 
     last_videos: list[dict] = []
 
-    if not query:
+    if not queries:
         return last_videos
 
     for vid_type_enum, limit_amount in queries:
