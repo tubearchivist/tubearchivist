@@ -35,6 +35,7 @@ class DownloadsConfigType(TypedDict):
     format: str | None
     format_sort: str | None
     add_metadata: bool
+    add_subtitles: bool
     add_thumbnail: bool
     subtitle: str | None
     subtitle_source: Literal["user", "auto"] | None
@@ -85,6 +86,7 @@ class AppConfig:
             "format": None,
             "format_sort": None,
             "add_metadata": False,
+            "add_subtitles": False,
             "add_thumbnail": False,
             "subtitle": None,
             "subtitle_source": None,
