@@ -68,6 +68,17 @@ def test_build_specific_query(default_config, empty_overwrites):
     assert result == (VideoTypeEnum.VIDEOS, 5)
 
 
+def test_build_unknown_type(default_config, empty_overwrites):
+    """unknown vid_type build list"""
+    builder = VideoQueryBuilder(default_config, empty_overwrites, limit=None)
+    result = builder.build_queries()
+    assert result == [
+        (VideoTypeEnum.VIDEOS, None),
+        (VideoTypeEnum.STREAMS, None),
+        (VideoTypeEnum.SHORTS, None),
+    ]
+
+
 def test_build_multiple_queries(default_config, empty_overwrites):
     """vid_type list"""
     builder = VideoQueryBuilder(default_config, empty_overwrites)
