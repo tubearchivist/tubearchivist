@@ -222,6 +222,10 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             return timestamp
 
         upload_date = self.youtube_meta["upload_date"]
+        if not upload_date:
+            raise ValueError(
+                f"Could not extract published date for {self.youtube_id}"
+            )
         upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
         published = upload_date_time.strftime("%Y-%m-%d")
 
