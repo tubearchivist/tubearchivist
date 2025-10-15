@@ -525,6 +525,19 @@ const SettingsApplication = () => {
               </div>
               <div className="settings-box-wrapper">
                 <div>
+                  <p>Extractor Arguments</p>
+                </div>
+                <InputConfig
+                  type="text"
+                  name="downloads.extractor_args"
+                  value={downloadsExtractorArgs}
+                  setValue={setDownloadsExtractorArgs}
+                  oldValue={appSettingsConfig.downloads.extractor_args}
+                  updateCallback={handleUpdateConfig}
+                />
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
                   <p>Extractor Language</p>
                 </div>
                 <InputConfig
