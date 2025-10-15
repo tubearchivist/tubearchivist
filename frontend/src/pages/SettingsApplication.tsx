@@ -55,6 +55,7 @@ const SettingsApplication = () => {
   // Download Format
   const [downloadsFormat, setDownloadsFormat] = useState<string | null>(null);
   const [downloadsFormatSort, setDownloadsFormatSort] = useState<string | null>(null);
+  const [downloadsExtractorArgs, setDownloadsExtractorArgs] = useState<string | null>(null);
   const [downloadsExtractorLang, setDownloadsExtractorLang] = useState<string | null>(null);
   const [embedMetadata, setEmbedMetadata] = useState(false);
   const [embedThumbnail, setEmbedThumbnail] = useState(false);
@@ -113,6 +114,7 @@ const SettingsApplication = () => {
     // Download Format
     setDownloadsFormat(appSettingsConfigData?.downloads.format || null);
     setDownloadsFormatSort(appSettingsConfigData?.downloads.format_sort || null);
+    setDownloadsExtractorArgs(appSettingsConfigData?.downloads.extractor_args || null);
     setDownloadsExtractorLang(appSettingsConfigData?.downloads.extractor_lang || null);
     setEmbedMetadata(appSettingsConfigData?.downloads.add_metadata || false);
     setEmbedThumbnail(appSettingsConfigData?.downloads.add_thumbnail || false);
@@ -450,6 +452,20 @@ const SettingsApplication = () => {
                             target="_blank"
                             href="https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#sorting-formats"
                           >
+                            here
+                          </a>
+                          .
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      Extractor Arguments to be passed at runtime
+                      <ul>
+                        <li>Some extractors accept additional arguments</li>
+                        <li>Format: EXTRACTOR:ARG1=VAL1,VAL2;ARG2=VAL3;ARG3=VAL4</li>
+                        <li>
+                          More details{' '}
+                          <a target="_blank" href="https://github.com/yt-dlp/yt-dlp#extractor-arguments">
                             here
                           </a>
                           .
