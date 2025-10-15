@@ -95,6 +95,7 @@ class AppConfig:
             "cookie_import": False,
             "potoken": False,
             "throttledratelimit": None,
+            "extractor_args": None,
             "extractor_lang": None,
             "integrate_ryd": False,
             "integrate_sponsorblock": False,
