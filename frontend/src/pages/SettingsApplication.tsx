@@ -465,7 +465,10 @@ const SettingsApplication = () => {
                         <li>Format: EXTRACTOR:ARG1=VAL1,VAL2;ARG2=VAL3;ARG3=VAL4</li>
                         <li>
                           More details{' '}
-                          <a target="_blank" href="https://github.com/yt-dlp/yt-dlp#extractor-arguments">
+                          <a
+                            target="_blank"
+                            href="https://github.com/yt-dlp/yt-dlp#extractor-arguments"
+                          >
                             here
                           </a>
                           .

@@ -30,11 +30,12 @@ class ExtractorArgsParser:
     Example:
         >>> parser = ExtractorArgsParser()
         >>> result = parser.parse("youtube:key1=val1,val2;key2=val3")
-        >>> # Returns: {"youtube": {"key1": ["val1", "val2"], "key2": ["val3"]}}
+        >>> # Returns: {"youtube": {"key1": ["val1", "val2"],
+        >>> #              "key2": ["val3"]}}
     """
 
     @staticmethod
-    def _parse_key_values(key, vals=''):
+    def _parse_key_values(key, vals=""):
         """
         Parse a single key=values pair following yt-dlp logic.
 
@@ -46,7 +47,7 @@ class ExtractorArgsParser:
             tuple: (normalized_key, list_of_values)
         """
         # Normalize key: strip, lowercase, replace hyphens with underscores
-        normalized_key = key.strip().lower().replace('-', '_')
+        normalized_key = key.strip().lower().replace("-", "_")
 
         # Split values by comma, but preserve escaped commas
         # yt-dlp uses: re.split(r'(?<!\\),', vals)
@@ -54,8 +55,8 @@ class ExtractorArgsParser:
             return normalized_key, []
 
         value_list = [
-            val.replace(r'\,', ',').strip()
-            for val in re.split(r'(?<!\\),', vals)
+            val.replace(r"\,", ",").strip()
+            for val in re.split(r"(?<!\\),", vals)
         ]
 
         return normalized_key, value_list
@@ -86,15 +87,21 @@ class ExtractorArgsParser:
 
         for spec in extractor_specs:
             # Split by first colon to separate extractor from args
-            if ':' not in spec:
-                print(f"[extractor_args] Warning: Invalid format (missing colon): {spec}")
+            if ":" not in spec:
+                print(
+                    "[extractor_args] Warning: Invalid format "
+                    f"(missing colon): {spec}"
+                )
                 continue
 
-            extractor_name, args_part = spec.split(':', 1)
+            extractor_name, args_part = spec.split(":", 1)
             extractor_name = extractor_name.strip()
 
             if not extractor_name:
-                print(f"[extractor_args] Warning: Empty extractor name in: {spec}")
+                print(
+                    "[extractor_args] Warning: Empty extractor name "
+                    f"in: {spec}"
+                )
                 continue
 
             # Initialize extractor dict if not exists
@@ -102,18 +109,21 @@ class ExtractorArgsParser:
                 result[extractor_name] = {}
 
             # Split args by semicolon to get individual key=value pairs
-            key_value_pairs = args_part.split(';')
+            key_value_pairs = args_part.split(";")
 
             for pair in key_value_pairs:
                 if not pair.strip():
                     continue
 
                 # Split by first equals sign
-                if '=' not in pair:
-                    print(f"[extractor_args] Warning: Invalid pair (missing =): {pair}")
+                if "=" not in pair:
+                    print(
+                        "[extractor_args] Warning: Invalid pair "
+                        f"(missing =): {pair}"
+                    )
                     continue
 
-                key_part, value_part = pair.split('=', 1)
+                key_part, value_part = pair.split("=", 1)
                 normalized_key, value_list = self._parse_key_values(
                     key_part, value_part
                 )
