@@ -462,7 +462,12 @@ const SettingsApplication = () => {
                       Extractor Arguments to be passed at runtime
                       <ul>
                         <li>Some extractors accept additional arguments</li>
-                        <li>Format: EXTRACTOR:ARG1=VAL1,VAL2;ARG2=VAL3;ARG3=VAL4</li>
+                        <li>Separate multiple extractors with a space</li>
+                        <li>
+                          <span className="settings-current">
+                            EXTRACTOR1:ARG1=VAL1,VAL2;ARG2=VAL3 EXTRACTOR2:ARG3=VAL4
+                          </span>
+                        </li>
                         <li>
                           More details{' '}
                           <a
