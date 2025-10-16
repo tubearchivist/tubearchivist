@@ -4,7 +4,7 @@ pre-commit==4.3.0
 pylint-django==2.6.1
 pylint==3.3.8
 pytest-django==4.11.1
-pytest==8.4.1
+pytest==8.4.2
 python-dotenv==1.1.1
 requirementscheck==0.1.0
-types-requests==2.32.4.20250809
+types-requests==2.32.4.20250913
