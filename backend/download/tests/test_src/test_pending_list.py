@@ -24,11 +24,9 @@ def test_returns_iso_date_if_upload_date_present():
     assert dt.second == 0
 
 
-def test_returns_current_timestamp_if_no_date_info():
+def test_returns_None_if_no_date_info():
     video_data = {}
 
-    before = int(datetime.now().timestamp())
     result = PendingList._PendingList__extract_published(video_data)
-    after = int(datetime.now().timestamp())
 
-    assert before <= result <= after
+    assert result == None

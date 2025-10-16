@@ -1,9 +1,9 @@
-apprise==1.9.4
+apprise==1.9.5
 celery==5.5.3
 django-auth-ldap==5.2.0
 django-celery-beat==2.8.1
 django-cors-headers==4.9.0
-Django==5.2.6
+Django==5.2.7
 djangorestframework==3.16.1
 drf-spectacular==0.28.0
 Pillow==11.3.0

@@ -155,7 +155,7 @@ class PendingList(PendingIndex):
         if entry["type"] == "video":
             to_add = self._add_video(entry["url"], entry["vid_type"])
             if to_add:
-                self.__notify_add(
+                self._notify_add(
                     item_type="video",
                     name=to_add["title"],
                     idx=idx,
@@ -220,7 +220,7 @@ class PendingList(PendingIndex):
 
         total = len(video_results)
         for idx, video_data in enumerate(video_results, start=1):
-            to_add = self.__parse_channel_video(
+            to_add = self._parse_channel_video(
                 video_data, vid_type, channel_handler.json_data
             )
             if self.task and self.task.is_stopped():
@@ -230,14 +230,14 @@ class PendingList(PendingIndex):
                 continue
 
             self.missing_videos.append(to_add)
-            self.__notify_add(
+            self._notify_add(
                 item_type="channel",
                 name=channel_handler.json_data["channel_name"],
                 idx=idx,
                 total=total,
             )
 
-    def __parse_channel_video(
+    def _parse_channel_video(
         self, video_data, vid_type, channel_json
     ) -> dict | None:
         """parse video of channel"""
@@ -302,7 +302,7 @@ class PendingList(PendingIndex):
                 continue
 
             self.missing_videos.append(to_add)
-            self.__notify_add(
+            self._notify_add(
                 item_type="playlist",
                 name=playlist.json_data["playlist_name"],
                 idx=idx,
@@ -370,11 +370,11 @@ class PendingList(PendingIndex):
         to_add = {
             "youtube_id": video_data["id"],
             "title": video_data["title"],
-            "vid_thumb_url": self.__extract_thumb(video_data),
+            "vid_thumb_url": self._extract_thumb(video_data),
             "duration": get_duration_str(video_data.get("duration", 0)),
-            "published": self.__extract_published(video_data),
+            "published": self._extract_published(video_data),
             "timestamp": int(datetime.now().timestamp()),
-            "vid_type": self.__extract_vid_type(video_data),
+            "vid_type": self._extract_vid_type(video_data),
             "channel_name": video_data["channel"],
             "channel_id": video_data["channel_id"],
             "channel_indexed": video_data["channel_id"] in self.all_channels,
@@ -382,7 +382,7 @@ class PendingList(PendingIndex):
 
         return to_add
 
-    def __extract_thumb(self, video_data) -> str | None:
+    def _extract_thumb(self, video_data) -> str | None:
         """extract thumb"""
         if "thumbnail" in video_data:
             return video_data["thumbnail"]
@@ -393,7 +393,7 @@ class PendingList(PendingIndex):
         return None
 
     @staticmethod
-    def __extract_published(video_data) -> str | int | None:
+    def _extract_published(video_data) -> str | int | None:
         """build published date or timestamp"""
         timestamp = video_data.get("timestamp")
         if timestamp:
@@ -406,11 +406,9 @@ class PendingList(PendingIndex):
                 tzinfo=ZoneInfo(EnvironmentSettings.TZ)
             ).timestamp()
 
-        return int(
-            datetime.now(tz=ZoneInfo(EnvironmentSettings.TZ)).timestamp()
-        )
+        return None
 
-    def __extract_vid_type(self, video_data) -> str:
+    def _extract_vid_type(self, video_data) -> str:
         """build vid type"""
         if (
             "vid_type" in video_data
@@ -481,7 +479,7 @@ class PendingList(PendingIndex):
 
         return len(self.missing_videos)
 
-    def __notify_add(
+    def _notify_add(
         self, item_type: str, name: str, idx: int, total: int
     ) -> None:
         """notify"""

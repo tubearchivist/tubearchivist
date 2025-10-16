@@ -1,8 +1,8 @@
 -r backend/requirements.txt
-ipython==9.5.0
+ipython==9.6.0
 pre-commit==4.3.0
 pylint-django==2.6.1
-pylint==3.3.8
+pylint==3.3.9
 pytest-django==4.11.1
 pytest==8.4.2
 python-dotenv==1.1.1
