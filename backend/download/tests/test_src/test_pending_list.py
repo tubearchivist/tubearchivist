@@ -29,4 +29,4 @@ def test_returns_None_if_no_date_info():
 
     result = PendingList._PendingList__extract_published(video_data)
 
-    assert result == None
+    assert result is None
