@@ -6,10 +6,12 @@ Functionality:
 
 import json
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from appsettings.src.config import AppConfig
 from channel.src.index import YoutubeChannel
 from channel.src.remote_query import get_last_channel_videos
+from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
 from common.src.helper import (
     get_channels,
@@ -390,20 +392,21 @@ class PendingList(PendingIndex):
 
         return None
 
-    def _extract_published(self, video_data) -> str | int | None:
+    @staticmethod
+    def _extract_published(video_data) -> str | int | None:
         """build published date or timestamp"""
         timestamp = video_data.get("timestamp")
         if timestamp:
             return timestamp
 
         upload_date = video_data.get("upload_date")
-        if not upload_date:
-            return None
+        if upload_date:
+            upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
+            return upload_date_time.replace(
+                tzinfo=ZoneInfo(EnvironmentSettings.TZ)
+            ).timestamp()
 
-        upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
-        published = upload_date_time.strftime("%Y-%m-%d")
-
-        return published
+        return None
 
     def _extract_vid_type(self, video_data) -> str:
         """build vid type"""
@@ -456,9 +459,21 @@ class PendingList(PendingIndex):
         # add last newline
         bulk_list.append("\n")
         query_str = "\n".join(bulk_list)
-        _, status_code = ElasticWrap("_bulk").post(query_str, ndjson=True)
+        response, status_code = ElasticWrap("_bulk").post(
+            query_str, ndjson=True
+        )
+        print(response)
         if status_code != 200:
             self._notify_fail(status_code)
+        elif response.get("errors", False):
+            failed_video_ids = []
+            for item in response.get("items", []):
+                action, result = next(iter(item.items()))
+                if "error" in result:
+                    failed_video_ids.append(result.get("_id"))
+
+            failed_video_ids_str = ",".join(failed_video_ids)
+            self._notify_fail(status_code, failed_video_ids_str)
         else:
             self._notify_done(total)
 
@@ -523,15 +538,20 @@ class PendingList(PendingIndex):
             ]
         )
 
-    def _notify_fail(self, status_code):
+    def _notify_fail(self, status_code, failed_video_ids=None):
         """failed to add"""
         if not self.task:
             return
 
+        message_lines = [
+            "Adding extracted videos failed.",
+            f"Status code: {status_code}",
+        ]
+
+        if failed_video_ids:
+            message_lines.append(f"Failed Videos: {failed_video_ids}")
+
         self.task.send_progress(
-            message_lines=[
-                "Adding extracted videos failed.",
-                f"Status code: {status_code}",
-            ],
+            message_lines=message_lines,
             level="error",
         )
