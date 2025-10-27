@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import hashlib
+from datetime import datetime
 from os import environ, path
 from pathlib import Path
 
@@ -76,6 +77,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "config.middleware.StartTimeMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -220,10 +222,13 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "mode",
 ]
+CORS_EXPOSE_HEADERS = ["X-Start-Timestamp"]
+
 
 # TA application settings
 TA_UPSTREAM = "https://github.com/tubearchivist/tubearchivist"
 TA_VERSION = "v0.5.8-unstable"
+TA_START = str(int(datetime.now().timestamp()))
 
 # API
 REST_FRAMEWORK = {

@@ -4,6 +4,7 @@ import getFetchCredentials from '../configuration/getFetchCredentials';
 import logOut from '../api/actions/logOut';
 import getCookie from './getCookie';
 import Routes from '../configuration/routes/RouteList';
+import { useBackendStore } from '../stores/BackendStore';
 
 export interface ApiClientOptions extends Omit<RequestInit, 'body'> {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -43,6 +44,12 @@ const APIClient = async <T>(
     body: body ? JSON.stringify(body) : undefined,
     ...options,
   });
+
+  const backendTimestamp = response.headers.get('X-Start-Timestamp');
+  if (backendTimestamp) {
+    const { setStartTimestamp } = useBackendStore.getState();
+    setStartTimestamp(backendTimestamp);
+  }
 
   // Handle common errors
   if (response.status === 400) {
