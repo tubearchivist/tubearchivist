@@ -8,14 +8,22 @@ export default defineConfig({
   base: '/',
   server: {
     host: true,
-    port: 3000, // This is the port which we will use in docker
-    // Thanks @sergiomoura for the window fix
-    // add the next lines if you're using windows and hot reload doesn't work
+    port: 3000,
     watch: {
       usePolling: true,
     },
   },
   build: {
     sourcemap: true,
+    outDir: 'dist',
+    assetsDir: 'assets',
+    manifest: true,
+    rollupOptions: {
+      output: {
+        entryFileNames: 'assets/[name].[hash].js',
+        chunkFileNames: 'assets/[name].[hash].js',
+        assetFileNames: 'assets/[name].[hash].[ext]',
+      },
+    },
   },
 });

@@ -434,6 +434,10 @@
                         }
                     }
                 },
+                "published": {
+                    "type": "date",
+                    "format": "epoch_second||strict_date_optional_time"
+                },
                 "vid_thumb_url": {
                     "type": "keyword"
                 },
