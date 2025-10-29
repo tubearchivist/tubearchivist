@@ -13,6 +13,7 @@ const SettingsActions = () => {
   const [deletePending, setDeletePending] = useState(false);
   const [processingImports, setProcessingImports] = useState(false);
   const [reEmbed, setReEmbed] = useState(false);
+  const [reSyncMeta, setReSyncMeta] = useState(false);
   const [backupStarted, setBackupStarted] = useState(false);
   const [isRestoringBackup, setIsRestoringBackup] = useState(false);
   const [reScanningFileSystem, setReScanningFileSystem] = useState(false);
@@ -44,6 +45,7 @@ const SettingsActions = () => {
             deletePending ||
             processingImports ||
             reEmbed ||
+            reSyncMeta ||
             backupStarted ||
             isRestoringBackup ||
             reScanningFileSystem
@@ -53,6 +55,7 @@ const SettingsActions = () => {
             setDeletePending(false);
             setProcessingImports(false);
             setReEmbed(false);
+            setReSyncMeta(false);
             setBackupStarted(false);
             setIsRestoringBackup(false);
             setReScanningFileSystem(false);
@@ -99,6 +102,22 @@ const SettingsActions = () => {
                 onClick={async () => {
                   await updateTaskByName('resync_thumbs');
                   setReEmbed(true);
+                }}
+              />
+            )}
+          </div>
+        </div>
+        <div className="settings-group">
+          <h2>Embed metadata into media file</h2>
+          <p>Embed metadata into media files as mp4 tags.</p>
+          <div id="re-meta">
+            {reSyncMeta && <p>Processing video metadata</p>}
+            {!reSyncMeta && (
+              <Button
+                label="Start process"
+                onClick={async () => {
+                  await updateTaskByName('resync_metadata');
+                  setReSyncMeta(true);
                 }}
               />
             )}
