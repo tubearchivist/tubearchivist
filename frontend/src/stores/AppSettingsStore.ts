@@ -23,6 +23,7 @@ export const useAppSettingsStore = create<AppSettingsState>(set => ({
       format: null,
       format_sort: null,
       add_metadata: false,
+      add_subtitles: false,
       add_thumbnail: false,
       subtitle: null,
       subtitle_source: null,
