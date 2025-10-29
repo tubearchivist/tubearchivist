@@ -431,9 +431,16 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         if not self.json_data:
             self.get_from_es()
 
+        if not self.json_data:
+            print(f"{self.youtube_id}: skip embed, video not indexed")
+            return
+
         video_base = EnvironmentSettings.MEDIA_DIR
         media_url = self.json_data.get("media_url")
         file_path = os.path.join(video_base, media_url)
+        if not os.path.exists(file_path):
+            print(f"{self.youtube_id}: skip embed, file not found")
+            return
 
         title = self.json_data["title"]
         artist = self.json_data["channel"]["channel_name"]
