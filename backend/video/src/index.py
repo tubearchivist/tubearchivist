@@ -4,6 +4,7 @@ functionality:
 - index and update in es
 """
 
+import json
 import os
 from datetime import datetime
 
@@ -14,6 +15,7 @@ from common.src.helper import get_duration_sec, get_duration_str, randomizor
 from common.src.index_generic import YouTubeItem
 from django.conf import settings
 from download.src.thumbnails import ThumbManager
+from mutagen.mp4 import MP4
 from playlist.src import index as ta_playlist
 from ryd_client import ryd_client
 from user.src.user_config import UserConfig
@@ -419,6 +421,61 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             subtitles.append(to_add)
 
         return subtitles
+
+    def embed_metadata(self):
+        """embed metadata for video"""
+        if not self.config["downloads"].get("add_metadata"):
+            return
+
+        print(f"{self.youtube_id}: embed metadata")
+        if not self.json_data:
+            self.get_from_es()
+
+        video_base = EnvironmentSettings.MEDIA_DIR
+        media_url = self.json_data.get("media_url")
+        file_path = os.path.join(video_base, media_url)
+
+        title = self.json_data["title"]
+        artist = self.json_data["channel"]["channel_name"]
+        description = self.json_data["description"]
+        to_embed = self._get_to_embed()
+
+        video = MP4(file_path)
+        video["\xa9nam"] = [title]  # title
+        video["\xa9ART"] = [artist]  # artist
+        video["desc"] = [description]  # description
+        video["ldes"] = [description]  # synopsis
+        video["----:com.tubearchivist:ta"] = [to_embed.encode("utf-8")]
+        video.save()
+
+    def _get_to_embed(self) -> str:
+        """get metadata json str to embed"""
+        comments = None
+        if self.json_data.get("comment_count"):
+            comments = Comments(self.youtube_id).get_es_comments()
+
+        subtitles = None
+        if self.json_data.get("subtitles"):
+            subtitles = YoutubeSubtitle(video=self).get_es_subtitles()
+
+        playlists = None
+        if self.json_data.get("playlist"):
+            playlists = []
+            for playlist_id in self.json_data["playlist"]:
+                playlist = ta_playlist.YoutubePlaylist(playlist_id)
+                playlist.get_from_es()
+                playlists.append(playlist.json_data)
+
+        to_embed = json.dumps(
+            {
+                "video": self.json_data,
+                "comments": comments,
+                "subtitles": subtitles,
+                "playlists": playlists,
+            }
+        )
+
+        return to_embed
 
 
 def index_new_video(youtube_id, video_type=VideoTypeEnum.VIDEOS):
