@@ -44,6 +44,7 @@ class DownloadsConfigType(TypedDict):
     cookie_import: bool
     potoken: bool
     throttledratelimit: int | None
+    extractor_args: str | None
     extractor_lang: str | None
     integrate_ryd: bool
     integrate_sponsorblock: bool
@@ -94,6 +95,7 @@ class AppConfig:
             "cookie_import": False,
             "potoken": False,
             "throttledratelimit": None,
+            "extractor_args": None,
             "extractor_lang": None,
             "integrate_ryd": False,
             "integrate_sponsorblock": False,
