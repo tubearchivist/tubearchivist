@@ -87,6 +87,13 @@ RESYNC_THUMBS: TaskItemConfig = {
     "api_stop": False,
 }
 
+RESYNC_METADATA: TaskItemConfig = {
+    "title": "Sync Metadata to Media Files",
+    "group": "setting:thumbnailsync",
+    "api_start": True,
+    "api_stop": False,
+}
+
 INDEX_PLAYLISTS: TaskItemConfig = {
     "title": "Index Channel Playlist",
     "group": "channel:indexplaylist",
@@ -119,6 +126,7 @@ TASK_CONFIG: dict[str, TaskItemConfig] = {
     "rescan_filesystem": RESCAN_FILESYSTEM,
     "thumbnail_check": THUMBNAIL_CHECK,
     "resync_thumbs": RESYNC_THUMBS,
+    "resync_metadata": RESYNC_METADATA,
     "index_playlists": INDEX_PLAYLISTS,
     "subscribe_to": SUBSCRIBE_TO,
     "version_check": VERSION_CHECK,

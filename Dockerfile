@@ -42,6 +42,8 @@ ARG INSTALL_DEBUG
 
 ENV PYTHONUNBUFFERED=1
 
+COPY --from=denoland/deno:bin /deno /usr/local/bin/deno
+
 # copy build requirements
 COPY --from=builder /root/.local /root/.local
 ENV PATH=/root/.local/bin:$PATH

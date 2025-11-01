@@ -24,6 +24,7 @@ from download.src.yt_dlp_handler import VideoDownloader
 from task.src.notify import Notifications
 from task.src.task_config import TASK_CONFIG
 from task.src.task_manager import TaskManager
+from video.src.meta_embed import MetadataEmbed
 
 
 class BaseTask(Task):
@@ -300,6 +301,19 @@ def re_sync_thumbs(self):
 
     manager.init(self)
     ThumbFilesystem(task=self).embed()
+
+
+@shared_task(bind=True, name="resync_metadata", base=BaseTask)
+def re_sync_metadata(self):
+    """resync metadata to media files"""
+    manager = TaskManager()
+    if manager.is_pending(self):
+        print(f"[task][{self.name}] metadata re-embed is already running")
+        self.send_progress(["Metadata re-embed is already running."])
+        return
+
+    manager.init(self)
+    MetadataEmbed(task=self).embed()
 
 
 @shared_task(bind=True, name="subscribe_to", base=BaseTask)

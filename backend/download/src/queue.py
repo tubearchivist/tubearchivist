@@ -462,8 +462,8 @@ class PendingList(PendingIndex):
         response, status_code = ElasticWrap("_bulk").post(
             query_str, ndjson=True
         )
-        print(response)
-        if status_code != 200:
+        if status_code not in [200, 201]:
+            print(response)
             self._notify_fail(status_code)
         elif response.get("errors", False):
             failed_video_ids = []

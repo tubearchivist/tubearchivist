@@ -5,6 +5,7 @@ type TaskNamesType =
   | 'update_subscribed'
   | 'manual_import'
   | 'resync_thumbs'
+  | 'resync_metadata'
   | 'rescan_filesystem';
 
 const updateTaskByName = async (taskName: TaskNamesType) => {
