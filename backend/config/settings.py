@@ -228,7 +228,7 @@ CORS_EXPOSE_HEADERS = ["X-Start-Timestamp"]
 # TA application settings
 TA_UPSTREAM = "https://github.com/tubearchivist/tubearchivist"
 TA_VERSION = "v0.5.8-unstable"
-TA_START = str(int(datetime.now().timestamp()))
+TA_START = str(int(datetime.now().timestamp() // 10 * 10))  # round it
 
 # API
 REST_FRAMEWORK = {
