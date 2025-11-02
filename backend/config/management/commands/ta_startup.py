@@ -52,6 +52,7 @@ class Command(BaseCommand):
         self._create_default_schedules()
         self._update_schedule_tz()
         self._init_app_config()
+        self._set_ta_startup_time()
         self._mig_fix_download_channel_indexed()
         self._mig_add_default_playlist_sort()
         self._mig_set_channel_tabs()
@@ -257,6 +258,17 @@ class Command(BaseCommand):
         )
         self.stdout.write(
             self.style.SUCCESS(f"      Status code: {status_code}")
+        )
+
+    def _set_ta_startup_time(self) -> None:
+        """set startup time to trigger frontend refresh, threadsafe"""
+        self.stdout.write("[11] Set startup timestamp")
+        message = str(int(datetime.now().timestamp() // 10 * 10))
+        RedisArchivist().set_message(
+            "STARTTIMESTAMP", message=message, save=True
+        )
+        self.stdout.write(
+            self.style.SUCCESS(f"    ✓ set timestamp to {message}.")
         )
 
     def _mig_fix_download_channel_indexed(self) -> None:
