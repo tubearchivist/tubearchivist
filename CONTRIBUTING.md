@@ -18,7 +18,7 @@ Welcome, and thanks for showing interest in improving Tube Archivist!
 ## Beta Testing
 Be the first to help test new features/improvements and provide feedback! Regular `:unstable` builds are available for early access. These are for the tinkerers and the brave. Ideally, use a testing environment first, before upgrading your main installation.
 
-There is always something that can get missed during development. Look at the commit messages tagged with `#build` - these are the unstable builds and give a quick overview of what has changed.
+There is always something that can get missed during development. Look at the commit messages tagged with [`#build`](https://github.com/search?q=repo%3Atubearchivist%2Ftubearchivist+%22%23build%22&type=commits&s=committer-date&o=desc) - these are the unstable builds and give a quick overview of what has changed.
 
 - Test the features mentioned, play around, try to break it.
 - Test the update path by installing the `:latest` release first, then upgrade to `:unstable` to check for any errors.
