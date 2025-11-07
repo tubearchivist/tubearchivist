@@ -33,7 +33,7 @@ services:
     image: redis
     container_name: archivist-redis
     restart: unless-stopped
-#    expose: #uncomment this and below line to expose the redis database directly to the network instead of using a docker network
+#    expose: #uncomment this & below line to expose the redis database directly to the network instead of using a docker network
 #      - "6379"
     volumes:
       - redis:/data
@@ -57,7 +57,7 @@ services:
         hard: -1
     volumes:
       - es:/usr/share/elasticsearch/data    # check for permission error when using bind mount, see readme
-#    expose:  #uncomment this and below line to expose archiveist-es directly to the network instead of using a docker network
+#    expose:  #uncomment this & below line to expose archiveist-es directly to the network instead of using a docker network
 #      - "9200"
     networks:
       - tube_archivist_backend
