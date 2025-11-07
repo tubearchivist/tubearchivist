@@ -27,16 +27,20 @@ services:
     depends_on:
       - archivist-es
       - archivist-redis
+    networks:
+      - tube_archivist_backend
   archivist-redis:
     image: redis
     container_name: archivist-redis
     restart: unless-stopped
-    expose:
-      - "6379"
+#    expose: #uncomment this and below line to expose the redis database directly to the network instead of using a docker network
+#      - "6379"
     volumes:
       - redis:/data
     depends_on:
       - archivist-es
+    networks:
+      - tube_archivist_backend
   archivist-es:
     image: bbilly1/tubearchivist-es         # only for amd64, or use official es 8.18.2
     container_name: archivist-es
@@ -53,11 +57,17 @@ services:
         hard: -1
     volumes:
       - es:/usr/share/elasticsearch/data    # check for permission error when using bind mount, see readme
-    expose:
-      - "9200"
+#    expose:  #uncomment this and below line to expose archiveist-es directly to the network instead of using a docker network
+#      - "9200"
+    networks:
+      - tube_archivist_backend
 
 volumes:
   media:
   cache:
   redis:
   es:
+
+networks:
+  tube_archivist_backend:
+    name: tube_archivist_backend
