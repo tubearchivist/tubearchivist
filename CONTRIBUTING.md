@@ -41,6 +41,7 @@ Please read this carefully before opening any [issue](https://github.com/tubearc
 - Don't open an issue for something that's already on the [roadmap](https://github.com/tubearchivist/tubearchivist#roadmap), this needs your help to implement it, not another issue.
 - Don't open an issue for something that's a [known limitation](https://github.com/tubearchivist/tubearchivist#known-limitations). These are *known* by definition and don't need another reminder. Some limitations may be solved in the future, maybe by you?
 - Don't overwrite the *issue template*, they are there for a reason. Overwriting that shows that you don't really care about this project. It shows that you have a misunderstanding how open source collaboration works and just want to push your ideas through. Overwriting the template may result in a ban.
+- Don't redirect people trying to help to other platforms. E.g. in this context, imgur or other image hosting platforms are not needed, you can add an image directly in the issue as an attachments. Same goes for log files.
 
 ### Bug Report
 Bug reports are highly welcome! This project has improved a lot due to your help by providing feedback when something doesn't work as expected. The developers can't possibly cover all edge cases in an ever changing environment like YouTube and yt-dlp.
