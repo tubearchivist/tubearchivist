@@ -244,6 +244,7 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "API documentation for Tube Archivist backend.",
     "VERSION": TA_VERSION,
     "SERVE_INCLUDE_SCHEMA": False,
+    "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAuthenticated"],
 }
 
 # Logging configuration
