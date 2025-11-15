@@ -45,25 +45,37 @@ class MediaStreamExtractor:
             self._extract_video_metadata(stream)
         elif codec_type == "audio":
             self._extract_audio_metadata(stream)
+        elif codec_type == "subtitle":
+            self._extract_subtitle_metadata(stream)
         else:
             return
 
     def _extract_video_metadata(self, stream):
         """parse video metadata"""
-        if "bit_rate" not in stream:
-            # is probably thumbnail
-            return
-
-        self.metadata.append(
-            {
-                "type": "video",
-                "index": stream["index"],
-                "codec": stream["codec_name"],
-                "width": stream["width"],
-                "height": stream["height"],
-                "bitrate": int(stream["bit_rate"]),
-            }
-        )
+        if stream["disposition"]["attached_pic"] == 1:
+            self.metadata.append(
+                {
+                    "type": "thumbnail",
+                    "index": stream["index"],
+                    "codec": stream["codec_name"],
+                    "width": stream["width"],
+                    "height": stream["height"],
+                }
+            )
+        else:
+            self.metadata.append(
+                {
+                    "type": "video",
+                    "index": stream["index"],
+                    "codec": stream["codec_name"],
+                    "width": stream["width"],
+                    "height": stream["height"],
+                    "bitrate": int(stream.get("bit_rate", 0)),
+                    "language": stream.get("tags", {}).get(
+                        "language", "unknown"
+                    ),
+                }
+            )
 
     def _extract_audio_metadata(self, stream):
         """extract audio metadata"""
@@ -73,6 +85,19 @@ class MediaStreamExtractor:
                 "index": stream["index"],
                 "codec": stream.get("codec_name", "undefined"),
                 "bitrate": int(stream.get("bit_rate", 0)),
+                "language": stream.get("tags", {}).get("language", "unknown"),
+            }
+        )
+
+    def _extract_subtitle_metadata(self, stream):
+        """extract subtitle metadata"""
+        self.metadata.append(
+            {
+                "type": "subtitle",
+                "index": stream["index"],
+                "codec": stream.get("codec_name", "text"),
+                "bitrate": int(stream.get("bit_rate", 0)),
+                "language": stream.get("tags", {}).get("language", "unknown"),
             }
         )
 

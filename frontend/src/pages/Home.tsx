@@ -43,10 +43,11 @@ export type StatsType = {
 export type StreamType = {
   type: string;
   index: number;
-  codec: string;
+  codec?: string;
   width?: number;
   height?: number;
-  bitrate: number;
+  bitrate?: number;
+  language?: string;
 };
 
 export type Subtitles = {
