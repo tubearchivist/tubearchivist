@@ -11,12 +11,12 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import hashlib
-from datetime import datetime
 from os import environ, path
 from pathlib import Path
 
 from common.src.env_settings import EnvironmentSettings
 from common.src.helper import ta_host_parser
+from common.src.ta_redis import RedisArchivist
 from corsheaders.defaults import default_headers
 
 try:
@@ -221,8 +221,12 @@ CORS_EXPOSE_HEADERS = ["X-Start-Timestamp"]
 
 # TA application settings
 TA_UPSTREAM = "https://github.com/tubearchivist/tubearchivist"
-TA_VERSION = "v0.5.8-unstable"
-TA_START = str(int(datetime.now().timestamp()))
+TA_VERSION = "v0.5.8"
+try:
+    TA_START = RedisArchivist().get_message_str("STARTTIMESTAMP")
+except ValueError:
+    # fails in unittests bootstrap
+    pass
 
 # API
 REST_FRAMEWORK = {
@@ -234,6 +238,7 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "API documentation for Tube Archivist backend.",
     "VERSION": TA_VERSION,
     "SERVE_INCLUDE_SCHEMA": False,
+    "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAuthenticated"],
 }
 
 # Logging configuration

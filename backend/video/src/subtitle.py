@@ -13,7 +13,7 @@ from operator import itemgetter
 
 import requests
 from common.src.env_settings import EnvironmentSettings
-from common.src.es_connect import ElasticWrap
+from common.src.es_connect import ElasticWrap, IndexPaginate
 from common.src.helper import rand_sleep, requests_headers
 from yt_dlp.utils import orderedSet_from_options
 
@@ -92,6 +92,14 @@ class YoutubeSubtitle:
             candidate_subtitles[lang] = subtitle
 
         return candidate_subtitles
+
+    def get_es_subtitles(self) -> list[dict]:
+        """get subtitles from elastic"""
+        data = {
+            "query": {"term": {"youtube_id": {"value": self.video.youtube_id}}}
+        }
+        response = IndexPaginate("ta_subtitle", data).get_results()
+        return response
 
     def download_subtitles(self, relevant_subtitles):
         """download subtitle files to archive"""

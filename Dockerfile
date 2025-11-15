@@ -42,6 +42,8 @@ ARG INSTALL_DEBUG
 
 ENV PYTHONUNBUFFERED=1
 
+COPY --from=denoland/deno:bin /deno /usr/local/bin/deno
+
 # copy build requirements
 COPY --from=builder /root/.local /root/.local
 ENV PATH=/root/.local/bin:$PATH
@@ -54,6 +56,7 @@ COPY --from=ffmpeg-builder ./ffprobe/ffprobe /usr/bin/ffprobe
 RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recommends \
     nginx \
     atomicparsley \
+    tini \
     curl && rm -rf /var/lib/apt/lists/*
 
 # install debug tools for testing environment
@@ -88,4 +91,4 @@ EXPOSE 8000
 
 RUN chmod +x ./run.sh
 
-CMD ["./run.sh"]
+CMD ["/bin/tini", "--", "./run.sh"]
