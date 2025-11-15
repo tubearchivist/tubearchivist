@@ -373,7 +373,7 @@ const Playlist = () => {
             <>
               {isCustomPlaylist && (
                 <p>
-                  Try going to the <a href="{% url 'home' %}">home page</a> to add videos to this
+                  Try going to the <Link to={Routes.Home}>home page</Link> to add videos to this
                   playlist.
                 </p>
               )}
