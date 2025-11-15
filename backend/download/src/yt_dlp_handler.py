@@ -40,7 +40,7 @@ class DownloaderBase:
     PLAYLIST_QUICK = "download:playlist:quick"
     VIDEO_QUEUE = "download:video"
 
-    def __init__(self, task):
+    def __init__(self, task=None):
         self.task = task
         self.config = AppConfig().config
         self.channel_overwrites = get_channel_overwrites()
@@ -381,6 +381,9 @@ class DownloadPostProcess(DownloaderBase):
             try:
                 playlist = YoutubePlaylist(playlist_id)
                 playlist.update_playlist(skip_on_empty=True)
+                if not playlist.json_data:
+                    raise ValueError("no json data extracted for playlist")
+
             except ValueError as err:
                 message = [
                     f"{playlist_id}: skip failed playlist import",
@@ -464,6 +467,7 @@ class DownloadPostProcess(DownloaderBase):
             playlist.get_from_es()
             playlist.add_vids_to_playlist()
             playlist.remove_vids_from_playlist()
+            playlist.match_local()
 
             if not self.task:
                 continue

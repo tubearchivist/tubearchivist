@@ -55,7 +55,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "corsheaders",
-    "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
     "rest_framework",
@@ -78,7 +77,6 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "config.middleware.StartTimeMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -191,11 +189,7 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = (str(BASE_DIR.joinpath("static")),)
 STATIC_ROOT = str(BASE_DIR.joinpath("staticfiles"))
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -227,7 +221,7 @@ CORS_EXPOSE_HEADERS = ["X-Start-Timestamp"]
 
 # TA application settings
 TA_UPSTREAM = "https://github.com/tubearchivist/tubearchivist"
-TA_VERSION = "v0.5.8"
+TA_VERSION = "v0.5.9-unstable"
 try:
     TA_START = RedisArchivist().get_message_str("STARTTIMESTAMP")
 except ValueError:
@@ -244,6 +238,7 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "API documentation for Tube Archivist backend.",
     "VERSION": TA_VERSION,
     "SERVE_INCLUDE_SCHEMA": False,
+    "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAuthenticated"],
 }
 
 # Logging configuration

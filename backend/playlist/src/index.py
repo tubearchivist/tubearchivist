@@ -197,6 +197,31 @@ class YoutubePlaylist(YouTubeItem):
             if status_code == 200:
                 print(f"{self.youtube_id}: removed {video_id} from playlist")
 
+    def match_local(self):
+        """match local videos as indexed"""
+        ids = [i["youtube_id"] for i in self.json_data["playlist_entries"]]
+        data = {
+            "query": {"terms": {"youtube_id": ids}},
+            "_source": ["youtube_id", "title", "channel.channel_name"],
+        }
+        local_vids = IndexPaginate("ta_video", data).get_results()
+        indexed_vids = {i["youtube_id"]: i for i in local_vids}
+
+        new_entries = []
+        for entry in self.json_data["playlist_entries"]:
+            if local_vid := indexed_vids.get(entry["youtube_id"]):
+                entry.update(
+                    {
+                        "title": local_vid["title"],
+                        "uploader": local_vid["channel"]["channel_name"],
+                        "downloaded": True,
+                    }
+                )
+            new_entries.append(entry)
+
+        self.json_data["playlist_entries"] = new_entries
+        self.upload_to_es()
+
     def update_playlist(self, skip_on_empty=False):
         """update metadata for playlist with data from YouTube"""
         self.build_json(scrape=True)

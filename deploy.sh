@@ -150,6 +150,9 @@ function sync_docker {
     git tag -a "$VERSION" -m "new release version $VERSION"
     git push origin "$VERSION"
 
+    # update API docs
+    python backend/manage.py spectacular --file ../docs/mkdocs/docs/api/schema.yaml
+
 }
 
 
