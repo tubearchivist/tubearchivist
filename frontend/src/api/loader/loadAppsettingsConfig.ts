@@ -25,6 +25,7 @@ export type AppSettingsConfigType = {
     cookie_import: boolean;
     potoken: boolean;
     throttledratelimit: number | null;
+    extractor_args: string | null;
     extractor_lang: string | null;
     integrate_ryd: boolean;
     integrate_sponsorblock: boolean;
