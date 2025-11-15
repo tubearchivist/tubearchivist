@@ -11,5 +11,4 @@ redis==7.0.0
 requests==2.32.5
 ryd-client==0.0.6
 uvicorn==0.38.0
-whitenoise==6.11.0
 yt-dlp[default] @ git+https://github.com/yt-dlp/yt-dlp@6224a3898821965a7d6a2cb9cc2de40a0fd6e6bc
