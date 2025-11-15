@@ -381,6 +381,9 @@ class DownloadPostProcess(DownloaderBase):
             try:
                 playlist = YoutubePlaylist(playlist_id)
                 playlist.update_playlist(skip_on_empty=True)
+                if not playlist.json_data:
+                    raise ValueError("no json data extracted for playlist")
+
             except ValueError as err:
                 message = [
                     f"{playlist_id}: skip failed playlist import",
