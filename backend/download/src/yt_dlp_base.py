@@ -186,6 +186,16 @@ class YtWrap:
     def _add_extractor_args(self):
         """add custom extractor_args from config if present"""
         extractor_args_str = self.config["downloads"].get("extractor_args")
+        pot_provider_url = self.config["downloads"].get("pot_provider_url")
+
+        # If pot_provider_url is set, append it to extractor_args
+        if pot_provider_url:
+            pot_arg = f"youtubepot-bgutilhttp:base_url={pot_provider_url}"
+            if extractor_args_str:
+                extractor_args_str = f"{extractor_args_str} {pot_arg}"
+            else:
+                extractor_args_str = pot_arg
+
         if not extractor_args_str:
             return
 
