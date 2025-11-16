@@ -74,6 +74,7 @@ const SettingsApplication = () => {
   const [showCookieForm, setShowCookieForm] = useState<boolean>(false);
   const [poTokenFormData, setPoTokenFormData] = useState<string>('web+');
   const [showPoTokenForm, setShowPoTokenForm] = useState<boolean>(false);
+  const [potProviderUrl, setPotProviderUrl] = useState<string | null>(null);
 
   // Integrations
   const [showApiToken, setShowApiToken] = useState(false);
@@ -127,6 +128,9 @@ const SettingsApplication = () => {
     // Comments
     setCommentsMax(appSettingsConfigData?.downloads.comment_max || null);
     setCommentsSort(appSettingsConfigData?.downloads.comment_sort || '');
+
+    // Cookie
+    setPotProviderUrl(appSettingsConfigData?.downloads.pot_provider_url || null);
 
     // Integrations
     setDownloadDislikes(appSettingsConfigData?.downloads.integrate_ryd || false);
@@ -748,6 +752,16 @@ const SettingsApplication = () => {
                         PO guide
                       </a>
                     </li>
+                    <li>
+                      The POT Provider URL <i>(bgutil-ytdlp-pot-provider)</i> running external to
+                      tubearchivist. Make sure to review{' '}
+                      <a
+                        target="_blank"
+                        href="https://github.com/Brainicism/bgutil-ytdlp-pot-provider/blob/master/README.md"
+                      >
+                        README.md
+                      </a>
+                    </li>
                   </ul>
                 </div>
               )}
@@ -846,6 +860,19 @@ const SettingsApplication = () => {
                     </div>
                   )}
                 </div>
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>POT Provider URL</p>
+                </div>
+                <InputConfig
+                  type="text"
+                  name="downloads.pot_provider_url"
+                  value={potProviderUrl}
+                  setValue={setPotProviderUrl}
+                  oldValue={appSettingsConfig.downloads.pot_provider_url}
+                  updateCallback={handleUpdateConfig}
+                />
               </div>
             </div>
             <div className="info-box-item">

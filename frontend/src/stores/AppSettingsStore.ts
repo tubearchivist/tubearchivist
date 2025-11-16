@@ -30,6 +30,7 @@ export const useAppSettingsStore = create<AppSettingsState>(set => ({
       comment_max: null,
       comment_sort: 'asc',
       cookie_import: false,
+      pot_provider_url: null,
       potoken: false,
       throttledratelimit: null,
       extractor_args: null,
