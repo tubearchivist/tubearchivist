@@ -757,9 +757,9 @@ const SettingsApplication = () => {
                       review{' '}
                       <a
                         target="_blank"
-                        href="https://github.com/Brainicism/bgutil-ytdlp-pot-provider/blob/master/README.md"
+                        href="https://docs.tubearchivist.com/settings/application/#po-token-provider-url"
                       >
-                        README.md
+                        User Guide
                       </a>
                     </li>
                   </ul>
