@@ -753,8 +753,8 @@ const SettingsApplication = () => {
                       </a>
                     </li>
                     <li>
-                      The POT Provider URL <i>(bgutil-ytdlp-pot-provider)</i> running external to
-                      tubearchivist. Make sure to review{' '}
+                      The PO Token Provider URL running external to tubearchivist. Make sure to
+                      review{' '}
                       <a
                         target="_blank"
                         href="https://github.com/Brainicism/bgutil-ytdlp-pot-provider/blob/master/README.md"
@@ -863,7 +863,7 @@ const SettingsApplication = () => {
               </div>
               <div className="settings-box-wrapper">
                 <div>
-                  <p>POT Provider URL</p>
+                  <p>PO Token Provider URL</p>
                 </div>
                 <InputConfig
                   type="text"
