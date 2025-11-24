@@ -113,6 +113,7 @@ class SearchParser:
                 "index": "ta_subtitle",
                 "lang": [],
                 "source": [],
+                "channel": [],
             },
         }
 
@@ -344,6 +345,22 @@ class QueryBuilder:
     def _build_fulltext(self):
         """build query for fulltext search"""
         must_list = []
+
+        if (channel := self.query_map.get("channel")) is not None:
+            must_list.append(
+                {
+                    "multi_match": {
+                        "query": channel,
+                        "type": "bool_prefix",
+                        "fuzziness": self._get_fuzzy(),
+                        "operator": "and",
+                        "fields": [
+                            "subtitle_channel",
+                            "subtitle_channel.keyword",
+                        ],
+                    }
+                }
+            )
 
         if (term := self.query_map.get("term")) is not None:
             must_list.append(
