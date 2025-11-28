@@ -104,6 +104,10 @@ const SearchExampleQueries = () => {
                   auto-generated subtitles only, or <i>user</i> to search through user-uploaded
                   subtitles only
                 </li>
+                <li>
+                  <span>channel:</span> — limit subtitle search to a specific channel name (for
+                  example: <code>full:javascript channel:corey schafer</code>)
+                </li>
               </ul>
             </li>
           </ul>
