@@ -108,7 +108,6 @@ const Playlist = () => {
       }
       setRefresh(false);
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     playlistId,
     userConfig.hide_watched_playlist,

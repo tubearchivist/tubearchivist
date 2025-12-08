@@ -182,11 +182,13 @@ const SettingsApplication = () => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
   }, []);
 
   useEffect(() => {
     if (refresh) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchData();
       setRefresh(false);
     }
