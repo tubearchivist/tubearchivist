@@ -1,4 +1,5 @@
 apprise==1.9.5
+bgutil-ytdlp-pot-provider==1.2.2
 celery==5.5.3
 django-auth-ldap==5.2.0
 django-celery-beat==2.8.1

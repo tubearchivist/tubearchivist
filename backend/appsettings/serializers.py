@@ -55,8 +55,10 @@ class AppConfigDownloadsSerializer(
         choices=["top", "new"], allow_null=True
     )
     cookie_import = serializers.BooleanField()
+    pot_provider_url = serializers.CharField(allow_null=True)
     potoken = serializers.BooleanField()
     throttledratelimit = serializers.IntegerField(allow_null=True)
+    extractor_args = serializers.CharField(allow_null=True)
     extractor_lang = serializers.CharField(allow_null=True)
     integrate_ryd = serializers.BooleanField()
     integrate_sponsorblock = serializers.BooleanField()

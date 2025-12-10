@@ -42,8 +42,10 @@ class DownloadsConfigType(TypedDict):
     comment_max: str | None
     comment_sort: Literal["top", "new"] | None
     cookie_import: bool
+    pot_provider_url: str | None
     potoken: bool
     throttledratelimit: int | None
+    extractor_args: str | None
     extractor_lang: str | None
     integrate_ryd: bool
     integrate_sponsorblock: bool
@@ -92,8 +94,10 @@ class AppConfig:
             "comment_max": None,
             "comment_sort": "top",
             "cookie_import": False,
+            "pot_provider_url": None,
             "potoken": False,
             "throttledratelimit": None,
+            "extractor_args": None,
             "extractor_lang": None,
             "integrate_ryd": False,
             "integrate_sponsorblock": False,
