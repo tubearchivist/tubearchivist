@@ -86,8 +86,9 @@ class Scanner:
                     ],
                     progress=(idx + 1) / total,
                 )
-            index_new_video(youtube_id)
-            YoutubeVideo(youtube_id).embed_metadata()
+            json_data = index_new_video(youtube_id)
+            if json_data:
+                YoutubeVideo(youtube_id).embed_metadata()
 
         comment_list = CommentList(task=self.task)
         comment_list.add(video_ids=list(self.to_index))
