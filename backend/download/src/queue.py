@@ -393,18 +393,24 @@ class PendingList(PendingIndex):
         return None
 
     @staticmethod
-    def _extract_published(video_data) -> str | int | None:
+    def _extract_published(video_data) -> int | None:
         """build published date or timestamp"""
         timestamp = video_data.get("timestamp")
-        if timestamp:
+        if timestamp and isinstance(timestamp, int):
             return timestamp
 
         upload_date = video_data.get("upload_date")
         if upload_date:
-            upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
-            return upload_date_time.replace(
-                tzinfo=ZoneInfo(EnvironmentSettings.TZ)
-            ).timestamp()
+            try:
+                upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
+            except ValueError:
+                youtube_id = video_data["id"]
+                print(f"{youtube_id}: published date extraction failed.")
+                return None
+
+            tz = ZoneInfo(EnvironmentSettings.TZ)
+            timestamp = int(upload_date_time.replace(tzinfo=tz).timestamp())
+            return timestamp
 
         return None
 
