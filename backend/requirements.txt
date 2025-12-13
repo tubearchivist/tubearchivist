@@ -3,7 +3,7 @@ celery==5.6.0
 django-auth-ldap==5.2.0
 django-celery-beat==2.8.1
 django-cors-headers==4.9.0
-Django==5.2.8
+Django==5.2.9
 djangorestframework==3.16.1
 drf-spectacular==0.29.0
 Pillow==12.0.0
