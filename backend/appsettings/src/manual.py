@@ -145,6 +145,7 @@ class ImportFolderScanner:
             print(f"manual import: {current_video}")
 
             ManualImport(current_video, config).run()
+            YoutubeVideo(current_video["video_id"]).embed_metadata()
 
         video_ids = [i["video_id"] for i in self.to_import]
         comment_list = CommentList(task=self.task)
