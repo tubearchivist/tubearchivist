@@ -345,6 +345,7 @@ class Reindex(ReindexBase):
         thumb_handler.download_video_thumb(video.json_data["vid_thumb_url"])
 
         Comments(youtube_id, config=self.config).reindex_comments()
+        video.get_from_es()
         video.embed_metadata()
         self.processed["videos"] += 1
 
