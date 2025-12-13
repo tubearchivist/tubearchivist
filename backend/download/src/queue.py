@@ -20,6 +20,7 @@ from common.src.helper import (
     rand_sleep,
 )
 from common.src.urlparser import ParsedURLType
+from download.serializers import DownloadItemSerializer
 from download.src.queue_interact import PendingInteract
 from download.src.thumbnails import ThumbManager
 from playlist.src.index import YoutubePlaylist
@@ -379,6 +380,12 @@ class PendingList(PendingIndex):
             "channel_id": video_data["channel_id"],
             "channel_indexed": video_data["channel_id"] in self.all_channels,
         }
+        serializer = DownloadItemSerializer(data=to_add)
+        is_valid = serializer.is_valid()
+        if not is_valid:
+            print(f"{youtube_id}: serializer failed: {serializer.errors}")
+            self._notify_fail(403, youtube_id)
+            return None
 
         return to_add
 
