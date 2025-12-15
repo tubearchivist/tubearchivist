@@ -110,6 +110,8 @@ def date_parser(timestamp: int | str | None) -> str | None:
 
     if isinstance(timestamp, int):
         date_obj = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+    elif isinstance(timestamp, str) and timestamp.isdigit():
+        date_obj = datetime.fromtimestamp(int(timestamp), tz=timezone.utc)
     elif isinstance(timestamp, str):
         date_obj = datetime.strptime(timestamp, "%Y-%m-%d")
         date_obj = date_obj.replace(tzinfo=timezone.utc)
