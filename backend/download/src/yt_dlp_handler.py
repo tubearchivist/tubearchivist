@@ -326,6 +326,9 @@ class DownloadPostProcess(DownloaderBase):
         for channel_id, value in self.channel_overwrites.items():
             if "autodelete_days" in value:
                 autodelete_days = value.get("autodelete_days")
+                if autodelete_days is None:
+                    continue
+
                 print(f"{channel_id}: delete older than {autodelete_days}d")
                 now_lte = str(self.now - autodelete_days * 24 * 60 * 60)
                 must_list = [
