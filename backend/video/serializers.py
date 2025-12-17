@@ -60,6 +60,23 @@ class StreamItemSerializer(serializers.Serializer):
     height = serializers.IntegerField(required=False)
 
 
+class SubtitleFragmentSerializer(serializers.Serializer):
+    """serialize subtitle fragment"""
+
+    subtitle_index = serializers.IntegerField()
+    subtitle_line = serializers.CharField()
+    subtitle_start = serializers.CharField()
+    subtitle_fragment_id = serializers.CharField()
+    subtitle_end = serializers.CharField()
+    youtube_id = serializers.CharField()
+    title = serializers.CharField()
+    subtitle_channel = serializers.CharField()
+    subtitle_channel_id = serializers.CharField()
+    subtitle_last_refresh = serializers.IntegerField()
+    subtitle_lang = serializers.CharField()
+    subtitle_source = serializers.ChoiceField(choices=["user", "auto"])
+
+
 class SubtitleItemSerializer(serializers.Serializer):
     """serialize subtitle item"""
 
@@ -76,8 +93,8 @@ class VideoSerializer(serializers.Serializer):
 
     active = serializers.BooleanField()
     category = serializers.ListField(child=serializers.CharField())
-    channel = ChannelSerializer()
-    comment_count = serializers.IntegerField(allow_null=True)
+    channel = ChannelSerializer(required=False)
+    comment_count = serializers.IntegerField(allow_null=True, required=False)
     date_downloaded = serializers.IntegerField()
     description = serializers.CharField()
     media_size = serializers.IntegerField()
@@ -85,7 +102,7 @@ class VideoSerializer(serializers.Serializer):
     player = PlayerSerializer()
     playlist = serializers.ListField(child=serializers.CharField())
     published = serializers.CharField()
-    sponsorblock = SponsorBlockSerializer(allow_null=True)
+    sponsorblock = SponsorBlockSerializer(allow_null=True, required=False)
     stats = StatsSerializer()
     streams = StreamItemSerializer(many=True)
     subtitles = SubtitleItemSerializer(many=True)
@@ -153,7 +170,16 @@ class CommentItemSerializer(serializers.Serializer):
     comment_author_thumbnail = serializers.URLField()
     comment_author_is_uploader = serializers.BooleanField()
     comment_parent = serializers.CharField()
-    comment_replies = CommentThreadItemSerializer(many=True)
+    comment_replies = CommentThreadItemSerializer(many=True, required=False)
+
+
+class CommentsSerializer(serializers.Serializer):
+    """serialize comments as indexed"""
+
+    youtube_id = serializers.CharField()
+    comment_last_refresh = serializers.IntegerField()
+    comment_channel_id = serializers.CharField()
+    comment_comments = CommentItemSerializer(many=True)
 
 
 class PlaylistNavMetaSerializer(serializers.Serializer):
