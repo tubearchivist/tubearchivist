@@ -1,0 +1,21 @@
+FROM denoland/deno:bin AS deno-bin
+
+FROM python:3.11.13-slim-bookworm
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+COPY --from=deno-bin /deno /usr/local/bin/deno
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential gcc libldap2-dev libsasl2-dev libssl-dev \
+    ffmpeg atomicparsley curl \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+
+COPY backend/requirements.txt backend/requirements.txt
+COPY requirements-dev.txt requirements-dev.txt
+
+RUN pip install --no-cache-dir -r requirements-dev.txt
+

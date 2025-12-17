@@ -1,0 +1,121 @@
+name: tubearchivist-dev
+
+services:
+  frontend-dev:
+    image: node:lts-alpine
+    container_name: tubearchivist-frontend-dev
+    restart: unless-stopped
+    working_dir: /workspace/frontend
+    volumes:
+      - ../../:/workspace
+      - frontend-node-modules:/workspace/frontend/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend-dev
+    command: >
+      sh -lc
+      "if [ ! -x node_modules/.bin/vite ]; then npm ci; fi; npm run dev -- --host 0.0.0.0 --port 3000"
+
+  backend-dev:
+    build:
+      context: ../../
+      dockerfile: dev/docker/Dockerfile.dev
+    container_name: tubearchivist-backend-dev
+    restart: unless-stopped
+    working_dir: /workspace/backend
+    volumes:
+      - ../../:/workspace
+    environment:
+      - TA_HOST=http://localhost:8000 http://localhost:3000
+      - TA_USERNAME=tubearchivist
+      - TA_PASSWORD=verysecret
+      - TA_MEDIA_DIR=static/volume/media
+      - TA_CACHE_DIR=static
+      - TA_APP_DIR=.
+      - REDIS_CON=redis://archivist-redis:6379
+      - ES_URL=http://archivist-es:9200
+      - ELASTIC_PASSWORD=verysecret
+      - TZ=America/New_York
+      - DJANGO_DEBUG=True
+    ports:
+      - "8000:8000"
+    depends_on:
+      - archivist-es
+      - archivist-redis
+    command: >
+      bash -lc
+      "mkdir -p static static/img static/volume/media &&
+       cp -an /workspace/frontend/public/img/. static/img/ || true &&
+       python manage.py ta_stop_on_error &&
+       python manage.py migrate &&
+       python manage.py ta_envcheck &&
+       python manage.py ta_connection &&
+       python manage.py ta_startup &&
+       python manage.py runserver 0.0.0.0:8000"
+
+  celery-dev:
+    build:
+      context: ../../
+      dockerfile: dev/docker/Dockerfile.dev
+    container_name: tubearchivist-celery-dev
+    restart: unless-stopped
+    working_dir: /workspace/backend
+    volumes:
+      - ../../:/workspace
+    environment:
+      - TA_HOST=http://localhost:8000 http://localhost:3000
+      - TA_USERNAME=tubearchivist
+      - TA_PASSWORD=verysecret
+      - TA_MEDIA_DIR=static/volume/media
+      - TA_CACHE_DIR=static
+      - TA_APP_DIR=.
+      - REDIS_CON=redis://archivist-redis:6379
+      - ES_URL=http://archivist-es:9200
+      - ELASTIC_PASSWORD=verysecret
+      - TZ=America/New_York
+      - DJANGO_DEBUG=True
+    depends_on:
+      - backend-dev
+    command: >
+      bash -lc
+      "mkdir -p static static/img static/volume/media &&
+       cp -an /workspace/frontend/public/img/. static/img/ || true &&
+       celery -A task.celery worker --loglevel=DEBUG --concurrency 2 --max-tasks-per-child 5 --max-memory-per-child 150000"
+
+  archivist-redis:
+    image: redis
+    container_name: archivist-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-dev:/data
+
+  archivist-es:
+    # This is the same ES image as the default docker-compose.yml uses.
+    # If your Docker host errors on ulimits/rlimits, omit ulimits (see README.md).
+    image: bbilly1/tubearchivist-es
+    container_name: archivist-es-dev
+    restart: unless-stopped
+    environment:
+      - "ELASTIC_PASSWORD=verysecret"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "xpack.security.enabled=true"
+      - "discovery.type=single-node"
+      - "path.repo=/usr/share/elasticsearch/data/snapshot"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    volumes:
+      - es-dev:/usr/share/elasticsearch/data
+
+volumes:
+  frontend-node-modules: {}
+  redis-dev: {}
+  es-dev: {}
