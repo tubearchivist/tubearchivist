@@ -484,9 +484,13 @@ const Video = () => {
             <div className="video-tag-box">
               {video.tags.map(tag => {
                 return (
-                  <span key={tag} className="video-tag">
+                  <Link
+                    key={tag}
+                    className="video-tag"
+                    to={`${Routes.Search}?query=${encodeURIComponent(`tag:${tag}`)}`}
+                  >
                     {tag}
-                  </span>
+                  </Link>
                 );
               })}
             </div>

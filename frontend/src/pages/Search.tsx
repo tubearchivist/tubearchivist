@@ -29,6 +29,7 @@ const Search = () => {
   const { userConfig } = useUserConfigStore();
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get('videoId');
+  const queryParam = searchParams.get('query');
 
   const viewVideos = userConfig.view_style_home;
   const viewChannels = userConfig.view_style_channel;
@@ -71,6 +72,12 @@ const Search = () => {
     setSearchResults(searchResults);
     setRefresh(false);
   };
+
+  useEffect(() => {
+    if (queryParam !== null) {
+      setSearchTerm(queryParam);
+    }
+  }, [queryParam]);
 
   useEffect(() => {
     const handler = setTimeout(() => {

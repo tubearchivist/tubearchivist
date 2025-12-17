@@ -60,6 +60,8 @@ class SearchParser:
 
     def run(self):
         """collection, return path and query dict for es"""
+        if not self.query_words:
+            raise ValueError("empty search query")
         print(f"query words: {self.query_words}")
         query_type = self._find_map()
         self._run_words()
@@ -76,16 +78,30 @@ class SearchParser:
         key_word_map = self._get_map()
 
         if ":" in first_word:
-            index_match, query_string = first_word.split(":")
+            index_match, query_string = first_word.split(":", 1)
             if index_match in key_word_map:
                 self.query_map.update(key_word_map.get(index_match))
                 self.query_words[0] = query_string
+                if index_match != "video" and self._has_keyword("tag"):
+                    raise ValueError("tag: is only supported in video mode")
                 return index_match
+
+        if self._has_keyword("tag"):
+            self.query_map.update(key_word_map.get("video"))
+            return "video"
 
         self.query_map.update(key_word_map.get("simple"))
         print(f"query_map: {self.query_map}")
 
         return "simple"
+
+    def _has_keyword(self, keyword):
+        """check if query contains keyword: bucket"""
+        for word in self.query_words:
+            if ":" in word and word.split(":", 1)[0] == keyword:
+                return True
+
+        return False
 
     @staticmethod
     def _get_map():
@@ -98,6 +114,7 @@ class SearchParser:
                 "index": "ta_video",
                 "channel": [],
                 "active": [],
+                "tag": [],
             },
             "channel": {
                 "index": "ta_channel",
@@ -121,7 +138,7 @@ class SearchParser:
         """append word by word"""
         for word in self.query_words:
             if ":" in word:
-                keyword, search_string = word.split(":")
+                keyword, search_string = word.split(":", 1)
                 if keyword in self.query_map:
                     self.append_to = keyword
                     word = search_string
@@ -182,12 +199,55 @@ class QueryBuilder:
         if self.query_type == "full":
             query = build_must_list()
         else:
+            must_list = build_must_list()
+            filter_list = []
+            if self.query_type == "video":
+                if (tags := self.query_map.get("tag")) is not None:
+                    filter_list.append(self._build_tag_filter(tags))
+            elif self.query_map.get("tag") is not None:
+                raise ValueError("tag: is only supported in video mode")
+
+            bool_query = {"must": must_list}
+            if filter_list:
+                bool_query["filter"] = filter_list
+
             query = {
                 "size": 30,
-                "query": {"bool": {"must": build_must_list()}},
+                "query": {"bool": bool_query},
             }
 
         return query
+
+    @staticmethod
+    def _build_tag_filter(tags):
+        """build OR tag filter list for tags.keyword"""
+        should_list = []
+        for tag in tags:
+            should_list.append(QueryBuilder._build_tag_query(tag))
+
+        return {"bool": {"should": should_list, "minimum_should_match": 1}}
+
+    @staticmethod
+    def _build_tag_query(tag):
+        """build per-tag query clause"""
+        if "?" in tag:
+            raise ValueError("unsupported wildcard for tag: only trailing * is supported")
+
+        if "*" in tag:
+            if tag.count("*") != 1 or not tag.endswith("*") or tag.startswith("*"):
+                raise ValueError(
+                    "unsupported wildcard for tag: only trailing * is supported"
+                )
+
+            prefix_value = tag[:-1]
+            if not prefix_value:
+                raise ValueError(
+                    "unsupported wildcard for tag: only trailing * is supported"
+                )
+
+            return {"prefix": {"tags.keyword": {"value": prefix_value}}}
+
+        return {"term": {"tags.keyword": {"value": tag}}}
 
     def _get_fuzzy(self):
         """return fuziness valuee"""

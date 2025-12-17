@@ -18,7 +18,7 @@ from common.src.searching import SearchForm
 from common.src.ta_redis import RedisArchivist
 from common.src.watched import WatchState
 from common.views_base import AdminOnly, ApiBaseView
-from drf_spectacular.utils import OpenApiResponse, extend_schema
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from task.tasks import check_reindex
@@ -156,16 +156,44 @@ class SearchView(ApiBaseView):
     """
 
     @staticmethod
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(description="Search results"),
+            400: OpenApiResponse(
+                ErrorResponseSerializer(), description="Bad request"
+            ),
+        },
+        parameters=[
+            OpenApiParameter(
+                name="query",
+                description=(
+                    "Search DSL string. Supports mode prefixes like "
+                    "`video:`, `channel:`, `playlist:`, `full:`. "
+                    "In `video` mode, `tag:` can be repeated to OR tags "
+                    "(e.g. `video:lofi tag:music tag:dance`). "
+                    "Trailing `*` is supported for prefix matches "
+                    "(e.g. `tag:music-*`). Only trailing `*` is allowed."
+                ),
+                required=True,
+                type=str,
+            ),
+        ],
+    )
     def get(request):
         """handle get request
         search through all indexes"""
         search_query = request.GET.get("query", None)
-        if search_query is None:
+        if search_query is None or not search_query.strip():
             return Response(
                 {"message": "no search query specified"}, status=400
             )
 
-        search_results = SearchForm().multi_search(search_query)
+        try:
+            search_results = SearchForm().multi_search(search_query)
+        except ValueError as exc:
+            error = ErrorResponseSerializer({"error": str(exc)})
+            return Response(error.data, status=400)
+
         return Response(search_results)
 
 

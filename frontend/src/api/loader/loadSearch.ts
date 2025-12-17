@@ -16,7 +16,7 @@ export type SearchResultsType = {
 };
 
 const loadSearch = async (query: string) => {
-  return APIClient<SearchResultsType>(`/api/search/?query=${query}`);
+  return APIClient<SearchResultsType>(`/api/search/?query=${encodeURIComponent(query)}`);
 };
 
 export default loadSearch;

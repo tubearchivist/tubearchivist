@@ -53,7 +53,8 @@
                     "fields": {
                         "keyword": {
                             "type": "keyword",
-                            "ignore_above": 256
+                            "ignore_above": 256,
+                            "normalizer": "to_lower"
                         }
                     }
                 },
@@ -209,7 +210,8 @@
                     "fields": {
                         "keyword": {
                             "type": "keyword",
-                            "ignore_above": 256
+                            "ignore_above": 256,
+                            "normalizer": "to_lower"
                         }
                     }
                 },

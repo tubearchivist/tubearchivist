@@ -5,11 +5,21 @@ const SearchExampleQueries = () => {
         <h2>Example queries</h2>
         <ul>
           <li>
-            <span className="value">music video</span> — basic search
+            <span className="value">music video</span> - basic search
+          </li>
+          <li>
+            <span>tag:</span>
+            <span className="value">music</span>
+            <span> tag:</span>
+            <span className="value">dance</span> - match any tag
+          </li>
+          <li>
+            <span>tag:</span>
+            <span className="value">music-*</span> - tag prefix match
           </li>
           <li>
             <span>video: active:</span>
-            <span className="value">no</span> — all videos deleted from YouTube
+            <span className="value">no</span> - all videos deleted from YouTube
           </li>
           <li>
             <span>video:</span>
@@ -51,10 +61,14 @@ const SearchExampleQueries = () => {
               titles
             </li>
             <li>
-              <span>video:</span> — search in video titles, tags and category field
+              <span>video:</span> - search in video titles, tags and category field
               <ul>
                 <li>
-                  <span>channel:</span> — channel name
+                  <span>tag:</span> - filter videos by tag (repeatable = OR, trailing <code>*</code>{' '}
+                  for prefix)
+                </li>
+                <li>
+                  <span>channel:</span> - channel name
                 </li>
                 <li>
                   <span>active:</span>
