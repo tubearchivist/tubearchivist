@@ -231,18 +231,26 @@ class QueryBuilder:
     def _build_tag_query(tag):
         """build per-tag query clause"""
         if "?" in tag:
-            raise ValueError("unsupported wildcard for tag: only trailing * is supported")
+            raise ValueError(
+                "unsupported wildcard for tag: only trailing * is supported"
+            )
 
         if "*" in tag:
-            if tag.count("*") != 1 or not tag.endswith("*") or tag.startswith("*"):
+            if (
+                tag.count("*") != 1
+                or not tag.endswith("*")
+                or tag.startswith("*")
+            ):
                 raise ValueError(
-                    "unsupported wildcard for tag: only trailing * is supported"
+                    "unsupported wildcard for tag: "
+                    "only trailing * is supported"
                 )
 
             prefix_value = tag[:-1]
             if not prefix_value:
                 raise ValueError(
-                    "unsupported wildcard for tag: only trailing * is supported"
+                    "unsupported wildcard for tag: "
+                    "only trailing * is supported"
                 )
 
             return {"prefix": {"tags.keyword": {"value": prefix_value}}}

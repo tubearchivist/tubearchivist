@@ -25,18 +25,20 @@ const EmptySearchResponse: ApiResponseType<SearchResultsType> = {
   status: 200,
 };
 
-const Search = () => {
+type SearchInnerProps = {
+  queryParam: string | null;
+  videoId: string | null;
+};
+
+const SearchInner = ({ queryParam, videoId }: SearchInnerProps) => {
   const { userConfig } = useUserConfigStore();
-  const [searchParams] = useSearchParams();
-  const videoId = searchParams.get('videoId');
-  const queryParam = searchParams.get('query');
 
   const viewVideos = userConfig.view_style_home;
   const viewChannels = userConfig.view_style_channel;
   const viewPlaylists = userConfig.view_style_playlist;
   const gridItems = userConfig.grid_items || 3;
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(() => queryParam ?? '');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');
   const [searchResults, setSearchResults] = useState<ApiResponseType<SearchResultsType>>();
 
@@ -72,12 +74,6 @@ const Search = () => {
     setSearchResults(searchResults);
     setRefresh(false);
   };
-
-  useEffect(() => {
-    if (queryParam !== null) {
-      setSearchTerm(queryParam);
-    }
-  }, [queryParam]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -174,6 +170,16 @@ const Search = () => {
         {!hasVideos && !hasChannels && !hasPlaylist && !hasFulltext && <SearchExampleQueries />}
       </div>
     </>
+  );
+};
+
+const Search = () => {
+  const [searchParams] = useSearchParams();
+  const videoId = searchParams.get('videoId');
+  const queryParam = searchParams.get('query');
+
+  return (
+    <SearchInner key={queryParam ?? '__no_query__'} queryParam={queryParam} videoId={videoId} />
   );
 };
 

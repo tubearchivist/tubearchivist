@@ -1,7 +1,6 @@
 """tests for search DSL parsing/building"""
 
 import pytest
-
 from common.src.searching import SearchParser
 
 
@@ -52,9 +51,7 @@ def test_tag_prefix_wildcard_builds_prefix_query():
 
 def test_tag_invalid_wildcard_rejected():
     """leading wildcard is not supported"""
-    with pytest.raises(
-        ValueError, match=r"only trailing \* is supported"
-    ):
+    with pytest.raises(ValueError, match=r"only trailing \* is supported"):
         SearchParser("tag:*music").run()
 
 
