@@ -10,12 +10,22 @@ import os
 import re
 from datetime import datetime
 from operator import itemgetter
+from typing import TypedDict
 
 import requests
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
 from common.src.helper import rand_sleep, requests_headers
 from yt_dlp.utils import orderedSet_from_options
+
+
+class SubtitleCue(TypedDict):
+    """describe single subtitle queue"""
+
+    start: str
+    end: str
+    text: str
+    idx: int
 
 
 class YoutubeSubtitle:
@@ -74,8 +84,7 @@ class YoutubeSubtitle:
                 # not supported yet
                 continue
 
-            video_media_url = self.video.json_data["media_url"]
-            media_url = video_media_url.replace(".mp4", f".{lang}.vtt")
+            media_url = self.get_media_url(lang)
             if not all_formats:
                 # no subtitles found
                 continue
@@ -92,6 +101,12 @@ class YoutubeSubtitle:
             candidate_subtitles[lang] = subtitle
 
         return candidate_subtitles
+
+    def get_media_url(self, lang: str) -> str:
+        """get media url"""
+        video_media_url = self.video.json_data["media_url"]
+        media_url = video_media_url.replace(".mp4", f".{lang}.vtt")
+        return media_url
 
     def get_es_subtitles(self) -> list[dict]:
         """get subtitles from elastic"""
@@ -135,17 +150,18 @@ class YoutubeSubtitle:
                 continue
 
             subtitle_str = parser.get_subtitle_str()
-            self._write_subtitle_file(dest_path, subtitle_str)
+            self.write_subtitle_file(dest_path, subtitle_str)
             if self.video.config["downloads"]["subtitle_index"]:
-                query_str = parser.create_bulk_import(self.video, source)
-                self._index_subtitle(query_str)
+                documents = parser.create_documents(self.video, source)
+                query_str = parser.create_bulk_import(documents)
+                self.index_subtitle(query_str)
 
             indexed.append(subtitle)
             rand_sleep(self.video.config)
 
         return indexed
 
-    def _write_subtitle_file(self, dest_path, subtitle_str):
+    def write_subtitle_file(self, dest_path, subtitle_str):
         """write subtitle file to disk"""
         # create folder here for first video of channel
         os.makedirs(os.path.split(dest_path)[0], exist_ok=True)
@@ -158,7 +174,7 @@ class YoutubeSubtitle:
             os.chown(dest_path, host_uid, host_gid)
 
     @staticmethod
-    def _index_subtitle(query_str):
+    def index_subtitle(query_str):
         """send subtitle to es for indexing"""
         _, _ = ElasticWrap("_bulk").post(data=query_str, ndjson=True)
 
@@ -190,15 +206,14 @@ class YoutubeSubtitle:
 class SubtitleParser:
     """parse subtitle str from youtube"""
 
-    def __init__(self, subtitle_str, lang, source):
+    def __init__(self, subtitle_str: str, lang: str, source: str) -> None:
         self.subtitle_raw = json.loads(subtitle_str)
         self.lang = lang
         self.source = source
-        self.all_cues = False
+        self.all_cues: list[SubtitleCue] = []
 
-    def process(self):
+    def process(self) -> None:
         """extract relevant que data"""
-        self.all_cues = []
         all_events = self.subtitle_raw.get("events")
 
         if not all_events:
@@ -213,12 +228,12 @@ class SubtitleParser:
                 print(f"skipping subtitle event without content: {event}")
                 continue
 
-            cue = {
-                "start": self._ms_conv(event["tStartMs"]),
-                "end": self._ms_conv(event["tStartMs"] + event["dDurationMs"]),
-                "text": "".join([i.get("utf8") for i in event["segs"]]),
-                "idx": idx + 1,
-            }
+            cue = SubtitleCue(
+                start=self._ms_conv(event["tStartMs"]),
+                end=self._ms_conv(event["tStartMs"] + event["dDurationMs"]),
+                text="".join([i.get("utf8") for i in event["segs"]]),
+                idx=idx + 1,
+            )
             self.all_cues.append(cue)
 
     @staticmethod
@@ -272,9 +287,8 @@ class SubtitleParser:
 
         return subtitle_str
 
-    def create_bulk_import(self, video, source):
+    def create_bulk_import(self, documents):
         """subtitle lines for es import"""
-        documents = self._create_documents(video, source)
         bulk_list = []
 
         for document in documents:
@@ -288,7 +302,7 @@ class SubtitleParser:
 
         return query_str
 
-    def _create_documents(self, video, source):
+    def create_documents(self, video, source):
         """process documents"""
         documents = self._chunk_list(video.youtube_id)
         channel = video.json_data.get("channel")
