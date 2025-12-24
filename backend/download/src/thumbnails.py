@@ -228,10 +228,13 @@ class ThumbManager(ThumbManagerBase):
         """delete all artwork of channel"""
         thumb = os.path.join(self.CHANNEL_DIR, f"{self.item_id}_thumb.jpg")
         banner = os.path.join(self.CHANNEL_DIR, f"{self.item_id}_banner.jpg")
+        tv = os.path.join(self.CHANNEL_DIR, f"{self.item_id}_tvart.jpg")
         if os.path.exists(thumb):
             os.remove(thumb)
         if os.path.exists(banner):
             os.remove(banner)
+        if os.path.exists(tv):
+            os.remove(tv)
 
     def delete_playlist_thumb(self):
         """delete playlist thumbnail"""
