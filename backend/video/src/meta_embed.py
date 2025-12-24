@@ -77,11 +77,11 @@ class IndexFromEmbed:
     def __init__(
         self,
         file_path: str,
-        reset_user_conf: bool = True,
+        use_user_conf: bool = True,
         config: AppConfigType | None = None,
     ):
         self.file_path = file_path
-        self.reset_user_conf = reset_user_conf
+        self.use_user_conf = use_user_conf
         self.config = config
 
     def run_index(self) -> None:
@@ -141,21 +141,19 @@ class IndexFromEmbed:
             )
 
         channel_data_clean = dict(serializer.data)
-        if self.reset_user_conf:
+        if not self.use_user_conf:
             if "channel_overwrites" in channel_data_clean:
                 channel_data_clean.pop("channel_overwrites")
 
             channel_data_clean["channel_subscribed"] = False
 
         channel = YoutubeChannel(youtube_id=channel_data_clean["channel_id"])
-        channel.build_json(upload=True)
-        if channel.json_data:
-            return
+        channel.get_from_es()
+        if not channel.json_data:
+            channel.json_data = channel_data_clean
+            channel.upload_to_es()
 
-        channel.json_data = channel_data_clean
-        channel.upload_to_es()
-
-        return channel_data_clean
+        return channel.json_data
 
     def index_video(self, json_embed, channel_data_clean):
         """index video"""
@@ -171,18 +169,15 @@ class IndexFromEmbed:
             )
 
         video_data_clean = dict(serializer.data)
-        if self.reset_user_conf:
+        if not self.use_user_conf:
             video_data_clean["player"]["watched"] = False
 
-        video = YoutubeVideo(youtube_id=video_data_clean["youtube_id"])
-        video.build_json()
-        if video.json_data:
-            video.upload_to_es()
-            return
-
         video_data_clean["channel"] = channel_data_clean
-        video.json_data = video_data_clean
-        video.upload_to_es()
+        video = YoutubeVideo(youtube_id=video_data_clean["youtube_id"])
+        video.get_from_es()
+        if not video.json_data:
+            video.json_data = video_data_clean
+            video.upload_to_es()
 
         return video
 
@@ -218,29 +213,25 @@ class IndexFromEmbed:
                 f"[{self.file_path}] subtitle serializer failed: {err}"
             )
 
-        self._process_embedded(video, subtitle_data=serializer.data)
+        self._process_embedded_subs(video, subtitle_data=serializer.data)
 
-    def _process_embedded(self, video, subtitle_data):
+    def _process_embedded_subs(self, video, subtitle_data):
         """process single embedded subtitle"""
         embedded_subs = {
             (i["subtitle_lang"], i["subtitle_source"]) for i in subtitle_data
         }
         subs = YoutubeSubtitle(video)
-
-        if video.youtube_meta:
-            relevant_subtitles = subs.get_subtitles()
-            indexed = subs.download_subtitles(relevant_subtitles)
-        else:
-            indexed = []
+        response = subs.get_es_subtitles()
+        indexed = {
+            (i["subtitle_lang"], i["subtitle_source"]) for i in response
+        }
 
         for embedded_lang, embedded_source in embedded_subs:
-            for sub_indexed in indexed:
-                if (
-                    sub_indexed.get("lang") == embedded_lang
-                    and sub_indexed.get("source") == embedded_source
-                ):
-                    # indexed from remote
-                    continue
+            needs_processing = self._process_subtitle(
+                indexed, embedded_lang, embedded_source
+            )
+            if not needs_processing:
+                continue
 
             segments = [
                 i
@@ -271,6 +262,35 @@ class IndexFromEmbed:
             dest_path = os.path.join(self.VIDEOS_BASE, media_url)
             subs.write_subtitle_file(dest_path, subtitle_str)
 
+    def _process_subtitle(
+        self, indexed, embedded_lang, embedded_source
+    ) -> bool:
+        """check if subtitle should be processed"""
+        for sub_indexed in indexed:
+            if (
+                sub_indexed.get("lang") == embedded_lang
+                and sub_indexed.get("source") == embedded_source
+            ):
+                # already indexed
+                return False
+
+        if not self.use_user_conf:
+            return True
+
+        if not self.config:
+            return False
+
+        langs = self.config["downloads"]["subtitle"]
+        source = self.config["downloads"]["subtitle_source"]
+        if not langs or not source:
+            return False
+
+        lang_codes = [i.strip() for i in langs.split(",")]
+        if embedded_lang not in lang_codes:
+            return True
+
+        return False
+
     def index_comments(self, json_embed):
         """index comments"""
         comment_data = json_embed.get("comments")
@@ -285,9 +305,14 @@ class IndexFromEmbed:
                 f"[{self.file_path}] comments serializer failed: {err}"
             )
 
-        comments = Comments(youtube_id=serializer.data["youtube_id"])
-        comments.build_json()
-        if not comments.json_data:
-            comments.json_data = dict(serializer.data)
+        if self.use_user_conf:
+            if self.config and not self.config["downloads"]["comment_max"]:
+                return
 
+        comments = Comments(youtube_id=serializer.data["youtube_id"])
+        existing = comments.get_es_comments()
+        if existing:
+            return
+
+        comments.json_data = dict(serializer.data)
         comments.upload_comments()
