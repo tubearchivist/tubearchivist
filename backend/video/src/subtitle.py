@@ -16,6 +16,7 @@ import requests
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
 from common.src.helper import rand_sleep, requests_headers
+from download.src.yt_dlp_base import CookieHandler
 from yt_dlp.utils import orderedSet_from_options
 
 
@@ -64,7 +65,9 @@ class YoutubeSubtitle:
                 )
             ]
         except re.error as e:
-            raise ValueError(f"wrong regex in subtitle config: {e.pattern}")
+            raise ValueError(
+                f"wrong regex in subtitle config: {e.pattern}"
+            ) from e
 
         return relevant_subtitles
 
@@ -128,22 +131,12 @@ class YoutubeSubtitle:
             dest_path = os.path.join(videos_base, subtitle["media_url"])
             source = subtitle["source"]
             lang = subtitle.get("lang")
-            response = requests.get(
-                subtitle["url"], headers=requests_headers(), timeout=30
-            )
-            if not response.ok:
-                subtitle_key = f"{self.video.youtube_id}-{lang}"
-                print(f"{subtitle_key}: failed to download subtitle")
-                print(response.text)
-                rand_sleep(self.video.config)
+
+            response_text = self._make_request(subtitle["url"], lang)
+            if not response_text:
                 continue
 
-            if not response.text:
-                print(f"{subtitle_key}: skip empty subtitle")
-                rand_sleep(self.video.config)
-                continue
-
-            parser = SubtitleParser(response.text, lang, source)
+            parser = SubtitleParser(response_text, lang, source)
             parser.process()
             if not parser.all_cues:
                 rand_sleep(self.video.config)
@@ -160,6 +153,42 @@ class YoutubeSubtitle:
             rand_sleep(self.video.config)
 
         return indexed
+
+    def _make_request(self, url: str, lang: str | None) -> str | None:
+        """make the request"""
+        request_kwargs: dict = {
+            "timeout": 30,
+            "headers": requests_headers(),
+        }
+        if self.video.config["downloads"].get("cookie_import"):
+            cookie = CookieHandler(self.video.config).get()
+            if cookie:
+                cookies_txt = cookie.read()
+                jar = requests.cookies.RequestsCookieJar()
+                for line in cookies_txt.split("\n"):
+                    words = line.split()
+                    if (len(words) == 7) and (words[0] != "#"):
+                        jar.set(
+                            words[5], words[6], domain=words[0], path=words[2]
+                        )
+
+                request_kwargs["cookies"] = jar
+
+        response = requests.get(url, **request_kwargs)
+
+        if not response.ok:
+            subtitle_key = f"{self.video.youtube_id}-{lang}"
+            print(f"{subtitle_key}: failed to download subtitle")
+            print(response.text)
+            rand_sleep(self.video.config)
+            return None
+
+        if not response.text:
+            print(f"{subtitle_key}: skip empty subtitle")
+            rand_sleep(self.video.config)
+            return None
+
+        return response.text
 
     def write_subtitle_file(self, dest_path, subtitle_str):
         """write subtitle file to disk"""
