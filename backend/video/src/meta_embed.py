@@ -9,6 +9,7 @@ from channel.serializers import ChannelSerializer
 from channel.src.index import YoutubeChannel
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
+from download.src.thumbnails import ThumbManager
 from mutagen.mp4 import MP4, MP4FreeForm
 from video.serializers import (
     CommentsSerializer,
@@ -71,6 +72,7 @@ class IndexFromEmbed:
     """restore from embedded metadata, potential untrusted"""
 
     VIDEOS_BASE = EnvironmentSettings.MEDIA_DIR
+    CACHE_DIR = EnvironmentSettings.CACHE_DIR
     HOST_UID = EnvironmentSettings.HOST_UID
     HOST_GID = EnvironmentSettings.HOST_GID
 
@@ -101,8 +103,8 @@ class IndexFromEmbed:
 
     def _get_embedded(self) -> dict | None:
         """get embedded metadata"""
-        video = MP4(self.file_path)
-        ta_data = video.get("----:com.tubearchivist:ta")
+        video_mutagen = MP4(self.file_path)
+        ta_data = video_mutagen.get("----:com.tubearchivist:ta")
         if not ta_data:
             return None
 
@@ -198,6 +200,51 @@ class IndexFromEmbed:
         shutil.move(self.file_path, new_path, copy_function=shutil.copyfile)
         if self.HOST_UID and self.HOST_GID:
             os.chown(new_path, self.HOST_UID, self.HOST_GID)
+
+    def restore_artwork(self, video):
+        """restore artwork if needed"""
+        video_mutagen = MP4(self.file_path)
+
+        thumb = ThumbManager(video.youtube_id).vid_thumb_path(absolute=True)
+        self._restore_art_item(video_mutagen, "covr", thumb)
+
+        channel_id = video.json_data["channel"]["channel_id"]
+        banner_path = os.path.join(
+            self.CACHE_DIR, "channels", f"{channel_id}_banner.jpg"
+        )
+        self._restore_art_item(
+            video_mutagen, "----:com.tubearchivist:channel_banner", banner_path
+        )
+
+        channel_icon = os.path.join(
+            self.CACHE_DIR, "channels", f"{channel_id}_thumb.jpg"
+        )
+        self._restore_art_item(
+            video_mutagen, "----:com.tubearchivist:channel_icon", channel_icon
+        )
+
+        tv_art_path = os.path.join(
+            self.CACHE_DIR, "channels", f"{channel_id}_tvart.jpg"
+        )
+        self._restore_art_item(
+            video_mutagen, "----:com.tubearchivist:channel_tv", tv_art_path
+        )
+
+    def _restore_art_item(
+        self, video_mutagen, mutagen_key: str, target_path: str
+    ) -> None:
+        """restore single art item"""
+        if os.path.exists(target_path):
+            # don't overwrite
+            return
+
+        art_item = video_mutagen.get(mutagen_key)
+        if not art_item and not isinstance(art_item, list):
+            # is not embedded
+            return
+
+        with open(target_path, "wb") as f:
+            f.write(bytes(art_item[0]))
 
     def index_subtitles(self, json_embed, video):
         """index subtitles"""
