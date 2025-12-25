@@ -496,7 +496,7 @@ class ThumbFilesystem:
         """entry point"""
         data = {
             "query": {"match_all": {}},
-            "_source": ["media_url", "youtube_id"],
+            "_source": ["media_url", "youtube_id", "channel.channel_id"],
         }
         paginate = IndexPaginate(
             index_name=self.INDEX_NAME,
