@@ -221,7 +221,7 @@ class ThumbManager(ThumbManagerBase):
         file_path = os.path.join(self.MEDIA_DIR, json_data["media_url"])
         video = MP4(file_path)
 
-        thumb_path = os.path.join(self.CACHE_DIR, self.vid_thumb_path())
+        thumb_path = self.vid_thumb_path(absolute=True)
         if os.path.exists(thumb_path):
             with open(thumb_path, "rb") as f:
                 cover_data = f.read()
