@@ -4,9 +4,7 @@ functionality:
 - check for missing thumbnails
 """
 
-import base64
 import os
-from io import BytesIO
 from time import sleep
 
 import requests
@@ -14,7 +12,7 @@ from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
 from common.src.helper import is_missing
 from mutagen.mp4 import MP4, MP4Cover
-from PIL import Image, ImageFile, ImageFilter, UnidentifiedImageError
+from PIL import Image, ImageFile, UnidentifiedImageError
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -23,6 +21,7 @@ class ThumbManagerBase:
     """base class for thumbnail management"""
 
     CACHE_DIR = EnvironmentSettings.CACHE_DIR
+    MEDIA_DIR = EnvironmentSettings.MEDIA_DIR
     VIDEO_DIR = os.path.join(CACHE_DIR, "videos")
     CHANNEL_DIR = os.path.join(CACHE_DIR, "channels")
     PLAYLIST_DIR = os.path.join(CACHE_DIR, "playlists")
@@ -217,6 +216,56 @@ class ThumbManager(ThumbManagerBase):
         img_raw = img_raw.resize((336, 189))
         img_raw.convert("RGB").save(thumb_path)
 
+    def embed_video_art(self, json_data: dict):
+        """embed video artwork"""
+        file_path = os.path.join(self.MEDIA_DIR, json_data["media_url"])
+        video = MP4(file_path)
+
+        thumb_path = os.path.join(self.CACHE_DIR, self.vid_thumb_path())
+        if os.path.exists(thumb_path):
+            with open(thumb_path, "rb") as f:
+                cover_data = f.read()
+
+            video["covr"] = [
+                MP4Cover(cover_data, imageformat=MP4Cover.FORMAT_JPEG)
+            ]
+
+        channel_id = json_data["channel"]["channel_id"]
+        banner_path = os.path.join(
+            self.CHANNEL_DIR, f"{channel_id}_banner.jpg"
+        )
+        if os.path.exists(banner_path):
+            with open(banner_path, "rb") as f:
+                banner_data = f.read()
+
+            video["----:com.tubearchivist:channel_banner"] = [
+                MP4Cover(banner_data, imageformat=MP4Cover.FORMAT_JPEG)
+            ]
+
+        channel_icon_path = os.path.join(
+            self.CHANNEL_DIR, f"{channel_id}_thumb.jpg"
+        )
+        if os.path.exists(channel_icon_path):
+            with open(channel_icon_path, "rb") as f:
+                icon_data = f.read()
+
+            video["----:com.tubearchivist:channel_icon"] = [
+                MP4Cover(icon_data, imageformat=MP4Cover.FORMAT_JPEG)
+            ]
+
+        channel_tv_path = os.path.join(
+            self.CHANNEL_DIR, f"{channel_id}_tvart.jpg"
+        )
+        if os.path.exists(channel_tv_path):
+            with open(channel_tv_path, "rb") as f:
+                tv_data = f.read()
+
+            video["----:com.tubearchivist:channel_tv"] = [
+                MP4Cover(tv_data, imageformat=MP4Cover.FORMAT_JPEG)
+            ]
+
+        video.save()
+
     def delete_video_thumb(self):
         """delete video thumbnail if exists"""
         thumb_path = self.vid_thumb_path()
@@ -241,20 +290,6 @@ class ThumbManager(ThumbManagerBase):
         thumb_path = os.path.join(self.PLAYLIST_DIR, f"{self.item_id}.jpg")
         if os.path.exists(thumb_path):
             os.remove(thumb_path)
-
-    def get_vid_base64_blur(self):
-        """return base64 encoded placeholder"""
-        file_path = os.path.join(self.CACHE_DIR, self.vid_thumb_path())
-        img_raw = Image.open(file_path)
-        img_raw.thumbnail((img_raw.width // 20, img_raw.height // 20))
-        img_blur = img_raw.filter(ImageFilter.BLUR)
-        buffer = BytesIO()
-        img_blur.save(buffer, format="JPEG")
-        img_data = buffer.getvalue()
-        img_base64 = base64.b64encode(img_data).decode()
-        data_url = f"data:image/jpg;base64,{img_base64}"
-
-        return data_url
 
 
 class ValidatorCallback:
@@ -484,9 +519,7 @@ class ThumbFilesystem:
 class EmbedCallback:
     """callback class to embed thumbnails"""
 
-    CACHE_DIR = EnvironmentSettings.CACHE_DIR
     MEDIA_DIR = EnvironmentSettings.MEDIA_DIR
-    FORMAT = MP4Cover.FORMAT_JPEG
 
     def __init__(self, source, index_name, counter=0):
         self.source = source
@@ -497,19 +530,4 @@ class EmbedCallback:
         """run embed"""
         for video in self.source:
             video_id = video["_source"]["youtube_id"]
-            media_url = os.path.join(
-                self.MEDIA_DIR, video["_source"]["media_url"]
-            )
-            thumb_path = os.path.join(
-                self.CACHE_DIR, ThumbManager(video_id).vid_thumb_path()
-            )
-            if os.path.exists(thumb_path):
-                self.embed(media_url, thumb_path)
-
-    def embed(self, media_url, thumb_path):
-        """embed thumb in single media file"""
-        video = MP4(media_url)
-        with open(thumb_path, "rb") as f:
-            video["covr"] = [MP4Cover(f.read(), imageformat=self.FORMAT)]
-
-        video.save()
+            ThumbManager(video_id).embed_video_art(video["_source"])

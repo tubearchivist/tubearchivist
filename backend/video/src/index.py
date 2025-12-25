@@ -424,9 +424,13 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def embed_metadata(self):
         """embed metadata for video"""
-        if not self.config["downloads"].get("add_metadata"):
-            return
+        if self.config["downloads"].get("add_metadata"):
+            self._embed_text_data()
 
+        if self.config["downloads"].get("add_thumbnail"):
+            self._embed_artwork()
+
+    def _embed_text_data(self):
         print(f"{self.youtube_id}: embed metadata")
         if not self.json_data:
             self.get_from_es()
@@ -483,6 +487,18 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         )
 
         return to_embed
+
+    def _embed_artwork(self):
+        """embed artwork"""
+        print(f"{self.youtube_id}: embed artwork")
+        if not self.json_data:
+            self.get_from_es()
+
+        if not self.json_data:
+            print(f"{self.youtube_id}: skip embed, video not indexed")
+            return
+
+        ThumbManager(self.youtube_id).embed_video_art(self.json_data)
 
 
 def index_new_video(youtube_id, video_type=VideoTypeEnum.VIDEOS):
