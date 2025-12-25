@@ -483,6 +483,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
                 "comments": comments,
                 "subtitles": subtitles,
                 "playlists": playlists,
+                "version": settings.TA_VERSION,
             }
         )
 
