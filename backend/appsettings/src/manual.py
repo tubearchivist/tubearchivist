@@ -16,7 +16,7 @@ from common.src.env_settings import EnvironmentSettings
 from common.src.helper import ignore_filelist
 from download.src.thumbnails import ThumbManager
 from PIL import Image
-from video.src.comments import CommentList
+from video.src.comments import Comments
 from video.src.index import YoutubeVideo
 from yt_dlp.utils import ISO639Utils
 
@@ -145,12 +145,8 @@ class ImportFolderScanner:
             print(f"manual import: {current_video}")
 
             ManualImport(current_video, config).run()
+            Comments(current_video["video_id"]).build_json(upload=True)
             YoutubeVideo(current_video["video_id"]).embed_metadata()
-
-        video_ids = [i["video_id"] for i in self.to_import]
-        comment_list = CommentList(task=self.task)
-        comment_list.add(video_ids=video_ids)
-        comment_list.index()
 
     def _notify(self, idx, current_video):
         """send notification back to task"""

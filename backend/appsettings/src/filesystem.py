@@ -8,7 +8,7 @@ import os
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import IndexPaginate
 from common.src.helper import ignore_filelist
-from video.src.comments import CommentList
+from video.src.comments import Comments
 from video.src.index import YoutubeVideo, index_new_video
 
 
@@ -88,8 +88,5 @@ class Scanner:
                 )
             json_data = index_new_video(youtube_id)
             if json_data:
+                Comments(youtube_id).build_json(upload=True)
                 YoutubeVideo(youtube_id).embed_metadata()
-
-        comment_list = CommentList(task=self.task)
-        comment_list.add(video_ids=list(self.to_index))
-        comment_list.index()

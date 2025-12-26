@@ -1,4 +1,8 @@
-"""bulk metadata embedding"""
+"""
+Functionality:
+- bulk metadata embedding
+- restore from embedded metadata
+"""
 
 import json
 import os
