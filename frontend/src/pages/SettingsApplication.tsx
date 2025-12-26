@@ -33,6 +33,7 @@ const SettingsApplication = () => {
   const { userConfig } = useUserConfigStore();
   const [response, setResponse] = useState<SettingsApplicationReponses>();
   const [refresh, setRefresh] = useState(false);
+  const [visibleSnapshotCount, setVisibleSnapshotCount] = useState(10);
 
   const snapshots = response?.snapshots;
   const appSettingsConfig = response?.appSettingsConfig;
@@ -976,10 +977,9 @@ const SettingsApplication = () => {
                         </p>
                         <br />
                         {restoringSnapshot && <p>Snapshot restore started</p>}
-                        {!restoringSnapshot &&
-                          snapshots.snapshots &&
-                          snapshots.snapshots.map(snapshot => {
-                            return (
+                        {!restoringSnapshot && snapshots.snapshots && (
+                          <>
+                            {snapshots.snapshots?.slice(0, visibleSnapshotCount).map(snapshot => (
                               <p key={snapshot.id}>
                                 <Button
                                   label="Restore"
@@ -994,8 +994,17 @@ const SettingsApplication = () => {
                                 <span className="settings-current">{snapshot.duration_s}s</span> to
                                 create. State: <i>{snapshot.state}</i>
                               </p>
-                            );
-                          })}
+                            ))}
+                            {visibleSnapshotCount < snapshots.snapshots.length && (
+                              <Button
+                                label="Load More"
+                                onClick={() => {
+                                  setVisibleSnapshotCount(visibleSnapshotCount + 10);
+                                }}
+                              />
+                            )}
+                          </>
+                        )}
                       </>
                     )}
                   </div>
