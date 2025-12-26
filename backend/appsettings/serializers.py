@@ -107,6 +107,13 @@ class RescanFileSystemConfig(serializers.Serializer):
     prefer_local = serializers.BooleanField()
 
 
+class ManualImportConfig(serializers.Serializer):
+    """serialize for manual import task"""
+
+    ignore_error = serializers.BooleanField()
+    prefer_local = serializers.BooleanField()
+
+
 class SnapshotItemSerializer(serializers.Serializer):
     """serialize snapshot response"""
 

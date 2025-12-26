@@ -50,6 +50,11 @@ urlpatterns = [
         name="api-rescan-filesystem",
     ),
     path(
+        "manual-import/",
+        views.ManualImportView.as_view(),
+        name="api-manual-import",
+    ),
+    path(
         "membership/profile/",
         views_mb.MembershipProfileView.as_view(),
         name="api-membership-profile",

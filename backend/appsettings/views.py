@@ -5,6 +5,7 @@ from appsettings.serializers import (
     BackupFileSerializer,
     CookieUpdateSerializer,
     CookieValidationSerializer,
+    ManualImportConfig,
     PoTokenSerializer,
     RescanFileSystemConfig,
     SnapshotCreateResponseSerializer,
@@ -395,8 +396,10 @@ class SnapshotApiListView(ApiBaseView):
 
 class RescanFileSystem(ApiBaseView):
     """resolves to /api/appsettings/rescan-filesystem/
-    POST: start new task rescan filesystem task
+    POST: start new rescan filesystem task
     """
+
+    permission_classes = [AdminOnly]
 
     @staticmethod
     @extend_schema(
@@ -412,6 +415,32 @@ class RescanFileSystem(ApiBaseView):
         validated_data = data_serializer.validated_data
 
         message = TaskCommand().start("rescan_filesystem", validated_data)
+        serializer = AsyncTaskResponseSerializer(message)
+
+        return Response(serializer.data)
+
+
+class ManualImportView(ApiBaseView):
+    """resolves to /api/appsettings/manual-import/
+    POST: start new manual import task
+    """
+
+    permission_classes = [AdminOnly]
+
+    @staticmethod
+    @extend_schema(
+        request=ManualImportConfig,
+        responses={
+            200: OpenApiResponse(AsyncTaskResponseSerializer()),
+        },
+    )
+    def post(request):
+        """manual import"""
+        data_serializer = ManualImportConfig(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+
+        message = TaskCommand().start("manual_import", validated_data)
         serializer = AsyncTaskResponseSerializer(message)
 
         return Response(serializer.data)

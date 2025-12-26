@@ -216,7 +216,7 @@ def check_reindex(self, data=False, extract_videos=False):
 
 
 @shared_task(bind=True, name="manual_import", base=BaseTask)
-def run_manual_import(self):
+def manual_import(self, ignore_error, prefer_local):
     """called from settings page, to go through import folder"""
     manager = TaskManager()
     if manager.is_pending(self):
@@ -225,7 +225,9 @@ def run_manual_import(self):
         return
 
     manager.init(self)
-    ImportFolderScanner(task=self).scan()
+    ImportFolderScanner(
+        task=self, ignore_error=ignore_error, prefer_local=prefer_local
+    ).scan()
 
 
 @shared_task(bind=True, name="run_backup", base=BaseTask)
