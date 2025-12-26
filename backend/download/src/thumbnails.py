@@ -501,7 +501,7 @@ class ThumbFilesystem:
         paginate = IndexPaginate(
             index_name=self.INDEX_NAME,
             data=data,
-            size=200,
+            size=100,
             callback=EmbedCallback,
             task=self.task,
             total=self._get_total(),
