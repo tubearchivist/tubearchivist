@@ -84,9 +84,9 @@ class TaskManager:
 class TaskCommand:
     """run commands on task"""
 
-    def start(self, task_name):
+    def start(self, task_name, kwargs: dict | None = None):
         """start task by task_name, only pass task that don't take args"""
-        task = celery_app.tasks.get(task_name).delay()
+        task = celery_app.tasks.get(task_name).delay(**(kwargs or {}))
         message = {
             "task_id": task.id,
             "status": task.status,

@@ -25,7 +25,7 @@ class Comments:
         self.is_activated = False
         self.comments_format = False
 
-    def build_json(self):
+    def build_json(self, upload: bool = False):
         """build json document for es"""
         print(f"{self.youtube_id}: get comments")
         self.check_config()
@@ -44,6 +44,8 @@ class Comments:
             "comment_channel_id": channel_id,
             "comment_comments": self.comments_format,
         }
+        if upload:
+            self.upload_comments()
 
     def check_config(self):
         """read config if not attached"""
@@ -142,14 +144,13 @@ class Comments:
 
     def upload_comments(self):
         """upload comments to es"""
-        if not self.is_activated:
-            return
-
         print(f"{self.youtube_id}: upload comments")
         _, _ = ElasticWrap(self.es_path).put(self.json_data)
 
         vid_path = f"ta_video/_update/{self.youtube_id}"
-        data = {"doc": {"comment_count": len(self.comments_format)}}
+        data = {
+            "doc": {"comment_count": len(self.json_data["comment_comments"])}
+        }
         _, _ = ElasticWrap(vid_path).post(data=data)
 
     def delete_comments(self):

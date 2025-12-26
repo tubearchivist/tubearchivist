@@ -10,13 +10,15 @@ from video.src.constants import VideoTypeEnum
 class DownloadItemSerializer(serializers.Serializer):
     """serialize download item"""
 
-    auto_start = serializers.BooleanField()
+    auto_start = serializers.BooleanField(required=False)
     channel_id = serializers.CharField()
     channel_indexed = serializers.BooleanField()
     channel_name = serializers.CharField()
     duration = serializers.CharField()
     published = serializers.CharField(allow_null=True)
-    status = serializers.ChoiceField(choices=["pending", "ignore"])
+    status = serializers.ChoiceField(
+        choices=["pending", "ignore"], required=False
+    )
     timestamp = serializers.IntegerField(allow_null=True)
     title = serializers.CharField()
     vid_thumb_url = serializers.CharField(allow_null=True)

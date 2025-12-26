@@ -1,12 +1,6 @@
 import APIClient from '../../functions/APIClient';
 
-type TaskNamesType =
-  | 'download_pending'
-  | 'update_subscribed'
-  | 'manual_import'
-  | 'resync_thumbs'
-  | 'resync_metadata'
-  | 'rescan_filesystem';
+type TaskNamesType = 'download_pending' | 'update_subscribed' | 'resync_thumbs' | 'resync_metadata';
 
 const updateTaskByName = async (taskName: TaskNamesType) => {
   return APIClient(`/api/task/by-name/${taskName}/`, {

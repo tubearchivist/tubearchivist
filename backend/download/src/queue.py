@@ -20,6 +20,7 @@ from common.src.helper import (
     rand_sleep,
 )
 from common.src.urlparser import ParsedURLType
+from download.serializers import DownloadItemSerializer
 from download.src.queue_interact import PendingInteract
 from download.src.thumbnails import ThumbManager
 from playlist.src.index import YoutubePlaylist
@@ -379,6 +380,12 @@ class PendingList(PendingIndex):
             "channel_id": video_data["channel_id"],
             "channel_indexed": video_data["channel_id"] in self.all_channels,
         }
+        serializer = DownloadItemSerializer(data=to_add)
+        is_valid = serializer.is_valid()
+        if not is_valid:
+            print(f"{youtube_id}: serializer failed: {serializer.errors}")
+            self._notify_fail(403, youtube_id)
+            return None
 
         return to_add
 
@@ -393,18 +400,24 @@ class PendingList(PendingIndex):
         return None
 
     @staticmethod
-    def _extract_published(video_data) -> str | int | None:
+    def _extract_published(video_data) -> int | None:
         """build published date or timestamp"""
         timestamp = video_data.get("timestamp")
-        if timestamp:
+        if timestamp and isinstance(timestamp, int):
             return timestamp
 
         upload_date = video_data.get("upload_date")
         if upload_date:
-            upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
-            return upload_date_time.replace(
-                tzinfo=ZoneInfo(EnvironmentSettings.TZ)
-            ).timestamp()
+            try:
+                upload_date_time = datetime.strptime(upload_date, "%Y%m%d")
+            except ValueError:
+                youtube_id = video_data["id"]
+                print(f"{youtube_id}: published date extraction failed.")
+                return None
+
+            tz = ZoneInfo(EnvironmentSettings.TZ)
+            timestamp = int(upload_date_time.replace(tzinfo=tz).timestamp())
+            return timestamp
 
         return None
 

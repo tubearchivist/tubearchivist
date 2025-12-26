@@ -196,15 +196,6 @@ class VideoDownloader(DownloaderBase):
                 }
             )
 
-        if self.config["downloads"]["add_thumbnail"]:
-            postprocessors.append(
-                {
-                    "key": "EmbedThumbnail",
-                    "already_have_thumbnail": True,
-                }
-            )
-            self.obs["writethumbnail"] = True
-
         self.obs["postprocessors"] = postprocessors
 
     def _set_overwrites(self, obs: dict, channel_id: str) -> None:
@@ -326,6 +317,9 @@ class DownloadPostProcess(DownloaderBase):
         for channel_id, value in self.channel_overwrites.items():
             if "autodelete_days" in value:
                 autodelete_days = value.get("autodelete_days")
+                if autodelete_days is None:
+                    continue
+
                 print(f"{channel_id}: delete older than {autodelete_days}d")
                 now_lte = str(self.now - autodelete_days * 24 * 60 * 60)
                 must_list = [
@@ -488,7 +482,10 @@ class DownloadPostProcess(DownloaderBase):
 
     def embed_metadata(self):
         """embed metadata in media file"""
-        if not self.config["downloads"].get("add_metadata"):
+        meta = self.config["downloads"].get("add_metadata")
+        thumb = self.config["downloads"].get("add_thumbnail")
+
+        if not meta and not thumb:
             return
 
         queue = RedisQueue(self.VIDEO_QUEUE)

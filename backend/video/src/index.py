@@ -220,7 +220,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     def _build_published(self):
         """build published date or timestamp"""
         timestamp = self.youtube_meta.get("timestamp")
-        if timestamp:
+        if timestamp and isinstance(timestamp, int):
             return timestamp
 
         upload_date = self.youtube_meta["upload_date"]
@@ -424,10 +424,6 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def embed_metadata(self):
         """embed metadata for video"""
-        if not self.config["downloads"].get("add_metadata"):
-            return
-
-        print(f"{self.youtube_id}: embed metadata")
         if not self.json_data:
             self.get_from_es()
 
@@ -435,6 +431,15 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             print(f"{self.youtube_id}: skip embed, video not indexed")
             return
 
+        if self.config["downloads"].get("add_metadata"):
+            self._embed_text_data()
+
+        if self.config["downloads"].get("add_thumbnail"):
+            self._embed_artwork()
+
+    def _embed_text_data(self):
+        """embed text metadata"""
+        print(f"{self.youtube_id}: embed metadata")
         video_base = EnvironmentSettings.MEDIA_DIR
         media_url = self.json_data.get("media_url")
         file_path = os.path.join(video_base, media_url)
@@ -479,10 +484,16 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
                 "comments": comments,
                 "subtitles": subtitles,
                 "playlists": playlists,
+                "version": settings.TA_VERSION,
             }
         )
 
         return to_embed
+
+    def _embed_artwork(self):
+        """embed artwork"""
+        print(f"{self.youtube_id}: embed artwork")
+        ThumbManager(self.youtube_id).embed_video_art(self.json_data)
 
 
 def index_new_video(youtube_id, video_type=VideoTypeEnum.VIDEOS):

@@ -146,6 +146,7 @@ const VideoPlayer = ({
     }
     if (setSeekToTimestamp) setSeekToTimestamp(undefined);
     window.scroll(0, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seekToTimestamp]);
 
   const [searchParams] = useSearchParams();
@@ -389,6 +390,7 @@ const VideoPlayer = ({
     } else if (!theaterModePressed) {
       setTheaterModeKeyPressed(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [theaterModePressed, isTheaterMode, theaterModeKeyPressed]);
 
   useEffect(() => {
@@ -401,6 +403,7 @@ const VideoPlayer = ({
 
       infoDialog('Normal mode');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [escapePressed, isTheaterMode]);
 
   return (
