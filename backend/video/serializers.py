@@ -100,7 +100,9 @@ class VideoSerializer(serializers.Serializer):
     media_size = serializers.IntegerField()
     media_url = serializers.CharField()
     player = PlayerSerializer()
-    playlist = serializers.ListField(child=serializers.CharField())
+    playlist = serializers.ListField(
+        child=serializers.CharField(), required=False
+    )
     published = serializers.CharField()
     sponsorblock = SponsorBlockSerializer(allow_null=True, required=False)
     stats = StatsSerializer()

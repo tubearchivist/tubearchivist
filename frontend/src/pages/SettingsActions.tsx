@@ -7,6 +7,8 @@ import restoreBackup from '../api/actions/restoreBackup';
 import Notifications from '../components/Notifications';
 import Button from '../components/Button';
 import { ApiResponseType } from '../functions/APIClient';
+import ToggleConfig from '../components/ToggleConfig';
+import queueStartFilesystemRescan from '../api/actions/queueStartFilesystemRescan';
 
 const SettingsActions = () => {
   const [deleteIgnored, setDeleteIgnored] = useState(false);
@@ -17,6 +19,8 @@ const SettingsActions = () => {
   const [backupStarted, setBackupStarted] = useState(false);
   const [isRestoringBackup, setIsRestoringBackup] = useState(false);
   const [reScanningFileSystem, setReScanningFileSystem] = useState(false);
+  const [rescanIgnoreErrors, setRescanIgnoreErrors] = useState(false);
+  const [rescanPreferLocal, setRescanPreferLocal] = useState(false);
 
   const [backupListResponse, setBackupListResponse] = useState<ApiResponseType<BackupListType>>();
 
@@ -196,23 +200,42 @@ const SettingsActions = () => {
             deleted videos from the filesystem.
           </p>
           <p>
-            Rescan your media folder looking for missing videos and clean up index. More info on the
-            Github{' '}
+            Rescan your media folder looking for missing videos and clean up index. More info on the{' '}
             <a
               href="https://docs.tubearchivist.com/settings/actions/#rescan-filesystem"
               target="_blank"
             >
-              Wiki
+              Docs
             </a>
             .
           </p>
           <div id="fs-rescan">
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Prefer embedded metadata</p>
+              </div>
+              <ToggleConfig
+                name="prefer_local"
+                value={rescanPreferLocal}
+                updateCallback={() => setRescanPreferLocal(!rescanPreferLocal)}
+              />
+            </div>
+            <div className="settings-box-wrapper">
+              <div>
+                <p>Ignore missing metadata errors</p>
+              </div>
+              <ToggleConfig
+                name="ignore_error"
+                value={rescanIgnoreErrors}
+                updateCallback={() => setRescanIgnoreErrors(!rescanIgnoreErrors)}
+              />
+            </div>
             {reScanningFileSystem && <p>File system scan in progress</p>}
             {!reScanningFileSystem && (
               <Button
                 label="Rescan filesystem"
                 onClick={async () => {
-                  await updateTaskByName('rescan_filesystem');
+                  await queueStartFilesystemRescan(rescanIgnoreErrors, rescanPreferLocal);
                   setReScanningFileSystem(true);
                 }}
               />

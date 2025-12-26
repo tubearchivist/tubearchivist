@@ -69,7 +69,7 @@ RESTORE_BACKUP: TaskItemConfig = {
 RESCAN_FILESYSTEM: TaskItemConfig = {
     "title": "Rescan your Filesystem",
     "group": "setting:filesystemscan",
-    "api_start": True,
+    "api_start": False,
     "api_stop": False,
 }
 

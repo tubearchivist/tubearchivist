@@ -90,20 +90,22 @@ class IndexFromEmbed:
         self.use_user_conf = use_user_conf
         self.config = config
 
-    def run_index(self) -> None:
+    def run_index(self) -> None | dict:
         """run index"""
         if not self.config:
             self.config = AppConfig().config
 
         json_embed = self._get_embedded()
         if not json_embed:
-            return
+            return None
 
         channel_data_clean = self.index_channel(json_embed)
         video = self.index_video(json_embed, channel_data_clean)
         self.archive_video(video)
         self.index_subtitles(json_embed, video)
         self.index_comments(json_embed)
+
+        return video.json_data
 
     def _get_embedded(self) -> dict | None:
         """get embedded metadata"""

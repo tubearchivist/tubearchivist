@@ -260,7 +260,7 @@ def run_restore_backup(self, filename):
 
 
 @shared_task(bind=True, name="rescan_filesystem", base=BaseTask)
-def rescan_filesystem(self):
+def rescan_filesystem(self, ignore_error, prefer_local):
     """check the media folder for mismatches"""
     manager = TaskManager()
     if manager.is_pending(self):
@@ -269,7 +269,9 @@ def rescan_filesystem(self):
         return
 
     manager.init(self)
-    handler = Scanner(task=self)
+    handler = Scanner(
+        task=self, ignore_error=ignore_error, prefer_local=prefer_local
+    )
     handler.scan()
     handler.apply()
     thumbnail_check.delay()

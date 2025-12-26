@@ -5,8 +5,7 @@ type TaskNamesType =
   | 'update_subscribed'
   | 'manual_import'
   | 'resync_thumbs'
-  | 'resync_metadata'
-  | 'rescan_filesystem';
+  | 'resync_metadata';
 
 const updateTaskByName = async (taskName: TaskNamesType) => {
   return APIClient(`/api/task/by-name/${taskName}/`, {

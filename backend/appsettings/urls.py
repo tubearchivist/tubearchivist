@@ -45,6 +45,11 @@ urlpatterns = [
         name="api-token",
     ),
     path(
+        "rescan-filesystem/",
+        views.RescanFileSystem.as_view(),
+        name="api-rescan-filesystem",
+    ),
+    path(
         "membership/profile/",
         views_mb.MembershipProfileView.as_view(),
         name="api-membership-profile",

@@ -100,6 +100,13 @@ class PoTokenSerializer(serializers.Serializer):
     potoken = serializers.CharField()
 
 
+class RescanFileSystemConfig(serializers.Serializer):
+    """serialize rescan filesystem config"""
+
+    ignore_error = serializers.BooleanField()
+    prefer_local = serializers.BooleanField()
+
+
 class SnapshotItemSerializer(serializers.Serializer):
     """serialize snapshot response"""
 
