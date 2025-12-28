@@ -15,7 +15,6 @@ const SettingsActions = () => {
   const [deleteIgnored, setDeleteIgnored] = useState(false);
   const [deletePending, setDeletePending] = useState(false);
   const [processingImports, setProcessingImports] = useState(false);
-  const [reEmbed, setReEmbed] = useState(false);
   const [reSyncMeta, setReSyncMeta] = useState(false);
   const [backupStarted, setBackupStarted] = useState(false);
   const [isRestoringBackup, setIsRestoringBackup] = useState(false);
@@ -51,7 +50,6 @@ const SettingsActions = () => {
             deleteIgnored ||
             deletePending ||
             processingImports ||
-            reEmbed ||
             reSyncMeta ||
             backupStarted ||
             isRestoringBackup ||
@@ -61,7 +59,6 @@ const SettingsActions = () => {
             setDeleteIgnored(false);
             setDeletePending(false);
             setProcessingImports(false);
-            setReEmbed(false);
             setReSyncMeta(false);
             setBackupStarted(false);
             setIsRestoringBackup(false);
@@ -113,22 +110,6 @@ const SettingsActions = () => {
                 onClick={async () => {
                   await queueManualImport(manualIgnoreErrors, manualPreferLocal);
                   setProcessingImports(true);
-                }}
-              />
-            )}
-          </div>
-        </div>
-        <div className="settings-group">
-          <h2>Embed thumbnails into media file.</h2>
-          <p>Set extracted youtube thumbnail as cover art of the media file.</p>
-          <div id="re-embed">
-            {reEmbed && <p>Processing thumbnails</p>}
-            {!reEmbed && (
-              <Button
-                label="Start process"
-                onClick={async () => {
-                  await updateTaskByName('resync_thumbs');
-                  setReEmbed(true);
                 }}
               />
             )}

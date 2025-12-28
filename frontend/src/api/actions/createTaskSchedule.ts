@@ -10,7 +10,6 @@ export type TaskScheduleNameType =
   | 'restore_backup'
   | 'rescan_filesystem'
   | 'thumbnail_check'
-  | 'resync_thumbs'
   | 'index_playlists'
   | 'subscribe_to'
   | 'version_check';

@@ -19,7 +19,7 @@ from common.src.ta_redis import RedisArchivist
 from common.src.urlparser import ParsedURLType, Parser
 from download.src.queue import PendingList
 from download.src.subscriptions import SubscriptionHandler, SubscriptionScanner
-from download.src.thumbnails import ThumbFilesystem, ThumbValidator
+from download.src.thumbnails import ThumbValidator
 from download.src.yt_dlp_handler import VideoDownloader
 from task.src.notify import Notifications
 from task.src.task_config import TASK_CONFIG
@@ -292,19 +292,6 @@ def thumbnail_check(self):
     thumbnail = ThumbValidator(task=self)
     thumbnail.validate()
     thumbnail.clean_up()
-
-
-@shared_task(bind=True, name="resync_thumbs", base=BaseTask)
-def re_sync_thumbs(self):
-    """sync thumbnails to mediafiles"""
-    manager = TaskManager()
-    if manager.is_pending(self):
-        print(f"[task][{self.name}] thumb re-embed is already running")
-        self.send_progress(["Thumbnail re-embed is already running."])
-        return
-
-    manager.init(self)
-    ThumbFilesystem(task=self).embed()
 
 
 @shared_task(bind=True, name="resync_metadata", base=BaseTask)
