@@ -37,8 +37,6 @@ TOPIC = """
 class Command(BaseCommand):
     """command framework"""
 
-    # pylint: disable=no-member
-
     def handle(self, *args, **options):
         """run all commands"""
         self.stdout.write(TOPIC)
@@ -53,7 +51,6 @@ class Command(BaseCommand):
         self._update_schedule_tz()
         self._init_app_config()
         self._set_ta_startup_time()
-        self._mig_fix_download_channel_indexed()
         self._mig_add_default_playlist_sort()
         self._mig_set_channel_tabs()
         self._mig_set_video_channel_tabs()
@@ -271,40 +268,6 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS(f"    ✓ set timestamp to {message}.")
         )
-
-    def _mig_fix_download_channel_indexed(self) -> None:
-        """migrate from v0.5.2 to 0.5.3, fix missing channel_indexed"""
-        self.stdout.write("[MIGRATION] fix incorrect video channel tags types")
-        path = "ta_download/_update_by_query"
-        data = {
-            "query": {
-                "bool": {
-                    "must_not": [{"exists": {"field": "channel_indexed"}}]
-                }
-            },
-            "script": {
-                "source": "ctx._source.channel_indexed = false",
-                "lang": "painless",
-            },
-        }
-        response, status_code = ElasticWrap(path).post(data)
-        if status_code in [200, 201]:
-            updated = response.get("updated")
-            if updated:
-                self.stdout.write(
-                    self.style.SUCCESS(f"    ✓ fixed {updated} queued videos")
-                )
-            else:
-                self.stdout.write(
-                    self.style.SUCCESS("    no queued videos to fix")
-                )
-            return
-
-        message = "    🗙 failed to fix video channel tags"
-        self.stdout.write(self.style.ERROR(message))
-        self.stdout.write(response)
-        sleep(60)
-        raise CommandError(message)
 
     def _mig_add_default_playlist_sort(self) -> None:
         """migrate from 0.5.4 to 0.5.5 set default playlist sortorder"""
