@@ -330,7 +330,7 @@ const Playlist = () => {
           </div>
         </div>
 
-        {playlist.playlist_description !== 'False' && (
+        {playlist.playlist_description !== null && (
           <div className="description-box">
             <p
               id={descriptionExpanded ? 'text-expand-expanded' : 'text-expand'}
