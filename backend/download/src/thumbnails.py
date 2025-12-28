@@ -234,37 +234,40 @@ class ThumbManager(ThumbManagerBase):
         banner_path = os.path.join(
             self.CHANNEL_DIR, f"{channel_id}_banner.jpg"
         )
-        if os.path.exists(banner_path):
-            with open(banner_path, "rb") as f:
-                banner_data = f.read()
-
-            video["----:com.tubearchivist:channel_banner"] = [
-                MP4Cover(banner_data, imageformat=MP4Cover.FORMAT_JPEG)
-            ]
+        self._embed_art_item(video, "channel_banner", art_path=banner_path)
 
         channel_icon_path = os.path.join(
             self.CHANNEL_DIR, f"{channel_id}_thumb.jpg"
         )
-        if os.path.exists(channel_icon_path):
-            with open(channel_icon_path, "rb") as f:
-                icon_data = f.read()
-
-            video["----:com.tubearchivist:channel_icon"] = [
-                MP4Cover(icon_data, imageformat=MP4Cover.FORMAT_JPEG)
-            ]
+        self._embed_art_item(video, "channel_icon", art_path=channel_icon_path)
 
         channel_tv_path = os.path.join(
             self.CHANNEL_DIR, f"{channel_id}_tvart.jpg"
         )
-        if os.path.exists(channel_tv_path):
-            with open(channel_tv_path, "rb") as f:
-                tv_data = f.read()
+        self._embed_art_item(video, "channel_tv", art_path=channel_tv_path)
 
-            video["----:com.tubearchivist:channel_tv"] = [
-                MP4Cover(tv_data, imageformat=MP4Cover.FORMAT_JPEG)
-            ]
+        playlist_ids = json_data.get("playlist", [])
+        for plalyist_id in playlist_ids:
+            playlist_path = os.path.join(
+                self.PLAYLIST_DIR, f"{plalyist_id}.jpg"
+            )
+            self._embed_art_item(
+                video, f"playlist_{plalyist_id}", art_path=playlist_path
+            )
 
         video.save()
+
+    def _embed_art_item(self, video, key, art_path):
+        """embed single item"""
+        if not os.path.exists(art_path):
+            return
+
+        with open(art_path, "rb") as f:
+            art_data = f.read()
+
+        video[f"----:com.tubearchivist:{key}"] = [
+            MP4Cover(art_data, imageformat=MP4Cover.FORMAT_JPEG)
+        ]
 
     def delete_video_thumb(self):
         """delete video thumbnail if exists"""

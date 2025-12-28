@@ -15,6 +15,8 @@ from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
 from download.src.thumbnails import ThumbManager
 from mutagen.mp4 import MP4, MP4FreeForm
+from playlist.serializers import PlaylistSerializer
+from playlist.src.index import YoutubePlaylist
 from video.serializers import (
     CommentsSerializer,
     SubtitleFragmentSerializer,
@@ -105,6 +107,7 @@ class IndexFromEmbed:
         self.index_subtitles(json_embed, video)
         self.index_comments(json_embed)
         self.restore_artwork(video)
+        self.index_playlists(json_embed, video)
 
         return video.json_data
 
@@ -207,6 +210,64 @@ class IndexFromEmbed:
         shutil.move(self.file_path, new_path, copy_function=shutil.copyfile)
         if self.HOST_UID and self.HOST_GID:
             os.chown(new_path, self.HOST_UID, self.HOST_GID)
+
+    def index_playlists(self, json_embed, video):
+        """index playlists"""
+        playlist_data = json_embed.get("playlists")
+        if not playlist_data or not isinstance(playlist_data, list):
+            return
+
+        serializer = PlaylistSerializer(data=playlist_data, many=True)
+        is_valid = serializer.is_valid()
+        if not is_valid:
+            err = serializer.errors
+            raise ValueError(
+                f"[{self.file_path}] playlist serializer failed: {err}"
+            )
+
+        expected = video.json_data.get("playlist", [])
+        video_mutagen = MP4(self.file_path)
+
+        for playlist_data in serializer.data:
+            playlist_id = playlist_data["playlist_id"]
+            if playlist_id not in expected:
+                continue
+
+            json_data = self._process_embedded_playlist(playlist_data)
+            if not json_data:
+                continue
+
+            playlist_art = os.path.join(
+                self.CACHE_DIR, "playlists", f"{playlist_id}.jpg"
+            )
+            self._restore_art_item(
+                video_mutagen,
+                "----:com.tubearchivist:playlist_{plalyist_id}",
+                playlist_art,
+            )
+
+    def _process_embedded_playlist(self, playlist_data) -> dict | None:
+        """process single embedded playlist"""
+        if not self.use_user_conf:
+            if playlist_data["playlist_type"] == "custom":
+                # custom playlist is user conf
+                return None
+
+        playlist = YoutubePlaylist(youtube_id=playlist_data["playlist_id"])
+        playlist.get_from_es()
+        if playlist.json_data:
+            # already indexed
+            return None
+
+        playlist_data_clean = dict(playlist_data)
+        if not self.use_user_conf:
+            playlist_data_clean["playlist_subscribed"] = False
+            playlist_data_clean["playlist_sort_order"] = "top"
+
+        playlist.json_data = playlist_data_clean
+        playlist.upload_to_es()
+
+        return playlist.json_data
 
     def restore_artwork(self, video):
         """restore artwork if needed"""
