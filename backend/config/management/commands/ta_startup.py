@@ -57,6 +57,7 @@ class Command(BaseCommand):
         self._mig_add_default_playlist_sort()
         self._mig_set_channel_tabs()
         self._mig_set_video_channel_tabs()
+        self._mig_fix_playlist_description()
 
     def _make_folders(self):
         """make expected cache folders"""
@@ -404,6 +405,37 @@ class Command(BaseCommand):
             return
 
         message = "    🗙 failed to set default channel_tabs"
+        self.stdout.write(self.style.ERROR(message))
+        self.stdout.write(response)
+        sleep(60)
+        raise CommandError(message)
+
+    def _mig_fix_playlist_description(self) -> None:
+        """migrate from 0.5.8 to 0.5.9 fix playlist desc null data type"""
+        self.stdout.write("[MIGRATION] fix playlist description data type")
+
+        path = "ta_playlist/_update_by_query"
+        data = {
+            "query": {"term": {"playlist_description": {"value": False}}},
+            "script": {
+                "source": "ctx._source.playlist_description = null",
+                "lang": "painless",
+            },
+        }
+        response, status_code = ElasticWrap(path).post(data)
+        if status_code in [200, 201]:
+            updated = response.get("updated")
+            if updated:
+                self.stdout.write(
+                    self.style.SUCCESS(f"    ✓ updated {updated} playlists")
+                )
+            else:
+                self.stdout.write(
+                    self.style.SUCCESS("    no playlists need updating")
+                )
+            return
+
+        message = "    🗙 failed to fix playlist description null data type"
         self.stdout.write(self.style.ERROR(message))
         self.stdout.write(response)
         sleep(60)

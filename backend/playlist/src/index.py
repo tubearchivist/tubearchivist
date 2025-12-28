@@ -81,7 +81,7 @@ class YoutubePlaylist(YouTubeItem):
             "playlist_channel": self.youtube_meta["channel"],
             "playlist_channel_id": self.youtube_meta["channel_id"],
             "playlist_thumbnail": playlist_thumbnail,
-            "playlist_description": self.youtube_meta["description"] or False,
+            "playlist_description": self.youtube_meta["description"] or None,
             "playlist_last_refresh": int(datetime.now().timestamp()),
             "playlist_type": "regular",
         }
