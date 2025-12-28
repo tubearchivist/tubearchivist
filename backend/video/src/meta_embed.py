@@ -104,6 +104,7 @@ class IndexFromEmbed:
         self.archive_video(video)
         self.index_subtitles(json_embed, video)
         self.index_comments(json_embed)
+        self.restore_artwork(video)
 
         return video.json_data
 
@@ -248,6 +249,10 @@ class IndexFromEmbed:
         if not art_item and not isinstance(art_item, list):
             # is not embedded
             return
+
+        art_folder = os.path.dirname(target_path)
+        if not os.path.exists(art_folder):
+            os.mkdir(art_folder)
 
         with open(target_path, "wb") as f:
             f.write(bytes(art_item[0]))
