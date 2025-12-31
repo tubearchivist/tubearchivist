@@ -433,8 +433,6 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
         if self.config["downloads"].get("add_metadata"):
             self._embed_text_data()
-
-        if self.config["downloads"].get("add_thumbnail"):
             self._embed_artwork()
 
     def _embed_text_data(self):

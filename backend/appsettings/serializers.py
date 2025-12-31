@@ -44,7 +44,6 @@ class AppConfigDownloadsSerializer(
     format = serializers.CharField(allow_null=True)
     format_sort = serializers.CharField(allow_null=True)
     add_metadata = serializers.BooleanField()
-    add_thumbnail = serializers.BooleanField()
     subtitle = serializers.CharField(allow_null=True)
     subtitle_source = serializers.ChoiceField(
         choices=["auto", "user"], allow_null=True

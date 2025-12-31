@@ -482,10 +482,7 @@ class DownloadPostProcess(DownloaderBase):
 
     def embed_metadata(self):
         """embed metadata in media file"""
-        meta = self.config["downloads"].get("add_metadata")
-        thumb = self.config["downloads"].get("add_thumbnail")
-
-        if not meta and not thumb:
+        if not self.config["downloads"].get("add_metadata"):
             return
 
         queue = RedisQueue(self.VIDEO_QUEUE)

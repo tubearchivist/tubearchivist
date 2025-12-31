@@ -58,7 +58,6 @@ const SettingsApplication = () => {
   const [downloadsFormatSort, setDownloadsFormatSort] = useState<string | null>(null);
   const [downloadsExtractorLang, setDownloadsExtractorLang] = useState<string | null>(null);
   const [embedMetadata, setEmbedMetadata] = useState(false);
-  const [embedThumbnail, setEmbedThumbnail] = useState(false);
 
   // Subtitles
   const [subtitleLang, setSubtitleLang] = useState<string | null>(null);
@@ -116,7 +115,6 @@ const SettingsApplication = () => {
     setDownloadsFormatSort(appSettingsConfigData?.downloads.format_sort || null);
     setDownloadsExtractorLang(appSettingsConfigData?.downloads.extractor_lang || null);
     setEmbedMetadata(appSettingsConfigData?.downloads.add_metadata || false);
-    setEmbedThumbnail(appSettingsConfigData?.downloads.add_thumbnail || false);
 
     // Subtitles
     setSubtitleLang(appSettingsConfigData?.downloads.subtitle || null);
@@ -476,9 +474,8 @@ const SettingsApplication = () => {
                         </li>
                       </ul>
                     </li>
-                    <li>Embedding metadata adds additional metadata directly to the mp4 file.</li>
                     <li>
-                      Embedding the thumbnail embeds the video thumbnail as a cover.jpg to the mp4
+                      Embedding metadata adds additional metadata and thumbnails directly to the mp4
                       file.
                     </li>
                   </ul>
@@ -530,16 +527,6 @@ const SettingsApplication = () => {
                 <ToggleConfig
                   name="downloads.add_metadata"
                   value={embedMetadata}
-                  updateCallback={handleUpdateConfig}
-                />
-              </div>
-              <div className="settings-box-wrapper">
-                <div>
-                  <p>Embed Thumbnail</p>
-                </div>
-                <ToggleConfig
-                  name="downloads.add_thumbnail"
-                  value={embedThumbnail}
                   updateCallback={handleUpdateConfig}
                 />
               </div>
