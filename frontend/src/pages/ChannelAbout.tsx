@@ -1,4 +1,4 @@
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
+import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import ChannelOverview from '../components/ChannelOverview';
 import { useEffect, useState } from 'react';
 import loadChannelById, { ChannelResponseType } from '../api/loader/loadChannelById';
@@ -238,9 +238,13 @@ const ChannelAbout = () => {
             <div className="video-tag-box">
               {channel.channel_tags.map(tag => {
                 return (
-                  <span key={tag} className="video-tag">
+                  <Link
+                    key={tag}
+                    className="video-tag"
+                    to={`${Routes.Search}?query=${encodeURIComponent(`tag:${tag}`)}`}
+                  >
                     {tag}
-                  </span>
+                  </Link>
                 );
               })}
             </div>
