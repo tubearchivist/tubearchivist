@@ -12,7 +12,7 @@ export type PlaylistType = {
   playlist_active: boolean;
   playlist_channel: string;
   playlist_channel_id: string;
-  playlist_description: string;
+  playlist_description: string | null;
   playlist_entries: PlaylistEntryType[];
   playlist_sort_order: 'top' | 'bottom';
   playlist_id: string;

@@ -429,7 +429,7 @@ class DownloadPostProcess(DownloaderBase):
             channel = YoutubeChannel(channel_id)
             channel.get_from_es()
             overwrites = channel.get_overwrites()
-            if "index_playlists" in overwrites:
+            if overwrites.get("index_playlists"):
                 channel.get_all_playlists()
                 to_add = [i[0] for i in channel.all_playlists]
                 RedisQueue(self.PLAYLIST_QUEUE).add_list(to_add)

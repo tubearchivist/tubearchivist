@@ -80,13 +80,6 @@ THUMBNAIL_CHECK: TaskItemConfig = {
     "api_stop": False,
 }
 
-RESYNC_THUMBS: TaskItemConfig = {
-    "title": "Sync Thumbnails to Media Files",
-    "group": "setting:thumbnailsync",
-    "api_start": True,
-    "api_stop": False,
-}
-
 RESYNC_METADATA: TaskItemConfig = {
     "title": "Sync Metadata to Media Files",
     "group": "setting:thumbnailsync",
@@ -125,7 +118,6 @@ TASK_CONFIG: dict[str, TaskItemConfig] = {
     "restore_backup": RESTORE_BACKUP,
     "rescan_filesystem": RESCAN_FILESYSTEM,
     "thumbnail_check": THUMBNAIL_CHECK,
-    "resync_thumbs": RESYNC_THUMBS,
     "resync_metadata": RESYNC_METADATA,
     "index_playlists": INDEX_PLAYLISTS,
     "subscribe_to": SUBSCRIBE_TO,

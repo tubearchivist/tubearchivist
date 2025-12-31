@@ -182,17 +182,23 @@ class SearchProcess:
 
     def _process_comment(self, comment_dict):
         """run on all comments, create reply thread"""
-        all_comments = comment_dict["comment_comments"]
-        processed_comments = []
+        comment_tree = []
+        lookup = {}
+        for comment in comment_dict["comment_comments"]:
+            comment = comment.copy()
+            comment["comment_replies"] = []
+            lookup[comment["comment_id"]] = comment
 
-        for comment in all_comments:
-            if comment["comment_parent"] == "root":
-                comment.update({"comment_replies": []})
-                processed_comments.append(comment)
+        for comment in lookup.values():
+            parent = comment.get("comment_parent")
+            if parent == "root":
+                comment_tree.append(comment)
             else:
-                processed_comments[-1]["comment_replies"].append(comment)
+                parent_node = lookup.get(parent)
+                if parent_node:
+                    parent_node["comment_replies"].append(comment)
 
-        return processed_comments
+        return comment_tree
 
     def _process_subtitle(self, result):
         """take complete result dict to extract highlight"""

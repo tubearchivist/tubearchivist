@@ -4,6 +4,7 @@
 
 from channel.serializers import ChannelSerializer
 from common.serializers import PaginationSerializer
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from video.src.constants import OrderEnum, SortEnum, VideoTypeEnum, WatchedEnum
 
@@ -107,7 +108,7 @@ class VideoSerializer(serializers.Serializer):
     sponsorblock = SponsorBlockSerializer(allow_null=True, required=False)
     stats = StatsSerializer()
     streams = StreamItemSerializer(many=True)
-    subtitles = SubtitleItemSerializer(many=True)
+    subtitles = SubtitleItemSerializer(many=True, required=False)
     tags = serializers.ListField(child=serializers.CharField())
     title = serializers.CharField()
     vid_last_refresh = serializers.CharField()
@@ -142,22 +143,6 @@ class VideoListQuerySerializer(serializers.Serializer):
     height = serializers.IntegerField(required=False)
 
 
-class CommentThreadItemSerializer(serializers.Serializer):
-    """serialize comment thread item"""
-
-    comment_id = serializers.CharField()
-    comment_text = serializers.CharField()
-    comment_timestamp = serializers.IntegerField()
-    comment_time_text = serializers.CharField()
-    comment_likecount = serializers.IntegerField()
-    comment_is_favorited = serializers.BooleanField()
-    comment_author = serializers.CharField()
-    comment_author_id = serializers.CharField()
-    comment_author_thumbnail = serializers.URLField()
-    comment_author_is_uploader = serializers.BooleanField()
-    comment_parent = serializers.CharField()
-
-
 class CommentItemSerializer(serializers.Serializer):
     """serialize comment item"""
 
@@ -172,7 +157,14 @@ class CommentItemSerializer(serializers.Serializer):
     comment_author_thumbnail = serializers.URLField()
     comment_author_is_uploader = serializers.BooleanField()
     comment_parent = serializers.CharField()
-    comment_replies = CommentThreadItemSerializer(many=True, required=False)
+    comment_replies = serializers.SerializerMethodField()
+
+    @extend_schema_field(serializers.ListField())
+    def get_comment_replies(self, obj):
+        """recursive replies"""
+        return CommentItemSerializer(
+            obj.get("comment_replies", []), many=True
+        ).data
 
 
 class CommentsSerializer(serializers.Serializer):

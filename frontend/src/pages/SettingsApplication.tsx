@@ -633,17 +633,17 @@ const SettingsApplication = () => {
                       Download and index comments. Browsable on the video detail page. Example:
                       <ul>
                         <li>
-                          <span className="settings-current">all,100,all,30</span>: Get 100
-                          max-parents and 30 max-replies-per-thread.
+                          <span className="settings-current">all,100,all,30,all</span>: Get 100
+                          max-parents and 30 max-replies-per-thread at any depth.
                         </li>
                         <li>
-                          <span className="settings-current">1000,all,all,50</span>: Get a total of
-                          1000 comments over all, 50 replies per thread.
+                          <span className="settings-current">1000,all,all,50,2</span>: Get a total
+                          of 1000 comments over all, 50 replies per thread, only 2 levels of depth.
                         </li>
                         <li>
                           Values are in the format:{' '}
                           <span className="settings-current">
-                            max-comments,max-parents,max-replies,max-replies-per-thread
+                            max-comments,max-parents,max-replies,max-replies-per-thread,max-depth
                           </span>
                           .
                         </li>
