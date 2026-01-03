@@ -255,10 +255,10 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     def _add_stats(self):
         """add stats dicst to json_data"""
         stats = {
-            "view_count": self.youtube_meta.get("view_count", 0),
-            "like_count": self.youtube_meta.get("like_count", 0),
-            "dislike_count": self.youtube_meta.get("dislike_count", 0),
-            "average_rating": self.youtube_meta.get("average_rating", 0),
+            "view_count": self.youtube_meta.get("view_count") or 0,
+            "like_count": self.youtube_meta.get("like_count") or 0,
+            "dislike_count": self.youtube_meta.get("dislike_count") or 0,
+            "average_rating": self.youtube_meta.get("average_rating") or 0,
         }
         self.json_data.update({"stats": stats})
 
@@ -379,8 +379,8 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             return
 
         dislikes = {
-            "dislike_count": result.get("dislikes", 0),
-            "average_rating": result.get("rating", 0),
+            "dislike_count": result.get("dislikes") or 0,
+            "average_rating": result.get("rating") or 0,
         }
         self.json_data["stats"].update(dislikes)
 

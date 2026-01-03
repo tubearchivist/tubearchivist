@@ -55,6 +55,7 @@ class Command(BaseCommand):
         self._mig_set_channel_tabs()
         self._mig_set_video_channel_tabs()
         self._mig_fix_playlist_description()
+        self._mig_fix_missing_stats()
 
     def _make_folders(self):
         """make expected cache folders"""
@@ -328,6 +329,29 @@ class Command(BaseCommand):
                 "lang": "painless",
             },
         )
+
+    def _mig_fix_missing_stats(self) -> None:
+        """migrate from 0.5.8 to 0.5.9, fix missing stats values"""
+        fields = [
+            "like_count",
+            "average_rating",
+            "view_count",
+            "dislike_count",
+        ]
+        for field in fields:
+            self._run_migration(
+                index_name="ta_video",
+                desc=f"fix missing stats field {field}",
+                query={
+                    "bool": {
+                        "must_not": [{"exists": {"field": f"stats.{field}"}}]
+                    }
+                },
+                script={
+                    "source": f"ctx._source.stats.{field} = 0",
+                    "lang": "painless",
+                },
+            )
 
     def _run_migration(
         self, index_name: str, desc: str, query: dict, script: dict

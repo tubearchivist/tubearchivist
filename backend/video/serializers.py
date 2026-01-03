@@ -44,10 +44,10 @@ class SponsorBlockSerializer(serializers.Serializer):
 class StatsSerializer(serializers.Serializer):
     """serialize stats"""
 
-    like_count = serializers.IntegerField(required=False)
-    average_rating = serializers.FloatField(required=False)
-    view_count = serializers.IntegerField(required=False)
-    dislike_count = serializers.IntegerField(required=False)
+    like_count = serializers.IntegerField()
+    average_rating = serializers.FloatField()
+    view_count = serializers.IntegerField()
+    dislike_count = serializers.IntegerField()
 
 
 class StreamItemSerializer(serializers.Serializer):
