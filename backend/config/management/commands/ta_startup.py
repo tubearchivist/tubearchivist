@@ -271,134 +271,83 @@ class Command(BaseCommand):
 
     def _mig_add_default_playlist_sort(self) -> None:
         """migrate from 0.5.4 to 0.5.5 set default playlist sortorder"""
-        self.stdout.write("[MIGRATION] set default playlist sort order")
-        path = "ta_playlist/_update_by_query"
-        data = {
-            "query": {
+        self._run_migration(
+            index_name="ta_playlist",
+            desc="set default playlist sort order",
+            query={
                 "bool": {
                     "must_not": [{"exists": {"field": "playlist_sort_order"}}]
                 }
             },
-            "script": {
+            script={
                 "source": "ctx._source.playlist_sort_order = 'top'",
                 "lang": "painless",
             },
-        }
-        response, status_code = ElasticWrap(path).post(data)
-        if status_code in [200, 201]:
-            updated = response.get("updated")
-            if updated:
-                self.stdout.write(
-                    self.style.SUCCESS(f"    ✓ updated {updated} playlists")
-                )
-            else:
-                self.stdout.write(
-                    self.style.SUCCESS("    no playlists need updating")
-                )
-            return
-
-        message = "    🗙 failed to set default playlist sort order"
-        self.stdout.write(self.style.ERROR(message))
-        self.stdout.write(response)
-        sleep(60)
-        raise CommandError(message)
+        )
 
     def _mig_set_channel_tabs(self) -> None:
         """migrate from 0.5.4 to 0.5.5 set initial channel tabs"""
-        self.stdout.write("[MIGRATION] set default channel_tabs")
-
-        path = "ta_channel/_update_by_query"
         tabs = VideoTypeEnum.values_known()
-        data = {
-            "query": {
+        self._run_migration(
+            index_name="ta_channel",
+            desc="set default channel_tabs in channel index",
+            query={
                 "bool": {"must_not": [{"exists": {"field": "channel_tabs"}}]}
             },
-            "script": {
+            script={
                 "source": f"ctx._source.channel_tabs = {tabs}",
                 "lang": "painless",
             },
-        }
-        response, status_code = ElasticWrap(path).post(data)
-        if status_code in [200, 201]:
-            updated = response.get("updated")
-            if updated:
-                self.stdout.write(
-                    self.style.SUCCESS(f"    ✓ updated {updated} channels")
-                )
-            else:
-                self.stdout.write(
-                    self.style.SUCCESS("    no channels need updating")
-                )
-            return
-
-        message = "    🗙 failed to set default channel_tabs"
-        self.stdout.write(self.style.ERROR(message))
-        self.stdout.write(response)
-        sleep(60)
-        raise CommandError(message)
+        )
 
     def _mig_set_video_channel_tabs(self) -> None:
         """migrate from 0.5.4 to 0.5.5 set initial video channel tabs"""
-        self.stdout.write("[MIGRATION] set default channel_tabs for videos")
-
-        path = "ta_video/_update_by_query"
         tabs = VideoTypeEnum.values_known()
-        data = {
-            "query": {
+        self._run_migration(
+            index_name="ta_video",
+            desc="set default channel_tabs for videos",
+            query={
                 "bool": {
                     "must_not": [{"exists": {"field": "channel.channel_tabs"}}]
                 }
             },
-            "script": {
+            script={
                 "source": f"ctx._source.channel.channel_tabs = {tabs}",
                 "lang": "painless",
             },
-        }
-        response, status_code = ElasticWrap(path).post(data)
-        if status_code in [200, 201]:
-            updated = response.get("updated")
-            if updated:
-                self.stdout.write(
-                    self.style.SUCCESS(f"    ✓ updated {updated} videos")
-                )
-            else:
-                self.stdout.write(
-                    self.style.SUCCESS("    no videos need updating")
-                )
-            return
-
-        message = "    🗙 failed to set default channel_tabs"
-        self.stdout.write(self.style.ERROR(message))
-        self.stdout.write(response)
-        sleep(60)
-        raise CommandError(message)
+        )
 
     def _mig_fix_playlist_description(self) -> None:
         """migrate from 0.5.8 to 0.5.9 fix playlist desc null data type"""
-        self.stdout.write("[MIGRATION] fix playlist description data type")
-
-        path = "ta_playlist/_update_by_query"
-        data = {
-            "query": {"term": {"playlist_description": {"value": False}}},
-            "script": {
+        self._run_migration(
+            index_name="ta_playlist",
+            desc="fix playlist description data type",
+            query={"term": {"playlist_description": {"value": False}}},
+            script={
                 "source": "ctx._source.playlist_description = null",
                 "lang": "painless",
             },
-        }
+        )
+
+    def _run_migration(
+        self, index_name: str, desc: str, query: dict, script: dict
+    ):
+        """run migration"""
+        self.stdout.write(f"[MIGRATION] run {desc}")
+        path = f"{index_name}/_update_by_query"
+        data = {"query": query, "script": script}
         response, status_code = ElasticWrap(path).post(data)
         if status_code in [200, 201]:
             updated = response.get("updated")
             if updated:
-                self.stdout.write(
-                    self.style.SUCCESS(f"    ✓ updated {updated} playlists")
-                )
+                suc_msg = f"    ✓ updated {updated} docs in {index_name}"
+                self.stdout.write(self.style.SUCCESS(suc_msg))
             else:
-                self.stdout.write(
-                    self.style.SUCCESS("    no playlists need updating")
-                )
+                noop_msg = f"    no items in {index_name} need updating"
+                self.stdout.write(self.style.SUCCESS(noop_msg))
             return
 
-        message = "    🗙 failed to fix playlist description null data type"
+        message = f"    🗙 failed to run {desc} on index {index_name}"
         self.stdout.write(self.style.ERROR(message))
         self.stdout.write(response)
         sleep(60)
