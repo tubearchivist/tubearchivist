@@ -184,7 +184,41 @@ And the frontend should be available at [localhost:3000](localhost:3000).
 
 ### Docker Instructions
 
-Edit the `docker-compose.yml` file and replace the [`image: bbilly1/tubearchivist` line](https://github.com/tubearchivist/tubearchivist/blob/4af12aee15620e330adf3624c984c3acf6d0ac8b/docker-compose.yml#L7) with `build: .`. Also make any other changes to the environment variables and so on necessary to run the application, just like you're launching the application as normal.
+There are two docker-based development workflows:
+
+#### Dev stack (hot reload, recommended)
+
+Use the local dev stack in `dev/docker/docker-compose.dev.yml`. This runs:
+- Elasticsearch + Redis
+- Django dev server (`runserver`) with source mounted from your host
+- Celery worker
+- Frontend dev server (Vite)
+
+From the repo root:
+
+```bash
+docker compose -f dev/docker/docker-compose.dev.yml up -d --build
+```
+
+Then:
+- Frontend: [localhost:3000](localhost:3000)
+- Backend health: [localhost:8000/api/health/](localhost:8000/api/health/)
+
+Stop everything with:
+
+```bash
+docker compose -f dev/docker/docker-compose.dev.yml down
+```
+
+This compose file uses persistent docker volumes for Elasticsearch, Redis and frontend `node_modules`. If you want a clean slate, remove the volumes:
+
+```bash
+docker compose -f dev/docker/docker-compose.dev.yml down -v
+```
+
+#### Production-like rebuild (full image)
+
+If you want to test closer to the production container, edit the `docker-compose.yml` file and replace the `image: bbilly1/tubearchivist` line with `build: .`. Also make any other changes to the environment variables and so on necessary to run the application, just like you're launching the application as normal.
 
 Run `docker compose up --build`. This will bring up the application. Kill it with `ctrl-c` or by running `docker compose down` from a new terminal window in the same directory.
 
