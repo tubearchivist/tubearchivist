@@ -12,6 +12,28 @@
                 "channel_id": {
                     "type": "keyword"
                 },
+                "channel_active": {
+                    "type": "boolean"
+                },
+                "channel_banner_url": {
+                    "type": "keyword",
+                    "index": false
+                },
+                "channel_thumb_url": {
+                    "type": "keyword",
+                    "index": false
+                },
+                "channel_tvart_url": {
+                    "type": "keyword",
+                    "index": false
+                },
+                "channel_description": {
+                    "type": "text"
+                },
+                "channel_last_refresh": {
+                    "type": "date",
+                    "format": "epoch_second"
+                },
                 "channel_name": {
                     "type": "text",
                     "analyzer": "english",
@@ -27,38 +49,6 @@
                             "max_shingle_size": 3
                         }
                     }
-                },
-                "channel_banner_url": {
-                    "type": "keyword",
-                    "index": false
-                },
-                "channel_tvart_url": {
-                    "type": "keyword",
-                    "index": false
-                },
-                "channel_thumb_url": {
-                    "type": "keyword",
-                    "index": false
-                },
-                "channel_description": {
-                    "type": "text"
-                },
-                "channel_last_refresh": {
-                    "type": "date",
-                    "format": "epoch_second"
-                },
-                "channel_tags": {
-                    "type": "text",
-                    "analyzer": "english",
-                    "fields": {
-                        "keyword": {
-                            "type": "keyword",
-                            "ignore_above": 256
-                        }
-                    }
-                },
-                "channel_tabs": {
-                    "type": "keyword"
                 },
                 "channel_overwrites": {
                     "properties": {
@@ -84,6 +74,25 @@
                             "type": "long"
                         }
                     }
+                },
+                "channel_subs": {
+                    "type": "long"
+                },
+                "channel_subscribed": {
+                    "type": "boolean"
+                },
+                "channel_tags": {
+                    "type": "text",
+                    "analyzer": "english",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "channel_tabs": {
+                    "type": "keyword"
                 }
             },
             "expected_set": {
@@ -118,6 +127,28 @@
                         "channel_id": {
                             "type": "keyword"
                         },
+                        "channel_active": {
+                            "type": "boolean"
+                        },
+                        "channel_banner_url": {
+                            "type": "keyword",
+                            "index": false
+                        },
+                        "channel_thumb_url": {
+                            "type": "keyword",
+                            "index": false
+                        },
+                        "channel_tvart_url": {
+                            "type": "keyword",
+                            "index": false
+                        },
+                        "channel_description": {
+                            "type": "text"
+                        },
+                        "channel_last_refresh": {
+                            "type": "date",
+                            "format": "epoch_second"
+                        },
                         "channel_name": {
                             "type": "text",
                             "analyzer": "english",
@@ -133,38 +164,6 @@
                                     "max_shingle_size": 3
                                 }
                             }
-                        },
-                        "channel_banner_url": {
-                            "type": "keyword",
-                            "index": false
-                        },
-                        "channel_tvart_url": {
-                            "type": "keyword",
-                            "index": false
-                        },
-                        "channel_thumb_url": {
-                            "type": "keyword",
-                            "index": false
-                        },
-                        "channel_description": {
-                            "type": "text"
-                        },
-                        "channel_last_refresh": {
-                            "type": "date",
-                            "format": "epoch_second"
-                        },
-                        "channel_tags": {
-                            "type": "text",
-                            "analyzer": "english",
-                            "fields": {
-                                "keyword": {
-                                    "type": "keyword",
-                                    "ignore_above": 256
-                                }
-                            }
-                        },
-                        "channel_tabs": {
-                            "type": "keyword"
                         },
                         "channel_overwrites": {
                             "properties": {
@@ -190,6 +189,25 @@
                                     "type": "long"
                                 }
                             }
+                        },
+                        "channel_subs": {
+                            "type": "long"
+                        },
+                        "channel_subscribed": {
+                            "type": "boolean"
+                        },
+                        "channel_tags": {
+                            "type": "text",
+                            "analyzer": "english",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        },
+                        "channel_tabs": {
+                            "type": "keyword"
                         }
                     }
                 },

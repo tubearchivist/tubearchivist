@@ -41,7 +41,6 @@ export type ChannelType = {
   channel_tags?: string[];
   channel_thumb_url: string;
   channel_tvart_url: string;
-  channel_views: number;
 };
 
 const Channels = () => {

@@ -324,9 +324,9 @@ class ValidatorCallback:
         """check if all channel artwork is there"""
         for channel in self.source:
             urls = (
-                channel["_source"]["channel_thumb_url"],
-                channel["_source"]["channel_banner_url"],
-                channel["_source"].get("channel_tvart_url", False),
+                channel["_source"].get("channel_thumb_url"),
+                channel["_source"].get("channel_banner_url"),
+                channel["_source"].get("channel_tvart_url"),
             )
             handler = ThumbManager(channel["_source"]["channel_id"])
             handler.download_channel_art(urls, skip_existing=True)

@@ -89,11 +89,24 @@ class SearchProcess:
         channel_dict.update(
             {
                 "channel_last_refresh": date_str,
-                "channel_banner_url": f"{art_base}_banner.jpg",
-                "channel_thumb_url": f"{art_base}_thumb.jpg",
-                "channel_tvart_url": f"{art_base}_tvart.jpg",
+                "channel_description": channel_dict.get("channel_description"),
             }
         )
+
+        if channel_dict.get("channel_banner_url"):
+            channel_dict["channel_banner_url"] = f"{art_base}_banner.jpg"
+        else:
+            channel_dict["channel_banner_url"] = None
+
+        if channel_dict.get("channel_thumb_url"):
+            channel_dict["channel_thumb_url"] = f"{art_base}_thumb.jpg"
+        else:
+            channel_dict["channel_thumb_url"] = None
+
+        if channel_dict.get("channel_tvart_url"):
+            channel_dict["channel_tvart_url"] = f"{art_base}_tvart.jpg"
+        else:
+            channel_dict["channel_tvart_url"] = None
 
         return dict(sorted(channel_dict.items()))
 

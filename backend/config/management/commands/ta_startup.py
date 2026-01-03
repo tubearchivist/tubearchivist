@@ -12,9 +12,10 @@ from time import sleep
 from appsettings.src.config import AppConfig, ReleaseVersion
 from appsettings.src.index_setup import ElasticIndexWrap
 from appsettings.src.snapshot import ElasticSnapshot
+from channel.src.index import YoutubeChannel
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap
-from common.src.helper import clear_dl_cache
+from common.src.helper import clear_dl_cache, get_channels
 from common.src.ta_redis import RedisArchivist
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import dateformat
@@ -56,6 +57,8 @@ class Command(BaseCommand):
         self._mig_set_video_channel_tabs()
         self._mig_fix_playlist_description()
         self._mig_fix_missing_stats()
+        self._mig_fix_channel_art_types()
+        self._mig_fix_channel_description()
 
     def _make_folders(self):
         """make expected cache folders"""
@@ -352,6 +355,59 @@ class Command(BaseCommand):
                     "lang": "painless",
                 },
             )
+
+    def _mig_fix_channel_art_types(self) -> None:
+        """migrate from 0.5.8 to 0.5.9, fix channel artwork types"""
+        fields = [
+            "channel_banner_url",
+            "channel_thumb_url",
+            "channel_tvart_url",
+        ]
+        for field in fields:
+            self._run_migration(
+                index_name="ta_channel",
+                desc=f"fix missing data type for field {field}",
+                query={"term": {field: {"value": False}}},
+                script={
+                    "source": f"ctx._source.remove('{field}')",
+                    "lang": "painless",
+                },
+            )
+            self._run_migration(
+                index_name="ta_video",
+                desc=f"fix missing data type for field channel.{field}",
+                query={"term": {f"channel.{field}": {"value": False}}},
+                script={
+                    "source": f"ctx._source.remove('channel.{field}')",
+                    "lang": "painless",
+                },
+            )
+
+    def _mig_fix_channel_description(self) -> None:
+        """migrate from 0.5.8 to 0.5.9, fix channel desc null value"""
+        desc = "fix channel description null value"
+        self.stdout.write(f"[MIGRATION] run {desc}")
+        channels = get_channels(
+            subscribed_only=False, source=["channel_description", "channel_id"]
+        )
+        counter = 0
+        for channel_response in channels:
+            if not channel_response.get("channel_description") == "":
+                continue
+
+            channel = YoutubeChannel(youtube_id=channel_response["channel_id"])
+            channel.get_from_es()
+            channel.json_data.pop("channel_description")
+            channel.upload_to_es()
+            channel.sync_to_videos()
+            counter += 1
+
+        if counter:
+            suc_msg = f"    ✓ updated {counter} channels with videos"
+            self.stdout.write(self.style.SUCCESS(suc_msg))
+        else:
+            noop_msg = "    no items needed updating"
+            self.stdout.write(self.style.SUCCESS(noop_msg))
 
     def _run_migration(
         self, index_name: str, desc: str, query: dict, script: dict
