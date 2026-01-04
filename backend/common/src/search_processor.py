@@ -138,6 +138,7 @@ class SearchProcess:
                 "vid_last_refresh": vid_last_refresh,
                 "published": published,
                 "vid_thumb_url": f"{cache_root}/{vid_thumb_url}",
+                "description": video_dict.get("description"),
             }
         )
 

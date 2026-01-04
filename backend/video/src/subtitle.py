@@ -149,7 +149,16 @@ class YoutubeSubtitle:
                 query_str = parser.create_bulk_import(documents)
                 self.index_subtitle(query_str)
 
-            indexed.append(subtitle)
+            indexed.append(
+                {
+                    "ext": "json3",
+                    "name": subtitle["name"],
+                    "source": subtitle["source"],
+                    "lang": subtitle["lang"],
+                    "media_url": subtitle["media_url"],
+                    "url": subtitle["url"],
+                }
+            )
             rand_sleep(self.video.config)
 
         return indexed

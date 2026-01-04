@@ -14,7 +14,7 @@ from appsettings.src.index_setup import ElasticIndexWrap
 from appsettings.src.snapshot import ElasticSnapshot
 from channel.src.index import YoutubeChannel
 from common.src.env_settings import EnvironmentSettings
-from common.src.es_connect import ElasticWrap
+from common.src.es_connect import ElasticWrap, IndexPaginate
 from common.src.helper import clear_dl_cache, get_channels
 from common.src.ta_redis import RedisArchivist
 from django.core.management.base import BaseCommand, CommandError
@@ -25,6 +25,7 @@ from task.src.config_schedule import ScheduleBuilder
 from task.src.task_manager import TaskManager
 from task.tasks import version_check
 from video.src.constants import VideoTypeEnum
+from video.src.index import YoutubeVideo
 
 TOPIC = """
 
@@ -59,6 +60,7 @@ class Command(BaseCommand):
         self._mig_fix_missing_stats()
         self._mig_fix_channel_art_types()
         self._mig_fix_channel_description()
+        self._mig_fix_video_description()
 
     def _make_folders(self):
         """make expected cache folders"""
@@ -404,6 +406,33 @@ class Command(BaseCommand):
 
         if counter:
             suc_msg = f"    ✓ updated {counter} channels with videos"
+            self.stdout.write(self.style.SUCCESS(suc_msg))
+        else:
+            noop_msg = "    no items needed updating"
+            self.stdout.write(self.style.SUCCESS(noop_msg))
+
+    def _mig_fix_video_description(self) -> None:
+        """migrate from 0.5.8 to 0.5.9, fix video desc null value"""
+        desc = "fix video description null value"
+        self.stdout.write(f"[MIGRATION] run {desc}")
+
+        data = {"_source": ["youtube_id", "description"]}
+        videos = IndexPaginate("ta_video", data=data).get_results()
+
+        counter = 0
+        for video_response in videos:
+            if not video_response.get("description") == "":
+                continue
+
+            video = YoutubeVideo(youtube_id=video_response["youtube_id"])
+            video.get_from_es()
+            video.json_data.pop("description")
+            video.upload_to_es()
+
+            counter += 1
+
+        if counter:
+            suc_msg = f"    ✓ updated {counter} videos"
             self.stdout.write(self.style.SUCCESS(suc_msg))
         else:
             noop_msg = "    no items needed updating"

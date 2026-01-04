@@ -16,6 +16,7 @@ class PlayerSerializer(serializers.Serializer):
     watched_date = serializers.IntegerField(required=False)
     duration = serializers.IntegerField()
     duration_str = serializers.CharField()
+
     progress = serializers.FloatField(required=False)
     position = serializers.FloatField(required=False)
 
@@ -53,12 +54,12 @@ class StatsSerializer(serializers.Serializer):
 class StreamItemSerializer(serializers.Serializer):
     """serialize stream item"""
 
-    index = serializers.IntegerField()
-    codec = serializers.CharField()
     bitrate = serializers.IntegerField()
+    codec = serializers.CharField()
+    height = serializers.IntegerField(required=False)
+    index = serializers.IntegerField()
     type = serializers.ChoiceField(choices=["video", "audio"])
     width = serializers.IntegerField(required=False)
-    height = serializers.IntegerField(required=False)
 
 
 class SubtitleFragmentSerializer(serializers.Serializer):
@@ -81,12 +82,12 @@ class SubtitleFragmentSerializer(serializers.Serializer):
 class SubtitleItemSerializer(serializers.Serializer):
     """serialize subtitle item"""
 
-    ext = serializers.ChoiceField(choices=["json3"])
-    name = serializers.CharField()
-    source = serializers.ChoiceField(choices=["user", "auto"])
+    ext = serializers.ChoiceField(choices=["json3", "vtt"])
     lang = serializers.CharField()
     media_url = serializers.CharField()
-    url = serializers.URLField()
+    name = serializers.CharField()
+    source = serializers.ChoiceField(choices=["user", "auto"])
+    url = serializers.URLField(allow_null=True)
 
 
 class VideoSerializer(serializers.Serializer):
@@ -97,7 +98,7 @@ class VideoSerializer(serializers.Serializer):
     channel = ChannelSerializer(required=False)
     comment_count = serializers.IntegerField(allow_null=True, required=False)
     date_downloaded = serializers.IntegerField()
-    description = serializers.CharField()
+    description = serializers.CharField(allow_null=True)
     media_size = serializers.IntegerField()
     media_url = serializers.CharField()
     player = PlayerSerializer()

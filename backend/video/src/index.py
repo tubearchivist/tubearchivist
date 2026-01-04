@@ -198,26 +198,25 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     def process_youtube_meta(self):
         """extract relevant fields from youtube"""
         self._validate_id()
-        # extract
         self.channel_id = self.youtube_meta["channel_id"]
         last_refresh = int(datetime.now().timestamp())
-        # build json_data basics
         self.json_data = {
-            "title": self.youtube_meta["title"],
-            "description": self.youtube_meta.get("description", ""),
-            "category": self.youtube_meta.get("categories", []),
-            "vid_thumb_url": self.youtube_meta["thumbnail"],
-            "tags": self.youtube_meta.get("tags", []),
-            "published": self._build_published(),
-            "vid_last_refresh": last_refresh,
-            "date_downloaded": last_refresh,
-            "youtube_id": self.youtube_id,
-            # Using .value to make json encodable
-            "vid_type": self.video_type.value,
             "active": True,
+            "category": self.youtube_meta.get("categories", []),
+            "date_downloaded": last_refresh,
+            "published": self._build_published(),
+            "tags": self.youtube_meta.get("tags", []),
+            "title": self.youtube_meta["title"],
+            "vid_last_refresh": last_refresh,
+            "vid_thumb_url": self.youtube_meta["thumbnail"],
+            "vid_type": self.video_type.value,
+            "youtube_id": self.youtube_id,
         }
 
-    def _build_published(self):
+        if description := self.youtube_meta.get("description"):
+            self.json_data["description"] = description
+
+    def _build_published(self) -> int | str:
         """build published date or timestamp"""
         timestamp = self.youtube_meta.get("timestamp")
         if timestamp and isinstance(timestamp, int):
@@ -288,9 +287,9 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         self.json_data.update(
             {
                 "player": {
-                    "watched": False,
                     "duration": duration,
                     "duration_str": get_duration_str(duration),
+                    "watched": False,
                 }
             }
         )
@@ -412,7 +411,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             subtitle_media_url = f"{base_name}.{lang}.vtt"
             to_add = {
                 "ext": "vtt",
-                "url": False,
+                "url": None,
                 "name": lang,
                 "lang": lang,
                 "source": "file",
