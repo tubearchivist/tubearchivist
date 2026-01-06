@@ -501,36 +501,8 @@
         {
             "index_name": "playlist",
             "expected_map": {
-                "playlist_id": {
-                    "type": "keyword"
-                },
-                "playlist_description": {
-                    "type": "text"
-                },
-                "playlist_subscribed": {
-                    "type": "boolean"
-                },
-                "playlist_type": {
-                    "type": "keyword"
-                },
                 "playlist_active": {
                     "type": "boolean"
-                },
-                "playlist_name": {
-                    "type": "text",
-                    "analyzer": "english",
-                    "fields": {
-                        "keyword": {
-                            "type": "keyword",
-                            "ignore_above": 256,
-                            "normalizer": "to_lower"
-                        },
-                        "search_as_you_type": {
-                            "type": "search_as_you_type",
-                            "doc_values": false,
-                            "max_shingle_size": 3
-                        }
-                    }
                 },
                 "playlist_channel": {
                     "type": "text",
@@ -545,15 +517,8 @@
                 "playlist_channel_id": {
                     "type": "keyword"
                 },
-                "playlist_thumbnail": {
-                    "type": "keyword"
-                },
-                "playlist_last_refresh": {
-                    "type": "date",
-                    "format": "epoch_second"
-                },
-                "playlist_sort_order": {
-                    "type": "keyword"
+                "playlist_description": {
+                    "type": "text"
                 },
                 "playlist_entries": {
                     "properties": {
@@ -589,6 +554,41 @@
                             "type": "keyword"
                         }
                     }
+                },
+                "playlist_id": {
+                    "type": "keyword"
+                },
+                "playlist_last_refresh": {
+                    "type": "date",
+                    "format": "epoch_second"
+                },
+                "playlist_name": {
+                    "type": "text",
+                    "analyzer": "english",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256,
+                            "normalizer": "to_lower"
+                        },
+                        "search_as_you_type": {
+                            "type": "search_as_you_type",
+                            "doc_values": false,
+                            "max_shingle_size": 3
+                        }
+                    }
+                },
+                "playlist_sort_order": {
+                    "type": "keyword"
+                },                
+                "playlist_subscribed": {
+                    "type": "boolean"
+                },
+                "playlist_thumbnail": {
+                    "type": "keyword"
+                },
+                "playlist_type": {
+                    "type": "keyword"
                 }
             },
             "expected_set": {

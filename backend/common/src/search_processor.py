@@ -168,10 +168,12 @@ class SearchProcess:
         )
         cache_root = EnvironmentSettings().get_cache_root()
         playlist_thumbnail = f"{cache_root}/playlists/{playlist_id}.jpg"
+        description = playlist_dict.get("playlist_description")
         playlist_dict.update(
             {
                 "playlist_thumbnail": playlist_thumbnail,
                 "playlist_last_refresh": playlist_last_refresh,
+                "playlist_description": description,
             }
         )
 
