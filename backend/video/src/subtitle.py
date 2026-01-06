@@ -345,13 +345,13 @@ class SubtitleParser:
         documents = self._chunk_list(video.youtube_id)
         channel = video.json_data.get("channel")
         meta_dict = {
-            "youtube_id": video.youtube_id,
-            "title": video.json_data.get("title"),
             "subtitle_channel": channel.get("channel_name"),
             "subtitle_channel_id": channel.get("channel_id"),
-            "subtitle_last_refresh": int(datetime.now().timestamp()),
             "subtitle_lang": self.lang,
+            "subtitle_last_refresh": int(datetime.now().timestamp()),
             "subtitle_source": source,
+            "title": video.json_data.get("title"),
+            "youtube_id": video.youtube_id,
         }
 
         _ = [i.update(meta_dict) for i in documents]

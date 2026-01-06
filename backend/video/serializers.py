@@ -65,18 +65,18 @@ class StreamItemSerializer(serializers.Serializer):
 class SubtitleFragmentSerializer(serializers.Serializer):
     """serialize subtitle fragment"""
 
-    subtitle_index = serializers.IntegerField()
-    subtitle_line = serializers.CharField()
-    subtitle_start = serializers.CharField()
-    subtitle_fragment_id = serializers.CharField()
-    subtitle_end = serializers.CharField()
-    youtube_id = serializers.CharField()
-    title = serializers.CharField()
     subtitle_channel = serializers.CharField()
     subtitle_channel_id = serializers.CharField()
-    subtitle_last_refresh = serializers.IntegerField()
+    subtitle_end = serializers.CharField()
+    subtitle_fragment_id = serializers.CharField()
+    subtitle_index = serializers.IntegerField()
     subtitle_lang = serializers.CharField()
+    subtitle_last_refresh = serializers.IntegerField()
+    subtitle_line = serializers.CharField()
     subtitle_source = serializers.ChoiceField(choices=["user", "auto"])
+    subtitle_start = serializers.CharField()
+    title = serializers.CharField()
+    youtube_id = serializers.CharField()
 
 
 class SubtitleItemSerializer(serializers.Serializer):

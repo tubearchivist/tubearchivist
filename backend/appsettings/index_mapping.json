@@ -606,22 +606,6 @@
         {
             "index_name": "subtitle",
             "expected_map": {
-                "youtube_id": {
-                    "type": "keyword"
-                },
-                "title": {
-                    "type": "text",
-                    "fields": {
-                        "keyword": {
-                            "type": "keyword",
-                            "ignore_above": 256,
-                            "normalizer": "to_lower"
-                        }
-                    }
-                },
-                "subtitle_fragment_id": {
-                    "type": "keyword"
-                },
                 "subtitle_channel": {
                     "type": "text",
                     "fields": {
@@ -635,15 +619,11 @@
                 "subtitle_channel_id": {
                     "type": "keyword"
                 },
-                "subtitle_start": {
-                    "type": "text"
-                },
                 "subtitle_end": {
                     "type": "text"
                 },
-                "subtitle_last_refresh": {
-                    "type": "date",
-                    "format": "epoch_second"
+                "subtitle_fragment_id": {
+                    "type": "keyword"
                 },
                 "subtitle_index": {
                     "type": "long"
@@ -651,12 +631,32 @@
                 "subtitle_lang": {
                     "type": "keyword"
                 },
-                "subtitle_source": {
-                    "type": "keyword"
+                "subtitle_last_refresh": {
+                    "type": "date",
+                    "format": "epoch_second"
                 },
                 "subtitle_line": {
                     "type": "text",
                     "analyzer": "english"
+                },
+                "subtitle_source": {
+                    "type": "keyword"
+                },
+                "subtitle_start": {
+                    "type": "text"
+                },
+                "title": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256,
+                            "normalizer": "to_lower"
+                        }
+                    }
+                },
+                "youtube_id": {
+                    "type": "keyword"
                 }
             },
             "expected_set": {
