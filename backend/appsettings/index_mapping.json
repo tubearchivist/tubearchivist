@@ -430,12 +430,14 @@
         {
             "index_name": "download",
             "expected_map": {
-                "timestamp": {
-                    "type": "date",
-                    "format": "epoch_second"
+                "auto_start": {
+                    "type": "boolean"
                 },
                 "channel_id": {
                     "type": "keyword"
+                },
+                "channel_indexed": {
+                    "type": "boolean"
                 },
                 "channel_name": {
                     "type": "text",
@@ -447,9 +449,23 @@
                         }
                     }
                 },
+                "duration": {
+                    "type": "keyword"
+                },
+                "message": {
+                    "type": "text"
+                },
+                "published": {
+                    "type": "date",
+                    "format": "epoch_second||strict_date_optional_time"
+                },
                 "status": {
                     "type": "keyword"
                 },
+                "timestamp": {
+                    "type": "date",
+                    "format": "epoch_second"
+                },                
                 "title": {
                     "type": "text",
                     "fields": {
@@ -460,24 +476,14 @@
                         }
                     }
                 },
-                "published": {
-                    "type": "date",
-                    "format": "epoch_second||strict_date_optional_time"
-                },
                 "vid_thumb_url": {
-                    "type": "keyword"
-                },
-                "youtube_id": {
                     "type": "keyword"
                 },
                 "vid_type": {
                     "type": "keyword"
                 },
-                "auto_start": {
-                    "type": "boolean"
-                },
-                "message": {
-                    "type": "text"
+                "youtube_id": {
+                    "type": "keyword"
                 }
             },
             "expected_set": {
