@@ -147,17 +147,18 @@ class VideoListQuerySerializer(serializers.Serializer):
 class CommentItemSerializer(serializers.Serializer):
     """serialize comment item"""
 
-    comment_id = serializers.CharField()
-    comment_text = serializers.CharField()
-    comment_timestamp = serializers.IntegerField()
-    comment_time_text = serializers.CharField()
-    comment_likecount = serializers.IntegerField()
-    comment_is_favorited = serializers.BooleanField()
     comment_author = serializers.CharField()
     comment_author_id = serializers.CharField()
-    comment_author_thumbnail = serializers.URLField()
     comment_author_is_uploader = serializers.BooleanField()
+    comment_author_thumbnail = serializers.URLField()
+    comment_id = serializers.CharField()
+    comment_is_favorited = serializers.BooleanField()
+    comment_likecount = serializers.IntegerField()
     comment_parent = serializers.CharField()
+    comment_text = serializers.CharField()
+    comment_time_text = serializers.CharField()
+    comment_timestamp = serializers.IntegerField()
+
     comment_replies = serializers.SerializerMethodField()
 
     @extend_schema_field(serializers.ListField())
@@ -171,10 +172,10 @@ class CommentItemSerializer(serializers.Serializer):
 class CommentsSerializer(serializers.Serializer):
     """serialize comments as indexed"""
 
-    youtube_id = serializers.CharField()
-    comment_last_refresh = serializers.IntegerField()
     comment_channel_id = serializers.CharField()
     comment_comments = CommentItemSerializer(many=True)
+    comment_last_refresh = serializers.IntegerField()
+    youtube_id = serializers.CharField()
 
 
 class PlaylistNavMetaSerializer(serializers.Serializer):

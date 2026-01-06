@@ -674,37 +674,11 @@
         {
             "index_name": "comment",
             "expected_map": {
-                "youtube_id": {
-                    "type": "keyword"
-                },
-                "comment_last_refresh": {
-                    "type": "date",
-                    "format": "epoch_second"
-                },
                 "comment_channel_id": {
                     "type": "keyword"
                 },
                 "comment_comments": {
                     "properties": {
-                        "comment_id": {
-                            "type": "keyword"
-                        },
-                        "comment_text": {
-                            "type": "text"
-                        },
-                        "comment_timestamp": {
-                            "type": "date",
-                            "format": "epoch_second"
-                        },
-                        "comment_time_text": {
-                            "type": "text"
-                        },
-                        "comment_likecount": {
-                            "type": "long"
-                        },
-                        "comment_is_favorited": {
-                            "type": "boolean"
-                        },
                         "comment_author": {
                             "type": "text",
                             "fields": {
@@ -718,16 +692,42 @@
                         "comment_author_id": {
                             "type": "keyword"
                         },
-                        "comment_author_thumbnail": {
-                            "type": "keyword"
-                        },
                         "comment_author_is_uploader": {
                             "type": "boolean"
                         },
+                        "comment_author_thumbnail": {
+                            "type": "keyword"
+                        },
+                        "comment_id": {
+                            "type": "keyword"
+                        },
+                        "comment_is_favorited": {
+                            "type": "boolean"
+                        },
+                        "comment_likecount": {
+                            "type": "long"
+                        },
                         "comment_parent": {
                             "type": "keyword"
+                        },
+                        "comment_text": {
+                            "type": "text"
+                        },
+                        "comment_time_text": {
+                            "type": "text"
+                        },
+                        "comment_timestamp": {
+                            "type": "date",
+                            "format": "epoch_second"
                         }
                     }
+                },
+                "comment_last_refresh": {
+                    "type": "date",
+                    "format": "epoch_second"
+                },
+                "youtube_id": {
+                    "type": "keyword"
                 }
             },
             "expected_set": {

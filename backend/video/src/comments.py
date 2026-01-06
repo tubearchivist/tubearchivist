@@ -39,10 +39,10 @@ class Comments:
         self.format_comments(comments_raw)
 
         self.json_data = {
-            "youtube_id": self.youtube_id,
-            "comment_last_refresh": int(datetime.now().timestamp()),
             "comment_channel_id": channel_id,
             "comment_comments": self.comments_format,
+            "comment_last_refresh": int(datetime.now().timestamp()),
+            "youtube_id": self.youtube_id,
         }
         if upload:
             self.upload_comments()
@@ -124,20 +124,20 @@ class Comments:
         if not comment.get("author"):
             comment["author"] = comment.get("author_id", "Unknown")
 
+        is_uploader = comment.get("author_is_uploader", False)
+
         cleaned_comment = {
-            "comment_id": comment["id"],
-            "comment_text": comment["text"].replace("\xa0", ""),
-            "comment_timestamp": comment["timestamp"],
-            "comment_time_text": time_text,
-            "comment_likecount": comment.get("like_count", None),
-            "comment_is_favorited": comment.get("is_favorited", False),
             "comment_author": comment["author"],
             "comment_author_id": comment["author_id"],
+            "comment_author_is_uploader": is_uploader,
             "comment_author_thumbnail": comment["author_thumbnail"],
-            "comment_author_is_uploader": comment.get(
-                "author_is_uploader", False
-            ),
+            "comment_id": comment["id"],
+            "comment_is_favorited": comment.get("is_favorited", False),
+            "comment_likecount": comment.get("like_count", None),
             "comment_parent": comment["parent"],
+            "comment_text": comment["text"].replace("\xa0", ""),
+            "comment_time_text": time_text,
+            "comment_timestamp": comment["timestamp"],
         }
 
         return cleaned_comment
