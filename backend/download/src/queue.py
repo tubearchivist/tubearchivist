@@ -406,6 +406,9 @@ class PendingList(PendingIndex):
         if timestamp and isinstance(timestamp, int):
             return timestamp
 
+        if timestamp and isinstance(timestamp, float):
+            return int(timestamp)
+
         upload_date = video_data.get("upload_date")
         if upload_date:
             try:
