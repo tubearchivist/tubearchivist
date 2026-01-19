@@ -6,7 +6,7 @@ from download.src.queue import PendingList
 
 
 def test_returns_scientific_timestamp_if_present():
-    video_data = {"timestamp": 1.5135732E9}
+    video_data = {"timestamp": 1.5135732e9}
     result = PendingList._extract_published(video_data)
     assert result == 1513573200
 
