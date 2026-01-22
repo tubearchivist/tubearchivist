@@ -1,15 +1,15 @@
-apprise==1.9.6
-celery==5.6.1
+apprise==1.9.7
+celery==5.6.2
 deepdiff==8.6.1
 django-auth-ldap==5.3.0
 django-celery-beat==2.8.1
 django-cors-headers==4.9.0
-Django==5.2.9
+Django==5.2.10
 djangorestframework==3.16.1
 drf-spectacular==0.28.0  # rc:ignore
-Pillow==12.0.0
+Pillow==12.1.0
 redis==7.1.0
 requests==2.32.5
 ryd-client==0.0.6
 uvicorn==0.40.0
-yt-dlp[default] @ git+https://github.com/yt-dlp/yt-dlp@468aa6a9b431194949ede9eaad8f33e314a288d6
+yt-dlp[default] @ git+https://github.com/yt-dlp/yt-dlp@23b846506378a6a9c9a0958382d37f943f7cfa51
