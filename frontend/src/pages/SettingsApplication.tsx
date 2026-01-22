@@ -73,6 +73,7 @@ const SettingsApplication = () => {
   const [showCookieForm, setShowCookieForm] = useState<boolean>(false);
   const [poTokenFormData, setPoTokenFormData] = useState<string>('web+');
   const [showPoTokenForm, setShowPoTokenForm] = useState<boolean>(false);
+  const [potProviderUrl, setPotProviderUrl] = useState<string | null>(null);
 
   // Integrations
   const [showApiToken, setShowApiToken] = useState(false);
@@ -124,6 +125,9 @@ const SettingsApplication = () => {
     // Comments
     setCommentsMax(appSettingsConfigData?.downloads.comment_max || null);
     setCommentsSort(appSettingsConfigData?.downloads.comment_sort || '');
+
+    // Cookie
+    setPotProviderUrl(appSettingsConfigData?.downloads.pot_provider_url || null);
 
     // Integrations
     setDownloadDislikes(appSettingsConfigData?.downloads.integrate_ryd || false);
@@ -701,6 +705,16 @@ const SettingsApplication = () => {
                         PO guide
                       </a>
                     </li>
+                    <li>
+                      The PO Token Provider URL running external to tubearchivist. Make sure to
+                      review{' '}
+                      <a
+                        target="_blank"
+                        href="https://docs.tubearchivist.com/settings/application/#po-token-provider-url"
+                      >
+                        User Guide
+                      </a>
+                    </li>
                   </ul>
                 </div>
               )}
@@ -799,6 +813,19 @@ const SettingsApplication = () => {
                     </div>
                   )}
                 </div>
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>PO Token Provider URL</p>
+                </div>
+                <InputConfig
+                  type="text"
+                  name="downloads.pot_provider_url"
+                  value={potProviderUrl}
+                  setValue={setPotProviderUrl}
+                  oldValue={appSettingsConfig.downloads.pot_provider_url}
+                  updateCallback={handleUpdateConfig}
+                />
               </div>
             </div>
             <div className="info-box-item">

@@ -37,6 +37,7 @@ class YtWrap:
         if self.config:
             self._add_cookie()
             self._add_potoken()
+            self._add_potoken_url()
 
         if getattr(settings, "DEBUG", False):
             del self.obs["quiet"]
@@ -59,6 +60,21 @@ class YtWrap:
                             "po_token": [potoken],
                             "player-client": ["mweb", "default"],
                         },
+                    }
+                }
+            )
+
+    def _add_potoken_url(self):
+        """add bgutils token url"""
+        if pot_provider_url := self.config["downloads"].get(
+            "pot_provider_url"
+        ):
+            self.obs.update(
+                {
+                    "extractor_args": {
+                        "youtubepot-bgutilhttp": {
+                            "base_url": [pot_provider_url]
+                        }
                     }
                 }
             )
