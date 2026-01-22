@@ -56,7 +56,6 @@ const SettingsApplication = () => {
   // Download Format
   const [downloadsFormat, setDownloadsFormat] = useState<string | null>(null);
   const [downloadsFormatSort, setDownloadsFormatSort] = useState<string | null>(null);
-  const [downloadsExtractorArgs, setDownloadsExtractorArgs] = useState<string | null>(null);
   const [downloadsExtractorLang, setDownloadsExtractorLang] = useState<string | null>(null);
   const [embedMetadata, setEmbedMetadata] = useState(false);
 
@@ -115,7 +114,6 @@ const SettingsApplication = () => {
     // Download Format
     setDownloadsFormat(appSettingsConfigData?.downloads.format || null);
     setDownloadsFormatSort(appSettingsConfigData?.downloads.format_sort || null);
-    setDownloadsExtractorArgs(appSettingsConfigData?.downloads.extractor_args || null);
     setDownloadsExtractorLang(appSettingsConfigData?.downloads.extractor_lang || null);
     setEmbedMetadata(appSettingsConfigData?.downloads.add_metadata || false);
 
@@ -464,28 +462,6 @@ const SettingsApplication = () => {
                       </ul>
                     </li>
                     <li>
-                      Extractor Arguments to be passed at runtime
-                      <ul>
-                        <li>Some extractors accept additional arguments</li>
-                        <li>Separate multiple extractors with a space</li>
-                        <li>
-                          <span className="settings-current">
-                            EXTRACTOR1:ARG1=VAL1,VAL2;ARG2=VAL3 EXTRACTOR2:ARG3=VAL4
-                          </span>
-                        </li>
-                        <li>
-                          More details{' '}
-                          <a
-                            target="_blank"
-                            href="https://github.com/yt-dlp/yt-dlp#extractor-arguments"
-                          >
-                            here
-                          </a>
-                          .
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
                       Extractor language will change how a video gets indexed. Index language
                       configuration
                       <ul>
@@ -532,19 +508,6 @@ const SettingsApplication = () => {
                   value={downloadsFormatSort}
                   setValue={setDownloadsFormatSort}
                   oldValue={appSettingsConfig.downloads.format_sort}
-                  updateCallback={handleUpdateConfig}
-                />
-              </div>
-              <div className="settings-box-wrapper">
-                <div>
-                  <p>Extractor Arguments</p>
-                </div>
-                <InputConfig
-                  type="text"
-                  name="downloads.extractor_args"
-                  value={downloadsExtractorArgs}
-                  setValue={setDownloadsExtractorArgs}
-                  oldValue={appSettingsConfig.downloads.extractor_args}
                   updateCallback={handleUpdateConfig}
                 />
               </div>

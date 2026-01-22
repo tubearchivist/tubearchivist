@@ -4,7 +4,6 @@ functionality:
 - handle yt-dlp errors
 """
 
-import re
 from datetime import datetime
 from http import cookiejar
 from io import StringIO
@@ -13,124 +12,6 @@ import yt_dlp
 from appsettings.src.config import AppConfig
 from common.src.ta_redis import RedisArchivist
 from django.conf import settings
-
-
-class ExtractorArgsParser:
-    """
-    Parse extractor_args string following yt-dlp format.
-
-    Format: "extractor1:key1=val1,val2;key2=val3 extractor2:key3=val4"
-
-    - Whitespace separates multiple extractors
-    - Colon (:) separates extractor name from key-value pairs
-    - Semicolon (;) separates multiple key-value pairs
-    - Equals (=) separates key from values
-    - Comma (,) separates multiple values (escaped commas \\, are preserved)
-
-    Example:
-        >>> parser = ExtractorArgsParser()
-        >>> result = parser.parse("youtube:key1=val1,val2;key2=val3")
-        >>> # Returns: {"youtube": {"key1": ["val1", "val2"],
-        >>> #              "key2": ["val3"]}}
-    """
-
-    @staticmethod
-    def _parse_key_values(key, vals=""):
-        """
-        Parse a single key=values pair following yt-dlp logic.
-
-        Args:
-            key: The key name (will be normalized)
-            vals: Comma-separated values (escaped commas preserved)
-
-        Returns:
-            tuple: (normalized_key, list_of_values)
-        """
-        # Normalize key: strip, lowercase, replace hyphens with underscores
-        normalized_key = key.strip().lower().replace("-", "_")
-
-        # Split values by comma, but preserve escaped commas
-        # yt-dlp uses: re.split(r'(?<!\\),', vals)
-        if not vals:
-            return normalized_key, []
-
-        value_list = [
-            val.replace(r"\,", ",").strip()
-            for val in re.split(r"(?<!\\),", vals)
-        ]
-
-        return normalized_key, value_list
-
-    def parse(self, extractor_args_str):
-        """
-        Parse extractor_args string into nested dictionary structure.
-
-        Args:
-            extractor_args_str: String in format "extractor:key=val;key2=val2"
-
-        Returns:
-            dict: Nested dictionary with structure:
-                  {extractor_name: {key: [values]}}
-
-        Example:
-            >>> parser.parse("youtube:lang=en,es;key2=val generic:key3=val3")
-            {'youtube': {'lang': ['en', 'es'], 'key2': ['val']},
-             'generic': {'key3': ['val3']}}
-        """
-        if not extractor_args_str or not extractor_args_str.strip():
-            return {}
-
-        result = {}
-
-        # Split by whitespace to get individual extractor specifications
-        extractor_specs = extractor_args_str.strip().split()
-
-        for spec in extractor_specs:
-            # Split by first colon to separate extractor from args
-            if ":" not in spec:
-                print(
-                    "[extractor_args] Warning: Invalid format "
-                    f"(missing colon): {spec}"
-                )
-                continue
-
-            extractor_name, args_part = spec.split(":", 1)
-            extractor_name = extractor_name.strip()
-
-            if not extractor_name:
-                print(
-                    "[extractor_args] Warning: Empty extractor name "
-                    f"in: {spec}"
-                )
-                continue
-
-            # Initialize extractor dict if not exists
-            if extractor_name not in result:
-                result[extractor_name] = {}
-
-            # Split args by semicolon to get individual key=value pairs
-            key_value_pairs = args_part.split(";")
-
-            for pair in key_value_pairs:
-                if not pair.strip():
-                    continue
-
-                # Split by first equals sign
-                if "=" not in pair:
-                    print(
-                        "[extractor_args] Warning: Invalid pair "
-                        f"(missing =): {pair}"
-                    )
-                    continue
-
-                key_part, value_part = pair.split("=", 1)
-                normalized_key, value_list = self._parse_key_values(
-                    key_part, value_part
-                )
-
-                result[extractor_name][normalized_key] = value_list
-
-        return result
 
 
 class YtWrap:
@@ -156,7 +37,7 @@ class YtWrap:
         if self.config:
             self._add_cookie()
             self._add_potoken()
-            self._add_extractor_args()
+            self._add_potoken_url()
 
         if getattr(settings, "DEBUG", False):
             del self.obs["quiet"]
@@ -183,41 +64,20 @@ class YtWrap:
                 }
             )
 
-    def _add_extractor_args(self):
-        """add custom extractor_args from config if present"""
-        extractor_args_str = self.config["downloads"].get("extractor_args")
-        pot_provider_url = self.config["downloads"].get("pot_provider_url")
-
-        # If pot_provider_url is set, append it to extractor_args
-        if pot_provider_url:
-            pot_arg = f"youtubepot-bgutilhttp:base_url={pot_provider_url}"
-            if extractor_args_str:
-                extractor_args_str = f"{extractor_args_str} {pot_arg}"
-            else:
-                extractor_args_str = pot_arg
-
-        if not extractor_args_str:
-            return
-
-        # Parse the extractor_args string
-        parser = ExtractorArgsParser()
-        parsed_args = parser.parse(extractor_args_str)
-
-        if not parsed_args:
-            return
-
-        # Merge with existing extractor_args if present
-        if "extractor_args" not in self.obs:
-            self.obs["extractor_args"] = {}
-
-        for extractor_name, args_dict in parsed_args.items():
-            if extractor_name not in self.obs["extractor_args"]:
-                self.obs["extractor_args"][extractor_name] = {}
-
-            # Merge the arguments, with parsed args taking precedence
-            self.obs["extractor_args"][extractor_name].update(args_dict)
-
-        print(f"[extractor_args] Applied custom args: {parsed_args}")
+    def _add_potoken_url(self):
+        """add bgutils token url"""
+        if pot_provider_url := self.config["downloads"].get(
+            "pot_provider_url"
+        ):
+            self.obs.update(
+                {
+                    "extractor_args": {
+                        "youtubepot-bgutilhttp": {
+                            "base_url": [pot_provider_url]
+                        }
+                    }
+                }
+            )
 
     def download(self, url):
         """make download request"""

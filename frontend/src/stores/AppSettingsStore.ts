@@ -32,7 +32,6 @@ export const useAppSettingsStore = create<AppSettingsState>(set => ({
       pot_provider_url: null,
       potoken: false,
       throttledratelimit: null,
-      extractor_args: null,
       extractor_lang: null,
       integrate_ryd: false,
       integrate_sponsorblock: false,

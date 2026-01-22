@@ -44,7 +44,6 @@ class DownloadsConfigType(TypedDict):
     pot_provider_url: str | None
     potoken: bool
     throttledratelimit: int | None
-    extractor_args: str | None
     extractor_lang: str | None
     integrate_ryd: bool
     integrate_sponsorblock: bool
@@ -95,7 +94,6 @@ class AppConfig:
             "pot_provider_url": None,
             "potoken": False,
             "throttledratelimit": None,
-            "extractor_args": None,
             "extractor_lang": None,
             "integrate_ryd": False,
             "integrate_sponsorblock": False,
