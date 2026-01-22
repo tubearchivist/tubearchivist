@@ -330,7 +330,7 @@ class Command(BaseCommand):
             desc="fix playlist description data type",
             query={"term": {"playlist_description": {"value": False}}},
             script={
-                "source": "ctx._source.remove(playlist_description)",
+                "source": "ctx._source.remove('playlist_description')",
                 "lang": "painless",
             },
         )
