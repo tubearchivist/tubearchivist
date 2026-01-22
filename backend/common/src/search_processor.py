@@ -56,17 +56,17 @@ class SearchProcess:
         """detect which type of data to process"""
         index = result["_index"]
         processed = False
-        if index == "ta_video":
+        if index.startswith("ta_video"):
             processed = self._process_video(result["_source"])
-        if index == "ta_channel":
+        if index.startswith("ta_channel"):
             processed = self._process_channel(result["_source"])
-        if index == "ta_playlist":
+        if index.startswith("ta_playlist"):
             processed = self._process_playlist(result["_source"])
-        if index == "ta_download":
+        if index.startswith("ta_download"):
             processed = self._process_download(result["_source"])
-        if index == "ta_comment":
+        if index.startswith("ta_comment"):
             processed = self._process_comment(result["_source"])
-        if index == "ta_subtitle":
+        if index.startswith("ta_subtitle"):
             processed = self._process_subtitle(result)
 
         if isinstance(processed, dict):

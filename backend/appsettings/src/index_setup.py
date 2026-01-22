@@ -5,15 +5,40 @@ functionality:
 - backup and restore metadata
 """
 
+from enum import Enum, auto
+
 from appsettings.src.backup import ElasticBackup
 from appsettings.src.config import AppConfig
 from appsettings.src.snapshot import ElasticSnapshot
 from common.src.es_connect import ElasticWrap
 from common.src.helper import get_mapping
+from deepdiff import DeepDiff
+from django.conf import settings
+
+
+class MappingAction(Enum):
+    """index action options"""
+
+    NOOP = auto()
+    PUT_MAPPING = auto()
+    REINDEX = auto()
 
 
 class ElasticIndex:
     """interact with a single index"""
+
+    REINDEX_KEYS = {
+        "type",
+        "analyzer",
+        "search_analyzer",
+        "normalizer",
+        "index",
+        "doc_values",
+        "norms",
+        "ignore_above",
+        "enabled",
+        "format",
+    }
 
     def __init__(self, index_name, expected_map=False, expected_set=False):
         self.index_name = index_name
@@ -21,67 +46,66 @@ class ElasticIndex:
         self.expected_set = expected_set
         self.exists, self.details = self.index_exists()
 
+    @property
+    def index_namespace(self) -> str:
+        """namespaced index"""
+        return f"ta_{self.index_name}"
+
     def index_exists(self):
         """check if index already exists and return mapping if it does"""
-        response, status_code = ElasticWrap(f"ta_{self.index_name}").get()
+        response, status_code = ElasticWrap(self.index_namespace).get()
         exists = status_code == 200
-        details = response.get(f"ta_{self.index_name}", False)
+
+        index_key = f"{self.index_namespace}"
+        current_version = self.get_current_version()
+        if current_version:
+            index_key += f"_v{current_version}"
+
+        details = response.get(index_key, False)
 
         return exists, details
 
-    def validate(self):
+    def get_current_version(self) -> None | int:
+        """get current version from aliases of index"""
+        response, _ = ElasticWrap(f"{self.index_namespace}/_alias").get()
+        if not response:
+            raise ValueError("failed to fetch aliases: ", response)
+
+        alias_name = list(response.keys())
+        if not alias_name:
+            return None
+
+        version_str = alias_name[0].lstrip(f"{self.index_namespace}_v")
+        if not version_str:
+            # is initial version
+            return None
+
+        if not version_str.isdigit():
+            raise ValueError("unexpected version_str: ", version_str)
+
+        return int(version_str)
+
+    def validate(self) -> tuple[MappingAction, set[str]]:
         """
         check if all expected mappings and settings match
         returns True when rebuild is needed
         """
-
-        if self.expected_map or self.expected_map == {}:
-            rebuild = self.validate_mappings()
-            if rebuild:
-                return rebuild
+        mapping_diff = self._get_mapping_diff()
+        removed_fields = self._get_fields_to_delete(diff=mapping_diff)
 
         if self.expected_set:
-            rebuild = self.validate_settings()
-            if rebuild:
-                return rebuild
+            settings_diff = self._validate_settings()
+            if settings_diff:
+                # treat settings diff as full reindex
+                return MappingAction.REINDEX, removed_fields
 
-        return False
+        if self.expected_map or self.expected_map == {}:
+            action = self._classify_mapping_diff(diff=mapping_diff)
+            return action, removed_fields
 
-    def validate_mappings(self):
-        """check if all mappings are as expected"""
-        now_map = self.details["mappings"].get("properties", {})
+        return MappingAction.NOOP, removed_fields
 
-        for key, value in self.expected_map.items():
-            # nested
-            if list(value.keys()) == ["properties"]:
-                for key_n, value_n in value["properties"].items():
-                    if key not in now_map:
-                        print(f"detected mapping change: {key_n}, {value_n}")
-                        return True
-                    if key_n not in now_map[key]["properties"].keys():
-                        print(f"detected mapping change: {key_n}, {value_n}")
-                        return True
-                    if not value_n == now_map[key]["properties"][key_n]:
-                        print(f"detected mapping change: {key_n}, {value_n}")
-                        return True
-
-                continue
-
-            # not nested
-            if key not in now_map.keys():
-                print(f"detected mapping change: {key}, {value}")
-                return True
-            if not value == now_map[key]:
-                print(f"detected mapping change: {key}, {value}")
-                return True
-
-        # simple doc store
-        if self.expected_map == {} and now_map != self.expected_map:
-            return True
-
-        return False
-
-    def validate_settings(self):
+    def _validate_settings(self):
         """check if all settings are as expected"""
 
         now_set = self.details["settings"]["index"]
@@ -97,44 +121,91 @@ class ElasticIndex:
 
         return False
 
-    def rebuild_index(self):
+    def _get_mapping_diff(self) -> DeepDiff:
+        """check if all mappings are as expected"""
+        now_map = self.details.get("mappings", {}).get("properties", {})
+        diff = DeepDiff(
+            now_map,
+            self.expected_map,
+            ignore_order=True,
+            report_repetition=True,
+            view="tree",
+        )
+        if diff:
+            print(f"[{self.index_namespace}] detected mapping change")
+            if settings.DEBUG:
+                print(f"[{self.index_namespace}] mapping change: {diff}")
+
+        return diff
+
+    def _classify_mapping_diff(self, diff: DeepDiff) -> MappingAction:
+        """use diff to detect what to do"""
+        if not diff:
+            return MappingAction.NOOP
+
+        if diff.get("type_changes"):
+            # always incompatible, needs reindex
+            return MappingAction.REINDEX
+
+        added = diff.get("dictionary_item_added", [])
+        has_additions = bool(added)
+
+        for item in diff.get("values_changed", []):
+            path = item.path(output_format="list")
+            if not path:
+                continue
+
+            if path[-1] in self.REINDEX_KEYS:
+                return MappingAction.REINDEX
+
+            # compatible addition
+            has_additions = True
+
+        if has_additions:
+            return MappingAction.PUT_MAPPING
+
+        return MappingAction.NOOP
+
+    def _get_fields_to_delete(self, diff: DeepDiff) -> set[str]:
+        """fields to remove during next reindex"""
+        removed_fields = set()
+        for item in diff.get("dictionary_item_removed", []):
+            value = item.t1 or {}
+            is_field_definition = "type" in value or "properties" in value
+            if not is_field_definition:
+                continue
+
+            path = item.path(output_format="list")
+            removed_fields.add(".".join(path))
+
+        return removed_fields
+
+    def rebuild_index(self, removed_fields: set[str]):
         """rebuild with new mapping"""
-        print(f"applying new mappings to index ta_{self.index_name}...")
-        self.create_blank(for_backup=True)
-        self.reindex("backup")
-        self.delete_index(backup=False)
-        self.create_blank()
-        self.reindex("restore")
-        self.delete_index()
+        print(f"[{self.index_namespace}] applying new mappings to index")
+        current_version = self.get_current_version()
 
-    def reindex(self, method):
-        """create on elastic search"""
-        if method == "backup":
-            source = f"ta_{self.index_name}"
-            destination = f"ta_{self.index_name}_backup"
-        elif method == "restore":
-            source = f"ta_{self.index_name}_backup"
-            destination = f"ta_{self.index_name}"
-        else:
-            raise ValueError("invalid method, expected 'backup' or 'restore'")
+        new_version = current_version + 1 if current_version else 2
 
-        data = {"source": {"index": source}, "dest": {"index": destination}}
-        _, _ = ElasticWrap("_reindex?refresh=true").post(data=data)
+        self.create_blank(new_version=new_version)
+        self.reindex(new_version=new_version, removed_fields=removed_fields)
+        self.delete_index(by_version=current_version)
+        self.create_alias(new_version=new_version, old_version=current_version)
 
-    def delete_index(self, backup=True):
+    def delete_index(self, by_version: int | None):
         """delete index passed as argument"""
-        path = f"ta_{self.index_name}"
-        if backup:
-            path = path + "_backup"
+        path = self.index_namespace
+        if by_version is not None:
+            path += f"_v{by_version}"
 
-        _, _ = ElasticWrap(path).delete()
+        response, status_code = ElasticWrap(path).delete()
+        print(f"{status_code}: {response}")
 
-    def create_blank(self, for_backup=False):
-        """apply new mapping and settings for blank new index"""
-        print(f"create new blank index with name ta_{self.index_name}...")
-        path = f"ta_{self.index_name}"
-        if for_backup:
-            path = f"{path}_backup"
+    def create_blank(self, new_version: int | None = None):
+        """create blank"""
+        path = self.index_namespace
+        if new_version is not None:
+            path += f"_v{new_version}"
 
         data = {}
         if self.expected_set:
@@ -145,7 +216,84 @@ class ElasticIndex:
                 # no indexing for config
                 data["mappings"]["dynamic"] = False
 
-        _, _ = ElasticWrap(path).put(data)
+        print(f"[{path}] create new blank index")
+        if settings.DEBUG:
+            print(f"[{path}] creat new blank index with data: {data}")
+
+        response, status_code = ElasticWrap(path).put(data)
+        if status_code not in [200, 201]:
+            print(f"{status_code}: {response}")
+            raise ValueError(f"create blank index {path} failed")
+
+    def reindex(self, new_version: int, removed_fields: set[str]):
+        """reindex to versioned new index after creating"""
+        source = self.index_namespace
+        dest = f"{self.index_namespace}_v{new_version}"
+        data: dict = {"source": {"index": source}, "dest": {"index": dest}}
+
+        if removed_fields:
+            script = "\n".join(
+                f"ctx._source.remove('{i}');" for i in removed_fields
+            )
+            data["script"] = {"lang": "painless", "source": script}
+
+        print(f"[{self.index_namespace}] reindex from {source} to {dest}")
+        if settings.DEBUG:
+            print(f"send data: {data}")
+
+        path = "_reindex?refresh=true"
+        response, status_code = ElasticWrap(path).post(data=data)
+        if status_code not in [200, 201]:
+            print(f"{status_code}: {response}")
+            raise ValueError("reindex failed failed")
+
+    def create_alias(self, new_version: int, old_version: int | None = None):
+        """create aliast for moved index"""
+        data: dict = {
+            "actions": [
+                {
+                    "add": {
+                        "index": f"{self.index_namespace}_v{new_version}",
+                        "alias": self.index_namespace,
+                        "is_write_index": True,
+                    },
+                },
+            ]
+        }
+        if old_version:
+            data["actions"].append(
+                {
+                    "remove": {
+                        "index": f"{self.index_namespace}_v{old_version}",
+                        "alias": self.index_namespace,
+                    }
+                }
+            )
+
+        if settings.DEBUG:
+            print(f"create alias: {data}")
+
+        response, status_code = ElasticWrap("_alias").put(data=data)
+        if status_code not in [200, 201]:
+            print(f"{status_code}: {response}")
+            raise ValueError("alias update failed")
+
+    def mapping_update(self):
+        """simple mapping update only, use migrations for defaults"""
+        current_version = self.get_current_version()
+        path = self.index_namespace
+        if current_version is not None:
+            path += f"_v{current_version}"
+
+        data = {"properties": self.expected_map}
+        print(f"[{path}] update mapping")
+        if settings.DEBUG:
+            print(f"[{path}] update mapping with data: {data}")
+
+        response, status_code = ElasticWrap(path).put(data)
+        if status_code not in [200, 201]:
+            print(f"{status_code}: {response}")
+            raise ValueError(f"create blank index {path} failed")
 
 
 class ElasticIndexWrap:
@@ -164,14 +312,17 @@ class ElasticIndexWrap:
                 handler.create_blank()
                 continue
 
-            rebuild = handler.validate()
-            if rebuild:
+            action, removed_fields = handler.validate()
+            if action == MappingAction.REINDEX:
                 self._check_backup()
-                handler.rebuild_index()
+                handler.rebuild_index(removed_fields)
                 continue
 
+            if action == MappingAction.PUT_MAPPING:
+                handler.mapping_update()
+
             # else all good
-            print(f"ta_{index_name} index is created and up to date...")
+            print(f"[ta_{index_name}] index status is as expected.")
 
     def reset(self):
         """reset all indexes to blank"""
@@ -180,11 +331,12 @@ class ElasticIndexWrap:
 
     def delete_all(self):
         """delete all indexes"""
-        print("reset elastic index")
         for index in self.index_config:
             index_name, _, _ = self._config_split(index)
+            print(f"[ta_{index_name}] reset elastic index")
             handler = ElasticIndex(index_name)
-            handler.delete_index(backup=False)
+            current_version = handler.get_current_version()
+            handler.delete_index(by_version=current_version)
 
     def create_all_blank(self):
         """create all blank indexes"""
