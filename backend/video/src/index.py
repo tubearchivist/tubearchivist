@@ -222,6 +222,9 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         if timestamp and isinstance(timestamp, int):
             return timestamp
 
+        if timestamp and isinstance(timestamp, float):
+            return int(timestamp)
+
         upload_date = self.youtube_meta["upload_date"]
         if not upload_date:
             raise ValueError(
