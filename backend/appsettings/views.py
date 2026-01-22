@@ -5,7 +5,9 @@ from appsettings.serializers import (
     BackupFileSerializer,
     CookieUpdateSerializer,
     CookieValidationSerializer,
+    ManualImportConfig,
     PoTokenSerializer,
+    RescanFileSystemConfig,
     SnapshotCreateResponseSerializer,
     SnapshotItemSerializer,
     SnapshotListSerializer,
@@ -291,7 +293,11 @@ class CookieView(ApiBaseView):
 
 
 class POTokenView(ApiBaseView):
-    """handle PO token"""
+    """resolves to /api/appsettings/potoken/
+    GET: get potoken
+    POST: update potoken
+    DELETE: revoke potoken
+    """
 
     permission_classes = [AdminOnly]
 
@@ -385,6 +391,58 @@ class SnapshotApiListView(ApiBaseView):
         # pylint: disable=unused-argument
         response = ElasticSnapshot().take_snapshot_now()
         serializer = SnapshotCreateResponseSerializer(response)
+        return Response(serializer.data)
+
+
+class RescanFileSystem(ApiBaseView):
+    """resolves to /api/appsettings/rescan-filesystem/
+    POST: start new rescan filesystem task
+    """
+
+    permission_classes = [AdminOnly]
+
+    @staticmethod
+    @extend_schema(
+        request=RescanFileSystemConfig,
+        responses={
+            200: OpenApiResponse(AsyncTaskResponseSerializer()),
+        },
+    )
+    def post(request):
+        """start new task rescan filesystem task"""
+        data_serializer = RescanFileSystemConfig(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+
+        message = TaskCommand().start("rescan_filesystem", validated_data)
+        serializer = AsyncTaskResponseSerializer(message)
+
+        return Response(serializer.data)
+
+
+class ManualImportView(ApiBaseView):
+    """resolves to /api/appsettings/manual-import/
+    POST: start new manual import task
+    """
+
+    permission_classes = [AdminOnly]
+
+    @staticmethod
+    @extend_schema(
+        request=ManualImportConfig,
+        responses={
+            200: OpenApiResponse(AsyncTaskResponseSerializer()),
+        },
+    )
+    def post(request):
+        """manual import"""
+        data_serializer = ManualImportConfig(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+
+        message = TaskCommand().start("manual_import", validated_data)
+        serializer = AsyncTaskResponseSerializer(message)
+
         return Response(serializer.data)
 
 

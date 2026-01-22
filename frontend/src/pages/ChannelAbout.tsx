@@ -8,7 +8,6 @@ import Routes from '../configuration/routes/RouteList';
 import queueReindex, { ReindexType, ReindexTypeEnum } from '../api/actions/queueReindex';
 import formatDate from '../functions/formatDates';
 import PaginationDummy from '../components/PaginationDummy';
-import FormattedNumber from '../components/FormattedNumber';
 import Button from '../components/Button';
 import updateChannelOverwrites from '../api/actions/updateChannelOverwrite';
 import useIsAdmin from '../functions/useIsAdmin';
@@ -145,10 +144,6 @@ const ChannelAbout = () => {
 
           <div className="info-box-item">
             <div>
-              {channel.channel_views > 0 && (
-                <FormattedNumber text="Channel views:" number={channel.channel_views} />
-              )}
-
               {isAdmin && (
                 <>
                   <div className="button-box">

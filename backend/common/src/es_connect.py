@@ -168,7 +168,7 @@ class IndexPaginate:
 
     def get_pit(self):
         """get pit for index"""
-        path = f"{self.index_name}/_pit?keep_alive=10m"
+        path = f"{self.index_name}/_pit?keep_alive=15m"
         response, _ = ElasticWrap(path).post()
         self.pit_id = response["id"]
 
@@ -184,7 +184,7 @@ class IndexPaginate:
             self.data.update({"sort": [{"_doc": {"order": "desc"}}]})
 
         self.data["size"] = self.kwargs.get("size") or self.DEFAULT_SIZE
-        self.data["pit"] = {"id": self.pit_id, "keep_alive": "10m"}
+        self.data["pit"] = {"id": self.pit_id, "keep_alive": "15m"}
 
     def run_loop(self):
         """loop through results until last hit"""

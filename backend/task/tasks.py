@@ -19,7 +19,7 @@ from common.src.ta_redis import RedisArchivist
 from common.src.urlparser import ParsedURLType, Parser
 from download.src.queue import PendingList
 from download.src.subscriptions import SubscriptionHandler, SubscriptionScanner
-from download.src.thumbnails import ThumbFilesystem, ThumbValidator
+from download.src.thumbnails import ThumbValidator
 from download.src.yt_dlp_handler import VideoDownloader
 from task.src.notify import Notifications
 from task.src.task_config import TASK_CONFIG
@@ -216,7 +216,7 @@ def check_reindex(self, data=False, extract_videos=False):
 
 
 @shared_task(bind=True, name="manual_import", base=BaseTask)
-def run_manual_import(self):
+def manual_import(self, ignore_error, prefer_local):
     """called from settings page, to go through import folder"""
     manager = TaskManager()
     if manager.is_pending(self):
@@ -225,7 +225,9 @@ def run_manual_import(self):
         return
 
     manager.init(self)
-    ImportFolderScanner(task=self).scan()
+    ImportFolderScanner(
+        task=self, ignore_error=ignore_error, prefer_local=prefer_local
+    ).scan()
 
 
 @shared_task(bind=True, name="run_backup", base=BaseTask)
@@ -260,7 +262,7 @@ def run_restore_backup(self, filename):
 
 
 @shared_task(bind=True, name="rescan_filesystem", base=BaseTask)
-def rescan_filesystem(self):
+def rescan_filesystem(self, ignore_error, prefer_local):
     """check the media folder for mismatches"""
     manager = TaskManager()
     if manager.is_pending(self):
@@ -269,7 +271,9 @@ def rescan_filesystem(self):
         return
 
     manager.init(self)
-    handler = Scanner(task=self)
+    handler = Scanner(
+        task=self, ignore_error=ignore_error, prefer_local=prefer_local
+    )
     handler.scan()
     handler.apply()
     thumbnail_check.delay()
@@ -288,19 +292,6 @@ def thumbnail_check(self):
     thumbnail = ThumbValidator(task=self)
     thumbnail.validate()
     thumbnail.clean_up()
-
-
-@shared_task(bind=True, name="resync_thumbs", base=BaseTask)
-def re_sync_thumbs(self):
-    """sync thumbnails to mediafiles"""
-    manager = TaskManager()
-    if manager.is_pending(self):
-        print(f"[task][{self.name}] thumb re-embed is already running")
-        self.send_progress(["Thumbnail re-embed is already running."])
-        return
-
-    manager.init(self)
-    ThumbFilesystem(task=self).embed()
 
 
 @shared_task(bind=True, name="resync_metadata", base=BaseTask)

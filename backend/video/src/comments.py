@@ -25,7 +25,7 @@ class Comments:
         self.is_activated = False
         self.comments_format = False
 
-    def build_json(self):
+    def build_json(self, upload: bool = False):
         """build json document for es"""
         print(f"{self.youtube_id}: get comments")
         self.check_config()
@@ -39,11 +39,13 @@ class Comments:
         self.format_comments(comments_raw)
 
         self.json_data = {
-            "youtube_id": self.youtube_id,
-            "comment_last_refresh": int(datetime.now().timestamp()),
             "comment_channel_id": channel_id,
             "comment_comments": self.comments_format,
+            "comment_last_refresh": int(datetime.now().timestamp()),
+            "youtube_id": self.youtube_id,
         }
+        if upload:
+            self.upload_comments()
 
     def check_config(self):
         """read config if not attached"""
@@ -122,34 +124,33 @@ class Comments:
         if not comment.get("author"):
             comment["author"] = comment.get("author_id", "Unknown")
 
+        is_uploader = comment.get("author_is_uploader", False)
+
         cleaned_comment = {
-            "comment_id": comment["id"],
-            "comment_text": comment["text"].replace("\xa0", ""),
-            "comment_timestamp": comment["timestamp"],
-            "comment_time_text": time_text,
-            "comment_likecount": comment.get("like_count", None),
-            "comment_is_favorited": comment.get("is_favorited", False),
             "comment_author": comment["author"],
             "comment_author_id": comment["author_id"],
+            "comment_author_is_uploader": is_uploader,
             "comment_author_thumbnail": comment["author_thumbnail"],
-            "comment_author_is_uploader": comment.get(
-                "author_is_uploader", False
-            ),
+            "comment_id": comment["id"],
+            "comment_is_favorited": comment.get("is_favorited", False),
+            "comment_likecount": comment.get("like_count", None),
             "comment_parent": comment["parent"],
+            "comment_text": comment["text"].replace("\xa0", ""),
+            "comment_time_text": time_text,
+            "comment_timestamp": comment["timestamp"],
         }
 
         return cleaned_comment
 
     def upload_comments(self):
         """upload comments to es"""
-        if not self.is_activated:
-            return
-
         print(f"{self.youtube_id}: upload comments")
         _, _ = ElasticWrap(self.es_path).put(self.json_data)
 
         vid_path = f"ta_video/_update/{self.youtube_id}"
-        data = {"doc": {"comment_count": len(self.comments_format)}}
+        data = {
+            "doc": {"comment_count": len(self.json_data["comment_comments"])}
+        }
         _, _ = ElasticWrap(vid_path).post(data=data)
 
     def delete_comments(self):

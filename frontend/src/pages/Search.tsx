@@ -65,6 +65,13 @@ const Search = () => {
   const gridView = isGridView ? `boxed-${gridItems}` : '';
   const gridViewGrid = isGridView ? `grid-${gridItems}` : '';
 
+  const fetchResults = async (searchQuery: string) => {
+    const searchResults = await loadSearch(searchQuery);
+
+    setSearchResults(searchResults);
+    setRefresh(false);
+  };
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -77,18 +84,12 @@ const Search = () => {
 
   useEffect(() => {
     if (debouncedSearchTerm.trim() !== '') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchResults(debouncedSearchTerm);
     } else {
       setSearchResults(EmptySearchResponse);
     }
   }, [debouncedSearchTerm, refresh, videoId]);
-
-  const fetchResults = async (searchQuery: string) => {
-    const searchResults = await loadSearch(searchQuery);
-
-    setSearchResults(searchResults);
-    setRefresh(false);
-  };
 
   return (
     <>

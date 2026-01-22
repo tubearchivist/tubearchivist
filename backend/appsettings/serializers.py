@@ -44,7 +44,6 @@ class AppConfigDownloadsSerializer(
     format = serializers.CharField(allow_null=True)
     format_sort = serializers.CharField(allow_null=True)
     add_metadata = serializers.BooleanField()
-    add_thumbnail = serializers.BooleanField()
     subtitle = serializers.CharField(allow_null=True)
     subtitle_source = serializers.ChoiceField(
         choices=["auto", "user"], allow_null=True
@@ -100,6 +99,20 @@ class PoTokenSerializer(serializers.Serializer):
     """serialize PO token"""
 
     potoken = serializers.CharField()
+
+
+class RescanFileSystemConfig(serializers.Serializer):
+    """serialize rescan filesystem config"""
+
+    ignore_error = serializers.BooleanField()
+    prefer_local = serializers.BooleanField()
+
+
+class ManualImportConfig(serializers.Serializer):
+    """serialize for manual import task"""
+
+    ignore_error = serializers.BooleanField()
+    prefer_local = serializers.BooleanField()
 
 
 class SnapshotItemSerializer(serializers.Serializer):

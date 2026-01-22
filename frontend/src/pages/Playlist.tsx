@@ -108,7 +108,6 @@ const Playlist = () => {
       }
       setRefresh(false);
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     playlistId,
     userConfig.hide_watched_playlist,
@@ -331,7 +330,7 @@ const Playlist = () => {
           </div>
         </div>
 
-        {playlist.playlist_description !== 'False' && (
+        {playlist.playlist_description !== null && (
           <div className="description-box">
             <p
               id={descriptionExpanded ? 'text-expand-expanded' : 'text-expand'}

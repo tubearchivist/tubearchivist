@@ -60,6 +60,7 @@ const Filterbar = ({
     }
 
     if (currentViewStyle === ViewStylesEnum.Table) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowHidden(true);
     } else {
       setShowHidden(false);

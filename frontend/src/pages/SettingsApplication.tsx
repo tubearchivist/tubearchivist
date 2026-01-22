@@ -33,6 +33,7 @@ const SettingsApplication = () => {
   const { userConfig } = useUserConfigStore();
   const [response, setResponse] = useState<SettingsApplicationReponses>();
   const [refresh, setRefresh] = useState(false);
+  const [visibleSnapshotCount, setVisibleSnapshotCount] = useState(10);
 
   const snapshots = response?.snapshots;
   const appSettingsConfig = response?.appSettingsConfig;
@@ -58,7 +59,6 @@ const SettingsApplication = () => {
   const [downloadsExtractorArgs, setDownloadsExtractorArgs] = useState<string | null>(null);
   const [downloadsExtractorLang, setDownloadsExtractorLang] = useState<string | null>(null);
   const [embedMetadata, setEmbedMetadata] = useState(false);
-  const [embedThumbnail, setEmbedThumbnail] = useState(false);
 
   // Subtitles
   const [subtitleLang, setSubtitleLang] = useState<string | null>(null);
@@ -118,7 +118,6 @@ const SettingsApplication = () => {
     setDownloadsExtractorArgs(appSettingsConfigData?.downloads.extractor_args || null);
     setDownloadsExtractorLang(appSettingsConfigData?.downloads.extractor_lang || null);
     setEmbedMetadata(appSettingsConfigData?.downloads.add_metadata || false);
-    setEmbedThumbnail(appSettingsConfigData?.downloads.add_thumbnail || false);
 
     // Subtitles
     setSubtitleLang(appSettingsConfigData?.downloads.subtitle || null);
@@ -188,11 +187,13 @@ const SettingsApplication = () => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
   }, []);
 
   useEffect(() => {
     if (refresh) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchData();
       setRefresh(false);
     }
@@ -501,9 +502,8 @@ const SettingsApplication = () => {
                         </li>
                       </ul>
                     </li>
-                    <li>Embedding metadata adds additional metadata directly to the mp4 file.</li>
                     <li>
-                      Embedding the thumbnail embeds the video thumbnail as a cover.jpg to the mp4
+                      Embedding metadata adds additional metadata and thumbnails directly to the mp4
                       file.
                     </li>
                   </ul>
@@ -568,16 +568,6 @@ const SettingsApplication = () => {
                 <ToggleConfig
                   name="downloads.add_metadata"
                   value={embedMetadata}
-                  updateCallback={handleUpdateConfig}
-                />
-              </div>
-              <div className="settings-box-wrapper">
-                <div>
-                  <p>Embed Thumbnail</p>
-                </div>
-                <ToggleConfig
-                  name="downloads.add_thumbnail"
-                  value={embedThumbnail}
                   updateCallback={handleUpdateConfig}
                 />
               </div>
@@ -671,17 +661,17 @@ const SettingsApplication = () => {
                       Download and index comments. Browsable on the video detail page. Example:
                       <ul>
                         <li>
-                          <span className="settings-current">all,100,all,30</span>: Get 100
-                          max-parents and 30 max-replies-per-thread.
+                          <span className="settings-current">all,100,all,30,all</span>: Get 100
+                          max-parents and 30 max-replies-per-thread at any depth.
                         </li>
                         <li>
-                          <span className="settings-current">1000,all,all,50</span>: Get a total of
-                          1000 comments over all, 50 replies per thread.
+                          <span className="settings-current">1000,all,all,50,2</span>: Get a total
+                          of 1000 comments over all, 50 replies per thread, only 2 levels of depth.
                         </li>
                         <li>
                           Values are in the format:{' '}
                           <span className="settings-current">
-                            max-comments,max-parents,max-replies,max-replies-per-thread
+                            max-comments,max-parents,max-replies,max-replies-per-thread,max-depth
                           </span>
                           .
                         </li>
@@ -1038,10 +1028,9 @@ const SettingsApplication = () => {
                         </p>
                         <br />
                         {restoringSnapshot && <p>Snapshot restore started</p>}
-                        {!restoringSnapshot &&
-                          snapshots.snapshots &&
-                          snapshots.snapshots.map(snapshot => {
-                            return (
+                        {!restoringSnapshot && snapshots.snapshots && (
+                          <>
+                            {snapshots.snapshots?.slice(0, visibleSnapshotCount).map(snapshot => (
                               <p key={snapshot.id}>
                                 <Button
                                   label="Restore"
@@ -1056,8 +1045,17 @@ const SettingsApplication = () => {
                                 <span className="settings-current">{snapshot.duration_s}s</span> to
                                 create. State: <i>{snapshot.state}</i>
                               </p>
-                            );
-                          })}
+                            ))}
+                            {visibleSnapshotCount < snapshots.snapshots.length && (
+                              <Button
+                                label="Load More"
+                                onClick={() => {
+                                  setVisibleSnapshotCount(visibleSnapshotCount + 10);
+                                }}
+                              />
+                            )}
+                          </>
+                        )}
                       </>
                     )}
                   </div>
