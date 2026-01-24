@@ -19,7 +19,10 @@ from task.models import CustomPeriodicTask
 class ElasticBackup:
     """dump index to nd-json files for later bulk import"""
 
-    INDEX_SPLIT = ["comment"]
+    INDEX_SIZE_CONF = {
+        "comment": 200,
+        "subtitle": 10000,
+    }
     CACHE_DIR = EnvironmentSettings.CACHE_DIR
     BACKUP_DIR = os.path.join(CACHE_DIR, "backup")
 
@@ -62,8 +65,8 @@ class ElasticBackup:
             "total": self._get_total(index_name),
         }
 
-        if index_name in self.INDEX_SPLIT:
-            paginate_kwargs.update({"size": 200})
+        if size_overwrite := self.INDEX_SIZE_CONF.get(index_name):
+            paginate_kwargs.update({"size": size_overwrite})
 
         paginate = IndexPaginate(f"ta_{index_name}", **paginate_kwargs)
         _ = paginate.get_results()
@@ -156,6 +159,7 @@ class ElasticBackup:
         call reset from ElasticIndexWrap first to start blank
         """
         zip_content = self._unpack_zip_backup(filename)
+        zip_content.sort()
         self._restore_json_files(zip_content)
 
     def _unpack_zip_backup(self, filename):
