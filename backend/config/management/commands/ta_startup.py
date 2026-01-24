@@ -443,7 +443,7 @@ class Command(BaseCommand):
     ):
         """run migration"""
         self.stdout.write(f"[MIGRATION] run {desc}")
-        path = f"{index_name}/_update_by_query"
+        path = f"{index_name}/_update_by_query?wait_for_completion=true"
         data = {"query": query, "script": script}
         response, status_code = ElasticWrap(path).post(data)
         if status_code in [200, 201]:
@@ -451,6 +451,9 @@ class Command(BaseCommand):
             if updated:
                 suc_msg = f"    ✓ updated {updated} docs in {index_name}"
                 self.stdout.write(self.style.SUCCESS(suc_msg))
+
+                # ensure index consistency
+                ElasticWrap(f"{index_name}/_refresh").post()
             else:
                 noop_msg = f"    no items in {index_name} need updating"
                 self.stdout.write(self.style.SUCCESS(noop_msg))
