@@ -55,6 +55,8 @@ class ElasticIndex:
         """check if index already exists and return mapping if it does"""
         response, status_code = ElasticWrap(self.index_namespace).get()
         exists = status_code == 200
+        if not exists:
+            return False, False
 
         index_key = f"{self.index_namespace}"
         current_version = self.get_current_version()
@@ -357,6 +359,9 @@ class ElasticIndexWrap:
             index_name, _, _ = self._config_split(index)
             print(f"[ta_{index_name}] reset elastic index")
             handler = ElasticIndex(index_name)
+            if not handler.exists:
+                continue
+
             current_version = handler.get_current_version()
             handler.delete_index(by_version=current_version)
 

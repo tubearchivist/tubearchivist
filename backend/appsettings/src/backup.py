@@ -7,6 +7,7 @@ Functionality:
 
 import json
 import os
+import re
 import zipfile
 from datetime import datetime
 
@@ -101,8 +102,7 @@ class ElasticBackup:
 
     def post_bulk_restore(self, file_name):
         """send bulk to es"""
-        file_path = os.path.join(self.CACHE_DIR, file_name)
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_name, "r", encoding="utf-8") as f:
             data = f.read()
 
         if not data.strip():
@@ -256,7 +256,7 @@ class BackupCallback:
 
         for document in self.source:
             document_id = document["_id"]
-            es_index = document["_index"]
+            es_index = re.sub(r"_v\d+$", "", document["_index"])  # remove _v
             action = {"index": {"_index": es_index, "_id": document_id}}
             source = document["_source"]
             bulk_list.append(json.dumps(action))
