@@ -198,8 +198,11 @@ class ElasticIndex:
         if by_version is not None:
             path += f"_v{by_version}"
 
+        print(f"[{path}] delete index")
         response, status_code = ElasticWrap(path).delete()
-        print(f"{status_code}: {response}")
+        if status_code not in [200, 201]:
+            print(f"{status_code}: {response}")
+            raise ValueError("index delete failed")
 
     def create_blank(self, new_version: int | None = None):
         """create blank"""
@@ -237,7 +240,12 @@ class ElasticIndex:
             )
             data["script"] = {"lang": "painless", "source": script}
 
-        print(f"[{self.index_namespace}] reindex from {source} to {dest}")
+        msg = f"[{self.index_namespace}] reindex from {source} to {dest}"
+        if removed_fields:
+            msg += f", remove unexpected fields: {removed_fields}"
+
+        print(msg)
+
         if settings.DEBUG:
             print(f"send data: {data}")
 
@@ -249,11 +257,14 @@ class ElasticIndex:
 
     def create_alias(self, new_version: int, old_version: int | None = None):
         """create aliast for moved index"""
+        index_new = f"{self.index_namespace}_v{new_version}"
+        index_old = None
+
         data: dict = {
             "actions": [
                 {
                     "add": {
-                        "index": f"{self.index_namespace}_v{new_version}",
+                        "index": index_new,
                         "alias": self.index_namespace,
                         "is_write_index": True,
                     },
@@ -261,17 +272,23 @@ class ElasticIndex:
             ]
         }
         if old_version:
+            index_old = f"{self.index_namespace}_v{old_version}"
             data["actions"].append(
                 {
                     "remove": {
-                        "index": f"{self.index_namespace}_v{old_version}",
+                        "index": index_old,
                         "alias": self.index_namespace,
                     }
                 }
             )
 
+        message = f"create new alias {index_new}"
+        if index_old:
+            message += f", remove old alias {index_old}"
+
+        print(f"[{self.index_namespace}] {message}")
         if settings.DEBUG:
-            print(f"create alias: {data}")
+            print(f"create alias with data: {data}")
 
         response, status_code = ElasticWrap("_alias").put(data=data)
         if status_code not in [200, 201]:
@@ -290,7 +307,7 @@ class ElasticIndex:
         if settings.DEBUG:
             print(f"[{path}] update mapping with data: {data}")
 
-        response, status_code = ElasticWrap(path).put(data)
+        response, status_code = ElasticWrap(f"{path}/_mapping").put(data)
         if status_code not in [200, 201]:
             print(f"{status_code}: {response}")
             raise ValueError(f"create blank index {path} failed")
@@ -321,8 +338,13 @@ class ElasticIndexWrap:
             if action == MappingAction.PUT_MAPPING:
                 handler.mapping_update()
 
-            # else all good
-            print(f"[ta_{index_name}] index status is as expected.")
+            if removed_fields:
+                print(
+                    f"[ta_{index_name}] skip removing unexpected fields:"
+                    + f" {removed_fields}"
+                )
+            else:
+                print(f"[ta_{index_name}] index status is as expected.")
 
     def reset(self):
         """reset all indexes to blank"""
