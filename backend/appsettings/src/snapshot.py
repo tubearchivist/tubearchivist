@@ -261,10 +261,15 @@ class ElasticSnapshot:
     def restore_all(self, snapshot_name):
         """restore snapshot by name"""
         for index in self.all_indices:
-            _, _ = ElasticWrap(index).delete()
+            response, status_code = ElasticWrap(index).get()
+            if status_code == 404:
+                continue
+
+            index_alias = list(response.keys())[0]
+            _, _ = ElasticWrap(index_alias).delete()
 
         path = f"_snapshot/{self.REPO}/{snapshot_name}/_restore"
-        data = {"indices": "*"}
+        data = {"indices": "*,-.*"}
         response, statuscode = ElasticWrap(path).post(data=data)
         if statuscode == 200:
             print(f"snapshot: executing now: {response}")

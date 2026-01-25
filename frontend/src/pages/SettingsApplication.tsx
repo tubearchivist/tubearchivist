@@ -58,7 +58,6 @@ const SettingsApplication = () => {
   const [downloadsFormatSort, setDownloadsFormatSort] = useState<string | null>(null);
   const [downloadsExtractorLang, setDownloadsExtractorLang] = useState<string | null>(null);
   const [embedMetadata, setEmbedMetadata] = useState(false);
-  const [embedThumbnail, setEmbedThumbnail] = useState(false);
 
   // Subtitles
   const [subtitleLang, setSubtitleLang] = useState<string | null>(null);
@@ -74,6 +73,7 @@ const SettingsApplication = () => {
   const [showCookieForm, setShowCookieForm] = useState<boolean>(false);
   const [poTokenFormData, setPoTokenFormData] = useState<string>('web+');
   const [showPoTokenForm, setShowPoTokenForm] = useState<boolean>(false);
+  const [potProviderUrl, setPotProviderUrl] = useState<string | null>(null);
 
   // Integrations
   const [showApiToken, setShowApiToken] = useState(false);
@@ -116,7 +116,6 @@ const SettingsApplication = () => {
     setDownloadsFormatSort(appSettingsConfigData?.downloads.format_sort || null);
     setDownloadsExtractorLang(appSettingsConfigData?.downloads.extractor_lang || null);
     setEmbedMetadata(appSettingsConfigData?.downloads.add_metadata || false);
-    setEmbedThumbnail(appSettingsConfigData?.downloads.add_thumbnail || false);
 
     // Subtitles
     setSubtitleLang(appSettingsConfigData?.downloads.subtitle || null);
@@ -126,6 +125,9 @@ const SettingsApplication = () => {
     // Comments
     setCommentsMax(appSettingsConfigData?.downloads.comment_max || null);
     setCommentsSort(appSettingsConfigData?.downloads.comment_sort || '');
+
+    // Cookie
+    setPotProviderUrl(appSettingsConfigData?.downloads.pot_provider_url || null);
 
     // Integrations
     setDownloadDislikes(appSettingsConfigData?.downloads.integrate_ryd || false);
@@ -476,9 +478,8 @@ const SettingsApplication = () => {
                         </li>
                       </ul>
                     </li>
-                    <li>Embedding metadata adds additional metadata directly to the mp4 file.</li>
                     <li>
-                      Embedding the thumbnail embeds the video thumbnail as a cover.jpg to the mp4
+                      Embedding metadata adds additional metadata and thumbnails directly to the mp4
                       file.
                     </li>
                   </ul>
@@ -530,16 +531,6 @@ const SettingsApplication = () => {
                 <ToggleConfig
                   name="downloads.add_metadata"
                   value={embedMetadata}
-                  updateCallback={handleUpdateConfig}
-                />
-              </div>
-              <div className="settings-box-wrapper">
-                <div>
-                  <p>Embed Thumbnail</p>
-                </div>
-                <ToggleConfig
-                  name="downloads.add_thumbnail"
-                  value={embedThumbnail}
                   updateCallback={handleUpdateConfig}
                 />
               </div>
@@ -714,6 +705,16 @@ const SettingsApplication = () => {
                         PO guide
                       </a>
                     </li>
+                    <li>
+                      The PO Token Provider URL running external to tubearchivist. Make sure to
+                      review{' '}
+                      <a
+                        target="_blank"
+                        href="https://docs.tubearchivist.com/settings/application/#po-token-provider-url"
+                      >
+                        User Guide
+                      </a>
+                    </li>
                   </ul>
                 </div>
               )}
@@ -812,6 +813,19 @@ const SettingsApplication = () => {
                     </div>
                   )}
                 </div>
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>PO Token Provider URL</p>
+                </div>
+                <InputConfig
+                  type="text"
+                  name="downloads.pot_provider_url"
+                  value={potProviderUrl}
+                  setValue={setPotProviderUrl}
+                  oldValue={appSettingsConfig.downloads.pot_provider_url}
+                  updateCallback={handleUpdateConfig}
+                />
               </div>
             </div>
             <div className="info-box-item">

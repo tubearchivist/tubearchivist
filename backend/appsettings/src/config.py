@@ -35,13 +35,13 @@ class DownloadsConfigType(TypedDict):
     format: str | None
     format_sort: str | None
     add_metadata: bool
-    add_thumbnail: bool
     subtitle: str | None
     subtitle_source: Literal["user", "auto"] | None
     subtitle_index: bool
     comment_max: str | None
     comment_sort: Literal["top", "new"] | None
     cookie_import: bool
+    pot_provider_url: str | None
     potoken: bool
     throttledratelimit: int | None
     extractor_lang: str | None
@@ -85,13 +85,13 @@ class AppConfig:
             "format": None,
             "format_sort": None,
             "add_metadata": False,
-            "add_thumbnail": False,
             "subtitle": None,
             "subtitle_source": None,
             "subtitle_index": False,
             "comment_max": None,
             "comment_sort": "top",
             "cookie_import": False,
+            "pot_provider_url": None,
             "potoken": False,
             "throttledratelimit": None,
             "extractor_lang": None,

@@ -369,16 +369,16 @@ class PendingList(PendingIndex):
             return None
 
         to_add = {
-            "youtube_id": video_data["id"],
-            "title": video_data["title"],
-            "vid_thumb_url": self._extract_thumb(video_data),
+            "channel_id": video_data["channel_id"],
+            "channel_indexed": video_data["channel_id"] in self.all_channels,
+            "channel_name": video_data["channel"],
             "duration": get_duration_str(video_data.get("duration", 0)),
             "published": self._extract_published(video_data),
             "timestamp": int(datetime.now().timestamp()),
+            "title": video_data["title"],
+            "vid_thumb_url": self._extract_thumb(video_data),
             "vid_type": self._extract_vid_type(video_data),
-            "channel_name": video_data["channel"],
-            "channel_id": video_data["channel_id"],
-            "channel_indexed": video_data["channel_id"] in self.all_channels,
+            "youtube_id": video_data["id"],
         }
         serializer = DownloadItemSerializer(data=to_add)
         is_valid = serializer.is_valid()
@@ -405,6 +405,9 @@ class PendingList(PendingIndex):
         timestamp = video_data.get("timestamp")
         if timestamp and isinstance(timestamp, int):
             return timestamp
+
+        if timestamp and isinstance(timestamp, float):
+            return int(timestamp)
 
         upload_date = video_data.get("upload_date")
         if upload_date:

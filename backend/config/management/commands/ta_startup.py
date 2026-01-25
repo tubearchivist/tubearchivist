@@ -12,9 +12,10 @@ from time import sleep
 from appsettings.src.config import AppConfig, ReleaseVersion
 from appsettings.src.index_setup import ElasticIndexWrap
 from appsettings.src.snapshot import ElasticSnapshot
+from channel.src.index import YoutubeChannel
 from common.src.env_settings import EnvironmentSettings
-from common.src.es_connect import ElasticWrap
-from common.src.helper import clear_dl_cache
+from common.src.es_connect import ElasticWrap, IndexPaginate
+from common.src.helper import clear_dl_cache, get_channels
 from common.src.ta_redis import RedisArchivist
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import dateformat
@@ -24,6 +25,7 @@ from task.src.config_schedule import ScheduleBuilder
 from task.src.task_manager import TaskManager
 from task.tasks import version_check
 from video.src.constants import VideoTypeEnum
+from video.src.index import YoutubeVideo
 
 TOPIC = """
 
@@ -55,6 +57,10 @@ class Command(BaseCommand):
         self._mig_set_channel_tabs()
         self._mig_set_video_channel_tabs()
         self._mig_fix_playlist_description()
+        self._mig_fix_missing_stats()
+        self._mig_fix_channel_art_types()
+        self._mig_fix_channel_description()
+        self._mig_fix_video_description()
 
     def _make_folders(self):
         """make expected cache folders"""
@@ -66,6 +72,7 @@ class Command(BaseCommand):
             "import",
             "playlists",
             "videos",
+            "ytdlp",
         ]
         cache_dir = EnvironmentSettings.CACHE_DIR
         for folder in folders:
@@ -271,134 +278,189 @@ class Command(BaseCommand):
 
     def _mig_add_default_playlist_sort(self) -> None:
         """migrate from 0.5.4 to 0.5.5 set default playlist sortorder"""
-        self.stdout.write("[MIGRATION] set default playlist sort order")
-        path = "ta_playlist/_update_by_query"
-        data = {
-            "query": {
+        self._run_migration(
+            index_name="ta_playlist",
+            desc="set default playlist sort order",
+            query={
                 "bool": {
                     "must_not": [{"exists": {"field": "playlist_sort_order"}}]
                 }
             },
-            "script": {
+            script={
                 "source": "ctx._source.playlist_sort_order = 'top'",
                 "lang": "painless",
             },
-        }
-        response, status_code = ElasticWrap(path).post(data)
-        if status_code in [200, 201]:
-            updated = response.get("updated")
-            if updated:
-                self.stdout.write(
-                    self.style.SUCCESS(f"    ✓ updated {updated} playlists")
-                )
-            else:
-                self.stdout.write(
-                    self.style.SUCCESS("    no playlists need updating")
-                )
-            return
-
-        message = "    🗙 failed to set default playlist sort order"
-        self.stdout.write(self.style.ERROR(message))
-        self.stdout.write(response)
-        sleep(60)
-        raise CommandError(message)
+        )
 
     def _mig_set_channel_tabs(self) -> None:
         """migrate from 0.5.4 to 0.5.5 set initial channel tabs"""
-        self.stdout.write("[MIGRATION] set default channel_tabs")
-
-        path = "ta_channel/_update_by_query"
         tabs = VideoTypeEnum.values_known()
-        data = {
-            "query": {
+        self._run_migration(
+            index_name="ta_channel",
+            desc="set default channel_tabs in channel index",
+            query={
                 "bool": {"must_not": [{"exists": {"field": "channel_tabs"}}]}
             },
-            "script": {
+            script={
                 "source": f"ctx._source.channel_tabs = {tabs}",
                 "lang": "painless",
             },
-        }
-        response, status_code = ElasticWrap(path).post(data)
-        if status_code in [200, 201]:
-            updated = response.get("updated")
-            if updated:
-                self.stdout.write(
-                    self.style.SUCCESS(f"    ✓ updated {updated} channels")
-                )
-            else:
-                self.stdout.write(
-                    self.style.SUCCESS("    no channels need updating")
-                )
-            return
-
-        message = "    🗙 failed to set default channel_tabs"
-        self.stdout.write(self.style.ERROR(message))
-        self.stdout.write(response)
-        sleep(60)
-        raise CommandError(message)
+        )
 
     def _mig_set_video_channel_tabs(self) -> None:
         """migrate from 0.5.4 to 0.5.5 set initial video channel tabs"""
-        self.stdout.write("[MIGRATION] set default channel_tabs for videos")
-
-        path = "ta_video/_update_by_query"
         tabs = VideoTypeEnum.values_known()
-        data = {
-            "query": {
+        self._run_migration(
+            index_name="ta_video",
+            desc="set default channel_tabs for videos",
+            query={
                 "bool": {
                     "must_not": [{"exists": {"field": "channel.channel_tabs"}}]
                 }
             },
-            "script": {
+            script={
                 "source": f"ctx._source.channel.channel_tabs = {tabs}",
                 "lang": "painless",
             },
-        }
-        response, status_code = ElasticWrap(path).post(data)
-        if status_code in [200, 201]:
-            updated = response.get("updated")
-            if updated:
-                self.stdout.write(
-                    self.style.SUCCESS(f"    ✓ updated {updated} videos")
-                )
-            else:
-                self.stdout.write(
-                    self.style.SUCCESS("    no videos need updating")
-                )
-            return
-
-        message = "    🗙 failed to set default channel_tabs"
-        self.stdout.write(self.style.ERROR(message))
-        self.stdout.write(response)
-        sleep(60)
-        raise CommandError(message)
+        )
 
     def _mig_fix_playlist_description(self) -> None:
         """migrate from 0.5.8 to 0.5.9 fix playlist desc null data type"""
-        self.stdout.write("[MIGRATION] fix playlist description data type")
-
-        path = "ta_playlist/_update_by_query"
-        data = {
-            "query": {"term": {"playlist_description": {"value": False}}},
-            "script": {
-                "source": "ctx._source.playlist_description = null",
+        self._run_migration(
+            index_name="ta_playlist",
+            desc="fix playlist description data type",
+            query={"term": {"playlist_description": {"value": False}}},
+            script={
+                "source": "ctx._source.remove('playlist_description')",
                 "lang": "painless",
             },
-        }
+        )
+
+    def _mig_fix_missing_stats(self) -> None:
+        """migrate from 0.5.8 to 0.5.9, fix missing stats values"""
+        fields = [
+            "like_count",
+            "average_rating",
+            "view_count",
+            "dislike_count",
+        ]
+        for field in fields:
+            self._run_migration(
+                index_name="ta_video",
+                desc=f"fix missing stats field {field}",
+                query={
+                    "bool": {
+                        "must_not": [{"exists": {"field": f"stats.{field}"}}]
+                    }
+                },
+                script={
+                    "source": f"ctx._source.stats.{field} = 0",
+                    "lang": "painless",
+                },
+            )
+
+    def _mig_fix_channel_art_types(self) -> None:
+        """migrate from 0.5.8 to 0.5.9, fix channel artwork types"""
+        fields = [
+            "channel_banner_url",
+            "channel_thumb_url",
+            "channel_tvart_url",
+        ]
+        for field in fields:
+            self._run_migration(
+                index_name="ta_channel",
+                desc=f"fix missing data type for field {field}",
+                query={"term": {field: {"value": False}}},
+                script={
+                    "source": f"ctx._source.remove('{field}')",
+                    "lang": "painless",
+                },
+            )
+            self._run_migration(
+                index_name="ta_video",
+                desc=f"fix missing data type for field channel.{field}",
+                query={"term": {f"channel.{field}": {"value": False}}},
+                script={
+                    "source": f"ctx._source.remove('channel.{field}')",
+                    "lang": "painless",
+                },
+            )
+
+    def _mig_fix_channel_description(self) -> None:
+        """migrate from 0.5.8 to 0.5.9, fix channel desc null value"""
+        desc = "fix channel description null value"
+        self.stdout.write(f"[MIGRATION] run {desc}")
+        channels = get_channels(
+            subscribed_only=False, source=["channel_description", "channel_id"]
+        )
+        counter = 0
+        for channel_response in channels:
+            if not channel_response.get("channel_description") == "":
+                continue
+
+            channel = YoutubeChannel(youtube_id=channel_response["channel_id"])
+            channel.get_from_es()
+            channel.json_data.pop("channel_description")
+            channel.upload_to_es()
+            channel.sync_to_videos()
+            counter += 1
+
+        if counter:
+            suc_msg = f"    ✓ updated {counter} channels with videos"
+            self.stdout.write(self.style.SUCCESS(suc_msg))
+        else:
+            noop_msg = "    no items needed updating"
+            self.stdout.write(self.style.SUCCESS(noop_msg))
+
+    def _mig_fix_video_description(self) -> None:
+        """migrate from 0.5.8 to 0.5.9, fix video desc null value"""
+        desc = "fix video description null value"
+        self.stdout.write(f"[MIGRATION] run {desc}")
+
+        data = {"_source": ["youtube_id", "description"]}
+        videos = IndexPaginate("ta_video", data=data).get_results()
+
+        counter = 0
+        for video_response in videos:
+            if not video_response.get("description") == "":
+                continue
+
+            video = YoutubeVideo(youtube_id=video_response["youtube_id"])
+            video.get_from_es()
+            video.json_data.pop("description")
+            video.upload_to_es()
+
+            counter += 1
+
+        if counter:
+            suc_msg = f"    ✓ updated {counter} videos"
+            self.stdout.write(self.style.SUCCESS(suc_msg))
+        else:
+            noop_msg = "    no items needed updating"
+            self.stdout.write(self.style.SUCCESS(noop_msg))
+
+    def _run_migration(
+        self, index_name: str, desc: str, query: dict, script: dict
+    ):
+        """run migration"""
+        self.stdout.write(f"[MIGRATION] run {desc}")
+        path = f"{index_name}/_update_by_query?wait_for_completion=true"
+        data = {"query": query, "script": script}
         response, status_code = ElasticWrap(path).post(data)
         if status_code in [200, 201]:
             updated = response.get("updated")
             if updated:
-                self.stdout.write(
-                    self.style.SUCCESS(f"    ✓ updated {updated} playlists")
-                )
+                suc_msg = f"    ✓ updated {updated} docs in {index_name}"
+                self.stdout.write(self.style.SUCCESS(suc_msg))
+
+                # ensure index consistency
+                ElasticWrap(f"{index_name}/_refresh").post()
             else:
-                self.stdout.write(
-                    self.style.SUCCESS("    no playlists need updating")
-                )
+                noop_msg = f"    no items in {index_name} need updating"
+                self.stdout.write(self.style.SUCCESS(noop_msg))
             return
 
-        message = "    🗙 failed to fix playlist description null data type"
+        message = f"    🗙 failed to run {desc} on index {index_name}"
         self.stdout.write(self.style.ERROR(message))
         self.stdout.write(response)
         sleep(60)

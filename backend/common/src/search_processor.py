@@ -56,17 +56,17 @@ class SearchProcess:
         """detect which type of data to process"""
         index = result["_index"]
         processed = False
-        if index == "ta_video":
+        if index.startswith("ta_video"):
             processed = self._process_video(result["_source"])
-        if index == "ta_channel":
+        if index.startswith("ta_channel"):
             processed = self._process_channel(result["_source"])
-        if index == "ta_playlist":
+        if index.startswith("ta_playlist"):
             processed = self._process_playlist(result["_source"])
-        if index == "ta_download":
+        if index.startswith("ta_download"):
             processed = self._process_download(result["_source"])
-        if index == "ta_comment":
+        if index.startswith("ta_comment"):
             processed = self._process_comment(result["_source"])
-        if index == "ta_subtitle":
+        if index.startswith("ta_subtitle"):
             processed = self._process_subtitle(result)
 
         if isinstance(processed, dict):
@@ -89,11 +89,24 @@ class SearchProcess:
         channel_dict.update(
             {
                 "channel_last_refresh": date_str,
-                "channel_banner_url": f"{art_base}_banner.jpg",
-                "channel_thumb_url": f"{art_base}_thumb.jpg",
-                "channel_tvart_url": f"{art_base}_tvart.jpg",
+                "channel_description": channel_dict.get("channel_description"),
             }
         )
+
+        if channel_dict.get("channel_banner_url"):
+            channel_dict["channel_banner_url"] = f"{art_base}_banner.jpg"
+        else:
+            channel_dict["channel_banner_url"] = None
+
+        if channel_dict.get("channel_thumb_url"):
+            channel_dict["channel_thumb_url"] = f"{art_base}_thumb.jpg"
+        else:
+            channel_dict["channel_thumb_url"] = None
+
+        if channel_dict.get("channel_tvart_url"):
+            channel_dict["channel_tvart_url"] = f"{art_base}_tvart.jpg"
+        else:
+            channel_dict["channel_tvart_url"] = None
 
         return dict(sorted(channel_dict.items()))
 
@@ -125,6 +138,7 @@ class SearchProcess:
                 "vid_last_refresh": vid_last_refresh,
                 "published": published,
                 "vid_thumb_url": f"{cache_root}/{vid_thumb_url}",
+                "description": video_dict.get("description"),
             }
         )
 
@@ -154,10 +168,12 @@ class SearchProcess:
         )
         cache_root = EnvironmentSettings().get_cache_root()
         playlist_thumbnail = f"{cache_root}/playlists/{playlist_id}.jpg"
+        description = playlist_dict.get("playlist_description")
         playlist_dict.update(
             {
                 "playlist_thumbnail": playlist_thumbnail,
                 "playlist_last_refresh": playlist_last_refresh,
+                "playlist_description": description,
             }
         )
 

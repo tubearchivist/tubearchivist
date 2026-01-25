@@ -44,7 +44,7 @@ class MetadataEmbed:
         paginate = IndexPaginate(
             index_name=self.INDEX_NAME,
             data=data,
-            size=200,
+            size=100,
             callback=MetadataEmbedCallback,
             task=self.task,
             total=self._get_total(),

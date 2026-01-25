@@ -44,7 +44,6 @@ class AppConfigDownloadsSerializer(
     format = serializers.CharField(allow_null=True)
     format_sort = serializers.CharField(allow_null=True)
     add_metadata = serializers.BooleanField()
-    add_thumbnail = serializers.BooleanField()
     subtitle = serializers.CharField(allow_null=True)
     subtitle_source = serializers.ChoiceField(
         choices=["auto", "user"], allow_null=True
@@ -55,6 +54,7 @@ class AppConfigDownloadsSerializer(
         choices=["top", "new"], allow_null=True
     )
     cookie_import = serializers.BooleanField()
+    pot_provider_url = serializers.CharField(allow_null=True)
     potoken = serializers.BooleanField()
     throttledratelimit = serializers.IntegerField(allow_null=True)
     extractor_lang = serializers.CharField(allow_null=True)

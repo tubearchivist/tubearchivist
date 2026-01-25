@@ -16,13 +16,13 @@ export type AppSettingsConfigType = {
     format: string | null;
     format_sort: string | null;
     add_metadata: boolean;
-    add_thumbnail: boolean;
     subtitle: string | null;
     subtitle_source: string | null;
     subtitle_index: boolean;
     comment_max: string | null;
     comment_sort: string;
     cookie_import: boolean;
+    pot_provider_url: string | null;
     potoken: boolean;
     throttledratelimit: number | null;
     extractor_lang: string | null;

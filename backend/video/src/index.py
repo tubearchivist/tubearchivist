@@ -198,30 +198,32 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     def process_youtube_meta(self):
         """extract relevant fields from youtube"""
         self._validate_id()
-        # extract
         self.channel_id = self.youtube_meta["channel_id"]
         last_refresh = int(datetime.now().timestamp())
-        # build json_data basics
         self.json_data = {
-            "title": self.youtube_meta["title"],
-            "description": self.youtube_meta.get("description", ""),
-            "category": self.youtube_meta.get("categories", []),
-            "vid_thumb_url": self.youtube_meta["thumbnail"],
-            "tags": self.youtube_meta.get("tags", []),
-            "published": self._build_published(),
-            "vid_last_refresh": last_refresh,
-            "date_downloaded": last_refresh,
-            "youtube_id": self.youtube_id,
-            # Using .value to make json encodable
-            "vid_type": self.video_type.value,
             "active": True,
+            "category": self.youtube_meta.get("categories", []),
+            "date_downloaded": last_refresh,
+            "published": self._build_published(),
+            "tags": self.youtube_meta.get("tags", []),
+            "title": self.youtube_meta["title"],
+            "vid_last_refresh": last_refresh,
+            "vid_thumb_url": self.youtube_meta["thumbnail"],
+            "vid_type": self.video_type.value,
+            "youtube_id": self.youtube_id,
         }
 
-    def _build_published(self):
+        if description := self.youtube_meta.get("description"):
+            self.json_data["description"] = description
+
+    def _build_published(self) -> int | str:
         """build published date or timestamp"""
         timestamp = self.youtube_meta.get("timestamp")
         if timestamp and isinstance(timestamp, int):
             return timestamp
+
+        if timestamp and isinstance(timestamp, float):
+            return int(timestamp)
 
         upload_date = self.youtube_meta["upload_date"]
         if not upload_date:
@@ -255,10 +257,10 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     def _add_stats(self):
         """add stats dicst to json_data"""
         stats = {
-            "view_count": self.youtube_meta.get("view_count", 0),
-            "like_count": self.youtube_meta.get("like_count", 0),
-            "dislike_count": self.youtube_meta.get("dislike_count", 0),
-            "average_rating": self.youtube_meta.get("average_rating", 0),
+            "view_count": self.youtube_meta.get("view_count") or 0,
+            "like_count": self.youtube_meta.get("like_count") or 0,
+            "dislike_count": self.youtube_meta.get("dislike_count") or 0,
+            "average_rating": self.youtube_meta.get("average_rating") or 0,
         }
         self.json_data.update({"stats": stats})
 
@@ -288,9 +290,9 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         self.json_data.update(
             {
                 "player": {
-                    "watched": False,
                     "duration": duration,
                     "duration_str": get_duration_str(duration),
+                    "watched": False,
                 }
             }
         )
@@ -379,8 +381,8 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             return
 
         dislikes = {
-            "dislike_count": result.get("dislikes", 0),
-            "average_rating": result.get("rating", 0),
+            "dislike_count": result.get("dislikes") or 0,
+            "average_rating": result.get("rating") or 0,
         }
         self.json_data["stats"].update(dislikes)
 
@@ -412,7 +414,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             subtitle_media_url = f"{base_name}.{lang}.vtt"
             to_add = {
                 "ext": "vtt",
-                "url": False,
+                "url": None,
                 "name": lang,
                 "lang": lang,
                 "source": "file",
@@ -433,8 +435,6 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
         if self.config["downloads"].get("add_metadata"):
             self._embed_text_data()
-
-        if self.config["downloads"].get("add_thumbnail"):
             self._embed_artwork()
 
     def _embed_text_data(self):
