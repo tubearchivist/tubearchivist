@@ -7,9 +7,11 @@ functionality:
 from datetime import datetime
 from http import cookiejar
 from io import StringIO
+from os import path
 
 import yt_dlp
 from appsettings.src.config import AppConfig
+from common.src.env_settings import EnvironmentSettings
 from common.src.ta_redis import RedisArchivist
 from django.conf import settings
 
@@ -23,6 +25,9 @@ class YtWrap:
         "socket_timeout": 10,
         "extractor_retries": 3,
         "retries": 10,
+        "cachedir": path.abspath(
+            path.join(EnvironmentSettings.CACHE_DIR, "ytdlp")
+        ),
     }
 
     def __init__(self, obs_request, config=False):
@@ -47,7 +52,10 @@ class YtWrap:
         """add cookie if enabled"""
         if self.config["downloads"]["cookie_import"]:
             cookie_io = CookieHandler(self.config).get()
-            self.obs["cookiefile"] = cookie_io
+        else:
+            cookie_io = CookieHandler(self.config).get("cookie_temp")
+
+        self.obs["cookiefile"] = cookie_io
 
     def _add_potoken(self):
         """add potoken if enabled"""
@@ -126,27 +134,37 @@ class YtWrap:
 
     def _validate_cookie(self):
         """check cookie and write it back for next use"""
-        if not self.obs.get("cookiefile"):
-            return
+        self.obs["cookiefile"].seek(0)
+        new_cookie = self.obs["cookiefile"].read().strip("\x00")
 
-        new_cookie = self.obs["cookiefile"].read()
-        old_cookie = RedisArchivist().get_message_str("cookie")
+        if self.config["downloads"]["cookie_import"]:
+            cookie_key = "cookie"
+            expire = False
+        else:
+            cookie_key = "cookie_temp"
+            expire = 60 * 30  # 30 min
+
+        old_cookie = RedisArchivist().get_message_str(cookie_key)
         if new_cookie and old_cookie != new_cookie:
-            print("refreshed stored cookie")
-            RedisArchivist().set_message("cookie", new_cookie, save=True)
+            print(f"refreshed stored {cookie_key}")
+            RedisArchivist().set_message(
+                cookie_key, new_cookie, expire=expire, save=True
+            )
 
 
 class CookieHandler:
     """handle youtube cookie for yt-dlp"""
 
+    COOKIE_EMPTY = "# Netscape HTTP Cookie File\n"
+
     def __init__(self, config):
         self.cookie_io = False
         self.config = config
 
-    def get(self):
+    def get(self, message_str: str = "cookie"):
         """get cookie io stream"""
-        cookie = RedisArchivist().get_message_str("cookie")
-        self.cookie_io = StringIO(cookie)
+        cookie = RedisArchivist().get_message_str(message_str)
+        self.cookie_io = StringIO(cookie or self.COOKIE_EMPTY)
         return self.cookie_io
 
     def set_cookie(self, cookie):

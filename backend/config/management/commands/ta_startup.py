@@ -72,6 +72,7 @@ class Command(BaseCommand):
             "import",
             "playlists",
             "videos",
+            "ytdlp",
         ]
         cache_dir = EnvironmentSettings.CACHE_DIR
         for folder in folders:
