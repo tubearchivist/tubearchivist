@@ -134,6 +134,10 @@ class YtWrap:
 
     def _validate_cookie(self):
         """check cookie and write it back for next use"""
+        if not self.obs.get("cookiefile"):
+            # empty in tests
+            return
+
         self.obs["cookiefile"].seek(0)
         new_cookie = self.obs["cookiefile"].read().strip("\x00")
 
