@@ -219,6 +219,10 @@ class ThumbManager(ThumbManagerBase):
     def embed_video_art(self, json_data: dict):
         """embed video artwork"""
         file_path = os.path.join(self.MEDIA_DIR, json_data["media_url"])
+        if not os.path.exists(file_path):
+            print(f"{self.item_id}: skip art embed, file not found")
+            return
+
         video = MP4(file_path)
 
         thumb_path = self.vid_thumb_path(absolute=True)

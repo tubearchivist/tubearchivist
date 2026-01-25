@@ -98,7 +98,7 @@ class VideoSerializer(serializers.Serializer):
     channel = ChannelSerializer(required=False)
     comment_count = serializers.IntegerField(allow_null=True, required=False)
     date_downloaded = serializers.IntegerField()
-    description = serializers.CharField(allow_null=True)
+    description = serializers.CharField(allow_null=True, required=False)
     media_size = serializers.IntegerField()
     media_url = serializers.CharField()
     player = PlayerSerializer()

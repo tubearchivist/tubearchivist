@@ -449,7 +449,7 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
         title = self.json_data["title"]
         artist = self.json_data["channel"]["channel_name"]
-        description = self.json_data["description"]
+        description = self.json_data.get("description", "")
         to_embed = self._get_to_embed()
 
         video = MP4(file_path)
