@@ -133,6 +133,19 @@ def time_parser(timestamp: str) -> float:
     return int(hours) * 60 * 60 + int(minutes) * 60 + float(seconds)
 
 
+def deep_merge(target: dict, source: dict) -> None:
+    """inplace nested dict merge, recursive"""
+    for key, value in source.items():
+        if (
+            key in target
+            and isinstance(target[key], dict)
+            and isinstance(value, dict)
+        ):
+            deep_merge(target[key], value)
+        else:
+            target[key] = value
+
+
 def clear_dl_cache(cache_dir: str) -> int:
     """clear leftover files from dl cache"""
     print("clear download cache")
