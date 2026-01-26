@@ -12,6 +12,7 @@ from os import path
 import yt_dlp
 from appsettings.src.config import AppConfig
 from common.src.env_settings import EnvironmentSettings
+from common.src.helper import deep_merge
 from common.src.ta_redis import RedisArchivist
 from django.conf import settings
 
@@ -38,7 +39,7 @@ class YtWrap:
     def build_obs(self):
         """build yt-dlp obs"""
         self.obs = self.OBS_BASE.copy()
-        self.obs.update(self.obs_request)
+        deep_merge(self.obs, self.obs_request)
         if self.config:
             self._add_cookie()
             self._add_potoken()
@@ -61,7 +62,8 @@ class YtWrap:
         """add potoken if enabled"""
         if self.config["downloads"].get("potoken"):
             potoken = POTokenHandler(self.config).get()
-            self.obs.update(
+            deep_merge(
+                self.obs,
                 {
                     "extractor_args": {
                         "youtube": {
@@ -69,7 +71,7 @@ class YtWrap:
                             "player-client": ["mweb", "default"],
                         },
                     }
-                }
+                },
             )
 
     def _add_potoken_url(self):
@@ -77,14 +79,15 @@ class YtWrap:
         if pot_provider_url := self.config["downloads"].get(
             "pot_provider_url"
         ):
-            self.obs.update(
+            deep_merge(
+                self.obs,
                 {
                     "extractor_args": {
                         "youtubepot-bgutilhttp": {
                             "base_url": [pot_provider_url]
                         }
                     }
-                }
+                },
             )
 
     def download(self, url):
