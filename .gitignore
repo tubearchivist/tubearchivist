@@ -12,5 +12,6 @@ backend/.env
 
 # JavaScript stuff
 node_modules
+frontend/dist
 
 .editorconfig
