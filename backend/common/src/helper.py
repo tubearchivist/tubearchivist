@@ -103,13 +103,15 @@ def requests_headers() -> dict[str, str]:
     return {"User-Agent": template}
 
 
-def date_parser(timestamp: int | str | None) -> str | None:
+def date_parser(timestamp: int | float | str | None) -> str | None:
     """return formatted date string"""
     if timestamp is None:
         return None
 
     if isinstance(timestamp, int):
         date_obj = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+    elif isinstance(timestamp, float):
+        date_obj = datetime.fromtimestamp(int(timestamp), tz=timezone.utc)
     elif isinstance(timestamp, str) and timestamp.isdigit():
         date_obj = datetime.fromtimestamp(int(timestamp), tz=timezone.utc)
     elif isinstance(timestamp, str):
