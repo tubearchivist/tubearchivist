@@ -148,6 +148,7 @@ class IndexPaginate:
     - callback: obj, Class implementing run method callback for every loop
     - task: task object to send notification
     - total: int, total items in index for progress message
+    - timeout: int, overwrite timeout in get request
     """
 
     DEFAULT_SIZE = 500
@@ -191,7 +192,11 @@ class IndexPaginate:
         all_results = []
         counter = 0
         while True:
-            response, _ = ElasticWrap("_search").get(data=self.data)
+            get_kwargs = {"data": self.data}
+            if timeout_overwrite := self.kwargs.get("timeout"):
+                get_kwargs.update({"timeout": timeout_overwrite})
+
+            response, _ = ElasticWrap("_search").get(**get_kwargs)
             all_hits = response["hits"]["hits"]
             if not all_hits:
                 break

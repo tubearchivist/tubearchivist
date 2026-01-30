@@ -21,7 +21,7 @@ class ElasticBackup:
     """dump index to nd-json files for later bulk import"""
 
     INDEX_SIZE_CONF = {
-        "comment": 200,
+        "comment": 100,
         "subtitle": 10000,
     }
     CACHE_DIR = EnvironmentSettings.CACHE_DIR
@@ -64,6 +64,7 @@ class ElasticBackup:
             "callback": BackupCallback,
             "task": self.task,
             "total": self._get_total(index_name),
+            "timeout": 30,
         }
 
         if size_overwrite := self.INDEX_SIZE_CONF.get(index_name):

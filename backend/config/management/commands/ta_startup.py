@@ -376,14 +376,15 @@ class Command(BaseCommand):
                     "lang": "painless",
                 },
             )
+            source = f"""
+                if (ctx._source.containsKey('channel'))
+                {{ctx._source.channel.remove('{field}');}}
+            """
             self._run_migration(
                 index_name="ta_video",
                 desc=f"fix missing data type for field channel.{field}",
                 query={"term": {f"channel.{field}": {"value": False}}},
-                script={
-                    "source": f"ctx._source.remove('channel.{field}')",
-                    "lang": "painless",
-                },
+                script={"source": source, "lang": "painless"},
             )
 
     def _mig_fix_channel_description(self) -> None:
