@@ -89,6 +89,17 @@ class YtWrap:
                     }
                 },
             )
+            return
+
+        # https://github.com/Brainicism/bgutil-ytdlp-pot-provider/pull/185
+        deep_merge(
+            self.obs,
+            {
+                "extractor_args": {
+                    "youtubepot-bgutilhttp": {"disable": ["True"]}
+                }
+            },
+        )
 
     def download(self, url):
         """make download request"""
