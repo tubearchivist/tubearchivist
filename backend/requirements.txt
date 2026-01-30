@@ -13,4 +13,4 @@ redis==7.1.0
 requests==2.32.5
 ryd-client==0.0.6
 uvicorn==0.40.0
-yt-dlp[default] @ git+https://github.com/yt-dlp/yt-dlp@23b846506378a6a9c9a0958382d37f943f7cfa51
+yt-dlp[default]==2026.1.29
