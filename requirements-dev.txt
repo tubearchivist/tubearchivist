@@ -1,5 +1,5 @@
 -r backend/requirements.txt
-ipython==9.9.0
+ipython==9.10.0
 pre-commit==4.5.1
 pylint-django==2.7.0
 pylint==4.0.4
