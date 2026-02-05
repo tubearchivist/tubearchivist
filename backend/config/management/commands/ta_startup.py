@@ -17,6 +17,7 @@ from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
 from common.src.helper import clear_dl_cache, get_channels
 from common.src.ta_redis import RedisArchivist
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import dateformat
 from django_celery_beat.models import CrontabSchedule, PeriodicTasks
@@ -53,6 +54,10 @@ class Command(BaseCommand):
         self._update_schedule_tz()
         self._init_app_config()
         self._set_ta_startup_time()
+
+        if self.skip_migrations:
+            return
+
         self._mig_add_default_playlist_sort()
         self._mig_set_channel_tabs()
         self._mig_set_video_channel_tabs()
@@ -61,6 +66,34 @@ class Command(BaseCommand):
         self._mig_fix_channel_art_types()
         self._mig_fix_channel_description()
         self._mig_fix_video_description()
+
+    @property
+    def skip_migrations(self) -> bool:
+        """
+        check if migrations should be skipped.
+        Experimental, might get replaced in the future.
+        """
+        current_version = settings.TA_VERSION.rstrip("-unstable").upper()
+        env_var = f"TA_MIG_SKIP_{current_version}"
+        skipping = bool(os.environ.get(env_var))
+
+        self.stdout.write("[MIGRATION] check, experimental")
+        if skipping:
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"    {env_var} is set, skipping migration check"
+                )
+            )
+        else:
+            self.stdout.write(
+                self.style.SUCCESS(
+                    "    Running migrations. "
+                    + "If migrations have run for this release, "
+                    + f"you can set {env_var} to skip the check"
+                )
+            )
+
+        return skipping
 
     def _make_folders(self):
         """make expected cache folders"""
