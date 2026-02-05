@@ -5,7 +5,7 @@ deepdiff==8.6.1
 django-auth-ldap==5.3.0
 django-celery-beat==2.8.1
 django-cors-headers==4.9.0
-Django==5.2.10
+Django==5.2.11
 djangorestframework==3.16.1
 drf-spectacular==0.28.0  # rc:ignore
 Pillow==12.1.0
@@ -13,4 +13,4 @@ redis==7.1.0
 requests==2.32.5
 ryd-client==0.0.6
 uvicorn==0.40.0
-yt-dlp[default]==2026.1.29
+yt-dlp[default]==2026.2.4
