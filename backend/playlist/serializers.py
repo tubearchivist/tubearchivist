@@ -22,7 +22,9 @@ class PlaylistSerializer(serializers.Serializer):
     playlist_active = serializers.BooleanField()
     playlist_channel = serializers.CharField()
     playlist_channel_id = serializers.CharField()
-    playlist_description = serializers.CharField(allow_null=True)
+    playlist_description = serializers.CharField(
+        allow_null=True, required=False
+    )
     playlist_entries = PlaylistEntrySerializer(many=True)
     playlist_id = serializers.CharField()
     playlist_last_refresh = serializers.CharField()
