@@ -103,11 +103,11 @@ class IndexFromEmbed:
 
         channel_data_clean = self.index_channel(json_embed)
         video = self.index_video(json_embed, channel_data_clean)
-        self.archive_video(video)
         self.index_subtitles(json_embed, video)
         self.index_comments(json_embed)
         self.restore_artwork(video)
         self.index_playlists(json_embed, video)
+        self.archive_video(video)
 
         return video.json_data
 
