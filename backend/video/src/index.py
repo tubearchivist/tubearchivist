@@ -15,7 +15,7 @@ from common.src.helper import get_duration_sec, get_duration_str, randomizor
 from common.src.index_generic import YouTubeItem
 from django.conf import settings
 from download.src.thumbnails import ThumbManager
-from mutagen.mp4 import MP4
+from mutagen.mp4 import MP4, MP4MetadataError
 from playlist.src import index as ta_playlist
 from ryd_client import ryd_client
 from user.src.user_config import UserConfig
@@ -434,8 +434,11 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             return
 
         if self.config["downloads"].get("add_metadata"):
-            self._embed_text_data()
-            self._embed_artwork()
+            try:
+                self._embed_text_data()
+                self._embed_artwork()
+            except MP4MetadataError as err:
+                print(f"{self.youtube_id}: embed failed: '{str(err)}'")
 
     def _embed_text_data(self):
         """embed text metadata"""
