@@ -11,6 +11,12 @@ def test_returns_scientific_timestamp_if_present():
     assert result == 1513573200
 
 
+def test_returns_scientific_timestamp_string_if_present():
+    video_data = {"timestamp": "1.5135732e9"}
+    result = PendingList._extract_published(video_data)
+    assert result == 1513573200
+
+
 def test_returns_timestamp_if_present():
     video_data = {"timestamp": 1508457600}
     result = PendingList._extract_published(video_data)

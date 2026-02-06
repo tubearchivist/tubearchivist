@@ -409,6 +409,13 @@ class PendingList(PendingIndex):
         if timestamp and isinstance(timestamp, float):
             return int(timestamp)
 
+        if timestamp and isinstance(timestamp, str):
+            try:
+                # scientific string
+                return int(float(timestamp))
+            except (TypeError, ValueError):
+                pass
+
         upload_date = video_data.get("upload_date")
         if upload_date:
             try:
