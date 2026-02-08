@@ -17,8 +17,6 @@ import updateCookie from '../api/actions/updateCookie';
 import loadCookie, { CookieStateType } from '../api/loader/loadCookie';
 import deleteCookie from '../api/actions/deleteCookie';
 import validateCookie from '../api/actions/validateCookie';
-import deletePoToken from '../api/actions/deletePoToken';
-import updatePoToken from '../api/actions/updatePoToken';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import MembershipAppsettings from '../components/MembershipAppsettings';
 
@@ -71,8 +69,6 @@ const SettingsApplication = () => {
   // Cookie
   const [cookieFormData, setCookieFormData] = useState<string>('');
   const [showCookieForm, setShowCookieForm] = useState<boolean>(false);
-  const [poTokenFormData, setPoTokenFormData] = useState<string>('web+');
-  const [showPoTokenForm, setShowPoTokenForm] = useState<boolean>(false);
   const [potProviderUrl, setPotProviderUrl] = useState<string | null>(null);
 
   // Integrations
@@ -169,18 +165,6 @@ const SettingsApplication = () => {
 
   const handleCookieValidate = async () => {
     await validateCookie();
-    setRefresh(true);
-  };
-
-  const handlePoTokenRevoke = async () => {
-    await deletePoToken();
-    setRefresh(true);
-  };
-
-  const handlePoTokenUpdate = async () => {
-    await updatePoToken(poTokenFormData);
-    setPoTokenFormData('web+');
-    setShowPoTokenForm(false);
     setRefresh(true);
   };
 
@@ -761,55 +745,6 @@ const SettingsApplication = () => {
                   ) : (
                     <div>
                       <button onClick={() => setShowCookieForm(true)}>Update Cookie</button>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="settings-box-wrapper">
-                <div>
-                  <p>Add PO Token</p>
-                </div>
-                <div>
-                  {response?.appSettingsConfig?.downloads.potoken ? (
-                    <>
-                      <p>PO Token enabled.</p>
-                      <button onClick={handlePoTokenRevoke} className="danger-button">
-                        Revoke
-                      </button>
-                    </>
-                  ) : (
-                    <p>PO Token disabled</p>
-                  )}
-                  {showPoTokenForm ? (
-                    <div>
-                      <input
-                        type="text"
-                        value={poTokenFormData}
-                        onChange={async e => {
-                          setPoTokenFormData(e.target.value);
-                        }}
-                      />
-                      {poTokenFormData !== 'web+' && (
-                        <button onClick={handlePoTokenUpdate}>Update</button>
-                      )}
-                      <button
-                        onClick={() => {
-                          setShowPoTokenForm(false);
-                          setPoTokenFormData('web+');
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
-                    <div>
-                      <button
-                        onClick={async () => {
-                          setShowPoTokenForm(true);
-                        }}
-                      >
-                        Update PO Token
-                      </button>
                     </div>
                   )}
                 </div>

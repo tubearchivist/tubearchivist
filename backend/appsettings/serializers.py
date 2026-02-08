@@ -55,7 +55,6 @@ class AppConfigDownloadsSerializer(
     )
     cookie_import = serializers.BooleanField()
     pot_provider_url = serializers.CharField(allow_null=True)
-    potoken = serializers.BooleanField()
     throttledratelimit = serializers.IntegerField(allow_null=True)
     extractor_lang = serializers.CharField(allow_null=True)
     integrate_ryd = serializers.BooleanField()
@@ -92,12 +91,6 @@ class CookieUpdateSerializer(serializers.Serializer):
     """serialize cookie to update"""
 
     cookie = serializers.CharField()
-
-
-class PoTokenSerializer(serializers.Serializer):
-    """serialize PO token"""
-
-    potoken = serializers.CharField()
 
 
 class RescanFileSystemConfig(serializers.Serializer):

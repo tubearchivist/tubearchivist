@@ -23,7 +23,6 @@ export type AppSettingsConfigType = {
     comment_sort: string;
     cookie_import: boolean;
     pot_provider_url: string | null;
-    potoken: boolean;
     throttledratelimit: number | null;
     extractor_lang: string | null;
     integrate_ryd: boolean;

@@ -42,7 +42,6 @@ class YtWrap:
         deep_merge(self.obs, self.obs_request)
         if self.config:
             self._add_cookie()
-            self._add_potoken()
             self._add_potoken_url()
 
         if getattr(settings, "DEBUG", False):
@@ -57,22 +56,6 @@ class YtWrap:
             cookie_io = CookieHandler(self.config).get("cookie_temp")
 
         self.obs["cookiefile"] = cookie_io
-
-    def _add_potoken(self):
-        """add potoken if enabled"""
-        if self.config["downloads"].get("potoken"):
-            potoken = POTokenHandler(self.config).get()
-            deep_merge(
-                self.obs,
-                {
-                    "extractor_args": {
-                        "youtube": {
-                            "po_token": [potoken],
-                            "player-client": ["mweb", "default"],
-                        },
-                    }
-                },
-            )
 
     def _add_potoken_url(self):
         """add bgutils token url"""
@@ -248,27 +231,3 @@ class CookieHandler:
             "validated_str": now.strftime("%Y-%m-%d %H:%M"),
         }
         RedisArchivist().set_message("cookie:valid", message, expire=3600)
-
-
-class POTokenHandler:
-    """handle po token"""
-
-    REDIS_KEY = "potoken"
-
-    def __init__(self, config):
-        self.config = config
-
-    def get(self) -> str | None:
-        """get PO token"""
-        potoken = RedisArchivist().get_message_str(self.REDIS_KEY)
-        return potoken
-
-    def set_token(self, new_token: str) -> None:
-        """set new PO token"""
-        RedisArchivist().set_message(self.REDIS_KEY, new_token)
-        AppConfig().update_config({"downloads": {"potoken": True}})
-
-    def revoke_token(self) -> None:
-        """revoke token"""
-        RedisArchivist().del_message(self.REDIS_KEY)
-        AppConfig().update_config({"downloads": {"potoken": False}})
