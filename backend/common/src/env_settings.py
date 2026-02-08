@@ -4,8 +4,7 @@ Functionality:
 - encapsulate persistence of application properties
 """
 
-import os.path
-from os import environ
+from os import environ, path
 
 try:
     from dotenv import load_dotenv
@@ -27,18 +26,19 @@ def get_password_from_file(env_var_name) -> str:
     if env_var_name_val is not None:
         return str(env_var_name_val)
 
-    elif env_var_path_val is not None:
-        if os.path.isfile(str(env_var_path_val)):
-            with open(
-                file=str(env_var_path_val), mode="r", encoding="utf-8"
-            ) as file:
-                return file.read()
-        else:
-            print(f"{env_var_file} file: {env_var_path_val} does not exist")
-    else:
+    if env_var_path_val is None:
         print(f"either {env_var_name} or {env_var_file} must be set")
+        return ""
 
-    return ""
+    is_path = path.isfile(env_var_path_val)
+    if not is_path:
+        print(f"{env_var_path_val} is not a path")
+        return ""
+
+    with open(env_var_path_val, "r", encoding="utf-8") as f:
+        file_content = f.read().strip()
+
+    return file_content
 
 
 class EnvironmentSettings:
