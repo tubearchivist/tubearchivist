@@ -19,7 +19,11 @@ def con_parser():
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 app = Celery(
-    "tasks", broker=con_parser(), backend=con_parser(), result_extended=True
+    "tasks",
+    broker=con_parser(),
+    backend=con_parser(),
+    result_extended=True,
+    broker_channel_error_retry=True,
 )
 app.config_from_object(
     "django.conf:settings", namespace=EnvironmentSettings.REDIS_NAME_SPACE
