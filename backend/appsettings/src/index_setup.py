@@ -292,7 +292,7 @@ class ElasticIndex:
         if settings.DEBUG:
             print(f"create alias with data: {data}")
 
-        response, status_code = ElasticWrap("_alias").put(data=data)
+        response, status_code = ElasticWrap("_aliases").post(data=data)
         if status_code not in [200, 201]:
             print(f"{status_code}: {response}")
             raise ValueError("alias update failed")
