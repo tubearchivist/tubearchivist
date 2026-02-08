@@ -140,10 +140,13 @@ class Command(BaseCommand):
         env = os.environ
         for var in EXPECTED_ENV_VARS:
             if not env.get(var):
-                message = f"    🗙 expected env var {var} not set\n    {INST}"
-                self.stdout.write(self.style.ERROR(message))
-                sleep(60)
-                raise CommandError(message)
+                if not (var.endswith("_PASSWORD") and env.get(var + "_FILE")):
+                    message = (
+                        f"    🗙 expected env var {var} not set\n    {INST}"
+                    )
+                    self.stdout.write(self.style.ERROR(message))
+                    sleep(60)
+                    raise CommandError(message)
 
         message = "    ✓ all expected env vars are set"
         self.stdout.write(self.style.SUCCESS(message))
