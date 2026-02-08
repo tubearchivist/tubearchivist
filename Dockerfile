@@ -1,11 +1,11 @@
 # multi stage to build tube archivist
 # build python wheel, download and extract ffmpeg, copy into final image
 
-FROM node:22.12.0-alpine AS npm-builder
+FROM --platform=$BUILDPLATFORM node:22.12.0-alpine AS npm-builder
 COPY frontend/package.json frontend/package-lock.json /
 RUN npm i
 
-FROM node:22.12.0-alpine AS node-builder
+FROM --platform=$BUILDPLATFORM node:22.12.0-alpine AS node-builder
 
 # RUN npm config set registry https://registry.npmjs.org/
 
