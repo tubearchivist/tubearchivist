@@ -680,16 +680,6 @@ const SettingsApplication = () => {
                       .
                     </li>
                     <li>
-                      The PO Token <i>(Proof of origin token)</i> can authenticate your request.
-                      Make sure to read the{' '}
-                      <a
-                        target="_blank"
-                        href="https://github.com/yt-dlp/yt-dlp/wiki/PO-Token-Guide"
-                      >
-                        PO guide
-                      </a>
-                    </li>
-                    <li>
                       The PO Token Provider URL running external to tubearchivist. Make sure to
                       review{' '}
                       <a
