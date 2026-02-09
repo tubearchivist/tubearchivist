@@ -35,10 +35,23 @@ ARG TARGETPLATFORM
 COPY docker_assets/ffmpeg_download.py ffmpeg_download.py
 RUN python ffmpeg_download.py $TARGETPLATFORM
 
+FROM python:3.13.11-slim-trixie AS s6-overlay
+ARG S6_OVERLAY_VERSION=3.2.2.0
+ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
+
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp/s6-noarch.tar.xz
+
+FROM s6-overlay AS s6-overlay-amd64
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp/s6.tar.xz
+
+FROM s6-overlay AS s6-overlay-arm64
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-aarch64.tar.xz /tmp/s6.tar.xz
+
 # build final image
-FROM python:3.13.11-slim-trixie AS tubearchivist
+FROM s6-overlay-${TARGETARCH} AS tubearchivist
 
 ARG INSTALL_DEBUG
+ARG TARGETPLATFORM
 
 ENV PYTHONUNBUFFERED=1
 
@@ -56,7 +69,9 @@ COPY --from=ffmpeg-builder ./ffprobe/ffprobe /usr/bin/ffprobe
 RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recommends \
     nginx \
     atomicparsley \
-    tini \
+    xz-utils \
+    s6 \
+    cron \
     curl && rm -rf /var/lib/apt/lists/*
 
 # install debug tools for testing environment
@@ -65,6 +80,12 @@ RUN if [ "$INSTALL_DEBUG" ] ; then \
     vim htop bmon net-tools iputils-ping procps lsof \
     && pip install --user ipython pytest pytest-django \
     ; fi
+
+# s6-overlay
+RUN ls -l /tmp; tar -C / -Jxpf /tmp/s6-noarch.tar.xz
+RUN tar -C / -Jxpf /tmp/s6.tar.xz
+RUN rm /tmp/*
+COPY ./s6-overlay /etc/s6-overlay
 
 # make folders
 RUN mkdir /cache /youtube /app
@@ -75,9 +96,8 @@ RUN sed -i 's/^user www\-data\;$/user root\;/' /etc/nginx/nginx.conf
 
 # copy application into container
 COPY ./backend /app
-COPY ./docker_assets/run.sh /app
 COPY ./docker_assets/backend_start.py /app
-COPY ./docker_assets/beat_auto_spawn.sh /app
+COPY ./docker_assets/*.sh /app
 
 COPY --from=node-builder ./frontend/dist /app/static
 
@@ -89,6 +109,6 @@ VOLUME /youtube
 WORKDIR /app
 EXPOSE 8000
 
-RUN chmod +x ./run.sh
+CMD ["/app/backend.sh"]
 
-CMD ["/bin/tini", "--", "./run.sh"]
+ENTRYPOINT ["/init"]

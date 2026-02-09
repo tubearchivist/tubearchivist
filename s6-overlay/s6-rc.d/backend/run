@@ -1,0 +1,3 @@
+#!/command/with-contenv bash
+. /etc/s6-overlay/scripts/base.sh
+python backend.py
