@@ -35,20 +35,25 @@ ARG TARGETPLATFORM
 COPY docker_assets/ffmpeg_download.py ffmpeg_download.py
 RUN python ffmpeg_download.py $TARGETPLATFORM
 
-FROM python:3.13.11-slim-trixie AS s6-overlay
+FROM scratch AS s6-overlay-amd64
 ARG S6_OVERLAY_VERSION=3.2.2.0
+
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /
+
+FROM scratch AS s6-overlay-arm64
+ARG S6_OVERLAY_VERSION=3.2.2.0
+
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-aarch64.tar.xz /
+
+FROM s6-overlay-${TARGETARCH} AS s6-overlay
 ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
 
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp/s6-noarch.tar.xz
-
-FROM s6-overlay AS s6-overlay-amd64
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp/s6.tar.xz
-
-FROM s6-overlay AS s6-overlay-arm64
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-aarch64.tar.xz /tmp/s6.tar.xz
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.xz /
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-arch.tar.xz /
 
 # build final image
-FROM s6-overlay-${TARGETARCH} AS tubearchivist
+FROM python:3.13.11-slim-trixie AS tubearchivist
 
 ARG INSTALL_DEBUG
 ARG TARGETPLATFORM
@@ -70,7 +75,6 @@ RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recomm
     nginx \
     atomicparsley \
     xz-utils \
-    s6 \
     cron \
     curl && rm -rf /var/lib/apt/lists/*
 
@@ -82,9 +86,9 @@ RUN if [ "$INSTALL_DEBUG" ] ; then \
     ; fi
 
 # s6-overlay
-RUN ls -l /tmp; tar -C / -Jxpf /tmp/s6-noarch.tar.xz
-RUN tar -C / -Jxpf /tmp/s6.tar.xz
-RUN rm /tmp/*
+COPY --from=s6-overlay / /s6install/
+RUN for pkg in $(ls /s6install/*.tar.xz); do tar -C / -Jxpf $pkg; done
+RUN rm -rf /s6install
 COPY ./s6-overlay /etc/s6-overlay
 
 # make folders
