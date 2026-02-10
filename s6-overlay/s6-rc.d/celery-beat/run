@@ -1,0 +1,5 @@
+#!/command/with-contenv bash
+. /app/base.sh
+celery -A task beat \
+    --loglevel=$LOGLEVEL \
+    --scheduler django_celery_beat.schedulers:DatabaseScheduler

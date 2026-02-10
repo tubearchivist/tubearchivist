@@ -1,0 +1,1 @@
+0 * * * * root s6-svc -r /run/service/celery-beat

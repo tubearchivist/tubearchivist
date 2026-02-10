@@ -1,11 +1,11 @@
 # multi stage to build tube archivist
 # build python wheel, download and extract ffmpeg, copy into final image
 
-FROM node:22.12.0-alpine AS npm-builder
+FROM --platform=$BUILDPLATFORM node:22.12.0-alpine AS npm-builder
 COPY frontend/package.json frontend/package-lock.json /
 RUN npm i
 
-FROM node:22.12.0-alpine AS node-builder
+FROM --platform=$BUILDPLATFORM node:22.12.0-alpine AS node-builder
 
 # RUN npm config set registry https://registry.npmjs.org/
 
@@ -35,10 +35,28 @@ ARG TARGETPLATFORM
 COPY docker_assets/ffmpeg_download.py ffmpeg_download.py
 RUN python ffmpeg_download.py $TARGETPLATFORM
 
+FROM scratch AS s6-overlay-amd64
+ARG S6_OVERLAY_VERSION=3.2.2.0
+
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /
+
+FROM scratch AS s6-overlay-arm64
+ARG S6_OVERLAY_VERSION=3.2.2.0
+
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-aarch64.tar.xz /
+
+FROM s6-overlay-${TARGETARCH} AS s6-overlay
+ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
+
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-noarch.tar.xz /
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-arch.tar.xz /
+
 # build final image
 FROM python:3.13.11-slim-trixie AS tubearchivist
 
 ARG INSTALL_DEBUG
+ARG TARGETPLATFORM
 
 ENV PYTHONUNBUFFERED=1
 
@@ -56,7 +74,8 @@ COPY --from=ffmpeg-builder ./ffprobe/ffprobe /usr/bin/ffprobe
 RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recommends \
     nginx \
     atomicparsley \
-    tini \
+    xz-utils \
+    cron \
     curl && rm -rf /var/lib/apt/lists/*
 
 # install debug tools for testing environment
@@ -65,6 +84,12 @@ RUN if [ "$INSTALL_DEBUG" ] ; then \
     vim htop bmon net-tools iputils-ping procps lsof \
     && pip install --user ipython pytest pytest-django \
     ; fi
+
+# s6-overlay
+COPY --from=s6-overlay / /s6install/
+RUN for pkg in $(ls /s6install/*.tar.xz); do tar -C / -Jxpf $pkg; done
+RUN rm -rf /s6install
+COPY ./s6-overlay /etc/s6-overlay
 
 # make folders
 RUN mkdir /cache /youtube /app
@@ -75,9 +100,9 @@ RUN sed -i 's/^user www\-data\;$/user root\;/' /etc/nginx/nginx.conf
 
 # copy application into container
 COPY ./backend /app
-COPY ./docker_assets/run.sh /app
 COPY ./docker_assets/backend_start.py /app
-COPY ./docker_assets/beat_auto_spawn.sh /app
+COPY ./docker_assets/*.sh /app
+COPY --chmod=600 ./docker_assets/cron.d/* /etc/cron.d
 
 COPY --from=node-builder ./frontend/dist /app/static
 
@@ -89,6 +114,6 @@ VOLUME /youtube
 WORKDIR /app
 EXPOSE 8000
 
-RUN chmod +x ./run.sh
+CMD ["/app/backend.sh"]
 
-CMD ["/bin/tini", "--", "./run.sh"]
+ENTRYPOINT ["/init"]

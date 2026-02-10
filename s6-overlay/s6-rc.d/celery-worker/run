@@ -1,0 +1,7 @@
+#!/command/with-contenv bash
+. /app/base.sh
+celery -A task.celery worker \
+    --loglevel=$LOGLEVEL \
+    --concurrency 4 \
+    --max-tasks-per-child 5 \
+    --max-memory-per-child 150000
