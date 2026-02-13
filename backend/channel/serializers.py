@@ -45,6 +45,18 @@ class ChannelSerializer(serializers.Serializer):
     channel_overwrites = ChannelOverwriteSerializer(required=False)
     channel_subs = serializers.IntegerField()
     channel_subscribed = serializers.BooleanField()
+    channel_video_count = serializers.IntegerField(
+        required=False, allow_null=True
+    )
+    channel_video_duration = serializers.IntegerField(
+        required=False, allow_null=True
+    )
+    channel_video_duration_str = serializers.CharField(
+        required=False, allow_null=True
+    )
+    channel_video_media_size = serializers.IntegerField(
+        required=False, allow_null=True
+    )
     channel_tags = serializers.ListField(
         child=serializers.CharField(), required=False
     )
