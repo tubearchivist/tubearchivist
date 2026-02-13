@@ -50,6 +50,7 @@ const SettingsApplication = () => {
   const [currentThrottledRate, setCurrentThrottledRate] = useState<number | null>(null);
   const [currentScrapingSleep, setCurrentScrapingSleep] = useState<number | null>(null);
   const [currentAutodelete, setCurrentAutodelete] = useState<number | null>(null);
+  const [stopOnBot, setStopOnBot] = useState(true);
 
   // Download Format
   const [downloadsFormat, setDownloadsFormat] = useState<string | null>(null);
@@ -106,6 +107,7 @@ const SettingsApplication = () => {
     setCurrentThrottledRate(appSettingsConfigData?.downloads.throttledratelimit || null);
     setCurrentScrapingSleep(appSettingsConfigData?.downloads.sleep_interval || null);
     setCurrentAutodelete(appSettingsConfigData?.downloads.autodelete_days || null);
+    setStopOnBot(appSettingsConfigData?.downloads.stop_on_bot ?? true);
 
     // Download Format
     setDownloadsFormat(appSettingsConfigData?.downloads.format || null);
@@ -309,6 +311,10 @@ const SettingsApplication = () => {
                       </ul>
                     </li>
                     <li>
+                      Stop on bot detection will stop the download queue when YT returns a bot
+                      detection error instead of continuing to fail every remaining video.
+                    </li>
+                    <li>
                       Auto delete deletes videos marked as watched after x days.
                       <ul>
                         <li>The cleanup task triggers after the download finishes.</li>
@@ -354,6 +360,16 @@ const SettingsApplication = () => {
                   value={currentScrapingSleep}
                   setValue={setCurrentScrapingSleep}
                   oldValue={appSettingsConfig?.downloads.sleep_interval}
+                  updateCallback={handleUpdateConfig}
+                />
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Stop queue on bot detection</p>
+                </div>
+                <ToggleConfig
+                  name="downloads.stop_on_bot"
+                  value={stopOnBot}
                   updateCallback={handleUpdateConfig}
                 />
               </div>

@@ -94,6 +94,11 @@ class YtWrap:
                 print(f"{url}: failed to download with message {err}")
                 if "Temporary failure in name resolution" in str(err):
                     raise ConnectionError("lost the internet, abort!") from err
+                if self.config["downloads"].get("stop_on_bot"):
+                    if "not a bot" in str(err):
+                        raise ConnectionError(
+                            "YouTube bot detection, abort!"
+                        ) from err
 
                 return False, str(err)
 
@@ -122,6 +127,11 @@ class YtWrap:
                 print(f"{url}: failed to get info from youtube: {err}")
                 if "Temporary failure in name resolution" in str(err):
                     raise ConnectionError("lost the internet, abort!") from err
+                if self.config["downloads"].get("stop_on_bot"):
+                    if "not a bot" in str(err):
+                        raise ConnectionError(
+                            "YouTube bot detection, abort!"
+                        ) from err
 
                 return None, str(err)
 
