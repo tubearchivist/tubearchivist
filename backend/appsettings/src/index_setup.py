@@ -114,6 +114,8 @@ class ElasticIndex:
         now_set = self.details["settings"]["index"]
 
         for key, value in self.expected_set.items():
+            if key == "number_of_replicas":
+                continue
             if key not in now_set.keys():
                 print(key, value)
                 return True
