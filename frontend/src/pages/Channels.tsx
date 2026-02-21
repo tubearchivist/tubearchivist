@@ -2,6 +2,7 @@ import { useOutletContext } from 'react-router-dom';
 import loadChannelList, { ChannelsListResponse } from '../api/loader/loadChannelList';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
+import iconTableView from '/img/icon-tableview.svg';
 import iconAdd from '/img/icon-add.svg';
 import iconFilter from '/img/icon-filter.svg';
 import { useEffect, useState } from 'react';
@@ -41,6 +42,10 @@ export type ChannelType = {
   channel_tags?: string[];
   channel_thumb_url: string;
   channel_tvart_url: string;
+  channel_video_count?: number;
+  channel_video_duration?: number;
+  channel_video_duration_str?: string;
+  channel_video_media_size?: number;
 };
 
 const Channels = () => {
@@ -193,6 +198,17 @@ const Channels = () => {
               data-origin="channel"
               data-value="list"
               alt="list view"
+            />
+            <img
+              src={iconTableView}
+              onClick={() => {
+                handleUserConfigUpdate({
+                  view_style_channel: ViewStylesEnum.Table as ViewStylesType,
+                });
+              }}
+              data-origin="channel"
+              data-value="table"
+              alt="table view"
             />
           </div>
         </div>
