@@ -149,6 +149,7 @@ class IndexPaginate:
     - task: task object to send notification
     - total: int, total items in index for progress message
     - timeout: int, overwrite timeout in get request
+    - pit_keep_alive: int, overwrite pit valid
     """
 
     DEFAULT_SIZE = 500
@@ -169,7 +170,8 @@ class IndexPaginate:
 
     def get_pit(self):
         """get pit for index"""
-        path = f"{self.index_name}/_pit?keep_alive=15m"
+        keep_alive = self.kwargs.get("pit_keep_alive", 15)
+        path = f"{self.index_name}/_pit?keep_alive={keep_alive}m"
         response, _ = ElasticWrap(path).post()
         self.pit_id = response["id"]
 
