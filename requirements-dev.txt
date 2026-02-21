@@ -2,8 +2,8 @@
 ipython==9.10.0
 pre-commit==4.5.1
 pylint-django==2.7.0
-pylint==4.0.4
-pytest-django==4.11.1
+pylint==4.0.5
+pytest-django==4.12.0
 pytest==9.0.2
 python-dotenv==1.2.1
 requirementscheck==0.1.0
