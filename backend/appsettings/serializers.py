@@ -59,7 +59,6 @@ class AppConfigDownloadsSerializer(
     extractor_lang = serializers.CharField(allow_null=True)
     integrate_ryd = serializers.BooleanField()
     integrate_sponsorblock = serializers.BooleanField()
-    stop_on_bot = serializers.BooleanField()
 
 
 class AppConfigAppSerializer(
