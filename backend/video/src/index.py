@@ -334,7 +334,11 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         )
 
     def _get_download_container(self) -> str:
-        """resolve container with channel overwrites"""
+        """resolve container with channel overwrites.
+
+        MKV is only forced when audio_multistream is effectively enabled.
+        audio_languages alone must not override the container (Option A / strict).
+        """
         container = self.config["downloads"].get("container", "mp4")
         channel_overwrites = self.json_data.get("channel", {}).get(
             "channel_overwrites", {}
@@ -342,17 +346,14 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         if channel_overwrites.get("download_container"):
             container = channel_overwrites.get("download_container")
 
-        # audio_languages or audio_multistream forces mkv for multi-stream support
-        audio_languages = (
-            channel_overwrites.get("audio_languages")
-            or self.config["downloads"].get("audio_languages")
-        )
+        # audio_multistream being on requires mkv for multi-track muxing.
+        # Respect channel override false explicitly (suppress global setting).
         audio_multistream = (
             channel_overwrites.get("audio_multistream")
             if channel_overwrites.get("audio_multistream") is not None
             else self.config["downloads"].get("audio_multistream")
         )
-        if audio_languages or audio_multistream:
+        if audio_multistream:
             container = "mkv"
 
         return container

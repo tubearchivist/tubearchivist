@@ -14,6 +14,7 @@ import useIsAdmin from '../functions/useIsAdmin';
 import InputConfig from '../components/InputConfig';
 import ToggleConfig from '../components/ToggleConfig';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import { useAppSettingsStore } from '../stores/AppSettingsStore';
 import { ApiResponseType } from '../functions/APIClient';
 
 export type ChannelBaseOutletContextType = {
@@ -35,6 +36,7 @@ type ChannelAboutParams = {
 const ChannelAbout = () => {
   const { channelId } = useParams() as ChannelAboutParams;
   const { userConfig } = useUserConfigStore();
+  const { appSettingsConfig } = useAppSettingsStore();
   const { setStartNotification } = useOutletContext() as ChannelBaseOutletContextType;
   const navigate = useNavigate();
   const isAdmin = useIsAdmin();
@@ -128,6 +130,11 @@ const ChannelAbout = () => {
   if (!channel) {
     return 'Channel not found!';
   }
+
+  // The effective container is the channel override if set, otherwise the global setting.
+  const globalContainer = appSettingsConfig.downloads.container ?? 'mp4';
+  const effectiveContainer = downloadContainer ?? globalContainer;
+  const isMkvActive = effectiveContainer === 'mkv';
 
   return (
     <>
@@ -342,9 +349,9 @@ const ChannelAbout = () => {
                 <ToggleConfig
                   name="audio_multistream"
                   value={audioMultistream ?? false}
-                  disabled={(downloadContainer ?? 'mp4') !== 'mkv'}
+                  disabled={!isMkvActive}
                   helperText={
-                    (downloadContainer ?? 'mp4') !== 'mkv'
+                    !isMkvActive
                       ? 'Choose mkv above (or use the global mkv setting) to enable multiple audio tracks.'
                       : 'Downloads every available audio language for this channel.'
                   }
@@ -358,19 +365,21 @@ const ChannelAbout = () => {
                   <p className="settings-error">{audioMultistreamWarning}</p>
                 )}
               </div>
-              <div className="settings-box-wrapper">
-                <div>
-                  <p>Audio Languages</p>
+              {isMkvActive && (
+                <div className="settings-box-wrapper">
+                  <div>
+                    <p>Audio Languages</p>
+                  </div>
+                  <InputConfig
+                    type="text"
+                    name="audio_languages"
+                    value={audioLanguages}
+                    setValue={setAudioLanguages}
+                    oldValue={channel.channel_overwrites?.audio_languages ?? null}
+                    updateCallback={handleUpdateConfig}
+                  />
                 </div>
-                <InputConfig
-                  type="text"
-                  name="audio_languages"
-                  value={audioLanguages}
-                  setValue={setAudioLanguages}
-                  oldValue={channel.channel_overwrites?.audio_languages ?? null}
-                  updateCallback={handleUpdateConfig}
-                />
-              </div>
+              )}
               <div className="settings-box-wrapper">
                 <div>
                   <p>

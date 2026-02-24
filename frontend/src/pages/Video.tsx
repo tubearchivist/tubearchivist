@@ -19,7 +19,6 @@ import humanFileSize from '../functions/humanFileSize';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import ChannelOverview from '../components/ChannelOverview';
 import deleteVideo from '../api/actions/deleteVideo';
-import capitalizeFirstLetter from '../functions/capitalizeFirstLetter';
 import formatDate from '../functions/formatDates';
 import formatNumbers from '../functions/formatNumbers';
 import queueReindex from '../api/actions/queueReindex';
@@ -465,15 +464,40 @@ const Video = () => {
 
             {video.streams &&
               video.streams.map(stream => {
+                const bitrateDisplay =
+                  stream.bitrate > 0
+                    ? `${humanFileSize(stream.bitrate, useSiUnits)}/s`
+                    : null;
+
+                if (stream.type === 'video') {
+                  return (
+                    <p key={stream.index}>
+                      Video: {stream.codec}
+                      {bitrateDisplay && <> {bitrateDisplay}</>}
+                      {stream.width && (
+                        <>
+                          <span className="space-carrot">|</span> {stream.width}x{stream.height}
+                        </>
+                      )}
+                    </p>
+                  );
+                }
+
+                // Audio stream
+                const langLabel = stream.title || stream.language?.toUpperCase() || null;
+                const layoutLabel = stream.channel_layout || (stream.channels ? `${stream.channels}ch` : null);
+
                 return (
                   <p key={stream.index}>
-                    {capitalizeFirstLetter(stream.type)}: {stream.codec}{' '}
-                    {humanFileSize(stream.bitrate, useSiUnits)}/s
-                    {stream.width && (
+                    Audio
+                    {langLabel && <> [{langLabel}]</>}:{' '}
+                    {stream.codec}
+                    {bitrateDisplay && <> {bitrateDisplay}</>}
+                    {layoutLabel && (
                       <>
-                        <span className="space-carrot">|</span> {stream.width}x{stream.height}
+                        <span className="space-carrot">|</span> {layoutLabel}
                       </>
-                    )}{' '}
+                    )}
                   </p>
                 );
               })}

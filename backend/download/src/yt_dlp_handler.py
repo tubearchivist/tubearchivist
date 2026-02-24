@@ -376,7 +376,14 @@ class VideoDownloader(DownloaderBase):
             obs["audio_multistreams"] = overwrites.get("audio_multistream")
 
     def _get_audio_languages(self, channel_id: str) -> list[str] | None:
-        """get audio languages from config or channel overwrites"""
+        """get audio languages from config or channel overwrites.
+
+        Returns None if audio_multistream is not effectively enabled — audio_languages
+        alone must not force multi-track downloads (Option A / strict mode).
+        """
+        if not self._is_audio_multistream_enabled(channel_id):
+            return None
+
         overwrites = self.channel_overwrites.get(channel_id, {})
         audio_languages = overwrites.get(
             "audio_languages",

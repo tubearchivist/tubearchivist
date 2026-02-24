@@ -60,6 +60,10 @@ class StreamItemSerializer(serializers.Serializer):
     index = serializers.IntegerField()
     type = serializers.ChoiceField(choices=["video", "audio"])
     width = serializers.IntegerField(required=False)
+    language = serializers.CharField(required=False, allow_null=True)
+    title = serializers.CharField(required=False, allow_null=True)
+    channels = serializers.IntegerField(required=False, allow_null=True)
+    channel_layout = serializers.CharField(required=False, allow_null=True)
 
 
 class SubtitleFragmentSerializer(serializers.Serializer):

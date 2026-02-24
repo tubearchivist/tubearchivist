@@ -47,6 +47,10 @@ export type StreamType = {
   width?: number;
   height?: number;
   bitrate: number;
+  language?: string | null;
+  title?: string | null;
+  channels?: number | null;
+  channel_layout?: string | null;
 };
 
 export type Subtitles = {

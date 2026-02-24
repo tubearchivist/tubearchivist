@@ -65,12 +65,41 @@ class MediaStreamExtractor:
 
     def _extract_audio_metadata(self, stream) -> None:
         """extract audio metadata"""
+        tags = stream.get("tags", {})
+
+        # Bitrate: prefer stream-level, fall back to BPS tag (common in MKV)
+        bitrate_raw = stream.get("bit_rate")
+        if not bitrate_raw:
+            bps_tag = tags.get("BPS") or tags.get("BPS-eng") or tags.get("NUMBER_OF_BYTES")
+            if bps_tag:
+                try:
+                    bitrate_raw = int(bps_tag)
+                except (TypeError, ValueError):
+                    bitrate_raw = 0
+            else:
+                bitrate_raw = 0
+
+        language = tags.get("language") or tags.get("LANGUAGE") or None
+        # Normalise "und" (undetermined) to None
+        if language == "und":
+            language = None
+
+        track_title = tags.get("title") or tags.get("TITLE") or None
+
+        # Channels: prefer channel_layout label, fall back to channel count
+        channel_layout = stream.get("channel_layout")
+        channels = stream.get("channels")
+
         self.metadata.append(
             {
-                "bitrate": int(stream.get("bit_rate", 0)),
+                "bitrate": int(bitrate_raw),
                 "codec": stream.get("codec_name", "undefined"),
                 "index": stream["index"],
                 "type": "audio",
+                "language": language,
+                "title": track_title,
+                "channels": channels,
+                "channel_layout": channel_layout,
             }
         )
 
