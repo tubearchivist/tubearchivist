@@ -223,6 +223,10 @@ class ThumbManager(ThumbManagerBase):
             print(f"{self.item_id}: skip art embed, file not found")
             return
 
+        if not json_data.get("media_url", "").endswith(".mp4"):
+            print(f"{self.item_id}: skip art embed, mp4-only")
+            return
+
         video = MP4(file_path)
 
         thumb_path = self.vid_thumb_path(absolute=True)

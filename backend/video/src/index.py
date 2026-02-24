@@ -275,14 +275,24 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         """find video path in dl cache"""
         cache_dir = EnvironmentSettings.CACHE_DIR
         video_id = self.json_data["youtube_id"]
-        cache_path = f"{cache_dir}/download/{video_id}.mp4"
+        container = self._get_download_container()
+        cache_path = f"{cache_dir}/download/{video_id}.{container}"
         if os.path.exists(cache_path):
             return cache_path
+
+        # check for mkv from audio_languages override
+        mkv_cache = f"{cache_dir}/download/{video_id}.mkv"
+        if os.path.exists(mkv_cache):
+            return mkv_cache
+
+        legacy_cache = f"{cache_dir}/download/{video_id}.mp4"
+        if os.path.exists(legacy_cache):
+            return legacy_cache
 
         channel_path = os.path.join(
             EnvironmentSettings.MEDIA_DIR,
             self.json_data["channel"]["channel_id"],
-            f"{video_id}.mp4",
+            f"{video_id}.{container}",
         )
         if os.path.exists(channel_path):
             return channel_path
@@ -317,10 +327,30 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def add_file_path(self):
         """build media_url for where file will be located"""
+        container = self._get_download_container()
         self.json_data["media_url"] = os.path.join(
             self.json_data["channel"]["channel_id"],
-            self.json_data["youtube_id"] + ".mp4",
+            self.json_data["youtube_id"] + f".{container}",
         )
+
+    def _get_download_container(self) -> str:
+        """resolve container with channel overwrites"""
+        container = self.config["downloads"].get("container", "mp4")
+        channel_overwrites = self.json_data.get("channel", {}).get(
+            "channel_overwrites", {}
+        )
+        if channel_overwrites.get("download_container"):
+            container = channel_overwrites.get("download_container")
+
+        # audio_languages forces mkv for multi-stream support
+        audio_languages = (
+            channel_overwrites.get("audio_languages")
+            or self.config["downloads"].get("audio_languages")
+        )
+        if audio_languages:
+            container = "mkv"
+
+        return container
 
     def delete_media_file(self):
         """delete video file, meta data"""
@@ -441,6 +471,11 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             return
 
         if self.config["downloads"].get("add_metadata"):
+            if not self.json_data.get("media_url", "").endswith(".mp4"):
+                print(
+                    f"{self.youtube_id}: skip embed, metadata is mp4-only"
+                )
+                return
             try:
                 self._embed_text_data()
                 self._embed_artwork()

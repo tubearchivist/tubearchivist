@@ -183,7 +183,7 @@ const VideoPlayer = ({
   const escapePressed = useKeyPress('Escape');
 
   const videoId = video.youtube_id;
-  const videoUrl = video.media_url;
+  const videoUrl = `/api/video/${video.youtube_id}/stream/`;
   const videoThumbUrl = video.vid_thumb_url;
   const watched = video.player.watched;
   const duration = video.player.duration;

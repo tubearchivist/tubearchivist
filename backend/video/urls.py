@@ -26,6 +26,11 @@ urlpatterns = [
         name="api-video-comment",
     ),
     path(
+        "<slug:video_id>/stream/",
+        views.VideoStreamView.as_view(),
+        name="api-video-stream",
+    ),
+    path(
         "<slug:video_id>/similar/",
         views.VideoSimilarView.as_view(),
         name="api-video-similar",

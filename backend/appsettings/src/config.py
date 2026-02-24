@@ -47,6 +47,8 @@ class DownloadsConfigType(TypedDict):
     integrate_ryd: bool
     integrate_sponsorblock: bool
     audio_multistream: bool
+    audio_languages: str | None
+    container: Literal["mp4", "mkv"]
 
 
 class ApplicationConfigType(TypedDict):
@@ -97,6 +99,8 @@ class AppConfig:
             "integrate_ryd": False,
             "integrate_sponsorblock": False,
             "audio_multistream": False,
+            "audio_languages": None,
+            "container": "mp4",
         },
         "application": {
             "enable_snapshot": True,

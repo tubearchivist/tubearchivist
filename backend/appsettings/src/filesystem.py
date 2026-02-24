@@ -53,7 +53,7 @@ class Scanner:
                 {
                     (i.split(".")[0], f"{channel}/{i}")
                     for i in files
-                    if i.endswith(".mp4")
+                    if i.endswith((".mp4", ".mkv"))
                 }
             )
 

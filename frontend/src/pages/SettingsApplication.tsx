@@ -57,6 +57,9 @@ const SettingsApplication = () => {
   const [downloadsExtractorLang, setDownloadsExtractorLang] = useState<string | null>(null);
   const [embedMetadata, setEmbedMetadata] = useState(false);
   const [audioMultistream, setAudioMultistream] = useState(false);
+  const [downloadContainer, setDownloadContainer] = useState<'mp4' | 'mkv'>('mp4');
+  const [audioLanguages, setAudioLanguages] = useState<string | null>(null);
+  const [audioMultistreamWarning, setAudioMultistreamWarning] = useState<string | null>(null);
 
   // Subtitles
   const [subtitleLang, setSubtitleLang] = useState<string | null>(null);
@@ -114,6 +117,9 @@ const SettingsApplication = () => {
     setDownloadsExtractorLang(appSettingsConfigData?.downloads.extractor_lang || null);
     setEmbedMetadata(appSettingsConfigData?.downloads.add_metadata || false);
     setAudioMultistream(appSettingsConfigData?.downloads.audio_multistream || false);
+    setAudioLanguages(appSettingsConfigData?.downloads.audio_languages || null);
+    setDownloadContainer(appSettingsConfigData?.downloads.container || 'mp4');
+    setAudioMultistreamWarning(null);
 
     // Subtitles
     setSubtitleLang(appSettingsConfigData?.downloads.subtitle || null);
@@ -149,7 +155,12 @@ const SettingsApplication = () => {
   ) => {
     const [group, key] = configKey.split('.');
     const updatedConfig = { [group]: { [key]: configValue } } as Partial<AppSettingsConfigType>;
-    await updateAppsettingsConfig(updatedConfig);
+    const response = await updateAppsettingsConfig(updatedConfig);
+    if (response?.error?.error) {
+      setAudioMultistreamWarning(response.error.error);
+      return;
+    }
+    setAudioMultistreamWarning(null);
     setRefresh(true);
   };
 
@@ -516,6 +527,25 @@ const SettingsApplication = () => {
               </div>
               <div className="settings-box-wrapper">
                 <div>
+                  <p>Download container</p>
+                </div>
+                <div>
+                  <select
+                    name="downloads.container"
+                    value={downloadContainer}
+                    onChange={event => {
+                      const value = event.target.value as 'mp4' | 'mkv';
+                      setDownloadContainer(value);
+                      handleUpdateConfig('downloads.container', value);
+                    }}
+                  >
+                    <option value="mp4">mp4 (browser friendly)</option>
+                    <option value="mkv">mkv (multi-audio)</option>
+                  </select>
+                </div>
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
                   <p>Embed metadata</p>
                 </div>
                 <ToggleConfig
@@ -531,9 +561,33 @@ const SettingsApplication = () => {
                 <ToggleConfig
                   name="downloads.audio_multistream"
                   value={audioMultistream}
+                  disabled={downloadContainer !== 'mkv'}
+                  helperText={
+                    downloadContainer !== 'mkv'
+                      ? 'Select the mkv container to enable multiple audio tracks.'
+                      : 'Downloads all available audio languages when supported.'
+                  }
                   updateCallback={handleUpdateConfig}
                 />
+                {audioMultistreamWarning && (
+                  <p className="settings-error">{audioMultistreamWarning}</p>
+                )}
               </div>
+              {audioMultistream && downloadContainer === 'mkv' && (
+                <div className="settings-box-wrapper">
+                  <div>
+                    <p>Audio languages</p>
+                  </div>
+                  <InputConfig
+                    type="text"
+                    name="downloads.audio_languages"
+                    value={audioLanguages}
+                    setValue={setAudioLanguages}
+                    oldValue={appSettingsConfig.downloads.audio_languages}
+                    updateCallback={handleUpdateConfig}
+                  />
+                </div>
+              )}
             </div>
             <div className="info-box-item">
               <h2 id="subtitles">Subtitles</h2>

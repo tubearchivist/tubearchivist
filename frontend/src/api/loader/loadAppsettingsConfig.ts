@@ -28,6 +28,8 @@ export type AppSettingsConfigType = {
     integrate_ryd: boolean;
     integrate_sponsorblock: boolean;
     audio_multistream: boolean;
+    audio_languages: string | null;
+    container: 'mp4' | 'mkv';
   };
   application: {
     enable_snapshot: boolean;

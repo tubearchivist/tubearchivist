@@ -7,6 +7,10 @@ from common.src.watched import WatchState
 from common.views_base import AdminWriteOnly, ApiBaseView
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from playlist.src.index import YoutubePlaylist
+import os
+import subprocess
+
+from django.http import FileResponse
 from rest_framework.response import Response
 from video.serializers import (
     CommentItemSerializer,
@@ -17,6 +21,7 @@ from video.serializers import (
     VideoProgressUpdateSerializer,
     VideoSerializer,
 )
+from common.src.env_settings import EnvironmentSettings
 from video.src.index import YoutubeVideo
 from video.src.query_building import QueryBuilder
 
@@ -287,3 +292,77 @@ class VideoSimilarView(ApiBaseView):
         self.get_document_list(request, pagination=False)
         serializer = VideoSerializer(self.response["data"], many=True)
         return Response(serializer.data)
+
+
+class VideoStreamView(ApiBaseView):
+    """resolves to /api/video/<video_id>/stream/
+    GET: return mp4 stream for playback
+    """
+
+    search_base = "ta_video/_doc/"
+
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(description="video stream"),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="video not found"
+            ),
+        },
+    )
+    def get(self, request, video_id):
+        """stream video or transcode to mp4"""
+        self.get_document(video_id)
+        if self.status_code == 404:
+            error = ErrorResponseSerializer({"error": "video not found"})
+            return Response(error.data, status=404)
+
+        media_url = self.response.get("media_url")
+        if not media_url:
+            error = ErrorResponseSerializer({"error": "video missing"})
+            return Response(error.data, status=404)
+
+        media_path = os.path.join(EnvironmentSettings.MEDIA_DIR, media_url)
+        if not os.path.exists(media_path):
+            error = ErrorResponseSerializer({"error": "video missing"})
+            return Response(error.data, status=404)
+
+        if media_url.endswith(".mp4"):
+            response = FileResponse(open(media_path, "rb"))
+            response["Content-Type"] = "video/mp4"
+            return response
+
+        cache_dir = os.path.join(EnvironmentSettings.CACHE_DIR, "transcode")
+        os.makedirs(cache_dir, exist_ok=True)
+        cache_path = os.path.join(cache_dir, f"{video_id}.mp4")
+
+        if not os.path.exists(cache_path):
+            cmd = [
+                "ffmpeg",
+                "-y",
+                "-i",
+                media_path,
+                "-map",
+                "0:v:0",
+                "-map",
+                "0:a",
+                "-c:v",
+                "libx264",
+                "-preset",
+                "veryfast",
+                "-crf",
+                "23",
+                "-c:a",
+                "aac",
+                "-movflags",
+                "+faststart",
+                cache_path,
+            ]
+            subprocess.run(cmd, check=False)
+
+        if not os.path.exists(cache_path):
+            error = ErrorResponseSerializer({"error": "transcode failed"})
+            return Response(error.data, status=404)
+
+        response = FileResponse(open(cache_path, "rb"))
+        response["Content-Type"] = "video/mp4"
+        return response

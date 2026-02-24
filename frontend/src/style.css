@@ -247,6 +247,18 @@ button:disabled:hover {
   text-align: center;
 }
 
+.settings-help-text {
+  color: var(--accent-font-light);
+  font-size: 0.85em;
+  margin-bottom: 5px;
+}
+
+.settings-error {
+  color: var(--highlight-error-light);
+  font-size: 0.9em;
+  margin-top: 5px;
+}
+
 .top-banner {
   background-image: var(--banner);
   background-repeat: no-repeat;
@@ -277,6 +289,11 @@ button:disabled:hover {
 .toggle {
   display: flex;
   align-items: center;
+}
+
+.toggle input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .toggleBox > input[type='checkbox'] {

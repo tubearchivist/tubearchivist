@@ -24,6 +24,7 @@ export const useAppSettingsStore = create<AppSettingsState>(set => ({
       format_sort: null,
       add_metadata: false,
       audio_multistream: false,
+      audio_languages: null,
       subtitle: null,
       subtitle_source: null,
       subtitle_index: false,
@@ -35,6 +36,7 @@ export const useAppSettingsStore = create<AppSettingsState>(set => ({
       extractor_lang: null,
       integrate_ryd: false,
       integrate_sponsorblock: false,
+      container: 'mp4',
     },
     application: {
       enable_snapshot: false,

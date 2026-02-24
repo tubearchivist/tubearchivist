@@ -108,7 +108,8 @@ class YoutubeSubtitle:
     def get_media_url(self, lang: str) -> str:
         """get media url"""
         video_media_url = self.video.json_data["media_url"]
-        media_url = video_media_url.replace(".mp4", f".{lang}.vtt")
+        base_name, _ = os.path.splitext(video_media_url)
+        media_url = f"{base_name}.{lang}.vtt"
         return media_url
 
     def get_es_subtitles(self) -> list[dict]:

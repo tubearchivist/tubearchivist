@@ -60,6 +60,8 @@ class AppConfigDownloadsSerializer(
     integrate_ryd = serializers.BooleanField()
     integrate_sponsorblock = serializers.BooleanField()
     audio_multistream = serializers.BooleanField()
+    audio_languages = serializers.CharField(allow_null=True)
+    container = serializers.ChoiceField(choices=["mp4", "mkv"])
 
 
 class AppConfigAppSerializer(

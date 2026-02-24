@@ -47,7 +47,9 @@ const ChannelAbout = () => {
   const [channelResponse, setChannelResponse] = useState<ApiResponseType<ChannelResponseType>>();
 
   const [downloadFormat, setDownloadFormat] = useState<string | null>(null);
+  const [downloadContainer, setDownloadContainer] = useState<'mp4' | 'mkv' | null>(null);
   const [audioMultistream, setAudioMultistream] = useState<boolean | null>(null);
+  const [audioMultistreamWarning, setAudioMultistreamWarning] = useState<string | null>(null);
   const [autoDeleteAfter, setAutoDeleteAfter] = useState<number | null>(null);
   const [indexPlaylists, setIndexPlaylists] = useState(false);
   const [enableSponsorblock, setEnableSponsorblock] = useState<boolean | null>(null);
@@ -67,9 +69,13 @@ const ChannelAbout = () => {
 
         setChannelResponse(channelResponse);
         setDownloadFormat(channelResponseData?.channel_overwrites?.download_format ?? null);
+        setDownloadContainer(
+          channelResponseData?.channel_overwrites?.download_container ?? null,
+        );
         setAudioMultistream(
           channelResponseData?.channel_overwrites?.audio_multistream ?? null,
         );
+        setAudioMultistreamWarning(null);
         setAutoDeleteAfter(channelResponseData?.channel_overwrites?.autodelete_days ?? null);
         setIndexPlaylists(channelResponseData?.channel_overwrites?.index_playlists ?? false);
         setEnableSponsorblock(
@@ -95,11 +101,14 @@ const ChannelAbout = () => {
     configValue: string | boolean | number | null,
   ) => {
     if (!channel) return;
-    await updateChannelOverwrites(channel.channel_id, configKey, configValue);
+    const response = await updateChannelOverwrites(channel.channel_id, configKey, configValue);
+    if (response?.error?.error) {
+      setAudioMultistreamWarning(response.error.error);
+      return;
+    }
+    setAudioMultistreamWarning(null);
     if (configKey === 'audio_multistream') {
-      setAudioMultistream(
-        configValue === null ? null : Boolean(configValue),
-      );
+      setAudioMultistream(configValue === null ? null : Boolean(configValue));
     }
     setRefresh(true);
   };
@@ -301,17 +310,51 @@ const ChannelAbout = () => {
               </div>
               <div className="settings-box-wrapper">
                 <div>
+                  <p>Download Container</p>
+                </div>
+                <div>
+                  <select
+                    name="download_container"
+                    value={downloadContainer ?? ''}
+                    onChange={event => {
+                      const value = event.target.value as 'mp4' | 'mkv' | '';
+                      if (value === '') {
+                        handleUpdateConfig('download_container', null);
+                        setDownloadContainer(null);
+                        return;
+                      }
+                      handleUpdateConfig('download_container', value);
+                      setDownloadContainer(value);
+                    }}
+                  >
+                    <option value="">(use global)</option>
+                    <option value="mp4">mp4</option>
+                    <option value="mkv">mkv</option>
+                  </select>
+                </div>
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
                   <p>Enable multistream audio</p>
                 </div>
                 <ToggleConfig
                   name="audio_multistream"
                   value={audioMultistream ?? false}
+                  disabled={(downloadContainer ?? 'mp4') !== 'mkv'}
+                  helperText={
+                    (downloadContainer ?? 'mp4') !== 'mkv'
+                      ? 'Choose mkv above (or use the global mkv setting) to enable multiple audio tracks.'
+                      : 'Downloads every available audio language for this channel.'
+                  }
                   updateCallback={handleUpdateConfig}
                   resetCallback={() => {
                     handleUpdateConfig('audio_multistream', null);
                     setAudioMultistream(null);
                   }}
                 />
+                {audioMultistreamWarning && (
+                  <p className="settings-error">{audioMultistreamWarning}</p>
+                )}
               </div>
               <div className="settings-box-wrapper">
                 <div>
