@@ -59,6 +59,7 @@ class AppConfigDownloadsSerializer(
     extractor_lang = serializers.CharField(allow_null=True)
     integrate_ryd = serializers.BooleanField()
     integrate_sponsorblock = serializers.BooleanField()
+    audio_multistream = serializers.BooleanField()
 
 
 class AppConfigAppSerializer(

@@ -46,6 +46,7 @@ class DownloadsConfigType(TypedDict):
     extractor_lang: str | None
     integrate_ryd: bool
     integrate_sponsorblock: bool
+    audio_multistream: bool
 
 
 class ApplicationConfigType(TypedDict):
@@ -95,6 +96,7 @@ class AppConfig:
             "extractor_lang": None,
             "integrate_ryd": False,
             "integrate_sponsorblock": False,
+            "audio_multistream": False,
         },
         "application": {
             "enable_snapshot": True,

@@ -47,6 +47,7 @@ const ChannelAbout = () => {
   const [channelResponse, setChannelResponse] = useState<ApiResponseType<ChannelResponseType>>();
 
   const [downloadFormat, setDownloadFormat] = useState<string | null>(null);
+  const [audioMultistream, setAudioMultistream] = useState<boolean | null>(null);
   const [autoDeleteAfter, setAutoDeleteAfter] = useState<number | null>(null);
   const [indexPlaylists, setIndexPlaylists] = useState(false);
   const [enableSponsorblock, setEnableSponsorblock] = useState<boolean | null>(null);
@@ -66,6 +67,9 @@ const ChannelAbout = () => {
 
         setChannelResponse(channelResponse);
         setDownloadFormat(channelResponseData?.channel_overwrites?.download_format ?? null);
+        setAudioMultistream(
+          channelResponseData?.channel_overwrites?.audio_multistream ?? null,
+        );
         setAutoDeleteAfter(channelResponseData?.channel_overwrites?.autodelete_days ?? null);
         setIndexPlaylists(channelResponseData?.channel_overwrites?.index_playlists ?? false);
         setEnableSponsorblock(
@@ -92,6 +96,11 @@ const ChannelAbout = () => {
   ) => {
     if (!channel) return;
     await updateChannelOverwrites(channel.channel_id, configKey, configValue);
+    if (configKey === 'audio_multistream') {
+      setAudioMultistream(
+        configValue === null ? null : Boolean(configValue),
+      );
+    }
     setRefresh(true);
   };
 
@@ -270,6 +279,10 @@ const ChannelAbout = () => {
                     <li>
                       Once you click on <i>Configure</i>, this will activate sponsorblock settings.
                     </li>
+                    <li>
+                      Enable multistream audio to download all available audio languages for this
+                      channel.
+                    </li>
                   </ul>
                 </div>
               )}
@@ -284,6 +297,20 @@ const ChannelAbout = () => {
                   setValue={setDownloadFormat}
                   oldValue={channel.channel_overwrites?.download_format ?? null}
                   updateCallback={handleUpdateConfig}
+                />
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Enable multistream audio</p>
+                </div>
+                <ToggleConfig
+                  name="audio_multistream"
+                  value={audioMultistream ?? false}
+                  updateCallback={handleUpdateConfig}
+                  resetCallback={() => {
+                    handleUpdateConfig('audio_multistream', null);
+                    setAudioMultistream(null);
+                  }}
                 />
               </div>
               <div className="settings-box-wrapper">

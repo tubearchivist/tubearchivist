@@ -174,6 +174,8 @@ class VideoDownloader(DownloaderBase):
             format_sort = self.config["downloads"]["format_sort"]
             format_sort_list = [i.strip() for i in format_sort.split(",")]
             self.obs["format_sort"] = format_sort_list
+        if self.config["downloads"].get("audio_multistream"):
+            self.obs["audio_multistream"] = True
         if self.config["downloads"]["limit_speed"]:
             self.obs["ratelimit"] = (
                 self.config["downloads"]["limit_speed"] * 1024
@@ -203,6 +205,8 @@ class VideoDownloader(DownloaderBase):
         overwrites = self.channel_overwrites.get(channel_id)
         if overwrites and overwrites.get("download_format"):
             obs["format"] = overwrites.get("download_format")
+        if overwrites and overwrites.get("audio_multistream") is not None:
+            obs["audio_multistream"] = overwrites.get("audio_multistream")
 
     def _dl_single_vid(self, youtube_id: str, channel_id: str) -> bool:
         """download single video"""

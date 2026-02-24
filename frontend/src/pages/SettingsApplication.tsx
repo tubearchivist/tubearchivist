@@ -56,6 +56,7 @@ const SettingsApplication = () => {
   const [downloadsFormatSort, setDownloadsFormatSort] = useState<string | null>(null);
   const [downloadsExtractorLang, setDownloadsExtractorLang] = useState<string | null>(null);
   const [embedMetadata, setEmbedMetadata] = useState(false);
+  const [audioMultistream, setAudioMultistream] = useState(false);
 
   // Subtitles
   const [subtitleLang, setSubtitleLang] = useState<string | null>(null);
@@ -112,6 +113,7 @@ const SettingsApplication = () => {
     setDownloadsFormatSort(appSettingsConfigData?.downloads.format_sort || null);
     setDownloadsExtractorLang(appSettingsConfigData?.downloads.extractor_lang || null);
     setEmbedMetadata(appSettingsConfigData?.downloads.add_metadata || false);
+    setAudioMultistream(appSettingsConfigData?.downloads.audio_multistream || false);
 
     // Subtitles
     setSubtitleLang(appSettingsConfigData?.downloads.subtitle || null);
@@ -466,6 +468,10 @@ const SettingsApplication = () => {
                       Embedding metadata adds additional metadata and thumbnails directly to the mp4
                       file.
                     </li>
+                    <li>
+                      Enable multistream audio to download all available audio languages (maps to
+                      <i>--audio-multistream</i>). This can increase file size.
+                    </li>
                   </ul>
                 </div>
               )}
@@ -515,6 +521,16 @@ const SettingsApplication = () => {
                 <ToggleConfig
                   name="downloads.add_metadata"
                   value={embedMetadata}
+                  updateCallback={handleUpdateConfig}
+                />
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Enable multistream audio</p>
+                </div>
+                <ToggleConfig
+                  name="downloads.audio_multistream"
+                  value={audioMultistream}
                   updateCallback={handleUpdateConfig}
                 />
               </div>
