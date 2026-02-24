@@ -50,6 +50,7 @@ const ChannelAbout = () => {
   const [downloadContainer, setDownloadContainer] = useState<'mp4' | 'mkv' | null>(null);
   const [audioMultistream, setAudioMultistream] = useState<boolean | null>(null);
   const [audioMultistreamWarning, setAudioMultistreamWarning] = useState<string | null>(null);
+  const [audioLanguages, setAudioLanguages] = useState<string | null>(null);
   const [autoDeleteAfter, setAutoDeleteAfter] = useState<number | null>(null);
   const [indexPlaylists, setIndexPlaylists] = useState(false);
   const [enableSponsorblock, setEnableSponsorblock] = useState<boolean | null>(null);
@@ -76,6 +77,7 @@ const ChannelAbout = () => {
           channelResponseData?.channel_overwrites?.audio_multistream ?? null,
         );
         setAudioMultistreamWarning(null);
+        setAudioLanguages(channelResponseData?.channel_overwrites?.audio_languages ?? null);
         setAutoDeleteAfter(channelResponseData?.channel_overwrites?.autodelete_days ?? null);
         setIndexPlaylists(channelResponseData?.channel_overwrites?.index_playlists ?? false);
         setEnableSponsorblock(
@@ -355,6 +357,19 @@ const ChannelAbout = () => {
                 {audioMultistreamWarning && (
                   <p className="settings-error">{audioMultistreamWarning}</p>
                 )}
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Audio Languages</p>
+                </div>
+                <InputConfig
+                  type="text"
+                  name="audio_languages"
+                  value={audioLanguages}
+                  setValue={setAudioLanguages}
+                  oldValue={channel.channel_overwrites?.audio_languages ?? null}
+                  updateCallback={handleUpdateConfig}
+                />
               </div>
               <div className="settings-box-wrapper">
                 <div>

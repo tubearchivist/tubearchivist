@@ -175,7 +175,11 @@ class ChannelApiView(ApiBaseView):
             )
 
         if overwrites := validated_data.get("channel_overwrites"):
-            channel_overwrites(channel_id, overwrites)
+            try:
+                channel_overwrites(channel_id, overwrites)
+            except ValueError as err:
+                error = ErrorResponseSerializer({"error": str(err)})
+                return Response(error.data, status=400)
             if overwrites.get("index_playlists"):
                 index_channel_playlists.delay(channel_id)
 

@@ -19,6 +19,7 @@ class ChannelOverwriteSerializer(
     audio_multistream = serializers.BooleanField(
         required=False, allow_null=True
     )
+    audio_languages = serializers.CharField(required=False, allow_null=True)
     autodelete_days = serializers.IntegerField(required=False, allow_null=True)
     index_playlists = serializers.BooleanField(required=False, allow_null=True)
     integrate_sponsorblock = serializers.BooleanField(

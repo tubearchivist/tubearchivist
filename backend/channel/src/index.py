@@ -268,6 +268,7 @@ class YoutubeChannel(YouTubeItem):
             "download_format",
             "download_container",
             "audio_multistream",
+            "audio_languages",
             "autodelete_days",
             "index_playlists",
             "integrate_sponsorblock",

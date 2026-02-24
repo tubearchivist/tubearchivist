@@ -342,12 +342,17 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         if channel_overwrites.get("download_container"):
             container = channel_overwrites.get("download_container")
 
-        # audio_languages forces mkv for multi-stream support
+        # audio_languages or audio_multistream forces mkv for multi-stream support
         audio_languages = (
             channel_overwrites.get("audio_languages")
             or self.config["downloads"].get("audio_languages")
         )
-        if audio_languages:
+        audio_multistream = (
+            channel_overwrites.get("audio_multistream")
+            if channel_overwrites.get("audio_multistream") is not None
+            else self.config["downloads"].get("audio_multistream")
+        )
+        if audio_languages or audio_multistream:
             container = "mkv"
 
         return container

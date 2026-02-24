@@ -391,6 +391,27 @@ class VideoDownloader(DownloaderBase):
             if lang.strip()
         ]
 
+    def _is_audio_multistream_enabled(self, channel_id: str) -> bool:
+        """return True if audio_multistream is enabled globally or via channel overwrite"""
+        overwrites = self.channel_overwrites.get(channel_id, {})
+        if "audio_multistream" in overwrites and overwrites["audio_multistream"] is not None:
+            return bool(overwrites["audio_multistream"])
+        return bool(self.config["downloads"].get("audio_multistream"))
+
+    @staticmethod
+    def _discover_audio_languages(formats: list[dict]) -> list[str]:
+        """collect all unique language codes from available audio formats"""
+        seen: set[str] = set()
+        langs: list[str] = []
+        for f in formats:
+            if (f.get("acodec") or "none") == "none":
+                continue
+            lang = (f.get("language") or "").strip()
+            if lang and lang not in seen:
+                seen.add(lang)
+                langs.append(lang)
+        return langs
+
     def _dl_single_vid(self, youtube_id: str, channel_id: str) -> bool:
         """download single video, with optional multi-language audio merging"""
         obs = self.obs.copy()
@@ -400,9 +421,20 @@ class VideoDownloader(DownloaderBase):
         languages = self._get_audio_languages(channel_id)
         hls_formats: dict[str, str] = {}  # lang -> format_id for HLS post-process
 
+        if not languages and self._is_audio_multistream_enabled(channel_id):
+            # audio_multistream is on but no explicit language list – auto-discover
+            print(f"{youtube_id}: audio_multistream enabled, auto-discovering languages")
+            formats = self._get_formats(youtube_id)
+            if formats:
+                languages = self._discover_audio_languages(formats)
+                print(f"{youtube_id}: discovered audio languages: {languages}")
+        else:
+            formats = None  # will be fetched below if needed
+
         if languages:
             print(f"{youtube_id}: applying audio languages {languages}")
-            formats = self._get_formats(youtube_id)
+            if formats is None:
+                formats = self._get_formats(youtube_id)
             if formats:
                 dash_fmt, hls_formats = self._resolve_audio_formats(
                     formats, languages

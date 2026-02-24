@@ -22,6 +22,7 @@ type ChannelOverwritesType = {
   download_format: string | null;
   download_container: 'mp4' | 'mkv' | null;
   audio_multistream: boolean | null;
+  audio_languages: string | null;
   autodelete_days: number | null;
   index_playlists: boolean | null;
   integrate_sponsorblock: boolean | null;
