@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import loadSnapshots, { SnapshotListType } from '../api/loader/loadSnapshots';
 import Notifications from '../components/Notifications';
 import PaginationDummy from '../components/PaginationDummy';
@@ -533,10 +533,17 @@ const SettingsApplication = () => {
                   <select
                     name="downloads.container"
                     value={downloadContainer}
-                    onChange={event => {
+                    onChange={async (event: ChangeEvent<HTMLSelectElement>) => {
                       const value = event.target.value as 'mp4' | 'mkv';
+
+                      if (value !== 'mkv' && audioMultistream) {
+                        // Clear multistream FIRST — backend rejects container=mp4 while multistream=true
+                        await handleUpdateConfig('downloads.audio_multistream', false);
+                        setAudioMultistream(false);
+                      }
+
+                      await handleUpdateConfig('downloads.container', value);
                       setDownloadContainer(value);
-                      handleUpdateConfig('downloads.container', value);
                     }}
                   >
                     <option value="mp4">mp4 (browser friendly)</option>

@@ -1,6 +1,6 @@
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import ChannelOverview from '../components/ChannelOverview';
-import { useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import loadChannelById, { ChannelResponseType } from '../api/loader/loadChannelById';
 import Linkify from '../components/Linkify';
 import deleteChannel from '../api/actions/deleteChannel';
@@ -325,14 +325,28 @@ const ChannelAbout = () => {
                   <select
                     name="download_container"
                     value={downloadContainer ?? ''}
-                    onChange={event => {
+                    onChange={async (event: ChangeEvent<HTMLSelectElement>) => {
                       const value = event.target.value as 'mp4' | 'mkv' | '';
+
                       if (value === '') {
-                        handleUpdateConfig('download_container', null);
+                        const newGlobal = appSettingsConfig.downloads.container ?? 'mp4';
+                        if (newGlobal !== 'mkv' && audioMultistream) {
+                          // Clear multistream FIRST — backend rejects container=mp4 while multistream=true
+                          await handleUpdateConfig('audio_multistream', null);
+                          setAudioMultistream(null);
+                        }
+                        await handleUpdateConfig('download_container', null);
                         setDownloadContainer(null);
                         return;
                       }
-                      handleUpdateConfig('download_container', value);
+
+                      if (value !== 'mkv' && audioMultistream) {
+                        // Clear multistream FIRST — backend rejects container=mp4 while multistream=true
+                        await handleUpdateConfig('audio_multistream', null);
+                        setAudioMultistream(null);
+                      }
+
+                      await handleUpdateConfig('download_container', value);
                       setDownloadContainer(value);
                     }}
                   >
