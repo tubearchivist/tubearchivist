@@ -56,10 +56,10 @@ const SettingsApplication = () => {
   const [downloadsFormatSort, setDownloadsFormatSort] = useState<string | null>(null);
   const [downloadsExtractorLang, setDownloadsExtractorLang] = useState<string | null>(null);
   const [embedMetadata, setEmbedMetadata] = useState(false);
-  const [audioMultistream, setAudioMultistream] = useState(false);
+  const [audioMultistreams, setAudioMultistreams] = useState(false);
   const [downloadContainer, setDownloadContainer] = useState<'mp4' | 'mkv'>('mp4');
   const [audioLanguages, setAudioLanguages] = useState<string | null>(null);
-  const [audioMultistreamWarning, setAudioMultistreamWarning] = useState<string | null>(null);
+  const [audioMultistreamsWarning, setAudioMultistreamsWarning] = useState<string | null>(null);
 
   // Subtitles
   const [subtitleLang, setSubtitleLang] = useState<string | null>(null);
@@ -116,10 +116,10 @@ const SettingsApplication = () => {
     setDownloadsFormatSort(appSettingsConfigData?.downloads.format_sort || null);
     setDownloadsExtractorLang(appSettingsConfigData?.downloads.extractor_lang || null);
     setEmbedMetadata(appSettingsConfigData?.downloads.add_metadata || false);
-    setAudioMultistream(appSettingsConfigData?.downloads.audio_multistream || false);
+    setAudioMultistreams(appSettingsConfigData?.downloads.audio_multistream || false);
     setAudioLanguages(appSettingsConfigData?.downloads.audio_languages || null);
     setDownloadContainer(appSettingsConfigData?.downloads.container || 'mp4');
-    setAudioMultistreamWarning(null);
+    setAudioMultistreamsWarning(null);
 
     // Subtitles
     setSubtitleLang(appSettingsConfigData?.downloads.subtitle || null);
@@ -157,10 +157,10 @@ const SettingsApplication = () => {
     const updatedConfig = { [group]: { [key]: configValue } } as Partial<AppSettingsConfigType>;
     const response = await updateAppsettingsConfig(updatedConfig);
     if (response?.error?.error) {
-      setAudioMultistreamWarning(response.error.error);
+      setAudioMultistreamsWarning(response.error.error);
       return;
     }
-    setAudioMultistreamWarning(null);
+    setAudioMultistreamsWarning(null);
     setRefresh(true);
   };
 
@@ -476,12 +476,17 @@ const SettingsApplication = () => {
                       </ul>
                     </li>
                     <li>
-                      Embedding metadata adds additional metadata and thumbnails directly to the mp4
-                      file.
+                      Download container sets the default file type: mp4 is most browser-friendly,
+                      while mkv is better for multi-audio tracks.
                     </li>
                     <li>
-                      Enable multistream audio to download all available audio languages (maps to
-                      <i>--audio-multistream</i>). This can increase file size.
+                      Embedding metadata adds additional metadata and thumbnails directly to mp4
+                      files. Mkv downloads are not embedded by this option.
+                    </li>
+                    <li>
+                      Enable multistream audio to download multiple audio languages (maps to{' '}
+                      <i>--audio-multistreams</i>). This increases file size and may use mkv when
+                      multiple tracks are selected.
                     </li>
                   </ul>
                 </div>
@@ -560,19 +565,19 @@ const SettingsApplication = () => {
                 </div>
                 <ToggleConfig
                   name="downloads.audio_multistream"
-                  value={audioMultistream}
+                  value={audioMultistreams}
                   helperText={
-                    audioMultistream
+                    audioMultistreams
                       ? 'If multiple audio tracks are selected/found, Tube Archivist will automatically save as mkv. Single-audio downloads keep your selected container.'
                       : 'Enable to include multiple audio languages when available.'
                   }
                   updateCallback={handleUpdateConfig}
                 />
-                {audioMultistreamWarning && (
-                  <p className="settings-error">{audioMultistreamWarning}</p>
+                {audioMultistreamsWarning && (
+                  <p className="settings-error">{audioMultistreamsWarning}</p>
                 )}
               </div>
-              {audioMultistream && (
+              {audioMultistreams && (
                 <div className="settings-box-wrapper">
                   <div>
                     <p>Audio languages</p>

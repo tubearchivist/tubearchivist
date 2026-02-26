@@ -48,8 +48,8 @@ const ChannelAbout = () => {
 
   const [downloadFormat, setDownloadFormat] = useState<string | null>(null);
   const [downloadContainer, setDownloadContainer] = useState<'mp4' | 'mkv' | null>(null);
-  const [audioMultistream, setAudioMultistream] = useState<boolean | null>(null);
-  const [audioMultistreamWarning, setAudioMultistreamWarning] = useState<string | null>(null);
+  const [audioMultistreams, setAudioMultistreams] = useState<boolean | null>(null);
+  const [audioMultistreamsWarning, setAudioMultistreamsWarning] = useState<string | null>(null);
   const [audioLanguages, setAudioLanguages] = useState<string | null>(null);
   const [autoDeleteAfter, setAutoDeleteAfter] = useState<number | null>(null);
   const [indexPlaylists, setIndexPlaylists] = useState(false);
@@ -73,10 +73,10 @@ const ChannelAbout = () => {
         setDownloadContainer(
           channelResponseData?.channel_overwrites?.download_container ?? null,
         );
-        setAudioMultistream(
+        setAudioMultistreams(
           channelResponseData?.channel_overwrites?.audio_multistream ?? null,
         );
-        setAudioMultistreamWarning(null);
+        setAudioMultistreamsWarning(null);
         setAudioLanguages(channelResponseData?.channel_overwrites?.audio_languages ?? null);
         setAutoDeleteAfter(channelResponseData?.channel_overwrites?.autodelete_days ?? null);
         setIndexPlaylists(channelResponseData?.channel_overwrites?.index_playlists ?? false);
@@ -105,12 +105,12 @@ const ChannelAbout = () => {
     if (!channel) return;
     const response = await updateChannelOverwrites(channel.channel_id, configKey, configValue);
     if (response?.error?.error) {
-      setAudioMultistreamWarning(response.error.error);
+      setAudioMultistreamsWarning(response.error.error);
       return;
     }
-    setAudioMultistreamWarning(null);
+    setAudioMultistreamsWarning(null);
     if (configKey === 'audio_multistream') {
-      setAudioMultistream(configValue === null ? null : Boolean(configValue));
+      setAudioMultistreams(configValue === null ? null : Boolean(configValue));
     }
     setRefresh(true);
   };
@@ -322,21 +322,21 @@ const ChannelAbout = () => {
                       const value = event.target.value as 'mp4' | 'mkv' | '';
 
                       if (value === '') {
-                        if (audioMultistream) {
+                        if (audioMultistreams) {
                           // Always clear channel multistream FIRST when switching to global container.
                           // This avoids stale global-container state causing persistent override drift.
                           await handleUpdateConfig('audio_multistream', null);
-                          setAudioMultistream(null);
+                          setAudioMultistreams(null);
                         }
                         await handleUpdateConfig('download_container', null);
                         setDownloadContainer(null);
                         return;
                       }
 
-                      if (value !== 'mkv' && audioMultistream) {
+                      if (value !== 'mkv' && audioMultistreams) {
                         // Clear multistream first when switching to single-audio container preference.
                         await handleUpdateConfig('audio_multistream', null);
-                        setAudioMultistream(null);
+                        setAudioMultistreams(null);
                       }
 
                       await handleUpdateConfig('download_container', value);
@@ -355,23 +355,23 @@ const ChannelAbout = () => {
                 </div>
                 <ToggleConfig
                   name="audio_multistream"
-                  value={audioMultistream ?? false}
+                  value={audioMultistreams ?? false}
                   helperText={
-                    audioMultistream
+                    audioMultistreams
                       ? 'If multiple audio tracks are selected/found, Tube Archivist will automatically save as mkv. Single-audio downloads keep the selected/effective container.'
                       : 'Enable to include multiple audio languages when available for this channel.'
                   }
                   updateCallback={handleUpdateConfig}
                   resetCallback={() => {
                     handleUpdateConfig('audio_multistream', null);
-                    setAudioMultistream(null);
+                    setAudioMultistreams(null);
                   }}
                 />
-                {audioMultistreamWarning && (
-                  <p className="settings-error">{audioMultistreamWarning}</p>
+                {audioMultistreamsWarning && (
+                  <p className="settings-error">{audioMultistreamsWarning}</p>
                 )}
               </div>
-              {audioMultistream && (
+              {audioMultistreams && (
                 <div className="settings-box-wrapper">
                   <div>
                     <p>Audio Languages</p>
