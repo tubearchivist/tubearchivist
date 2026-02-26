@@ -79,12 +79,30 @@ class MediaStreamExtractor:
             else:
                 bitrate_raw = 0
 
-        language = tags.get("language") or tags.get("LANGUAGE") or None
+        language = (
+            tags.get("language")
+            or tags.get("LANGUAGE")
+            or tags.get("Language")
+            or tags.get("lang")
+            or tags.get("LANG")
+            or None
+        )
         # Normalise "und" (undetermined) to None
-        if language == "und":
+        if isinstance(language, str):
+            language = language.strip()
+
+        if language and language.lower() == "und":
             language = None
 
-        track_title = tags.get("title") or tags.get("TITLE") or None
+        track_title = (
+            tags.get("title")
+            or tags.get("TITLE")
+            or tags.get("Title")
+            or tags.get("handler_name")
+            or tags.get("HANDLER_NAME")
+            or None
+        )
+        track_title = self._clean_audio_title(track_title)
 
         # Channels: prefer channel_layout label, fall back to channel count
         channel_layout = stream.get("channel_layout")
@@ -102,6 +120,28 @@ class MediaStreamExtractor:
                 "channel_layout": channel_layout,
             }
         )
+
+    @staticmethod
+    def _clean_audio_title(track_title: str | None) -> str | None:
+        """remove noisy/generic audio titles that aren't useful for UI labels"""
+        if not track_title:
+            return None
+
+        cleaned = track_title.strip()
+        if not cleaned:
+            return None
+
+        lower = cleaned.lower()
+        noisy_titles = {
+            "iso media file produced by google inc.",
+            "soundhandler",
+            "iso media",
+        }
+
+        if lower in noisy_titles:
+            return None
+
+        return cleaned
 
     def get_file_size(self) -> int:
         """get filesize in bytes"""

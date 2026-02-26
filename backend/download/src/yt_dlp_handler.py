@@ -8,6 +8,7 @@ functionality:
 
 import os
 import shutil
+import subprocess
 from datetime import datetime
 
 from appsettings.src.config import AppConfig
@@ -28,6 +29,7 @@ from playlist.src.index import YoutubePlaylist
 from video.src.comments import CommentList
 from video.src.constants import VideoTypeEnum
 from video.src.index import YoutubeVideo, index_new_video
+from yt_dlp.utils import ISO639Utils
 
 
 class DownloaderBase:
@@ -317,18 +319,84 @@ class VideoDownloader(DownloaderBase):
         return None
 
     @staticmethod
-    def _merge_audio_tracks(main_path: str, audio_files: list[str]) -> bool:
-        """ffmpeg-merge additional audio tracks into the main MKV file"""
-        import subprocess
+    def _normalize_language_code(lang: str) -> str:
+        """best-effort normalisation for ffmpeg language metadata"""
+        if not lang:
+            return "und"
 
+        # Keep the primary subtag for values like "en-US" or "zh-Hans".
+        primary = lang.split("-")[0].strip().lower()
+        if not primary:
+            return "und"
+
+        return primary
+
+    @staticmethod
+    def _language_title(lang: str) -> str:
+        """build a human-friendly stream title from a language tag"""
+        if not lang:
+            return "Unknown"
+
+        code = VideoDownloader._normalize_language_code(lang)
+        long_name = ISO639Utils.short2long(code)
+        if long_name:
+            return long_name
+
+        return lang.upper()
+
+    @staticmethod
+    def _count_audio_streams(path: str) -> int:
+        """count audio streams in a media file"""
+        cmd = [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "a",
+            "-show_entries",
+            "stream=index",
+            "-of",
+            "csv=p=0",
+            path,
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        if result.returncode != 0:
+            return 0
+
+        output = result.stdout.strip()
+        if not output:
+            return 0
+
+        return len(output.splitlines())
+
+    @staticmethod
+    def _merge_audio_tracks(
+        main_path: str, audio_tracks: list[tuple[str, str]]
+    ) -> bool:
+        """ffmpeg-merge additional audio tracks into the main MKV file"""
         output_path = main_path + ".merging.mkv"
         cmd = ["ffmpeg", "-y", "-i", main_path]
-        for af in audio_files:
+        for _, af in audio_tracks:
             cmd += ["-i", af]
+
         # copy all streams from main + audio-only from each extra file
         cmd += ["-map", "0"]
-        for i in range(1, len(audio_files) + 1):
-            cmd += ["-map", f"{i}:a"]
+
+        for i in range(1, len(audio_tracks) + 1):
+            cmd += ["-map", f"{i}:a:0"]
+
+        existing_audio_count = VideoDownloader._count_audio_streams(main_path)
+        for idx, (lang, _) in enumerate(audio_tracks):
+            audio_stream_idx = existing_audio_count + idx
+            language_code = VideoDownloader._normalize_language_code(lang)
+            language_title = VideoDownloader._language_title(lang)
+            cmd += [
+                f"-metadata:s:a:{audio_stream_idx}",
+                f"language={language_code}",
+                f"-metadata:s:a:{audio_stream_idx}",
+                f"title={language_title}",
+            ]
+
         cmd += ["-c", "copy", output_path]
 
         print(f"[audio_languages] ffmpeg merge: {' '.join(cmd)}")
@@ -472,16 +540,17 @@ class VideoDownloader(DownloaderBase):
         # phase 2: merge HLS-only language audio tracks via ffmpeg
         if hls_formats and selected_audio_count > 1:
             main_path = os.path.join(dl_cache, f"{youtube_id}.mkv")
-            audio_files = []
+            audio_tracks: list[tuple[str, str]] = []
             try:
                 for lang, fmt_id in hls_formats.items():
                     af = self._download_hls_audio(youtube_id, fmt_id, lang)
                     if af:
-                        audio_files.append(af)
-                if audio_files:
-                    self._merge_audio_tracks(main_path, audio_files)
+                        audio_tracks.append((lang, af))
+
+                if audio_tracks:
+                    self._merge_audio_tracks(main_path, audio_tracks)
             finally:
-                for af in audio_files:
+                for _, af in audio_tracks:
                     try:
                         os.remove(af)
                     except FileNotFoundError:
