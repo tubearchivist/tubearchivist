@@ -2,8 +2,7 @@ services:
   tubearchivist:
     container_name: tubearchivist
     restart: unless-stopped
-    build: .
-    image: tubearchivist-local
+    image: bbilly1/tubearchivist
     ports:
       - 8000:8000
     volumes:
