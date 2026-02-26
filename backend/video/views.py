@@ -335,7 +335,24 @@ class VideoStreamView(ApiBaseView):
         os.makedirs(cache_dir, exist_ok=True)
         cache_path = os.path.join(cache_dir, f"{video_id}.mp4")
 
-        if not os.path.exists(cache_path):
+        sentinel_path = cache_path + ".transcoding"
+
+        # Serve cached transcode immediately if available
+        if os.path.exists(cache_path):
+            response = FileResponse(open(cache_path, "rb"))
+            response["Content-Type"] = "video/mp4"
+            return response
+
+        # Guard against concurrent transcode of the same video
+        if os.path.exists(sentinel_path):
+            in_progress = Response({"status": "transcoding"}, status=202)
+            in_progress["Retry-After"] = "5"
+            return in_progress
+
+        # Run transcode; sentinel is removed regardless of outcome
+        try:
+            with open(sentinel_path, "w"):
+                pass  # create sentinel
             cmd = [
                 "ffmpeg",
                 "-y",
@@ -358,10 +375,15 @@ class VideoStreamView(ApiBaseView):
                 cache_path,
             ]
             subprocess.run(cmd, check=False)
+        finally:
+            try:
+                os.remove(sentinel_path)
+            except FileNotFoundError:
+                pass
 
         if not os.path.exists(cache_path):
             error = ErrorResponseSerializer({"error": "transcode failed"})
-            return Response(error.data, status=404)
+            return Response(error.data, status=500)
 
         response = FileResponse(open(cache_path, "rb"))
         response["Content-Type"] = "video/mp4"

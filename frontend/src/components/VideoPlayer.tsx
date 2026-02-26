@@ -128,6 +128,19 @@ const VideoPlayer = ({
   setSeekToTimestamp,
 }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [isTranscoding, setIsTranscoding] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
+
+  // If the video element errors (e.g. server returned 202 Transcoding),
+  // show a message and automatically retry after 5 seconds.
+  useEffect(() => {
+    if (!isTranscoding) return;
+    const timer = setTimeout(() => {
+      setIsTranscoding(false);
+      setRetryKey((k: number) => k + 1);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [isTranscoding]);
 
   useEffect(() => {
     if (seekToTimestamp === undefined || !videoRef.current) {
@@ -413,9 +426,12 @@ const VideoPlayer = ({
         className={embed ? '' : `player-wrapper ${isTheaterMode ? 'theater-mode' : ''}`}
       >
         <div className={embed ? '' : `video-main ${isTheaterMode ? 'theater-mode' : ''}`}>
+          {isTranscoding && (
+            <p className="video-transcoding">Transcoding video for browser playback, retrying in 5 seconds…</p>
+          )}
           <video
             ref={videoRef}
-            key={`${getApiUrl()}${videoUrl}`}
+            key={`${getApiUrl()}${videoUrl}-${retryKey}`}
             poster={`${getApiUrl()}${videoThumbUrl}`}
             onVolumeChange={(videoTag: VideoTag) => {
               localStorage.setItem('playerVolume', videoTag.currentTarget.volume.toString());
@@ -445,6 +461,16 @@ const VideoPlayer = ({
               });
             }}
             onEnded={handleVideoEnd(videoId, watched)}
+            onError={async () => {
+              try {
+                const res = await fetch(`${getApiUrl()}${videoUrl}`, { method: 'HEAD' });
+                if (res.status === 202) {
+                  setIsTranscoding(true);
+                }
+              } catch {
+                // network error — ignore
+              }
+            }}
             onKeyDown={e => {
               if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
                 e.preventDefault();
