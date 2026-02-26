@@ -329,9 +329,9 @@ const ChannelAbout = () => {
                       const value = event.target.value as 'mp4' | 'mkv' | '';
 
                       if (value === '') {
-                        const newGlobal = appSettingsConfig.downloads.container ?? 'mp4';
-                        if (newGlobal !== 'mkv' && audioMultistream) {
-                          // Clear multistream FIRST — backend rejects container=mp4 while multistream=true
+                        if (audioMultistream) {
+                          // Always clear channel multistream FIRST when switching to global container.
+                          // This avoids stale global-container state causing persistent override drift.
                           await handleUpdateConfig('audio_multistream', null);
                           setAudioMultistream(null);
                         }
