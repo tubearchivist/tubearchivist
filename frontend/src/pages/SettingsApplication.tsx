@@ -535,13 +535,6 @@ const SettingsApplication = () => {
                     value={downloadContainer}
                     onChange={async (event: ChangeEvent<HTMLSelectElement>) => {
                       const value = event.target.value as 'mp4' | 'mkv';
-
-                      if (value !== 'mkv' && audioMultistream) {
-                        // Clear multistream FIRST — backend rejects container=mp4 while multistream=true
-                        await handleUpdateConfig('downloads.audio_multistream', false);
-                        setAudioMultistream(false);
-                      }
-
                       await handleUpdateConfig('downloads.container', value);
                       setDownloadContainer(value);
                     }}
@@ -568,11 +561,10 @@ const SettingsApplication = () => {
                 <ToggleConfig
                   name="downloads.audio_multistream"
                   value={audioMultistream}
-                  disabled={downloadContainer !== 'mkv'}
                   helperText={
-                    downloadContainer !== 'mkv'
-                      ? 'Select the mkv container to enable multiple audio tracks.'
-                      : 'Downloads all available audio languages when supported.'
+                    audioMultistream
+                      ? 'If multiple audio tracks are selected/found, Tube Archivist will automatically save as mkv. Single-audio downloads keep your selected container.'
+                      : 'Enable to include multiple audio languages when available.'
                   }
                   updateCallback={handleUpdateConfig}
                 />
@@ -580,7 +572,7 @@ const SettingsApplication = () => {
                   <p className="settings-error">{audioMultistreamWarning}</p>
                 )}
               </div>
-              {audioMultistream && downloadContainer === 'mkv' && (
+              {audioMultistream && (
                 <div className="settings-box-wrapper">
                   <div>
                     <p>Audio languages</p>

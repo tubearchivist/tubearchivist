@@ -182,26 +182,6 @@ class AppConfigApiView(ApiBaseView):
         serializer = AppConfigSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
-        current_config = AppConfig().config
-        downloads_update = validated_data.get("downloads") or {}
-        if downloads_update:
-            audio_multistream = downloads_update.get(
-                "audio_multistream",
-                current_config["downloads"]["audio_multistream"],
-            )
-            container = downloads_update.get(
-                "container",
-                current_config["downloads"]["container"],
-            )
-            if audio_multistream and container != "mkv":
-                error = ErrorResponseSerializer(
-                    {
-                        "error": (
-                            "audio_multistream requires mkv container"
-                        )
-                    }
-                )
-                return Response(error.data, status=400)
         updated_config = AppConfig().update_config(validated_data)
         updated_serializer = AppConfigSerializer(updated_config)
         return Response(updated_serializer.data)

@@ -427,6 +427,7 @@ class VideoDownloader(DownloaderBase):
 
         languages = self._get_audio_languages(channel_id)
         hls_formats: dict[str, str] = {}  # lang -> format_id for HLS post-process
+        selected_audio_count = 0
 
         if not languages and self._is_audio_multistream_enabled(channel_id):
             # audio_multistream is on but no explicit language list – auto-discover
@@ -446,16 +447,20 @@ class VideoDownloader(DownloaderBase):
                 dash_fmt, hls_formats = self._resolve_audio_formats(
                     formats, languages
                 )
+                selected_audio_count = len(dash_fmt) + len(hls_formats)
                 main_fmt = self._build_main_format(formats, dash_fmt)
                 if main_fmt:
                     obs["format"] = main_fmt
                     if len(dash_fmt) > 1:
                         obs["audio_multistreams"] = True
-                    obs["merge_output_format"] = "mkv"
-                    obs["outtmpl"] = self.CACHE_DIR + "/download/%(id)s.mkv"
+                    # Only force MKV when multiple audio tracks are actually selected.
+                    if selected_audio_count > 1:
+                        obs["merge_output_format"] = "mkv"
+                        obs["outtmpl"] = self.CACHE_DIR + "/download/%(id)s.mkv"
                     print(f"{youtube_id}: main format: {main_fmt}")
-                elif hls_formats:
-                    # all langs are HLS-only; keep default format for video+audio
+                elif hls_formats and selected_audio_count > 1:
+                    # all selected langs are HLS-only and we have >1 tracks,
+                    # so force MKV for audio track merge.
                     obs["merge_output_format"] = "mkv"
                     obs["outtmpl"] = self.CACHE_DIR + "/download/%(id)s.mkv"
 
@@ -465,7 +470,7 @@ class VideoDownloader(DownloaderBase):
             return False
 
         # phase 2: merge HLS-only language audio tracks via ffmpeg
-        if hls_formats:
+        if hls_formats and selected_audio_count > 1:
             main_path = os.path.join(dl_cache, f"{youtube_id}.mkv")
             audio_files = []
             try:

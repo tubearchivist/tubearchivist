@@ -14,7 +14,6 @@ import useIsAdmin from '../functions/useIsAdmin';
 import InputConfig from '../components/InputConfig';
 import ToggleConfig from '../components/ToggleConfig';
 import { useUserConfigStore } from '../stores/UserConfigStore';
-import { useAppSettingsStore } from '../stores/AppSettingsStore';
 import { ApiResponseType } from '../functions/APIClient';
 
 export type ChannelBaseOutletContextType = {
@@ -36,7 +35,6 @@ type ChannelAboutParams = {
 const ChannelAbout = () => {
   const { channelId } = useParams() as ChannelAboutParams;
   const { userConfig } = useUserConfigStore();
-  const { appSettingsConfig } = useAppSettingsStore();
   const { setStartNotification } = useOutletContext() as ChannelBaseOutletContextType;
   const navigate = useNavigate();
   const isAdmin = useIsAdmin();
@@ -130,11 +128,6 @@ const ChannelAbout = () => {
   if (!channel) {
     return 'Channel not found!';
   }
-
-  // The effective container is the channel override if set, otherwise the global setting.
-  const globalContainer = appSettingsConfig.downloads.container ?? 'mp4';
-  const effectiveContainer = downloadContainer ?? globalContainer;
-  const isMkvActive = effectiveContainer === 'mkv';
 
   return (
     <>
@@ -341,7 +334,7 @@ const ChannelAbout = () => {
                       }
 
                       if (value !== 'mkv' && audioMultistream) {
-                        // Clear multistream FIRST — backend rejects container=mp4 while multistream=true
+                        // Clear multistream first when switching to single-audio container preference.
                         await handleUpdateConfig('audio_multistream', null);
                         setAudioMultistream(null);
                       }
@@ -363,11 +356,10 @@ const ChannelAbout = () => {
                 <ToggleConfig
                   name="audio_multistream"
                   value={audioMultistream ?? false}
-                  disabled={!isMkvActive}
                   helperText={
-                    !isMkvActive
-                      ? 'Choose mkv above (or use the global mkv setting) to enable multiple audio tracks.'
-                      : 'Downloads every available audio language for this channel.'
+                    audioMultistream
+                      ? 'If multiple audio tracks are selected/found, Tube Archivist will automatically save as mkv. Single-audio downloads keep the selected/effective container.'
+                      : 'Enable to include multiple audio languages when available for this channel.'
                   }
                   updateCallback={handleUpdateConfig}
                   resetCallback={() => {
@@ -379,7 +371,7 @@ const ChannelAbout = () => {
                   <p className="settings-error">{audioMultistreamWarning}</p>
                 )}
               </div>
-              {isMkvActive && (
+              {audioMultistream && (
                 <div className="settings-box-wrapper">
                   <div>
                     <p>Audio Languages</p>

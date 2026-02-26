@@ -10,7 +10,6 @@ from channel.serializers import (
     ChannelUpdateSerializer,
 )
 from channel.src.index import YoutubeChannel, channel_overwrites
-from appsettings.src.config import AppConfig
 from channel.src.nav import ChannelNav
 from common.serializers import ErrorResponseSerializer
 from common.src.urlparser import Parser
@@ -144,29 +143,6 @@ class ChannelApiView(ApiBaseView):
         serializer = ChannelUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
-
-        current_overwrites = self.response.get("channel_overwrites", {})
-        global_container = AppConfig().config["downloads"]["container"]
-        if overwrites := validated_data.get("channel_overwrites"):
-            audio_multistream = overwrites.get(
-                "audio_multistream",
-                current_overwrites.get("audio_multistream"),
-            )
-            container = overwrites.get(
-                "download_container",
-                current_overwrites.get("download_container"),
-            )
-            if container is None:
-                container = global_container
-            if audio_multistream and container != "mkv":
-                error = ErrorResponseSerializer(
-                    {
-                        "error": (
-                            "audio_multistream requires mkv container"
-                        )
-                    }
-                )
-                return Response(error.data, status=400)
 
         subscribed = validated_data.get("channel_subscribed")
         if subscribed is not None:

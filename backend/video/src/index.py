@@ -328,6 +328,24 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
     def add_file_path(self):
         """build media_url for where file will be located"""
         container = self._get_download_container()
+
+        # Prefer the actually downloaded cache file extension when available.
+        # This keeps media_url aligned with effective runtime output when
+        # multistream is enabled but only a single audio track is selected.
+        cache_dir = os.path.join(EnvironmentSettings.CACHE_DIR, "download")
+        preferred_order = [container, "mp4", "mkv"]
+        seen: set[str] = set()
+        for ext in preferred_order:
+            if ext in seen:
+                continue
+            seen.add(ext)
+            candidate = os.path.join(
+                cache_dir, f"{self.json_data['youtube_id']}.{ext}"
+            )
+            if os.path.exists(candidate):
+                container = ext
+                break
+
         self.json_data["media_url"] = os.path.join(
             self.json_data["channel"]["channel_id"],
             self.json_data["youtube_id"] + f".{container}",
