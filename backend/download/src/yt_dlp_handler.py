@@ -302,6 +302,8 @@ class VideoDownloader(DownloaderBase):
             "outtmpl": os.path.join(dl_dir, f"{base_name}.%(ext)s"),
             "audio_multistreams": False,
             "quiet": True,
+            "noprogress": True,
+            "no_warnings": True,
             "noplaylist": True,
         }
         print(f"[audio_languages] downloading HLS audio {lang}: {format_id}")
