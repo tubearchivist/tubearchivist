@@ -406,6 +406,10 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             self.json_data["subtitles"] = indexed
             return
 
+        if not self.youtube_meta:
+            print(f"{self.youtube_id}: skip subtitle check without metadata")
+            return
+
         handler = YoutubeSubtitle(self)
         subtitles = handler.get_subtitles()
         if subtitles:
@@ -508,8 +512,16 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
 def index_new_video(youtube_id, video_type=VideoTypeEnum.VIDEOS):
     """combined classes to create new video in index"""
+    from appsettings.src.reindex import Reindex
+
     video = YoutubeVideo(youtube_id, video_type=video_type)
-    video.build_json()
+    video.get_from_es(print_error=False)
+    if video.json_data:
+        # reindex only for force redownload
+        video = Reindex().reindex_single_video(youtube_id=youtube_id)
+    else:
+        video.build_json()
+
     if not video.json_data:
         raise ValueError("failed to get metadata for " + youtube_id)
 

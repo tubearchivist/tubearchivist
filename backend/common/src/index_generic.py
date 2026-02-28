@@ -53,11 +53,11 @@ class YouTubeItem:
             obs_request, self.config
         ).extract(url)
 
-    def get_from_es(self):
+    def get_from_es(self, print_error: bool = True) -> None:
         """get indexed data from elastic search"""
         print(f"{self.youtube_id}: get metadata from es")
-        response, _ = ElasticWrap(f"{self.es_path}").get()
-        source = response.get("_source")
+        resp, _ = ElasticWrap(f"{self.es_path}").get(print_error=print_error)
+        source = resp.get("_source")
         self.json_data = source
 
     def upload_to_es(self):
