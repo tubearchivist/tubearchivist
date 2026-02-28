@@ -314,7 +314,10 @@ class YoutubePlaylist(YouTubeItem):
         self.del_in_es()
 
     def is_custom_playlist(self):
-        self.get_from_es()
+        """check if is custom playlist"""
+        if not self.json_data:
+            self.get_from_es()
+
         return self.json_data["playlist_type"] == "custom"
 
     def delete_videos_metadata(self, channel_id=None):
@@ -392,13 +395,16 @@ class YoutubePlaylist(YouTubeItem):
         return True
 
     def remove_playlist_from_video(self, video_id):
+        """remove playlist id from video metadata"""
         video = ta_video.YoutubeVideo(video_id)
         video.get_from_es()
         if video.json_data is not None and "playlist" in video.json_data:
-            video.json_data["playlist"].remove(self.youtube_id)
-            video.upload_to_es()
+            if self.youtube_id in video.json_data["playlist"]:
+                video.json_data["playlist"].remove(self.youtube_id)
+                video.upload_to_es()
 
     def move_video(self, video_id, action, hide_watched=False):
+        """move video within custion playlist based on action"""
         self.get_from_es()
         video_index = self.get_video_index(video_id)
         playlist = self.json_data["playlist_entries"]
