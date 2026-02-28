@@ -1,5 +1,5 @@
 apprise==1.9.7
-bgutil-ytdlp-pot-provider @ git+https://github.com/bbilly1/bgutil-ytdlp-pot-provider@c3f7bf4c99f8eb62015cb1c4142324f3d681cf07#subdirectory=plugin
+bgutil-ytdlp-pot-provider @ git+https://github.com/bbilly1/bgutil-ytdlp-pot-provider@47c4f8c21c6748d4522c82de0e78a2f1e38714a7#subdirectory=plugin
 celery==5.6.2
 deepdiff==8.6.1
 django-auth-ldap==5.3.0
@@ -9,8 +9,8 @@ Django==5.2.11
 djangorestframework==3.16.1
 drf-spectacular==0.28.0  # rc:ignore
 Pillow==12.1.1
-redis==7.2.0
+redis==7.2.1
 requests==2.32.5
 ryd-client==0.0.6
 uvicorn==0.41.0
-yt-dlp[default]==2026.2.4
+yt-dlp[default]==2026.2.21
