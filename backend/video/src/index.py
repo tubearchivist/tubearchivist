@@ -469,8 +469,10 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         video = MP4(file_path)
         video["\xa9nam"] = [title]  # title
         video["\xa9ART"] = [artist]  # artist
-        video["desc"] = [description]  # description
-        video["ldes"] = [description]  # synopsis
+        if description:
+            video["desc"] = [description]  # description
+            video["ldes"] = [description]  # synopsis
+
         video["----:com.tubearchivist:ta"] = [to_embed.encode("utf-8")]
         video.save()
 
