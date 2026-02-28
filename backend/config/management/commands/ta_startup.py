@@ -280,6 +280,12 @@ class Command(BaseCommand):
                     self.style.SUCCESS(f"    added new default: {new_default}")
                 )
 
+            cleared = AppConfig().clear_old_keys()
+            for removed_key in cleared:
+                self.stdout.write(
+                    self.style.SUCCESS(f"    removed old key: {removed_key}")
+                )
+
             return
 
         if status_code != 404:

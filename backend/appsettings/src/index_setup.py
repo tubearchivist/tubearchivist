@@ -13,6 +13,7 @@ from appsettings.src.snapshot import ElasticSnapshot
 from common.src.es_connect import ElasticWrap
 from common.src.helper import get_mapping
 from deepdiff import DeepDiff
+from deepdiff.model import DiffLevel
 from django.conf import settings
 
 
@@ -113,6 +114,8 @@ class ElasticIndex:
         now_set = self.details["settings"]["index"]
 
         for key, value in self.expected_set.items():
+            if key == "number_of_replicas":
+                continue
             if key not in now_set.keys():
                 print(key, value)
                 return True
@@ -150,23 +153,36 @@ class ElasticIndex:
             return MappingAction.REINDEX
 
         added = diff.get("dictionary_item_added", [])
-        has_additions = bool(added)
+        reindex_from_added = self._needs_reindex(diff_items=added)
+        if reindex_from_added:
+            return MappingAction.REINDEX
 
-        for item in diff.get("values_changed", []):
-            path = item.path(output_format="list")
-            if not path:
-                continue
+        removed = diff.get("dictionary_item_removed", [])
+        reindex_from_removed = self._needs_reindex(diff_items=removed)
+        if reindex_from_removed:
+            return MappingAction.REINDEX
 
-            if path[-1] in self.REINDEX_KEYS:
-                return MappingAction.REINDEX
+        changed = diff.get("values_changed", [])
+        reindex_from_changed = self._needs_reindex(diff_items=changed)
+        if reindex_from_changed:
+            return MappingAction.REINDEX
 
-            # compatible addition
-            has_additions = True
-
-        if has_additions:
+        if added or changed:
             return MappingAction.PUT_MAPPING
 
         return MappingAction.NOOP
+
+    def _needs_reindex(self, diff_items: list[DiffLevel]) -> bool:
+        """check if diff has fields that need reindex"""
+        for item in diff_items:
+            path = item.path(output_format="list")
+            if not path:
+                return False
+
+            if path[-1] in self.REINDEX_KEYS:
+                return True
+
+        return False
 
     def _get_fields_to_delete(self, diff: DeepDiff) -> set[str]:
         """fields to remove during next reindex"""
@@ -192,7 +208,7 @@ class ElasticIndex:
         self.create_blank(new_version=new_version)
         self.reindex(new_version=new_version, removed_fields=removed_fields)
         self.delete_index(by_version=current_version)
-        self.create_alias(new_version=new_version, old_version=current_version)
+        self.create_alias(new_version=new_version)
 
     def delete_index(self, by_version: int | None):
         """delete index passed as argument"""
@@ -257,7 +273,7 @@ class ElasticIndex:
             print(f"{status_code}: {response}")
             raise ValueError("reindex failed failed")
 
-    def create_alias(self, new_version: int, old_version: int | None = None):
+    def create_alias(self, new_version: int):
         """create aliast for moved index"""
         index_new = f"{self.index_namespace}_v{new_version}"
         index_old = None
@@ -273,16 +289,6 @@ class ElasticIndex:
                 },
             ]
         }
-        if old_version:
-            index_old = f"{self.index_namespace}_v{old_version}"
-            data["actions"].append(
-                {
-                    "remove": {
-                        "index": index_old,
-                        "alias": self.index_namespace,
-                    }
-                }
-            )
 
         message = f"create new alias {index_new}"
         if index_old:
@@ -292,7 +298,7 @@ class ElasticIndex:
         if settings.DEBUG:
             print(f"create alias with data: {data}")
 
-        response, status_code = ElasticWrap("_alias").put(data=data)
+        response, status_code = ElasticWrap("_aliases").post(data=data)
         if status_code not in [200, 201]:
             print(f"{status_code}: {response}")
             raise ValueError("alias update failed")

@@ -48,6 +48,7 @@ class MetadataEmbed:
             callback=MetadataEmbedCallback,
             task=self.task,
             total=self._get_total(),
+            pit_keep_alive=1000,
         )
         _ = paginate.get_results()
 

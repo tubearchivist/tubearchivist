@@ -31,13 +31,13 @@ class SearchForm:
         fulltext_results = []
         if search_results:
             for result in search_results:
-                if result["_index"] == "ta_video":
+                if result["_index"].startswith("ta_video"):
                     video_results.append(result)
-                elif result["_index"] == "ta_channel":
+                elif result["_index"].startswith("ta_channel"):
                     channel_results.append(result)
-                elif result["_index"] == "ta_playlist":
+                elif result["_index"].startswith("ta_playlist"):
                     playlist_results.append(result)
-                elif result["_index"] == "ta_subtitle":
+                elif result["_index"].startswith("ta_subtitle"):
                     fulltext_results.append(result)
 
         all_results = {

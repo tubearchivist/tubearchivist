@@ -4,7 +4,7 @@ Functionality:
 - encapsulate persistence of application properties
 """
 
-from os import environ
+from os import environ, path
 
 try:
     from dotenv import load_dotenv
@@ -13,6 +13,32 @@ try:
     load_dotenv(".env")
 except ModuleNotFoundError:
     pass
+
+
+def get_password_from_file(env_var_name) -> str:
+    """get password from file"""
+
+    env_var_file: str = env_var_name + "_FILE"
+
+    env_var_name_val = environ.get(env_var_name)
+    env_var_path_val = environ.get(env_var_file)
+
+    if env_var_name_val is not None:
+        return str(env_var_name_val)
+
+    if env_var_path_val is None:
+        print(f"either {env_var_name} or {env_var_file} must be set")
+        return ""
+
+    is_path = path.isfile(env_var_path_val)
+    if not is_path:
+        print(f"{env_var_path_val} is not a path")
+        return ""
+
+    with open(env_var_path_val, "r", encoding="utf-8") as f:
+        file_content = f.read().strip()
+
+    return file_content
 
 
 class EnvironmentSettings:
@@ -29,7 +55,7 @@ class EnvironmentSettings:
     TA_PORT: int = int(environ.get("TA_PORT", False))
     TA_BACKEND_PORT: int = int(environ.get("TA_BACKEND_PORT", False))
     TA_USERNAME: str = str(environ.get("TA_USERNAME"))
-    TA_PASSWORD: str = str(environ.get("TA_PASSWORD"))
+    TA_PASSWORD: str = get_password_from_file("TA_PASSWORD")
 
     # Application Paths
     MEDIA_DIR: str = str(environ.get("TA_MEDIA_DIR", "/youtube"))
@@ -42,7 +68,7 @@ class EnvironmentSettings:
 
     # ElasticSearch
     ES_URL: str = str(environ.get("ES_URL"))
-    ES_PASS: str = str(environ.get("ELASTIC_PASSWORD"))
+    ES_PASS: str = get_password_from_file("ELASTIC_PASSWORD")
     ES_USER: str = str(environ.get("ELASTIC_USER", "elastic"))
     ES_SNAPSHOT_DIR: str = str(
         environ.get(

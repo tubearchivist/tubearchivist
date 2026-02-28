@@ -7,7 +7,7 @@ functionality:
 import json
 import os
 from datetime import datetime
-from typing import Callable, TypedDict
+from typing import TypedDict
 
 from appsettings.src.config import AppConfig
 from channel.src.index import YoutubeChannel
@@ -277,7 +277,6 @@ class Reindex(ReindexBase):
 
     def reindex_type(self, name: str, index_config: ReindexConfigType) -> None:
         """reindex all of a single index"""
-        reindex = self._get_reindex_map(index_config["index_name"])
         queue = RedisQueue(index_config["queue_name"])
         while True:
             total = queue.max_score()
@@ -288,18 +287,18 @@ class Reindex(ReindexBase):
             if self.task:
                 self._notify(name, total, idx)
 
-            reindex(youtube_id)
+            index_name = index_config["index_name"]
+            if index_name == "ta_vide":
+                video = self.reindex_single_video(youtube_id)
+                if video:
+                    self._reindex_video_related(video)
+
+            elif index_name == "ta_channel":
+                self._reindex_single_channel(channel_id=youtube_id)
+            elif index_name == "ta_playlist":
+                self._reindex_single_playlist(playlist_id=youtube_id)
+
             rand_sleep(self.config)
-
-    def _get_reindex_map(self, index_name: str) -> Callable:
-        """return def to run for index"""
-        def_map = {
-            "ta_video": self._reindex_single_video,
-            "ta_channel": self._reindex_single_channel,
-            "ta_playlist": self._reindex_single_playlist,
-        }
-
-        return def_map[index_name]
 
     def _notify(self, name: str, total: int, idx: int) -> None:
         """send notification back to task"""
@@ -307,25 +306,29 @@ class Reindex(ReindexBase):
         progress = idx / total
         self.task.send_progress(message, progress=progress)
 
-    def _reindex_single_video(self, youtube_id: str) -> None:
+    def reindex_single_video(self, youtube_id: str) -> YoutubeVideo | None:
         """refresh data for single video"""
         video = YoutubeVideo(youtube_id)
 
         # read current state
         video.get_from_es()
         if not video.json_data:
-            return
+            return None
 
         es_meta = video.json_data.copy()
 
         # get new
-        media_url = os.path.join(
+        media_url: str | bool = os.path.join(
             EnvironmentSettings.MEDIA_DIR, es_meta["media_url"]
         )
+        if not os.path.exists(media_url):
+            # fallback to cache path
+            media_url = False
+
         video.build_json(media_path=media_url)
         if not video.youtube_meta:
             video.deactivate()
-            return
+            return None
 
         video.delete_subtitles(subtitles=es_meta.get("subtitles"))
         video.check_subtitles()
@@ -339,15 +342,19 @@ class Reindex(ReindexBase):
             video.json_data["playlist"] = es_meta.get("playlist")
 
         video.upload_to_es()
+        self.processed["videos"] += 1
 
-        thumb_handler = ThumbManager(youtube_id)
+        return video
+
+    def _reindex_video_related(self, video: YoutubeVideo) -> None:
+        """reindex video related metadata and fields"""
+        thumb_handler = ThumbManager(video.youtube_id)
         thumb_handler.delete_video_thumb()
         thumb_handler.download_video_thumb(video.json_data["vid_thumb_url"])
 
-        Comments(youtube_id, config=self.config).reindex_comments()
+        Comments(video.youtube_id, config=self.config).reindex_comments()
         video.get_from_es()
         video.embed_metadata()
-        self.processed["videos"] += 1
 
     def _reindex_single_channel(self, channel_id: str) -> None:
         """refresh channel data and sync to videos"""

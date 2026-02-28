@@ -42,7 +42,6 @@ class DownloadsConfigType(TypedDict):
     comment_sort: Literal["top", "new"] | None
     cookie_import: bool
     pot_provider_url: str | None
-    potoken: bool
     throttledratelimit: int | None
     extractor_lang: str | None
     integrate_ryd: bool
@@ -92,7 +91,6 @@ class AppConfig:
             "comment_sort": "top",
             "cookie_import": False,
             "pot_provider_url": None,
-            "potoken": False,
             "throttledratelimit": None,
             "extractor_lang": None,
             "integrate_ryd": False,
@@ -178,6 +176,34 @@ class AppConfig:
                     updated.append(str(to_update))
 
         return updated
+
+    def clear_old_keys(self) -> list[str]:
+        """clear old unused keys"""
+        cleared = []
+        for key, value in self.config.items():
+            if key not in self.CONFIG_DEFAULTS:
+                # complete key removed
+                self.config.pop(key)
+                cleared.append(str({key: value}))
+                continue
+
+            expected_keys = set(
+                self.CONFIG_DEFAULTS[key].keys()  # type: ignore
+            )
+            is_keys = set(self.config[key].keys())
+
+            for to_delete in is_keys - expected_keys:
+                self.config[key].pop(to_delete)
+                cleared.append(f"{key}.{to_delete}")
+
+        if not cleared:
+            return []
+
+        response, status_code = ElasticWrap(self.ES_PATH).post(self.config)
+        if not status_code == 200:
+            print(response)
+
+        return cleared
 
 
 class ReleaseVersion:
