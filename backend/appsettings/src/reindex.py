@@ -288,7 +288,7 @@ class Reindex(ReindexBase):
                 self._notify(name, total, idx)
 
             index_name = index_config["index_name"]
-            if index_name == "ta_vide":
+            if index_name == "ta_video":
                 video = self.reindex_single_video(youtube_id)
                 if video:
                     self._reindex_video_related(video)
