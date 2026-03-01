@@ -280,12 +280,11 @@ class Command(BaseCommand):
                     self.style.SUCCESS(f"    added new default: {new_default}")
                 )
 
-            # FIXME
-            # cleared = AppConfig().clear_old_keys()
-            # for removed_key in cleared:
-            #     self.stdout.write(
-            #         self.style.SUCCESS(f"    removed old key: {removed_key}")
-            #     )
+            cleared = AppConfig().clear_old_keys()
+            for removed_key in cleared:
+                self.stdout.write(
+                    self.style.SUCCESS(f"    removed old key: {removed_key}")
+                )
 
             return
 
