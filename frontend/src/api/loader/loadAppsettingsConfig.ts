@@ -27,6 +27,8 @@ export type AppSettingsConfigType = {
     extractor_lang: string | null;
     integrate_ryd: boolean;
     integrate_sponsorblock: boolean;
+    audio_multistream: boolean;
+    audio_languages: string | null;
   };
   application: {
     enable_snapshot: boolean;

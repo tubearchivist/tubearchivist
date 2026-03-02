@@ -20,6 +20,8 @@ import { ViewStylesEnum, ViewStylesType } from '../configuration/constants/ViewS
 
 type ChannelOverwritesType = {
   download_format: string | null;
+  audio_multistream: boolean | null;
+  audio_languages: string | null;
   autodelete_days: number | null;
   index_playlists: boolean | null;
   integrate_sponsorblock: boolean | null;

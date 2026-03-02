@@ -46,6 +46,8 @@ class DownloadsConfigType(TypedDict):
     extractor_lang: str | None
     integrate_ryd: bool
     integrate_sponsorblock: bool
+    audio_multistream: bool
+    audio_languages: str | None
 
 
 class ApplicationConfigType(TypedDict):
@@ -95,6 +97,8 @@ class AppConfig:
             "extractor_lang": None,
             "integrate_ryd": False,
             "integrate_sponsorblock": False,
+            "audio_multistream": False,
+            "audio_languages": None,
         },
         "application": {
             "enable_snapshot": True,
@@ -180,17 +184,17 @@ class AppConfig:
     def clear_old_keys(self) -> list[str]:
         """clear old unused keys"""
         cleared = []
-        for key in list(self.config.keys()):
+        for key, value in self.config.items():
             if key not in self.CONFIG_DEFAULTS:
                 # complete key removed
-                value = self.config.pop(key)
+                self.config.pop(key)
                 cleared.append(str({key: value}))
                 continue
 
             expected_keys = set(
                 self.CONFIG_DEFAULTS[key].keys()  # type: ignore
             )
-            is_keys = set(list(self.config[key].keys()))
+            is_keys = set(self.config[key].keys())
 
             for to_delete in is_keys - expected_keys:
                 self.config[key].pop(to_delete)
