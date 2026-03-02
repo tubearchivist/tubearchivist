@@ -154,11 +154,22 @@ const SettingsApplication = () => {
   ) => {
     const [group, key] = configKey.split('.');
     const updatedConfig = { [group]: { [key]: configValue } } as Partial<AppSettingsConfigType>;
+    await updateAppsettingsConfig(updatedConfig);
+    setRefresh(true);
+  };
+
+  const handleAudioUpdateConfig = async (
+    configKey: string,
+    configValue: string | boolean | number | null,
+  ) => {
+    const [group, key] = configKey.split('.');
+    const updatedConfig = { [group]: { [key]: configValue } } as Partial<AppSettingsConfigType>;
     const response = await updateAppsettingsConfig(updatedConfig);
     if (response?.error?.error) {
       setAudioMultistreamsWarning(response.error.error);
       return;
     }
+
     setAudioMultistreamsWarning(null);
     setRefresh(true);
   };
@@ -542,7 +553,7 @@ const SettingsApplication = () => {
                   name="downloads.audio_multistream"
                   value={audioMultistreams}
                   helperText={'Enable to include multiple audio languages when available.'}
-                  updateCallback={handleUpdateConfig}
+                  updateCallback={handleAudioUpdateConfig}
                 />
                 {audioMultistreamsWarning && (
                   <p className="settings-error">{audioMultistreamsWarning}</p>
@@ -557,7 +568,7 @@ const SettingsApplication = () => {
                     name="downloads.audio_languages"
                     value={audioLanguages}
                     oldValue={appSettingsConfig.downloads.audio_languages}
-                    updateCallback={handleUpdateConfig}
+                    updateCallback={handleAudioUpdateConfig}
                   />
                 </div>
               )}
