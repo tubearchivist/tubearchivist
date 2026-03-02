@@ -65,11 +65,14 @@ class MediaStreamExtractor:
 
     def _extract_audio_metadata(self, stream) -> None:
         """extract audio metadata"""
+        tags = stream.get("tags") or {}
         self.metadata.append(
             {
                 "bitrate": int(stream.get("bit_rate", 0)),
                 "codec": stream.get("codec_name", "undefined"),
                 "index": stream["index"],
+                "language": tags.get("language"),
+                "title": tags.get("title"),
                 "type": "audio",
             }
         )

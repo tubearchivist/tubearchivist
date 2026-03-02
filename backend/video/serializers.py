@@ -58,6 +58,8 @@ class StreamItemSerializer(serializers.Serializer):
     codec = serializers.CharField()
     height = serializers.IntegerField(required=False)
     index = serializers.IntegerField()
+    language = serializers.CharField(required=False, allow_null=True)
+    title = serializers.CharField(required=False, allow_null=True)
     type = serializers.ChoiceField(choices=["video", "audio"])
     width = serializers.IntegerField(required=False)
 
