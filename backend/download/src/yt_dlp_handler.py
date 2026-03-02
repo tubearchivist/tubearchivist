@@ -319,6 +319,18 @@ class VideoDownloader(DownloaderBase):
         if not primary:
             return "und"
 
+        # MP4 track language metadata is most reliable with ISO-639-2/T
+        # (three-letter) codes. Convert from short code when possible.
+        if len(primary) == 2:
+            converted = ISO639Utils.short2long(primary)
+            if converted and len(converted) == 3:
+                return converted
+
+            return "und"
+
+        if len(primary) == 3:
+            return primary
+
         return primary
 
     @staticmethod
