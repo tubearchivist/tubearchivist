@@ -34,6 +34,8 @@ export const useAppSettingsStore = create<AppSettingsState>(set => ({
       extractor_lang: null,
       integrate_ryd: false,
       integrate_sponsorblock: false,
+      audio_multistream: false,
+      audio_languages: null,
     },
     application: {
       enable_snapshot: false,
