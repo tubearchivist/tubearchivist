@@ -465,6 +465,10 @@ const Video = () => {
 
             {video.streams &&
               video.streams.map(stream => {
+                const languageLabel = stream.language?.trim();
+                const titleLabel = stream.title?.trim();
+                const streamTags = [languageLabel, titleLabel].filter(Boolean).join(' | ');
+
                 return (
                   <p key={stream.index}>
                     {capitalizeFirstLetter(stream.type)}: {stream.codec}{' '}
@@ -472,6 +476,11 @@ const Video = () => {
                     {stream.width && (
                       <>
                         <span className="space-carrot">|</span> {stream.width}x{stream.height}
+                      </>
+                    )}
+                    {streamTags && (
+                      <>
+                        <span className="space-carrot">|</span> {streamTags}
                       </>
                     )}{' '}
                   </p>

@@ -44,6 +44,8 @@ export type StreamType = {
   type: string;
   index: number;
   codec: string;
+  language?: string | null;
+  title?: string | null;
   width?: number;
   height?: number;
   bitrate: number;
