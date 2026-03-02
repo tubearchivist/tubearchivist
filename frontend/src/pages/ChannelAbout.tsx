@@ -104,11 +104,21 @@ const ChannelAbout = () => {
     configValue: string | boolean | number | null,
   ) => {
     if (!channel) return;
+    await updateChannelOverwrites(channel.channel_id, configKey, configValue);
+    setRefresh(true);
+  };
+
+  const handleAudioUpdateConfig = async (
+    configKey: string,
+    configValue: string | boolean | number | null,
+  ) => {
+    if (!channel) return;
     const response = await updateChannelOverwrites(channel.channel_id, configKey, configValue);
     if (response?.error?.error) {
       setAudioMultistreamsWarning(response.error.error);
       return;
     }
+
     setAudioMultistreamsWarning(null);
     if (configKey === 'audio_multistream') {
       setAudioMultistreams(configValue === null ? null : Boolean(configValue));
@@ -323,9 +333,9 @@ const ChannelAbout = () => {
                       ? `Enable to include multiple audio languages when available for this channel. Using global setting: ${globalAudioMultistream ? 'On' : 'Off'}.`
                       : 'Enable to include multiple audio languages when available for this channel.'
                   }
-                  updateCallback={handleUpdateConfig}
+                  updateCallback={handleAudioUpdateConfig}
                   resetCallback={() => {
-                    handleUpdateConfig('audio_multistream', null);
+                    handleAudioUpdateConfig('audio_multistream', null);
                     setAudioMultistreams(null);
                   }}
                 />
@@ -342,7 +352,7 @@ const ChannelAbout = () => {
                     name="audio_languages"
                     value={audioLanguages}
                     oldValue={channel.channel_overwrites?.audio_languages ?? null}
-                    updateCallback={handleUpdateConfig}
+                    updateCallback={handleAudioUpdateConfig}
                   />
                 </div>
               )}
