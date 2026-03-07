@@ -12,6 +12,8 @@ from channel.serializers import (
 from channel.src.index import YoutubeChannel, channel_overwrites
 from channel.src.nav import ChannelNav
 from common.serializers import ErrorResponseSerializer
+from common.src.es_connect import ElasticWrap
+from common.src.helper import get_duration_str
 from common.src.urlparser import Parser
 from common.views_base import AdminWriteOnly, ApiBaseView
 from drf_spectacular.utils import (
@@ -24,6 +26,48 @@ from task.tasks import index_channel_playlists, subscribe_to
 
 
 class ChannelApiListView(ApiBaseView):
+    @staticmethod
+    def _get_channel_video_stats(channel_ids):
+        if not channel_ids:
+            return {}
+
+        data = {
+            "size": 0,
+            "query": {"terms": {"channel.channel_id": channel_ids}},
+            "aggs": {
+                "channel_stats": {
+                    "multi_terms": {
+                        "size": len(channel_ids),
+                        "terms": [
+                            {"field": "channel.channel_id"},
+                            {"field": "channel.channel_name.keyword"},
+                        ],
+                    },
+                    "aggs": {
+                        "doc_count": {"value_count": {"field": "_index"}},
+                        "duration": {"sum": {"field": "player.duration"}},
+                        "media_size": {"sum": {"field": "media_size"}},
+                    },
+                }
+            },
+        }
+        response, _ = ElasticWrap("ta_video/_search").get(data=data)
+        buckets = (
+            response.get("aggregations", {})
+            .get("channel_stats", {})
+            .get("buckets", [])
+        )
+        stats = {}
+        for bucket in buckets:
+            duration_value = int(bucket["duration"]["value"])
+            stats[bucket["key"][0]] = {
+                "channel_video_count": int(bucket["doc_count"]["value"]),
+                "channel_video_duration": duration_value,
+                "channel_video_duration_str": get_duration_str(duration_value),
+                "channel_video_media_size": int(bucket["media_size"]["value"]),
+            }
+        return stats
+
     """resolves to /api/channel/
     GET: returns list of channels
     POST: edit a list of channels
@@ -59,6 +103,23 @@ class ChannelApiListView(ApiBaseView):
 
         self.data["query"] = {"bool": {"must": must_list}}
         self.get_document_list(request)
+        if self.response.get("data"):
+            channel_ids = [
+                channel["channel_id"] for channel in self.response["data"]
+            ]
+            channel_stats = self._get_channel_video_stats(channel_ids)
+            for channel in self.response["data"]:
+                channel.update(
+                    channel_stats.get(
+                        channel["channel_id"],
+                        {
+                            "channel_video_count": 0,
+                            "channel_video_duration": 0,
+                            "channel_video_duration_str": get_duration_str(0),
+                            "channel_video_media_size": 0,
+                        },
+                    )
+                )
         serializer = ChannelListSerializer(self.response)
 
         return Response(serializer.data)
