@@ -13,6 +13,7 @@ import updateAppsettingsConfig from '../api/actions/updateAppsettingsConfig';
 import loadApiToken from '../api/loader/loadApiToken';
 import InputConfig from '../components/InputConfig';
 import ToggleConfig from '../components/ToggleConfig';
+import AudioLanguageSelector from '../components/AudioLanguageSelector';
 import updateCookie from '../api/actions/updateCookie';
 import loadCookie, { CookieStateType } from '../api/loader/loadCookie';
 import deleteCookie from '../api/actions/deleteCookie';
@@ -56,6 +57,9 @@ const SettingsApplication = () => {
   const [downloadsFormatSort, setDownloadsFormatSort] = useState<string | null>(null);
   const [downloadsExtractorLang, setDownloadsExtractorLang] = useState<string | null>(null);
   const [embedMetadata, setEmbedMetadata] = useState(false);
+  const [audioMultistreams, setAudioMultistreams] = useState(false);
+  const [audioLanguages, setAudioLanguages] = useState<string | null>(null);
+  const [audioMultistreamsWarning, setAudioMultistreamsWarning] = useState<string | null>(null);
 
   // Subtitles
   const [subtitleLang, setSubtitleLang] = useState<string | null>(null);
@@ -112,6 +116,9 @@ const SettingsApplication = () => {
     setDownloadsFormatSort(appSettingsConfigData?.downloads.format_sort || null);
     setDownloadsExtractorLang(appSettingsConfigData?.downloads.extractor_lang || null);
     setEmbedMetadata(appSettingsConfigData?.downloads.add_metadata || false);
+    setAudioMultistreams(appSettingsConfigData?.downloads.audio_multistream || false);
+    setAudioLanguages(appSettingsConfigData?.downloads.audio_languages || null);
+    setAudioMultistreamsWarning(null);
 
     // Subtitles
     setSubtitleLang(appSettingsConfigData?.downloads.subtitle || null);
@@ -148,6 +155,22 @@ const SettingsApplication = () => {
     const [group, key] = configKey.split('.');
     const updatedConfig = { [group]: { [key]: configValue } } as Partial<AppSettingsConfigType>;
     await updateAppsettingsConfig(updatedConfig);
+    setRefresh(true);
+  };
+
+  const handleAudioUpdateConfig = async (
+    configKey: string,
+    configValue: string | boolean | number | null,
+  ) => {
+    const [group, key] = configKey.split('.');
+    const updatedConfig = { [group]: { [key]: configValue } } as Partial<AppSettingsConfigType>;
+    const response = await updateAppsettingsConfig(updatedConfig);
+    if (response?.error?.error) {
+      setAudioMultistreamsWarning(response.error.error);
+      return;
+    }
+
+    setAudioMultistreamsWarning(null);
     setRefresh(true);
   };
 
@@ -463,8 +486,12 @@ const SettingsApplication = () => {
                       </ul>
                     </li>
                     <li>
-                      Embedding metadata adds additional metadata and thumbnails directly to the mp4
-                      file.
+                      Embedding metadata adds additional metadata and thumbnails directly to mp4
+                      files.
+                    </li>
+                    <li>
+                      Enable multistream audio to download multiple audio languages (maps to{' '}
+                      <i>--audio-multistreams</i>). This increases file size.
                     </li>
                   </ul>
                 </div>
@@ -518,6 +545,33 @@ const SettingsApplication = () => {
                   updateCallback={handleUpdateConfig}
                 />
               </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Enable multistream audio</p>
+                </div>
+                <ToggleConfig
+                  name="downloads.audio_multistream"
+                  value={audioMultistreams}
+                  helperText={'Enable to include multiple audio languages when available.'}
+                  updateCallback={handleAudioUpdateConfig}
+                />
+                {audioMultistreamsWarning && (
+                  <p className="settings-error">{audioMultistreamsWarning}</p>
+                )}
+              </div>
+              {audioMultistreams && (
+                <div className="settings-box-wrapper">
+                  <div>
+                    <p>Audio languages</p>
+                  </div>
+                  <AudioLanguageSelector
+                    name="downloads.audio_languages"
+                    value={audioLanguages}
+                    oldValue={appSettingsConfig.downloads.audio_languages}
+                    updateCallback={handleAudioUpdateConfig}
+                  />
+                </div>
+              )}
             </div>
             <div className="info-box-item">
               <h2 id="subtitles">Subtitles</h2>
