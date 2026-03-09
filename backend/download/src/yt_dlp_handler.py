@@ -177,7 +177,7 @@ class VideoDownloader(DownloaderBase):
             format_sort = self.config["downloads"]["format_sort"]
             format_sort_list = [i.strip() for i in format_sort.split(",")]
             self.obs["format_sort"] = format_sort_list
-        if self.config["downloads"].get("audio_multistream"):
+        if self.config["downloads"].get("audio_multistreams"):
             self.obs["audio_multistreams"] = True
         if self.config["downloads"]["limit_speed"]:
             self.obs["ratelimit"] = (
@@ -295,10 +295,16 @@ class VideoDownloader(DownloaderBase):
             "noplaylist": True,
         }
 
-        print(f"[audio_languages] downloading HLS fallback {lang}: {format_id}")
+        print(
+            f"[audio_languages] downloading HLS fallback "
+            f"{lang}: {format_id}"
+        )
         success, _ = YtWrap(hls_obs, self.config).download(youtube_id)
         if not success:
-            print(f"[audio_languages] failed HLS fallback download for: {lang}")
+            print(
+                f"[audio_languages] failed HLS fallback "
+                f"download for: {lang}"
+            )
             return None
 
         # yt-dlp chooses extension by source/container, so discover by prefix.
@@ -361,7 +367,9 @@ class VideoDownloader(DownloaderBase):
             "csv=p=0",
             path,
         ]
-        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, check=False
+        )
         if result.returncode != 0:
             return 0
 
@@ -391,13 +399,15 @@ class VideoDownloader(DownloaderBase):
         for input_idx in range(1, len(audio_tracks) + 1):
             cmd += ["-map", f"{input_idx}:a:0"]
 
-        # Label appended tracks so ffprobe/UI can show meaningful language info.
-        # We offset by existing main-file audio stream count, then annotate each
+        # Label appended tracks so ffprobe/UI can show meaningful
+        # language info. We offset by existing main-file audio stream count,
         # appended stream with both language and title metadata.
         existing_audio_count = VideoDownloader._count_audio_streams(main_path)
         for idx, (lang, _) in enumerate(audio_tracks):
             audio_stream_idx = existing_audio_count + idx
-            language_code = VideoDownloader._normalize_language_code(lang)
+            language_code = VideoDownloader._normalize_language_code(
+                lang
+            )
             language_title = VideoDownloader._language_title(lang)
             cmd += [
                 f"-metadata:s:a:{audio_stream_idx}",
@@ -426,7 +436,7 @@ class VideoDownloader(DownloaderBase):
     def _build_main_format(
         formats: list[dict], dash_lang_formats: dict
     ) -> str | None:
-        """build DASH-only format string: bestvideo + DASH audio per language"""
+        """build DASH-only format string for requested audio tracks"""
         video_only = [
             f
             for f in formats
@@ -475,8 +485,8 @@ class VideoDownloader(DownloaderBase):
         overwrites = self.channel_overwrites.get(channel_id)
         if overwrites and overwrites.get("download_format"):
             obs["format"] = overwrites.get("download_format")
-        if overwrites and overwrites.get("audio_multistream") is not None:
-            obs["audio_multistreams"] = overwrites.get("audio_multistream")
+        if overwrites and overwrites.get("audio_multistreams") is not None:
+            obs["audio_multistreams"] = overwrites.get("audio_multistreams")
 
         # Keep output container mp4-only regardless of channel/global values.
         obs["merge_output_format"] = "mp4"
@@ -485,8 +495,8 @@ class VideoDownloader(DownloaderBase):
     def _get_audio_languages(self, channel_id: str) -> list[str] | None:
         """get audio languages from config or channel overwrites.
 
-        Returns None if audio_multistream is not effectively enabled — audio_languages
-        alone must not force multi-track downloads (Option A / strict mode).
+        Returns None if audio_multistreams is not effectively enabled.
+        audio_languages alone must not force multi-track downloads.
         """
         if not self._is_audio_multistream_enabled(channel_id):
             return None
@@ -506,11 +516,14 @@ class VideoDownloader(DownloaderBase):
         ]
 
     def _is_audio_multistream_enabled(self, channel_id: str) -> bool:
-        """return True if audio_multistream is enabled globally or via channel overwrite"""
+        """return True when audio_multistreams is enabled"""
         overwrites = self.channel_overwrites.get(channel_id, {})
-        if "audio_multistream" in overwrites and overwrites["audio_multistream"] is not None:
-            return bool(overwrites["audio_multistream"])
-        return bool(self.config["downloads"].get("audio_multistream"))
+        if (
+            "audio_multistreams" in overwrites
+            and overwrites["audio_multistreams"] is not None
+        ):
+            return bool(overwrites["audio_multistreams"])
+        return bool(self.config["downloads"].get("audio_multistreams"))
 
     @staticmethod
     def _discover_audio_languages(formats: list[dict]) -> list[str]:
@@ -526,92 +539,138 @@ class VideoDownloader(DownloaderBase):
                 langs.append(lang)
         return langs
 
+    def _resolve_requested_audio_languages(
+        self, youtube_id: str, channel_id: str
+    ) -> tuple[list[str] | None, list[dict] | None]:
+        """get configured or auto-discovered audio languages"""
+        languages = self._get_audio_languages(channel_id)
+        if languages:
+            return languages, None
+
+        if not self._is_audio_multistream_enabled(channel_id):
+            return None, None
+
+        print(
+            f"{youtube_id}: audio_multistreams enabled, "
+            "auto-discovering languages"
+        )
+        formats = self._get_formats(youtube_id)
+        if not formats:
+            return None, formats
+
+        languages = self._discover_audio_languages(formats)
+        print(f"{youtube_id}: discovered audio languages: {languages}")
+        return languages, formats
+
+    def _set_hls_base_download(
+        self, obs: dict, youtube_id: str, hls_formats: dict[str, str]
+    ) -> dict[str, str]:
+        """use the first HLS language as the base download"""
+        first_lang, first_fmt = next(iter(hls_formats.items()))
+        obs["format"] = first_fmt
+        print(
+            f"{youtube_id}: no DASH main format, using HLS "
+            f"{first_lang}:{first_fmt} as base"
+        )
+        return {
+            lang: fmt
+            for lang, fmt in hls_formats.items()
+            if lang != first_lang
+        }
+
+    def _select_audio_language_formats(
+        self,
+        obs: dict,
+        youtube_id: str,
+        languages: list[str] | None,
+        formats: list[dict] | None,
+    ) -> dict[str, str]:
+        """update yt-dlp options for selected audio languages"""
+        if not languages:
+            return {}
+
+        print(f"{youtube_id}: applying audio languages {languages}")
+        available_formats = formats or self._get_formats(youtube_id)
+        if not available_formats:
+            return {}
+
+        dash_fmt = self._resolve_dash_audio_formats(
+            available_formats, languages
+        )
+        hls_fmt = self._resolve_hls_audio_formats(
+            available_formats, languages, dash_fmt
+        )
+        main_fmt = self._build_main_format(available_formats, dash_fmt)
+        if main_fmt:
+            selected_audio_count = len(dash_fmt) + len(hls_fmt)
+            obs["format"] = main_fmt
+            if selected_audio_count > 1:
+                obs["audio_multistreams"] = True
+            print(f"{youtube_id}: main format: {main_fmt}")
+            return hls_fmt
+
+        if not hls_fmt:
+            return {}
+
+        return self._set_hls_base_download(obs, youtube_id, hls_fmt)
+
+    @staticmethod
+    def _cleanup_audio_tracks(
+        audio_tracks: list[tuple[str, str]]
+    ) -> None:
+        """remove temporary fallback track files"""
+        for _, track_path in audio_tracks:
+            try:
+                os.remove(track_path)
+            except FileNotFoundError:
+                pass
+
+    def _merge_hls_audio_tracks(
+        self,
+        youtube_id: str,
+        dl_cache: str,
+        hls_formats_to_merge: dict[str, str],
+    ) -> None:
+        """download HLS fallback tracks and merge them into the MP4"""
+        if not hls_formats_to_merge:
+            return
+
+        # Post-step for HLS-only languages: download temporary fallback files
+        # and append their audio streams to the MP4 generated above.
+        main_path = os.path.join(dl_cache, f"{youtube_id}.mp4")
+        audio_tracks: list[tuple[str, str]] = []
+        try:
+            for lang, fmt_id in hls_formats_to_merge.items():
+                track_path = self._download_hls_audio(youtube_id, fmt_id, lang)
+                if track_path:
+                    audio_tracks.append((lang, track_path))
+
+            if audio_tracks:
+                self._merge_additional_audio_tracks(main_path, audio_tracks)
+        finally:
+            self._cleanup_audio_tracks(audio_tracks)
+
     def _dl_single_vid(self, youtube_id: str, channel_id: str) -> bool:
-        """download single video with optional multi-language audio selection"""
+        """download one video with optional multi-language audio"""
         obs = self.obs.copy()
         self._set_overwrites(obs, channel_id)
         dl_cache = os.path.join(self.CACHE_DIR, "download")
 
-        languages = self._get_audio_languages(channel_id)
-        hls_formats_to_merge: dict[str, str] = {}
-
-        if not languages and self._is_audio_multistream_enabled(channel_id):
-            # audio_multistream is on but no explicit language list – auto-discover
-            print(f"{youtube_id}: audio_multistream enabled, auto-discovering languages")
-            formats = self._get_formats(youtube_id)
-            if formats:
-                languages = self._discover_audio_languages(formats)
-                print(f"{youtube_id}: discovered audio languages: {languages}")
-        else:
-            formats = None  # will be fetched below if needed
-
-        if languages:
-            print(f"{youtube_id}: applying audio languages {languages}")
-            if formats is None:
-                formats = self._get_formats(youtube_id)
-            if formats:
-                # Build yt-dlp format string using DASH audio tracks only.
-                # If no DASH tracks are found, fall back to the normal format selection.
-                dash_fmt = self._resolve_dash_audio_formats(formats, languages)
-                hls_fmt = self._resolve_hls_audio_formats(
-                    formats, languages, dash_fmt
-                )
-                selected_audio_count = len(dash_fmt) + len(hls_fmt)
-
-                # DASH-first: use bestvideo + selected DASH audios as main file.
-                main_fmt = self._build_main_format(formats, dash_fmt)
-                if main_fmt:
-                    obs["format"] = main_fmt
-                    # If we selected more than one total audio track (DASH+HLS),
-                    # keep yt-dlp multistream flag enabled for the main pass.
-                    if selected_audio_count > 1:
-                        obs["audio_multistreams"] = True
-                    print(f"{youtube_id}: main format: {main_fmt}")
-
-                    # Any languages that only exist as HLS are merged afterward.
-                    hls_formats_to_merge = hls_fmt
-                elif hls_fmt:
-                    # No DASH audio matched. Use first HLS language as the main
-                    # download to ensure at least one requested language lands
-                    # in the base file; merge remaining HLS tracks afterward.
-                    first_lang, first_fmt = next(iter(hls_fmt.items()))
-                    obs["format"] = first_fmt
-                    hls_formats_to_merge = {
-                        lang: fmt
-                        for lang, fmt in hls_fmt.items()
-                        if lang != first_lang
-                    }
-                    print(
-                        f"{youtube_id}: no DASH main format, using HLS "
-                        f"{first_lang}:{first_fmt} as base"
-                    )
+        languages, formats = self._resolve_requested_audio_languages(
+            youtube_id, channel_id
+        )
+        hls_formats_to_merge = self._select_audio_language_formats(
+            obs, youtube_id, languages, formats
+        )
 
         success, message = YtWrap(obs, self.config).download(youtube_id)
         if not success:
             self._handle_error(youtube_id, message)
             return False
 
-        if hls_formats_to_merge:
-            # Post-step for HLS-only languages: download temporary fallback files
-            # and append their audio streams to the MP4 generated above.
-            main_path = os.path.join(dl_cache, f"{youtube_id}.mp4")
-            audio_tracks: list[tuple[str, str]] = []
-            try:
-                for lang, fmt_id in hls_formats_to_merge.items():
-                    track_path = self._download_hls_audio(
-                        youtube_id, fmt_id, lang
-                    )
-                    if track_path:
-                        audio_tracks.append((lang, track_path))
-
-                if audio_tracks:
-                    self._merge_additional_audio_tracks(main_path, audio_tracks)
-            finally:
-                for _, track_path in audio_tracks:
-                    try:
-                        os.remove(track_path)
-                    except FileNotFoundError:
-                        pass
+        self._merge_hls_audio_tracks(
+            youtube_id, dl_cache, hls_formats_to_merge
+        )
 
         if self.obs["writethumbnail"]:
             # webp files don't get cleaned up automatically

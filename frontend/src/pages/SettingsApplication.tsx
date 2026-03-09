@@ -116,7 +116,7 @@ const SettingsApplication = () => {
     setDownloadsFormatSort(appSettingsConfigData?.downloads.format_sort || null);
     setDownloadsExtractorLang(appSettingsConfigData?.downloads.extractor_lang || null);
     setEmbedMetadata(appSettingsConfigData?.downloads.add_metadata || false);
-    setAudioMultistreams(appSettingsConfigData?.downloads.audio_multistream || false);
+    setAudioMultistreams(appSettingsConfigData?.downloads.audio_multistreams || false);
     setAudioLanguages(appSettingsConfigData?.downloads.audio_languages || null);
     setAudioMultistreamsWarning(null);
 
@@ -550,7 +550,7 @@ const SettingsApplication = () => {
                   <p>Enable multistream audio</p>
                 </div>
                 <ToggleConfig
-                  name="downloads.audio_multistream"
+                  name="downloads.audio_multistreams"
                   value={audioMultistreams}
                   helperText={'Enable to include multiple audio languages when available.'}
                   updateCallback={handleAudioUpdateConfig}
@@ -565,6 +565,11 @@ const SettingsApplication = () => {
                     <p>Audio languages</p>
                   </div>
                   <AudioLanguageSelector
+                    key={[
+                      'downloads.audio_languages',
+                      audioLanguages ?? '',
+                      appSettingsConfig.downloads.audio_languages ?? '',
+                    ].join(':')}
                     name="downloads.audio_languages"
                     value={audioLanguages}
                     oldValue={appSettingsConfig.downloads.audio_languages}

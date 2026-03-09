@@ -46,7 +46,7 @@ class DownloadsConfigType(TypedDict):
     extractor_lang: str | None
     integrate_ryd: bool
     integrate_sponsorblock: bool
-    audio_multistream: bool
+    audio_multistreams: bool
     audio_languages: str | None
 
 
@@ -97,7 +97,7 @@ class AppConfig:
             "extractor_lang": None,
             "integrate_ryd": False,
             "integrate_sponsorblock": False,
-            "audio_multistream": False,
+            "audio_multistreams": False,
             "audio_languages": None,
         },
         "application": {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 type AudioLanguageSelectorProps = {
   name: string;
@@ -31,6 +31,15 @@ const normalizeCsv = (value: string | null): string[] => {
     .filter(Boolean);
 };
 
+const splitLanguages = (value: string | null, commonCodes: Set<string>) => {
+  const parsed = normalizeCsv(value);
+
+  return {
+    known: parsed.filter(item => commonCodes.has(item)),
+    custom: parsed.filter(item => !commonCodes.has(item)),
+  };
+};
+
 const AudioLanguageSelector = ({
   name,
   value,
@@ -38,17 +47,9 @@ const AudioLanguageSelector = ({
   updateCallback,
 }: AudioLanguageSelectorProps) => {
   const commonCodes = useMemo(() => new Set(COMMON_AUDIO_LANGUAGES.map(item => item.code)), []);
-  const [selectedCommon, setSelectedCommon] = useState<string[]>([]);
-  const [customLanguages, setCustomLanguages] = useState('');
-
-  useEffect(() => {
-    const parsed = normalizeCsv(value);
-    const known = parsed.filter(item => commonCodes.has(item));
-    const custom = parsed.filter(item => !commonCodes.has(item));
-
-    setSelectedCommon(known);
-    setCustomLanguages(custom.join(', '));
-  }, [value, commonCodes]);
+  const initialSelection = useMemo(() => splitLanguages(value, commonCodes), [value, commonCodes]);
+  const [selectedCommon, setSelectedCommon] = useState<string[]>(initialSelection.known);
+  const [customLanguages, setCustomLanguages] = useState(initialSelection.custom.join(', '));
 
   const mergedValue = useMemo(() => {
     const custom = normalizeCsv(customLanguages);
@@ -58,7 +59,9 @@ const AudioLanguageSelector = ({
 
   return (
     <div>
-      <p className="settings-help-text">Select common languages and/or add custom tags. No selection will download all languages.</p>
+      <p className="settings-help-text">
+        Select common languages and/or add custom tags. No selection will download all languages.
+      </p>
       <select
         multiple
         value={selectedCommon}
@@ -87,11 +90,9 @@ const AudioLanguageSelector = ({
             <button onClick={() => updateCallback(name, mergedValue)}>Update</button>
             <button
               onClick={() => {
-                const parsed = normalizeCsv(oldValue);
-                const known = parsed.filter(item => commonCodes.has(item));
-                const custom = parsed.filter(item => !commonCodes.has(item));
-                setSelectedCommon(known);
-                setCustomLanguages(custom.join(', '));
+                const resetSelection = splitLanguages(oldValue, commonCodes);
+                setSelectedCommon(resetSelection.known);
+                setCustomLanguages(resetSelection.custom.join(', '));
               }}
             >
               Cancel

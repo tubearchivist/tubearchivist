@@ -13,7 +13,7 @@ class ChannelOverwriteSerializer(
     """serialize channel overwrites"""
 
     download_format = serializers.CharField(required=False, allow_null=True)
-    audio_multistream = serializers.BooleanField(
+    audio_multistreams = serializers.BooleanField(
         required=False, allow_null=True
     )
     audio_languages = serializers.CharField(required=False, allow_null=True)

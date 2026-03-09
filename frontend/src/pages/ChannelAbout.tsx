@@ -63,7 +63,7 @@ const ChannelAbout = () => {
   const { data: channelResponseData } = channelResponse ?? {};
 
   const channel = channelResponseData;
-  const globalAudioMultistream = appSettingsConfig.downloads.audio_multistream;
+  const globalAudioMultistream = appSettingsConfig.downloads.audio_multistreams;
   const effectiveAudioMultistream = audioMultistreams ?? globalAudioMultistream;
 
   useEffect(() => {
@@ -75,7 +75,7 @@ const ChannelAbout = () => {
         setChannelResponse(channelResponse);
         setDownloadFormat(channelResponseData?.channel_overwrites?.download_format ?? null);
         setAudioMultistreams(
-          channelResponseData?.channel_overwrites?.audio_multistream ?? null,
+          channelResponseData?.channel_overwrites?.audio_multistreams ?? null,
         );
         setAudioMultistreamsWarning(null);
         setAudioLanguages(channelResponseData?.channel_overwrites?.audio_languages ?? null);
@@ -120,7 +120,7 @@ const ChannelAbout = () => {
     }
 
     setAudioMultistreamsWarning(null);
-    if (configKey === 'audio_multistream') {
+    if (configKey === 'audio_multistreams') {
       setAudioMultistreams(configValue === null ? null : Boolean(configValue));
     }
     setRefresh(true);
@@ -326,7 +326,7 @@ const ChannelAbout = () => {
                   <p>Enable multistream audio</p>
                 </div>
                 <ToggleConfig
-                  name="audio_multistream"
+                  name="audio_multistreams"
                   value={effectiveAudioMultistream}
                   helperText={
                     audioMultistreams === null
@@ -335,7 +335,7 @@ const ChannelAbout = () => {
                   }
                   updateCallback={handleAudioUpdateConfig}
                   resetCallback={() => {
-                    handleAudioUpdateConfig('audio_multistream', null);
+                    handleAudioUpdateConfig('audio_multistreams', null);
                     setAudioMultistreams(null);
                   }}
                 />
@@ -349,6 +349,11 @@ const ChannelAbout = () => {
                     <p>Audio Languages</p>
                   </div>
                   <AudioLanguageSelector
+                    key={[
+                      'audio_languages',
+                      audioLanguages ?? '',
+                      channel.channel_overwrites?.audio_languages ?? '',
+                    ].join(':')}
                     name="audio_languages"
                     value={audioLanguages}
                     oldValue={channel.channel_overwrites?.audio_languages ?? null}
