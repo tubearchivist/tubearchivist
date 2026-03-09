@@ -8,7 +8,10 @@ from os import stat
 class MediaStreamExtractor:
     """extract stream metadata"""
 
-    GENERIC_AUDIO_TITLES = {"soundhandler", "iso media file produced by google inc."}
+    GENERIC_AUDIO_TITLES = {
+        "soundhandler",
+        "iso media file produced by google inc.",
+    }
 
     def __init__(self, media_path):
         self.media_path = media_path
@@ -78,7 +81,10 @@ class MediaStreamExtractor:
             or tags.get("handler_name")
             or tags.get("HANDLER_NAME")
         )
-        if isinstance(title, str) and title.strip().lower() in self.GENERIC_AUDIO_TITLES:
+        if (
+            isinstance(title, str)
+            and title.strip().lower() in self.GENERIC_AUDIO_TITLES
+        ):
             title = None
 
         self.metadata.append(

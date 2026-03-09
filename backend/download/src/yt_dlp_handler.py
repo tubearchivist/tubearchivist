@@ -405,9 +405,7 @@ class VideoDownloader(DownloaderBase):
         existing_audio_count = VideoDownloader._count_audio_streams(main_path)
         for idx, (lang, _) in enumerate(audio_tracks):
             audio_stream_idx = existing_audio_count + idx
-            language_code = VideoDownloader._normalize_language_code(
-                lang
-            )
+            language_code = VideoDownloader._normalize_language_code(lang)
             language_title = VideoDownloader._language_title(lang)
             cmd += [
                 f"-metadata:s:a:{audio_stream_idx}",
@@ -510,9 +508,7 @@ class VideoDownloader(DownloaderBase):
             return None
 
         return [
-            lang.strip()
-            for lang in audio_languages.split(",")
-            if lang.strip()
+            lang.strip() for lang in audio_languages.split(",") if lang.strip()
         ]
 
     def _is_audio_multistream_enabled(self, channel_id: str) -> bool:
@@ -615,9 +611,7 @@ class VideoDownloader(DownloaderBase):
         return self._set_hls_base_download(obs, youtube_id, hls_fmt)
 
     @staticmethod
-    def _cleanup_audio_tracks(
-        audio_tracks: list[tuple[str, str]]
-    ) -> None:
+    def _cleanup_audio_tracks(audio_tracks: list[tuple[str, str]]) -> None:
         """remove temporary fallback track files"""
         for _, track_path in audio_tracks:
             try:

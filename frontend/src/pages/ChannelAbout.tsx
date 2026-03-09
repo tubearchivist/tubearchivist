@@ -74,9 +74,7 @@ const ChannelAbout = () => {
 
         setChannelResponse(channelResponse);
         setDownloadFormat(channelResponseData?.channel_overwrites?.download_format ?? null);
-        setAudioMultistreams(
-          channelResponseData?.channel_overwrites?.audio_multistreams ?? null,
-        );
+        setAudioMultistreams(channelResponseData?.channel_overwrites?.audio_multistreams ?? null);
         setAudioMultistreamsWarning(null);
         setAudioLanguages(channelResponseData?.channel_overwrites?.audio_languages ?? null);
         setAutoDeleteAfter(channelResponseData?.channel_overwrites?.autodelete_days ?? null);
