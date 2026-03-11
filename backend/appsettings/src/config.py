@@ -180,17 +180,17 @@ class AppConfig:
     def clear_old_keys(self) -> list[str]:
         """clear old unused keys"""
         cleared = []
-        for key, value in self.config.items():
+        for key in list(self.config.keys()):
             if key not in self.CONFIG_DEFAULTS:
                 # complete key removed
-                self.config.pop(key)
+                value = self.config.pop(key)
                 cleared.append(str({key: value}))
                 continue
 
             expected_keys = set(
                 self.CONFIG_DEFAULTS[key].keys()  # type: ignore
             )
-            is_keys = set(self.config[key].keys())
+            is_keys = set(list(self.config[key].keys()))
 
             for to_delete in is_keys - expected_keys:
                 self.config[key].pop(to_delete)
