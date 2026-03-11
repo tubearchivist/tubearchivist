@@ -81,6 +81,24 @@ class ChannelListQuerySerializer(serializers.Serializer):
         choices=["subscribed", "unsubscribed"], required=False
     )
     page = serializers.IntegerField(required=False)
+    view = serializers.ChoiceField(
+        choices=["grid", "list", "table"], required=False
+    )
+    sort = serializers.ChoiceField(
+        choices=[
+            "name",
+            "subscribers",
+            "video_count",
+            "duration",
+            "media_size",
+            "last_refresh",
+        ],
+        required=False,
+        default="name",
+    )
+    order = serializers.ChoiceField(
+        choices=["asc", "desc"], required=False, default="asc"
+    )
 
 
 class ChannelUpdateSerializer(serializers.Serializer):

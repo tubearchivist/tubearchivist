@@ -85,16 +85,21 @@ class ChannelApiListView(ApiBaseView):
     )
     def get(self, request):
         """get request"""
-        self.data.update(
-            {"sort": [{"channel_name.keyword": {"order": "asc"}}]}
-        )
-
         serializer = ChannelListQuerySerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
 
-        must_list = []
+        view = validated_data.get("view")
+        sort = validated_data.get("sort", "name")
+        order = validated_data.get("order", "asc")
         query_filter = validated_data.get("filter")
+
+        # Aggregation-based sort fields
+        agg_sorts = ["video_count", "duration", "media_size"]
+        needs_aggregations = view == "table" or sort in agg_sorts
+
+        # Build filter
+        must_list = []
         if query_filter is not None:
             channel_subscribed = query_filter == "subscribed"
             must_list.append(
@@ -102,8 +107,23 @@ class ChannelApiListView(ApiBaseView):
             )
 
         self.data["query"] = {"bool": {"must": must_list}}
+
+        # Apply ES-level sort for non-aggregation fields
+        sort_field_map = {
+            "name": "channel_name.keyword",
+            "subscribers": "channel_subs",
+            "last_refresh": "channel_last_refresh",
+        }
+        if sort in sort_field_map:
+            self.data["sort"] = [{sort_field_map[sort]: {"order": order}}]
+        else:
+            # For aggregation-based sorts, use default ES sort first
+            self.data["sort"] = [{"channel_name.keyword": {"order": "asc"}}]
+
         self.get_document_list(request)
-        if self.response.get("data"):
+
+        # Conditionally compute aggregations
+        if self.response.get("data") and needs_aggregations:
             channel_ids = [
                 channel["channel_id"] for channel in self.response["data"]
             ]
@@ -120,9 +140,29 @@ class ChannelApiListView(ApiBaseView):
                         },
                     )
                 )
+
+            # Sort by aggregated field in Python
+            if sort in agg_sorts:
+                self._sort_by_aggregation(sort, order)
+
         serializer = ChannelListSerializer(self.response)
 
         return Response(serializer.data)
+
+    def _sort_by_aggregation(self, sort: str, order: str):
+        """Sort response data by aggregated field"""
+        sort_key_map = {
+            "video_count": "channel_video_count",
+            "duration": "channel_video_duration",
+            "media_size": "channel_video_media_size",
+        }
+        key = sort_key_map.get(sort)
+        if key:
+            self.response["data"] = sorted(
+                self.response["data"],
+                key=lambda x: x.get(key, 0),
+                reverse=(order == "desc"),
+            )
 
     def post(self, request):
         """subscribe/unsubscribe to list of channels"""

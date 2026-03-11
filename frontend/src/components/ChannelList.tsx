@@ -12,16 +12,42 @@ import ChannelBanner from './ChannelBanner';
 import LoadingIndicator from './LoadingIndicator';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { ViewStylesEnum } from '../configuration/constants/ViewStyle';
+import { ChannelSortOptions, SortOrder } from '../api/loader/loadChannelList';
 
 type ChannelListProps = {
   channelList: ChannelType[] | undefined;
   refreshChannelList: (refresh: boolean) => void;
+  sortBy?: ChannelSortOptions;
+  sortOrder?: SortOrder;
+  onSort?: (column: ChannelSortOptions) => void;
 };
 
-const ChannelList = ({ channelList, refreshChannelList }: ChannelListProps) => {
+const ChannelList = ({
+  channelList,
+  refreshChannelList,
+  sortBy,
+  sortOrder,
+  onSort,
+}: ChannelListProps) => {
   const { userConfig } = useUserConfigStore();
   const viewStyle = userConfig.view_style_channel;
   const useSiUnits = userConfig.file_size_unit === FileSizeUnits.Metric;
+
+  const getSortIndicator = (column: ChannelSortOptions) => {
+    if (sortBy !== column) return '';
+    return sortOrder === 'asc' ? ' \u25B2' : ' \u25BC';
+  };
+
+  const renderSortableHeader = (column: ChannelSortOptions, label: string) => (
+    <th
+      onClick={() => onSort?.(column)}
+      style={{ cursor: 'pointer' }}
+      className={sortBy === column ? 'sort-active' : ''}
+    >
+      {label}
+      {getSortIndicator(column)}
+    </th>
+  );
 
   if (!channelList) {
     return <LoadingIndicator />;
@@ -36,12 +62,12 @@ const ChannelList = ({ channelList, refreshChannelList }: ChannelListProps) => {
         <table>
           <thead>
             <tr>
-              <th>Channel</th>
-              <th>Subscribers</th>
-              <th>Videos</th>
-              <th>Duration</th>
-              <th>Media size</th>
-              <th>Last refreshed</th>
+              {renderSortableHeader('name', 'Channel')}
+              {renderSortableHeader('subscribers', 'Subscribers')}
+              {renderSortableHeader('video_count', 'Videos')}
+              {renderSortableHeader('duration', 'Duration')}
+              {renderSortableHeader('media_size', 'Media size')}
+              {renderSortableHeader('last_refresh', 'Last refreshed')}
               <th>Status</th>
             </tr>
           </thead>
