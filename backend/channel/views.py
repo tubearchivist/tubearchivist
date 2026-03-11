@@ -120,49 +120,91 @@ class ChannelApiListView(ApiBaseView):
             # For aggregation-based sorts, use default ES sort first
             self.data["sort"] = [{"channel_name.keyword": {"order": "asc"}}]
 
-        self.get_document_list(request)
-
-        # Conditionally compute aggregations
-        if self.response.get("data") and needs_aggregations:
-            channel_ids = [
-                channel["channel_id"] for channel in self.response["data"]
-            ]
-            channel_stats = self._get_channel_video_stats(channel_ids)
-            for channel in self.response["data"]:
-                channel.update(
-                    channel_stats.get(
-                        channel["channel_id"],
-                        {
-                            "channel_video_count": 0,
-                            "channel_video_duration": 0,
-                            "channel_video_duration_str": get_duration_str(0),
-                            "channel_video_media_size": 0,
-                        },
-                    )
-                )
-
-            # Sort by aggregated field in Python
-            if sort in agg_sorts:
-                self._sort_by_aggregation(sort, order)
+        # For table view or aggregation sorts, fetch all and paginate in Python
+        if needs_aggregations:
+            self._get_all_with_aggregations(request, sort, order, agg_sorts)
+        else:
+            self.get_document_list(request)
 
         serializer = ChannelListSerializer(self.response)
 
         return Response(serializer.data)
 
-    def _sort_by_aggregation(self, sort: str, order: str):
-        """Sort response data by aggregated field"""
+    def _get_all_with_aggregations(
+        self, request, sort: str, order: str, agg_sorts: list
+    ):
+        """Fetch all channels, compute aggregations, sort, and paginate."""
+        from common.src.index_generic import Pagination
+
+        # Initialize pagination to get page info
+        pagination_handler = Pagination(request)
+        page_size = pagination_handler.pagination["page_size"]
+        current_page = pagination_handler.pagination["current_page"] or 1
+
+        # Fetch all channels (up to 10000)
+        self.data["size"] = 10000
+        self.data["from"] = 0
+
+        es_handler = ElasticWrap(self.search_base)
+        response, status_code = es_handler.get(data=self.data)
+
+        from common.src.search_processor import SearchProcess
+
+        all_channels = SearchProcess(response).process() or []
+
+        if not all_channels:
+            self.response["data"] = []
+            self.response["paginate"] = pagination_handler.pagination
+            self.status_code = 404
+            return
+
+        self.status_code = status_code
+
+        # Compute aggregations for all channels
+        channel_ids = [channel["channel_id"] for channel in all_channels]
+        channel_stats = self._get_channel_video_stats(channel_ids)
+        for channel in all_channels:
+            channel.update(
+                channel_stats.get(
+                    channel["channel_id"],
+                    {
+                        "channel_video_count": 0,
+                        "channel_video_duration": 0,
+                        "channel_video_duration_str": get_duration_str(0),
+                        "channel_video_media_size": 0,
+                    },
+                )
+            )
+
+        # Sort all channels
         sort_key_map = {
+            "name": "channel_name",
+            "subscribers": "channel_subs",
+            "last_refresh": "channel_last_refresh",
             "video_count": "channel_video_count",
             "duration": "channel_video_duration",
             "media_size": "channel_video_media_size",
         }
-        key = sort_key_map.get(sort)
-        if key:
-            self.response["data"] = sorted(
-                self.response["data"],
-                key=lambda x: x.get(key, 0),
-                reverse=(order == "desc"),
-            )
+        sort_key = sort_key_map.get(sort, "channel_name")
+        all_channels = sorted(
+            all_channels,
+            key=lambda x: (
+                (x.get(sort_key) or 0)
+                if sort in agg_sorts + ["subscribers"]
+                else (x.get(sort_key) or "").lower()
+            ),
+            reverse=(order == "desc"),
+        )
+
+        # Paginate in Python
+        total_hits = len(all_channels)
+        page_from = (current_page - 1) * page_size if current_page > 0 else 0
+        page_to = page_from + page_size
+        self.response["data"] = all_channels[page_from:page_to]
+
+        # Build pagination response
+        pagination_handler.validate(total_hits)
+        self.response["paginate"] = pagination_handler.pagination
 
     def post(self, request):
         """subscribe/unsubscribe to list of channels"""
