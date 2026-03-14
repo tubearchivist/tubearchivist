@@ -3,27 +3,135 @@ import { ChannelType } from '../pages/Channels';
 import Routes from '../configuration/routes/RouteList';
 import updateChannelSubscription from '../api/actions/updateChannelSubscription';
 import formatDate from '../functions/formatDates';
+import humanFileSize from '../functions/humanFileSize';
+import { FileSizeUnits } from '../api/actions/updateUserConfig';
 import FormattedNumber from './FormattedNumber';
 import Button from './Button';
 import ChannelIcon from './ChannelIcon';
 import ChannelBanner from './ChannelBanner';
 import LoadingIndicator from './LoadingIndicator';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import { ViewStylesEnum } from '../configuration/constants/ViewStyle';
+import { ChannelSortOptions, SortOrder } from '../api/loader/loadChannelList';
 
 type ChannelListProps = {
   channelList: ChannelType[] | undefined;
   refreshChannelList: (refresh: boolean) => void;
+  sortBy?: ChannelSortOptions;
+  sortOrder?: SortOrder;
+  onSort?: (column: ChannelSortOptions) => void;
 };
 
-const ChannelList = ({ channelList, refreshChannelList }: ChannelListProps) => {
+const ChannelList = ({
+  channelList,
+  refreshChannelList,
+  sortBy,
+  sortOrder,
+  onSort,
+}: ChannelListProps) => {
   const { userConfig } = useUserConfigStore();
   const viewStyle = userConfig.view_style_channel;
+  const useSiUnits = userConfig.file_size_unit === FileSizeUnits.Metric;
+
+  const getSortIndicator = (column: ChannelSortOptions) => {
+    if (sortBy !== column) return '';
+    return sortOrder === 'asc' ? ' \u25B2' : ' \u25BC';
+  };
+
+  const renderSortableHeader = (column: ChannelSortOptions, label: string) => (
+    <th
+      onClick={() => onSort?.(column)}
+      style={{ cursor: 'pointer' }}
+      className={sortBy === column ? 'sort-active' : ''}
+    >
+      {label}
+      {getSortIndicator(column)}
+    </th>
+  );
 
   if (!channelList) {
     return <LoadingIndicator />;
   }
   if (channelList.length === 0) {
     return <h2>No channels found...</h2>;
+  }
+
+  if (viewStyle === ViewStylesEnum.Table) {
+    return (
+      <div className={`channel-item ${viewStyle}`}>
+        <table>
+          <thead>
+            <tr>
+              {renderSortableHeader('name', 'Channel')}
+              {renderSortableHeader('subscribers', 'Subscribers')}
+              {renderSortableHeader('video_count', 'Videos')}
+              {renderSortableHeader('duration', 'Duration')}
+              {renderSortableHeader('media_size', 'Media size')}
+              {renderSortableHeader('last_refresh', 'Last refreshed')}
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {channelList.map(channel => {
+              return (
+                <tr key={channel.channel_id}>
+                  <td className="no-nowrap">
+                    <div className="channel-table-title">
+                      <div className="round-img">
+                        <Link to={Routes.Channel(channel.channel_id)}>
+                          <ChannelIcon
+                            channelId={channel.channel_id}
+                            channelThumbUrl={channel.channel_thumb_url}
+                          />
+                        </Link>
+                      </div>
+                      <div>
+                        <Link to={Routes.Channel(channel.channel_id)}>{channel.channel_name}</Link>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    {channel.channel_subs !== null ? (
+                      <FormattedNumber text="" number={channel.channel_subs} />
+                    ) : (
+                      '-'
+                    )}
+                  </td>
+                  <td>{channel.channel_video_count ?? 0}</td>
+                  <td>{channel.channel_video_duration_str ?? '0s'}</td>
+                  <td>{humanFileSize(channel.channel_video_media_size ?? 0, useSiUnits)}</td>
+                  <td>{formatDate(channel.channel_last_refresh)}</td>
+                  <td>
+                    {channel.channel_subscribed ? (
+                      <Button
+                        label="Unsubscribe"
+                        className="unsubscribe"
+                        type="button"
+                        title={`Unsubscribe from ${channel.channel_name}`}
+                        onClick={async () => {
+                          await updateChannelSubscription(channel.channel_id, false);
+                          refreshChannelList(true);
+                        }}
+                      />
+                    ) : (
+                      <Button
+                        label="Subscribe"
+                        type="button"
+                        title={`Subscribe to ${channel.channel_name}`}
+                        onClick={async () => {
+                          await updateChannelSubscription(channel.channel_id, true);
+                          refreshChannelList(true);
+                        }}
+                      />
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
   }
 
   return (

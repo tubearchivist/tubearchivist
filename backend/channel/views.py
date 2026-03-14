@@ -12,6 +12,8 @@ from channel.serializers import (
 from channel.src.index import YoutubeChannel, channel_overwrites
 from channel.src.nav import ChannelNav
 from common.serializers import ErrorResponseSerializer
+from common.src.es_connect import ElasticWrap
+from common.src.helper import get_duration_str
 from common.src.urlparser import Parser
 from common.views_base import AdminWriteOnly, ApiBaseView
 from drf_spectacular.utils import (
@@ -24,6 +26,48 @@ from task.tasks import index_channel_playlists, subscribe_to
 
 
 class ChannelApiListView(ApiBaseView):
+    @staticmethod
+    def _get_channel_video_stats(channel_ids):
+        if not channel_ids:
+            return {}
+
+        data = {
+            "size": 0,
+            "query": {"terms": {"channel.channel_id": channel_ids}},
+            "aggs": {
+                "channel_stats": {
+                    "multi_terms": {
+                        "size": len(channel_ids),
+                        "terms": [
+                            {"field": "channel.channel_id"},
+                            {"field": "channel.channel_name.keyword"},
+                        ],
+                    },
+                    "aggs": {
+                        "doc_count": {"value_count": {"field": "_index"}},
+                        "duration": {"sum": {"field": "player.duration"}},
+                        "media_size": {"sum": {"field": "media_size"}},
+                    },
+                }
+            },
+        }
+        response, _ = ElasticWrap("ta_video/_search").get(data=data)
+        buckets = (
+            response.get("aggregations", {})
+            .get("channel_stats", {})
+            .get("buckets", [])
+        )
+        stats = {}
+        for bucket in buckets:
+            duration_value = int(bucket["duration"]["value"])
+            stats[bucket["key"][0]] = {
+                "channel_video_count": int(bucket["doc_count"]["value"]),
+                "channel_video_duration": duration_value,
+                "channel_video_duration_str": get_duration_str(duration_value),
+                "channel_video_media_size": int(bucket["media_size"]["value"]),
+            }
+        return stats
+
     """resolves to /api/channel/
     GET: returns list of channels
     POST: edit a list of channels
@@ -41,16 +85,21 @@ class ChannelApiListView(ApiBaseView):
     )
     def get(self, request):
         """get request"""
-        self.data.update(
-            {"sort": [{"channel_name.keyword": {"order": "asc"}}]}
-        )
-
         serializer = ChannelListQuerySerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
 
-        must_list = []
+        view = validated_data.get("view")
+        sort = validated_data.get("sort", "name")
+        order = validated_data.get("order", "asc")
         query_filter = validated_data.get("filter")
+
+        # Aggregation-based sort fields
+        agg_sorts = ["video_count", "duration", "media_size"]
+        needs_aggregations = view == "table" or sort in agg_sorts
+
+        # Build filter
+        must_list = []
         if query_filter is not None:
             channel_subscribed = query_filter == "subscribed"
             must_list.append(
@@ -58,10 +107,104 @@ class ChannelApiListView(ApiBaseView):
             )
 
         self.data["query"] = {"bool": {"must": must_list}}
-        self.get_document_list(request)
+
+        # Apply ES-level sort for non-aggregation fields
+        sort_field_map = {
+            "name": "channel_name.keyword",
+            "subscribers": "channel_subs",
+            "last_refresh": "channel_last_refresh",
+        }
+        if sort in sort_field_map:
+            self.data["sort"] = [{sort_field_map[sort]: {"order": order}}]
+        else:
+            # For aggregation-based sorts, use default ES sort first
+            self.data["sort"] = [{"channel_name.keyword": {"order": "asc"}}]
+
+        # For table view or aggregation sorts, fetch all and paginate in Python
+        if needs_aggregations:
+            self._get_all_with_aggregations(request, sort, order, agg_sorts)
+        else:
+            self.get_document_list(request)
+
         serializer = ChannelListSerializer(self.response)
 
         return Response(serializer.data)
+
+    def _get_all_with_aggregations(
+        self, request, sort: str, order: str, agg_sorts: list
+    ):
+        """Fetch all channels, compute aggregations, sort, and paginate."""
+        from common.src.index_generic import Pagination
+
+        # Initialize pagination to get page info
+        pagination_handler = Pagination(request)
+        page_size = pagination_handler.pagination["page_size"]
+        current_page = pagination_handler.pagination["current_page"] or 1
+
+        # Fetch all channels (up to 10000)
+        self.data["size"] = 10000
+        self.data["from"] = 0
+
+        es_handler = ElasticWrap(self.search_base)
+        response, status_code = es_handler.get(data=self.data)
+
+        from common.src.search_processor import SearchProcess
+
+        all_channels = SearchProcess(response).process() or []
+
+        if not all_channels:
+            self.response["data"] = []
+            self.response["paginate"] = pagination_handler.pagination
+            self.status_code = 404
+            return
+
+        self.status_code = status_code
+
+        # Compute aggregations for all channels
+        channel_ids = [channel["channel_id"] for channel in all_channels]
+        channel_stats = self._get_channel_video_stats(channel_ids)
+        for channel in all_channels:
+            channel.update(
+                channel_stats.get(
+                    channel["channel_id"],
+                    {
+                        "channel_video_count": 0,
+                        "channel_video_duration": 0,
+                        "channel_video_duration_str": get_duration_str(0),
+                        "channel_video_media_size": 0,
+                    },
+                )
+            )
+
+        # Sort all channels
+        sort_key_map = {
+            "name": "channel_name",
+            "subscribers": "channel_subs",
+            "last_refresh": "channel_last_refresh",
+            "video_count": "channel_video_count",
+            "duration": "channel_video_duration",
+            "media_size": "channel_video_media_size",
+        }
+        sort_key = sort_key_map.get(sort, "channel_name")
+        all_channels = sorted(
+            all_channels,
+            key=lambda x: (
+                (x.get(sort_key) or 0)
+                if sort in agg_sorts + ["subscribers"]
+                else (x.get(sort_key) or "").lower()
+            ),
+            reverse=(order == "desc"),
+        )
+
+        # Paginate in Python
+        total_hits = len(all_channels)
+        page_from = (current_page - 1) * page_size if current_page > 0 else 0
+        page_to = page_from + page_size
+        self.response["data"] = all_channels[page_from:page_to]
+
+        # Build pagination response
+        pagination_handler.validate(total_hits)
+        self.response["paginate"] = pagination_handler.pagination
 
     def post(self, request):
         """subscribe/unsubscribe to list of channels"""
