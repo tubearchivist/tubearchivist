@@ -13,7 +13,9 @@ import updateChannelOverwrites from '../api/actions/updateChannelOverwrite';
 import useIsAdmin from '../functions/useIsAdmin';
 import InputConfig from '../components/InputConfig';
 import ToggleConfig from '../components/ToggleConfig';
+import AudioLanguageSelector from '../components/AudioLanguageSelector';
 import { useUserConfigStore } from '../stores/UserConfigStore';
+import { useAppSettingsStore } from '../stores/AppSettingsStore';
 import { ApiResponseType } from '../functions/APIClient';
 
 export type ChannelBaseOutletContextType = {
@@ -35,6 +37,7 @@ type ChannelAboutParams = {
 const ChannelAbout = () => {
   const { channelId } = useParams() as ChannelAboutParams;
   const { userConfig } = useUserConfigStore();
+  const { appSettingsConfig } = useAppSettingsStore();
   const { setStartNotification } = useOutletContext() as ChannelBaseOutletContextType;
   const navigate = useNavigate();
   const isAdmin = useIsAdmin();
@@ -47,6 +50,9 @@ const ChannelAbout = () => {
   const [channelResponse, setChannelResponse] = useState<ApiResponseType<ChannelResponseType>>();
 
   const [downloadFormat, setDownloadFormat] = useState<string | null>(null);
+  const [audioMultistreams, setAudioMultistreams] = useState<boolean | null>(null);
+  const [audioMultistreamsWarning, setAudioMultistreamsWarning] = useState<string | null>(null);
+  const [audioLanguages, setAudioLanguages] = useState<string | null>(null);
   const [autoDeleteAfter, setAutoDeleteAfter] = useState<number | null>(null);
   const [indexPlaylists, setIndexPlaylists] = useState(false);
   const [enableSponsorblock, setEnableSponsorblock] = useState<boolean | null>(null);
@@ -57,6 +63,8 @@ const ChannelAbout = () => {
   const { data: channelResponseData } = channelResponse ?? {};
 
   const channel = channelResponseData;
+  const globalAudioMultistream = appSettingsConfig.downloads.audio_multistreams;
+  const effectiveAudioMultistream = audioMultistreams ?? globalAudioMultistream;
 
   useEffect(() => {
     (async () => {
@@ -66,6 +74,9 @@ const ChannelAbout = () => {
 
         setChannelResponse(channelResponse);
         setDownloadFormat(channelResponseData?.channel_overwrites?.download_format ?? null);
+        setAudioMultistreams(channelResponseData?.channel_overwrites?.audio_multistreams ?? null);
+        setAudioMultistreamsWarning(null);
+        setAudioLanguages(channelResponseData?.channel_overwrites?.audio_languages ?? null);
         setAutoDeleteAfter(channelResponseData?.channel_overwrites?.autodelete_days ?? null);
         setIndexPlaylists(channelResponseData?.channel_overwrites?.index_playlists ?? false);
         setEnableSponsorblock(
@@ -92,6 +103,24 @@ const ChannelAbout = () => {
   ) => {
     if (!channel) return;
     await updateChannelOverwrites(channel.channel_id, configKey, configValue);
+    setRefresh(true);
+  };
+
+  const handleAudioUpdateConfig = async (
+    configKey: string,
+    configValue: string | boolean | number | null,
+  ) => {
+    if (!channel) return;
+    const response = await updateChannelOverwrites(channel.channel_id, configKey, configValue);
+    if (response?.error?.error) {
+      setAudioMultistreamsWarning(response.error.error);
+      return;
+    }
+
+    setAudioMultistreamsWarning(null);
+    if (configKey === 'audio_multistreams') {
+      setAudioMultistreams(configValue === null ? null : Boolean(configValue));
+    }
     setRefresh(true);
   };
 
@@ -270,6 +299,10 @@ const ChannelAbout = () => {
                     <li>
                       Once you click on <i>Configure</i>, this will activate sponsorblock settings.
                     </li>
+                    <li>
+                      Enable multistream audio to download all available audio languages for this
+                      channel.
+                    </li>
                   </ul>
                 </div>
               )}
@@ -286,6 +319,46 @@ const ChannelAbout = () => {
                   updateCallback={handleUpdateConfig}
                 />
               </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Enable multistream audio</p>
+                </div>
+                <ToggleConfig
+                  name="audio_multistreams"
+                  value={effectiveAudioMultistream}
+                  helperText={
+                    audioMultistreams === null
+                      ? `Enable to include multiple audio languages when available for this channel. Using global setting: ${globalAudioMultistream ? 'On' : 'Off'}.`
+                      : 'Enable to include multiple audio languages when available for this channel.'
+                  }
+                  updateCallback={handleAudioUpdateConfig}
+                  resetCallback={() => {
+                    handleAudioUpdateConfig('audio_multistreams', null);
+                    setAudioMultistreams(null);
+                  }}
+                />
+                {audioMultistreamsWarning && (
+                  <p className="settings-error">{audioMultistreamsWarning}</p>
+                )}
+              </div>
+              {effectiveAudioMultistream && (
+                <div className="settings-box-wrapper">
+                  <div>
+                    <p>Audio Languages</p>
+                  </div>
+                  <AudioLanguageSelector
+                    key={[
+                      'audio_languages',
+                      audioLanguages ?? '',
+                      channel.channel_overwrites?.audio_languages ?? '',
+                    ].join(':')}
+                    name="audio_languages"
+                    value={audioLanguages}
+                    oldValue={channel.channel_overwrites?.audio_languages ?? null}
+                    updateCallback={handleAudioUpdateConfig}
+                  />
+                </div>
+              )}
               <div className="settings-box-wrapper">
                 <div>
                   <p>

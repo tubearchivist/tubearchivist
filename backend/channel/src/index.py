@@ -266,6 +266,8 @@ class YoutubeChannel(YouTubeItem):
         """set per channel overwrites"""
         valid_keys = [
             "download_format",
+            "audio_multistreams",
+            "audio_languages",
             "autodelete_days",
             "index_playlists",
             "integrate_sponsorblock",
