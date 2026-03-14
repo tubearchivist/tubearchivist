@@ -29,6 +29,7 @@ class YtWrap:
         "cachedir": path.abspath(
             path.join(EnvironmentSettings.CACHE_DIR, "ytdlp")
         ),
+        "plugin_dirs": [],
     }
 
     def __init__(self, obs_request, config=False):
@@ -72,17 +73,7 @@ class YtWrap:
                     }
                 },
             )
-            return
-
-        # https://github.com/Brainicism/bgutil-ytdlp-pot-provider/pull/185
-        deep_merge(
-            self.obs,
-            {
-                "extractor_args": {
-                    "youtubepot-bgutilhttp": {"disable": ["True"]}
-                }
-            },
-        )
+            self.obs["plugin_dirs"].append("/opt/yt_plugins/bgutil")
 
     def download(self, url):
         """make download request"""
