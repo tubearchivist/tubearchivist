@@ -11,5 +11,5 @@ Pillow==12.1.1
 redis==7.3.0
 requests==2.32.5
 ryd-client==0.0.6
-uvicorn==0.41.0
-yt-dlp[default]==2026.3.13
+uvicorn==0.42.0
+yt-dlp[default]==2026.3.17
