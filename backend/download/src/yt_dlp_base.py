@@ -78,7 +78,9 @@ class YtWrap:
                     }
                 },
             )
-            self.obs["plugin_dirs"].append("/opt/yt_plugins/bgutil")
+            if EnvironmentSettings.APP_DIR == "/app":
+                # container internal only
+                self.obs["plugin_dirs"].append("/opt/yt_plugins/bgutil")
 
     def download(self, url):
         """make download request"""
