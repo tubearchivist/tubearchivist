@@ -158,7 +158,7 @@ class YtWrap:
 
         return True, True
 
-    def _handle_extract_dl_error(self, err, attempt, max_attempts) -> tuple[int, bool]:
+    def _handle_extract_dl_error(self, url, err, attempt, max_attempts) -> tuple[int, bool]:
         """
         handle download errors in extract()
         returns attempt count, continue, error
@@ -204,6 +204,7 @@ class YtWrap:
                     return None, str(err)
                 except yt_dlp.utils.DownloadError as err:
                     attempt, cont, error = self._handle_extract_dl_error(
+                        url = url,
                         err = err,
                         attempt = attempt,
                         max_attempts = max_attempts
