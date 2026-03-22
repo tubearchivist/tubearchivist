@@ -49,7 +49,7 @@ class YtWrap:
         deep_merge(self.obs, self.obs_request)
         if self.config:
             self._add_cookie()
-            self._add_potoken_url()
+            self._add_urls()
 
         if getattr(settings, "DEBUG", False):
             del self.obs["quiet"]
@@ -64,8 +64,8 @@ class YtWrap:
 
         self.obs["cookiefile"] = cookie_io
 
-    def _add_potoken_url(self):
-        """add bgutils token url"""
+    def _add_urls(self):
+        """add bgutils token and proxy url"""
         if pot_provider_url := self.config["downloads"].get(
             "pot_provider_url"
         ):
@@ -82,9 +82,6 @@ class YtWrap:
             if EnvironmentSettings.APP_DIR == "/app":
                 # container internal only
                 self.obs["plugin_dirs"].append("/opt/yt_plugins/bgutil")
-    
-    def _add_gluetun_url(self):
-        """add gluetun proxy url"""
         if gluetun_url := self.config["downloads"].get("gluetun_url"):
             deep_merge(
                 self.obs,
