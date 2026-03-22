@@ -23,6 +23,12 @@ export type AppSettingsConfigType = {
     comment_sort: string;
     cookie_import: boolean;
     pot_provider_url: string | null;
+    gluetun_url: string | null;
+    gluetun_control_url: string | null;
+    gluetun_control_key: string | null;
+    gluetun_swap: boolean;
+    gluetun_attempts: number | null;
+    gluetun_sleep: number | null;
     throttledratelimit: number | null;
     extractor_lang: string | null;
     integrate_ryd: boolean;
