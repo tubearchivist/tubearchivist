@@ -60,7 +60,6 @@ class AppConfigDownloadsSerializer(
     gluetun_control_key = serializers.CharField(allow_null=True)
     gluetun_swap = serializers.BooleanField()
     gluetun_attempts = serializers.IntegerField(allow_null=True)
-    gluetun_sleep = serializers.IntegerField(allow_null=True)
     throttledratelimit = serializers.IntegerField(allow_null=True)
     extractor_lang = serializers.CharField(allow_null=True)
     integrate_ryd = serializers.BooleanField()

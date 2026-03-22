@@ -35,7 +35,6 @@ export const useAppSettingsStore = create<AppSettingsState>(set => ({
       gluetun_control_key: null,
       gluetun_swap: false,
       gluetun_attempts: null,
-      gluetun_sleep: null,
       throttledratelimit: null,
       extractor_lang: null,
       integrate_ryd: false,

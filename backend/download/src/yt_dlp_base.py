@@ -89,6 +89,39 @@ class YtWrap:
                     "proxy": [proxy_url]
                 },
             )
+    
+    def _swap_ip(self):
+        control_url = self.config['downloads'].get('gluetun_control_url')
+        headers = {
+            "Content-Type": "application/json",
+            "X-API-Key": self.config['downloads'].get('gluetun_control_key')
+        }
+        requests.put(
+            url = control_url + "/v1/vpn/status",
+            headers = headers,
+            json = {"status": "stopped"}
+        )
+        requests.put(
+            url = control_url + "/v1/vpn/status",
+            headers = headers,
+            json = {"status": "running"}
+        )
+        swap_attempt = 0
+        while swap_attempt < 5:
+            time.sleep(10)
+            try:
+                res = requests.get(
+                    url = control_url + "/v1/publicip/ip",
+                    headers = headers
+                )
+                if (res.text == ""):
+                    raise ConnectionError("Gluetun has not connected to VPN yet")
+                break
+            except:
+                swap_attempt += 1
+                if (swap_attempt == 5):
+                    raise ConnectionError("Gluetun could not connect to VPN!")
+                            
 
     def download(self, url):
         """make download request"""
@@ -111,28 +144,10 @@ class YtWrap:
                     if any(m in str(err) for m in self.BOT_MESSAGES):
                         print(self.BOT_ERROR_LOG)
                         if self.config["downloads"].get("gluetun_swap"):
-                            control_url=f"{self.config['downloads'].get('gluetun_control_url')}/v1/vpn/status"
-                            headers={
-                                "Content-Type": "application/json",
-                                "X-API-Key": self.config['downloads'].get('gluetun_control_key')
-                            }
-                            requests.put(
-                                url=control_url,
-                                headers=headers,
-                                json={"status": "stopped"}
-                            )
-                            requests.put(
-                                url=control_url,
-                                headers=headers,
-                                json={"status": "running"}
-                            )
-                            sleep_amount = self.config['downloads'].get('gluetun_sleep')
-                            if sleep_amount == 0:
-                                sleep_amount = 30
-                            time.sleep(sleep_amount)
                             attempt += 1
                             if (attempt == max_attempts):
                                 raise ConnectionError("Reached maximum IP attempts!") from err
+                            self._swap_ip()
                             continue
                         rand_sleep(self.config)
                         raise ConnectionError(self.BOT_ERROR_LOG) from err
@@ -175,28 +190,10 @@ class YtWrap:
                     if any(m in str(err) for m in self.BOT_MESSAGES):
                         print(self.BOT_ERROR_LOG)
                         if self.config["downloads"].get("gluetun_swap"):
-                            control_url=f"{self.config['downloads'].get('gluetun_control_url')}/v1/vpn/status"
-                            headers={
-                                "Content-Type": "application/json",
-                                "X-API-Key": self.config['downloads'].get('gluetun_control_key')
-                            }
-                            requests.put(
-                                url=control_url,
-                                headers=headers,
-                                json={"status": "stopped"}
-                            )
-                            requests.put(
-                                url=control_url,
-                                headers=headers,
-                                json={"status": "running"}
-                            )
-                            sleep_amount = self.config['downloads'].get('gluetun_sleep')
-                            if sleep_amount == 0:
-                                sleep_amount = 30
-                            time.sleep(sleep_amount)
                             attempt += 1
                             if (attempt == max_attempts):
                                 raise ConnectionError("Reached maximum IP attempts!") from err
+                            self._swap_ip()
                             continue
                         rand_sleep(self.config)
                         raise ConnectionError(self.BOT_ERROR_LOG) from err

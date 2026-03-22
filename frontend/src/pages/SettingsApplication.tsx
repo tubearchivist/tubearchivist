@@ -76,8 +76,7 @@ const SettingsApplication = () => {
   const [gluetunControlUrl, setGluetunControlUrl] = useState<string | null>(null);
   const [gluetunControlKey, setGluetunControlKey] = useState<string | null>(null);
   const [gluetunSwap, setGluetunSwap] = useState<boolean>(false);
-  const [gluetunAttempts, setGluetunAttempts] = useState<number | null>(null);
-  const [gluetunSleep, setGluetunSleep] = useState<number | null>(null);
+  const [gluetunAttempts, setGluetunAttempts] = useState<number | null>(null)
 
   // Integrations
   const [showApiToken, setShowApiToken] = useState(false);
@@ -139,7 +138,6 @@ const SettingsApplication = () => {
     setGluetunControlKey(appSettingsConfigData?.downloads.gluetun_control_key || null);
     setGluetunSwap(appSettingsConfigData?.downloads.gluetun_swap || false);
     setGluetunAttempts(appSettingsConfigData?.downloads.gluetun_attempts || null);
-    setGluetunSleep(appSettingsConfigData?.downloads.gluetun_sleep || null);
 
     // Integrations
     setDownloadDislikes(appSettingsConfigData?.downloads.integrate_ryd || false);
@@ -806,10 +804,6 @@ const SettingsApplication = () => {
                       swapping the IP infinitely until it can download. Otherwise, it
                       will attempt to swap the IP only for a certain number of attempts.
                     </li>
-                    <li>
-                      Setting "Sleep Interval" will wait that amount of time after
-                      swapping the IP before attempting to download again. Default is 30.
-                    </li>
                   </ul>
                 </div>
               )}
@@ -872,19 +866,6 @@ const SettingsApplication = () => {
                   value={gluetunAttempts}
                   setValue={setGluetunAttempts}
                   oldValue={appSettingsConfig?.downloads.gluetun_attempts}
-                  updateCallback={handleUpdateConfig}
-                />
-              </div>
-              <div className="settings-box-wrapper">
-                <div>
-                  <p>Sleep Interval</p>
-                </div>
-                <InputConfig
-                  type="number"
-                  name="downloads.gluetun_sleep"
-                  value={gluetunSleep}
-                  setValue={setGluetunSleep}
-                  oldValue={appSettingsConfig?.downloads.gluetun_sleep}
                   updateCallback={handleUpdateConfig}
                 />
               </div>

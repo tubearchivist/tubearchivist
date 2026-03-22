@@ -98,7 +98,6 @@ class AppConfig:
             "gluetun_control_key": None,
             "gluetun_swap": False,
             "gluetun_attempts": 0,
-            "gluetun_sleep": 0,
             "throttledratelimit": None,
             "extractor_lang": None,
             "integrate_ryd": False,
