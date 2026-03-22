@@ -55,7 +55,7 @@ class AppConfigDownloadsSerializer(
     )
     cookie_import = serializers.BooleanField()
     pot_provider_url = serializers.CharField(allow_null=True)
-    gluetun_url = serializers.CharField(allow_null=True)
+    proxy_url = serializers.CharField(allow_null=True)
     gluetun_control_url = serializers.CharField(allow_null=True)
     gluetun_control_key = serializers.CharField(allow_null=True)
     gluetun_swap = serializers.BooleanField()

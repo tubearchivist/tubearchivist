@@ -82,11 +82,11 @@ class YtWrap:
             if EnvironmentSettings.APP_DIR == "/app":
                 # container internal only
                 self.obs["plugin_dirs"].append("/opt/yt_plugins/bgutil")
-        if gluetun_url := self.config["downloads"].get("gluetun_url"):
+        if proxy_url := self.config["downloads"].get("proxy_url"):
             deep_merge(
                 self.obs,
                 {
-                    "proxy": [gluetun_url]
+                    "proxy": [proxy_url]
                 },
             )
 

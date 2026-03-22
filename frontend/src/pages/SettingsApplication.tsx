@@ -72,7 +72,7 @@ const SettingsApplication = () => {
   const [potProviderUrl, setPotProviderUrl] = useState<string | null>(null);
 
   // Gluetun
-  const [gluetunUrl, setGluetunUrl] = useState<string | null>(null);
+  const [proxyUrl, setProxyUrl] = useState<string | null>(null);
   const [gluetunControlUrl, setGluetunControlUrl] = useState<string | null>(null);
   const [gluetunControlKey, setGluetunControlKey] = useState<string | null>(null);
   const [gluetunSwap, setGluetunSwap] = useState<boolean>(false);
@@ -133,8 +133,8 @@ const SettingsApplication = () => {
     // Cookie
     setPotProviderUrl(appSettingsConfigData?.downloads.pot_provider_url || null);
 
-    // Gluetun
-    setGluetunUrl(appSettingsConfigData?.downloads.gluetun_url || null);
+    // Proxy/Gluetun
+    setProxyUrl(appSettingsConfigData?.downloads.proxy_url || null);
     setGluetunControlUrl(appSettingsConfigData?.downloads.gluetun_control_url || null);
     setGluetunControlKey(appSettingsConfigData?.downloads.gluetun_control_key || null);
     setGluetunSwap(appSettingsConfigData?.downloads.gluetun_swap || false);
@@ -774,25 +774,22 @@ const SettingsApplication = () => {
               {userConfig.show_help_text && (
                 <div className="help-text">
                   <p>
-                    Use a VPN for downloads via Gluetun
+                    Use a Proxy/VPN for downloads
                   </p>
                   <ul>
                     <li>
-                      Using a VPN can help get work around blocked requests if you don't 
-                      have or want to use an account.
+                      Using a Proxy or VPN can help get work around blocked requests if 
+                      you don't have or want to use an account.
                     </li>
                     <li>
-                      This expects you to use and setup{' '}
+                      Enabling Swap IPs will change the VPN's IP if it's blocked from 
+                      downloading regular videos. This expects you to use and setup{' '}
                       <a
                         target="_blank"
                         href="https://github.com/qdm12/gluetun"
                       >
                         Gluetun.
                       </a>
-                    </li>
-                    <li>
-                      Enabling Swap IPs will change the VPN's IP if it's blocked from 
-                      downloading regular videos.
                     </li>
                     <li>
                       Using Swap IPs requires you to configure a control server and use
@@ -818,14 +815,14 @@ const SettingsApplication = () => {
               )}
               <div className="settings-box-wrapper">
                 <div>
-                  <p>Gluetun Proxy URL</p>
+                  <p>Proxy URL</p>
                 </div>
                 <InputConfig
                   type="text"
-                  name="downloads.gluetun_url"
-                  value={gluetunUrl}
-                  setValue={setGluetunUrl}
-                  oldValue={appSettingsConfig.downloads.gluetun_url}
+                  name="downloads.proxy_url"
+                  value={proxyUrl}
+                  setValue={setProxyUrl}
+                  oldValue={appSettingsConfig.downloads.proxy_url}
                   updateCallback={handleUpdateConfig}
                 />
               </div>

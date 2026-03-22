@@ -42,7 +42,7 @@ class DownloadsConfigType(TypedDict):
     comment_sort: Literal["top", "new"] | None
     cookie_import: bool
     pot_provider_url: str | None
-    gluetun_url: str | None
+    proxy_url: str | None
     gluetun_swap: bool
     throttledratelimit: int | None
     extractor_lang: str | None
@@ -93,7 +93,7 @@ class AppConfig:
             "comment_sort": "top",
             "cookie_import": False,
             "pot_provider_url": None,
-            "gluetun_url": None,
+            "proxy_url": None,
             "gluetun_control_url": None,
             "gluetun_control_key": None,
             "gluetun_swap": False,

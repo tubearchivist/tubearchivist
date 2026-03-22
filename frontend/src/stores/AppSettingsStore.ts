@@ -30,7 +30,7 @@ export const useAppSettingsStore = create<AppSettingsState>(set => ({
       comment_sort: 'asc',
       cookie_import: false,
       pot_provider_url: null,
-      gluetun_url: null,
+      proxy_url: null,
       gluetun_control_url: null,
       gluetun_control_key: null,
       gluetun_swap: false,
