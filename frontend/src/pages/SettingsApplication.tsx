@@ -71,6 +71,14 @@ const SettingsApplication = () => {
   const [showCookieForm, setShowCookieForm] = useState<boolean>(false);
   const [potProviderUrl, setPotProviderUrl] = useState<string | null>(null);
 
+  // Gluetun
+  const [gluetunUrl, setGluetunUrl] = useState<string | null>(null);
+  const [gluetunControlUrl, setGluetunControlUrl] = useState<string | null>(null);
+  const [gluetunControlKey, setGluetunControlKey] = useState<string | null>(null);
+  const [gluetunSwap, setGluetunSwap] = useState<boolean>(false);
+  const [gluetunAttempts, setGluetunAttempts] = useState<number | null>(null);
+  const [gluetunSleep, setGluetunSleep] = useState<number | null>(null);
+
   // Integrations
   const [showApiToken, setShowApiToken] = useState(false);
   const [downloadDislikes, setDownloadDislikes] = useState(false);
@@ -124,6 +132,14 @@ const SettingsApplication = () => {
 
     // Cookie
     setPotProviderUrl(appSettingsConfigData?.downloads.pot_provider_url || null);
+
+    // Gluetun
+    setGluetunUrl(appSettingsConfigData?.downloads.gluetun_url || null);
+    setGluetunControlUrl(appSettingsConfigData?.downloads.gluetun_control_url || null);
+    setGluetunControlKey(appSettingsConfigData?.downloads.gluetun_control_key || null);
+    setGluetunSwap(appSettingsConfigData?.downloads.gluetun_swap || false);
+    setGluetunAttempts(appSettingsConfigData?.downloads.gluetun_attempts || null);
+    setGluetunSleep(appSettingsConfigData?.downloads.gluetun_sleep || null);
 
     // Integrations
     setDownloadDislikes(appSettingsConfigData?.downloads.integrate_ryd || false);
@@ -749,6 +765,129 @@ const SettingsApplication = () => {
                   value={potProviderUrl}
                   setValue={setPotProviderUrl}
                   oldValue={appSettingsConfig.downloads.pot_provider_url}
+                  updateCallback={handleUpdateConfig}
+                />
+              </div>
+            </div>
+            <div className="info-box-item">
+              <h2 id="gluetun">Gluetun</h2>
+              {userConfig.show_help_text && (
+                <div className="help-text">
+                  <p>
+                    Use a VPN for downloads via Gluetun
+                  </p>
+                  <ul>
+                    <li>
+                      Using a VPN can help get work around blocked requests if you don't 
+                      have or want to use an account.
+                    </li>
+                    <li>
+                      This expects you to use and setup{' '}
+                      <a
+                        target="_blank"
+                        href="https://github.com/qdm12/gluetun"
+                      >
+                        Gluetun.
+                      </a>
+                    </li>
+                    <li>
+                      Enabling Swap IPs will change the VPN's IP if it's blocked from 
+                      downloading regular videos.
+                    </li>
+                    <li>
+                      Using Swap IPs requires you to configure a control server and use
+                      an API key, see{' '}
+                      <a
+                        target="_blank"
+                        href="https://github.com/qdm12/gluetun-wiki/blob/main/setup/advanced/control-server.md"
+                      >
+                        Gluetun's Documentation.
+                      </a>
+                    </li>
+                    <li>
+                      Setting "Swap IP attempts" to 0 or leaving it empty will try 
+                      swapping the IP infinitely until it can download. Otherwise, it
+                      will attempt to swap the IP only for a certain number of attempts.
+                    </li>
+                    <li>
+                      Setting "Sleep Interval" will wait that amount of time after
+                      swapping the IP before attempting to download again. Default is 30.
+                    </li>
+                  </ul>
+                </div>
+              )}
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Gluetun Proxy URL</p>
+                </div>
+                <InputConfig
+                  type="text"
+                  name="downloads.gluetun_url"
+                  value={gluetunUrl}
+                  setValue={setGluetunUrl}
+                  oldValue={appSettingsConfig.downloads.gluetun_url}
+                  updateCallback={handleUpdateConfig}
+                />
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Gluetun Control Server URL</p>
+                </div>
+                <InputConfig
+                  type="text"
+                  name="downloads.gluetun_control_url"
+                  value={gluetunControlUrl}
+                  setValue={setGluetunControlUrl}
+                  oldValue={appSettingsConfig.downloads.gluetun_control_url}
+                  updateCallback={handleUpdateConfig}
+                />
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Gluetun Control Server API Key</p>
+                </div>
+                <InputConfig
+                  type="text"
+                  name="downloads.gluetun_control_key"
+                  value={gluetunControlKey}
+                  setValue={setGluetunControlKey}
+                  oldValue={appSettingsConfig.downloads.gluetun_control_key}
+                  updateCallback={handleUpdateConfig}
+                />
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Swap IPs</p>
+                </div>
+                <ToggleConfig
+                  name="downloads.gluetun_swap"
+                  value={gluetunSwap}
+                  updateCallback={handleUpdateConfig}
+                />
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Swap IP Attempts</p>
+                </div>
+                <InputConfig
+                  type="number"
+                  name="downloads.gluetun_attempts"
+                  value={gluetunAttempts}
+                  setValue={setGluetunAttempts}
+                  oldValue={appSettingsConfig?.downloads.gluetun_attempts}
+                  updateCallback={handleUpdateConfig}
+                />
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Sleep Interval</p>
+                </div>
+                <InputConfig
+                  type="number"
+                  name="downloads.gluetun_sleep"
+                  value={gluetunSleep}
+                  setValue={setGluetunSleep}
+                  oldValue={appSettingsConfig?.downloads.gluetun_sleep}
                   updateCallback={handleUpdateConfig}
                 />
               </div>

@@ -4,18 +4,19 @@ functionality:
 - handle yt-dlp errors
 """
 
+import time
 from datetime import datetime
 from http import cookiejar
 from io import StringIO
 from os import path
 
 import yt_dlp
+import requests
 from appsettings.src.config import AppConfig
 from common.src.env_settings import EnvironmentSettings
 from common.src.helper import deep_merge, rand_sleep
 from common.src.ta_redis import RedisArchivist
 from django.conf import settings
-
 
 class YtWrap:
     """wrap calls to yt"""
@@ -81,23 +82,65 @@ class YtWrap:
             if EnvironmentSettings.APP_DIR == "/app":
                 # container internal only
                 self.obs["plugin_dirs"].append("/opt/yt_plugins/bgutil")
+    
+    def _add_gluetun_url(self):
+        """add gluetun proxy url"""
+        if gluetun_url := self.config["downloads"].get("gluetun_url"):
+            deep_merge(
+                self.obs,
+                {
+                    "proxy": [gluetun_url]
+                },
+            )
 
     def download(self, url):
         """make download request"""
         self.obs.update({"check_formats": "selected"})
         with yt_dlp.YoutubeDL(self.obs) as ydl:
-            try:
-                ydl.download([url])
-            except yt_dlp.utils.DownloadError as err:
-                print(f"{url}: failed to download with message {err}")
-                if "Temporary failure in name resolution" in str(err):
-                    raise ConnectionError("lost the internet, abort!") from err
-                if any(m in str(err) for m in self.BOT_MESSAGES):
-                    print(self.BOT_ERROR_LOG)
-                    rand_sleep(self.config)
-                    raise ConnectionError(self.BOT_ERROR_LOG) from err
+            max_attempts = self.config["downloads"].get("gluetun_attempts")
+            inf = False
+            if max_attempts == 0 or max_attempts == None:
+                inf = True
+                max_attempts = 0
+            attempt = 0
+            while attempt < max_attempts or inf:
+                try:
+                    ydl.download([url])
+                    break
+                except yt_dlp.utils.DownloadError as err:
+                    print(f"{url}: failed to download with message {err}")
+                    if "Temporary failure in name resolution" in str(err):
+                        raise ConnectionError("lost the internet, abort!") from err
+                    if any(m in str(err) for m in self.BOT_MESSAGES):
+                        print(self.BOT_ERROR_LOG)
+                        if self.config["downloads"].get("gluetun_swap"):
+                            control_url=f"{self.config['downloads'].get('gluetun_control_url')}/v1/vpn/status"
+                            headers={
+                                "Content-Type": "application/json",
+                                "X-API-Key": self.config['downloads'].get('gluetun_control_key')
+                            }
+                            requests.put(
+                                url=control_url,
+                                headers=headers,
+                                json={"status": "stopped"}
+                            )
+                            requests.put(
+                                url=control_url,
+                                headers=headers,
+                                json={"status": "running"}
+                            )
+                            sleep_amount = self.config['downloads'].get('gluetun_sleep')
+                            if sleep_amount == 0:
+                                sleep_amount = 30
+                            time.sleep(sleep_amount)
+                            attempt += 1
+                            if (attempt == max_attempts):
+                                raise ConnectionError("Reached maximum IP attempts!") from err
+                            continue
+                        rand_sleep(self.config)
+                        raise ConnectionError(self.BOT_ERROR_LOG) from err
 
-                return False, str(err)
+                    return False, str(err)
 
         self._validate_cookie()
 
@@ -109,27 +152,59 @@ class YtWrap:
         returns response, error
         """
         with yt_dlp.YoutubeDL(self.obs) as ydl:
-            try:
-                response = ydl.extract_info(url)
-            except cookiejar.LoadError as err:
-                print(f"cookie file is invalid: {err}")
-                return None, str(err)
-            except yt_dlp.utils.ExtractorError as err:
-                print(f"{url}: failed to extract: {err}, continue...")
-                return None, str(err)
-            except yt_dlp.utils.DownloadError as err:
-                if "This channel does not have a" in str(err):
-                    return None, None
+            max_attempts = self.config["downloads"].get("gluetun_attempts")
+            inf = False
+            if max_attempts == 0 or max_attempts == None:
+                inf = True
+                max_attempts = 0
+            attempt = 0
+            while attempt < max_attempts or inf:
+                try:
+                    response = ydl.extract_info(url)
+                    break
+                except cookiejar.LoadError as err:
+                    print(f"cookie file is invalid: {err}")
+                    return None, str(err)
+                except yt_dlp.utils.ExtractorError as err:
+                    print(f"{url}: failed to extract: {err}, continue...")
+                    return None, str(err)
+                except yt_dlp.utils.DownloadError as err:
+                    if "This channel does not have a" in str(err):
+                        return None, None
 
-                print(f"{url}: failed to get info from youtube: {err}")
-                if "Temporary failure in name resolution" in str(err):
-                    raise ConnectionError("lost the internet, abort!") from err
-                if any(m in str(err) for m in self.BOT_MESSAGES):
-                    print(self.BOT_ERROR_LOG)
-                    rand_sleep(self.config)
-                    raise ConnectionError(self.BOT_ERROR_LOG) from err
+                    print(f"{url}: failed to get info from youtube: {err}")
+                    if "Temporary failure in name resolution" in str(err):
+                        raise ConnectionError("lost the internet, abort!") from err
+                    if any(m in str(err) for m in self.BOT_MESSAGES):
+                        print(self.BOT_ERROR_LOG)
+                        if self.config["downloads"].get("gluetun_swap"):
+                            control_url=f"{self.config['downloads'].get('gluetun_control_url')}/v1/vpn/status"
+                            headers={
+                                "Content-Type": "application/json",
+                                "X-API-Key": self.config['downloads'].get('gluetun_control_key')
+                            }
+                            requests.put(
+                                url=control_url,
+                                headers=headers,
+                                json={"status": "stopped"}
+                            )
+                            requests.put(
+                                url=control_url,
+                                headers=headers,
+                                json={"status": "running"}
+                            )
+                            sleep_amount = self.config['downloads'].get('gluetun_sleep')
+                            if sleep_amount == 0:
+                                sleep_amount = 30
+                            time.sleep(sleep_amount)
+                            attempt += 1
+                            if (attempt == max_attempts):
+                                raise ConnectionError("Reached maximum IP attempts!") from err
+                            continue
+                        rand_sleep(self.config)
+                        raise ConnectionError(self.BOT_ERROR_LOG) from err
 
-                return None, str(err)
+                    return None, str(err)
 
         self._validate_cookie()
 
