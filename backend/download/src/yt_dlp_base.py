@@ -117,7 +117,7 @@ class YtWrap:
                 if (res.text == ""):
                     raise ConnectionError("Gluetun has not connected to VPN yet")
                 break
-            except:
+            except (ConnectionError, requests.exceptions.HTTPError):
                 swap_attempt += 1
                 if (swap_attempt == 5):
                     raise ConnectionError("Gluetun could not connect to VPN!")
@@ -129,7 +129,7 @@ class YtWrap:
         with yt_dlp.YoutubeDL(self.obs) as ydl:
             max_attempts = self.config["downloads"].get("gluetun_attempts")
             inf = False
-            if max_attempts == 0 or max_attempts == None:
+            if max_attempts == 0 or max_attempts is None:
                 inf = True
                 max_attempts = 0
             attempt = 0
@@ -166,7 +166,7 @@ class YtWrap:
         with yt_dlp.YoutubeDL(self.obs) as ydl:
             max_attempts = self.config["downloads"].get("gluetun_attempts")
             inf = False
-            if max_attempts == 0 or max_attempts == None:
+            if max_attempts == 0 or max_attempts is None:
                 inf = True
                 max_attempts = 0
             attempt = 0
