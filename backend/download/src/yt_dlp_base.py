@@ -158,6 +158,28 @@ class YtWrap:
 
         return True, True
 
+    def _handle_extract_dl_error(self, err, attempt, max_attempts) -> tuple[int, bool]:
+        """
+        handle download errors in extract()
+        returns attempt count, continue, error
+        """
+        if "This channel does not have a" in str(err):
+            return attempt, False, True
+        print(f"{url}: failed to get info from youtube: {err}")
+        if "Temporary failure in name resolution" in str(err):
+            raise ConnectionError("lost the internet, abort!") from err
+        if any(m in str(err) for m in self.BOT_MESSAGES):
+            print(self.BOT_ERROR_LOG)
+            if self.config["downloads"].get("gluetun_swap"):
+                attempt += 1
+                if (attempt == max_attempts):
+                    raise ConnectionError("Reached maximum IP attempts!") from err
+                self._swap_ip()
+                return attempt, True, False
+            rand_sleep(self.config)
+            raise ConnectionError(self.BOT_ERROR_LOG) from err
+
+
     def extract(self, url) -> tuple[dict | None, str | None]:
         """
         make extract request
@@ -181,22 +203,15 @@ class YtWrap:
                     print(f"{url}: failed to extract: {err}, continue...")
                     return None, str(err)
                 except yt_dlp.utils.DownloadError as err:
-                    if "This channel does not have a" in str(err):
+                    attempt, cont, error = self._handle_extract_dl_error(
+                        err = err,
+                        attempt = attempt,
+                        max_attempts = max_attempts
+                    )
+                    if cont:
+                        continue
+                    elif error:
                         return None, None
-
-                    print(f"{url}: failed to get info from youtube: {err}")
-                    if "Temporary failure in name resolution" in str(err):
-                        raise ConnectionError("lost the internet, abort!") from err
-                    if any(m in str(err) for m in self.BOT_MESSAGES):
-                        print(self.BOT_ERROR_LOG)
-                        if self.config["downloads"].get("gluetun_swap"):
-                            attempt += 1
-                            if (attempt == max_attempts):
-                                raise ConnectionError("Reached maximum IP attempts!") from err
-                            self._swap_ip()
-                            continue
-                        rand_sleep(self.config)
-                        raise ConnectionError(self.BOT_ERROR_LOG) from err
 
                     return None, str(err)
 
