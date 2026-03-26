@@ -37,6 +37,8 @@ Once your YouTube video collection grows, it becomes hard to search and find a s
 - [Jellyfin Plugin](https://github.com/tubearchivist/tubearchivist-jf-plugin): Add your videos to Jellyfin
 - [Plex Plugin](https://github.com/tubearchivist/tubearchivist-plex): Add your videos to Plex
 
+For forward-auth setups, configure `TA_AUTH_PROXY_LOGOUT_URL` to define an external logout redirect.
+
 ## Installing
 For minimal system requirements, the Tube Archivist stack needs around 2GB of available memory for a small testing setup and around 4GB of available memory for a mid to large sized installation. Minimal with dual core with 4 threads, better quad core plus.
 This project requires docker. Ensure it is installed and running on your system.
