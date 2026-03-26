@@ -4,6 +4,7 @@ Functionality:
 - identify vid_type if possible
 """
 
+import re
 from typing import Literal, NotRequired, TypedDict
 from urllib.parse import parse_qs, urlparse
 
@@ -85,6 +86,11 @@ class Parser:
         if all_paths[0] == "live":
             return self._validate_expected(all_paths[1], "video")
 
+        if all_paths[0].startswith("@"):
+            channel_url = f"https://www.youtube.com/{all_paths[0]}"
+            channel_id = self._extract_channel_name(channel_url)
+            return {"type": "channel", "url": channel_id}
+
         # detect channel
         channel_id = self._extract_channel_name(parsed.geturl())
         return {"type": "channel", "url": channel_id}
@@ -109,12 +115,17 @@ class Parser:
             channel_id = self._extract_channel_name(url)
             return {"type": "channel", "url": channel_id}
 
-        len_id_str = len(id_str)
-        if len_id_str == 11:
+        if re.fullmatch(r"[\w-]{11}", id_str):
             item_type = "video"
-        elif len_id_str == 24:
+        elif re.fullmatch(r"[\w-]{24}", id_str):
             item_type = "channel"
-        elif len_id_str in (34, 26, 18) or id_str.startswith("TA_playlist_"):
+        elif (
+            re.fullmatch(r"[\w-]{34}", id_str)
+            or re.fullmatch(r"[\w-]{26}", id_str)
+            or re.fullmatch(r"[\w-]{18}", id_str)
+            or re.fullmatch(r"OLAK5uy_[\w-]{33}", id_str)
+            or id_str.startswith("TA_playlist_")
+        ):
             item_type = "playlist"
         else:
             raise ValueError(f"not a valid id_str: {id_str}")
