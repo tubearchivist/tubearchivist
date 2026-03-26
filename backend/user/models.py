@@ -15,11 +15,10 @@ class AccountManager(BaseUserManager):
 
     def _create_user(self, name, password, **extra_fields):
         """create regular user private"""
-        values = [name, password]
-        field_value_map = dict(zip(self.model.REQUIRED_FIELDS, values))
-        for field_name, value in field_value_map.items():
-            if not value:
-                raise ValueError(f"The {field_name} value must be set")
+        if not name:
+            raise ValueError("The name value must be set")
+        if not password:
+            raise ValueError("The password value must be set")
 
         user = self.model(name=name, **extra_fields)
         user.set_password(password)
@@ -51,4 +50,4 @@ class Account(AbstractBaseUser, PermissionsMixin):
     objects = AccountManager()
 
     USERNAME_FIELD = "name"
-    REQUIRED_FIELDS = ["password"]
+    REQUIRED_FIELDS = []
