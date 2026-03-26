@@ -42,19 +42,20 @@ class DownloadApiListView(ApiBaseView):
     )
     def get(self, request):
         """get download queue list"""
-        query_filter = request.GET.get("filter", False)
+        serializer = DownloadListQuerySerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+
+        sort_field = validated_data.get("sort", "timestamp")
+        sort_order = validated_data.get("order", "asc")
         self.data.update(
             {
                 "sort": [
                     {"auto_start": {"order": "desc"}},
-                    {"timestamp": {"order": "asc"}},
+                    {sort_field: {"order": sort_order}},
                 ],
             }
         )
-
-        serializer = DownloadListQuerySerializer(data=request.query_params)
-        serializer.is_valid(raise_exception=True)
-        validated_data = serializer.validated_data
 
         must_list = []
         query_filter = validated_data.get("filter")

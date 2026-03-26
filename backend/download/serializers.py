@@ -51,6 +51,16 @@ class DownloadListQuerySerializer(
     page = serializers.IntegerField(required=False)
     q = serializers.CharField(required=False, help_text="Search Query")
     error = serializers.BooleanField(required=False, allow_null=True)
+    sort = serializers.ChoiceField(
+        choices=["published", "timestamp"],
+        required=False,
+        help_text="Sort field",
+    )
+    order = serializers.ChoiceField(
+        choices=["asc", "desc"],
+        required=False,
+        help_text="Sort order",
+    )
 
 
 class DownloadListQueueDeleteQuerySerializer(serializers.Serializer):
