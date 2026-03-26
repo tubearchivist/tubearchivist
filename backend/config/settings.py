@@ -198,6 +198,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "/login/"
 LOGOUT_REDIRECT_URL = "/login/"
+AUTH_PROXY_LOGOUT_URL = (
+    (environ.get("TA_AUTH_PROXY_LOGOUT_URL") or "").strip() or None
+)
 
 # Cors needed for browser extension
 # background.js makes the request so HTTP_ORIGIN will be from extension
