@@ -53,6 +53,7 @@ class VideoDownloader(DownloaderBase):
     def __init__(self, task=False):
         super().__init__(task)
         self.obs = False
+        self._last_info = False
         self._build_obs()
 
     def run_queue(self, auto_only=False) -> tuple[int, int]:
@@ -73,6 +74,7 @@ class VideoDownloader(DownloaderBase):
             print(f"{youtube_id}: Downloading video")
             self._notify(video_data, "Validate download format")
 
+            self._last_info = False
             success = self._dl_single_vid(youtube_id, channel_id)
             if not success:
                 failed += 1
@@ -81,6 +83,7 @@ class VideoDownloader(DownloaderBase):
             self._notify(video_data, "Add video metadata to index", progress=1)
             video_type = VideoTypeEnum(video_data["vid_type"])
             vid_dict = index_new_video(youtube_id, video_type=video_type)
+            self._save_selected_formats(youtube_id)
             RedisQueue(self.CHANNEL_QUEUE).add(channel_id)
             RedisQueue(self.VIDEO_QUEUE).add(youtube_id)
 
@@ -143,9 +146,65 @@ class VideoDownloader(DownloaderBase):
         except KeyError:
             message = "processing"
 
+        info_dict = response.get("info_dict")
+        if info_dict:
+            self._last_info = info_dict
+
         if self.task:
             title = response["info_dict"]["title"]
             self.task.send_progress([title, message], progress=progress)
+
+    def _save_selected_formats(self, youtube_id):
+        """persist selected format data after successful download"""
+        if not self._last_info or self._last_info.get("id") != youtube_id:
+            return
+
+        format_data = self._normalize_selected_formats(self._last_info)
+        if not format_data:
+            return
+
+        data = {
+            "doc": {
+                "selected_formats": format_data,
+                "selected_formats_captured_at": datetime.now().isoformat(),
+            }
+        }
+        _, status_code = ElasticWrap(f"ta_video/_update/{youtube_id}").post(data=data)
+        if status_code not in [200, 201]:
+            print(f"{youtube_id}: failed to persist selected formats")
+
+    @staticmethod
+    def _normalize_selected_formats(info_dict):
+        """normalize selected format payload"""
+        normalized = []
+        for format_item in info_dict.get("requested_formats", []):
+            item = VideoDownloader._normalize_format_item(format_item)
+            if item:
+                normalized.append(item)
+
+        if normalized:
+            return normalized
+
+        single_item = VideoDownloader._normalize_format_item(info_dict)
+        if single_item:
+            return [single_item]
+
+        return False
+
+    @staticmethod
+    def _normalize_format_item(format_item):
+        """normalize one selected format"""
+        format_id = format_item.get("format_id")
+        if format_id is None:
+            return False
+
+        data = {"format_id": str(format_id)}
+        for key in ["height", "width", "fps", "vcodec", "acodec", "tbr", "vbr", "abr"]:
+            value = format_item.get(key)
+            if value is not None:
+                data[key] = value
+
+        return data
 
     def _build_obs(self):
         """collection to build all obs passed to yt-dlp"""
