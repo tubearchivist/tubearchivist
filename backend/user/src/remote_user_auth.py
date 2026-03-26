@@ -8,3 +8,16 @@ class HttpRemoteUserMiddleware(PersistentRemoteUserMiddleware):
     """
 
     header = settings.TA_AUTH_PROXY_USERNAME_HEADER
+
+    def process_request(self, request):
+        """Only trust remote-user header from configured proxy IPs."""
+        trusted_proxy_ips = getattr(settings, "TA_TRUSTED_PROXY_IPS", [])
+        if isinstance(trusted_proxy_ips, str):
+            trusted_proxy_ips = [
+                ip.strip() for ip in trusted_proxy_ips.split(",") if ip.strip()
+            ]
+
+        if request.META.get("REMOTE_ADDR") not in trusted_proxy_ips:
+            request.META.pop(self.header, None)
+
+        return super().process_request(request)
