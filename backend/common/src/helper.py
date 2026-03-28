@@ -103,13 +103,17 @@ def requests_headers() -> dict[str, str]:
     return {"User-Agent": template}
 
 
-def date_parser(timestamp: int | str | None) -> str | None:
+def date_parser(timestamp: int | float | str | None) -> str | None:
     """return formatted date string"""
     if timestamp is None:
         return None
 
     if isinstance(timestamp, int):
         date_obj = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+    elif isinstance(timestamp, float):
+        date_obj = datetime.fromtimestamp(int(timestamp), tz=timezone.utc)
+    elif isinstance(timestamp, str) and timestamp.isdigit():
+        date_obj = datetime.fromtimestamp(int(timestamp), tz=timezone.utc)
     elif isinstance(timestamp, str):
         date_obj = datetime.strptime(timestamp, "%Y-%m-%d")
         date_obj = date_obj.replace(tzinfo=timezone.utc)
@@ -129,6 +133,19 @@ def time_parser(timestamp: str) -> float:
 
     hours, minutes, seconds = timestamp.split(":", maxsplit=3)
     return int(hours) * 60 * 60 + int(minutes) * 60 + float(seconds)
+
+
+def deep_merge(target: dict, source: dict) -> None:
+    """inplace nested dict merge, recursive"""
+    for key, value in source.items():
+        if (
+            key in target
+            and isinstance(target[key], dict)
+            and isinstance(value, dict)
+        ):
+            deep_merge(target[key], value)
+        else:
+            target[key] = value
 
 
 def clear_dl_cache(cache_dir: str) -> int:

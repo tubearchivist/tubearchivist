@@ -48,7 +48,7 @@ CHECK_REINDEX: TaskItemConfig = {
 MANUAL_IMPORT: TaskItemConfig = {
     "title": "Manual video import",
     "group": "setting:import",
-    "api_start": True,
+    "api_start": False,
     "api_stop": False,
 }
 
@@ -69,20 +69,13 @@ RESTORE_BACKUP: TaskItemConfig = {
 RESCAN_FILESYSTEM: TaskItemConfig = {
     "title": "Rescan your Filesystem",
     "group": "setting:filesystemscan",
-    "api_start": True,
+    "api_start": False,
     "api_stop": False,
 }
 
 THUMBNAIL_CHECK: TaskItemConfig = {
     "title": "Check your Thumbnails",
     "group": "setting:thumbnailcheck",
-    "api_start": True,
-    "api_stop": False,
-}
-
-RESYNC_THUMBS: TaskItemConfig = {
-    "title": "Sync Thumbnails to Media Files",
-    "group": "setting:thumbnailsync",
     "api_start": True,
     "api_stop": False,
 }
@@ -125,7 +118,6 @@ TASK_CONFIG: dict[str, TaskItemConfig] = {
     "restore_backup": RESTORE_BACKUP,
     "rescan_filesystem": RESCAN_FILESYSTEM,
     "thumbnail_check": THUMBNAIL_CHECK,
-    "resync_thumbs": RESYNC_THUMBS,
     "resync_metadata": RESYNC_METADATA,
     "index_playlists": INDEX_PLAYLISTS,
     "subscribe_to": SUBSCRIBE_TO,

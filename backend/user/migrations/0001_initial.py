@@ -39,7 +39,9 @@ class Migration(migrations.Migration):
                     "is_superuser",
                     models.BooleanField(
                         default=False,
-                        help_text="Designates that this user has all permissions without explicitly assigning them.",
+                        help_text=(
+                            "Designates that this user has all permissions without explicitly assigning them."
+                        ),
                         verbose_name="superuser status",
                     ),
                 ),
@@ -49,7 +51,9 @@ class Migration(migrations.Migration):
                     "groups",
                     models.ManyToManyField(
                         blank=True,
-                        help_text="The groups this user belongs to. A user will get all permissions granted to each of their groups.",
+                        help_text=(
+                            "The groups this user belongs to. A user will get all permissions granted to each of their groups."
+                        ),
                         related_name="user_set",
                         related_query_name="user",
                         to="auth.group",

@@ -44,7 +44,6 @@ class AppConfigDownloadsSerializer(
     format = serializers.CharField(allow_null=True)
     format_sort = serializers.CharField(allow_null=True)
     add_metadata = serializers.BooleanField()
-    add_thumbnail = serializers.BooleanField()
     subtitle = serializers.CharField(allow_null=True)
     subtitle_source = serializers.ChoiceField(
         choices=["auto", "user"], allow_null=True
@@ -55,7 +54,7 @@ class AppConfigDownloadsSerializer(
         choices=["top", "new"], allow_null=True
     )
     cookie_import = serializers.BooleanField()
-    potoken = serializers.BooleanField()
+    pot_provider_url = serializers.CharField(allow_null=True)
     throttledratelimit = serializers.IntegerField(allow_null=True)
     extractor_lang = serializers.CharField(allow_null=True)
     integrate_ryd = serializers.BooleanField()
@@ -94,10 +93,18 @@ class CookieUpdateSerializer(serializers.Serializer):
     cookie = serializers.CharField()
 
 
-class PoTokenSerializer(serializers.Serializer):
-    """serialize PO token"""
+class RescanFileSystemConfig(serializers.Serializer):
+    """serialize rescan filesystem config"""
 
-    potoken = serializers.CharField()
+    ignore_error = serializers.BooleanField()
+    prefer_local = serializers.BooleanField()
+
+
+class ManualImportConfig(serializers.Serializer):
+    """serialize for manual import task"""
+
+    ignore_error = serializers.BooleanField()
+    prefer_local = serializers.BooleanField()
 
 
 class SnapshotItemSerializer(serializers.Serializer):

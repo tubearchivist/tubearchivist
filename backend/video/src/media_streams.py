@@ -12,7 +12,7 @@ class MediaStreamExtractor:
         self.media_path = media_path
         self.metadata = []
 
-    def extract_metadata(self):
+    def extract_metadata(self) -> list[dict]:
         """entry point to extract metadata"""
 
         cmd = [
@@ -38,17 +38,15 @@ class MediaStreamExtractor:
 
         return self.metadata
 
-    def process_stream(self, stream):
+    def process_stream(self, stream) -> None:
         """parse stream to metadata"""
         codec_type = stream.get("codec_type")
         if codec_type == "video":
             self._extract_video_metadata(stream)
         elif codec_type == "audio":
             self._extract_audio_metadata(stream)
-        else:
-            return
 
-    def _extract_video_metadata(self, stream):
+    def _extract_video_metadata(self, stream) -> None:
         """parse video metadata"""
         if "bit_rate" not in stream:
             # is probably thumbnail
@@ -56,26 +54,26 @@ class MediaStreamExtractor:
 
         self.metadata.append(
             {
-                "type": "video",
-                "index": stream["index"],
+                "bitrate": int(stream.get("bit_rate", 0)),
                 "codec": stream["codec_name"],
-                "width": stream["width"],
                 "height": stream["height"],
-                "bitrate": int(stream["bit_rate"]),
+                "index": stream["index"],
+                "type": "video",
+                "width": stream["width"],
             }
         )
 
-    def _extract_audio_metadata(self, stream):
+    def _extract_audio_metadata(self, stream) -> None:
         """extract audio metadata"""
         self.metadata.append(
             {
-                "type": "audio",
-                "index": stream["index"],
-                "codec": stream.get("codec_name", "undefined"),
                 "bitrate": int(stream.get("bit_rate", 0)),
+                "codec": stream.get("codec_name", "undefined"),
+                "index": stream["index"],
+                "type": "audio",
             }
         )
 
-    def get_file_size(self):
+    def get_file_size(self) -> int:
         """get filesize in bytes"""
         return stat(self.media_path).st_size

@@ -6,20 +6,6 @@ import Linkify from './Linkify';
 import formatNumbers from '../functions/formatNumbers';
 import Button from './Button';
 
-export type CommentReplyType = {
-  comment_id: string;
-  comment_text: string;
-  comment_timestamp: number;
-  comment_time_text: string;
-  comment_likecount: number;
-  comment_is_favorited: false;
-  comment_author: string;
-  comment_author_id: string;
-  comment_author_thumbnail: string;
-  comment_author_is_uploader: boolean;
-  comment_parent: string;
-};
-
 export type CommentsType = {
   comment_id: string;
   comment_text: string;
@@ -32,16 +18,17 @@ export type CommentsType = {
   comment_author_thumbnail: string;
   comment_author_is_uploader: boolean;
   comment_parent: string;
-  comment_replies?: CommentReplyType[];
+  comment_replies: CommentsType[];
 };
 
 type CommentBoxProps = {
   comment: CommentsType;
+  showThread?: boolean;
   onTimestampClick?: (seconds: number) => void;
 };
 
-const CommentBox = ({ comment, onTimestampClick }: CommentBoxProps) => {
-  const [showSubComments, setShowSubComments] = useState(false);
+const CommentBox = ({ comment, showThread = false, onTimestampClick }: CommentBoxProps) => {
+  const [showSubComments, setShowSubComments] = useState(showThread);
 
   const hasSubComments =
     comment.comment_replies !== undefined && comment.comment_replies.length > 0;
@@ -93,10 +80,14 @@ const CommentBox = ({ comment, onTimestampClick }: CommentBoxProps) => {
 
           <div className="comments-replies" style={{ display: 'block' }}>
             {showSubComments &&
-              comment.comment_replies?.map(comment => {
+              comment.comment_replies.map(comment => {
                 return (
                   <Fragment key={comment.comment_id}>
-                    <CommentBox comment={comment} onTimestampClick={onTimestampClick} />
+                    <CommentBox
+                      comment={comment}
+                      onTimestampClick={onTimestampClick}
+                      showThread={showSubComments}
+                    />
                   </Fragment>
                 );
               })}

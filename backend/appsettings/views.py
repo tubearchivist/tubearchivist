@@ -5,7 +5,8 @@ from appsettings.serializers import (
     BackupFileSerializer,
     CookieUpdateSerializer,
     CookieValidationSerializer,
-    PoTokenSerializer,
+    ManualImportConfig,
+    RescanFileSystemConfig,
     SnapshotCreateResponseSerializer,
     SnapshotItemSerializer,
     SnapshotListSerializer,
@@ -22,7 +23,7 @@ from common.serializers import (
 from common.src.ta_redis import RedisArchivist
 from common.views_base import AdminOnly, AdminWriteOnly, ApiBaseView
 from django.conf import settings
-from download.src.yt_dlp_base import CookieHandler, POTokenHandler
+from download.src.yt_dlp_base import CookieHandler
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -290,69 +291,6 @@ class CookieView(ApiBaseView):
         return validation
 
 
-class POTokenView(ApiBaseView):
-    """handle PO token"""
-
-    permission_classes = [AdminOnly]
-
-    @extend_schema(
-        responses={
-            200: OpenApiResponse(PoTokenSerializer()),
-            404: OpenApiResponse(
-                ErrorResponseSerializer(), description="PO token not found"
-            ),
-        }
-    )
-    def get(self, request):
-        """get PO token"""
-        config = AppConfig().config
-        potoken = POTokenHandler(config).get()
-        if not potoken:
-            error = ErrorResponseSerializer({"error": "PO token not found"})
-            return Response(error.data, status=404)
-
-        serializer = PoTokenSerializer(data={"potoken": potoken})
-        serializer.is_valid(raise_exception=True)
-
-        return Response(serializer.data)
-
-    @extend_schema(
-        responses={
-            200: OpenApiResponse(PoTokenSerializer()),
-            400: OpenApiResponse(
-                ErrorResponseSerializer(), description="Bad request"
-            ),
-        }
-    )
-    def post(self, request):
-        """Update PO token"""
-        serializer = PoTokenSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        validated_data = serializer.validated_data
-        if not validated_data:
-            error = ErrorResponseSerializer(
-                {"error": "missing PO token key in request data"}
-            )
-            return Response(error.data, status=400)
-
-        config = AppConfig().config
-        new_token = validated_data["potoken"]
-
-        POTokenHandler(config).set_token(new_token)
-        return Response(serializer.data)
-
-    @extend_schema(
-        responses={
-            204: OpenApiResponse(description="PO token revoked"),
-        },
-    )
-    def delete(self, request):
-        """delete PO token"""
-        config = AppConfig().config
-        POTokenHandler(config).revoke_token()
-        return Response(status=204)
-
-
 class SnapshotApiListView(ApiBaseView):
     """resolves to /api/appsettings/snapshot/
     GET: returns snapshot config plus list of existing snapshots
@@ -385,6 +323,58 @@ class SnapshotApiListView(ApiBaseView):
         # pylint: disable=unused-argument
         response = ElasticSnapshot().take_snapshot_now()
         serializer = SnapshotCreateResponseSerializer(response)
+        return Response(serializer.data)
+
+
+class RescanFileSystem(ApiBaseView):
+    """resolves to /api/appsettings/rescan-filesystem/
+    POST: start new rescan filesystem task
+    """
+
+    permission_classes = [AdminOnly]
+
+    @staticmethod
+    @extend_schema(
+        request=RescanFileSystemConfig,
+        responses={
+            200: OpenApiResponse(AsyncTaskResponseSerializer()),
+        },
+    )
+    def post(request):
+        """start new task rescan filesystem task"""
+        data_serializer = RescanFileSystemConfig(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+
+        message = TaskCommand().start("rescan_filesystem", validated_data)
+        serializer = AsyncTaskResponseSerializer(message)
+
+        return Response(serializer.data)
+
+
+class ManualImportView(ApiBaseView):
+    """resolves to /api/appsettings/manual-import/
+    POST: start new manual import task
+    """
+
+    permission_classes = [AdminOnly]
+
+    @staticmethod
+    @extend_schema(
+        request=ManualImportConfig,
+        responses={
+            200: OpenApiResponse(AsyncTaskResponseSerializer()),
+        },
+    )
+    def post(request):
+        """manual import"""
+        data_serializer = ManualImportConfig(data=request.data)
+        data_serializer.is_valid(raise_exception=True)
+        validated_data = data_serializer.validated_data
+
+        message = TaskCommand().start("manual_import", validated_data)
+        serializer = AsyncTaskResponseSerializer(message)
+
         return Response(serializer.data)
 
 

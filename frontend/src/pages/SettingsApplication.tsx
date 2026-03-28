@@ -17,8 +17,6 @@ import updateCookie from '../api/actions/updateCookie';
 import loadCookie, { CookieStateType } from '../api/loader/loadCookie';
 import deleteCookie from '../api/actions/deleteCookie';
 import validateCookie from '../api/actions/validateCookie';
-import deletePoToken from '../api/actions/deletePoToken';
-import updatePoToken from '../api/actions/updatePoToken';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import MembershipAppsettings from '../components/MembershipAppsettings';
 
@@ -33,6 +31,7 @@ const SettingsApplication = () => {
   const { userConfig } = useUserConfigStore();
   const [response, setResponse] = useState<SettingsApplicationReponses>();
   const [refresh, setRefresh] = useState(false);
+  const [visibleSnapshotCount, setVisibleSnapshotCount] = useState(10);
 
   const snapshots = response?.snapshots;
   const appSettingsConfig = response?.appSettingsConfig;
@@ -57,7 +56,6 @@ const SettingsApplication = () => {
   const [downloadsFormatSort, setDownloadsFormatSort] = useState<string | null>(null);
   const [downloadsExtractorLang, setDownloadsExtractorLang] = useState<string | null>(null);
   const [embedMetadata, setEmbedMetadata] = useState(false);
-  const [embedThumbnail, setEmbedThumbnail] = useState(false);
 
   // Subtitles
   const [subtitleLang, setSubtitleLang] = useState<string | null>(null);
@@ -71,8 +69,7 @@ const SettingsApplication = () => {
   // Cookie
   const [cookieFormData, setCookieFormData] = useState<string>('');
   const [showCookieForm, setShowCookieForm] = useState<boolean>(false);
-  const [poTokenFormData, setPoTokenFormData] = useState<string>('web+');
-  const [showPoTokenForm, setShowPoTokenForm] = useState<boolean>(false);
+  const [potProviderUrl, setPotProviderUrl] = useState<string | null>(null);
 
   // Integrations
   const [showApiToken, setShowApiToken] = useState(false);
@@ -115,7 +112,6 @@ const SettingsApplication = () => {
     setDownloadsFormatSort(appSettingsConfigData?.downloads.format_sort || null);
     setDownloadsExtractorLang(appSettingsConfigData?.downloads.extractor_lang || null);
     setEmbedMetadata(appSettingsConfigData?.downloads.add_metadata || false);
-    setEmbedThumbnail(appSettingsConfigData?.downloads.add_thumbnail || false);
 
     // Subtitles
     setSubtitleLang(appSettingsConfigData?.downloads.subtitle || null);
@@ -125,6 +121,9 @@ const SettingsApplication = () => {
     // Comments
     setCommentsMax(appSettingsConfigData?.downloads.comment_max || null);
     setCommentsSort(appSettingsConfigData?.downloads.comment_sort || '');
+
+    // Cookie
+    setPotProviderUrl(appSettingsConfigData?.downloads.pot_provider_url || null);
 
     // Integrations
     setDownloadDislikes(appSettingsConfigData?.downloads.integrate_ryd || false);
@@ -169,24 +168,14 @@ const SettingsApplication = () => {
     setRefresh(true);
   };
 
-  const handlePoTokenRevoke = async () => {
-    await deletePoToken();
-    setRefresh(true);
-  };
-
-  const handlePoTokenUpdate = async () => {
-    await updatePoToken(poTokenFormData);
-    setPoTokenFormData('web+');
-    setShowPoTokenForm(false);
-    setRefresh(true);
-  };
-
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
   }, []);
 
   useEffect(() => {
     if (refresh) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchData();
       setRefresh(false);
     }
@@ -473,9 +462,8 @@ const SettingsApplication = () => {
                         </li>
                       </ul>
                     </li>
-                    <li>Embedding metadata adds additional metadata directly to the mp4 file.</li>
                     <li>
-                      Embedding the thumbnail embeds the video thumbnail as a cover.jpg to the mp4
+                      Embedding metadata adds additional metadata and thumbnails directly to the mp4
                       file.
                     </li>
                   </ul>
@@ -527,16 +515,6 @@ const SettingsApplication = () => {
                 <ToggleConfig
                   name="downloads.add_metadata"
                   value={embedMetadata}
-                  updateCallback={handleUpdateConfig}
-                />
-              </div>
-              <div className="settings-box-wrapper">
-                <div>
-                  <p>Embed Thumbnail</p>
-                </div>
-                <ToggleConfig
-                  name="downloads.add_thumbnail"
-                  value={embedThumbnail}
                   updateCallback={handleUpdateConfig}
                 />
               </div>
@@ -630,17 +608,17 @@ const SettingsApplication = () => {
                       Download and index comments. Browsable on the video detail page. Example:
                       <ul>
                         <li>
-                          <span className="settings-current">all,100,all,30</span>: Get 100
-                          max-parents and 30 max-replies-per-thread.
+                          <span className="settings-current">all,100,all,30,all</span>: Get 100
+                          max-parents and 30 max-replies-per-thread at any depth.
                         </li>
                         <li>
-                          <span className="settings-current">1000,all,all,50</span>: Get a total of
-                          1000 comments over all, 50 replies per thread.
+                          <span className="settings-current">1000,all,all,50,2</span>: Get a total
+                          of 1000 comments over all, 50 replies per thread, only 2 levels of depth.
                         </li>
                         <li>
                           Values are in the format:{' '}
                           <span className="settings-current">
-                            max-comments,max-parents,max-replies,max-replies-per-thread
+                            max-comments,max-parents,max-replies,max-replies-per-thread,max-depth
                           </span>
                           .
                         </li>
@@ -702,13 +680,13 @@ const SettingsApplication = () => {
                       .
                     </li>
                     <li>
-                      The PO Token <i>(Proof of origin token)</i> can authenticate your request.
-                      Make sure to read the{' '}
+                      The PO Token Provider URL running external to tubearchivist. Make sure to
+                      review{' '}
                       <a
                         target="_blank"
-                        href="https://github.com/yt-dlp/yt-dlp/wiki/PO-Token-Guide"
+                        href="https://docs.tubearchivist.com/settings/application/#po-token-provider-url"
                       >
-                        PO guide
+                        User Guide
                       </a>
                     </li>
                   </ul>
@@ -763,52 +741,16 @@ const SettingsApplication = () => {
               </div>
               <div className="settings-box-wrapper">
                 <div>
-                  <p>Add PO Token</p>
+                  <p>PO Token Provider URL</p>
                 </div>
-                <div>
-                  {response?.appSettingsConfig?.downloads.potoken ? (
-                    <>
-                      <p>PO Token enabled.</p>
-                      <button onClick={handlePoTokenRevoke} className="danger-button">
-                        Revoke
-                      </button>
-                    </>
-                  ) : (
-                    <p>PO Token disabled</p>
-                  )}
-                  {showPoTokenForm ? (
-                    <div>
-                      <input
-                        type="text"
-                        value={poTokenFormData}
-                        onChange={async e => {
-                          setPoTokenFormData(e.target.value);
-                        }}
-                      />
-                      {poTokenFormData !== 'web+' && (
-                        <button onClick={handlePoTokenUpdate}>Update</button>
-                      )}
-                      <button
-                        onClick={() => {
-                          setShowPoTokenForm(false);
-                          setPoTokenFormData('web+');
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
-                    <div>
-                      <button
-                        onClick={async () => {
-                          setShowPoTokenForm(true);
-                        }}
-                      >
-                        Update PO Token
-                      </button>
-                    </div>
-                  )}
-                </div>
+                <InputConfig
+                  type="text"
+                  name="downloads.pot_provider_url"
+                  value={potProviderUrl}
+                  setValue={setPotProviderUrl}
+                  oldValue={appSettingsConfig.downloads.pot_provider_url}
+                  updateCallback={handleUpdateConfig}
+                />
               </div>
             </div>
             <div className="info-box-item">
@@ -974,10 +916,9 @@ const SettingsApplication = () => {
                         </p>
                         <br />
                         {restoringSnapshot && <p>Snapshot restore started</p>}
-                        {!restoringSnapshot &&
-                          snapshots.snapshots &&
-                          snapshots.snapshots.map(snapshot => {
-                            return (
+                        {!restoringSnapshot && snapshots.snapshots && (
+                          <>
+                            {snapshots.snapshots?.slice(0, visibleSnapshotCount).map(snapshot => (
                               <p key={snapshot.id}>
                                 <Button
                                   label="Restore"
@@ -992,8 +933,17 @@ const SettingsApplication = () => {
                                 <span className="settings-current">{snapshot.duration_s}s</span> to
                                 create. State: <i>{snapshot.state}</i>
                               </p>
-                            );
-                          })}
+                            ))}
+                            {visibleSnapshotCount < snapshots.snapshots.length && (
+                              <Button
+                                label="Load More"
+                                onClick={() => {
+                                  setVisibleSnapshotCount(visibleSnapshotCount + 10);
+                                }}
+                              />
+                            )}
+                          </>
+                        )}
                       </>
                     )}
                   </div>

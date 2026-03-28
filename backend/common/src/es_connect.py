@@ -148,6 +148,8 @@ class IndexPaginate:
     - callback: obj, Class implementing run method callback for every loop
     - task: task object to send notification
     - total: int, total items in index for progress message
+    - timeout: int, overwrite timeout in get request
+    - pit_keep_alive: int, overwrite pit valid
     """
 
     DEFAULT_SIZE = 500
@@ -168,7 +170,8 @@ class IndexPaginate:
 
     def get_pit(self):
         """get pit for index"""
-        path = f"{self.index_name}/_pit?keep_alive=10m"
+        keep_alive = self.kwargs.get("pit_keep_alive", 15)
+        path = f"{self.index_name}/_pit?keep_alive={keep_alive}m"
         response, _ = ElasticWrap(path).post()
         self.pit_id = response["id"]
 
@@ -184,14 +187,18 @@ class IndexPaginate:
             self.data.update({"sort": [{"_doc": {"order": "desc"}}]})
 
         self.data["size"] = self.kwargs.get("size") or self.DEFAULT_SIZE
-        self.data["pit"] = {"id": self.pit_id, "keep_alive": "10m"}
+        self.data["pit"] = {"id": self.pit_id, "keep_alive": "15m"}
 
     def run_loop(self):
         """loop through results until last hit"""
         all_results = []
         counter = 0
         while True:
-            response, _ = ElasticWrap("_search").get(data=self.data)
+            get_kwargs = {"data": self.data}
+            if timeout_overwrite := self.kwargs.get("timeout"):
+                get_kwargs.update({"timeout": timeout_overwrite})
+
+            response, _ = ElasticWrap("_search").get(**get_kwargs)
             all_hits = response["hits"]["hits"]
             if not all_hits:
                 break

@@ -35,14 +35,19 @@ urlpatterns = [
         name="api-cookie",
     ),
     path(
-        "potoken/",
-        views.POTokenView.as_view(),
-        name="api-potoken",
-    ),
-    path(
         "token/",
         views.TokenView.as_view(),
         name="api-token",
+    ),
+    path(
+        "rescan-filesystem/",
+        views.RescanFileSystem.as_view(),
+        name="api-rescan-filesystem",
+    ),
+    path(
+        "manual-import/",
+        views.ManualImportView.as_view(),
+        name="api-manual-import",
     ),
     path(
         "membership/profile/",

@@ -24,6 +24,7 @@ type ProfileResponseType = {
   sponsor_tier: SponsorTierType;
   subscription_count: number;
   subscription_is_max: boolean;
+  is_connected: boolean;
 };
 
 export default function MembershipAppsettings({ show_help_text }: { show_help_text: boolean }) {
@@ -137,6 +138,13 @@ export default function MembershipAppsettings({ show_help_text }: { show_help_te
             </li>
             <li>Click on validate to verify everything is working.</li>
             <li>
+              Setup the{' '}
+              <a href="https://github.com/tubearchivist/members" target="_blank">
+                Client Container
+              </a>
+              .
+            </li>
+            <li>
               If you are subscribed to less channels than your sponsor tier allows, you can directly
               sync all your subscriptions here.
             </li>
@@ -206,6 +214,19 @@ export default function MembershipAppsettings({ show_help_text }: { show_help_te
                     <br />
                     Subscriptions: {profileResponse.subscription_count}/
                     {profileResponse.sponsor_tier.max_subs}
+                    <br />
+                    Socket:{' '}
+                    {profileResponse.is_connected ? (
+                      'Established'
+                    ) : (
+                      <>
+                        Not established. Make sure the{' '}
+                        <a href="https://github.com/tubearchivist/members" target="_blank">
+                          Client Container
+                        </a>{' '}
+                        is connected.
+                      </>
+                    )}
                   </p>
                 </>
               )}

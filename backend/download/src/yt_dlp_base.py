@@ -7,9 +7,12 @@ functionality:
 from datetime import datetime
 from http import cookiejar
 from io import StringIO
+from os import path
 
 import yt_dlp
 from appsettings.src.config import AppConfig
+from common.src.env_settings import EnvironmentSettings
+from common.src.helper import deep_merge, rand_sleep
 from common.src.ta_redis import RedisArchivist
 from django.conf import settings
 
@@ -17,12 +20,21 @@ from django.conf import settings
 class YtWrap:
     """wrap calls to yt"""
 
+    BOT_MESSAGES = [
+        "not a bot",
+    ]
+    BOT_ERROR_LOG = "YouTube bot detection, abort!"
+
     OBS_BASE = {
         "default_search": "ytsearch",
         "quiet": True,
         "socket_timeout": 10,
         "extractor_retries": 3,
         "retries": 10,
+        "cachedir": path.abspath(
+            path.join(EnvironmentSettings.CACHE_DIR, "ytdlp")
+        ),
+        "plugin_dirs": [],
     }
 
     def __init__(self, obs_request, config=False):
@@ -33,10 +45,10 @@ class YtWrap:
     def build_obs(self):
         """build yt-dlp obs"""
         self.obs = self.OBS_BASE.copy()
-        self.obs.update(self.obs_request)
+        deep_merge(self.obs, self.obs_request)
         if self.config:
             self._add_cookie()
-            self._add_potoken()
+            self._add_potoken_url()
 
         if getattr(settings, "DEBUG", False):
             del self.obs["quiet"]
@@ -46,22 +58,29 @@ class YtWrap:
         """add cookie if enabled"""
         if self.config["downloads"]["cookie_import"]:
             cookie_io = CookieHandler(self.config).get()
-            self.obs["cookiefile"] = cookie_io
+        else:
+            cookie_io = CookieHandler(self.config).get("cookie_temp")
 
-    def _add_potoken(self):
-        """add potoken if enabled"""
-        if self.config["downloads"].get("potoken"):
-            potoken = POTokenHandler(self.config).get()
-            self.obs.update(
+        self.obs["cookiefile"] = cookie_io
+
+    def _add_potoken_url(self):
+        """add bgutils token url"""
+        if pot_provider_url := self.config["downloads"].get(
+            "pot_provider_url"
+        ):
+            deep_merge(
+                self.obs,
                 {
                     "extractor_args": {
-                        "youtube": {
-                            "po_token": [potoken],
-                            "player-client": ["mweb", "default"],
-                        },
+                        "youtubepot-bgutilhttp": {
+                            "base_url": [pot_provider_url]
+                        }
                     }
-                }
+                },
             )
+            if EnvironmentSettings.APP_DIR == "/app":
+                # container internal only
+                self.obs["plugin_dirs"].append("/opt/yt_plugins/bgutil")
 
     def download(self, url):
         """make download request"""
@@ -73,6 +92,10 @@ class YtWrap:
                 print(f"{url}: failed to download with message {err}")
                 if "Temporary failure in name resolution" in str(err):
                     raise ConnectionError("lost the internet, abort!") from err
+                if any(m in str(err) for m in self.BOT_MESSAGES):
+                    print(self.BOT_ERROR_LOG)
+                    rand_sleep(self.config)
+                    raise ConnectionError(self.BOT_ERROR_LOG) from err
 
                 return False, str(err)
 
@@ -101,6 +124,10 @@ class YtWrap:
                 print(f"{url}: failed to get info from youtube: {err}")
                 if "Temporary failure in name resolution" in str(err):
                     raise ConnectionError("lost the internet, abort!") from err
+                if any(m in str(err) for m in self.BOT_MESSAGES):
+                    print(self.BOT_ERROR_LOG)
+                    rand_sleep(self.config)
+                    raise ConnectionError(self.BOT_ERROR_LOG) from err
 
                 return None, str(err)
 
@@ -111,26 +138,40 @@ class YtWrap:
     def _validate_cookie(self):
         """check cookie and write it back for next use"""
         if not self.obs.get("cookiefile"):
+            # empty in tests
             return
 
-        new_cookie = self.obs["cookiefile"].read()
-        old_cookie = RedisArchivist().get_message_str("cookie")
+        self.obs["cookiefile"].seek(0)
+        new_cookie = self.obs["cookiefile"].read().strip("\x00")
+
+        if self.config["downloads"]["cookie_import"]:
+            cookie_key = "cookie"
+            expire = False
+        else:
+            cookie_key = "cookie_temp"
+            expire = 60 * 30  # 30 min
+
+        old_cookie = RedisArchivist().get_message_str(cookie_key)
         if new_cookie and old_cookie != new_cookie:
-            print("refreshed stored cookie")
-            RedisArchivist().set_message("cookie", new_cookie, save=True)
+            print(f"refreshed stored {cookie_key}")
+            RedisArchivist().set_message(
+                cookie_key, new_cookie, expire=expire, save=True
+            )
 
 
 class CookieHandler:
     """handle youtube cookie for yt-dlp"""
 
+    COOKIE_EMPTY = "# Netscape HTTP Cookie File\n"
+
     def __init__(self, config):
         self.cookie_io = False
         self.config = config
 
-    def get(self):
+    def get(self, message_str: str = "cookie"):
         """get cookie io stream"""
-        cookie = RedisArchivist().get_message_str("cookie")
-        self.cookie_io = StringIO(cookie)
+        cookie = RedisArchivist().get_message_str(message_str)
+        self.cookie_io = StringIO(cookie or self.COOKIE_EMPTY)
         return self.cookie_io
 
     def set_cookie(self, cookie):
@@ -196,27 +237,3 @@ class CookieHandler:
             "validated_str": now.strftime("%Y-%m-%d %H:%M"),
         }
         RedisArchivist().set_message("cookie:valid", message, expire=3600)
-
-
-class POTokenHandler:
-    """handle po token"""
-
-    REDIS_KEY = "potoken"
-
-    def __init__(self, config):
-        self.config = config
-
-    def get(self) -> str | None:
-        """get PO token"""
-        potoken = RedisArchivist().get_message_str(self.REDIS_KEY)
-        return potoken
-
-    def set_token(self, new_token: str) -> None:
-        """set new PO token"""
-        RedisArchivist().set_message(self.REDIS_KEY, new_token)
-        AppConfig().update_config({"downloads": {"potoken": True}})
-
-    def revoke_token(self) -> None:
-        """revoke token"""
-        RedisArchivist().del_message(self.REDIS_KEY)
-        AppConfig().update_config({"downloads": {"potoken": False}})

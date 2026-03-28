@@ -57,54 +57,56 @@ class YoutubeChannel(YouTubeItem):
         """extract relevant fields"""
         self.youtube_meta["thumbnails"].reverse()
         channel_name = self.youtube_meta["uploader"] or self.youtube_meta["id"]
+        description = self.youtube_meta.get("description") or None
         self.json_data = {
             "channel_active": True,
-            "channel_description": self.youtube_meta.get("description", ""),
+            "channel_description": description,
             "channel_id": self.youtube_id,
             "channel_last_refresh": int(datetime.now().timestamp()),
             "channel_name": channel_name,
-            "channel_subs": self.youtube_meta.get("channel_follower_count", 0),
+            "channel_subs": self.youtube_meta.get("channel_follower_count")
+            or 0,
             "channel_subscribed": False,
             "channel_tags": self.youtube_meta.get("tags", []),
-            "channel_banner_url": self._get_banner_art(),
-            "channel_thumb_url": self._get_thumb_art(),
-            "channel_tvart_url": self._get_tv_art(),
-            "channel_views": self.youtube_meta.get("view_count") or 0,
             "channel_tabs": self.get_channel_tabs(),
         }
 
-    def _get_thumb_art(self):
+        self._get_thumb_art()
+        self._get_tv_art()
+        self._get_banner_art()
+
+    def _get_thumb_art(self) -> None:
         """extract thumb art"""
         for i in self.youtube_meta["thumbnails"]:
             if not i.get("width"):
                 continue
             if i.get("width") == i.get("height"):
-                return i["url"]
+                self.json_data["channel_thumb_url"] = i["url"]
+                return
 
-        return False
-
-    def _get_tv_art(self):
+    def _get_tv_art(self) -> None:
         """extract tv artwork"""
         for i in self.youtube_meta["thumbnails"]:
             if i.get("id") == "banner_uncropped":
-                return i["url"]
+                self.json_data["channel_tvart_url"] = i["url"]
+                return
         for i in self.youtube_meta["thumbnails"]:
             if not i.get("width"):
                 continue
             if i["width"] // i["height"] < 2 and not i["width"] == i["height"]:
-                return i["url"]
+                self.json_data["channel_tvart_url"] = i["url"]
+                return
 
-        return False
+        return
 
-    def _get_banner_art(self):
+    def _get_banner_art(self) -> None:
         """extract banner artwork"""
         for i in self.youtube_meta["thumbnails"]:
             if not i.get("width"):
                 continue
             if i["width"] // i["height"] > 5:
-                return i["url"]
-
-        return False
+                self.json_data["channel_banner_url"] = i["url"]
+                return
 
     def get_channel_tabs(self) -> list[str]:
         """get channel tabs"""
@@ -132,51 +134,39 @@ class YoutubeChannel(YouTubeItem):
         self.json_data = {
             "channel_active": False,
             "channel_last_refresh": int(datetime.now().timestamp()),
-            "channel_subs": fallback.get("channel_follower_count", 0),
+            "channel_subs": fallback.get("channel_follower_count") or 0,
             "channel_name": fallback["uploader"],
-            "channel_banner_url": False,
-            "channel_tvart_url": False,
             "channel_id": self.youtube_id,
             "channel_subscribed": False,
             "channel_tags": [],
-            "channel_description": "",
-            "channel_thumb_url": False,
-            "channel_views": 0,
         }
 
     def get_channel_art(self):
         """download channel art for new channels"""
         urls = (
-            self.json_data["channel_thumb_url"],
-            self.json_data["channel_banner_url"],
-            self.json_data["channel_tvart_url"],
+            self.json_data.get("channel_thumb_url"),
+            self.json_data.get("channel_banner_url"),
+            self.json_data.get("channel_tvart_url"),
         )
         ThumbManager(self.youtube_id, item_type="channel").download(urls)
 
     def sync_to_videos(self):
         """sync new channel_dict to all videos of channel"""
-        # add ingest pipeline
-        processors = []
-        for field, value in self.json_data.items():
-            if value is None:
-                line = {
-                    "script": {
-                        "lang": "painless",
-                        "source": f"ctx['{field}'] = null;",
-                    }
-                }
-            else:
-                line = {"set": {"field": "channel." + field, "value": value}}
-
-            processors.append(line)
-
-        data = {"description": self.youtube_id, "processors": processors}
-        ingest_path = f"_ingest/pipeline/{self.youtube_id}"
-        _, _ = ElasticWrap(ingest_path).put(data)
-        # apply pipeline
-        data = {"query": {"match": {"channel.channel_id": self.youtube_id}}}
-        update_path = f"ta_video/_update_by_query?pipeline={self.youtube_id}"
-        _, _ = ElasticWrap(update_path).post(data)
+        data = {
+            "query": {
+                "term": {"channel.channel_id": {"value": self.youtube_id}},
+            },
+            "script": {
+                "lang": "painless",
+                "params": {"channel": self.json_data},
+                "source": "ctx._source.channel = params.channel",
+            },
+        }
+        update_path = "ta_video/_update_by_query"
+        response, status_code = ElasticWrap(update_path).post(data)
+        if status_code not in [200, 201]:
+            print(f"sync to videos failed with status code {status_code}")
+            print(response)
 
     def change_subscribe(self, new_subscribe_state: bool):
         """change subscribe status"""

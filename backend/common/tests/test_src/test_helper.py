@@ -26,6 +26,20 @@ def test_date_parser_with_int():
     assert date_parser(timestamp) == expected_date
 
 
+def test_date_parser_with_digit():
+    """unix timestamp"""
+    timestamp = "1621539600"
+    expected_date = "2021-05-20T19:40:00+00:00"
+    assert date_parser(timestamp) == expected_date
+
+
+def test_date_parser_with_float():
+    """iso timestamp"""
+    date_float = 1766210400.0
+    expected_date = "2025-12-20T06:00:00+00:00"
+    assert date_parser(date_float) == expected_date
+
+
 def test_date_parser_with_str():
     """iso timestamp"""
     date_str = "2021-05-21"

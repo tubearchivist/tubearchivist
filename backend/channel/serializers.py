@@ -34,10 +34,12 @@ class ChannelSerializer(serializers.Serializer):
 
     channel_id = serializers.CharField()
     channel_active = serializers.BooleanField()
-    channel_banner_url = serializers.CharField()
-    channel_thumb_url = serializers.CharField()
-    channel_tvart_url = serializers.CharField()
-    channel_description = serializers.CharField()
+    channel_banner_url = serializers.CharField(allow_null=True, required=False)
+    channel_thumb_url = serializers.CharField(allow_null=True, required=False)
+    channel_tvart_url = serializers.CharField(allow_null=True, required=False)
+    channel_description = serializers.CharField(
+        allow_null=True, required=False
+    )
     channel_last_refresh = serializers.CharField()
     channel_name = serializers.CharField()
     channel_overwrites = ChannelOverwriteSerializer(required=False)
@@ -49,7 +51,6 @@ class ChannelSerializer(serializers.Serializer):
     channel_tabs = serializers.ListField(
         child=serializers.ChoiceField(VideoTypeEnum.values_known())
     )
-    channel_views = serializers.IntegerField()
     _index = serializers.CharField(required=False)
     _score = serializers.IntegerField(required=False)
 

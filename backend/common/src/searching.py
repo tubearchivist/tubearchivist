@@ -31,13 +31,13 @@ class SearchForm:
         fulltext_results = []
         if search_results:
             for result in search_results:
-                if result["_index"] == "ta_video":
+                if result["_index"].startswith("ta_video"):
                     video_results.append(result)
-                elif result["_index"] == "ta_channel":
+                elif result["_index"].startswith("ta_channel"):
                     channel_results.append(result)
-                elif result["_index"] == "ta_playlist":
+                elif result["_index"].startswith("ta_playlist"):
                     playlist_results.append(result)
-                elif result["_index"] == "ta_subtitle":
+                elif result["_index"].startswith("ta_subtitle"):
                     fulltext_results.append(result)
 
         all_results = {
@@ -113,6 +113,7 @@ class SearchParser:
                 "index": "ta_subtitle",
                 "lang": [],
                 "source": [],
+                "channel": [],
             },
         }
 
@@ -344,6 +345,22 @@ class QueryBuilder:
     def _build_fulltext(self):
         """build query for fulltext search"""
         must_list = []
+
+        if (channel := self.query_map.get("channel")) is not None:
+            must_list.append(
+                {
+                    "multi_match": {
+                        "query": channel,
+                        "type": "bool_prefix",
+                        "fuzziness": self._get_fuzzy(),
+                        "operator": "and",
+                        "fields": [
+                            "subtitle_channel",
+                            "subtitle_channel.keyword",
+                        ],
+                    }
+                }
+            )
 
         if (term := self.query_map.get("term")) is not None:
             must_list.append(

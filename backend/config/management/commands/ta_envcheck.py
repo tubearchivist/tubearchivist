@@ -61,6 +61,10 @@ EXPECTED_ENV_VARS = [
     "ES_URL",
     "TA_HOST",
 ]
+FILE_FALLBACK = [
+    "ELASTIC_PASSWORD",
+    "TA_PASSWORD",
+]
 UNEXPECTED_ENV_VARS = {
     "TA_UWSGI_PORT": "Has been replaced with 'TA_BACKEND_PORT'",
     "REDIS_HOST": "Has been replaced with 'REDIS_CON' connection string",
@@ -139,11 +143,16 @@ class Command(BaseCommand):
         self.stdout.write("[1] checking expected env vars")
         env = os.environ
         for var in EXPECTED_ENV_VARS:
-            if not env.get(var):
-                message = f"    🗙 expected env var {var} not set\n    {INST}"
-                self.stdout.write(self.style.ERROR(message))
-                sleep(60)
-                raise CommandError(message)
+            if var in env:
+                continue
+
+            if var in FILE_FALLBACK and f"{var}_FILE" in env:
+                continue
+
+            message = f"    🗙 expected env var {var} not set\n    {INST}"
+            self.stdout.write(self.style.ERROR(message))
+            sleep(60)
+            raise CommandError(message)
 
         message = "    ✓ all expected env vars are set"
         self.stdout.write(self.style.SUCCESS(message))

@@ -16,8 +16,9 @@ from common.src.env_settings import EnvironmentSettings
 from common.src.helper import ignore_filelist
 from download.src.thumbnails import ThumbManager
 from PIL import Image
-from video.src.comments import CommentList
+from video.src.comments import Comments
 from video.src.index import YoutubeVideo
+from video.src.meta_embed import IndexFromEmbed
 from yt_dlp.utils import ISO639Utils
 
 
@@ -41,9 +42,16 @@ class ImportFolderScanner:
         "subtitle": [".vtt"],
     }
 
-    def __init__(self, task=False):
+    def __init__(
+        self,
+        task=False,
+        ignore_error: bool = False,
+        prefer_local: bool = False,
+    ):
         self.task = task
         self.to_import = False
+        self.ignore_error = ignore_error
+        self.prefer_local = prefer_local
 
     def scan(self):
         """scan and match media files"""
@@ -142,14 +150,14 @@ class ImportFolderScanner:
             self._convert_thumb(current_video)
             self._get_subtitles(current_video)
             self._convert_video(current_video)
+
             print(f"manual import: {current_video}")
-
-            ManualImport(current_video, config).run()
-
-        video_ids = [i["video_id"] for i in self.to_import]
-        comment_list = CommentList(task=self.task)
-        comment_list.add(video_ids=video_ids)
-        comment_list.index()
+            ManualImport(
+                current_video,
+                config,
+                ignore_error=self.ignore_error,
+                prefer_local=self.prefer_local,
+            ).run()
 
     def _notify(self, idx, current_video):
         """send notification back to task"""
@@ -185,17 +193,27 @@ class ImportFolderScanner:
         expects filename ending in [<youtube_id>].<ext>
         """
         base_name, _ = os.path.splitext(file_name)
+
+        # yt-dlp default like [youtubeid]
         id_search = re.search(r"\[([a-zA-Z0-9_-]{11})\]$", base_name)
         if id_search:
             youtube_id = id_search.group(1)
+            return youtube_id
+
+        file_name_search = re.search(r"([a-zA-Z0-9_-]{11})$", base_name)
+        if file_name_search:
+            youtube_id = file_name_search.group(1)
             return youtube_id
 
         print(f"id extraction failed from filename: {file_name}")
 
         return False
 
-    def _extract_id_from_json(self, json_file):
+    def _extract_id_from_json(self, json_file: str | bool) -> str | None:
         """open json file and extract id"""
+        if not json_file or not isinstance(json_file, str):
+            return None
+
         json_path = os.path.join(self.CACHE_DIR, "import", json_file)
         with open(json_path, "r", encoding="utf-8") as f:
             json_content = f.read()
@@ -388,17 +406,49 @@ class ImportFolderScanner:
 class ManualImport:
     """import single identified video"""
 
-    def __init__(self, current_video, config):
+    def __init__(
+        self, current_video, config, ignore_error: bool, prefer_local: bool
+    ):
         self.current_video = current_video
         self.config = config
+        self.ignore_error: bool = ignore_error
+        self.prefer_local: bool = prefer_local
 
     def run(self):
         """run all"""
-        json_data = self.index_metadata()
-        self._move_to_archive(json_data)
-        self._cleanup(json_data)
+        json_data = None
+        if self.prefer_local:
+            # embedded first
+            json_data = IndexFromEmbed(
+                self.current_video["media"],
+                use_user_conf=False,
+                config=self.config,
+            ).run_index()
+            if json_data:
+                self._cleanup()
+                return
 
-    def index_metadata(self):
+        try:
+            json_data = self.index_metadata()
+        except ValueError as err:
+            json_data = IndexFromEmbed(
+                self.current_video["media"],
+                use_user_conf=False,
+                config=self.config,
+            ).run_index()
+            if not json_data and not self.ignore_error:
+                raise ValueError from err
+
+        if not json_data:
+            return
+
+        self._move_to_archive(json_data)
+        self._cleanup()
+
+        Comments(self.current_video["video_id"]).build_json(upload=True)
+        YoutubeVideo(self.current_video["video_id"]).embed_metadata()
+
+    def index_metadata(self) -> dict | None:
         """get metadata from yt or json"""
         video_id = self.current_video["video_id"]
         video = YoutubeVideo(video_id)
@@ -411,6 +461,9 @@ class ManualImport:
                 f"{video_id}: manual import failed, and no metadata found."
             )
             print(message)
+            if self.ignore_error:
+                return None
+
             raise ValueError(message)
 
         video.check_subtitles(subtitle_files=self.current_video["subtitle"])
@@ -463,7 +516,7 @@ class ManualImport:
             new_path = f"{base_name}.{lang}.vtt"
             shutil.move(old_path, new_path, copy_function=shutil.copyfile)
 
-    def _cleanup(self, json_data):
+    def _cleanup(self):
         """cleanup leftover files"""
         meta_data = self.current_video["metadata"]
         if meta_data and os.path.exists(meta_data):
@@ -476,11 +529,3 @@ class ManualImport:
         for subtitle_file in self.current_video["subtitle"]:
             if os.path.exists(subtitle_file):
                 os.remove(subtitle_file)
-
-        channel_info = os.path.join(
-            EnvironmentSettings.CACHE_DIR,
-            "import",
-            f"{json_data['channel']['channel_id']}.info.json",
-        )
-        if os.path.exists(channel_info):
-            os.remove(channel_info)

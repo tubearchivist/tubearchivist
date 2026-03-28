@@ -89,7 +89,6 @@ export type DownloadsType = {
   format: boolean;
   format_sort: boolean;
   add_metadata: boolean;
-  add_thumbnail: boolean;
   subtitle: boolean;
   subtitle_source: boolean;
   subtitle_index: boolean;

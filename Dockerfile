@@ -1,11 +1,11 @@
 # multi stage to build tube archivist
 # build python wheel, download and extract ffmpeg, copy into final image
 
-FROM node:lts-alpine AS npm-builder
+FROM node:22.13.0-alpine AS npm-builder
 COPY frontend/package.json frontend/package-lock.json /
 RUN npm i
 
-FROM node:lts-alpine AS node-builder
+FROM node:22.13.0-alpine AS node-builder
 
 # RUN npm config set registry https://registry.npmjs.org/
 
@@ -18,17 +18,19 @@ RUN npm run build:deploy
 WORKDIR /
 
 # First stage to build python wheel
-FROM python:3.11.13-slim-bookworm AS builder
+FROM python:3.13.11-slim-trixie AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential gcc libldap2-dev libsasl2-dev libssl-dev git
 
 # install requirements
 COPY ./backend/requirements.txt /requirements.txt
-RUN pip install --user -r requirements.txt
+COPY ./backend/requirements.plugins.txt /requirements.plugins.txt
+RUN pip install --user -r /requirements.txt \
+    && python -m pip install --target /opt/yt_plugins/bgutil -r /requirements.plugins.txt
 
 # build ffmpeg
-FROM python:3.11.13-slim-bookworm AS ffmpeg-builder
+FROM python:3.13.11-slim-trixie AS ffmpeg-builder
 
 ARG TARGETPLATFORM
 
@@ -36,7 +38,7 @@ COPY docker_assets/ffmpeg_download.py ffmpeg_download.py
 RUN python ffmpeg_download.py $TARGETPLATFORM
 
 # build final image
-FROM python:3.11.13-slim-bookworm AS tubearchivist
+FROM python:3.13.11-slim-trixie AS tubearchivist
 
 ARG INSTALL_DEBUG
 
@@ -46,6 +48,7 @@ COPY --from=denoland/deno:bin /deno /usr/local/bin/deno
 
 # copy build requirements
 COPY --from=builder /root/.local /root/.local
+COPY --from=builder /opt/yt_plugins /opt/yt_plugins
 ENV PATH=/root/.local/bin:$PATH
 
 # copy ffmpeg

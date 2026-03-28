@@ -238,6 +238,7 @@ This is your time to shine, [read this](https://github.com/tubearchivist/tubearc
 * [tangyjoust/Tautulli-Notify-TubeArchivist-of-Plex-Watched-State](https://github.com/tangyjoust/Tautulli-Notify-TubeArchivist-of-Plex-Watched-State) Mark videos watched in Plex (through streaming not manually) through Tautulli back to TubeArchivist
 * [Dhs92/delete_shorts](https://github.com/Dhs92/delete_shorts): A script to delete ALL YouTube Shorts from TubeArchivist
 * [arisenfromtheashes/TA_DVR](https://github.com/arisenfromtheashes/TA_DVR): Scripts to assist in using Tube Archivist like a DVR
+* [WreckingBANG/Self.Tube](https://codeberg.org/WreckingBANG/Self.Tube): Client app for Android and Linux phones written in Flutter.
 
 <!-- The Donate section is parsed by frontend/src/pages/About.tsx -->
 ## Donate

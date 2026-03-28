@@ -40,7 +40,7 @@ class UserConfig:
 
     _DEFAULT_USER_SETTINGS = UserConfigType(
         stylesheet="dark.css",
-        page_size=12,
+        page_size=25,
         sort_by="published",
         sort_order="desc",
         view_style_home="grid",

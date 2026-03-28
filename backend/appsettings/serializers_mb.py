@@ -29,3 +29,4 @@ class MembershipProfileSerializer(serializers.Serializer):
     sponsor_tier = SponsortierSerializer()
     subscription_count = serializers.IntegerField()
     subscription_is_max = serializers.BooleanField()
+    is_connected = serializers.BooleanField()
