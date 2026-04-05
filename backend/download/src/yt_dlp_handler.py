@@ -55,10 +55,12 @@ class VideoDownloader(DownloaderBase):
         self.obs = False
         self._build_obs()
 
-    def run_queue(self, auto_only=False) -> tuple[int, int]:
+    def run_queue(self, auto_only=False) -> tuple[int, int, list[dict]]:
         """setup download queue in redis loop until no more items"""
         downloaded = 0
         failed = 0
+        downloaded_videos: list[dict] = []
+
         while True:
             video_data = self._get_next(auto_only)
             if self.task.is_stopped() or not video_data:
@@ -87,12 +89,21 @@ class VideoDownloader(DownloaderBase):
             self._notify(video_data, "Move downloaded file to archive")
             self.move_to_archive(vid_dict)
             self._delete_from_pending(youtube_id)
+            downloaded_videos.append(
+                {
+                    "youtube_id": youtube_id,
+                    "title": video_data.get("title"),
+                    "channel_name": video_data.get("channel_name"),
+                    "channel_id": video_data.get("channel_id"),
+                }
+            )
+
             downloaded += 1
 
         # post processing
         DownloadPostProcess(self.task).run()
 
-        return downloaded, failed
+        return downloaded, failed, downloaded_videos
 
     def _notify(self, video_data, message, progress=False):
         """send progress notification to task"""

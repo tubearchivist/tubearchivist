@@ -6,6 +6,8 @@ Functionality:
 - handle task locking
 """
 
+import json
+
 from appsettings.src.backup import ElasticBackup
 from appsettings.src.config import ReleaseVersion
 from appsettings.src.filesystem import Scanner
@@ -133,7 +135,9 @@ def download_pending(self, auto_only=False):
     manager.init(self)
     try:
         downloader = VideoDownloader(task=self)
-        downloaded, failed = downloader.run_queue(auto_only=auto_only)
+        downloaded, failed, downloaded_videos = downloader.run_queue(
+            auto_only=auto_only
+        )
 
         if failed:
             print(f"[task][{self.name}] Videos failed, retry.")
@@ -144,7 +148,8 @@ def download_pending(self, auto_only=False):
         raise exc
 
     if downloaded:
-        return f"downloaded {downloaded} video(s)."
+        videos_json = json.dumps(downloaded_videos)
+        return f"downloaded {downloaded} video(s): {videos_json}"
 
     return None
 
