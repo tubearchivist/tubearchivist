@@ -301,7 +301,7 @@ class StreamTokenView(ApiBaseView):
     """
 
     search_base = "ta_video/_doc/"
-    TTL_SECONDS = 300  # 5 minutes
+    TTL_SECONDS = 43200  # 12 hours
 
     def post(self, request, video_id):
         """mint a streaming token"""
