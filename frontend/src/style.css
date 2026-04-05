@@ -1090,7 +1090,7 @@ video:-webkit-full-screen {
 
 .channel-banner img {
   width: 100%;
-  aspect-ratio: 18/3;
+  aspect-ratio: 18 / 3;
   background: var(--highlight-bg-transparent);
 }
 
