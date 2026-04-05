@@ -220,8 +220,10 @@ class HealthCheck(APIView):
 class StreamAuthView(APIView):
     """resolves to /api/stream-auth/
     Called by nginx auth_request to validate signed streaming URLs.
-    Reads the original URI from X-Original-URI, extracts sig + expires
-    query params, validates HMAC and Redis presence. No DRF auth.
+    Reads the original URI from X-Original-URI, extracts sig from the query
+    string, looks up the Redis entry (which stores video_id/user_id/expires),
+    and validates the HMAC. No DRF auth. Expiry is enforced by Redis TTL and
+    the explicit expires check below.
     """
 
     authentication_classes = []
@@ -235,21 +237,15 @@ class StreamAuthView(APIView):
         query = parse_qs(parsed.query)
 
         sig = query.get("sig", [None])[0]
-        expires_raw = query.get("expires", [None])[0]
-
-        if not sig or not expires_raw:
-            return HttpResponse(status=403)
-
-        try:
-            expires = int(expires_raw)
-        except ValueError:
-            return HttpResponse(status=403)
-
-        if expires < int(time.time()):
+        if not sig:
             return HttpResponse(status=403)
 
         cached = RedisArchivist().get_message_dict(f"stream_token:{sig}")
         if not cached:
+            return HttpResponse(status=403)
+
+        expires = cached.get("expires")
+        if not isinstance(expires, int) or expires < int(time.time()):
             return HttpResponse(status=403)
 
         payload = f"{cached['video_id']}:{expires}:{cached['user_id']}"
