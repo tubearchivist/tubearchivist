@@ -252,9 +252,7 @@ class StreamAuthView(APIView):
         if not cached:
             return HttpResponse(status=403)
 
-        payload = (
-            f"{cached['video_id']}:{expires}:{cached['user_id']}"
-        )
+        payload = f"{cached['video_id']}:{expires}:{cached['user_id']}"
         expected = hmac.new(
             settings.SECRET_KEY.encode(),
             payload.encode(),
