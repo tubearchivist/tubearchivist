@@ -1,5 +1,10 @@
 """all API views"""
 
+import hashlib
+import hmac
+import time
+from urllib.parse import parse_qs, urlparse
+
 from appsettings.src.config import ReleaseVersion
 from appsettings.src.reindex import ReindexProgress
 from common.serializers import (
@@ -18,6 +23,8 @@ from common.src.searching import SearchForm
 from common.src.ta_redis import RedisArchivist
 from common.src.watched import WatchState
 from common.views_base import AdminOnly, ApiBaseView
+from django.conf import settings
+from django.http import HttpResponse
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -208,3 +215,57 @@ class HealthCheck(APIView):
     def get(self, request):
         """health check, no auth needed"""
         return Response("OK", status=200)
+
+
+class StreamAuthView(APIView):
+    """resolves to /api/stream-auth/
+    Called by nginx auth_request to validate signed streaming URLs.
+    Reads the original URI from X-Original-URI, extracts sig + expires
+    query params, validates HMAC and Redis presence. No DRF auth.
+    """
+
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request):
+        # pylint: disable=too-many-return-statements
+        """validate a signed stream URL"""
+        original_uri = request.META.get("HTTP_X_ORIGINAL_URI", "")
+        parsed = urlparse(original_uri)
+        query = parse_qs(parsed.query)
+
+        sig = query.get("sig", [None])[0]
+        expires_raw = query.get("expires", [None])[0]
+
+        if not sig or not expires_raw:
+            return HttpResponse(status=403)
+
+        try:
+            expires = int(expires_raw)
+        except ValueError:
+            return HttpResponse(status=403)
+
+        if expires < int(time.time()):
+            return HttpResponse(status=403)
+
+        cached = RedisArchivist().get_message_dict(f"stream_token:{sig}")
+        if not cached:
+            return HttpResponse(status=403)
+
+        payload = (
+            f"{cached['video_id']}:{expires}:{cached['user_id']}"
+        )
+        expected = hmac.new(
+            settings.SECRET_KEY.encode(),
+            payload.encode(),
+            hashlib.sha256,
+        ).hexdigest()
+
+        if not hmac.compare_digest(sig, expected):
+            return HttpResponse(status=403)
+
+        # Ensure the requested URI matches the signed video
+        if f"/{cached['video_id']}." not in parsed.path:
+            return HttpResponse(status=403)
+
+        return HttpResponse(status=200)
