@@ -30,4 +30,9 @@ urlpatterns = [
         views.HealthCheck.as_view(),
         name="api-health",
     ),
+    path(
+        "stream-auth/",
+        views.StreamAuthView.as_view(),
+        name="api-stream-auth",
+    ),
 ]

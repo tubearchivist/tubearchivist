@@ -1,10 +1,15 @@
 """all API views for video endpoints"""
 
+import hashlib
+import hmac
+import time
+
 from common.serializers import ErrorResponseSerializer
 from common.src.helper import calc_is_watched
 from common.src.ta_redis import RedisArchivist
 from common.src.watched import WatchState
 from common.views_base import AdminWriteOnly, ApiBaseView
+from django.conf import settings
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from playlist.src.index import YoutubePlaylist
 from rest_framework.response import Response
@@ -287,3 +292,49 @@ class VideoSimilarView(ApiBaseView):
         self.get_document_list(request, pagination=False)
         serializer = VideoSerializer(self.response["data"], many=True)
         return Response(serializer.data)
+
+
+class StreamTokenView(ApiBaseView):
+    """resolves to /api/video/<video_id>/stream-token/
+    POST: mint a short-lived signed streaming token for VLC playback
+    DELETE: revoke the active streaming token
+    """
+
+    search_base = "ta_video/_doc/"
+    TTL_SECONDS = 300  # 5 minutes
+
+    def post(self, request, video_id):
+        """mint a streaming token"""
+        self.get_document(video_id)
+        if not self.response:
+            error = ErrorResponseSerializer({"error": "video not found"})
+            return Response(error.data, status=404)
+
+        expires = int(time.time()) + self.TTL_SECONDS
+        user_id = request.user.id
+        payload = f"{video_id}:{expires}:{user_id}"
+        sig = hmac.new(
+            settings.SECRET_KEY.encode(),
+            payload.encode(),
+            hashlib.sha256,
+        ).hexdigest()
+
+        RedisArchivist().set_message(
+            f"stream_token:{sig}",
+            {
+                "video_id": video_id,
+                "user_id": user_id,
+                "expires": expires,
+            },
+            expire=self.TTL_SECONDS,
+        )
+
+        return Response({"sig": sig, "expires": expires})
+
+    def delete(self, request, video_id):
+        # pylint: disable=unused-argument
+        """revoke a streaming token"""
+        sig = request.data.get("sig") or request.query_params.get("sig")
+        if sig:
+            RedisArchivist().del_message(f"stream_token:{sig}")
+        return Response(status=204)

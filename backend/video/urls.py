@@ -30,4 +30,9 @@ urlpatterns = [
         views.VideoSimilarView.as_view(),
         name="api-video-similar",
     ),
+    path(
+        "<slug:video_id>/stream-token/",
+        views.StreamTokenView.as_view(),
+        name="api-video-stream-token",
+    ),
 ]
