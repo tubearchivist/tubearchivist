@@ -11,7 +11,7 @@ import VideoThumbnail from './VideoThumbail';
 
 type DownloadListItemProps = {
   download: Download;
-  setRefresh: (status: boolean) => void;
+  setRefresh: () => void;
 };
 
 const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
@@ -76,7 +76,7 @@ const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
                   label="Forget"
                   onClick={async () => {
                     await deleteDownloadById(download.youtube_id);
-                    setRefresh(true);
+                    setRefresh();
                   }}
                 />
               </div>
@@ -86,7 +86,7 @@ const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
                   label="Add to queue"
                   onClick={async () => {
                     await updateDownloadQueueStatusById(download.youtube_id, 'pending');
-                    setRefresh(true);
+                    setRefresh();
                   }}
                 />
               </div>
@@ -100,7 +100,7 @@ const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
                   onClick={async () => {
                     await updateDownloadQueueStatusById(download.youtube_id, 'ignore');
 
-                    setRefresh(true);
+                    setRefresh();
                   }}
                 />
               </div>
@@ -114,7 +114,7 @@ const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
 
                       await updateDownloadQueueStatusById(download.youtube_id, 'priority');
 
-                      setRefresh(true);
+                      setRefresh();
                     }}
                   />
                 </div>
@@ -129,7 +129,7 @@ const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
                 className="danger-button"
                 onClick={async () => {
                   await deleteDownloadById(download.youtube_id);
-                  setRefresh(true);
+                  setRefresh();
                 }}
               />
             </div>

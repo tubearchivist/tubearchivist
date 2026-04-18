@@ -1,8 +1,8 @@
-import { Outlet, useLoaderData, useLocation, useSearchParams } from 'react-router-dom';
+import { Outlet, useLoaderData, useSearchParams } from 'react-router-dom';
 import Footer from '../components/Footer';
 import Colours from '../configuration/colours/Colours';
 import { UserConfigType } from '../api/actions/updateUserConfig';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import { useAuthStore } from '../stores/AuthDataStore';
 import { useUserConfigStore } from '../stores/UserConfigStore';
@@ -43,12 +43,8 @@ const Base = () => {
   const { setAppSettingsConfig } = useAppSettingsStore();
 
   const { userConfig, userAccount, appSettings, auth } = useLoaderData() as BaseLoaderData;
-
-  const location = useLocation();
-
   const currentPageFromUrl = Number(searchParams.get('page'));
-
-  const [currentPage, setCurrentPage] = useState(currentPageFromUrl);
+  const currentPage = Number.isNaN(currentPageFromUrl) ? 0 : currentPageFromUrl;
 
   useEffect(() => {
     setAuth(auth);
@@ -59,40 +55,20 @@ const Base = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (currentPageFromUrl !== currentPage) {
-      setCurrentPage(0);
-    }
-
-    // This should only be executed when location.pathname changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]);
-
-  useEffect(() => {
-    if (currentPageFromUrl !== currentPage) {
-      setCurrentPage(currentPageFromUrl);
-    }
-
-    // This should only be executed when currentPageFromUrl changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPageFromUrl]);
-
-  useEffect(() => {
-    if (currentPageFromUrl !== currentPage) {
+  const setCurrentPage = useCallback(
+    (page: number) => {
       setSearchParams(params => {
-        if (currentPage == 0) {
+        if (page === 0) {
           params.delete('page');
         } else {
-          params.set('page', currentPage.toString());
+          params.set('page', page.toString());
         }
 
         return params;
       });
-    }
-
-    // This should only be executed when currentPage changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage]);
+    },
+    [setSearchParams],
+  );
 
   return (
     <>

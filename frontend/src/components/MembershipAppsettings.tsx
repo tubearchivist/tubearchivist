@@ -37,13 +37,6 @@ export default function MembershipAppsettings({ show_help_text }: { show_help_te
   const [isLoadingSync, setIsLoadingSync] = useState(false);
   const [subSyncMessage, setSubSyncMessage] = useState('');
 
-  const fetchMembershipToken = async () => {
-    const apiTokenResponse = await APIClient<ApiTokenResponse>(
-      '/api/appsettings/membership/token/',
-    );
-    setMembershipApiToken(apiTokenResponse.data?.token || null);
-  };
-
   const deleteMembershipToken = async () => {
     await APIClient('/api/appsettings/membership/token/', { method: 'DELETE' });
     setMembershipApiToken(null);
@@ -64,6 +57,12 @@ export default function MembershipAppsettings({ show_help_text }: { show_help_te
   };
 
   useEffect(() => {
+    const fetchMembershipToken = async () => {
+      const apiTokenResponse = await APIClient<ApiTokenResponse>(
+        '/api/appsettings/membership/token/',
+      );
+      setMembershipApiToken(apiTokenResponse.data?.token || null);
+    };
     fetchMembershipToken();
   }, []);
 

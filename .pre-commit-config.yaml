@@ -24,7 +24,7 @@ repos:
       - id: flake8
         alias: python
         files: ^backend/
-        args: ["--max-complexity=10", "--max-line-length=79"]
+        args: ["--jobs=1", "--max-complexity=10", "--max-line-length=79"]
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.2
     hooks:
