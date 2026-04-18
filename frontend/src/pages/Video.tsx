@@ -342,7 +342,7 @@ const Video = () => {
                         label="Reindex"
                         title={`Reindex ${video.title}`}
                         onClick={async () => {
-                          await queueReindex(video.youtube_id, 'video');
+                          await queueReindex([video.youtube_id], 'video');
                           setReindex(true);
                         }}
                       />

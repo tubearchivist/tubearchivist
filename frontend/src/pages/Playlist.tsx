@@ -284,7 +284,7 @@ const Playlist = () => {
                       onClick={async () => {
                         setReindex(true);
 
-                        await queueReindex(playlist.playlist_id, 'playlist');
+                        await queueReindex([playlist.playlist_id], 'playlist');
                       }}
                     />
                   )}{' '}
@@ -294,7 +294,7 @@ const Playlist = () => {
                     onClick={async () => {
                       setReindex(true);
 
-                      await queueReindex(playlist.playlist_id, 'playlist', true);
+                      await queueReindex([playlist.playlist_id], 'playlist', true);
                     }}
                   />
                 </div>
