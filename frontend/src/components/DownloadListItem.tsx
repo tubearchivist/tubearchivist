@@ -62,7 +62,11 @@ const DownloadListItem = ({ download, setRefresh }: DownloadListItemProps) => {
           <span>{download.youtube_id}</span>
         </p>
 
-        {download.message && <p className="danger-zone">{download.message}</p>}
+        {download.message && (
+          <div>
+            <p className="danger-zone">{download.message}</p>
+          </div>
+        )}
 
         <div>
           {showIgnored && (
