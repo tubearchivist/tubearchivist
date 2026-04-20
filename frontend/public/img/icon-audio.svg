@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="svg-icon-audio"
+	 xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 500 500"
+	 style="enable-background:new 0 0 500 500;" xml:space="preserve">
+<g>
+	<!-- Headband arc -->
+	<path d="M250,60c-104.9,0-190,85.1-190,190v10c0,11,9,20,20,20h10c11,0,20-9,20-20v-10
+		c0-77.3,62.7-140,140-140s140,62.7,140,140v10c0,11,9,20,20,20h10c11,0,20-9,20-20v-10
+		C440,145.1,354.9,60,250,60z"/>
+	<!-- Left ear cup -->
+	<rect x="60" y="270" width="80" height="110" rx="20" ry="20"/>
+	<!-- Right ear cup -->
+	<rect x="360" y="270" width="80" height="110" rx="20" ry="20"/>
+</g>
+</svg>

@@ -30,4 +30,9 @@ urlpatterns = [
         views.VideoSimilarView.as_view(),
         name="api-video-similar",
     ),
+    path(
+        "<slug:video_id>/stream-mp3/",
+        views.VideoStreamMp3View.as_view(),
+        name="api-video-stream-mp3",
+    ),
 ]

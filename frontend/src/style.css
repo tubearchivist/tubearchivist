@@ -925,7 +925,8 @@ video:-webkit-full-screen {
   background: rgba(0, 0, 0, 0.5);
 }
 
-.video-main video {
+.video-main video,
+.video-audio-toggle-wrap video {
   max-height: 70vh;
   margin-bottom: 1rem;
 }
@@ -1531,7 +1532,97 @@ video:-webkit-full-screen {
   justify-content: space-between;
 }
 
-/** loading indicator */
+/* audio mode toggle & card */
+.video-audio-toggle-wrap {
+  position: relative;
+  width: 90%;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.video-audio-toggle-wrap video {
+  display: block;
+  width: 100%;
+  margin: 0;
+}
+
+.audio-mode-icon-btn {
+  position: absolute;
+  bottom: 46px; /* sit above the native controls bar (~40px) */
+  right: 8px;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  background-color: rgba(0, 0, 0, 0.55);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  z-index: 10;
+}
+
+.audio-mode-icon-btn:hover {
+  background-color: rgba(0, 0, 0, 0.85);
+  transform: none;
+}
+
+.audio-mode-icon-btn img {
+  width: 100%;
+  height: 100%;
+  filter: invert(1);
+}
+
+.audio-card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--highlight-bg);
+  width: 90%;
+  max-width: 1500px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.audio-card-thumb-wrap {
+  position: relative;
+  cursor: pointer;
+}
+
+.audio-card-thumb-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0);
+  transition: background-color 0.2s;
+}
+
+.audio-card-thumb-wrap:hover::after {
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+.audio-card-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+}
+
+.audio-card-thumb-wrap .audio-mode-icon-btn {
+  bottom: 12px;
+  right: 12px;
+}
+
+.audio-card-controls {
+  padding: 1rem 1.5rem;
+}
+
+.audio-card-controls audio {
+  width: 100%;
+  accent-color: var(--accent-font-dark);
+}
+
 /** source: https://github.com/loadingio/css-spinner/ */
 .lds-ring,
 .lds-ring div {

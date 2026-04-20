@@ -1,10 +1,15 @@
 """all API views for video endpoints"""
 
+import os
+import subprocess
+import urllib.parse
+
 from common.serializers import ErrorResponseSerializer
 from common.src.helper import calc_is_watched
 from common.src.ta_redis import RedisArchivist
 from common.src.watched import WatchState
 from common.views_base import AdminWriteOnly, ApiBaseView
+from django.http import StreamingHttpResponse
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from playlist.src.index import YoutubePlaylist
 from rest_framework.response import Response
@@ -287,3 +292,89 @@ class VideoSimilarView(ApiBaseView):
         self.get_document_list(request, pagination=False)
         serializer = VideoSerializer(self.response["data"], many=True)
         return Response(serializer.data)
+
+
+class VideoStreamMp3View(ApiBaseView):
+    """resolves to /api/video/<video_id>/stream-mp3/
+    GET: stream the audio of a video as an MP3 using ffmpeg
+    """
+
+    search_base = "ta_video/_doc/"
+
+    CHUNK_SIZE = 8192
+
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(description="MP3 audio stream"),
+            404: OpenApiResponse(
+                ErrorResponseSerializer(), description="video not found"
+            ),
+        }
+    )
+    def get(self, request, video_id):
+        # pylint: disable=unused-argument
+        """stream video audio as mp3"""
+        self.get_document(video_id)
+        if self.status_code == 404:
+            error = ErrorResponseSerializer({"error": "video not found"})
+            return Response(error.data, status=404)
+
+        media_url = self.response.get("media_url")
+        if not media_url:
+            error = ErrorResponseSerializer({"error": "media file not found"})
+            return Response(error.data, status=404)
+
+        file_path = urllib.parse.unquote(media_url)
+
+        if not os.path.exists(file_path):
+            error = ErrorResponseSerializer({"error": "media file not found"})
+            return Response(error.data, status=404)
+
+        title = self.response.get("title", video_id)
+
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-i",
+            file_path,
+            "-vn",
+            "-acodec",
+            "libmp3lame",
+            "-ab",
+            "192k",
+            "-f",
+            "mp3",
+            "pipe:1",
+        ]
+
+        process = subprocess.Popen(
+            ffmpeg_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+        )
+
+        def stream_chunks():
+            try:
+                while True:
+                    chunk = process.stdout.read(self.CHUNK_SIZE)
+                    if not chunk:
+                        break
+                    yield chunk
+            finally:
+                process.stdout.close()
+                process.wait()
+
+        safe_title = (
+            "".join(c for c in title if c.isalnum() or c in " _-").strip()
+            or video_id
+        )
+
+        response = StreamingHttpResponse(
+            stream_chunks(),
+            content_type="audio/mpeg",
+        )
+        response["Content-Disposition"] = (
+            f'inline; filename="{safe_title}.mp3"'
+        )
+        response["X-Accel-Buffering"] = "no"
+
+        return response

@@ -18,6 +18,7 @@ import { VideoResponseType } from '../api/loader/loadVideoById';
 const VIDEO_PLAYBACK_SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3];
 
 type VideoTag = SyntheticEvent<HTMLVideoElement, Event>;
+type AudioTag = SyntheticEvent<HTMLAudioElement, Event>;
 
 export type SkippedSegmentType = {
   from: number;
@@ -128,6 +129,17 @@ const VideoPlayer = ({
   setSeekToTimestamp,
 }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [audioMode, setAudioMode] = useState(localStorage.getItem('playerAudioMode') === 'true');
+
+  // Returns the currently active media element regardless of mode
+  const mediaRef = (): HTMLVideoElement | HTMLAudioElement | null =>
+    audioMode ? audioRef.current : videoRef.current;
+
+  const toggleAudioMode = (next: boolean) => {
+    localStorage.setItem('playerAudioMode', String(next));
+    setAudioMode(next);
+  };
 
   useEffect(() => {
     if (seekToTimestamp === undefined || !videoRef.current) {
@@ -196,19 +208,21 @@ const VideoPlayer = ({
   });
 
   useKeyPress('p', () => {
-    if (videoRef.current?.paused) {
-      videoRef.current.play();
+    const media = mediaRef();
+    if (media?.paused) {
+      media.play();
     } else {
-      videoRef.current?.pause();
+      media?.pause();
     }
   });
 
   useKeyPress('>', () => {
     const newSpeed = playbackSpeedIndex + 1;
+    const media = mediaRef();
 
-    if (videoRef.current && VIDEO_PLAYBACK_SPEEDS[newSpeed]) {
+    if (media && VIDEO_PLAYBACK_SPEEDS[newSpeed]) {
       const speed = VIDEO_PLAYBACK_SPEEDS[newSpeed];
-      videoRef.current.playbackRate = speed;
+      media.playbackRate = speed;
 
       setPlaybackSpeedIndex(newSpeed);
       infoDialog(`${speed}x`);
@@ -217,10 +231,11 @@ const VideoPlayer = ({
 
   useKeyPress('<', () => {
     const newSpeedIndex = playbackSpeedIndex - 1;
+    const media = mediaRef();
 
-    if (videoRef.current && VIDEO_PLAYBACK_SPEEDS[newSpeedIndex]) {
+    if (media && VIDEO_PLAYBACK_SPEEDS[newSpeedIndex]) {
       const speed = VIDEO_PLAYBACK_SPEEDS[newSpeedIndex];
-      videoRef.current.playbackRate = speed;
+      media.playbackRate = speed;
 
       setPlaybackSpeedIndex(newSpeedIndex);
       infoDialog(`${speed}x`);
@@ -229,10 +244,11 @@ const VideoPlayer = ({
 
   useKeyPress('=', () => {
     const newSpeedIndex = 3;
+    const media = mediaRef();
 
-    if (videoRef.current && VIDEO_PLAYBACK_SPEEDS[newSpeedIndex]) {
+    if (media && VIDEO_PLAYBACK_SPEEDS[newSpeedIndex]) {
       const speed = VIDEO_PLAYBACK_SPEEDS[newSpeedIndex];
-      videoRef.current.playbackRate = speed;
+      media.playbackRate = speed;
 
       setPlaybackSpeedIndex(newSpeedIndex);
       infoDialog(`${speed}x`);
@@ -240,6 +256,7 @@ const VideoPlayer = ({
   });
 
   useKeyPress('f', () => {
+    if (audioMode) return;
     if (videoRef.current && videoRef.current.requestFullscreen && !document.fullscreenElement) {
       videoRef.current.requestFullscreen().catch(e => {
         console.error(e);
@@ -254,15 +271,10 @@ const VideoPlayer = ({
   });
 
   useKeyPress('c', () => {
-    if (!videoRef.current) {
-      return;
-    }
+    if (audioMode || !videoRef.current) return;
 
     const tracks = [...videoRef.current.textTracks];
-
-    if (tracks.length === 0) {
-      return;
-    }
+    if (tracks.length === 0) return;
 
     const lastIndex = tracks.findIndex(x => x.mode === 'showing');
     const active = tracks[lastIndex];
@@ -277,20 +289,18 @@ const VideoPlayer = ({
   });
 
   useKeyPress('ArrowLeft', () => {
-    const currentCurrentTime = videoRef.current?.currentTime;
-
-    if (currentCurrentTime !== undefined && videoRef.current) {
+    const media = mediaRef();
+    if (media?.currentTime !== undefined) {
       infoDialog('- 5 seconds');
-      videoRef.current.currentTime = currentCurrentTime - 5;
+      media.currentTime -= 5;
     }
   });
 
   useKeyPress('ArrowRight', () => {
-    const currentCurrentTime = videoRef.current?.currentTime;
-
-    if (currentCurrentTime !== undefined && videoRef.current) {
+    const media = mediaRef();
+    if (media?.currentTime !== undefined) {
       infoDialog('+ 5 seconds');
-      videoRef.current.currentTime = currentCurrentTime + 5;
+      media.currentTime += 5;
     }
   });
 
@@ -337,13 +347,13 @@ const VideoPlayer = ({
     });
   });
 
-  const handleVideoEnd =
+  const handleMediaEnd =
     (
       youtubeId: string,
       watched: boolean,
       setSponsorSegmentSkipped?: Dispatch<SetStateAction<SponsorSegmentsSkippedType>>,
     ) =>
-    async (videoTag: VideoTag) => {
+    async (videoTag: VideoTag | AudioTag) => {
       const currentTime = Number(videoTag.currentTarget.currentTime);
 
       const videoProgressResponse = await updateVideoProgressById({
@@ -377,57 +387,147 @@ const VideoPlayer = ({
         className={embed ? '' : `player-wrapper ${isTheaterMode ? 'theater-mode' : ''}`}
       >
         <div className={embed ? '' : `video-main ${isTheaterMode ? 'theater-mode' : ''}`}>
-          <video
-            ref={videoRef}
-            key={`${getApiUrl()}${videoUrl}`}
-            poster={`${getApiUrl()}${videoThumbUrl}`}
-            onVolumeChange={(videoTag: VideoTag) => {
-              localStorage.setItem('playerVolume', videoTag.currentTarget.volume.toString());
-            }}
-            onRateChange={(videoTag: VideoTag) => {
-              localStorage.setItem('playerSpeed', videoTag.currentTarget.playbackRate.toString());
-            }}
-            onLoadStart={(videoTag: VideoTag) => {
-              videoTag.currentTarget.volume = volumeFromStorage;
-              videoTag.currentTarget.playbackRate = Number(playBackSpeedFromStorage ?? 1);
-            }}
-            onTimeUpdate={handleTimeUpdate(
-              videoId,
-              watched,
-              sponsorBlock,
-              setSkippedSegments,
-              onWatchStateChanged,
-            )}
-            onPause={async (videoTag: VideoTag) => {
-              const currentTime = Number(videoTag.currentTarget.currentTime);
+          {!audioMode && (
+            <div className="video-audio-toggle-wrap">
+              <video
+                ref={videoRef}
+                key={`${getApiUrl()}${videoUrl}`}
+                poster={`${getApiUrl()}${videoThumbUrl}`}
+                onVolumeChange={(videoTag: VideoTag) => {
+                  localStorage.setItem('playerVolume', videoTag.currentTarget.volume.toString());
+                }}
+                onRateChange={(videoTag: VideoTag) => {
+                  localStorage.setItem(
+                    'playerSpeed',
+                    videoTag.currentTarget.playbackRate.toString(),
+                  );
+                }}
+                onLoadStart={(videoTag: VideoTag) => {
+                  videoTag.currentTarget.volume = volumeFromStorage;
+                  videoTag.currentTarget.playbackRate = Number(playBackSpeedFromStorage ?? 1);
+                }}
+                onTimeUpdate={handleTimeUpdate(
+                  videoId,
+                  watched,
+                  sponsorBlock,
+                  setSkippedSegments,
+                  onWatchStateChanged,
+                )}
+                onPause={async (videoTag: VideoTag) => {
+                  const currentTime = Number(videoTag.currentTarget.currentTime);
 
-              if (currentTime < 10 || currentTime > duration * 0.95) return;
+                  if (currentTime < 10 || currentTime > duration * 0.95) return;
 
-              await updateVideoProgressById({
-                youtubeId: videoId,
-                currentProgress: currentTime,
-              });
-            }}
-            onEnded={handleVideoEnd(videoId, watched)}
-            onKeyDown={e => {
-              if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                e.preventDefault();
-              }
-            }}
-            autoPlay={autoplay}
-            controls
-            width="100%"
-            playsInline
-            id="video-item"
-            muted={isMuted}
-          >
-            <source
-              src={`${getApiUrl()}${videoUrl}#t=${videoSrcProgress}`}
-              type="video/mp4"
-              id="video-source"
-            />
-            {videoSubtitles && <Subtitles subtitles={videoSubtitles} />}
-          </video>
+                  await updateVideoProgressById({
+                    youtubeId: videoId,
+                    currentProgress: currentTime,
+                  });
+                }}
+                onEnded={handleMediaEnd(videoId, watched)}
+                onKeyDown={e => {
+                  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                    e.preventDefault();
+                  }
+                }}
+                autoPlay={autoplay}
+                controls
+                width="100%"
+                playsInline
+                id="video-item"
+                muted={isMuted}
+              >
+                <source
+                  src={`${getApiUrl()}${videoUrl}#t=${videoSrcProgress}`}
+                  type="video/mp4"
+                  id="video-source"
+                />
+                {videoSubtitles && <Subtitles subtitles={videoSubtitles} />}
+              </video>
+              <button
+                className="audio-mode-icon-btn"
+                onClick={() => toggleAudioMode(true)}
+                title="Switch to audio only"
+              >
+                <img src="/img/icon-audio.svg" alt="Audio only" />
+              </button>
+            </div>
+          )}
+
+          {audioMode && (
+            <div className="audio-card">
+              <div
+                className="audio-card-thumb-wrap"
+                onClick={() => {
+                  const audio = audioRef.current;
+                  if (!audio) return;
+
+                  if (audio.paused) {
+                    audio.play();
+                  } else {
+                    audio.pause();
+                  }
+                }}
+              >
+                <img
+                  className="audio-card-thumb"
+                  src={`${getApiUrl()}${videoThumbUrl}`}
+                  alt={video.title}
+                />
+                <button
+                  className="audio-mode-icon-btn"
+                  onClick={e => {
+                    e.stopPropagation();
+                    toggleAudioMode(false);
+                  }}
+                  title="Switch to video"
+                >
+                  <img src="/img/icon-play.svg" alt="Switch to video" />
+                </button>
+              </div>
+              <div className="audio-card-controls">
+                <audio
+                  ref={audioRef}
+                  onVolumeChange={(e: AudioTag) => {
+                    localStorage.setItem('playerVolume', e.currentTarget.volume.toString());
+                  }}
+                  onRateChange={(e: AudioTag) => {
+                    localStorage.setItem('playerSpeed', e.currentTarget.playbackRate.toString());
+                  }}
+                  onLoadStart={(e: AudioTag) => {
+                    e.currentTarget.volume = volumeFromStorage;
+                    e.currentTarget.playbackRate = Number(playBackSpeedFromStorage ?? 1);
+                  }}
+                  onTimeUpdate={handleTimeUpdate(
+                    videoId,
+                    watched,
+                    sponsorBlock,
+                    setSkippedSegments,
+                    onWatchStateChanged,
+                  )}
+                  onPause={async (videoTag: AudioTag) => {
+                    const currentTime = Number(videoTag.currentTarget.currentTime);
+
+                    if (currentTime < 10 || currentTime > duration * 0.95) return;
+
+                    await updateVideoProgressById({
+                      youtubeId: videoId,
+                      currentProgress: currentTime,
+                    });
+                  }}
+                  onEnded={handleMediaEnd(videoId, watched)}
+                  onKeyDown={e => {
+                    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                      e.preventDefault();
+                    }
+                  }}
+                  autoPlay={autoplay}
+                  controls
+                  src={`${getApiUrl()}/api/video/${videoId}/stream-mp3/`}
+                  muted={isMuted}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
