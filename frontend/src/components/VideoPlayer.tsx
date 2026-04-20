@@ -406,8 +406,7 @@ const VideoPlayer = ({
 
       onVideoEnd?.();
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [videoId, watched],
+    [onVideoEnd, onWatchStateChanged, videoId, watched],
   );
 
   const handleKeyDown = useCallback((e: KeyboardEvent<HTMLVideoElement | HTMLAudioElement>) => {
