@@ -3,8 +3,10 @@ import { SponsorBlockSegmentType, SponsorBlockType } from '../pages/Video';
 import {
   Dispatch,
   Fragment,
+  KeyboardEvent,
   SetStateAction,
   SyntheticEvent,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -347,17 +349,42 @@ const VideoPlayer = ({
     });
   });
 
-  const handleMediaEnd =
-    (
-      youtubeId: string,
-      watched: boolean,
-      setSponsorSegmentSkipped?: Dispatch<SetStateAction<SponsorSegmentsSkippedType>>,
-    ) =>
-    async (videoTag: VideoTag | AudioTag) => {
-      const currentTime = Number(videoTag.currentTarget.currentTime);
+  const handleVolumeChange = useCallback((e: VideoTag | AudioTag) => {
+    localStorage.setItem('playerVolume', e.currentTarget.volume.toString());
+  }, []);
+
+  const handleRateChange = useCallback((e: VideoTag | AudioTag) => {
+    localStorage.setItem('playerSpeed', e.currentTarget.playbackRate.toString());
+  }, []);
+
+  const handleLoadStart = useCallback(
+    (e: VideoTag | AudioTag) => {
+      e.currentTarget.volume = volumeFromStorage;
+      e.currentTarget.playbackRate = Number(playBackSpeedFromStorage ?? 1);
+    },
+    [volumeFromStorage, playBackSpeedFromStorage],
+  );
+
+  const handlePause = useCallback(
+    async (e: VideoTag | AudioTag) => {
+      const currentTime = Number(e.currentTarget.currentTime);
+
+      if (currentTime < 10 || currentTime > duration * 0.95) return;
+
+      await updateVideoProgressById({
+        youtubeId: videoId,
+        currentProgress: currentTime,
+      });
+    },
+    [videoId, duration],
+  );
+
+  const handleMediaEndCalled = useCallback(
+    async (e: VideoTag | AudioTag) => {
+      const currentTime = Number(e.currentTarget.currentTime);
 
       const videoProgressResponse = await updateVideoProgressById({
-        youtubeId,
+        youtubeId: videoId,
         currentProgress: currentTime,
       });
 
@@ -367,7 +394,7 @@ const VideoPlayer = ({
         onWatchStateChanged?.(true);
       }
 
-      setSponsorSegmentSkipped?.((segments: SponsorSegmentsSkippedType) => {
+      setSkippedSegments((segments: SponsorSegmentsSkippedType) => {
         const keys = Object.keys(segments);
 
         keys.forEach(uuid => {
@@ -378,7 +405,16 @@ const VideoPlayer = ({
       });
 
       onVideoEnd?.();
-    };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [videoId, watched],
+  );
+
+  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLVideoElement | HTMLAudioElement>) => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault();
+    }
+  }, []);
 
   return (
     <>
@@ -393,19 +429,9 @@ const VideoPlayer = ({
                 ref={videoRef}
                 key={`${getApiUrl()}${videoUrl}`}
                 poster={`${getApiUrl()}${videoThumbUrl}`}
-                onVolumeChange={(videoTag: VideoTag) => {
-                  localStorage.setItem('playerVolume', videoTag.currentTarget.volume.toString());
-                }}
-                onRateChange={(videoTag: VideoTag) => {
-                  localStorage.setItem(
-                    'playerSpeed',
-                    videoTag.currentTarget.playbackRate.toString(),
-                  );
-                }}
-                onLoadStart={(videoTag: VideoTag) => {
-                  videoTag.currentTarget.volume = volumeFromStorage;
-                  videoTag.currentTarget.playbackRate = Number(playBackSpeedFromStorage ?? 1);
-                }}
+                onVolumeChange={handleVolumeChange}
+                onRateChange={handleRateChange}
+                onLoadStart={handleLoadStart}
                 onTimeUpdate={handleTimeUpdate(
                   videoId,
                   watched,
@@ -413,22 +439,9 @@ const VideoPlayer = ({
                   setSkippedSegments,
                   onWatchStateChanged,
                 )}
-                onPause={async (videoTag: VideoTag) => {
-                  const currentTime = Number(videoTag.currentTarget.currentTime);
-
-                  if (currentTime < 10 || currentTime > duration * 0.95) return;
-
-                  await updateVideoProgressById({
-                    youtubeId: videoId,
-                    currentProgress: currentTime,
-                  });
-                }}
-                onEnded={handleMediaEnd(videoId, watched)}
-                onKeyDown={e => {
-                  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                    e.preventDefault();
-                  }
-                }}
+                onPause={handlePause}
+                onEnded={handleMediaEndCalled}
+                onKeyDown={handleKeyDown}
                 autoPlay={autoplay}
                 controls
                 width="100%"
@@ -487,16 +500,9 @@ const VideoPlayer = ({
               <div className="audio-card-controls">
                 <audio
                   ref={audioRef}
-                  onVolumeChange={(e: AudioTag) => {
-                    localStorage.setItem('playerVolume', e.currentTarget.volume.toString());
-                  }}
-                  onRateChange={(e: AudioTag) => {
-                    localStorage.setItem('playerSpeed', e.currentTarget.playbackRate.toString());
-                  }}
-                  onLoadStart={(e: AudioTag) => {
-                    e.currentTarget.volume = volumeFromStorage;
-                    e.currentTarget.playbackRate = Number(playBackSpeedFromStorage ?? 1);
-                  }}
+                  onVolumeChange={handleVolumeChange}
+                  onRateChange={handleRateChange}
+                  onLoadStart={handleLoadStart}
                   onTimeUpdate={handleTimeUpdate(
                     videoId,
                     watched,
@@ -504,22 +510,9 @@ const VideoPlayer = ({
                     setSkippedSegments,
                     onWatchStateChanged,
                   )}
-                  onPause={async (videoTag: AudioTag) => {
-                    const currentTime = Number(videoTag.currentTarget.currentTime);
-
-                    if (currentTime < 10 || currentTime > duration * 0.95) return;
-
-                    await updateVideoProgressById({
-                      youtubeId: videoId,
-                      currentProgress: currentTime,
-                    });
-                  }}
-                  onEnded={handleMediaEnd(videoId, watched)}
-                  onKeyDown={e => {
-                    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                      e.preventDefault();
-                    }
-                  }}
+                  onPause={handlePause}
+                  onEnded={handleMediaEndCalled}
+                  onKeyDown={handleKeyDown}
                   autoPlay={autoplay}
                   controls
                   src={`${getApiUrl()}/api/video/${videoId}/stream-mp3/`}
