@@ -1548,7 +1548,7 @@ video:-webkit-full-screen {
 
 .audio-mode-icon-btn {
   position: absolute;
-  bottom: 46px; /* sit above the native controls bar (~40px) */
+  top: 8px; /* sit above the native controls bar (~40px) */
   right: 8px;
   width: 36px;
   height: 36px;
