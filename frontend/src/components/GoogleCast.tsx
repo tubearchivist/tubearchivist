@@ -216,17 +216,16 @@ const GoogleCast = ({ video, setRefresh, onWatchStateChanged }: GoogleCastProps)
   }
 
   return (
-    <>
-      <>
-        <script
-          type="text/javascript"
-          src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"
-        ></script>
+    <div>
+      <script
+        async
+        type="text/javascript"
+        src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"
+      />
 
-        {/* @ts-expect-error React does not know what to do with the google-cast-launcher, but it works. */}
-        <google-cast-launcher id="castbutton"></google-cast-launcher>
-      </>
-    </>
+      {/* @ts-expect-error React does not know what to do with the google-cast-launcher, but it works. */}
+      <google-cast-launcher id="castbutton"></google-cast-launcher>
+    </div>
   );
 };
 
