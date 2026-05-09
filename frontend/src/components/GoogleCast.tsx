@@ -197,11 +197,22 @@ const GoogleCast = ({ video, setRefresh, onWatchStateChanged }: GoogleCastProps)
 
   useEffect(() => {
     // @ts-expect-error __onGCastApiAvailable is the google cast window hook ( source: https://developers.google.com/cast/docs/web_sender/integrate )
+    // this needs to be registered before the script below is executed
     window['__onGCastApiAvailable'] = function (isAvailable: boolean) {
       if (isAvailable) {
         setup();
       }
     };
+
+    const scriptId = 'google-cast-sdk';
+    // avoid injecting the script multiple times
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1';
+      script.async = true;
+      document.body.appendChild(script);
+    }
   }, [setup]);
 
   useEffect(() => {
@@ -217,12 +228,6 @@ const GoogleCast = ({ video, setRefresh, onWatchStateChanged }: GoogleCastProps)
 
   return (
     <div>
-      <script
-        async
-        type="text/javascript"
-        src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"
-      />
-
       {/* @ts-expect-error React does not know what to do with the google-cast-launcher, but it works. */}
       <google-cast-launcher id="castbutton"></google-cast-launcher>
     </div>
