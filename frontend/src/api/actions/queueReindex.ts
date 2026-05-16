@@ -8,7 +8,7 @@ export const ReindexTypeEnum = {
   playlist: 'playlist',
 };
 
-const queueReindex = async (id: string, type: ReindexType, reindexVideos = false) => {
+const queueReindex = async (id: string[], type: ReindexType, reindexVideos = false) => {
   let params = '';
   if (reindexVideos) {
     params = '?extract_videos=true';
@@ -16,7 +16,7 @@ const queueReindex = async (id: string, type: ReindexType, reindexVideos = false
 
   return APIClient(`/api/refresh/${params}`, {
     method: 'POST',
-    body: { [type]: [id] },
+    body: { [type]: id },
   });
 };
 

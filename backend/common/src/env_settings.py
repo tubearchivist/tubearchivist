@@ -93,8 +93,7 @@ class EnvironmentSettings:
 
     def print_generic(self):
         """print generic env vars"""
-        print(
-            f"""
+        print(f"""
             HOST_UID: {self.HOST_UID}
             HOST_GID: {self.HOST_GID}
             TZ: {self.TZ}
@@ -102,36 +101,29 @@ class EnvironmentSettings:
             TA_PORT: {self.TA_PORT}
             TA_BACKEND_PORT: {self.TA_BACKEND_PORT}
             TA_USERNAME: {self.TA_USERNAME}
-            TA_PASSWORD: *****"""
-        )
+            TA_PASSWORD: *****""")
 
     def print_paths(self):
         """debug paths set"""
-        print(
-            f"""
+        print(f"""
             MEDIA_DIR: {self.MEDIA_DIR}
             APP_DIR: {self.APP_DIR}
-            CACHE_DIR: {self.CACHE_DIR}"""
-        )
+            CACHE_DIR: {self.CACHE_DIR}""")
 
     def print_redis_conf(self):
         """debug redis conf paths"""
-        print(
-            f"""
+        print(f"""
             REDIS_CON: {self.REDIS_CON}
-            REDIS_NAME_SPACE: {self.REDIS_NAME_SPACE}"""
-        )
+            REDIS_NAME_SPACE: {self.REDIS_NAME_SPACE}""")
 
     def print_es_paths(self):
         """debug es conf"""
-        print(
-            f"""
+        print(f"""
             ES_URL: {self.ES_URL}
             ES_PASS: *****
             ES_USER: {self.ES_USER}
             ES_SNAPSHOT_DIR: {self.ES_SNAPSHOT_DIR}
-            ES_DISABLE_VERIFY_SSL: {self.ES_DISABLE_VERIFY_SSL}"""
-        )
+            ES_DISABLE_VERIFY_SSL: {self.ES_DISABLE_VERIFY_SSL}""")
 
     def print_all(self):
         """print all"""

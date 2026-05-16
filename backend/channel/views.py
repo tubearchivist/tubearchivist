@@ -278,6 +278,12 @@ class ChannelApiSearchView(ApiBaseView):
             return Response(error.data, status=400)
 
         self.get_document(parsed["url"])
+        if not self.response:
+            error = ErrorResponseSerializer(
+                {"error": f"channel not found: {query}"}
+            )
+            return Response(error.data, status=404)
+
         serializer = ChannelSerializer(self.response)
 
         return Response(serializer.data, status=self.status_code)

@@ -167,20 +167,6 @@ const VideoPlayer = ({
   const [showInfoDialog, setShowInfoDialog] = useState(false);
   const [infoDialogContent, setInfoDialogContent] = useState('');
   const [isTheaterMode, setIsTheaterMode] = useState(false);
-  const [theaterModeKeyPressed, setTheaterModeKeyPressed] = useState(false);
-
-  const questionmarkPressed = useKeyPress('?');
-  const mutePressed = useKeyPress('m');
-  const fullscreenPressed = useKeyPress('f');
-  const subtitlesPressed = useKeyPress('c');
-  const increasePlaybackSpeedPressed = useKeyPress('>');
-  const decreasePlaybackSpeedPressed = useKeyPress('<');
-  const resetPlaybackSpeedPressed = useKeyPress('=');
-  const arrowRightPressed = useKeyPress('ArrowRight');
-  const arrowLeftPressed = useKeyPress('ArrowLeft');
-  const pPausedPressed = useKeyPress('p');
-  const theaterModePressed = useKeyPress('t');
-  const escapePressed = useKeyPress('Escape');
 
   const videoId = video.youtube_id;
   const videoUrl = video.media_url;
@@ -204,6 +190,152 @@ const VideoPlayer = ({
       setInfoDialogContent('');
     }, 500);
   };
+
+  useKeyPress('m', () => {
+    setIsMuted(current => !current);
+  });
+
+  useKeyPress('p', () => {
+    if (videoRef.current?.paused) {
+      videoRef.current.play();
+    } else {
+      videoRef.current?.pause();
+    }
+  });
+
+  useKeyPress('>', () => {
+    const newSpeed = playbackSpeedIndex + 1;
+
+    if (videoRef.current && VIDEO_PLAYBACK_SPEEDS[newSpeed]) {
+      const speed = VIDEO_PLAYBACK_SPEEDS[newSpeed];
+      videoRef.current.playbackRate = speed;
+
+      setPlaybackSpeedIndex(newSpeed);
+      infoDialog(`${speed}x`);
+    }
+  });
+
+  useKeyPress('<', () => {
+    const newSpeedIndex = playbackSpeedIndex - 1;
+
+    if (videoRef.current && VIDEO_PLAYBACK_SPEEDS[newSpeedIndex]) {
+      const speed = VIDEO_PLAYBACK_SPEEDS[newSpeedIndex];
+      videoRef.current.playbackRate = speed;
+
+      setPlaybackSpeedIndex(newSpeedIndex);
+      infoDialog(`${speed}x`);
+    }
+  });
+
+  useKeyPress('=', () => {
+    const newSpeedIndex = 3;
+
+    if (videoRef.current && VIDEO_PLAYBACK_SPEEDS[newSpeedIndex]) {
+      const speed = VIDEO_PLAYBACK_SPEEDS[newSpeedIndex];
+      videoRef.current.playbackRate = speed;
+
+      setPlaybackSpeedIndex(newSpeedIndex);
+      infoDialog(`${speed}x`);
+    }
+  });
+
+  useKeyPress('f', () => {
+    if (videoRef.current && videoRef.current.requestFullscreen && !document.fullscreenElement) {
+      videoRef.current.requestFullscreen().catch(e => {
+        console.error(e);
+        infoDialog('Unable to enter fullscreen');
+      });
+    } else {
+      document.exitFullscreen().catch(e => {
+        console.error(e);
+        infoDialog('Unable to exit fullscreen');
+      });
+    }
+  });
+
+  useKeyPress('c', () => {
+    if (!videoRef.current) {
+      return;
+    }
+
+    const tracks = [...videoRef.current.textTracks];
+
+    if (tracks.length === 0) {
+      return;
+    }
+
+    const lastIndex = tracks.findIndex(x => x.mode === 'showing');
+    const active = tracks[lastIndex];
+
+    if (!active && lastSubtitleTack !== 0) {
+      tracks[lastSubtitleTack - 1].mode = 'showing';
+    } else if (active) {
+      active.mode = 'hidden';
+
+      setLastSubtitleTack(lastIndex + 1);
+    }
+  });
+
+  useKeyPress('ArrowLeft', () => {
+    const currentCurrentTime = videoRef.current?.currentTime;
+
+    if (currentCurrentTime !== undefined && videoRef.current) {
+      infoDialog('- 5 seconds');
+      videoRef.current.currentTime = currentCurrentTime - 5;
+    }
+  });
+
+  useKeyPress('ArrowRight', () => {
+    const currentCurrentTime = videoRef.current?.currentTime;
+
+    if (currentCurrentTime !== undefined && videoRef.current) {
+      infoDialog('+ 5 seconds');
+      videoRef.current.currentTime = currentCurrentTime + 5;
+    }
+  });
+
+  useKeyPress('?', () => {
+    setShowHelpDialog(current => {
+      const next = !current;
+
+      if (next) {
+        setTimeout(() => {
+          setShowHelpDialog(false);
+        }, 3000);
+      }
+
+      return next;
+    });
+  });
+
+  useKeyPress('t', () => {
+    if (embed) {
+      return;
+    }
+
+    setIsTheaterMode(current => {
+      const next = !current;
+      infoDialog(next ? 'Theater mode' : 'Normal mode');
+
+      return next;
+    });
+  });
+
+  useKeyPress('Escape', () => {
+    if (embed) {
+      return;
+    }
+
+    setIsTheaterMode(current => {
+      if (!current) {
+        return current;
+      }
+
+      infoDialog('Normal mode');
+
+      return false;
+    });
+  });
 
   const handleVideoEnd =
     (
@@ -237,174 +369,6 @@ const VideoPlayer = ({
 
       onVideoEnd?.();
     };
-
-  useEffect(() => {
-    if (mutePressed) {
-      setIsMuted(!isMuted);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mutePressed]);
-
-  useEffect(() => {
-    if (pPausedPressed) {
-      if (videoRef.current?.paused) {
-        videoRef.current.play();
-      } else {
-        videoRef.current?.pause();
-      }
-    }
-  }, [pPausedPressed]);
-
-  useEffect(() => {
-    if (increasePlaybackSpeedPressed) {
-      const newSpeed = playbackSpeedIndex + 1;
-
-      if (videoRef.current && VIDEO_PLAYBACK_SPEEDS[newSpeed]) {
-        const speed = VIDEO_PLAYBACK_SPEEDS[newSpeed];
-        videoRef.current.playbackRate = speed;
-
-        setPlaybackSpeedIndex(newSpeed);
-        infoDialog(`${speed}x`);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [increasePlaybackSpeedPressed]);
-
-  useEffect(() => {
-    if (decreasePlaybackSpeedPressed) {
-      const newSpeedIndex = playbackSpeedIndex - 1;
-
-      if (videoRef.current && VIDEO_PLAYBACK_SPEEDS[newSpeedIndex]) {
-        const speed = VIDEO_PLAYBACK_SPEEDS[newSpeedIndex];
-        videoRef.current.playbackRate = speed;
-
-        setPlaybackSpeedIndex(newSpeedIndex);
-        infoDialog(`${speed}x`);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [decreasePlaybackSpeedPressed]);
-
-  useEffect(() => {
-    if (resetPlaybackSpeedPressed) {
-      const newSpeedIndex = 3;
-
-      if (videoRef.current && VIDEO_PLAYBACK_SPEEDS[newSpeedIndex]) {
-        const speed = VIDEO_PLAYBACK_SPEEDS[newSpeedIndex];
-        videoRef.current.playbackRate = speed;
-
-        setPlaybackSpeedIndex(newSpeedIndex);
-        infoDialog(`${speed}x`);
-      }
-    }
-  }, [resetPlaybackSpeedPressed]);
-
-  useEffect(() => {
-    if (fullscreenPressed) {
-      if (videoRef.current && videoRef.current.requestFullscreen && !document.fullscreenElement) {
-        videoRef.current.requestFullscreen().catch(e => {
-          console.error(e);
-          infoDialog('Unable to enter fullscreen');
-        });
-      } else {
-        document.exitFullscreen().catch(e => {
-          console.error(e);
-          infoDialog('Unable to exit fullscreen');
-        });
-      }
-    }
-  }, [fullscreenPressed]);
-
-  useEffect(() => {
-    if (subtitlesPressed) {
-      if (videoRef.current) {
-        const tracks = [...videoRef.current.textTracks];
-
-        if (tracks.length === 0) {
-          return;
-        }
-
-        const lastIndex = tracks.findIndex(x => x.mode === 'showing');
-        const active = tracks[lastIndex];
-
-        if (!active && lastSubtitleTack !== 0) {
-          tracks[lastSubtitleTack - 1].mode = 'showing';
-        } else {
-          if (active) {
-            active.mode = 'hidden';
-
-            setLastSubtitleTack(lastIndex + 1);
-          }
-        }
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subtitlesPressed]);
-
-  useEffect(() => {
-    if (arrowLeftPressed || arrowRightPressed) {
-      let timeStep = 5;
-
-      if (arrowLeftPressed) {
-        infoDialog('- 5 seconds');
-        timeStep *= -1;
-      }
-
-      if (arrowRightPressed) {
-        infoDialog('+ 5 seconds');
-      }
-
-      const currentCurrentTime = videoRef.current?.currentTime;
-
-      if (currentCurrentTime !== undefined && videoRef.current) {
-        videoRef.current.currentTime = currentCurrentTime + timeStep;
-      }
-    }
-  }, [arrowLeftPressed, arrowRightPressed]);
-
-  useEffect(() => {
-    if (questionmarkPressed) {
-      if (!showHelpDialog) {
-        setTimeout(() => {
-          setShowHelpDialog(false);
-        }, 3000);
-      }
-
-      setShowHelpDialog(!showHelpDialog);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questionmarkPressed]);
-
-  useEffect(() => {
-    if (embed) {
-      return;
-    }
-
-    if (theaterModePressed && !theaterModeKeyPressed) {
-      setTheaterModeKeyPressed(true);
-
-      const newTheaterMode = !isTheaterMode;
-      setIsTheaterMode(newTheaterMode);
-
-      infoDialog(newTheaterMode ? 'Theater mode' : 'Normal mode');
-    } else if (!theaterModePressed) {
-      setTheaterModeKeyPressed(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [theaterModePressed, isTheaterMode, theaterModeKeyPressed]);
-
-  useEffect(() => {
-    if (embed) {
-      return;
-    }
-
-    if (escapePressed && isTheaterMode) {
-      setIsTheaterMode(false);
-
-      infoDialog('Normal mode');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [escapePressed, isTheaterMode]);
 
   return (
     <>

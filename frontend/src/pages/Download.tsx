@@ -60,7 +60,7 @@ const Download = () => {
   const vidTypeFilterFromUrl = searchParams.get('vid-type');
   const errorFilterFromUrl = searchParams.get('error');
 
-  const [refresh, setRefresh] = useState(false);
+  const [refreshNonce, setRefreshNonce] = useState(0);
   const [showHiddenForm, setShowHiddenForm] = useState(false);
   const [addAsAutoStart, setAddAsAutoStart] = useState(false);
   const [addAsFlat, setAddAsFlat] = useState(false);
@@ -113,34 +113,31 @@ const Download = () => {
     }
   };
 
+  const refreshDownloadQueue = () => {
+    setRefreshNonce(current => current + 1);
+  };
+
   useEffect(() => {
     (async () => {
-      if (refresh) {
-        const videosResponse = await loadDownloadQueue(
-          currentPage,
-          channelFilterFromUrl,
-          vidTypeFilterFromUrl,
-          errorFilterFromUrl,
-          showIgnored,
-          searchInput,
-        );
-        const { data: channelResponseData } = videosResponse ?? {};
-        const videoCount = channelResponseData?.paginate?.total_hits;
+      const videosResponse = await loadDownloadQueue(
+        currentPage,
+        channelFilterFromUrl,
+        vidTypeFilterFromUrl,
+        errorFilterFromUrl,
+        showIgnored,
+        searchInput,
+      );
+      const { data: channelResponseData } = videosResponse ?? {};
+      const videoCount = channelResponseData?.paginate?.total_hits;
 
-        if (videoCount && lastVideoCount !== videoCount) {
-          setLastVideoCount(videoCount);
-        }
-
-        setDownloadResponse(videosResponse);
-        setRefresh(false);
+      if (videoCount && lastVideoCount !== videoCount) {
+        setLastVideoCount(videoCount);
       }
+
+      setDownloadResponse(videosResponse);
     })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refresh]);
-
-  useEffect(() => {
-    setRefresh(true);
   }, [
     channelFilterFromUrl,
     vidTypeFilterFromUrl,
@@ -148,6 +145,7 @@ const Download = () => {
     currentPage,
     showIgnored,
     searchInput,
+    refreshNonce,
   ]);
 
   useEffect(() => {
@@ -166,7 +164,7 @@ const Download = () => {
       errorFilterFromUrl,
       status,
     );
-    setRefresh(true);
+    refreshDownloadQueue();
   };
 
   return (
@@ -184,7 +182,7 @@ const Download = () => {
             if (!isDone) {
               setRescanPending(false);
               setDownloadPending(false);
-              setRefresh(true);
+              refreshDownloadQueue();
             }
           }}
         />
@@ -308,7 +306,7 @@ const Download = () => {
                           force: addAsForce,
                         });
                         setDownloadQueueText('');
-                        setRefresh(true);
+                        refreshDownloadQueue();
                         setShowHiddenForm(false);
                       }
                     }}
@@ -329,7 +327,7 @@ const Download = () => {
                   const newParams = new URLSearchParams();
                   newParams.set('ignored', String(!showIgnored));
                   setSearchParams(newParams);
-                  setRefresh(true);
+                  refreshDownloadQueue();
                 }}
                 type="checkbox"
                 checked={showIgnored}
@@ -539,7 +537,7 @@ const Download = () => {
                         channelFilterFromUrl,
                         vidTypeFilterFromUrl,
                       );
-                      setRefresh(true);
+                      refreshDownloadQueue();
                       setShowDeleteConfirm(false);
                     }}
                   >
@@ -563,7 +561,7 @@ const Download = () => {
                 <Fragment
                   key={`${download.channel_id}_${download.timestamp}_${download.youtube_id}`}
                 >
-                  <DownloadListItem download={download} setRefresh={setRefresh} />
+                  <DownloadListItem download={download} setRefresh={refreshDownloadQueue} />
                 </Fragment>
               );
             })}

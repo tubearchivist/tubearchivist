@@ -1,15 +1,16 @@
 apprise==1.9.9
+bgutil-ytdlp-pot-provider @ git+https://github.com/bbilly1/bgutil-ytdlp-pot-provider@68578674650bade31cd77fb80ce84f7045191ba7#subdirectory=plugin
 celery==5.6.3
-deepdiff==8.6.2
+deepdiff==9.0.0
 django-auth-ldap==5.3.0
 django-celery-beat==2.9.0
 django-cors-headers==4.9.0
-Django==6.0.3
+Django==6.0.4
 djangorestframework==3.17.1
 drf-spectacular==0.28.0  # rc:ignore
-Pillow==12.1.1
+Pillow==12.2.0
 redis==7.4.0
-requests==2.33.0
+requests==2.33.1
 ryd-client==0.0.6
-uvicorn==0.42.0
+uvicorn==0.44.0
 yt-dlp[default]==2026.3.17

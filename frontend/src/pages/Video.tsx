@@ -45,6 +45,7 @@ import NotFound from './NotFound';
 import { ApiResponseType } from '../functions/APIClient';
 import VideoThumbnail from '../components/VideoThumbail';
 import { ViewStylesEnum, ViewStylesType } from '../configuration/constants/ViewStyle';
+import bitsToBytes from '../functions/bitsToBytes';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {
   return playlist.playlist_entries.some(entry => {
@@ -108,7 +109,6 @@ const Video = () => {
   const { appSettingsConfig } = useAppSettingsStore();
   const { userConfig } = useUserConfigStore();
 
-  const [videoEnded, setVideoEnded] = useState(false);
   const [seekToTimestamp, setSeekToTimestamp] = useState<number>();
   const [playlistAutoplay, setPlaylistAutoplay] = useState(
     localStorage.getItem('playlistAutoplay') === 'true',
@@ -179,24 +179,6 @@ const Video = () => {
     localStorage.setItem('playlistIdForAutoplay', playlistIdForAutoplay || '');
   }, [playlistAutoplay, playlistIdForAutoplay]);
 
-  useEffect(() => {
-    if (videoEnded && playlistAutoplay) {
-      const playlist = videoPlaylistNavResponseData?.find(playlist => {
-        return playlist.playlist_meta.playlist_id === playlistIdForAutoplay;
-      });
-
-      if (playlist) {
-        const nextYoutubeId = playlist.playlist_next?.youtube_id;
-
-        if (nextYoutubeId) {
-          setVideoEnded(false);
-          navigate(Routes.Video(nextYoutubeId));
-        }
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [videoEnded, playlistAutoplay]);
-
   const errorMessage = videoResponseError?.error;
 
   if (errorMessage) {
@@ -235,7 +217,18 @@ const Video = () => {
           setRefreshVideoList(true);
         }}
         onVideoEnd={() => {
-          setVideoEnded(true);
+          if (!playlistAutoplay) {
+            return;
+          }
+
+          const playlist = videoPlaylistNavResponseData?.find(playlist => {
+            return playlist.playlist_meta.playlist_id === playlistIdForAutoplay;
+          });
+          const nextYoutubeId = playlist?.playlist_next?.youtube_id;
+
+          if (nextYoutubeId) {
+            navigate(Routes.Video(nextYoutubeId));
+          }
         }}
       />
 
@@ -342,7 +335,7 @@ const Video = () => {
                         label="Reindex"
                         title={`Reindex ${video.title}`}
                         onClick={async () => {
-                          await queueReindex(video.youtube_id, 'video');
+                          await queueReindex([video.youtube_id], 'video');
                           setReindex(true);
                         }}
                       />
@@ -468,7 +461,7 @@ const Video = () => {
                 return (
                   <p key={stream.index}>
                     {capitalizeFirstLetter(stream.type)}: {stream.codec}{' '}
-                    {humanFileSize(stream.bitrate, useSiUnits)}/s
+                    {humanFileSize(bitsToBytes(stream.bitrate), useSiUnits)}/s
                     {stream.width && (
                       <>
                         <span className="space-carrot">|</span> {stream.width}x{stream.height}

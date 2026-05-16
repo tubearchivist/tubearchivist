@@ -625,6 +625,8 @@ video:-webkit-full-screen {
 .video-thumb img {
   width: 100%;
   position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--highlight-bg-transparent);
 }
 
 .video-tags {
@@ -1088,6 +1090,8 @@ video:-webkit-full-screen {
 
 .channel-banner img {
   width: 100%;
+  aspect-ratio: 18 / 3;
+  background: var(--highlight-bg-transparent);
 }
 
 .channel-banner.grid {

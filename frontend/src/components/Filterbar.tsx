@@ -22,6 +22,9 @@ import { useVideoSelectionStore } from '../stores/VideoSelectionStore';
 import Button from './Button';
 import updateDownloadQueue from '../api/actions/updateDownloadQueue';
 import { HideWatchedType } from '../configuration/constants/HideWatched';
+import queueReindex from '../api/actions/queueReindex';
+import { useOutletContext } from 'react-router-dom';
+import { ChannelBaseOutletContextType } from '../pages/ChannelAbout';
 
 type FilterbarProps = {
   viewStyle: ViewStyleNamesType;
@@ -49,6 +52,7 @@ const Filterbar = ({
   const [showHidden, setShowHidden] = useState(false);
   const { filterHeight, setFilterHeight, showFilterItems, setShowFilterItems } =
     useFilterBarTempConf();
+  const { setStartNotification } = useOutletContext() as ChannelBaseOutletContextType;
 
   const currentViewStyle = userConfig[viewStyle];
   const currentHideWatched = userConfig[hideWatched];
@@ -84,10 +88,19 @@ const Filterbar = ({
     });
   };
 
+  const reindexSelected = async (ids: string[]) => {
+    queueReindex(ids, 'video');
+    if (setStartNotification !== undefined) setStartNotification(true);
+  };
+
   const actionList = [
     {
       label: 'Redownload',
       handler: redownloadSelected,
+    },
+    {
+      label: 'Reindex',
+      handler: reindexSelected,
     },
   ];
 

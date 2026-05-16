@@ -54,7 +54,7 @@ Take a look at the example [docker-compose.yml](https://github.com/tubearchivist
 
 All environment variables are explained in detail in the docs [here](https://docs.tubearchivist.com/installation/env-vars/).
 
-Both `TA_PASSWORD` and `ELASTIC_PASSWORD` can be suffixed with `_FILE` to allow passing in passwords as secretes. `_FILE` is a convention used by some images including [ElasticSearch](https://www.elastic.co/docs/deploy-manage/deploy/self-managed/install-elasticsearch-docker-configure)
+Both `TA_PASSWORD` and `ELASTIC_PASSWORD` can be suffixed with `_FILE` to allow passing in passwords as secrets. `_FILE` is a convention used by some images including [ElasticSearch](https://www.elastic.co/docs/deploy-manage/deploy/self-managed/install-elasticsearch-docker-configure)
 
 ### TubeArchivist
 

@@ -183,7 +183,7 @@ const ChannelAbout = () => {
                         label="Reindex"
                         title={`Reindex Channel ${channel.channel_name}`}
                         onClick={async () => {
-                          await queueReindex(channelId, ReindexTypeEnum.channel as ReindexType);
+                          await queueReindex([channelId], ReindexTypeEnum.channel as ReindexType);
 
                           setReindex(true);
                           setStartNotification(true);
@@ -194,7 +194,7 @@ const ChannelAbout = () => {
                         title={`Reindex Videos of ${channel.channel_name}`}
                         onClick={async () => {
                           await queueReindex(
-                            channelId,
+                            [channelId],
                             ReindexTypeEnum.channel as ReindexType,
                             true,
                           );

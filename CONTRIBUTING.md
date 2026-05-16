@@ -126,9 +126,9 @@ Some of you might have created useful scripts or API integrations around this pr
 
 ---
 
-## Improve to the Documentation
+## Improving the Documentation
 
-The documentation available at [docs.tubearchivist.com](https://docs.tubearchivist.com/) and is build from a separate repo [tubearchivist/docs](https://github.com/tubearchivist/docs). The Readme there has additional instructions on how to make changes.
+The documentation is available at [docs.tubearchivist.com](https://docs.tubearchivist.com/), and is built from a separate repo: [tubearchivist/docs](https://github.com/tubearchivist/docs). The Readme there has additional instructions on how to make changes.
 
 ---
 

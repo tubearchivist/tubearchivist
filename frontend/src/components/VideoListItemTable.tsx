@@ -8,6 +8,7 @@ import { useUserConfigStore } from '../stores/UserConfigStore';
 import { useVideoSelectionStore } from '../stores/VideoSelectionStore';
 import iconChecked from '/img/icon-seen.svg';
 import iconUnchecked from '/img/icon-unseen.svg';
+import bitsToBytes from '../functions/bitsToBytes';
 
 const StreamsTypeEmun = {
   Video: 'video',
@@ -97,9 +98,9 @@ const VideoListItemTable = ({ videoList, viewStyle }: VideoListItemProps) => {
                 <td>{`${videoStream?.width || '-'}x${videoStream?.height || '-'}`}</td>
                 <td>{humanFileSize(media_size, useSiUnits)}</td>
                 <td>{videoStream?.codec || '-'}</td>
-                <td>{humanFileSize(videoStream?.bitrate || 0, useSiUnits)}</td>
+                <td>{humanFileSize(bitsToBytes(videoStream?.bitrate || 0), useSiUnits)}</td>
                 <td>{audioStream?.codec || '-'}</td>
-                <td>{humanFileSize(audioStream?.bitrate || 0, useSiUnits)}</td>
+                <td>{humanFileSize(bitsToBytes(audioStream?.bitrate || 0), useSiUnits)}</td>
               </tr>
             );
           })}
