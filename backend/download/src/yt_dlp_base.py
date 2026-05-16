@@ -78,9 +78,17 @@ class YtWrap:
                     }
                 },
             )
-            if EnvironmentSettings.APP_DIR == "/app":
-                # container internal only
-                self.obs["plugin_dirs"].append("/opt/yt_plugins/bgutil")
+            return
+
+        # from fork: https://github.com/bbilly1/bgutil-ytdlp-pot-provider
+        deep_merge(
+            self.obs,
+            {
+                "extractor_args": {
+                    "youtubepot-bgutilhttp": {"disable": ["True"]}
+                }
+            },
+        )
 
     def download(self, url):
         """make download request"""

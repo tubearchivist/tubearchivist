@@ -25,9 +25,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # install requirements
 COPY ./backend/requirements.txt /requirements.txt
-COPY ./backend/requirements.plugins.txt /requirements.plugins.txt
-RUN pip install --user -r /requirements.txt \
-    && python -m pip install --target /opt/yt_plugins/bgutil -r /requirements.plugins.txt
+RUN pip install --user -r requirements.txt
 
 # build ffmpeg
 FROM python:3.13.11-slim-trixie AS ffmpeg-builder
@@ -48,7 +46,6 @@ COPY --from=denoland/deno:bin /deno /usr/local/bin/deno
 
 # copy build requirements
 COPY --from=builder /root/.local /root/.local
-COPY --from=builder /opt/yt_plugins /opt/yt_plugins
 ENV PATH=/root/.local/bin:$PATH
 
 # copy ffmpeg
