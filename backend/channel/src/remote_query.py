@@ -91,6 +91,27 @@ class VideoQueryBuilder:
         return (vid_type, None)
 
 
+def _resolve_channel_query(
+    channel_id: str,
+    url: str,
+    obs: dict,
+    config: AppConfigType,
+) -> dict | None:
+    """extract channel query, following a redirect if yt-dlp returns one"""
+    channel_query, _ = YtWrap(obs, config).extract(url)
+    if not channel_query:
+        return None
+
+    # yt-dlp may return a redirect (_type: 'url') instead of a playlist
+    # when YouTube redirects a channel ID to another. Follow the redirect.
+    if channel_query.get("_type") == "url" and channel_query.get("url"):
+        redirect_url = channel_query["url"]
+        print(f"{channel_id}: following channel redirect to {redirect_url}")
+        channel_query, _ = YtWrap(obs, config).extract(redirect_url)
+
+    return channel_query or None
+
+
 def get_last_channel_videos(
     channel_id: str,
     config: AppConfigType,
@@ -127,8 +148,12 @@ def get_last_channel_videos(
             obs["playlist_items"] = f":{limit_amount}:1"
 
         url = f"https://www.youtube.com/channel/{channel_id}/{vid_type}"
-        channel_query, _ = YtWrap(obs, config).extract(url)
+        channel_query = _resolve_channel_query(channel_id, url, obs, config)
         if not channel_query:
+            continue
+
+        if "entries" not in channel_query:
+            print(f"{channel_id}: no entries found for {vid_type}, skipping")
             continue
 
         for entry in channel_query["entries"]:
