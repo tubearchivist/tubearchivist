@@ -165,7 +165,8 @@ const GoogleCast = ({ video, setRefresh, onWatchStateChanged }: GoogleCastProps)
       for (let i = 0; i < videoSubtitles.length; i++) {
         const subtitle = new chrome.cast.media.Track(i, chrome.cast.media.TrackType.TEXT);
 
-        subtitle.trackContentId = videoSubtitles[i].media_url;
+        // subtitle.trackContentId = videoSubtitles[i].media_url;
+        subtitle.trackContentId = `${getURL()}${videoSubtitles[i].media_url}`;
         subtitle.trackContentType = 'text/vtt';
         subtitle.subtype = chrome.cast.media.TextTrackType.SUBTITLES;
         subtitle.name = videoSubtitles[i].name;
@@ -188,6 +189,9 @@ const GoogleCast = ({ video, setRefresh, onWatchStateChanged }: GoogleCastProps)
     // request.queueData = new chrome.cast.media.QueueData(); // See https://developers.google.com/cast/docs/reference/web_sender/chrome.cast.media.QueueData for playlist support.
     request.currentTime = shiftCurrentTime(video?.player?.position); // Set video start position based on the browser video position
     // request.activeTrackIds = contentActiveSubtitle; // Set active subtitle based on video player
+    if (contentSubtitles.length > 0) {
+      request.activeTrackIds = [0];
+    }
 
     castSession.loadMedia(request).then(
       function () {
