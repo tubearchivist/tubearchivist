@@ -165,7 +165,6 @@ const GoogleCast = ({ video, setRefresh, onWatchStateChanged }: GoogleCastProps)
       for (let i = 0; i < videoSubtitles.length; i++) {
         const subtitle = new chrome.cast.media.Track(i, chrome.cast.media.TrackType.TEXT);
 
-        // subtitle.trackContentId = videoSubtitles[i].media_url;
         subtitle.trackContentId = `${getURL()}${videoSubtitles[i].media_url}`;
         subtitle.trackContentType = 'text/vtt';
         subtitle.subtype = chrome.cast.media.TextTrackType.SUBTITLES;
