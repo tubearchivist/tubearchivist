@@ -64,6 +64,7 @@ class Command(BaseCommand):
         self._mig_fix_playlist_description()
         self._mig_fix_missing_stats()
         self._mig_fix_channel_art_types()
+        self._mig_fix_channel_tags()
         self._mig_fix_channel_description()
         self._mig_fix_video_description()
 
@@ -425,6 +426,36 @@ class Command(BaseCommand):
                 query={"term": {f"channel.{field}": {"value": False}}},
                 script={"source": source, "lang": "painless"},
             )
+
+    def _mig_fix_channel_tags(self) -> None:
+        """migrate: fix channel_tags stored as boolean instead of list"""
+        # Boolean false is not indexable as keyword, so term queries don't
+        # match it; use match_all + Painless instanceof check instead.
+        channel_script = (
+            "if (ctx._source.containsKey('channel_tags')"
+            " && !(ctx._source.channel_tags instanceof List))"
+            " { ctx._source.channel_tags = []; }"
+            " else { ctx.op = 'noop'; }"
+        )
+        self._run_migration(
+            index_name="ta_channel",
+            desc="fix channel_tags data type in channel index",
+            query={"match_all": {}},
+            script={"source": channel_script, "lang": "painless"},
+        )
+        video_script = (
+            "if (ctx._source.containsKey('channel')"
+            " && ctx._source.channel.containsKey('channel_tags')"
+            " && !(ctx._source.channel.channel_tags instanceof List))"
+            " { ctx._source.channel.channel_tags = []; }"
+            " else { ctx.op = 'noop'; }"
+        )
+        self._run_migration(
+            index_name="ta_video",
+            desc="fix channel_tags data type in video index",
+            query={"match_all": {}},
+            script={"source": video_script, "lang": "painless"},
+        )
 
     def _mig_fix_channel_description(self) -> None:
         """migrate from 0.5.8 to 0.5.9, fix channel desc null value"""
