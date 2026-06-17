@@ -51,6 +51,9 @@ class ChannelSerializer(serializers.Serializer):
     channel_tabs = serializers.ListField(
         child=serializers.ChoiceField(VideoTypeEnum.values_known())
     )
+    channel_media_size = serializers.IntegerField(required=False)
+    channel_video_count = serializers.IntegerField(required=False)
+    channel_media_duration = serializers.IntegerField(required=False)
     _index = serializers.CharField(required=False)
     _score = serializers.IntegerField(required=False)
 
@@ -69,6 +72,24 @@ class ChannelListQuerySerializer(serializers.Serializer):
         choices=["subscribed", "unsubscribed"], required=False
     )
     page = serializers.IntegerField(required=False)
+    view = serializers.ChoiceField(
+        choices=["list", "grid", "table"], required=False
+    )
+    sort = serializers.ChoiceField(
+        choices=[
+            "name",
+            "subscribers",
+            "video_count",
+            "duration",
+            "media_size",
+            "last_refresh",
+        ],
+        required=False,
+        default="name",
+    )
+    order = serializers.ChoiceField(
+        choices=["asc", "desc"], required=False, default="asc"
+    )
 
 
 class ChannelUpdateSerializer(serializers.Serializer):
