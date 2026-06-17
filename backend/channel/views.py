@@ -1,7 +1,6 @@
 """all channel API views"""
 
 from channel.serializers import (
-    ChannelAggSerializer,
     ChannelListQuerySerializer,
     ChannelListSerializer,
     ChannelNavSerializer,
@@ -187,38 +186,6 @@ class ChannelApiView(ApiBaseView):
 
         error = ErrorResponseSerializer({"error": "channel not found"})
         return Response(error.data, status=404)
-
-
-class ChannelAggsApiView(ApiBaseView):
-    """resolves to /api/channel/<channel_id>/aggs/
-    GET: get channel aggregations
-    """
-
-    search_base = "ta_video/_search"
-
-    @extend_schema(
-        responses={
-            200: OpenApiResponse(ChannelAggSerializer()),
-        },
-    )
-    def get(self, request, channel_id):
-        """get channel aggregations"""
-        self.data.update(
-            {
-                "query": {
-                    "term": {"channel.channel_id": {"value": channel_id}}
-                },
-                "aggs": {
-                    "total_items": {"value_count": {"field": "youtube_id"}},
-                    "total_size": {"sum": {"field": "media_size"}},
-                    "total_duration": {"sum": {"field": "player.duration"}},
-                },
-            }
-        )
-        self.get_aggs()
-        serializer = ChannelAggSerializer(self.response)
-
-        return Response(serializer.data)
 
 
 class ChannelNavApiView(ApiBaseView):

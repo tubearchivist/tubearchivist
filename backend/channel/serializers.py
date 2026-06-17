@@ -99,21 +99,6 @@ class ChannelUpdateSerializer(serializers.Serializer):
     channel_overwrites = ChannelOverwriteSerializer(required=False)
 
 
-class ChannelAggBucketSerializer(serializers.Serializer):
-    """serialize channel agg bucket"""
-
-    value = serializers.IntegerField()
-    value_str = serializers.CharField(required=False)
-
-
-class ChannelAggSerializer(serializers.Serializer):
-    """serialize channel aggregation"""
-
-    total_items = ChannelAggBucketSerializer()
-    total_size = ChannelAggBucketSerializer()
-    total_duration = ChannelAggBucketSerializer()
-
-
 class ChannelNavSerializer(serializers.Serializer):
     """serialize channel navigation"""
 
