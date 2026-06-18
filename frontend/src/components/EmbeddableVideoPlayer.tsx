@@ -37,12 +37,14 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
 
   const { data: videoResponseData } = videoResponse ?? {};
 
-  useEffect(() => {
+  const [prevVideoId, setPrevVideoId] = useState(videoId);
+  if (videoId !== prevVideoId) {
+    setPrevVideoId(videoId);
     if (!videoId) {
       setVideoResponse(undefined);
       setPlaylists(undefined);
     }
-  }, [videoId]);
+  }
 
   useEffect(() => {
     (async () => {
