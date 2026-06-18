@@ -126,6 +126,7 @@ const EmbeddableVideoPlayer = ({ videoId }: EmbeddableVideoPlayerProps) => {
                   newParams.delete('videoId');
                   return newParams;
                 });
+                setRefresh(true);
               }}
             />
 
