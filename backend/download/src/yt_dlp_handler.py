@@ -426,9 +426,21 @@ class DownloadPostProcess(DownloaderBase):
             if not channel_id:
                 break
 
-            channel = YoutubeChannel(channel_id)
-            channel.get_from_es()
-            overwrites = channel.get_overwrites()
+            try:
+                channel = YoutubeChannel(channel_id)
+                channel.get_from_es()
+                if not channel.json_data:
+                    raise ValueError("no json data extracted for channel")
+
+                overwrites = channel.get_overwrites()
+            except ValueError as err:
+                message = [f"{channel_id}: skip deleted channel", str(err)]
+                print(message)
+                if self.task:
+                    self.task.send_progress(message)
+
+                continue
+
             if overwrites.get("index_playlists"):
                 channel.get_all_playlists()
                 to_add = [i[0] for i in channel.all_playlists]
@@ -457,11 +469,22 @@ class DownloadPostProcess(DownloaderBase):
             if not playlist_id or not idx or not total:
                 break
 
-            playlist = YoutubePlaylist(playlist_id)
-            playlist.get_from_es()
-            playlist.add_vids_to_playlist()
-            playlist.remove_vids_from_playlist()
-            playlist.match_local()
+            try:
+                playlist = YoutubePlaylist(playlist_id)
+                playlist.get_from_es()
+                if not playlist.json_data:
+                    raise ValueError("no json data extracted for playlist")
+
+                playlist.add_vids_to_playlist()
+                playlist.remove_vids_from_playlist()
+                playlist.match_local()
+            except ValueError as err:
+                message = [f"{playlist_id}: skip deleted playlist", str(err)]
+                print(message)
+                if self.task:
+                    self.task.send_progress(message)
+
+                continue
 
             if not self.task:
                 continue
