@@ -57,3 +57,12 @@ class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
     remember_me = serializers.ChoiceField(choices=["on", "off"], default="off")
+
+
+class OidcInfoSerializer(serializers.Serializer):
+    """serialize public SSO login capability for the login page"""
+
+    enabled = serializers.BooleanField()
+    local_login = serializers.BooleanField()
+    label = serializers.CharField()
+    login_url = serializers.CharField()

@@ -5,6 +5,8 @@ import Colours from '../configuration/colours/Colours';
 import Button from '../components/Button';
 import signIn from '../api/actions/signIn';
 import loadAuth from '../api/loader/loadAuth';
+import loadOidcInfo, { OidcInfoType } from '../api/loader/loadOidcInfo';
+import getApiUrl from '../configuration/getApiUrl';
 import LoadingIndicator from '../components/LoadingIndicator';
 
 const Login = () => {
@@ -16,6 +18,8 @@ const Login = () => {
   const [waitingForBackend, setWaitingForBackend] = useState(false);
   const [waitedCount, setWaitedCount] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [oidcInfo, setOidcInfo] = useState<OidcInfoType | null>(null);
+  const [oidcLoaded, setOidcLoaded] = useState(false);
 
   const handleSubmit = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
@@ -38,6 +42,13 @@ const Login = () => {
       navigate(Routes.Login);
     }
   };
+
+  useEffect(() => {
+    loadOidcInfo()
+      .then(setOidcInfo)
+      .catch(() => setOidcInfo(null))
+      .finally(() => setOidcLoaded(true));
+  }, []);
 
   useEffect(() => {
     let retryCount = 0;
@@ -72,6 +83,8 @@ const Login = () => {
     };
   }, [navigate]);
 
+  const showLocalLogin = oidcInfo?.local_login ?? true;
+
   return (
     <>
       <title>TA | Welcome</title>
@@ -89,59 +102,72 @@ const Login = () => {
           </p>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="username"
-            id="id_username"
-            placeholder="Username"
-            autoComplete="username"
-            maxLength={150}
-            required={true}
-            value={username}
-            onChange={event => setUsername(event.target.value)}
-          />
-
-          <br />
-
-          <input
-            type="password"
-            name="password"
-            id="id_password"
-            placeholder="Password"
-            autoComplete="current-password"
-            required={true}
-            value={password}
-            onChange={event => setPassword(event.target.value)}
-          />
-
-          <br />
-
-          <p>
-            Remember me:{' '}
+        {oidcLoaded && showLocalLogin && (
+          <form onSubmit={handleSubmit}>
             <input
-              type="checkbox"
-              name="remember_me"
-              id="id_remember_me"
-              checked={saveLogin}
-              onChange={() => {
-                setSaveLogin(!saveLogin);
-              }}
+              type="text"
+              name="username"
+              id="id_username"
+              placeholder="Username"
+              autoComplete="username"
+              maxLength={150}
+              required={true}
+              value={username}
+              onChange={event => setUsername(event.target.value)}
             />
-          </p>
 
-          <input type="hidden" name="next" value={Routes.Home} />
+            <br />
 
-          {waitingForBackend && (
-            <>
-              <p>
-                Waiting for backend <LoadingIndicator />
-              </p>
-            </>
-          )}
+            <input
+              type="password"
+              name="password"
+              id="id_password"
+              placeholder="Password"
+              autoComplete="current-password"
+              required={true}
+              value={password}
+              onChange={event => setPassword(event.target.value)}
+            />
 
-          {!waitingForBackend && <Button label="Login" type="submit" />}
-        </form>
+            <br />
+
+            <p>
+              Remember me:{' '}
+              <input
+                type="checkbox"
+                name="remember_me"
+                id="id_remember_me"
+                checked={saveLogin}
+                onChange={() => {
+                  setSaveLogin(!saveLogin);
+                }}
+              />
+            </p>
+
+            <input type="hidden" name="next" value={Routes.Home} />
+
+            {waitingForBackend && (
+              <>
+                <p>
+                  Waiting for backend <LoadingIndicator />
+                </p>
+              </>
+            )}
+
+            {!waitingForBackend && <Button label="Login" type="submit" />}
+          </form>
+        )}
+
+        {oidcInfo?.enabled && (
+          <Button
+            label={oidcInfo.label}
+            type="button"
+            className="oidc-login-button"
+            onClick={() => {
+              window.location.assign(`${getApiUrl()}${oidcInfo.login_url}`);
+            }}
+          />
+        )}
 
         {waitedCount > 10 && (
           <div className="info-box">

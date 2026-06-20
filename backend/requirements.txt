@@ -8,6 +8,7 @@ django-cors-headers==4.9.0
 Django==6.0.6
 djangorestframework==3.17.1
 drf-spectacular==0.28.0  # rc:ignore
+mozilla-django-oidc==5.0.2
 Pillow==12.2.0
 redis==7.4.0
 requests==2.34.2

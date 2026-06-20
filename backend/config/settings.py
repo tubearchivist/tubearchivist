@@ -159,6 +159,19 @@ elif _login_auth_mode == "ldap_local":
         "django.contrib.auth.backends.ModelBackend",
     )
     from .ldap_settings import *  # noqa: F403 F401
+elif _login_auth_mode == "oidc":
+    from .oidc_settings import *  # noqa: F403 F401
+
+    AUTHENTICATION_BACKENDS = ("user.src.oidc_auth.TAOIDCBackend",)
+    INSTALLED_APPS.append("mozilla_django_oidc")
+elif _login_auth_mode == "oidc_local":
+    from .oidc_settings import *  # noqa: F403 F401
+
+    AUTHENTICATION_BACKENDS = (
+        "user.src.oidc_auth.TAOIDCBackend",
+        "django.contrib.auth.backends.ModelBackend",
+    )
+    INSTALLED_APPS.append("mozilla_django_oidc")
 else:
     # If none of these cases match, AUTHENTICATION_BACKENDS is unset, which
     # means the ModelBackend should be used by default
@@ -172,6 +185,10 @@ else:
             "django.contrib.auth.backends.RemoteUserBackend",
         )
         MIDDLEWARE.append("user.src.remote_user_auth.HttpRemoteUserMiddleware")
+
+# auth capabilities exposed to the login UI via /api/user/oidc/
+TA_SSO_ENABLED = _login_auth_mode in ("oidc", "oidc_local")
+TA_LOCAL_LOGIN_ENABLED = _login_auth_mode != "oidc"
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/

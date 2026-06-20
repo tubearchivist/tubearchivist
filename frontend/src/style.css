@@ -865,6 +865,12 @@ video:-webkit-full-screen {
   margin-top: 5px;
 }
 
+.login-page .oidc-login-button {
+  position: relative;
+  z-index: 1;
+  margin-top: 15px;
+}
+
 .login-links a {
   text-decoration: underline;
   margin: 30px 0;

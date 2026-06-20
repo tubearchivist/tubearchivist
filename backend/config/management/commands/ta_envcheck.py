@@ -103,6 +103,14 @@ class Command(BaseCommand):
             "TA_LDAP_USER_BASE",
             "TA_LDAP_USER_FILTER",
         ]
+        oidc_required_env = [
+            "TA_OIDC_CLIENT_ID",
+            "TA_OIDC_CLIENT_SECRET",
+            "TA_OIDC_AUTHORIZATION_ENDPOINT",
+            "TA_OIDC_TOKEN_ENDPOINT",
+            "TA_OIDC_USER_ENDPOINT",
+            "TA_OIDC_JWKS_ENDPOINT",
+        ]
         _login_auth_mode = (
             os.environ.get("TA_LOGIN_AUTH_MODE") or "single"
         ).casefold()
@@ -124,6 +132,14 @@ class Command(BaseCommand):
             )
         elif _login_auth_mode == "ldap_local":
             EXPECTED_ENV_VARS.extend(ldap_required_env)
+            UNEXPECTED_ENV_VARS["TA_ENABLE_AUTH_PROXY"] = (
+                "TA_ENABLE_AUTH_PROXY is not valid with current auth mode"
+            )
+        elif _login_auth_mode in ("oidc", "oidc_local"):
+            EXPECTED_ENV_VARS.extend(oidc_required_env)
+            UNEXPECTED_ENV_VARS["TA_LDAP"] = (
+                "TA_LDAP is not valid with current auth mode"
+            )
             UNEXPECTED_ENV_VARS["TA_ENABLE_AUTH_PROXY"] = (
                 "TA_ENABLE_AUTH_PROXY is not valid with current auth mode"
             )

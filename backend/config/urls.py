@@ -14,6 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
@@ -36,3 +37,7 @@ urlpatterns = [
     ),
     path("admin/", admin.site.urls),
 ]
+
+# OIDC login/callback routes, only when an SSO auth mode is active
+if "mozilla_django_oidc" in settings.INSTALLED_APPS:
+    urlpatterns.append(path("api/oidc/", include("user.src.oidc_urls")))

@@ -2,6 +2,7 @@
 
 from common.serializers import ErrorResponseSerializer
 from common.views import ApiBaseView
+from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -13,6 +14,7 @@ from user.models import Account
 from user.serializers import (
     AccountSerializer,
     LoginSerializer,
+    OidcInfoSerializer,
     UserMeConfigSerializer,
 )
 from user.src.user_config import UserConfig
@@ -110,6 +112,28 @@ class LoginApiView(APIView):
 
         login(request, user)  # Creates a session for the user
         return Response(status=204)
+
+
+class OidcInfoView(APIView):
+    """resolves to /api/user/oidc/
+    GET: public SSO login capability, consumed by the login page
+    """
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    @extend_schema(responses=OidcInfoSerializer())
+    def get(self, request):
+        """report whether SSO is offered and how to present it"""
+        data = {
+            "enabled": getattr(settings, "TA_SSO_ENABLED", False),
+            "local_login": getattr(settings, "TA_LOCAL_LOGIN_ENABLED", True),
+            "label": getattr(
+                settings, "TA_OIDC_BUTTON_LABEL", "Log in with SSO"
+            ),
+            "login_url": "/api/oidc/authenticate/",
+        }
+        return Response(OidcInfoSerializer(data).data)
 
 
 class LogoutApiView(ApiBaseView):
