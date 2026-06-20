@@ -1,0 +1,8 @@
+{
+  "name": "ta-oidc-e2e",
+  "private": true,
+  "description": "Browser E2E for TubeArchivist OIDC SSO login",
+  "devDependencies": {
+    "@playwright/test": "1.49.0"
+  }
+}

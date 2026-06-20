@@ -1,0 +1,109 @@
+# End-to-end OIDC SSO test stack.
+#
+# Everything runs on one docker network so browser-facing and backend-facing
+# OIDC endpoints share identical hostnames (service names) - this sidesteps the
+# classic "issuer host differs between browser and app" problem you hit with
+# OIDC behind docker. The Playwright runner is itself a container on the network
+# (profile: test), so "localhost" is never involved in the flow.
+#
+#   docker compose -f docker-compose.e2e.yml up -d --wait    # bring up the app
+#   docker compose -f docker-compose.e2e.yml --profile test up \
+#       --abort-on-container-exit e2e-tests                  # run the browser E2E
+#
+# mock-oidc is navikt/mock-oauth2-server: a real OIDC provider (discovery,
+# authorize form, token, jwks) that accepts any client/redirect - zero config.
+# Swap it for real Authentik with docker-compose.authentik.yml for fidelity.
+
+services:
+  tubearchivist:
+    image: ta-oidc:e2e
+    build:
+      context: ..
+      args:
+        INSTALL_DEBUG: "1"
+    environment:
+      - ES_URL=http://archivist-es:9200
+      - REDIS_CON=redis://archivist-redis:6379
+      - HOST_UID=0
+      - HOST_GID=0
+      - TA_HOST=http://tubearchivist:8000
+      - TA_USERNAME=tubearchivist
+      - TA_PASSWORD=verysecret
+      - ELASTIC_PASSWORD=verysecret
+      - TZ=UTC
+      # --- OIDC / SSO ---
+      - TA_LOGIN_AUTH_MODE=oidc_local
+      - TA_OIDC_CLIENT_ID=tubearchivist
+      - TA_OIDC_CLIENT_SECRET=tubearchivist-secret
+      - TA_OIDC_AUTHORIZATION_ENDPOINT=http://mock-oidc:8080/default/authorize
+      - TA_OIDC_TOKEN_ENDPOINT=http://mock-oidc:8080/default/token
+      - TA_OIDC_USER_ENDPOINT=http://mock-oidc:8080/default/userinfo
+      - TA_OIDC_JWKS_ENDPOINT=http://mock-oidc:8080/default/jwks
+      - TA_OIDC_ADMIN_GROUP=tubearchivist-admins
+      - TA_OIDC_BUTTON_LABEL=Log in with SSO
+    ports:
+      - 8000:8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+    depends_on:
+      archivist-es:
+        condition: service_healthy
+      archivist-redis:
+        condition: service_started
+      mock-oidc:
+        condition: service_started
+
+  archivist-redis:
+    image: redis
+    expose:
+      - "6379"
+
+  archivist-es:
+    # official multi-arch image: runs arm64-native here (the bundled
+    # bbilly1/tubearchivist-es is amd64-only and dies under qemu: no seccomp).
+    # TA uses no ES plugins (no ICU), so stock ES is sufficient.
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.0
+    environment:
+      - "ELASTIC_PASSWORD=verysecret"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "xpack.security.enabled=true"
+      - "discovery.type=single-node"
+      - "path.repo=/usr/share/elasticsearch/data/snapshot"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    expose:
+      - "9200"
+    healthcheck:
+      test:
+        ["CMD-SHELL", "curl -s -u elastic:verysecret http://localhost:9200/_cluster/health | grep -q '\"status\"'"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+
+  mock-oidc:
+    image: ghcr.io/navikt/mock-oauth2-server:2.1.10
+    expose:
+      - "8080"
+    environment:
+      - LOG_LEVEL=INFO
+
+  e2e-tests:
+    image: mcr.microsoft.com/playwright:v1.49.0-noble
+    profiles: ["test"]
+    depends_on:
+      tubearchivist:
+        condition: service_healthy
+    environment:
+      - TA_BASE_URL=http://tubearchivist:8000
+      - CI=1
+    volumes:
+      - ./playwright:/work
+    working_dir: /work
+    command: sh -c "npm install --no-audit --no-fund && npx playwright test"
