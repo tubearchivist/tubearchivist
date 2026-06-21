@@ -428,6 +428,10 @@ class DownloadPostProcess(DownloaderBase):
 
             channel = YoutubeChannel(channel_id)
             channel.get_from_es()
+            if not channel.json_data:
+                print(f"{channel_id}: skip deleted channel for playlist refresh")
+                continue
+
             overwrites = channel.get_overwrites()
             if overwrites.get("index_playlists"):
                 channel.get_all_playlists()
