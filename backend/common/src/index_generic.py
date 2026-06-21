@@ -89,6 +89,11 @@ class Pagination:
     figure out the pagination based on page size and total_hits
     """
 
+    # elasticsearch's default index.max_result_window; ES rejects any
+    # ``from + size`` request that exceeds this with a 400 (becomes a
+    # 500 to the user).  see issue #746.
+    MAX_RESULT_WINDOW = 10000
+
     def __init__(self, request):
         self.request = request
         self.page_get = False
@@ -121,12 +126,21 @@ class Pagination:
                 i for i in range(page_get - 1, page_get - 6, -1) if i > 1
             ]
             prev_pages.reverse()
+        # clamp page_from so the ES request stays within max_result_window.
+        # without this, large channel pages that cross the 10000 hit
+        # boundary (e.g. page 67 of a 9981-video channel with page_size=150)
+        # return 500.  see issue #746.
+        safe_size = self.page_size if isinstance(self.page_size, int) else 0
+        max_hits = False
+        if page_from + safe_size > self.MAX_RESULT_WINDOW:
+            page_from = self.MAX_RESULT_WINDOW - safe_size
+            max_hits = True
         pagination = {
             "page_size": self.page_size,
             "page_from": page_from,
             "prev_pages": prev_pages,
             "current_page": page_get,
-            "max_hits": False,
+            "max_hits": max_hits,
             "params": self.params,
         }
 
@@ -136,7 +150,7 @@ class Pagination:
         """validate pagination with total_hits after making api call"""
         page_get = self.page_get
         max_pages = math.ceil(total_hits / self.page_size)
-        if total_hits >= 10000:
+        if total_hits >= self.MAX_RESULT_WINDOW:
             # es returns maximal 10000 results
             self.pagination["max_hits"] = True
             max_pages = max_pages - 1
