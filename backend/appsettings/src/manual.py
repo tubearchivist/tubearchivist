@@ -430,7 +430,9 @@ class ManualImport:
 
         try:
             json_data = self.index_metadata()
-        except ValueError as err:
+        except (ValueError, ConnectionError, KeyError) as err:
+            # fallback to embedded metadata when YT fetch fails (private
+            # videos, bot detection, or no internet). see issue #1133.
             json_data = IndexFromEmbed(
                 self.current_video["media"],
                 use_user_conf=False,
