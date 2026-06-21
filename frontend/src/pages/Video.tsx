@@ -16,6 +16,7 @@ import loadSimilarVideosById from '../api/loader/loadSimilarVideosById';
 import VideoList from '../components/VideoList';
 import updateWatchedState from '../api/actions/updateWatchedState';
 import humanFileSize from '../functions/humanFileSize';
+import humanBitrate from '../functions/humanBitrate';
 import ScrollToTopOnNavigate from '../components/ScrollToTop';
 import ChannelOverview from '../components/ChannelOverview';
 import deleteVideo from '../api/actions/deleteVideo';
@@ -45,7 +46,6 @@ import NotFound from './NotFound';
 import { ApiResponseType } from '../functions/APIClient';
 import VideoThumbnail from '../components/VideoThumbail';
 import { ViewStylesEnum, ViewStylesType } from '../configuration/constants/ViewStyle';
-import bitsToBytes from '../functions/bitsToBytes';
 
 const isInPlaylist = (videoId: string, playlist: PlaylistType) => {
   return playlist.playlist_entries.some(entry => {
@@ -461,7 +461,7 @@ const Video = () => {
                 return (
                   <p key={stream.index}>
                     {capitalizeFirstLetter(stream.type)}: {stream.codec}{' '}
-                    {humanFileSize(bitsToBytes(stream.bitrate), useSiUnits)}/s
+                    {humanBitrate(stream.bitrate)}
                     {stream.width && (
                       <>
                         <span className="space-carrot">|</span> {stream.width}x{stream.height}

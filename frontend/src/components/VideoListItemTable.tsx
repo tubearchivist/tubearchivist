@@ -3,12 +3,12 @@ import Routes from '../configuration/routes/RouteList';
 import { VideoType } from '../pages/Home';
 import { ViewStylesType } from '../configuration/constants/ViewStyle';
 import humanFileSize from '../functions/humanFileSize';
+import humanBitrate from '../functions/humanBitrate';
 import { FileSizeUnits } from '../api/actions/updateUserConfig';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { useVideoSelectionStore } from '../stores/VideoSelectionStore';
 import iconChecked from '/img/icon-seen.svg';
 import iconUnchecked from '/img/icon-unseen.svg';
-import bitsToBytes from '../functions/bitsToBytes';
 
 const StreamsTypeEmun = {
   Video: 'video',
@@ -98,9 +98,9 @@ const VideoListItemTable = ({ videoList, viewStyle }: VideoListItemProps) => {
                 <td>{`${videoStream?.width || '-'}x${videoStream?.height || '-'}`}</td>
                 <td>{humanFileSize(media_size, useSiUnits)}</td>
                 <td>{videoStream?.codec || '-'}</td>
-                <td>{humanFileSize(bitsToBytes(videoStream?.bitrate || 0), useSiUnits)}</td>
+                <td>{humanBitrate(videoStream?.bitrate || 0)}</td>
                 <td>{audioStream?.codec || '-'}</td>
-                <td>{humanFileSize(bitsToBytes(audioStream?.bitrate || 0), useSiUnits)}</td>
+                <td>{humanBitrate(audioStream?.bitrate || 0)}</td>
               </tr>
             );
           })}
