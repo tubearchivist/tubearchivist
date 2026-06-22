@@ -10,9 +10,7 @@ ValueError fallback shape.
 from unittest.mock import patch
 
 import pytest
-
 from appsettings.src.manual import ManualImport
-
 
 SAMPLE_VIDEO = {
     "media": "/cache/import/dQw4w9WgXcQ.mp4",
@@ -24,7 +22,12 @@ SAMPLE_VIDEO = {
 
 EMBED_JSON_DATA = {"video_id": "dQw4w9WgXcQ", "media_url": "channel/test.mp4"}
 
-CONFIG = {"downloads": {"integrate_ryd": False, "integrate_sponsorblock": False}}
+CONFIG = {
+    "downloads": {
+        "integrate_ryd": False,
+        "integrate_sponsorblock": False,
+    }
+}
 
 
 def _make_import(ignore_error: bool = False) -> ManualImport:
@@ -80,9 +83,13 @@ def test_value_error_still_falls_back_to_embedded():
 
 
 def test_keyerror_with_no_embed_and_strict_mode_raises():
-    """strict mode (ignore_error=False) must still raise when both paths fail."""
+    """strict mode (ignore_error=False) raises when both paths fail."""
     with (
-        patch.object(ManualImport, "index_metadata", side_effect=KeyError("id")),
+        patch.object(
+            ManualImport,
+            "index_metadata",
+            side_effect=KeyError("id"),
+        ),
         patch("appsettings.src.manual.IndexFromEmbed") as mock_embed,
     ):
         mock_embed.return_value.run_index.return_value = None
@@ -93,7 +100,11 @@ def test_keyerror_with_no_embed_and_strict_mode_raises():
 def test_keyerror_with_no_embed_and_lenient_mode_silent():
     """ignore_error=True must swallow the failure when fallback also empty."""
     with (
-        patch.object(ManualImport, "index_metadata", side_effect=KeyError("id")),
+        patch.object(
+            ManualImport,
+            "index_metadata",
+            side_effect=KeyError("id"),
+        ),
         patch("appsettings.src.manual.IndexFromEmbed") as mock_embed,
     ):
         mock_embed.return_value.run_index.return_value = None
