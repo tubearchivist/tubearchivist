@@ -7,7 +7,7 @@ from download.src.yt_dlp_handler import DownloadPostProcess
 
 
 class FakeChannelQueue:
-    """minimal queue stand-in returning a fixed sequence of (channel_id, idx) pairs"""
+    """minimal queue stand-in returning (channel_id, idx) pairs in order"""
 
     def __init__(self, items):
         self._items = list(items)
@@ -34,7 +34,7 @@ class FakePlaylistQueue:
 
 @pytest.fixture
 def handler():
-    """DownloadPostProcess with __init__ bypassed — _add_channel_playlists doesn't touch config or task"""
+    """handler with __init__ bypassed; doesn't touch config or task"""
 
     instance = DownloadPostProcess.__new__(DownloadPostProcess)
     instance.task = None
@@ -42,7 +42,7 @@ def handler():
 
 
 def test_skips_channel_when_json_data_missing(handler, capsys):
-    """regression for #1103: channel deleted from ES must not raise AttributeError"""
+    """#1103 regression: deleted ES channel must not raise AttributeError"""
 
     channel_id = "UCdeleted-channel-1"
     fake_channel_q = FakeChannelQueue([(channel_id, 0)])
@@ -88,7 +88,10 @@ def test_processes_channel_with_playlists_enabled(handler):
     class FakeLiveChannel:
         youtube_id = channel_id
         json_data = {"channel_overwrites": {"index_playlists": True}}
-        all_playlists = [("PLplaylistA", "Playlist A"), ("PLplaylistB", "Playlist B")]
+        all_playlists = [
+            ("PLplaylistA", "Playlist A"),
+            ("PLplaylistB", "Playlist B"),
+        ]
 
         def get_from_es(self):
             pass
