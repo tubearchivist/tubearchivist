@@ -319,13 +319,13 @@ const SettingsApplication = () => {
                       </ul>
                     </li>
                     <li>
-                      Auto delete empty unsubscribed channels.
+                      Auto delete empty unsubscribed playlists.
                       <ul>
                         <li>The cleanup task triggers after the download finishes.</li>
                       </ul>
                     </li>
                     <li>
-                      Auto delete empty unsubscribed playlists.
+                      Auto delete empty unsubscribed channels.
                       <ul>
                         <li>The cleanup task triggers after the download finishes.</li>
                       </ul>
