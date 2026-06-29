@@ -50,8 +50,11 @@ const SettingsApplication = () => {
   const [currentThrottledRate, setCurrentThrottledRate] = useState<number | null>(null);
   const [currentScrapingSleep, setCurrentScrapingSleep] = useState<number | null>(null);
   const [currentAutodelete, setCurrentAutodelete] = useState<number | null>(null);
-  const [currentAutodeleteEmptyChannels, setCurrentAutodeleteEmptyChannels] = useState<boolean>(false);
-  const [currentAutodeleteEmptyPlaylists, setCurrentAutodeleteEmptyPlaylists] = useState<boolean>(false);
+  const [currentAutodeleteEmptyChannels, setCurrentAutodeleteEmptyChannels] =
+    useState<boolean>(false);
+  const [currentAutodeleteEmptyPlaylists, setCurrentAutodeleteEmptyPlaylists] =
+    useState<boolean>(false);
+
   // Download Format
   const [downloadsFormat, setDownloadsFormat] = useState<string | null>(null);
   const [downloadsFormatSort, setDownloadsFormatSort] = useState<string | null>(null);
@@ -107,8 +110,12 @@ const SettingsApplication = () => {
     setCurrentThrottledRate(appSettingsConfigData?.downloads.throttledratelimit || null);
     setCurrentScrapingSleep(appSettingsConfigData?.downloads.sleep_interval || null);
     setCurrentAutodelete(appSettingsConfigData?.downloads.autodelete_days || null);
-    setCurrentAutodeleteEmptyChannels(appSettingsConfigData?.downloads.autodelete_empty_channels || false);
-    setCurrentAutodeleteEmptyPlaylists(appSettingsConfigData?.downloads.autodelete_empty_playlists || false);
+    setCurrentAutodeleteEmptyChannels(
+      appSettingsConfigData?.downloads.autodelete_empty_channels || false,
+    );
+    setCurrentAutodeleteEmptyPlaylists(
+      appSettingsConfigData?.downloads.autodelete_empty_playlists || false,
+    );
 
     // Download Format
     setDownloadsFormat(appSettingsConfigData?.downloads.format || null);
