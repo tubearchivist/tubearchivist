@@ -16,6 +16,7 @@ from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
 from common.src.helper import (
     get_channel_overwrites,
+    get_channels,
     get_playlists,
     ignore_filelist,
     rand_sleep,
@@ -280,6 +281,8 @@ class DownloadPostProcess(DownloaderBase):
         """run all functions"""
         self.auto_delete_all()
         self.auto_delete_overwrites()
+        self.auto_delete_empty_playlists()
+        self.auto_delete_empty_channels()
         self.refresh_playlist()
         self.match_videos()
         self.get_comments()
@@ -360,6 +363,63 @@ class DownloadPostProcess(DownloaderBase):
             )
 
         PendingList(youtube_ids=parsed_ids).parse_url_list(status="ignore")
+
+    def auto_delete_empty_playlists(self):
+        """handle auto delete empty playlists"""
+        if not self.config["downloads"]["autodelete_empty_playlists"]:
+            return
+
+        print("auto delete empty playlists")
+
+        playlists = get_playlists(
+            subscribed_only=False,
+            source=[
+                "playlist_id",
+                "playlist_subscribed",
+                "playlist_entries",
+                "playlist_type",
+            ],
+        )
+        for playlist in playlists:
+            if playlist.get("playlist_type") == "custom":
+                continue
+            if playlist.get("playlist_subscribed"):
+                continue
+            entries = playlist.get("playlist_entries", [])
+            if any(entry.get("downloaded") for entry in entries):
+                continue
+
+            playlist_id = playlist["playlist_id"]
+            print(f"{playlist_id}: auto delete empty playlist")
+            YoutubePlaylist(playlist_id).delete_metadata()
+
+    def auto_delete_empty_channels(self):
+        """handle auto delete empty channels"""
+        if not self.config["downloads"]["autodelete_empty_channels"]:
+            return
+
+        print("auto delete empty channels")
+
+        channels = get_channels(
+            subscribed_only=False,
+            source=["channel_id", "channel_subscribed"],
+        )
+        for channel in channels:
+            if channel.get("channel_subscribed"):
+                continue
+            channel_id = channel["channel_id"]
+            channel_handler = YoutubeChannel(channel_id)
+            if get_playlists(
+                subscribed_only=False,
+                source=["playlist_id"],
+                channel_id=channel_id,
+            ):
+                continue
+            if channel_handler.get_channel_videos():
+                continue
+
+            print(f"{channel_id}: auto delete empty channel")
+            channel_handler.delete_channel()
 
     def refresh_playlist(self) -> None:
         """match videos with playlists"""

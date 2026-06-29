@@ -50,7 +50,8 @@ const SettingsApplication = () => {
   const [currentThrottledRate, setCurrentThrottledRate] = useState<number | null>(null);
   const [currentScrapingSleep, setCurrentScrapingSleep] = useState<number | null>(null);
   const [currentAutodelete, setCurrentAutodelete] = useState<number | null>(null);
-
+  const [currentAutodeleteEmptyChannels, setCurrentAutodeleteEmptyChannels] = useState<boolean>(false);
+  const [currentAutodeleteEmptyPlaylists, setCurrentAutodeleteEmptyPlaylists] = useState<boolean>(false);
   // Download Format
   const [downloadsFormat, setDownloadsFormat] = useState<string | null>(null);
   const [downloadsFormatSort, setDownloadsFormatSort] = useState<string | null>(null);
@@ -106,6 +107,8 @@ const SettingsApplication = () => {
     setCurrentThrottledRate(appSettingsConfigData?.downloads.throttledratelimit || null);
     setCurrentScrapingSleep(appSettingsConfigData?.downloads.sleep_interval || null);
     setCurrentAutodelete(appSettingsConfigData?.downloads.autodelete_days || null);
+    setCurrentAutodeleteEmptyChannels(appSettingsConfigData?.downloads.autodelete_empty_channels || false);
+    setCurrentAutodeleteEmptyPlaylists(appSettingsConfigData?.downloads.autodelete_empty_playlists || false);
 
     // Download Format
     setDownloadsFormat(appSettingsConfigData?.downloads.format || null);
@@ -315,6 +318,18 @@ const SettingsApplication = () => {
                         <li>Can also be configured on a per channel basis.</li>
                       </ul>
                     </li>
+                    <li>
+                      Auto delete empty unsubscribed channels.
+                      <ul>
+                        <li>The cleanup task triggers after the download finishes.</li>
+                      </ul>
+                    </li>
+                    <li>
+                      Auto delete empty unsubscribed playlists.
+                      <ul>
+                        <li>The cleanup task triggers after the download finishes.</li>
+                      </ul>
+                    </li>
                   </ul>
                 </div>
               )}
@@ -369,6 +384,26 @@ const SettingsApplication = () => {
                   value={currentAutodelete}
                   setValue={setCurrentAutodelete}
                   oldValue={appSettingsConfig?.downloads.autodelete_days}
+                  updateCallback={handleUpdateConfig}
+                />
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Auto delete empty playlists</p>
+                </div>
+                <ToggleConfig
+                  name="downloads.autodelete_empty_playlists"
+                  value={currentAutodeleteEmptyPlaylists}
+                  updateCallback={handleUpdateConfig}
+                />
+              </div>
+              <div className="settings-box-wrapper">
+                <div>
+                  <p>Auto delete empty channels</p>
+                </div>
+                <ToggleConfig
+                  name="downloads.autodelete_empty_channels"
+                  value={currentAutodeleteEmptyChannels}
                   updateCallback={handleUpdateConfig}
                 />
               </div>
