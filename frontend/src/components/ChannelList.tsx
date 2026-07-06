@@ -3,6 +3,7 @@ import { ChannelType } from '../pages/Channels';
 import Routes from '../configuration/routes/RouteList';
 import updateChannelSubscription from '../api/actions/updateChannelSubscription';
 import formatDate from '../functions/formatDates';
+import formatTime from '../functions/formatTime';
 import humanFileSize from '../functions/humanFileSize';
 import { FileSizeUnits } from '../api/actions/updateUserConfig';
 import FormattedNumber from './FormattedNumber';
@@ -97,7 +98,7 @@ const ChannelList = ({
                     )}
                   </td>
                   <td>{channel.channel_video_count ?? 0}</td>
-                  <td>{channel.channel_media_duration ?? '0s'}</td>
+                  <td>{formatTime(channel.channel_media_duration ?? 0)}</td>
                   <td>{humanFileSize(channel.channel_media_size ?? 0, useSiUnits)}</td>
                   <td>{formatDate(channel.channel_last_refresh)}</td>
                   <td>
