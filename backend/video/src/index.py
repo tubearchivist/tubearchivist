@@ -520,9 +520,12 @@ def index_new_video(youtube_id, video_type=VideoTypeEnum.VIDEOS):
     video.get_from_es(print_error=False)
     if video.json_data:
         # reindex only for force redownload
-        video = Reindex().reindex_single_video(youtube_id=youtube_id)
-    else:
-        video.build_json()
+        video = Reindex().reindex_single_video(
+            youtube_id=youtube_id, from_download=True
+        )
+        return video.json_data
+
+    video.build_json()
 
     if not video.json_data:
         raise ValueError("failed to get metadata for " + youtube_id)

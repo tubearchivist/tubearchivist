@@ -428,6 +428,10 @@ class DownloadPostProcess(DownloaderBase):
 
             channel = YoutubeChannel(channel_id)
             channel.get_from_es()
+            if not channel.json_data:
+                print(f"{channel_id}: skip failed channel import")
+                continue
+
             overwrites = channel.get_overwrites()
             if overwrites.get("index_playlists"):
                 channel.get_all_playlists()
@@ -459,6 +463,10 @@ class DownloadPostProcess(DownloaderBase):
 
             playlist = YoutubePlaylist(playlist_id)
             playlist.get_from_es()
+            if not playlist.json_data:
+                print(f"{playlist_id}: skip failed playlist import")
+                continue
+
             playlist.add_vids_to_playlist()
             playlist.remove_vids_from_playlist()
             playlist.match_local()

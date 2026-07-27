@@ -8,7 +8,7 @@ VIDEO_URL_IN = [
     "7DKv5H5Frt0",
     "https://www.youtube.com/watch?v=7DKv5H5Frt0",
     "https://www.youtube.com/watch?v=7DKv5H5Frt0&t=113&feature=shared",
-    "https://www.youtube.com/watch?v=7DKv5H5Frt0&list=PL96C35uN7xGJu6skU4TBYrIWxggkZBrF5&index=1&pp=iAQB"  # noqa: E501
+    "https://www.youtube.com/watch?v=7DKv5H5Frt0&list=PL96C35uN7xGJu6skU4TBYrIWxggkZBrF5&index=1&pp=iAQB",  # noqa: E501
     "https://youtu.be/7DKv5H5Frt0",
     "https://www.youtube.com/live/7DKv5H5Frt0",
 ]
@@ -77,15 +77,28 @@ CHANNEL_VID_TYPES = [
 PLAYLIST_URL_IN = [
     "PL96C35uN7xGJu6skU4TBYrIWxggkZBrF5",
     "https://www.youtube.com/playlist?list=PL96C35uN7xGJu6skU4TBYrIWxggkZBrF5",
+    "https://www.youtube.com/playlist?list=PLE6-bhDW8GWg",
 ]
 PLAYLIST_OUT = [
     {
         "type": "playlist",
         "url": "PL96C35uN7xGJu6skU4TBYrIWxggkZBrF5",
         "vid_type": "unknown",
-    }
+    },
+    {
+        "type": "playlist",
+        "url": "PL96C35uN7xGJu6skU4TBYrIWxggkZBrF5",
+        "vid_type": "unknown",
+    },
+    {
+        "type": "playlist",
+        "url": "PLE6-bhDW8GWg",
+        "vid_type": "unknown",
+    },
 ]
-PLAYLIST_TEST_CASES = [(i, PLAYLIST_OUT) for i in PLAYLIST_URL_IN]
+PLAYLIST_TEST_CASES = [
+    (i, [PLAYLIST_OUT[idx]]) for idx, i in enumerate(PLAYLIST_URL_IN)
+]
 
 # personal playlists
 EXPECTED_WL = [{"type": "playlist", "url": "WL", "vid_type": "unknown"}]
