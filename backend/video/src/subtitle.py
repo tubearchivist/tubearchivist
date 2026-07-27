@@ -193,7 +193,7 @@ class YoutubeSubtitle:
             return None
 
         if not response.text:
-            print(f"{subtitle_key}: skip empty subtitle")
+            print("skip empty subtitle")
             rand_sleep(self.video.config)
             return None
 
