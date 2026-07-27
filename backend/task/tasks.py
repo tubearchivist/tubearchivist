@@ -135,7 +135,7 @@ def download_pending(self, auto_only=False):
         downloader = VideoDownloader(task=self)
         downloaded, failed = downloader.run_queue(auto_only=auto_only)
 
-        if failed:
+        if failed and not self.is_stopped():
             print(f"[task][{self.name}] Videos failed, retry.")
             self.send_progress(["Videos failed, retry."])
             raise self.retry()
