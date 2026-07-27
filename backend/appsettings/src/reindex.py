@@ -306,7 +306,9 @@ class Reindex(ReindexBase):
         progress = idx / total
         self.task.send_progress(message, progress=progress)
 
-    def reindex_single_video(self, youtube_id: str) -> YoutubeVideo | None:
+    def reindex_single_video(
+        self, youtube_id: str, from_download=False
+    ) -> YoutubeVideo | None:
         """refresh data for single video"""
         video = YoutubeVideo(youtube_id)
 
@@ -317,13 +319,14 @@ class Reindex(ReindexBase):
 
         es_meta = video.json_data.copy()
 
-        # get new
-        media_url: str | bool = os.path.join(
-            EnvironmentSettings.MEDIA_DIR, es_meta["media_url"]
-        )
-        if not os.path.exists(media_url):
-            # fallback to cache path
+        if from_download:
+            # use cache path for reindex media file
             media_url = False
+        else:
+            # use archive path for reindex media file
+            media_url: str | bool = os.path.join(
+                EnvironmentSettings.MEDIA_DIR, es_meta["media_url"]
+            )
 
         video.build_json(media_path=media_url)
         if not video.youtube_meta:
