@@ -346,7 +346,7 @@ const SettingsApplication = () => {
               </div>
               <div className="settings-box-wrapper">
                 <div>
-                  <p>Sleep interval</p>
+                  <p>Sleep interval (s)</p>
                 </div>
                 <InputConfig
                   type="number"
