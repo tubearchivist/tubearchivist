@@ -332,7 +332,9 @@ def get_channels(
 
 
 def get_playlists(
-    subscribed_only: bool, source: list[str] | None = None
+    subscribed_only: bool,
+    source: list[str] | None = None,
+    channel_id: str | None = None,
 ) -> list[dict]:
     """get list of playlists"""
 
@@ -343,8 +345,12 @@ def get_playlists(
     must_list = [{"term": {"playlist_active": {"value": True}}}]
     if subscribed_only:
         must_list.append({"term": {"playlist_subscribed": {"value": True}}})
+    if channel_id:
+        must_list.append(
+            {"term": {"playlist_channel_id": {"value": channel_id}}}
+        )
 
-    data = {"query": {"bool": {"must": must_list}}}  # type: ignore
+    data["query"] = {"bool": {"must": must_list}}  # type: ignore
     if source:
         data["_source"] = source  # type: ignore
 
