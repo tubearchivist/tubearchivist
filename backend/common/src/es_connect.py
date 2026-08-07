@@ -118,6 +118,7 @@ class ElasticWrap:
         self,
         data: bool | dict = False,
         refresh: bool = False,
+        print_error: bool = True,
     ) -> tuple[dict, Any]:
         """delete document from es"""
 
@@ -134,7 +135,7 @@ class ElasticWrap:
 
         response = requests.delete(self.url, **kwargs)
 
-        if not response.ok:
+        if print_error and not response.ok:
             print(response.text)
 
         return response.json(), response.status_code

@@ -14,6 +14,7 @@ import subprocess
 from appsettings.src.config import AppConfig
 from common.src.env_settings import EnvironmentSettings
 from common.src.helper import ignore_filelist
+from download.src.queue_interact import PendingInteract
 from download.src.thumbnails import ThumbManager
 from PIL import Image
 from video.src.comments import Comments
@@ -517,7 +518,7 @@ class ManualImport:
             shutil.move(old_path, new_path, copy_function=shutil.copyfile)
 
     def _cleanup(self):
-        """cleanup leftover files"""
+        """cleanup leftover files, clean up from queue"""
         meta_data = self.current_video["metadata"]
         if meta_data and os.path.exists(meta_data):
             os.remove(meta_data)
@@ -529,3 +530,6 @@ class ManualImport:
         for subtitle_file in self.current_video["subtitle"]:
             if os.path.exists(subtitle_file):
                 os.remove(subtitle_file)
+
+        video_id = self.current_video["video_id"]
+        PendingInteract(youtube_id=video_id).delete_item(print_error=False)
