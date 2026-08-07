@@ -1,7 +1,12 @@
 import { useOutletContext } from 'react-router-dom';
-import loadChannelList, { ChannelsListResponse } from '../api/loader/loadChannelList';
+import loadChannelList, {
+  ChannelsListResponse,
+  ChannelSortByType,
+} from '../api/loader/loadChannelList';
+import { SortOrderType } from '../api/loader/loadVideoListByPage';
 import iconGridView from '/img/icon-gridview.svg';
 import iconListView from '/img/icon-listview.svg';
+import iconTableView from '/img/icon-tableview.svg';
 import iconAdd from '/img/icon-add.svg';
 import iconFilter from '/img/icon-filter.svg';
 import { useEffect, useState } from 'react';
@@ -41,6 +46,9 @@ export type ChannelType = {
   channel_tags?: string[];
   channel_thumb_url: string;
   channel_tvart_url: string;
+  channel_media_size?: number;
+  channel_video_count?: number;
+  channel_media_duration?: number;
 };
 
 const Channels = () => {
@@ -61,6 +69,19 @@ const Channels = () => {
   const channels = channelListResponseData?.data;
   const pagination = channelListResponseData?.paginate;
 
+  const [sortBy, setSortBy] = useState<ChannelSortByType>('name');
+  const [sortOrder, setSortOrder] = useState<SortOrderType>('asc');
+
+  const viewStyle = userConfig.view_style_channel;
+
+  const handleSort = (column: ChannelSortByType) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
+    }
+  };
   const handleUserConfigUpdate = async (config: Partial<UserConfigType>) => {
     const updatedUserConfig = await updateUserConfig(config);
     const { data: updatedUserConfigData } = updatedUserConfig;
@@ -72,13 +93,27 @@ const Channels = () => {
 
   useEffect(() => {
     (async () => {
-      const channelListResponse = await loadChannelList(currentPage, userConfig.show_subed_only);
+      const channelListResponse = await loadChannelList(
+        currentPage,
+        userConfig.show_subed_only,
+        viewStyle,
+        sortBy,
+        sortOrder,
+      );
 
       setChannelListResponse(channelListResponse);
       setShowNotification(false);
       setRefresh(false);
     })();
-  }, [refresh, userConfig.show_subed_only, currentPage, pagination?.current_page]);
+  }, [
+    refresh,
+    userConfig.show_subed_only,
+    currentPage,
+    pagination?.current_page,
+    viewStyle,
+    sortBy,
+    sortOrder,
+  ]);
 
   return (
     <>
@@ -194,11 +229,28 @@ const Channels = () => {
               data-value="list"
               alt="list view"
             />
+            <img
+              src={iconTableView}
+              onClick={() => {
+                handleUserConfigUpdate({
+                  view_style_channel: ViewStylesEnum.Table as ViewStylesType,
+                });
+              }}
+              data-origin="channel"
+              data-value="table"
+              alt="table view"
+            />
           </div>
         </div>
 
         <div className={`channel-list ${userConfig.view_style_channel}`}>
-          <ChannelList channelList={channels} refreshChannelList={setRefresh} />
+          <ChannelList
+            channelList={channels}
+            refreshChannelList={setRefresh}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            onSort={handleSort}
+          />
         </div>
 
         {pagination && (
