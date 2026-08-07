@@ -10,10 +10,10 @@ class PendingInteract:
         self.youtube_id = youtube_id
         self.status = status
 
-    def delete_item(self):
+    def delete_item(self, print_error: bool = True) -> None:
         """delete single item from pending"""
         path = f"ta_download/_doc/{self.youtube_id}"
-        _, _ = ElasticWrap(path).delete(refresh=True)
+        _, _ = ElasticWrap(path).delete(refresh=True, print_error=print_error)
 
     def delete_bulk(self, channel_id: str | None, vid_type: str | None):
         """delete all matching item by status"""
