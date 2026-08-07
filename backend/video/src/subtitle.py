@@ -185,15 +185,15 @@ class YoutubeSubtitle:
 
         response = requests.get(url, **request_kwargs)
 
+        subtitle_key = f"{self.video.youtube_id}-{lang}"
         if not response.ok:
-            subtitle_key = f"{self.video.youtube_id}-{lang}"
             print(f"{subtitle_key}: failed to download subtitle")
             print(response.text)
             rand_sleep(self.video.config)
             return None
 
         if not response.text:
-            print("skip empty subtitle")
+            print(f"{subtitle_key}: skip empty subtitle")
             rand_sleep(self.video.config)
             return None
 
