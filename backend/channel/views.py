@@ -1,7 +1,6 @@
 """all channel API views"""
 
 from channel.serializers import (
-    ChannelAggSerializer,
     ChannelListQuerySerializer,
     ChannelListSerializer,
     ChannelNavSerializer,
@@ -33,6 +32,15 @@ class ChannelApiListView(ApiBaseView):
     valid_filter = ["subscribed"]
     permission_classes = [AdminWriteOnly]
 
+    sort_field_map = {
+        "name": "channel_name.keyword",
+        "subscribers": "channel_subs",
+        "video_count": "channel_video_count",
+        "duration": "channel_media_duration",
+        "media_size": "channel_media_size",
+        "last_refresh": "channel_last_refresh",
+    }
+
     @extend_schema(
         responses={
             200: OpenApiResponse(ChannelListSerializer()),
@@ -41,13 +49,14 @@ class ChannelApiListView(ApiBaseView):
     )
     def get(self, request):
         """get request"""
-        self.data.update(
-            {"sort": [{"channel_name.keyword": {"order": "asc"}}]}
-        )
-
         serializer = ChannelListQuerySerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
+
+        sort_by = validated_data.get("sort", "name")
+        sort_order = validated_data.get("order", "asc")
+        es_sort_field = self.sort_field_map[sort_by]
+        self.data["sort"] = [{es_sort_field: {"order": sort_order}}]
 
         must_list = []
         query_filter = validated_data.get("filter")
@@ -177,38 +186,6 @@ class ChannelApiView(ApiBaseView):
 
         error = ErrorResponseSerializer({"error": "channel not found"})
         return Response(error.data, status=404)
-
-
-class ChannelAggsApiView(ApiBaseView):
-    """resolves to /api/channel/<channel_id>/aggs/
-    GET: get channel aggregations
-    """
-
-    search_base = "ta_video/_search"
-
-    @extend_schema(
-        responses={
-            200: OpenApiResponse(ChannelAggSerializer()),
-        },
-    )
-    def get(self, request, channel_id):
-        """get channel aggregations"""
-        self.data.update(
-            {
-                "query": {
-                    "term": {"channel.channel_id": {"value": channel_id}}
-                },
-                "aggs": {
-                    "total_items": {"value_count": {"field": "youtube_id"}},
-                    "total_size": {"sum": {"field": "media_size"}},
-                    "total_duration": {"sum": {"field": "player.duration"}},
-                },
-            }
-        )
-        self.get_aggs()
-        serializer = ChannelAggSerializer(self.response)
-
-        return Response(serializer.data)
 
 
 class ChannelNavApiView(ApiBaseView):

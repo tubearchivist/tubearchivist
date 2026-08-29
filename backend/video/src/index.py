@@ -337,10 +337,12 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
         except FileNotFoundError:
             print(f"{self.youtube_id}: failed {media_url}, continue.")
 
+        channel_id = self.json_data["channel"]["channel_id"]
         self.del_in_playlists()
         self.del_in_es()
         self.delete_subtitles()
         self.delete_comments()
+        ta_channel.YoutubeChannel(channel_id).update_channel_stats()
 
     def del_in_playlists(self):
         """remove downloaded in playlist"""

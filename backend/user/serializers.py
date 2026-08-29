@@ -34,7 +34,9 @@ class UserMeConfigSerializer(serializers.Serializer):
     view_style_home = serializers.ChoiceField(
         choices=["grid", "list", "table"]
     )
-    view_style_channel = serializers.ChoiceField(choices=["grid", "list"])
+    view_style_channel = serializers.ChoiceField(
+        choices=["grid", "list", "table"]
+    )
     view_style_downloads = serializers.ChoiceField(choices=["grid", "list"])
     view_style_playlist = serializers.ChoiceField(choices=["grid", "list"])
     vid_type_filter = serializers.ChoiceField(
