@@ -20,6 +20,8 @@ export const useAppSettingsStore = create<AppSettingsState>(set => ({
       limit_speed: null,
       sleep_interval: null,
       autodelete_days: null,
+      autodelete_empty_channels: false,
+      autodelete_empty_playlists: false,
       format: null,
       format_sort: null,
       add_metadata: false,

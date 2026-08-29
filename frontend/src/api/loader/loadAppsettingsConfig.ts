@@ -13,6 +13,8 @@ export type AppSettingsConfigType = {
     limit_speed: number | null;
     sleep_interval: number | null;
     autodelete_days: number | null;
+    autodelete_empty_channels: boolean;
+    autodelete_empty_playlists: boolean;
     format: string | null;
     format_sort: string | null;
     add_metadata: boolean;
