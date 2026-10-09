@@ -93,6 +93,15 @@
                 },
                 "channel_tabs": {
                     "type": "keyword"
+                },
+                "channel_media_size": {
+                    "type": "long"
+                },
+                "channel_video_count": {
+                    "type": "long"
+                },
+                "channel_media_duration": {
+                    "type": "long"
                 }
             },
             "expected_set": {
@@ -208,6 +217,15 @@
                         },
                         "channel_tabs": {
                             "type": "keyword"
+                        },
+                        "channel_media_size": {
+                            "type": "long"
+                        },
+                        "channel_video_count": {
+                            "type": "long"
+                        },
+                        "channel_media_duration": {
+                            "type": "long"
                         }
                     }
                 },

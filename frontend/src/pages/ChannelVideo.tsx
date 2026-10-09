@@ -22,8 +22,8 @@ import loadVideoListByFilter, {
   WatchTypes,
   WatchTypesEnum,
 } from '../api/loader/loadVideoListByPage';
-import loadChannelAggs, { ChannelAggsType } from '../api/loader/loadChannelAggs';
 import humanFileSize from '../functions/humanFileSize';
+import formatTime from '../functions/formatTime';
 import { useUserConfigStore } from '../stores/UserConfigStore';
 import { FileSizeUnits } from '../api/actions/updateUserConfig';
 import { ApiResponseType } from '../functions/APIClient';
@@ -51,16 +51,12 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
   const [channelResponse, setChannelResponse] = useState<ApiResponseType<ChannelResponseType>>();
   const [videoResponse, setVideoReponse] =
     useState<ApiResponseType<VideoListByFilterResponseType>>();
-  const [videoAggsResponse, setVideoAggsResponse] = useState<ApiResponseType<ChannelAggsType>>();
-
   const { data: channelResponseData } = channelResponse ?? {};
   const { data: videoResponseData } = videoResponse ?? {};
-  const { data: videoAggsResponseData } = videoAggsResponse ?? {};
 
   const channel = channelResponseData;
   const videoList = videoResponseData?.data;
   const pagination = videoResponseData?.paginate;
-  const videoAggs = videoAggsResponseData;
 
   const hasVideos = videoResponseData?.data?.length !== 0;
   const useSiUnits = userConfig.file_size_unit === FileSizeUnits.Metric;
@@ -87,11 +83,8 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
         type: videoType,
         height: filterHeight,
       });
-      const channelAggs = await loadChannelAggs(channelId);
-
       setChannelResponse(channelResponse);
       setVideoReponse(videos);
-      setVideoAggsResponse(channelAggs);
       setRefresh(false);
     })();
   }, [
@@ -123,13 +116,13 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
               setRefresh={setRefresh}
             />
             <div className="info-box-item">
-              {videoAggs && (
+              {channel.channel_video_count !== undefined && (
                 <>
                   <p>
-                    {videoAggs.total_items.value} videos <span className="space-carrot">|</span>{' '}
-                    {videoAggs.total_duration.value_str} playback{' '}
+                    {channel.channel_video_count} videos <span className="space-carrot">|</span>{' '}
+                    {formatTime(channel.channel_media_duration ?? 0)} playback{' '}
                     <span className="space-carrot">|</span> Total size{' '}
-                    {humanFileSize(videoAggs.total_size.value, useSiUnits)}
+                    {humanFileSize(channel.channel_media_size ?? 0, useSiUnits)}
                   </p>
                   <div className="button-box">
                     <Button

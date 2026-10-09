@@ -66,6 +66,7 @@ class Command(BaseCommand):
         self._mig_fix_channel_art_types()
         self._mig_fix_channel_description()
         self._mig_fix_video_description()
+        self._mig_populate_channel_stats()
 
     @property
     def skip_migrations(self) -> bool:
@@ -478,6 +479,34 @@ class Command(BaseCommand):
         else:
             noop_msg = "    no items needed updating"
             self.stdout.write(self.style.SUCCESS(noop_msg))
+
+    def _mig_populate_channel_stats(self) -> None:
+        """populate channel size/count/duration for channels missing stats"""
+        desc = "populate channel media stats"
+        self.stdout.write(f"[MIGRATION] run {desc}")
+        channels = get_channels(
+            subscribed_only=False, source=["channel_id", "channel_media_size"]
+        )
+        counter = 0
+        for channel_response in channels:
+            if channel_response.get("channel_media_size") is not None:
+                continue
+
+            YoutubeChannel(
+                channel_response["channel_id"]
+            ).update_channel_stats()
+            counter += 1
+
+        if counter:
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"    ✓ populated stats for {counter} channels"
+                )
+            )
+        else:
+            self.stdout.write(
+                self.style.SUCCESS("    no channels needed updating")
+            )
 
     def _run_migration(
         self, index_name: str, desc: str, query: dict, script: dict

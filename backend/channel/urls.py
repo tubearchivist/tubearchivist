@@ -20,11 +20,6 @@ urlpatterns = [
         name="api-channel",
     ),
     path(
-        "<slug:channel_id>/aggs/",
-        views.ChannelAggsApiView.as_view(),
-        name="api-channel-aggs",
-    ),
-    path(
         "<slug:channel_id>/nav/",
         views.ChannelNavApiView.as_view(),
         name="api-channel-nav",

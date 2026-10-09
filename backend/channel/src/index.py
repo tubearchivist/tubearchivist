@@ -168,6 +168,31 @@ class YoutubeChannel(YouTubeItem):
             print(f"sync to videos failed with status code {status_code}")
             print(response)
 
+    def update_channel_stats(self) -> None:
+        """Recompute and store media stats on the channel document."""
+        data = {
+            "query": {
+                "term": {"channel.channel_id": {"value": self.youtube_id}}
+            },
+            "aggs": {
+                "total_items": {"value_count": {"field": "youtube_id"}},
+                "total_size": {"sum": {"field": "media_size"}},
+                "total_duration": {"sum": {"field": "player.duration"}},
+            },
+            "size": 0,
+        }
+        response, _ = ElasticWrap("ta_video/_search").get(data=data)
+        aggs = response.get("aggregations", {})
+
+        update = {
+            "doc": {
+                "channel_video_count": int(aggs["total_items"]["value"]),
+                "channel_media_size": int(aggs["total_size"]["value"]),
+                "channel_media_duration": int(aggs["total_duration"]["value"]),
+            }
+        }
+        ElasticWrap(f"ta_channel/_update/{self.youtube_id}").post(update)
+
     def change_subscribe(self, new_subscribe_state: bool):
         """change subscribe status"""
         if not self.json_data:

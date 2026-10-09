@@ -87,6 +87,7 @@ class VideoDownloader(DownloaderBase):
             self._notify(video_data, "Move downloaded file to archive")
             self.move_to_archive(vid_dict)
             self._delete_from_pending(youtube_id)
+            YoutubeChannel(channel_id).update_channel_stats()
             downloaded += 1
 
         # post processing
