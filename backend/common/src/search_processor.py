@@ -5,6 +5,7 @@ Functionality:
 """
 
 import urllib.parse
+from pathlib import Path
 
 from common.src.env_settings import EnvironmentSettings
 from common.src.helper import date_parser, get_duration_str
@@ -181,9 +182,11 @@ class SearchProcess:
         vid_thumb_url = None
         if download_dict.get("vid_thumb_url"):
             video_id = download_dict["youtube_id"]
-            cache_root = EnvironmentSettings().get_cache_root()
-            relative_path = ThumbManager(video_id).vid_thumb_path()
-            vid_thumb_url = f"{cache_root}/{relative_path}"
+            vid_thumb_path = Path(
+                ThumbManager(item_id=video_id).vid_thumb_path(absolute=True)
+            )
+            if vid_thumb_path.exists():
+                vid_thumb_url = f"/media/thumb/video/{video_id}.jpg"
 
         download_dict.update(
             {
