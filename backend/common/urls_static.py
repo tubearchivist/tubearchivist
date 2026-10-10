@@ -1,0 +1,12 @@
+"""static urls"""
+
+from common import views_static
+from django.urls import path
+
+urlpatterns = [
+    path(
+        "stream/<slug:channel_id>/<slug:video_id>.mp4",
+        views_static.MediaStreamView.as_view(),
+        name="stream",
+    ),
+]

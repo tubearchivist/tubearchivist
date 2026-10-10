@@ -134,7 +134,7 @@ class SearchProcess:
         video_dict.update(
             {
                 "channel": channel,
-                "media_url": f"/api/stream/{media_url}",
+                "media_url": f"/media/stream/{media_url}",
                 "vid_last_refresh": vid_last_refresh,
                 "published": published,
                 "vid_thumb_url": f"{cache_root}/{vid_thumb_url}",

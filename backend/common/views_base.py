@@ -1,5 +1,6 @@
 """base classes to inherit from"""
 
+from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap
 from common.src.index_generic import Pagination
 from common.src.search_processor import SearchProcess, process_aggs
@@ -100,3 +101,19 @@ class ApiBaseView(APIView):
         process_aggs(response)
 
         self.response = response.get("aggregations")
+
+
+class StaticAuthBaseView(APIView):
+    """baseview for static files, handle DISABLE_STATIC_AUTH"""
+
+    http_method_names = [method.lower() for method in permissions.SAFE_METHODS]
+    permission_classes = (
+        [permissions.AllowAny]
+        if EnvironmentSettings.DISABLE_STATIC_AUTH
+        else [permissions.IsAuthenticated]
+    )
+    authentication_classes = (
+        []
+        if EnvironmentSettings.DISABLE_STATIC_AUTH
+        else [SessionAuthentication, TokenAuthentication]
+    )

@@ -4,11 +4,6 @@ from common import views
 from django.urls import path
 
 urlpatterns = [
-    path(
-        "stream/<slug:channel_id>/<slug:video_id>.mp4",
-        views.MediaStreamView.as_view(),
-        name="stream",
-    ),
     path("ping/", views.PingView.as_view(), name="ping"),
     path(
         "refresh/",
