@@ -10,7 +10,18 @@ from common.src.streaming import RangedFileResponse
 from common.views_base import StaticAuthBaseView
 from django.http import HttpResponse
 from download.src.thumbnails import ThumbManager
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    OpenApiResponse,
+    extend_schema,
+)
 from rest_framework.response import Response
+
+ERROR_RESPONSES = {
+    400: OpenApiResponse(ErrorResponseSerializer(), description="Bad request"),
+    404: OpenApiResponse(ErrorResponseSerializer(), description="Not found"),
+}
 
 
 class MediaStreamView(StaticAuthBaseView):
@@ -29,8 +40,25 @@ class MediaStreamView(StaticAuthBaseView):
             EnvironmentSettings.MEDIA_DIR, channel_id, f"{video_id}.mp4"
         )
 
+    @extend_schema(
+        operation_id="media_stream",
+        parameters=[
+            OpenApiParameter(
+                name="Range",
+                type=str,
+                location=OpenApiParameter.HEADER,
+                description="Single byte range, for example bytes=0-1023",
+            )
+        ],
+        responses={
+            (200, "video/mp4"): OpenApiTypes.BINARY,
+            (206, "video/mp4"): OpenApiTypes.BINARY,
+            **ERROR_RESPONSES,
+            416: OpenApiResponse(description="Range not satisfiable"),
+        },
+    )
     def get(self, request, channel_id, video_id):
-        """get request"""
+        """get media stream, handle ranged byte request"""
         try:
             path = self.get_media_path(channel_id, video_id)
         except ValueError as path_err:
@@ -69,8 +97,15 @@ class SubtitleView(StaticAuthBaseView):
             EnvironmentSettings.MEDIA_DIR, channel_id, f"{video_id}.{lang}.vtt"
         )
 
+    @extend_schema(
+        operation_id="media_subtitle",
+        responses={
+            (200, "text/vtt"): OpenApiTypes.BINARY,
+            **ERROR_RESPONSES,
+        },
+    )
     def get(self, request, channel_id, video_id, lang):
-        """get request"""
+        """get subtitle file"""
         try:
             subtitle_path = self.get_subtitle_path(channel_id, video_id, lang)
         except ValueError as path_err:
@@ -102,8 +137,15 @@ class VideoThumbView(StaticAuthBaseView):
             ThumbManager(item_id=video_id).vid_thumb_path(absolute=True)
         )
 
+    @extend_schema(
+        operation_id="media_video_thumbnail",
+        responses={
+            (200, "image/jpeg"): OpenApiTypes.BINARY,
+            **ERROR_RESPONSES,
+        },
+    )
     def get(self, request, video_id):
-        """get thumb"""
+        """get video thumb"""
         try:
             thumb_path = self.get_thumb_path(video_id)
         except ValueError as path_err:
@@ -136,8 +178,15 @@ class ChannelArtView(StaticAuthBaseView):
         self.validate_channel_art_type(art_type)
         return Path(ThumbManager(channel_id).channel_art_path(art_type))
 
+    @extend_schema(
+        operation_id="media_channel_art",
+        responses={
+            (200, "image/jpeg"): OpenApiTypes.BINARY,
+            **ERROR_RESPONSES,
+        },
+    )
     def get(self, request, channel_id, art_type):
-        """get artwork"""
+        """get channel artwork"""
         try:
             art_path = self.get_art_path(channel_id, art_type=art_type)
         except ValueError as path_err:
@@ -167,8 +216,15 @@ class PlaylistThumbView(StaticAuthBaseView):
         self.validate_playlist_id(playlist_id)
         return Path(ThumbManager(item_id=playlist_id).playlist_art_path())
 
+    @extend_schema(
+        operation_id="media_playlist_thumbnail",
+        responses={
+            (200, "image/jpeg"): OpenApiTypes.BINARY,
+            **ERROR_RESPONSES,
+        },
+    )
     def get(self, request, playlist_id):
-        """get thumb"""
+        """get playlist thumb"""
         try:
             thumb_path = self.get_thumb_path(playlist_id)
         except ValueError as path_err:
