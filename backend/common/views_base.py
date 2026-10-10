@@ -130,6 +130,7 @@ class StaticAuthBaseView(APIView):
     CHANNEL_ART_REG = re.compile(r"banner|thumb|tvart")
     VIDEO_ID_REG = re.compile(r"[A-Za-z0-9_-]{11}")
     PLAYLIST_ID_REG = re.compile(r"(?:LL|WL|[A-Za-z0-9_-]{13,48})")
+    SUBTITLE_LANG_REG = re.compile(r"[A-Za-z0-9_-]{2,10}")
 
     def validate_channel_id(self, channel_id: str) -> None:
         """validate channel id"""
@@ -150,3 +151,8 @@ class StaticAuthBaseView(APIView):
         """validate playlist id"""
         if not self.PLAYLIST_ID_REG.fullmatch(playlist_id):
             raise ValueError("invalid playlist ID")
+
+    def validate_subtitle_lang(self, lang: str) -> None:
+        """validate subtitle lang"""
+        if not self.SUBTITLE_LANG_REG.fullmatch(lang):
+            raise ValueError("invalid subtitle lang")

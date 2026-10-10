@@ -50,6 +50,44 @@ class MediaStreamView(StaticAuthBaseView):
         )
 
 
+class SubtitleView(StaticAuthBaseView):
+    """resolves to /media/subtitle/<channel_id>/<video_id>.<lang>.vtt
+    authenticated subtitle serving.
+    public read with DISABLE_STATIC_AUTH
+    GET: get subtitle
+    """
+
+    def get_subtitle_path(
+        self, channel_id: str, video_id: str, lang: str
+    ) -> Path:
+        """get subtitle path"""
+        self.validate_channel_id(channel_id)
+        self.validate_video_id(video_id)
+        self.validate_subtitle_lang(lang)
+
+        return Path(
+            EnvironmentSettings.MEDIA_DIR, channel_id, f"{video_id}.{lang}.vtt"
+        )
+
+    def get(self, request, channel_id, video_id, lang):
+        """get request"""
+        try:
+            subtitle_path = self.get_subtitle_path(channel_id, video_id, lang)
+        except ValueError as path_err:
+            error = ErrorResponseSerializer({"error": str(path_err)})
+            return Response(error.data, status=400)
+
+        if not subtitle_path.is_file():
+            error = ErrorResponseSerializer({"error": "file not found"})
+            return Response(error.data, status=404)
+
+        content = subtitle_path.read_bytes()
+        response = HttpResponse(content, content_type="text/vtt")
+        response["Cache-Control"] = self.CACHE_CONTROL
+
+        return response
+
+
 class VideoThumbView(StaticAuthBaseView):
     """resolves to /media/thumb/video/<video_id>.jpg
     authenticated video thumb endpoint

@@ -7,7 +7,6 @@ Functionality:
 import urllib.parse
 from pathlib import Path
 
-from common.src.env_settings import EnvironmentSettings
 from common.src.helper import date_parser, get_duration_str
 from common.src.ta_redis import RedisArchivist
 from download.src.thumbnails import ThumbManager
@@ -118,14 +117,11 @@ class SearchProcess:
         published = date_parser(video_dict["published"])
         channel = self._process_channel(video_dict["channel"])
 
-        media_root = EnvironmentSettings().get_media_root()
-
         if "subtitles" in video_dict:
             for idx, _ in enumerate(video_dict["subtitles"]):
                 url = video_dict["subtitles"][idx]["media_url"]
-                video_dict["subtitles"][idx][
-                    "media_url"
-                ] = f"{media_root}/{url}"
+                subtitle_url = f"/media/subtitle/{url}"
+                video_dict["subtitles"][idx]["media_url"] = subtitle_url
         else:
             video_dict["subtitles"] = []
 
@@ -235,8 +231,10 @@ class SearchProcess:
             subtitle_line = highlight.get("subtitle_line")[0]
             subtitle_dict.update({"subtitle_line": subtitle_line})
 
-        thumb_path = ThumbManager(subtitle_dict["youtube_id"]).vid_thumb_path()
-        subtitle_dict.update({"vid_thumb_url": f"/cache/{thumb_path}"})
+        video_id = subtitle_dict["youtube_id"]
+        subtitle_dict.update(
+            {"vid_thumb_url": f"/media/thumb/video/{video_id}.jpg"}
+        )
 
         return subtitle_dict
 

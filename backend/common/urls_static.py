@@ -10,6 +10,11 @@ urlpatterns = [
         name="stream",
     ),
     path(
+        "subtitle/<slug:channel_id>/<slug:video_id>.<slug:lang>.vtt",
+        views_static.SubtitleView.as_view(),
+        name="subtitle",
+    ),
+    path(
         "thumb/video/<slug:video_id>.jpg",
         views_static.VideoThumbView.as_view(),
         name="video-thumb",

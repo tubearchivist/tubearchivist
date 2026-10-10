@@ -149,7 +149,6 @@ This codebase is set up to be developed natively outside of docker as well as in
 
 Note:
 - This project doesn't look for contributions to this to cover additional dev setup environments from new contributors. If you are a regular contributor and you see ways to improve this, please reach out on Discord first.
-- Subtitles currently fail to load with `DJANGO_DEBUG=True`, that is due to incorrect `Content-Type` error set by Django's static file implementation. That's only if you run the Django dev server, Nginx sets the correct headers in the container.
 
 ### Native Instruction
 
