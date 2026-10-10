@@ -83,8 +83,7 @@ class SearchProcess:
     def _process_channel(channel_dict):
         """run on single channel"""
         channel_id = channel_dict["channel_id"]
-        cache_root = EnvironmentSettings().get_cache_root()
-        art_base = f"{cache_root}/channels/{channel_id}"
+        art_base = f"/media/thumb/channel/{channel_id}"
         date_str = date_parser(channel_dict["channel_last_refresh"])
         channel_dict.update(
             {
@@ -94,17 +93,17 @@ class SearchProcess:
         )
 
         if channel_dict.get("channel_banner_url"):
-            channel_dict["channel_banner_url"] = f"{art_base}_banner.jpg"
+            channel_dict["channel_banner_url"] = f"{art_base}/banner.jpg"
         else:
             channel_dict["channel_banner_url"] = None
 
         if channel_dict.get("channel_thumb_url"):
-            channel_dict["channel_thumb_url"] = f"{art_base}_thumb.jpg"
+            channel_dict["channel_thumb_url"] = f"{art_base}/thumb.jpg"
         else:
             channel_dict["channel_thumb_url"] = None
 
         if channel_dict.get("channel_tvart_url"):
-            channel_dict["channel_tvart_url"] = f"{art_base}_tvart.jpg"
+            channel_dict["channel_tvart_url"] = f"{art_base}/tvart.jpg"
         else:
             channel_dict["channel_tvart_url"] = None
 

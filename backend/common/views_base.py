@@ -120,7 +120,14 @@ class StaticAuthBaseView(APIView):
         else [SessionAuthentication, TokenAuthentication]
     )
 
+    CACHE_CONTROL = (
+        "public, max-age=3600"
+        if EnvironmentSettings.DISABLE_STATIC_AUTH
+        else "private, max-age=3600"
+    )
+
     CHANNEL_ID_REG = re.compile(r"UC[A-Za-z0-9_-]{22}")
+    CHANNEL_ART_REG = re.compile(r"banner|thumb|tvart")
     VIDEO_ID_REG = re.compile(r"[A-Za-z0-9_-]{11}")
     PLAYLIST_ID_REG = re.compile(r"[A-Za-z0-9_-]{13,48}")
 
@@ -128,6 +135,11 @@ class StaticAuthBaseView(APIView):
         """validate channel id"""
         if not self.CHANNEL_ID_REG.fullmatch(channel_id):
             raise ValueError("invalid channel ID")
+
+    def validate_channel_art_type(self, channel_art: str) -> None:
+        """validate channel art type"""
+        if not self.CHANNEL_ART_REG.fullmatch(channel_art):
+            raise ValueError("invalid channel art type")
 
     def validate_video_id(self, video_id: str) -> None:
         """validate video id"""

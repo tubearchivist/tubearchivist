@@ -2,6 +2,7 @@
 
 import mimetypes
 from pathlib import Path
+from typing import Literal
 
 from common.serializers import ErrorResponseSerializer
 from common.src.env_settings import EnvironmentSettings
@@ -77,6 +78,40 @@ class VideoThumbView(StaticAuthBaseView):
 
         content = thumb_path.read_bytes()
         response = HttpResponse(content, content_type="image/jpeg")
-        response["Cache-Control"] = "public, max-age=3600"
+        response["Cache-Control"] = self.CACHE_CONTROL
+
+        return response
+
+
+class ChannelArtView(StaticAuthBaseView):
+    """resolves to /media/thumb/channel/<channel_id>/<art-type>.jpg
+    authenticated channel art endpoint
+    public read with DISABLE_STATIC_AUTH
+    GET: get thumbnail
+    """
+
+    def get_art_path(
+        self, channel_id: str, art_type: Literal["thumb", "banner", "tvart"]
+    ) -> Path:
+        """get path"""
+        self.validate_channel_id(channel_id)
+        self.validate_channel_art_type(art_type)
+        return Path(ThumbManager(channel_id).channel_art_path(art_type))
+
+    def get(self, request, channel_id, art_type):
+        """get artwork"""
+        try:
+            art_path = self.get_art_path(channel_id, art_type=art_type)
+        except ValueError as path_err:
+            error = ErrorResponseSerializer({"error": str(path_err)})
+            return Response(error.data, status=400)
+
+        if not art_path.is_file():
+            error = ErrorResponseSerializer({"error": "file not found"})
+            return Response(error.data, status=404)
+
+        content = art_path.read_bytes()
+        response = HttpResponse(content, content_type="image/jpeg")
+        response["Cache-Control"] = self.CACHE_CONTROL
 
         return response
