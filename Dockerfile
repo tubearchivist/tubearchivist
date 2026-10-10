@@ -54,7 +54,6 @@ COPY --from=ffmpeg-builder ./ffprobe/ffprobe /usr/bin/ffprobe
 
 # install distro packages needed
 RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recommends \
-    nginx \
     atomicparsley \
     tini \
     curl && rm -rf /var/lib/apt/lists/*
@@ -69,10 +68,6 @@ RUN if [ "$INSTALL_DEBUG" ] ; then \
 # make folders
 RUN mkdir /cache /youtube /app
 
-# copy config files
-COPY docker_assets/nginx.conf /etc/nginx/sites-available/default
-RUN sed -i 's/^user www\-data\;$/user root\;/' /etc/nginx/nginx.conf
-
 # copy application into container
 COPY ./backend /app
 COPY ./docker_assets/run.sh /app
@@ -80,6 +75,8 @@ COPY ./docker_assets/backend_start.py /app
 COPY ./docker_assets/beat_auto_spawn.sh /app
 
 COPY --from=node-builder ./frontend/dist /app/static
+
+RUN python /app/manage.py collectstatic --noinput -c
 
 # volumes
 VOLUME /cache

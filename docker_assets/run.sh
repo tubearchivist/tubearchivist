@@ -23,7 +23,6 @@ python manage.py ta_stop_on_error
 
 # django setup
 python manage.py migrate
-python manage.py collectstatic --noinput -c
 
 # ta setup
 python manage.py ta_envcheck
@@ -31,7 +30,6 @@ python manage.py ta_connection
 python manage.py ta_startup
 
 # start all tasks
-nginx &
 celery -A task.celery worker \
     --loglevel=$LOGLEVEL \
     --concurrency 4 \
