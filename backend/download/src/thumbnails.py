@@ -166,6 +166,14 @@ class ThumbManager(ThumbManagerBase):
 
         return channel_path
 
+    def playlist_art_path(
+        self,
+        item_id: str | None = None,
+    ):
+        """playlist art path building"""
+        playlist_id = item_id if item_id else self.item_id
+        return os.path.join(self.PLAYLIST_DIR, f"{playlist_id}.jpg")
+
     def download_channel_art(self, urls, skip_existing=False):
         """pass tuple of channel thumbnails"""
         channel_thumb, channel_banner, channel_tv = urls
@@ -206,7 +214,7 @@ class ThumbManager(ThumbManagerBase):
 
     def download_playlist_thumb(self, url, skip_existing=False):
         """pass thumbnail url"""
-        thumb_path = os.path.join(self.PLAYLIST_DIR, f"{self.item_id}.jpg")
+        thumb_path = self.playlist_art_path()
         if skip_existing and os.path.exists(thumb_path):
             return
 
@@ -254,11 +262,9 @@ class ThumbManager(ThumbManagerBase):
 
         playlist_ids = json_data.get("playlist", [])
         for plalyist_id in playlist_ids:
-            playlist_path = os.path.join(
-                self.PLAYLIST_DIR, f"{plalyist_id}.jpg"
-            )
+            art_path = self.playlist_art_path(item_id=plalyist_id)
             self._embed_art_item(
-                video, f"playlist_{plalyist_id}", art_path=playlist_path
+                video, f"playlist_{plalyist_id}", art_path=art_path
             )
 
         video.save()
@@ -297,7 +303,7 @@ class ThumbManager(ThumbManagerBase):
 
     def delete_playlist_thumb(self):
         """delete playlist thumbnail"""
-        thumb_path = os.path.join(self.PLAYLIST_DIR, f"{self.item_id}.jpg")
+        thumb_path = self.playlist_art_path()
         if os.path.exists(thumb_path):
             os.remove(thumb_path)
 

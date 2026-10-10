@@ -129,7 +129,7 @@ class StaticAuthBaseView(APIView):
     CHANNEL_ID_REG = re.compile(r"UC[A-Za-z0-9_-]{22}")
     CHANNEL_ART_REG = re.compile(r"banner|thumb|tvart")
     VIDEO_ID_REG = re.compile(r"[A-Za-z0-9_-]{11}")
-    PLAYLIST_ID_REG = re.compile(r"[A-Za-z0-9_-]{13,48}")
+    PLAYLIST_ID_REG = re.compile(r"(?:LL|WL|[A-Za-z0-9_-]{13,48})")
 
     def validate_channel_id(self, channel_id: str) -> None:
         """validate channel id"""

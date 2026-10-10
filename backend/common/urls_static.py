@@ -19,4 +19,9 @@ urlpatterns = [
         views_static.ChannelArtView.as_view(),
         name="channel-art",
     ),
+    path(
+        "thumb/playlist/<slug:playlist_id>.jpg",
+        views_static.PlaylistThumbView.as_view(),
+        name="playlist-thumb",
+    ),
 ]

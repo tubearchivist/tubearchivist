@@ -157,15 +157,12 @@ class SearchProcess:
 
         return dict(sorted(video_dict.items()))
 
-    @staticmethod
-    def _process_playlist(playlist_dict):
+    def _process_playlist(self, playlist_dict):
         """run on single playlist dict"""
-        playlist_id = playlist_dict["playlist_id"]
         playlist_last_refresh = date_parser(
             playlist_dict["playlist_last_refresh"]
         )
-        cache_root = EnvironmentSettings().get_cache_root()
-        playlist_thumbnail = f"{cache_root}/playlists/{playlist_id}.jpg"
+        playlist_thumbnail = self._playlist_thumb_vid_check(playlist_dict)
         description = playlist_dict.get("playlist_description")
         playlist_dict.update(
             {
@@ -176,6 +173,19 @@ class SearchProcess:
         )
 
         return dict(sorted(playlist_dict.items()))
+
+    @staticmethod
+    def _playlist_thumb_vid_check(playlist_dict: dict):
+        """use first video in playlist if available
+        this is usually higher resolution"""
+        entries = playlist_dict.get("playlist_entries", [])
+        if len(entries) > 0 and entries[0]["downloaded"]:
+            first_vid_id = entries[0]["youtube_id"]
+            vid_path = ThumbManager(first_vid_id).vid_thumb_path(absolute=True)
+            if Path(vid_path).exists():
+                return f"/media/thumb/video/{first_vid_id}.jpg"
+
+        return f"/media/thumb/playlist/{playlist_dict['playlist_id']}.jpg"
 
     def _process_download(self, download_dict):
         """run on single download item"""

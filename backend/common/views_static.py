@@ -115,3 +115,34 @@ class ChannelArtView(StaticAuthBaseView):
         response["Cache-Control"] = self.CACHE_CONTROL
 
         return response
+
+
+class PlaylistThumbView(StaticAuthBaseView):
+    """resolves to /media/thumb/playlist/<playlist_id>.jpg
+    authenticated playlist thumb endpoint
+    public read with DISABLE_STATIC_AUTH
+    GET: get thumbnail
+    """
+
+    def get_thumb_path(self, playlist_id: str) -> Path:
+        """get path"""
+        self.validate_playlist_id(playlist_id)
+        return Path(ThumbManager(item_id=playlist_id).playlist_art_path())
+
+    def get(self, request, playlist_id):
+        """get thumb"""
+        try:
+            thumb_path = self.get_thumb_path(playlist_id)
+        except ValueError as path_err:
+            error = ErrorResponseSerializer({"error": str(path_err)})
+            return Response(error.data, status=400)
+
+        if not thumb_path.is_file():
+            error = ErrorResponseSerializer({"error": "file not found"})
+            return Response(error.data, status=404)
+
+        content = thumb_path.read_bytes()
+        response = HttpResponse(content, content_type="image/jpeg")
+        response["Cache-Control"] = self.CACHE_CONTROL
+
+        return response
