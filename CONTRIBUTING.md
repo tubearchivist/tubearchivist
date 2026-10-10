@@ -214,7 +214,7 @@ You may find it nice to run everything inside of a VM for complete environment s
 ```bash
 ./deploy.sh test
 ```
-- The command above will call the docker build command with `--build-arg INSTALL_DEBUG=1` to install additional useful debug tools.
+
 - The `test` argument takes another optional argument to build for a specific architecture valid options are: `amd64`, `arm64` and `multi`, default is `amd64`.
 - This `deploy.sh` script is not meant to be universally usable for every possible environment but could serve as an idea on how to automatically rebuild containers to test changes - customize to your liking.
 

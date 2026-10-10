@@ -69,6 +69,8 @@ UNEXPECTED_ENV_VARS = {
     "REDIS_PORT": "Has been consolidated in 'REDIS_CON' connection string",
     "ENABLE_CAST": "That is now a toggle in setting and DISABLE_STATIC_AUTH",
     "TA_BACKEND_PORT": "That is removed, only TA_PORT is needed",
+    "HOST_UID": "Removed, start container under dedicated user instead",
+    "HOST_GID": "Removed, start container under dedicated user instead",
 }
 INST = "https://github.com/tubearchivist/tubearchivist#installing-and-updating"
 

@@ -25,7 +25,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # install requirements
 COPY ./backend/requirements.txt /requirements.txt
-RUN pip install --user -r requirements.txt
+ENV VIRTUAL_ENV=/opt/venv
+RUN python -m venv "$VIRTUAL_ENV"
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+RUN pip install --no-cache-dir -r /requirements.txt
 
 # build ffmpeg
 FROM python:3.13.11-slim-trixie AS ffmpeg-builder
@@ -38,15 +42,15 @@ RUN python ffmpeg_download.py $TARGETPLATFORM
 # build final image
 FROM python:3.13.11-slim-trixie AS tubearchivist
 
-ARG INSTALL_DEBUG
-
 ENV PYTHONUNBUFFERED=1
 
 COPY --from=denoland/deno:bin /deno /usr/local/bin/deno
 
 # copy build requirements
-COPY --from=builder /root/.local /root/.local
-ENV PATH=/root/.local/bin:$PATH
+COPY --from=builder /opt/venv /opt/venv
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+ENV HOME=/tmp
 
 # copy ffmpeg
 COPY --from=ffmpeg-builder ./ffmpeg/ffmpeg /usr/bin/ffmpeg
@@ -57,13 +61,6 @@ RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recomm
     atomicparsley \
     tini \
     curl && rm -rf /var/lib/apt/lists/*
-
-# install debug tools for testing environment
-RUN if [ "$INSTALL_DEBUG" ] ; then \
-    apt-get -y update && apt-get -y install --no-install-recommends \
-    vim htop bmon net-tools iputils-ping procps lsof \
-    && pip install --user ipython pytest pytest-django \
-    ; fi
 
 # make folders
 RUN mkdir /cache /youtube /app

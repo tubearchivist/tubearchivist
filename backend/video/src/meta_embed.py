@@ -80,8 +80,6 @@ class IndexFromEmbed:
 
     VIDEOS_BASE = EnvironmentSettings.MEDIA_DIR
     CACHE_DIR = EnvironmentSettings.CACHE_DIR
-    HOST_UID = EnvironmentSettings.HOST_UID
-    HOST_GID = EnvironmentSettings.HOST_GID
 
     def __init__(
         self,
@@ -200,8 +198,6 @@ class IndexFromEmbed:
         folder = os.path.join(self.VIDEOS_BASE, channel_id)
         if not os.path.exists(folder):
             os.makedirs(folder)
-            if self.HOST_UID and self.HOST_GID:
-                os.chown(folder, self.HOST_UID, self.HOST_GID)
 
         new_path = os.path.join(folder, f"{video.youtube_id}.mp4")
         if self.file_path == new_path:
@@ -209,8 +205,6 @@ class IndexFromEmbed:
             return
 
         shutil.move(self.file_path, new_path, copy_function=shutil.copyfile)
-        if self.HOST_UID and self.HOST_GID:
-            os.chown(new_path, self.HOST_UID, self.HOST_GID)
 
     def index_playlists(self, json_embed, video):
         """index playlists"""

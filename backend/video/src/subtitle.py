@@ -206,11 +206,6 @@ class YoutubeSubtitle:
         with open(dest_path, "w", encoding="utf-8") as subfile:
             subfile.write(subtitle_str)
 
-        host_uid = EnvironmentSettings.HOST_UID
-        host_gid = EnvironmentSettings.HOST_GID
-        if host_uid and host_gid:
-            os.chown(dest_path, host_uid, host_gid)
-
     @staticmethod
     def index_subtitle(query_str):
         """send subtitle to es for indexing"""

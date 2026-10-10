@@ -232,24 +232,18 @@ class VideoDownloader(DownloaderBase):
 
     def move_to_archive(self, vid_dict):
         """move downloaded video from cache to archive"""
-        host_uid = EnvironmentSettings.HOST_UID
-        host_gid = EnvironmentSettings.HOST_GID
         # make folder
         folder = os.path.join(
             self.MEDIA_DIR, vid_dict["channel"]["channel_id"]
         )
         if not os.path.exists(folder):
             os.makedirs(folder)
-            if host_uid and host_gid:
-                os.chown(folder, host_uid, host_gid)
+
         # move media file
         media_file = vid_dict["youtube_id"] + ".mp4"
         old_path = os.path.join(self.CACHE_DIR, "download", media_file)
         new_path = os.path.join(self.MEDIA_DIR, vid_dict["media_url"])
-        # move media file and fix permission
         shutil.move(old_path, new_path, copy_function=shutil.copyfile)
-        if host_uid and host_gid:
-            os.chown(new_path, host_uid, host_gid)
 
     @staticmethod
     def _delete_from_pending(youtube_id):

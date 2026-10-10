@@ -10,12 +10,25 @@ else
 fi
 
 # update yt-dlp if needed
+YTDLP_UPDATE_DIR=/tmp/ta-yt-dlp
 if [[ "${TA_AUTO_UPDATE_YTDLP,,}" =~ ^(release|nightly)$ ]]; then
-    echo "Updating yt-dlp..."
-    preflag=$([[ "${TA_AUTO_UPDATE_YTDLP,,}" == "nightly" ]] && echo "--pre" || echo "")
-    python -m pip install --target=/root/.local/bin --upgrade $preflag "yt-dlp[default]" || {
-        echo "yt-dlp update failed"
-    }
+  echo "Updating yt-dlp..."
+  preflag=""
+  if [[ "${TA_AUTO_UPDATE_YTDLP,,}" == "nightly" ]]; then
+    preflag="--pre"
+  fi
+
+  if python -m pip install \
+    --no-cache-dir \
+    --target="$YTDLP_UPDATE_DIR" \
+    --upgrade \
+    $preflag \
+    "yt-dlp[default]"
+  then
+    export PYTHONPATH="$YTDLP_UPDATE_DIR${PYTHONPATH:+:$PYTHONPATH}"
+  else
+    echo "yt-dlp update failed, using bundled version"
+  fi
 fi
 
 # stop on pending manual migration
