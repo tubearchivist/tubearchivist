@@ -1,32 +1,28 @@
 """static media serving endpoints"""
 
 import mimetypes
-import re
 from pathlib import Path
 
 from common.serializers import ErrorResponseSerializer
 from common.src.env_settings import EnvironmentSettings
 from common.src.streaming import RangedFileResponse
 from common.views_base import StaticAuthBaseView
+from django.http import HttpResponse
+from download.src.thumbnails import ThumbManager
 from rest_framework.response import Response
 
 
 class MediaStreamView(StaticAuthBaseView):
-    """resolves to /media/stream/<channel_id>/<video_id>/
-    Authenticated media streaming endpoint.
+    """resolves to /media/stream/<channel_id>/<video_id>.mp4
+    authenticated media streaming endpoint.
+    public read with DISABLE_STATIC_AUTH
     GET: get media partial range or complete
     """
 
-    CHANNEL_ID_REG = re.compile(r"UC[A-Za-z0-9_-]{22}")
-    VIDEO_ID_REG = re.compile(r"[A-Za-z0-9_-]{11}")
-
     def get_media_path(self, channel_id: str, video_id: str) -> Path:
         """build media path, protect path access"""
-        if not self.CHANNEL_ID_REG.fullmatch(channel_id):
-            raise ValueError("invalid channel ID")
-
-        if not self.VIDEO_ID_REG.fullmatch(video_id):
-            raise ValueError("invalid video ID")
+        self.validate_channel_id(channel_id)
+        self.validate_video_id(video_id)
 
         return Path(
             EnvironmentSettings.MEDIA_DIR, channel_id, f"{video_id}.mp4"
@@ -51,3 +47,36 @@ class MediaStreamView(StaticAuthBaseView):
             path=path,
             content_type=content_type or "application/octet-stream",
         )
+
+
+class VideoThumbView(StaticAuthBaseView):
+    """resolves to /media/thumb/video/<video_id>.jpg
+    authenticated video thumb endpoint
+    public read with DISABLE_STATIC_AUTH
+    GET: get thumbnail
+    """
+
+    def get_thumb_path(self, video_id: str) -> Path:
+        """get path"""
+        self.validate_video_id(video_id)
+        return Path(
+            ThumbManager(item_id=video_id).vid_thumb_path(absolute=True)
+        )
+
+    def get(self, request, video_id):
+        """get thumb"""
+        try:
+            thumb_path = self.get_thumb_path(video_id)
+        except ValueError as path_err:
+            error = ErrorResponseSerializer({"error": str(path_err)})
+            return Response(error.data, status=400)
+
+        if not thumb_path.is_file():
+            error = ErrorResponseSerializer({"error": "file not found"})
+            return Response(error.data, status=404)
+
+        content = thumb_path.read_bytes()
+        response = HttpResponse(content, content_type="image/jpeg")
+        response["Cache-Control"] = "public, max-age=3600"
+
+        return response

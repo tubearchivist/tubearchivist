@@ -116,10 +116,8 @@ class SearchProcess:
         media_url = urllib.parse.quote(video_dict["media_url"])
         vid_last_refresh = date_parser(video_dict["vid_last_refresh"])
         published = date_parser(video_dict["published"])
-        vid_thumb_url = ThumbManager(video_id).vid_thumb_path()
         channel = self._process_channel(video_dict["channel"])
 
-        cache_root = EnvironmentSettings().get_cache_root()
         media_root = EnvironmentSettings().get_media_root()
 
         if "subtitles" in video_dict:
@@ -137,7 +135,7 @@ class SearchProcess:
                 "media_url": f"/media/stream/{media_url}",
                 "vid_last_refresh": vid_last_refresh,
                 "published": published,
-                "vid_thumb_url": f"{cache_root}/{vid_thumb_url}",
+                "vid_thumb_url": f"/media/thumb/video/{video_id}.jpg",
                 "description": video_dict.get("description"),
             }
         )

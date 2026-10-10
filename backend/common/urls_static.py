@@ -9,4 +9,9 @@ urlpatterns = [
         views_static.MediaStreamView.as_view(),
         name="stream",
     ),
+    path(
+        "thumb/video/<slug:video_id>.jpg",
+        views_static.VideoThumbView.as_view(),
+        name="video-thumb",
+    ),
 ]

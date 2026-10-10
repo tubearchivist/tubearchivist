@@ -1,5 +1,7 @@
 """base classes to inherit from"""
 
+import re
+
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap
 from common.src.index_generic import Pagination
@@ -117,3 +119,22 @@ class StaticAuthBaseView(APIView):
         if EnvironmentSettings.DISABLE_STATIC_AUTH
         else [SessionAuthentication, TokenAuthentication]
     )
+
+    CHANNEL_ID_REG = re.compile(r"UC[A-Za-z0-9_-]{22}")
+    VIDEO_ID_REG = re.compile(r"[A-Za-z0-9_-]{11}")
+    PLAYLIST_ID_REG = re.compile(r"[A-Za-z0-9_-]{13,48}")
+
+    def validate_channel_id(self, channel_id: str) -> None:
+        """validate channel id"""
+        if not self.CHANNEL_ID_REG.fullmatch(channel_id):
+            raise ValueError("invalid channel ID")
+
+    def validate_video_id(self, video_id: str) -> None:
+        """validate video id"""
+        if not self.VIDEO_ID_REG.fullmatch(video_id):
+            raise ValueError("invalid video ID")
+
+    def validate_playlist_id(self, playlist_id: str) -> None:
+        """validate playlist id"""
+        if not self.PLAYLIST_ID_REG.fullmatch(playlist_id):
+            raise ValueError("invalid playlist ID")
