@@ -18,7 +18,7 @@ RUN npm run build:deploy
 WORKDIR /
 
 # First stage to build python wheel
-FROM python:3.13.11-slim-trixie AS builder
+FROM python:3.14.7-slim-trixie AS builder
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -39,7 +39,7 @@ RUN python -m venv "$VIRTUAL_ENV" \
     && pip install --no-cache-dir -r /requirements.txt
 
 # build ffmpeg
-FROM python:3.13.11-slim-trixie AS ffmpeg-builder
+FROM python:3.14.7-slim-trixie AS ffmpeg-builder
 
 ARG TARGETPLATFORM
 
@@ -47,7 +47,7 @@ COPY docker_assets/ffmpeg_download.py ffmpeg_download.py
 RUN python ffmpeg_download.py $TARGETPLATFORM
 
 # build final image
-FROM python:3.13.11-slim-trixie AS tubearchivist
+FROM python:3.14.7-slim-trixie AS tubearchivist
 
 ENV PYTHONUNBUFFERED=1 \
     VIRTUAL_ENV=/opt/venv \
