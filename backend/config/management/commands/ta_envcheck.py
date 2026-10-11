@@ -7,7 +7,6 @@ Functionality:
 """
 
 import os
-import re
 from time import sleep
 
 from common.src.env_settings import EnvironmentSettings
@@ -66,13 +65,14 @@ FILE_FALLBACK = [
     "TA_PASSWORD",
 ]
 UNEXPECTED_ENV_VARS = {
-    "TA_UWSGI_PORT": "Has been replaced with 'TA_BACKEND_PORT'",
     "REDIS_HOST": "Has been replaced with 'REDIS_CON' connection string",
     "REDIS_PORT": "Has been consolidated in 'REDIS_CON' connection string",
     "ENABLE_CAST": "That is now a toggle in setting and DISABLE_STATIC_AUTH",
+    "TA_BACKEND_PORT": "That is removed, only TA_PORT is needed",
+    "HOST_UID": "Removed, start container under dedicated user instead",
+    "HOST_GID": "Removed, start container under dedicated user instead",
 }
 INST = "https://github.com/tubearchivist/tubearchivist#installing-and-updating"
-NGINX = "/etc/nginx/sites-available/default"
 
 
 class Command(BaseCommand):
@@ -89,9 +89,6 @@ class Command(BaseCommand):
         self._expected_vars()
         self._unexpected_vars()
         self._elastic_user_overwrite()
-        self._ta_port_overwrite()
-        self._ta_backend_port_overwrite()
-        self._disable_static_auth()
         self._create_superuser()
 
     def _additional_auth_vars_expectations(self):
@@ -183,67 +180,9 @@ class Command(BaseCommand):
         env = EnvironmentSettings.ES_USER
         self.stdout.write(self.style.SUCCESS(f"    ✓ ES user is set to {env}"))
 
-    def _ta_port_overwrite(self):
-        """set TA_PORT overwrite for nginx"""
-        self.stdout.write("[4] check TA_PORT overwrite")
-        overwrite = EnvironmentSettings.TA_PORT
-        if not overwrite:
-            self.stdout.write(self.style.SUCCESS("    TA_PORT is not set"))
-            return
-
-        regex = re.compile(r"listen [0-9]{1,5}")
-        to_overwrite = f"listen {overwrite}"
-        changed = file_overwrite(NGINX, regex, to_overwrite)
-        if changed:
-            message = f"    ✓ TA_PORT changed to {overwrite}"
-        else:
-            message = f"    ✓ TA_PORT already set to {overwrite}"
-
-        self.stdout.write(self.style.SUCCESS(message))
-
-    def _ta_backend_port_overwrite(self):
-        """set TA_BACKEND_PORT overwrite"""
-        self.stdout.write("[5] check TA_BACKEND_PORT overwrite")
-        overwrite = EnvironmentSettings.TA_BACKEND_PORT
-        if not overwrite:
-            message = "    TA_BACKEND_PORT is not set"
-            self.stdout.write(self.style.SUCCESS(message))
-            return
-
-        # modify nginx conf
-        regex = re.compile(r"proxy_pass http://localhost:[0-9]{1,5}")
-        to_overwrite = f"proxy_pass http://localhost:{overwrite}"
-        changed = file_overwrite(NGINX, regex, to_overwrite)
-
-        if changed:
-            message = f"    ✓ TA_BACKEND_PORT changed to {overwrite}"
-        else:
-            message = f"    ✓ TA_BACKEND_PORT already set to {overwrite}"
-
-        self.stdout.write(self.style.SUCCESS(message))
-
-    def _disable_static_auth(self):
-        """cast workaround, remove auth for static files in nginx"""
-        self.stdout.write("[7] check DISABLE_STATIC_AUTH overwrite")
-        overwrite = EnvironmentSettings.DISABLE_STATIC_AUTH
-        if not overwrite:
-            self.stdout.write(
-                self.style.SUCCESS("    DISABLE_STATIC_AUTH is not set")
-            )
-            return
-
-        regex = re.compile(r"[^\S\r\n]*auth_request /api/ping/;\n")
-        changed = file_overwrite(NGINX, regex, "")
-        if changed:
-            message = "    ✓ process nginx to disable static auth"
-        else:
-            message = "    ✓ static auth is already disabled in nginx"
-
-        self.stdout.write(self.style.SUCCESS(message))
-
     def _create_superuser(self):
         """create superuser if not exist"""
-        self.stdout.write("[8] create superuser")
+        self.stdout.write("[4] create superuser")
         is_created = Account.objects.filter(is_superuser=True)
         if is_created:
             message = "    superuser already created"
@@ -255,18 +194,3 @@ class Command(BaseCommand):
         Account.objects.create_superuser(name, password)
         message = f"    ✓ new superuser with name {name} created"
         self.stdout.write(self.style.SUCCESS(message))
-
-
-def file_overwrite(file_path, regex, overwrite):
-    """change file content from old to overwrite, return true when changed"""
-    with open(file_path, "r", encoding="utf-8") as f:
-        file_content = f.read()
-
-    changed = re.sub(regex, overwrite, file_content)
-    if changed == file_content:
-        return False
-
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.write(changed)
-
-    return True

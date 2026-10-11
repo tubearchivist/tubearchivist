@@ -18,17 +18,28 @@ RUN npm run build:deploy
 WORKDIR /
 
 # First stage to build python wheel
-FROM python:3.13.11-slim-trixie AS builder
+FROM python:3.14.7-slim-trixie AS builder
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential gcc libldap2-dev libsasl2-dev libssl-dev git
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        gcc \
+        git \
+        libldap2-dev \
+        libsasl2-dev \
+        libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # install requirements
 COPY ./backend/requirements.txt /requirements.txt
-RUN pip install --user -r requirements.txt
+ENV VIRTUAL_ENV=/opt/venv \
+    PATH="/opt/venv/bin:$PATH"
+
+RUN python -m venv "$VIRTUAL_ENV" \
+    && pip install --no-cache-dir -r /requirements.txt
 
 # build ffmpeg
-FROM python:3.13.11-slim-trixie AS ffmpeg-builder
+FROM python:3.14.7-slim-trixie AS ffmpeg-builder
 
 ARG TARGETPLATFORM
 
@@ -36,60 +47,51 @@ COPY docker_assets/ffmpeg_download.py ffmpeg_download.py
 RUN python ffmpeg_download.py $TARGETPLATFORM
 
 # build final image
-FROM python:3.13.11-slim-trixie AS tubearchivist
+FROM python:3.14.7-slim-trixie AS tubearchivist
 
-ARG INSTALL_DEBUG
-
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONUNBUFFERED=1 \
+    VIRTUAL_ENV=/opt/venv \
+    PATH="/opt/venv/bin:$PATH" \
+    HOME=/tmp
 
 COPY --from=denoland/deno:bin /deno /usr/local/bin/deno
 
 # copy build requirements
-COPY --from=builder /root/.local /root/.local
-ENV PATH=/root/.local/bin:$PATH
+COPY --from=builder /opt/venv /opt/venv
 
 # copy ffmpeg
-COPY --from=ffmpeg-builder ./ffmpeg/ffmpeg /usr/bin/ffmpeg
-COPY --from=ffmpeg-builder ./ffprobe/ffprobe /usr/bin/ffprobe
+COPY --from=ffmpeg-builder \
+    ./ffmpeg/ffmpeg \
+    ./ffprobe/ffprobe \
+    /usr/bin/
 
 # install distro packages needed
-RUN apt-get clean && apt-get -y update && apt-get -y install --no-install-recommends \
-    nginx \
-    atomicparsley \
-    tini \
-    curl && rm -rf /var/lib/apt/lists/*
-
-# install debug tools for testing environment
-RUN if [ "$INSTALL_DEBUG" ] ; then \
-    apt-get -y update && apt-get -y install --no-install-recommends \
-    vim htop bmon net-tools iputils-ping procps lsof \
-    && pip install --user ipython pytest pytest-django \
-    ; fi
-
-# make folders
-RUN mkdir /cache /youtube /app
-
-# copy config files
-COPY docker_assets/nginx.conf /etc/nginx/sites-available/default
-RUN sed -i 's/^user www\-data\;$/user root\;/' /etc/nginx/nginx.conf
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        atomicparsley \
+        tini \
+        curl \
+    && mkdir -p /cache /youtube \
+    && rm -rf /var/lib/apt/lists/*
 
 # copy application into container
 COPY ./backend /app
-COPY ./docker_assets/run.sh /app
-COPY ./docker_assets/backend_start.py /app
-COPY ./docker_assets/beat_auto_spawn.sh /app
+COPY --chmod=755 \
+    ./docker_assets/run.sh \
+    ./docker_assets/backend_start.py \
+    ./docker_assets/beat_auto_spawn.sh \
+    /app/
 
 COPY --from=node-builder ./frontend/dist /app/static
 
+RUN python /app/manage.py collectstatic --noinput -c
+
 # volumes
-VOLUME /cache
-VOLUME /youtube
+VOLUME ["/cache", "/youtube"]
 
 # start
 WORKDIR /app
 EXPOSE 8000
-
-RUN chmod +x ./run.sh
 
 ENTRYPOINT ["/bin/tini", "--"]
 CMD ["./run.sh"]

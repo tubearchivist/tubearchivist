@@ -5,7 +5,7 @@ from os import environ
 import uvicorn
 
 LOG_LEVEL = "info" if environ.get("DJANGO_DEBUG") else "error"
-PORT = int(environ.get("TA_BACKEND_PORT", 8080))
+PORT = int(environ.get("TA_PORT", 8000))
 
 if __name__ == "__main__":
     uvicorn.run(

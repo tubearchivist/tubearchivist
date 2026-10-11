@@ -1,5 +1,8 @@
 """base classes to inherit from"""
 
+import re
+
+from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap
 from common.src.index_generic import Pagination
 from common.src.search_processor import SearchProcess, process_aggs
@@ -100,3 +103,56 @@ class ApiBaseView(APIView):
         process_aggs(response)
 
         self.response = response.get("aggregations")
+
+
+class StaticAuthBaseView(APIView):
+    """baseview for static files, handle DISABLE_STATIC_AUTH"""
+
+    http_method_names = [method.lower() for method in permissions.SAFE_METHODS]
+    permission_classes = (
+        [permissions.AllowAny]
+        if EnvironmentSettings.DISABLE_STATIC_AUTH
+        else [permissions.IsAuthenticated]
+    )
+    authentication_classes = (
+        []
+        if EnvironmentSettings.DISABLE_STATIC_AUTH
+        else [SessionAuthentication, TokenAuthentication]
+    )
+
+    CACHE_CONTROL = (
+        "public, max-age=3600"
+        if EnvironmentSettings.DISABLE_STATIC_AUTH
+        else "private, max-age=3600"
+    )
+
+    CHANNEL_ID_REG = re.compile(r"UC[A-Za-z0-9_-]{22}")
+    CHANNEL_ART_REG = re.compile(r"banner|thumb|tvart")
+    VIDEO_ID_REG = re.compile(r"[A-Za-z0-9_-]{11}")
+    PLAYLIST_ID_REG = re.compile(r"(?:LL|WL|[A-Za-z0-9_-]{13,48})")
+    SUBTITLE_LANG_REG = re.compile(r"[A-Za-z0-9_-]{2,10}")
+
+    def validate_channel_id(self, channel_id: str) -> None:
+        """validate channel id"""
+        if not self.CHANNEL_ID_REG.fullmatch(channel_id):
+            raise ValueError("invalid channel ID")
+
+    def validate_channel_art_type(self, channel_art: str) -> None:
+        """validate channel art type"""
+        if not self.CHANNEL_ART_REG.fullmatch(channel_art):
+            raise ValueError("invalid channel art type")
+
+    def validate_video_id(self, video_id: str) -> None:
+        """validate video id"""
+        if not self.VIDEO_ID_REG.fullmatch(video_id):
+            raise ValueError("invalid video ID")
+
+    def validate_playlist_id(self, playlist_id: str) -> None:
+        """validate playlist id"""
+        if not self.PLAYLIST_ID_REG.fullmatch(playlist_id):
+            raise ValueError("invalid playlist ID")
+
+    def validate_subtitle_lang(self, lang: str) -> None:
+        """validate subtitle lang"""
+        if not self.SUBTITLE_LANG_REG.fullmatch(lang):
+            raise ValueError("invalid subtitle lang")

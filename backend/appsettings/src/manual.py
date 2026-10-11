@@ -494,23 +494,14 @@ class ManualImport:
     def _move_to_archive(self, json_data):
         """move identified media file to archive"""
         videos = EnvironmentSettings.MEDIA_DIR
-        host_uid = EnvironmentSettings.HOST_UID
-        host_gid = EnvironmentSettings.HOST_GID
-
         channel, file = os.path.split(json_data["media_url"])
         channel_folder = os.path.join(videos, channel)
         if not os.path.exists(channel_folder):
             os.makedirs(channel_folder)
 
-        if host_uid and host_gid:
-            os.chown(channel_folder, host_uid, host_gid)
-
         old_path = self.current_video["media"]
         new_path = os.path.join(channel_folder, file)
         shutil.move(old_path, new_path, copy_function=shutil.copyfile)
-        if host_uid and host_gid:
-            os.chown(new_path, host_uid, host_gid)
-
         base_name, _ = os.path.splitext(new_path)
         for old_path in self.current_video["subtitle"]:
             lang = old_path.split(".")[-2]

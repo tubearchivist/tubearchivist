@@ -37,7 +37,7 @@ type Download = {
   status: string;
   timestamp: number | null;
   title: string;
-  vid_thumb_url: string;
+  vid_thumb_url: string | null;
   vid_type: string;
   youtube_id: string;
   _index: string;

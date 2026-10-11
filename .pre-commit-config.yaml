@@ -1,17 +1,20 @@
+default_install_hook_types: [pre-commit, pre-push]
+default_stages: [pre-commit]
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
       - id: end-of-file-fixer
   - repo: https://github.com/psf/black
-    rev: 26.3.1
+    rev: 26.10.1
     hooks:
       - id: black
         alias: python
         files: ^backend/
         args: ["--line-length=79"]
   - repo: https://github.com/pycqa/isort
-    rev: 8.0.1
+    rev: 9.0.2
     hooks:
       - id: isort
         name: isort (python)
@@ -19,19 +22,19 @@ repos:
         files: ^backend/
         args: ["--profile", "black", "-l 79"]
   - repo: https://github.com/pycqa/flake8
-    rev: 7.3.0
+    rev: 7.4.1
     hooks:
       - id: flake8
         alias: python
         files: ^backend/
         args: ["--jobs=1", "--max-complexity=10", "--max-line-length=79"]
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.2
+    rev: v2.4.3
     hooks:
       - id: codespell
         exclude: ^frontend/package-lock.json
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v10.2.0
+    rev: v10.12.0
     hooks:
       - id: eslint
         name: eslint
@@ -45,5 +48,14 @@ repos:
       - id: prettier
         entry: npm run --prefix ./frontend format
         pass_filenames: false
+  - repo: local
+    hooks:
+      - id: check-pushed-version
+        name: Check pushed TA version
+        entry: ./.github/check_pushed_version.py
+        language: python
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
 
 exclude: '.*(\.svg|/migrations/).*'

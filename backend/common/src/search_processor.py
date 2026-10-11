@@ -5,8 +5,8 @@ Functionality:
 """
 
 import urllib.parse
+from pathlib import Path
 
-from common.src.env_settings import EnvironmentSettings
 from common.src.helper import date_parser, get_duration_str
 from common.src.ta_redis import RedisArchivist
 from download.src.thumbnails import ThumbManager
@@ -83,8 +83,7 @@ class SearchProcess:
     def _process_channel(channel_dict):
         """run on single channel"""
         channel_id = channel_dict["channel_id"]
-        cache_root = EnvironmentSettings().get_cache_root()
-        art_base = f"{cache_root}/channels/{channel_id}"
+        art_base = f"/media/thumb/channel/{channel_id}"
         date_str = date_parser(channel_dict["channel_last_refresh"])
         channel_dict.update(
             {
@@ -94,17 +93,17 @@ class SearchProcess:
         )
 
         if channel_dict.get("channel_banner_url"):
-            channel_dict["channel_banner_url"] = f"{art_base}_banner.jpg"
+            channel_dict["channel_banner_url"] = f"{art_base}/banner.jpg"
         else:
             channel_dict["channel_banner_url"] = None
 
         if channel_dict.get("channel_thumb_url"):
-            channel_dict["channel_thumb_url"] = f"{art_base}_thumb.jpg"
+            channel_dict["channel_thumb_url"] = f"{art_base}/thumb.jpg"
         else:
             channel_dict["channel_thumb_url"] = None
 
         if channel_dict.get("channel_tvart_url"):
-            channel_dict["channel_tvart_url"] = f"{art_base}_tvart.jpg"
+            channel_dict["channel_tvart_url"] = f"{art_base}/tvart.jpg"
         else:
             channel_dict["channel_tvart_url"] = None
 
@@ -116,28 +115,23 @@ class SearchProcess:
         media_url = urllib.parse.quote(video_dict["media_url"])
         vid_last_refresh = date_parser(video_dict["vid_last_refresh"])
         published = date_parser(video_dict["published"])
-        vid_thumb_url = ThumbManager(video_id).vid_thumb_path()
         channel = self._process_channel(video_dict["channel"])
-
-        cache_root = EnvironmentSettings().get_cache_root()
-        media_root = EnvironmentSettings().get_media_root()
 
         if "subtitles" in video_dict:
             for idx, _ in enumerate(video_dict["subtitles"]):
                 url = video_dict["subtitles"][idx]["media_url"]
-                video_dict["subtitles"][idx][
-                    "media_url"
-                ] = f"{media_root}/{url}"
+                subtitle_url = f"/media/subtitle/{url}"
+                video_dict["subtitles"][idx]["media_url"] = subtitle_url
         else:
             video_dict["subtitles"] = []
 
         video_dict.update(
             {
                 "channel": channel,
-                "media_url": f"{media_root}/{media_url}",
+                "media_url": f"/media/stream/{media_url}",
                 "vid_last_refresh": vid_last_refresh,
                 "published": published,
-                "vid_thumb_url": f"{cache_root}/{vid_thumb_url}",
+                "vid_thumb_url": f"/media/thumb/video/{video_id}.jpg",
                 "description": video_dict.get("description"),
             }
         )
@@ -159,15 +153,12 @@ class SearchProcess:
 
         return dict(sorted(video_dict.items()))
 
-    @staticmethod
-    def _process_playlist(playlist_dict):
+    def _process_playlist(self, playlist_dict):
         """run on single playlist dict"""
-        playlist_id = playlist_dict["playlist_id"]
         playlist_last_refresh = date_parser(
             playlist_dict["playlist_last_refresh"]
         )
-        cache_root = EnvironmentSettings().get_cache_root()
-        playlist_thumbnail = f"{cache_root}/playlists/{playlist_id}.jpg"
+        playlist_thumbnail = self._playlist_thumb_vid_check(playlist_dict)
         description = playlist_dict.get("playlist_description")
         playlist_dict.update(
             {
@@ -179,14 +170,29 @@ class SearchProcess:
 
         return dict(sorted(playlist_dict.items()))
 
+    @staticmethod
+    def _playlist_thumb_vid_check(playlist_dict: dict):
+        """use first video in playlist if available
+        this is usually higher resolution"""
+        entries = playlist_dict.get("playlist_entries", [])
+        if len(entries) > 0 and entries[0]["downloaded"]:
+            first_vid_id = entries[0]["youtube_id"]
+            vid_path = ThumbManager(first_vid_id).vid_thumb_path(absolute=True)
+            if Path(vid_path).exists():
+                return f"/media/thumb/video/{first_vid_id}.jpg"
+
+        return f"/media/thumb/playlist/{playlist_dict['playlist_id']}.jpg"
+
     def _process_download(self, download_dict):
         """run on single download item"""
         vid_thumb_url = None
         if download_dict.get("vid_thumb_url"):
             video_id = download_dict["youtube_id"]
-            cache_root = EnvironmentSettings().get_cache_root()
-            relative_path = ThumbManager(video_id).vid_thumb_path()
-            vid_thumb_url = f"{cache_root}/{relative_path}"
+            vid_thumb_path = Path(
+                ThumbManager(item_id=video_id).vid_thumb_path(absolute=True)
+            )
+            if vid_thumb_path.exists():
+                vid_thumb_url = f"/media/thumb/video/{video_id}.jpg"
 
         download_dict.update(
             {
@@ -225,8 +231,10 @@ class SearchProcess:
             subtitle_line = highlight.get("subtitle_line")[0]
             subtitle_dict.update({"subtitle_line": subtitle_line})
 
-        thumb_path = ThumbManager(subtitle_dict["youtube_id"]).vid_thumb_path()
-        subtitle_dict.update({"vid_thumb_url": f"/cache/{thumb_path}"})
+        video_id = subtitle_dict["youtube_id"]
+        subtitle_dict.update(
+            {"vid_thumb_url": f"/media/thumb/video/{video_id}.jpg"}
+        )
 
         return subtitle_dict
 

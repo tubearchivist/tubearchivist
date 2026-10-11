@@ -1,16 +1,17 @@
-apprise==1.12.0
-bgutil-ytdlp-pot-provider @ git+https://github.com/bbilly1/bgutil-ytdlp-pot-provider@2a8772a693e7c5485ca65fd9cecd0f050f760ad1#subdirectory=plugin
+aiofiles==25.1.0
+apprise==1.13.1
+bgutil-ytdlp-pot-provider @ git+https://github.com/bbilly1/bgutil-ytdlp-pot-provider@9b8f5e8d9a1eb936134eb995d6702716b895e1e4#subdirectory=plugin
 celery==5.6.3
 deepdiff==8.6.2  # rc:ignore
 django-auth-ldap==5.3.0
 django-celery-beat==2.9.0
 django-cors-headers==4.9.0
-Django==6.0.7
-djangorestframework==3.18.0
+Django==6.0.9
+djangorestframework==3.18.3
 drf-spectacular==0.30.0
 Pillow==12.3.0
-redis==7.4.0
+redis==7.4.1
 requests==2.34.2
 ryd-client==0.0.6
-uvicorn==0.52.4
+uvicorn==0.54.0
 yt-dlp[default]==2026.8.19

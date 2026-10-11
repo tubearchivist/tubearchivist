@@ -14,8 +14,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from common import views_frontend
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
@@ -34,5 +35,25 @@ urlpatterns = [
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
     ),
+    path("media/", include("common.urls_static")),
     path("admin/", admin.site.urls),
+    path(
+        "static/<path:asset_path>",
+        views_frontend.django_static,
+        name="django-static",
+    ),
+    *[
+        path(
+            f"{directory}/<path:asset_path>",
+            views_frontend.frontend_asset,
+            {"directory": directory},
+            name=f"frontend-{directory}",
+        )
+        for directory in ("assets", "css", "favicon", "font", "img")
+    ],
+    re_path(
+        r"^(?!(?:api|admin|media|static)(?:/|$)).*$",
+        views_frontend.frontend_index,
+        name="frontend",
+    ),
 ]
