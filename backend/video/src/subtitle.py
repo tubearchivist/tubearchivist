@@ -138,7 +138,7 @@ class YoutubeSubtitle:
 
             parser = SubtitleParser(response_text, lang, source)
             parser.process()
-            if not parser.all_cues:
+            if not any(cue["text"].strip() for cue in parser.all_cues):
                 rand_sleep(self.video.config)
                 continue
 
@@ -146,8 +146,11 @@ class YoutubeSubtitle:
             self.write_subtitle_file(dest_path, subtitle_str)
             if self.video.config["downloads"]["subtitle_index"]:
                 documents = parser.create_documents(self.video, source)
-                query_str = parser.create_bulk_import(documents)
-                self.index_subtitle(query_str)
+                if any(doc["subtitle_line"].strip() for doc in documents):
+                    # only proceed if actually anything to write
+                    query_str = parser.create_bulk_import(documents)
+                    self.delete_single_indexed(lang=lang)
+                    self.index_subtitle(query_str)
 
             indexed.append(
                 {
@@ -210,6 +213,22 @@ class YoutubeSubtitle:
     def index_subtitle(query_str):
         """send subtitle to es for indexing"""
         _, _ = ElasticWrap("_bulk").post(data=query_str, ndjson=True)
+
+    def delete_single_indexed(self, lang: str) -> None:
+        """delete single indexed lang, before reindexing"""
+        youtube_id = self.video.youtube_id
+        data = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {"term": {"youtube_id": {"value": youtube_id}}},
+                        {"term": {"subtitle_lang": {"value": lang}}},
+                    ]
+                }
+            }
+        }
+        path = "ta_subtitle/_delete_by_query?refresh=true"
+        _, _ = ElasticWrap(path).post(data=data)
 
     def delete(self, subtitles=False):
         """delete subtitles from index and filesystem"""
@@ -371,10 +390,13 @@ class SubtitleParser:
                 }
 
             chunk["subtitle_fragment_id"] = f"{youtube_id}-{self.lang}-{idx}"
+            chunk["subtitle_end"] = cue.get("end")
 
             if cue["idx"] % 5 == 0:
-                chunk["subtitle_end"] = cue.get("end")
                 chunk_list.append(chunk)
                 chunk = {}
+
+        if chunk:
+            chunk_list.append(chunk)
 
         return chunk_list
