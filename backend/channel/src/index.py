@@ -39,7 +39,13 @@ class YoutubeChannel(YouTubeItem):
         if self.json_data:
             return
 
-        self.get_from_youtube()
+        try:
+            self.get_from_youtube()
+        except Exception:  # pylint: disable=broad-except
+            if not fallback:
+                # only raise if we don't have fallback
+                raise
+
         if not self.youtube_meta and fallback:
             self._video_fallback(fallback)
         else:
