@@ -285,7 +285,7 @@ class ImportFolderScanner:
         streams = self._get_streams(media_path)
 
         for stream in streams["streams"]:
-            if stream["codec_name"] in ["png", "jpg"]:
+            if stream["codec_name"] in ["png", "jpg", "mjpeg"]:
                 return stream["codec_name"]
 
         return False
@@ -302,8 +302,8 @@ class ImportFolderScanner:
             return
 
         new_path = f"{base_path}.jpg"
-        img_raw = Image.open(thumb_path)
-        img_raw.convert("RGB").save(new_path)
+        with Image.open(thumb_path) as img:
+            img.convert("RGB").save(new_path)
 
         os.remove(thumb_path)
         current_video["thumb"] = new_path
