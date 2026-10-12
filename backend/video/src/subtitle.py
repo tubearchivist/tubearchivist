@@ -12,11 +12,10 @@ from datetime import datetime
 from operator import itemgetter
 from typing import TypedDict
 
-import requests
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
-from common.src.helper import rand_sleep, requests_headers
-from download.src.yt_dlp_base import CookieHandler
+from common.src.helper import rand_sleep
+from download.src.yt_dlp_base import YtWrap
 from yt_dlp.utils import orderedSet_from_options
 
 
@@ -168,39 +167,15 @@ class YoutubeSubtitle:
 
     def _make_request(self, url: str, lang: str | None) -> str | None:
         """make the request"""
-        request_kwargs: dict = {
-            "timeout": 30,
-            "headers": requests_headers(),
-        }
-        if self.video.config["downloads"].get("cookie_import"):
-            cookie = CookieHandler(self.video.config).get()
-            if cookie:
-                cookies_txt = cookie.read()
-                jar = requests.cookies.RequestsCookieJar()
-                for line in cookies_txt.split("\n"):
-                    words = line.split()
-                    if (len(words) == 7) and (words[0] != "#"):
-                        jar.set(
-                            words[5], words[6], domain=words[0], path=words[2]
-                        )
-
-                request_kwargs["cookies"] = jar
-
-        response = requests.get(url, **request_kwargs)
+        response, err = YtWrap({}, config=self.video.config).fetch_text(url)
 
         subtitle_key = f"{self.video.youtube_id}-{lang}"
-        if not response.ok:
-            print(f"{subtitle_key}: failed to download subtitle")
-            print(response.text)
+        if not response:
+            print(f"{subtitle_key}: failed to fetch subtitle: {err}")
             rand_sleep(self.video.config)
             return None
 
-        if not response.text:
-            print(f"{subtitle_key}: skip empty subtitle")
-            rand_sleep(self.video.config)
-            return None
-
-        return response.text
+        return response
 
     def write_subtitle_file(self, dest_path, subtitle_str):
         """write subtitle file to disk"""
