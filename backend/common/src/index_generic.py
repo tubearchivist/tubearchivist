@@ -8,6 +8,7 @@ import math
 from appsettings.src.config import AppConfig
 from common.src.es_connect import ElasticWrap
 from download.src.yt_dlp_base import YtWrap
+from rest_framework.exceptions import ValidationError
 from user.src.user_config import UserConfig
 
 
@@ -89,6 +90,8 @@ class Pagination:
     figure out the pagination based on page size and total_hits
     """
 
+    MAX_RESULTS = 10000
+
     def __init__(self, request):
         self.request = request
         self.page_get = False
@@ -121,8 +124,14 @@ class Pagination:
                 i for i in range(page_get - 1, page_get - 6, -1) if i > 1
             ]
             prev_pages.reverse()
+
+        if page_from >= self.MAX_RESULTS:
+            raise ValidationError(
+                f"Page exceeds the {self.MAX_RESULTS}-result window."
+            )
+
         pagination = {
-            "page_size": self.page_size,
+            "page_size": min(self.page_size, self.MAX_RESULTS - page_from),
             "page_from": page_from,
             "prev_pages": prev_pages,
             "current_page": page_get,
@@ -135,11 +144,12 @@ class Pagination:
     def validate(self, total_hits):
         """validate pagination with total_hits after making api call"""
         page_get = self.page_get
-        max_pages = math.ceil(total_hits / self.page_size)
-        if total_hits >= 10000:
-            # es returns maximal 10000 results
+        max_pages = math.ceil(
+            min(total_hits, self.MAX_RESULTS) / self.page_size
+        )
+        if total_hits >= self.MAX_RESULTS:
+            # es caps the reported total at the result limit
             self.pagination["max_hits"] = True
-            max_pages = max_pages - 1
 
         if page_get < max_pages and max_pages > 1:
             self.pagination["last_page"] = max_pages
