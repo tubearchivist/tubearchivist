@@ -320,54 +320,42 @@ class DownloadHist(AggBase):
         return response
 
 
-class BiggestChannel(AggBase):
-    """get channel aggregations"""
+class BiggestChannel:
+    """get biggest channels by precomputed channel stats"""
+
+    path = "ta_channel/_search"
+    sort_field_map = {
+        "doc_count": "channel_video_count",
+        "duration": "channel_media_duration",
+        "media_size": "channel_media_size",
+    }
 
     def __init__(self, order):
-        self.data["aggs"][self.name]["multi_terms"]["order"] = {order: "desc"}
-
-    name = "channel_stats"
-    path = "ta_video/_search"
-    data = {
-        "size": 0,
-        "aggs": {
-            name: {
-                "multi_terms": {
-                    "terms": [
-                        {"field": "channel.channel_name.keyword"},
-                        {"field": "channel.channel_id"},
-                    ],
-                    "order": {"doc_count": "desc"},
-                },
-                "aggs": {
-                    "doc_count": {"value_count": {"field": "_index"}},
-                    "duration": {"sum": {"field": "player.duration"}},
-                    "media_size": {"sum": {"field": "media_size"}},
-                },
-            },
-        },
-    }
-    order_choices = ["doc_count", "duration", "media_size"]
+        self.order = order
 
     def process(self):
-        """process aggregation, order_by validated in the view"""
-
-        aggregations = self.get()
-        if not aggregations:
+        """get channels sorted by order, order_by validated in the view"""
+        data = {
+            "size": 10,
+            "sort": [{self.sort_field_map[self.order]: {"order": "desc"}}],
+        }
+        response, _ = ElasticWrap(self.path).get(data=data)
+        hits = response.get("hits", {}).get("hits")
+        if not hits:
             return None
-
-        buckets = aggregations[self.name]["buckets"]
 
         response = [
             {
-                "id": i["key"][1],
-                "name": i["key"][0].title(),
-                "doc_count": i["doc_count"]["value"],
-                "duration": i["duration"]["value"],
-                "duration_str": get_duration_str(int(i["duration"]["value"])),
-                "media_size": i["media_size"]["value"],
+                "id": hit["_source"]["channel_id"],
+                "name": hit["_source"]["channel_name"],
+                "doc_count": hit["_source"].get("channel_video_count", 0),
+                "duration": hit["_source"].get("channel_media_duration", 0),
+                "duration_str": get_duration_str(
+                    hit["_source"].get("channel_media_duration", 0)
+                ),
+                "media_size": hit["_source"].get("channel_media_size", 0),
             }
-            for i in buckets
+            for hit in hits
         ]
 
         return response
