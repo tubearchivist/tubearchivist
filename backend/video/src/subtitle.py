@@ -12,11 +12,10 @@ from datetime import datetime
 from operator import itemgetter
 from typing import TypedDict
 
-import requests
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap, IndexPaginate
-from common.src.helper import rand_sleep, requests_headers
-from download.src.yt_dlp_base import CookieHandler
+from common.src.helper import rand_sleep
+from download.src.yt_dlp_base import YtWrap
 from yt_dlp.utils import orderedSet_from_options
 
 
@@ -138,7 +137,7 @@ class YoutubeSubtitle:
 
             parser = SubtitleParser(response_text, lang, source)
             parser.process()
-            if not parser.all_cues:
+            if not any(cue["text"].strip() for cue in parser.all_cues):
                 rand_sleep(self.video.config)
                 continue
 
@@ -146,8 +145,11 @@ class YoutubeSubtitle:
             self.write_subtitle_file(dest_path, subtitle_str)
             if self.video.config["downloads"]["subtitle_index"]:
                 documents = parser.create_documents(self.video, source)
-                query_str = parser.create_bulk_import(documents)
-                self.index_subtitle(query_str)
+                if any(doc["subtitle_line"].strip() for doc in documents):
+                    # only proceed if actually anything to write
+                    query_str = parser.create_bulk_import(documents)
+                    self.delete_single_indexed(lang=lang)
+                    self.index_subtitle(query_str)
 
             indexed.append(
                 {
@@ -165,39 +167,15 @@ class YoutubeSubtitle:
 
     def _make_request(self, url: str, lang: str | None) -> str | None:
         """make the request"""
-        request_kwargs: dict = {
-            "timeout": 30,
-            "headers": requests_headers(),
-        }
-        if self.video.config["downloads"].get("cookie_import"):
-            cookie = CookieHandler(self.video.config).get()
-            if cookie:
-                cookies_txt = cookie.read()
-                jar = requests.cookies.RequestsCookieJar()
-                for line in cookies_txt.split("\n"):
-                    words = line.split()
-                    if (len(words) == 7) and (words[0] != "#"):
-                        jar.set(
-                            words[5], words[6], domain=words[0], path=words[2]
-                        )
-
-                request_kwargs["cookies"] = jar
-
-        response = requests.get(url, **request_kwargs)
+        response, err = YtWrap({}, config=self.video.config).fetch_text(url)
 
         subtitle_key = f"{self.video.youtube_id}-{lang}"
-        if not response.ok:
-            print(f"{subtitle_key}: failed to download subtitle")
-            print(response.text)
+        if not response:
+            print(f"{subtitle_key}: failed to fetch subtitle: {err}")
             rand_sleep(self.video.config)
             return None
 
-        if not response.text:
-            print(f"{subtitle_key}: skip empty subtitle")
-            rand_sleep(self.video.config)
-            return None
-
-        return response.text
+        return response
 
     def write_subtitle_file(self, dest_path, subtitle_str):
         """write subtitle file to disk"""
@@ -210,6 +188,22 @@ class YoutubeSubtitle:
     def index_subtitle(query_str):
         """send subtitle to es for indexing"""
         _, _ = ElasticWrap("_bulk").post(data=query_str, ndjson=True)
+
+    def delete_single_indexed(self, lang: str) -> None:
+        """delete single indexed lang, before reindexing"""
+        youtube_id = self.video.youtube_id
+        data = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {"term": {"youtube_id": {"value": youtube_id}}},
+                        {"term": {"subtitle_lang": {"value": lang}}},
+                    ]
+                }
+            }
+        }
+        path = "ta_subtitle/_delete_by_query?refresh=true"
+        _, _ = ElasticWrap(path).post(data=data)
 
     def delete(self, subtitles=False):
         """delete subtitles from index and filesystem"""
@@ -371,10 +365,13 @@ class SubtitleParser:
                 }
 
             chunk["subtitle_fragment_id"] = f"{youtube_id}-{self.lang}-{idx}"
+            chunk["subtitle_end"] = cue.get("end")
 
             if cue["idx"] % 5 == 0:
-                chunk["subtitle_end"] = cue.get("end")
                 chunk_list.append(chunk)
                 chunk = {}
+
+        if chunk:
+            chunk_list.append(chunk)
 
         return chunk_list

@@ -285,7 +285,7 @@ class ImportFolderScanner:
         streams = self._get_streams(media_path)
 
         for stream in streams["streams"]:
-            if stream["codec_name"] in ["png", "jpg"]:
+            if stream["codec_name"] in ["png", "jpg", "mjpeg"]:
                 return stream["codec_name"]
 
         return False
@@ -302,8 +302,8 @@ class ImportFolderScanner:
             return
 
         new_path = f"{base_path}.jpg"
-        img_raw = Image.open(thumb_path)
-        img_raw.convert("RGB").save(new_path)
+        with Image.open(thumb_path) as img:
+            img.convert("RGB").save(new_path)
 
         os.remove(thumb_path)
         current_video["thumb"] = new_path
@@ -440,6 +440,10 @@ class ManualImport:
             if not json_data and not self.ignore_error:
                 raise ValueError from err
 
+            if json_data:
+                self._cleanup()
+                return
+
         if not json_data:
             return
 
@@ -453,17 +457,20 @@ class ManualImport:
         """get metadata from yt or json"""
         video_id = self.current_video["video_id"]
         video = YoutubeVideo(video_id)
-        video.build_json(
-            youtube_meta_overwrite=self._get_info_json(),
-            media_path=self.current_video["media"],
-        )
-        if not video.json_data:
-            message = (
-                f"{video_id}: manual import failed, and no metadata found."
+
+        try:
+            video.build_json(
+                youtube_meta_overwrite=self._get_info_json(),
+                media_path=self.current_video["media"],
             )
+        except Exception as exc:  # pylint: disable=broad-except
+            raise ValueError(
+                f"[{video_id}] metadata build failed: {exc}"
+            ) from exc
+
+        if not video.json_data:
+            message = f"[{video_id}]: no video remote data extracted"
             print(message)
-            if self.ignore_error:
-                return None
 
             raise ValueError(message)
 

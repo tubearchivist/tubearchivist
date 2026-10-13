@@ -160,7 +160,13 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
 
     def build_json(self, youtube_meta_overwrite=False, media_path=False):
         """build json dict of video"""
-        self.get_from_youtube()
+        try:
+            self.get_from_youtube()
+        except Exception:  # pylint: disable=broad-except
+            if not youtube_meta_overwrite:
+                # only raise if we don't have youtube_meta_overwrite
+                raise
+
         if not self.youtube_meta and not youtube_meta_overwrite:
             return
 

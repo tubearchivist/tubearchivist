@@ -347,8 +347,20 @@ class Reindex(ReindexBase):
             video.deactivate()
             return None
 
-        video.delete_subtitles(subtitles=es_meta.get("subtitles"))
         video.check_subtitles()
+
+        # Preserve existing languages unless successfully refreshed.
+        subtitles = {
+            subtitle["lang"]: subtitle
+            for subtitle in es_meta.get("subtitles", [])
+        }
+        subtitles.update(
+            {
+                subtitle["lang"]: subtitle
+                for subtitle in video.json_data.get("subtitles", [])
+            }
+        )
+        video.json_data["subtitles"] = list(subtitles.values())
 
         # add back
         video.json_data["player"] = es_meta.get("player")
