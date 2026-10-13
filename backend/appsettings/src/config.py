@@ -32,6 +32,8 @@ class DownloadsConfigType(TypedDict):
     limit_speed: int | None
     sleep_interval: int | None
     autodelete_days: int | None
+    autodelete_empty_channels: bool
+    autodelete_empty_playlists: bool
     format: str | None
     format_sort: str | None
     add_metadata: bool
@@ -81,6 +83,8 @@ class AppConfig:
             "limit_speed": None,
             "sleep_interval": 10,
             "autodelete_days": None,
+            "autodelete_empty_channels": False,
+            "autodelete_empty_playlists": False,
             "format": None,
             "format_sort": None,
             "add_metadata": False,
