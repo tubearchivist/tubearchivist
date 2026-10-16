@@ -1,17 +1,21 @@
 """base classes to inherit from"""
 
+import logging
 import re
 
 from common.src.env_settings import EnvironmentSettings
 from common.src.es_connect import ElasticWrap
 from common.src.index_generic import Pagination
 from common.src.search_processor import SearchProcess, process_aggs
-from rest_framework import permissions
+from django.conf import settings
+from rest_framework import exceptions, permissions
 from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
 )
 from rest_framework.views import APIView
+
+DRF_LOGGER = logging.getLogger("django.security.csrf")
 
 
 def check_admin(user):
@@ -36,10 +40,32 @@ class AdminWriteOnly(permissions.BasePermission):
         return check_admin(request.user)
 
 
+class CsrfLoggingSessionAuthentication(SessionAuthentication):
+    """Log DRF CSRF failures when Django debug mode is enabled."""
+
+    def enforce_csrf(self, request):
+        try:
+            super().enforce_csrf(request)
+        except exceptions.PermissionDenied as err:
+            if settings.DEBUG:
+                DRF_LOGGER.warning(
+                    "CSRF validation failed for path %r: %r. "
+                    "Set TA_HOST to the browser origin; trusted origins: %r",
+                    request.path,
+                    str(err.detail),
+                    settings.CSRF_TRUSTED_ORIGINS,
+                )
+
+            raise
+
+
 class ApiBaseView(APIView):
     """base view to inherit from"""
 
-    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    authentication_classes = [
+        CsrfLoggingSessionAuthentication,
+        TokenAuthentication,
+    ]
     permission_classes = [permissions.IsAuthenticated]
     search_base = ""
     data = ""
@@ -117,7 +143,7 @@ class StaticAuthBaseView(APIView):
     authentication_classes = (
         []
         if EnvironmentSettings.DISABLE_STATIC_AUTH
-        else [SessionAuthentication, TokenAuthentication]
+        else [CsrfLoggingSessionAuthentication, TokenAuthentication]
     )
 
     CACHE_CONTROL = (
