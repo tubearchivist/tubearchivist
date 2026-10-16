@@ -67,15 +67,12 @@ Both `TA_PASSWORD` and `ELASTIC_PASSWORD` can be suffixed with `_FILE` to allow 
 | REDIS_CON                     | Connection string to Redis | Required |
 | TZ                            | Set your timezone for the scheduler | Required |
 | TA_PORT                       | Overwrite Nginx port | Optional |
-| TA_BACKEND_PORT               | Overwrite container internal backend server port | Optional |
 | TA_ENABLE_AUTH_PROXY          | Enables support for forwarding auth in reverse proxies | [Read more](https://docs.tubearchivist.com/configuration/forward-auth/) |
 | TA_AUTH_PROXY_USERNAME_HEADER | Header containing username to log in | Optional |
 | TA_AUTH_PROXY_LOGOUT_URL      | Logout URL for forwarded auth | Optional |
 | ES_URL                        | URL That ElasticSearch runs on | Optional |
 | ES_DISABLE_VERIFY_SSL         | Disable ElasticSearch SSL certificate verification | Optional |
 | ES_SNAPSHOT_DIR               | Custom path where elastic search stores snapshots for master/data nodes | Optional |
-| HOST_GID                      | Allow TA to own the video files instead of container user | Optional |
-| HOST_UID                      | Allow TA to own the video files instead of container user | Optional |
 | ELASTIC_USER                  | Change the default ElasticSearch user | Optional |
 | TA_LDAP                       | Configure TA to use LDAP Authentication | [Read more](https://docs.tubearchivist.com/configuration/ldap/) |
 | DISABLE_STATIC_AUTH           | Remove authentication from media files, (Google Cast...) | [Read more](https://docs.tubearchivist.com/installation/env-vars/#disable_static_auth) |
