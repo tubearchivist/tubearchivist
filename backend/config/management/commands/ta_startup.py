@@ -25,7 +25,6 @@ from task.models import CustomPeriodicTask
 from task.src.config_schedule import ScheduleBuilder
 from task.src.task_manager import TaskManager
 from task.tasks import version_check
-from video.src.constants import VideoTypeEnum
 from video.src.index import YoutubeVideo
 
 TOPIC = """
@@ -58,9 +57,6 @@ class Command(BaseCommand):
         if self.skip_migrations:
             return
 
-        self._mig_add_default_playlist_sort()
-        self._mig_set_channel_tabs()
-        self._mig_set_video_channel_tabs()
         self._mig_fix_playlist_description()
         self._mig_fix_missing_stats()
         self._mig_fix_channel_art_types()
@@ -313,54 +309,6 @@ class Command(BaseCommand):
         )
         self.stdout.write(
             self.style.SUCCESS(f"    ✓ set timestamp to {message}.")
-        )
-
-    def _mig_add_default_playlist_sort(self) -> None:
-        """migrate from 0.5.4 to 0.5.5 set default playlist sortorder"""
-        self._run_migration(
-            index_name="ta_playlist",
-            desc="set default playlist sort order",
-            query={
-                "bool": {
-                    "must_not": [{"exists": {"field": "playlist_sort_order"}}]
-                }
-            },
-            script={
-                "source": "ctx._source.playlist_sort_order = 'top'",
-                "lang": "painless",
-            },
-        )
-
-    def _mig_set_channel_tabs(self) -> None:
-        """migrate from 0.5.4 to 0.5.5 set initial channel tabs"""
-        tabs = VideoTypeEnum.values_known()
-        self._run_migration(
-            index_name="ta_channel",
-            desc="set default channel_tabs in channel index",
-            query={
-                "bool": {"must_not": [{"exists": {"field": "channel_tabs"}}]}
-            },
-            script={
-                "source": f"ctx._source.channel_tabs = {tabs}",
-                "lang": "painless",
-            },
-        )
-
-    def _mig_set_video_channel_tabs(self) -> None:
-        """migrate from 0.5.4 to 0.5.5 set initial video channel tabs"""
-        tabs = VideoTypeEnum.values_known()
-        self._run_migration(
-            index_name="ta_video",
-            desc="set default channel_tabs for videos",
-            query={
-                "bool": {
-                    "must_not": [{"exists": {"field": "channel.channel_tabs"}}]
-                }
-            },
-            script={
-                "source": f"ctx._source.channel.channel_tabs = {tabs}",
-                "lang": "painless",
-            },
         )
 
     def _mig_fix_playlist_description(self) -> None:
