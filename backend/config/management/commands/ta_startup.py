@@ -48,10 +48,10 @@ class Command(BaseCommand):
         self._clear_dl_cache()
         self._version_check()
         self._index_setup()
+        self._init_app_config()
         self._snapshot_check()
         self._create_default_schedules()
         self._update_schedule_tz()
-        self._init_app_config()
         self._set_ta_startup_time()
 
         if self.skip_migrations:
@@ -188,14 +188,54 @@ class Command(BaseCommand):
         self.stdout.write("[6] validate index mappings")
         ElasticIndexWrap().setup()
 
+    def _init_app_config(self) -> None:
+        """init default app config to ES"""
+        self.stdout.write("[7] Check AppConfig")
+        response, status_code = ElasticWrap("ta_config/_doc/appsettings").get()
+        if status_code in [200, 201]:
+            self.stdout.write(
+                self.style.SUCCESS("    skip completed appsettings init")
+            )
+            updated_defaults = AppConfig().add_new_defaults()
+            for new_default in updated_defaults:
+                self.stdout.write(
+                    self.style.SUCCESS(f"    added new default: {new_default}")
+                )
+
+            cleared = AppConfig().clear_old_keys()
+            for removed_key in cleared:
+                self.stdout.write(
+                    self.style.SUCCESS(f"    removed old key: {removed_key}")
+                )
+
+            return
+
+        if status_code != 404:
+            message = "    🗙 ta_config index lookup failed"
+            self.stdout.write(self.style.ERROR(message))
+            self.stdout.write(response)
+            sleep(60)
+            raise CommandError(message)
+
+        handler = AppConfig.__new__(AppConfig)
+        _, status_code = handler.sync_defaults()
+        self.stdout.write(
+            self.style.SUCCESS("    ✓ Created default appsettings.")
+        )
+        self.stdout.write(
+            self.style.SUCCESS(f"      Status code: {status_code}")
+        )
+
     def _snapshot_check(self):
         """migration setup snapshots"""
-        self.stdout.write("[7] setup snapshots")
-        ElasticSnapshot().setup()
+        self.stdout.write("[8] setup snapshots")
+        is_enabled = AppConfig().config["application"]["enable_snapshot"]
+        if is_enabled:
+            ElasticSnapshot().setup()
 
     def _create_default_schedules(self) -> None:
         """create default schedules for new installations"""
-        self.stdout.write("[8] create initial schedules")
+        self.stdout.write("[9] create initial schedules")
         init_has_run = CustomPeriodicTask.objects.filter(
             name="version_check"
         ).exists()
@@ -246,7 +286,7 @@ class Command(BaseCommand):
 
     def _update_schedule_tz(self) -> None:
         """update timezone for Schedule instances"""
-        self.stdout.write("[9] validate schedules TZ")
+        self.stdout.write("[10] validate schedules TZ")
         tz = EnvironmentSettings.TZ
         to_update = CrontabSchedule.objects.exclude(timezone=tz)
 
@@ -261,44 +301,6 @@ class Command(BaseCommand):
             self.style.SUCCESS(f"    ✓ updated {updated} schedules to {tz}.")
         )
         PeriodicTasks.update_changed()
-
-    def _init_app_config(self) -> None:
-        """init default app config to ES"""
-        self.stdout.write("[10] Check AppConfig")
-        response, status_code = ElasticWrap("ta_config/_doc/appsettings").get()
-        if status_code in [200, 201]:
-            self.stdout.write(
-                self.style.SUCCESS("    skip completed appsettings init")
-            )
-            updated_defaults = AppConfig().add_new_defaults()
-            for new_default in updated_defaults:
-                self.stdout.write(
-                    self.style.SUCCESS(f"    added new default: {new_default}")
-                )
-
-            cleared = AppConfig().clear_old_keys()
-            for removed_key in cleared:
-                self.stdout.write(
-                    self.style.SUCCESS(f"    removed old key: {removed_key}")
-                )
-
-            return
-
-        if status_code != 404:
-            message = "    🗙 ta_config index lookup failed"
-            self.stdout.write(self.style.ERROR(message))
-            self.stdout.write(response)
-            sleep(60)
-            raise CommandError(message)
-
-        handler = AppConfig.__new__(AppConfig)
-        _, status_code = handler.sync_defaults()
-        self.stdout.write(
-            self.style.SUCCESS("    ✓ Created default appsettings.")
-        )
-        self.stdout.write(
-            self.style.SUCCESS(f"      Status code: {status_code}")
-        )
 
     def _set_ta_startup_time(self) -> None:
         """set startup time to trigger frontend refresh, threadsafe"""
