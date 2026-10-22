@@ -78,17 +78,6 @@ class RedisArchivist(RedisBase):
 
         return json.loads(reply)
 
-    def get_message(self, key: str) -> dict | None:
-        """
-        get message dict from redis
-        old json get message, only used for migration, to be removed later
-        """
-        reply = self.conn.execute_command("JSON.GET", self.NAME_SPACE + key)
-        if reply:
-            return json.loads(reply)
-
-        return {"status": False}
-
     def list_keys(self, query: str) -> list:
         """return all key matches"""
         reply = self.conn.execute_command(

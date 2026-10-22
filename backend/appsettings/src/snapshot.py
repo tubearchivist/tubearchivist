@@ -48,6 +48,17 @@ class ElasticSnapshot:
         if is_outdated:
             _ = self.take_snapshot_now()
 
+    def teardown(self):
+        """delete policy and snapshots"""
+        success = self.delete_policy()
+        if not success:
+            return
+
+        snap_dicts = self._get_all_snapshots()
+        if snap_dicts:
+            for snapshot in snap_dicts:
+                self.delete_single_snapshot(snapshot_id=snapshot["id"])
+
     def _check_repo_exists(self):
         """check if expected repo already exists"""
         path = f"_snapshot/{self.REPO}"
@@ -105,6 +116,18 @@ class ElasticSnapshot:
         response, statuscode = ElasticWrap(path).put(data)
         if statuscode == 200:
             print(f"snapshot: policy setup correctly: {response}")
+
+    def delete_policy(self) -> bool:
+        """delete snapshot lifetime policy"""
+        path = f"_slm/policy/{self.POLICY}"
+        response, status_code = ElasticWrap(path).delete()
+        success_codes = [200, 404]
+        if status_code in success_codes:
+            print(f"snapshot: policy deleted correctly: {response}")
+        else:
+            print(f"snapshot: policy delete failed: {response}")
+
+        return status_code in success_codes
 
     def _build_policy_data(self):
         """build policy dict from config"""

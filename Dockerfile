@@ -1,11 +1,11 @@
 # multi stage to build tube archivist
 # build python wheel, download and extract ffmpeg, copy into final image
 
-FROM node:24.14.1-alpine AS npm-builder
+FROM node:24.22.1-alpine AS npm-builder
 COPY frontend/package.json frontend/package-lock.json /
 RUN npm i
 
-FROM node:24.14.1-alpine AS node-builder
+FROM node:24.22.1-alpine AS node-builder
 
 # RUN npm config set registry https://registry.npmjs.org/
 
@@ -17,8 +17,13 @@ RUN npm run build:deploy
 
 WORKDIR /
 
+# Update pip's bundled trust store for all Python stages
+FROM python:3.14.8-slim-trixie AS python-base
+
+RUN pip install --no-cache-dir --upgrade 'pip>=26.2.2'
+
 # First stage to build python wheel
-FROM python:3.14.7-slim-trixie AS builder
+FROM python-base AS builder
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -36,10 +41,11 @@ ENV VIRTUAL_ENV=/opt/venv \
     PATH="/opt/venv/bin:$PATH"
 
 RUN python -m venv "$VIRTUAL_ENV" \
+    && pip install --no-cache-dir --upgrade 'pip>=26.2.2' \
     && pip install --no-cache-dir -r /requirements.txt
 
 # build ffmpeg
-FROM python:3.14.7-slim-trixie AS ffmpeg-builder
+FROM python-base AS ffmpeg-builder
 
 ARG TARGETPLATFORM
 
@@ -47,7 +53,7 @@ COPY docker_assets/ffmpeg_download.py ffmpeg_download.py
 RUN python ffmpeg_download.py $TARGETPLATFORM
 
 # build final image
-FROM python:3.14.7-slim-trixie AS tubearchivist
+FROM python-base AS tubearchivist
 
 ENV PYTHONUNBUFFERED=1 \
     VIRTUAL_ENV=/opt/venv \
