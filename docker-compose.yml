@@ -8,11 +8,10 @@ services:
     volumes:
       - media:/youtube
       - cache:/cache
+    # user: "1000:1000" # optionally run container under arbitrary user
     environment:
       - ES_URL=http://archivist-es:9200     # needs protocol e.g. http and port
       - REDIS_CON=redis://archivist-redis:6379
-      - HOST_UID=1000
-      - HOST_GID=1000
       - TA_HOST=http://tubearchivist.local:8000  # set your host name with protocol and port
       - TA_USERNAME=tubearchivist           # your initial TA credentials
       - TA_PASSWORD=verysecret              # your initial TA credentials
