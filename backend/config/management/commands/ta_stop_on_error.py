@@ -1,13 +1,20 @@
-"""stop on unexpected table"""
+"""stop on pending v0.6.0 environment migration"""
 
+import os
 from time import sleep
 
 from django.core.management.base import BaseCommand, CommandError
-from django.db import connection
+
+REMOVED_ENV_VARS = ("HOST_UID", "HOST_GID", "TA_BACKEND_PORT")
 
 ERROR_MESSAGE = """
-    🗙 Database is incompatible, see latest release notes for instructions:
-    🗙 https://github.com/tubearchivist/tubearchivist/releases/tag/v0.5.0
+    🗙 Startup blocked: environment variables removed in v0.6.0 are set:
+    🗙 {variables}
+    🗙 Remove these variables from your container configuration.
+    🗙 For HOST_UID/HOST_GID, configure the container user and file ownership.
+    🗙 For TA_BACKEND_PORT, use TA_PORT instead if overriding the port.
+    🗙 Follow the v0.6.0 migration guide before restarting:
+    🗙 https://github.com/tubearchivist/tubearchivist/releases/tag/v0.6.0
 """
 
 
@@ -17,24 +24,15 @@ class Command(BaseCommand):
     # pylint: disable=no-member
 
     def handle(self, *args, **options):
-        """handle"""
-        self.stdout.write("[MIGRATION] Confirming v0.5.0 table layout")
-        all_tables = self.list_tables()
-        for table in all_tables:
-            if table == "home_account":
+        """require removal of obsolete environment variables"""
+        self.stdout.write("[MIGRATION] Confirming v0.6.0 environment")
+        variables = [var for var in REMOVED_ENV_VARS if var in os.environ]
+        if variables:
+            message = ERROR_MESSAGE.format(variables=", ".join(variables))
+            self.stdout.write(self.style.ERROR(message))
+            sleep(60)
+            raise CommandError(message)
 
-                self.stdout.write(self.style.ERROR(ERROR_MESSAGE))
-                sleep(60)
-                raise CommandError(ERROR_MESSAGE)
-
-        self.stdout.write(self.style.SUCCESS("    ✓ local DB is up-to-date."))
-
-    def list_tables(self):
-        """raw list all tables"""
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT name FROM sqlite_master WHERE type='table';"
-            )
-            tables = cursor.fetchall()
-
-        return [table[0] for table in tables]
+        self.stdout.write(
+            self.style.SUCCESS("    ✓ environment is up-to-date.")
+        )
