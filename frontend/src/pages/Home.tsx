@@ -206,6 +206,7 @@ const Home = () => {
           viewStyle={ViewStyleNames.Home as ViewStyleNamesType}
           hideWatched={HideWatchedName.Home as HideWatchedType}
           showTypeFilter={true}
+          refreshVideoList={setRefreshVideoList}
         />
       </div>
 
