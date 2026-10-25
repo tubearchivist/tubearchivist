@@ -175,7 +175,7 @@ DJANGO_DEBUG=True
 Then look at the container startup script `run.sh`, make sure all needed migrations and startup checks ran. To start the dev backend server from the same folder as `manage.py` run:
 
 ```bash
-python manage.py runserver
+uvicorn config.asgi:application --reload
 ```
 
 The backend will be available on [localhost:8000/api/](localhost:8000/api/).
