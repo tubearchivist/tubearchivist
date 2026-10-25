@@ -1,7 +1,9 @@
 import { PaginationType } from '../../components/Pagination';
+import { ViewStylesType } from '../../configuration/constants/ViewStyle';
 import APIClient from '../../functions/APIClient';
 import { ChannelType } from '../../pages/Channels';
 import { ConfigType } from '../../pages/Home';
+import { SortOrderType } from './loadVideoListByPage';
 
 export type ChannelsListResponse = {
   data: ChannelType[];
@@ -9,13 +11,30 @@ export type ChannelsListResponse = {
   config?: ConfigType;
 };
 
-const loadChannelList = async (page: number, showSubscribed: boolean | null) => {
+export type ChannelSortByType =
+  | 'name'
+  | 'subscribers'
+  | 'video_count'
+  | 'duration'
+  | 'media_size'
+  | 'last_refresh';
+
+const loadChannelList = async (
+  page: number,
+  showSubscribed: boolean | null,
+  viewStyle?: ViewStylesType,
+  sort?: ChannelSortByType,
+  order?: SortOrderType,
+) => {
   const searchParams = new URLSearchParams();
 
   if (page) searchParams.append('page', page.toString());
   if (showSubscribed !== null) {
     searchParams.append('filter', showSubscribed ? 'subscribed' : 'unsubscribed');
   }
+  if (viewStyle) searchParams.append('view', viewStyle);
+  if (sort) searchParams.append('sort', sort);
+  if (order) searchParams.append('order', order);
 
   const endpoint = `/api/channel/${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
 
