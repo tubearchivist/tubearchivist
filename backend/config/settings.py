@@ -220,7 +220,7 @@ CORS_EXPOSE_HEADERS = ["X-Start-Timestamp"]
 
 # TA application settings
 TA_UPSTREAM = "https://github.com/tubearchivist/tubearchivist"
-TA_VERSION = "v0.6.0-unstable"
+TA_VERSION = "v0.6.0"
 TA_USERAGENT = {"User-Agent": f"{TA_UPSTREAM} {TA_VERSION}"}
 try:
     TA_START = RedisArchivist().get_message_str("STARTTIMESTAMP")
