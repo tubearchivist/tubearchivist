@@ -9,6 +9,7 @@ import requests
 from appsettings.src.config import AppConfig
 from common.src.helper import get_channels
 from common.src.ta_redis import RedisArchivist
+from django.conf import settings
 
 
 class Membership:
@@ -29,15 +30,17 @@ class Membership:
         )
         return response
 
-    def _get_headers(self):
+    def _get_headers(self) -> dict:
         """get headers with api key"""
         token = RedisArchivist().get_message_dict(self.REDIS_KEY)
         if not token:
             raise ValueError("expected MB_API_KEY")
 
         token_str = token["token"]
+        headers = {"Authorization": f"Token {token_str}"}
+        headers.update(settings.TA_USERAGENT)
 
-        return {"Authorization": f"Token {token_str}"}
+        return headers
 
     def sync_subs(self):
         """sync subscriptions, works if within max limits"""

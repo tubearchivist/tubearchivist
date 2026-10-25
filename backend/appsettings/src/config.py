@@ -242,7 +242,9 @@ class ReleaseVersion:
     def get_remote_version(self) -> None:
         """read version from remote"""
         sleep(randint(0, 60))
-        response = requests.get(self.REMOTE_URL, timeout=20).json()
+        response = requests.get(
+            self.REMOTE_URL, timeout=20, headers=settings.TA_USERAGENT
+        ).json()
         self.remote_version = response["release_version"]
         self.is_breaking = response["breaking_changes"]
 
