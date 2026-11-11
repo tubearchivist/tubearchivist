@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@videojs/react": "^10.3.0",
     "dompurify": "^3.3.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

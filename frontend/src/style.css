@@ -10,7 +10,7 @@
   font-family: 'Sen-Regular';
 }
 
-* {
+*:not(.videojs-player-skin):not(.videojs-player-skin *) {
   margin: 0;
   padding: 0;
 }
@@ -84,10 +84,10 @@ ul {
   margin-left: 20px;
 }
 
-td,
-th,
-span,
-label {
+td:not(.videojs-player-skin td),
+th:not(.videojs-player-skin th),
+span:not(.videojs-player-skin span),
+label:not(.videojs-player-skin label) {
   font-family: Sen-Regular, sans-serif;
   color: var(--main-font);
   text-align: left;
@@ -118,7 +118,7 @@ textarea {
   width: 100%;
 }
 
-button {
+button:not(.videojs-player-skin button) {
   border-radius: 0;
   padding: 5px 13px;
   border: none;
@@ -127,18 +127,18 @@ button {
   color: #ffffff;
 }
 
-button:hover {
+button:not(.videojs-player-skin button):hover {
   background-color: var(--accent-font-light);
   transform: scale(1.05);
   color: var(--main-bg);
 }
 
-button:disabled {
+button:not(.videojs-player-skin button):disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
 
-button:disabled:hover {
+button:not(.videojs-player-skin button):disabled:hover {
   background-color: var(--accent-font-dark);
   transform: none;
   color: #ffffff;
@@ -507,7 +507,7 @@ button:disabled:hover {
   margin: 0;
 }
 
-.video-main.theater-mode video {
+.video-main.theater-mode .videojs-player-skin {
   max-height: 95vh;
   max-width: 95vw;
   width: auto;
@@ -537,8 +537,8 @@ button:disabled:hover {
   margin: auto;
 }
 
-.video-player video,
-.video-main video {
+.video-player .videojs-player-skin,
+.video-main .videojs-player-skin {
   max-height: 80vh;
   width: 90%;
   max-width: 1500px;

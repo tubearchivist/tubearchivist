@@ -14,6 +14,12 @@ import { useSearchParams } from 'react-router-dom';
 import getApiUrl from '../configuration/getApiUrl';
 import { useKeyPress } from '../functions/useKeypressHook';
 import { VideoResponseType } from '../api/loader/loadVideoById';
+import {
+  Video as VideoJsVideo,
+  VideoPlayer as VideoJsPlayer,
+  VideoSkin,
+} from '@videojs/react/video';
+import '@videojs/react/video/skin.css';
 
 const VIDEO_PLAYBACK_SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3];
 
@@ -377,58 +383,63 @@ const VideoPlayer = ({
         className={embed ? '' : `player-wrapper ${isTheaterMode ? 'theater-mode' : ''}`}
       >
         <div className={embed ? '' : `video-main ${isTheaterMode ? 'theater-mode' : ''}`}>
-          <video
-            ref={videoRef}
-            key={`${getApiUrl()}${videoUrl}`}
-            poster={`${getApiUrl()}${videoThumbUrl}`}
-            onVolumeChange={(videoTag: VideoTag) => {
-              localStorage.setItem('playerVolume', videoTag.currentTarget.volume.toString());
-            }}
-            onRateChange={(videoTag: VideoTag) => {
-              localStorage.setItem('playerSpeed', videoTag.currentTarget.playbackRate.toString());
-            }}
-            onLoadStart={(videoTag: VideoTag) => {
-              videoTag.currentTarget.volume = volumeFromStorage;
-              videoTag.currentTarget.playbackRate = Number(playBackSpeedFromStorage ?? 1);
-            }}
-            onTimeUpdate={handleTimeUpdate(
-              videoId,
-              watched,
-              sponsorBlock,
-              setSkippedSegments,
-              onWatchStateChanged,
-            )}
-            onPause={async (videoTag: VideoTag) => {
-              const currentTime = Number(videoTag.currentTarget.currentTime);
+          <VideoJsPlayer poster={`${getApiUrl()}${videoThumbUrl}`}>
+            <VideoSkin className="videojs-player-skin">
+              <VideoJsVideo
+                ref={videoRef}
+                key={`${getApiUrl()}${videoUrl}`}
+                onVolumeChange={(videoTag: VideoTag) => {
+                  localStorage.setItem('playerVolume', videoTag.currentTarget.volume.toString());
+                }}
+                onRateChange={(videoTag: VideoTag) => {
+                  localStorage.setItem(
+                    'playerSpeed',
+                    videoTag.currentTarget.playbackRate.toString(),
+                  );
+                }}
+                onLoadStart={(videoTag: VideoTag) => {
+                  videoTag.currentTarget.volume = volumeFromStorage;
+                  videoTag.currentTarget.playbackRate = Number(playBackSpeedFromStorage ?? 1);
+                }}
+                onTimeUpdate={handleTimeUpdate(
+                  videoId,
+                  watched,
+                  sponsorBlock,
+                  setSkippedSegments,
+                  onWatchStateChanged,
+                )}
+                onPause={async (videoTag: VideoTag) => {
+                  const currentTime = Number(videoTag.currentTarget.currentTime);
 
-              if (currentTime < 10 || currentTime > duration * 0.95) return;
+                  if (currentTime < 10 || currentTime > duration * 0.95) return;
 
-              await updateVideoProgressById({
-                youtubeId: videoId,
-                currentProgress: currentTime,
-              });
-            }}
-            onEnded={handleVideoEnd(videoId, watched)}
-            onKeyDown={e => {
-              if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                e.preventDefault();
-              }
-            }}
-            autoPlay={autoplay}
-            controls
-            width="100%"
-            playsInline
-            id="video-item"
-            muted={isMuted}
-            crossOrigin="use-credentials"
-          >
-            <source
-              src={`${getApiUrl()}${videoUrl}#t=${videoSrcProgress}`}
-              type="video/mp4"
-              id="video-source"
-            />
-            {videoSubtitles && <Subtitles subtitles={videoSubtitles} />}
-          </video>
+                  await updateVideoProgressById({
+                    youtubeId: videoId,
+                    currentProgress: currentTime,
+                  });
+                }}
+                onEnded={handleVideoEnd(videoId, watched)}
+                onKeyDown={e => {
+                  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                    e.preventDefault();
+                  }
+                }}
+                autoPlay={autoplay}
+                width="100%"
+                playsInline
+                id="video-item"
+                muted={isMuted}
+                crossOrigin="use-credentials"
+              >
+                <source
+                  src={`${getApiUrl()}${videoUrl}#t=${videoSrcProgress}`}
+                  type="video/mp4"
+                  id="video-source"
+                />
+                {videoSubtitles && <Subtitles subtitles={videoSubtitles} />}
+              </VideoJsVideo>
+            </VideoSkin>
+          </VideoJsPlayer>
         </div>
       </div>
 
