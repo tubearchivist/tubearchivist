@@ -1,7 +1,7 @@
 aiofiles==25.1.0
 apprise==1.13.1
 bgutil-ytdlp-pot-provider @ git+https://github.com/bbilly1/bgutil-ytdlp-pot-provider@9b8f5e8d9a1eb936134eb995d6702716b895e1e4#subdirectory=plugin
-celery==5.6.3
+celery[redis]==5.6.3
 deepdiff==8.6.2  # rc:ignore
 django-auth-ldap==5.4.0
 django-celery-beat==2.9.0
