@@ -24,8 +24,13 @@ services:
       retries: 3
       start_period: 30s
     depends_on:
-      - archivist-es
-      - archivist-redis
+      archivist-es:
+        condition: service_healhty
+        restart: true
+      archivist-redis:
+        condition: service_healthy
+        restart: true
+
   archivist-redis:
     image: redis
     container_name: archivist-redis
@@ -34,8 +39,13 @@ services:
       - "6379"
     volumes:
       - redis:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]  
     depends_on:
-      - archivist-es
+      archivist-es:
+        condition: service_healthy
+        restart: true # restart redis when es is restarted
+
   archivist-es:
     image: bbilly1/tubearchivist-es         # only for amd64, or use official es 9.5.5
     container_name: archivist-es
@@ -54,6 +64,12 @@ services:
       - es:/usr/share/elasticsearch/data    # check for permission error when using bind mount, see readme
     expose:
       - "9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs -u \"elastic:$${ELASTIC_PASSWORD}\" \"http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 volumes:
   media:
