@@ -283,6 +283,8 @@ class ScheduleNotification(ApiBaseView):
     DEL: delete notification
     """
 
+    permission_classes = [AdminOnly]
+
     @extend_schema(
         responses=TaskNotificationSerializer(),
     )
@@ -350,6 +352,8 @@ class NotificationTestView(ApiBaseView):
     """resolves to /api/task/notification/test/
     POST: test notification url
     """
+
+    permission_classes = [AdminOnly]
 
     @extend_schema(
         request=TaskNotificationTestSerializer(),
