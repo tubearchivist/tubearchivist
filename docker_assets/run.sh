@@ -9,6 +9,9 @@ else
   LOGLEVEL="INFO"
 fi
 
+# stop on pending manual migration
+python manage.py ta_stop_on_error
+
 # update yt-dlp if needed
 YTDLP_UPDATE_DIR=/tmp/ta-yt-dlp
 if [[ "${TA_AUTO_UPDATE_YTDLP,,}" =~ ^(release|nightly)$ ]]; then
@@ -30,9 +33,6 @@ if [[ "${TA_AUTO_UPDATE_YTDLP,,}" =~ ^(release|nightly)$ ]]; then
     echo "yt-dlp update failed, using bundled version"
   fi
 fi
-
-# stop on pending manual migration
-python manage.py ta_stop_on_error
 
 # django setup
 python manage.py migrate
