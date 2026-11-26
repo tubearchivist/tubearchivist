@@ -171,6 +171,7 @@ const ChannelVideo = ({ videoType }: ChannelVideoProps) => {
           <Filterbar
             viewStyle={ViewStyleNames.Home as ViewStyleNamesType}
             hideWatched={HideWatchedName.Channel as HideWatchedType}
+            refreshVideoList={setRefresh}
           />
         </div>
 

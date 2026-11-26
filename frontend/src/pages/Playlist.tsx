@@ -354,6 +354,7 @@ const Playlist = () => {
           hideWatched={HideWatchedName.Playlist as HideWatchedType}
           showSort={false}
           showTypeFilter={true}
+          refreshVideoList={setRefresh}
         />
       </div>
 

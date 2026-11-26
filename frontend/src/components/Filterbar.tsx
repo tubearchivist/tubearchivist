@@ -25,12 +25,16 @@ import { HideWatchedType } from '../configuration/constants/HideWatched';
 import queueReindex from '../api/actions/queueReindex';
 import { useOutletContext } from 'react-router-dom';
 import { ChannelBaseOutletContextType } from '../pages/ChannelAbout';
+import deleteVideo from '../api/actions/deleteVideo';
+import updateDownloadQueueStatusById from '../api/actions/updateDownloadQueueStatusById';
+import useIsAdmin from '../functions/useIsAdmin';
 
 type FilterbarProps = {
   viewStyle: ViewStyleNamesType;
   hideWatched: HideWatchedType;
   showSort?: boolean;
   showTypeFilter?: boolean;
+  refreshVideoList: (refresh: boolean) => void;
 };
 
 const Filterbar = ({
@@ -38,8 +42,10 @@ const Filterbar = ({
   hideWatched,
   showSort = true,
   showTypeFilter = false,
+  refreshVideoList,
 }: FilterbarProps) => {
   const { userConfig, setUserConfig } = useUserConfigStore();
+  const isAdmin = useIsAdmin();
   const {
     selectedVideoIds,
     clearSelected,
@@ -50,6 +56,8 @@ const Filterbar = ({
   } = useVideoSelectionStore();
 
   const [showHidden, setShowHidden] = useState(false);
+  const [confirmActionLabel, setConfirmActionLabel] = useState<string>();
+  const [showActionConfirm, setShowActionConfirm] = useState(false);
   const { filterHeight, setFilterHeight, showFilterItems, setShowFilterItems } =
     useFilterBarTempConf();
   const { setStartNotification } = useOutletContext() as ChannelBaseOutletContextType;
@@ -93,6 +101,21 @@ const Filterbar = ({
     if (setStartNotification !== undefined) setStartNotification(true);
   };
 
+  const deleteSelected = async (ids: string[]) => {
+    await Promise.all(ids.map(deleteVideo));
+    refreshVideoList(true);
+  };
+
+  const deleteAndIgnoreSelected = async (ids: string[]) => {
+    await Promise.all(
+      ids.map(async id => {
+        await deleteVideo(id);
+        await updateDownloadQueueStatusById(id, 'ignore-force');
+      }),
+    );
+    refreshVideoList(true);
+  };
+
   const actionList = [
     {
       label: 'Redownload',
@@ -102,24 +125,51 @@ const Filterbar = ({
       label: 'Reindex',
       handler: reindexSelected,
     },
+    ...(isAdmin
+      ? [
+          { label: 'Delete', handler: deleteSelected, requiresConfirmation: true },
+          {
+            label: 'Delete and Ignore',
+            handler: deleteAndIgnoreSelected,
+            requiresConfirmation: true,
+          },
+        ]
+      : []),
   ];
 
   const handleActionSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
+    setConfirmActionLabel(undefined);
+    setShowActionConfirm(false);
     if (value === '') {
       setSelectedAction(null);
     } else {
-      setSelectedAction(actionList[Number(value)].handler);
+      const action = actionList[Number(value)];
+      setSelectedAction(action.handler);
+      if (action.requiresConfirmation) {
+        setConfirmActionLabel(action.label);
+      }
+    }
+  };
+
+  const runSelectedAction = async () => {
+    if (selectedAction) {
+      await selectedAction(selectedVideoIds);
+      setSelectedAction(null);
+      setConfirmActionLabel(undefined);
+      setShowActionConfirm(false);
+      clearSelected();
+      setShowSelection(false);
     }
   };
 
   const handleSelectedActionRun = async () => {
-    if (selectedAction) {
-      selectedAction(selectedVideoIds);
-      setSelectedAction(null);
-      clearSelected();
-      setShowSelection(false);
+    if (confirmActionLabel) {
+      setShowActionConfirm(true);
+      return;
     }
+
+    await runSelectedAction();
   };
 
   return (
@@ -269,20 +319,38 @@ const Filterbar = ({
       </div>
       {showSelection && (
         <div className="info-box-item">
-          <p>
-            Selected Videos: {selectedVideoIds.length} -{' '}
-            <Button onClick={clearSelected}>Clear</Button>
-          </p>
-          <p>Apply action:</p>
-          <select onChange={handleActionSelectChange}>
-            <option value="">---</option>
-            {actionList.map((actionItem, idx) => (
-              <option key={idx} value={idx}>
-                {actionItem.label}
-              </option>
-            ))}
-          </select>
-          {selectedAction !== null && <Button onClick={handleSelectedActionRun}>Apply</Button>}
+          {showActionConfirm ? (
+            <div className="delete-confirm">
+              <span>
+                {confirmActionLabel} {selectedVideoIds.length} selected videos?
+              </span>{' '}
+              <Button
+                label={confirmActionLabel}
+                className="danger-button"
+                onClick={runSelectedAction}
+              />
+              <Button label="Cancel" onClick={() => setShowActionConfirm(false)} />
+            </div>
+          ) : (
+            <>
+              <p>
+                Selected Videos: {selectedVideoIds.length} -{' '}
+                <Button onClick={clearSelected}>Clear</Button>
+              </p>
+              <p>Apply action:</p>
+              <select onChange={handleActionSelectChange}>
+                <option value="">---</option>
+                {actionList.map((actionItem, idx) => (
+                  <option key={idx} value={idx}>
+                    {actionItem.label}
+                  </option>
+                ))}
+              </select>
+              {selectedAction !== null && selectedVideoIds.length > 0 && (
+                <Button onClick={handleSelectedActionRun}>Apply</Button>
+              )}
+            </>
+          )}
         </div>
       )}
     </>
